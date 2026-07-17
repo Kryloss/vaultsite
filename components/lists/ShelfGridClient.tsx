@@ -9,6 +9,8 @@ export interface ShelfItem {
   author?: string;
   medium?: string;
   coverUrl?: string;
+  /** "contain" letterboxes wide art (logos) instead of cropping to fill. */
+  coverFit?: "contain";
 }
 
 /** Pretty labels for common mediums; unknown values are shown capitalized. */
@@ -79,7 +81,11 @@ export default function ShelfGridClient({
                   <img
                     src={item.coverUrl}
                     alt={item.title}
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+                    className={
+                      item.coverFit === "contain"
+                        ? "h-full w-full object-contain p-6"
+                        : "h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+                    }
                     loading="lazy"
                   />
                 ) : (

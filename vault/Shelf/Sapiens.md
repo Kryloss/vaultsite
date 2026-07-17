@@ -4,7 +4,8 @@ author: Yuval Noah Harari
 medium: book
 date: 2026-07-17
 description: A brief history of humankind.
-# cover: sapiens.jpg   ← drop the book cover into vault/Shelf/ and uncomment
+cover: sapiens.jpg
+# cover source: Open Library covers API, ISBN 9780062316097
 ---
 
 ## At a glance

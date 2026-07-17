@@ -103,6 +103,10 @@ description: <one-line who-they-are>
 
 ## Why <first name>
 <his reasons>
+
+## Sources
+
+- <2–4 links used to verify the facts>
 ```
 
 ### Project — `vault/Projects/<Title>.md`
@@ -127,20 +131,33 @@ batched in one line ("Downloading 2 covers: sapiens.jpg from Open Library
 `cover: https://…` — the site renders it directly. Flag it in your report so
 he knows it's a hotlink that could rot.
 
-**Where to look, per type:**
+**Search cascade — exhaust it before giving up.** Work down each chain until
+something usable appears; a failed first source is normal, an empty report
+after one attempt is not.
 
-| Content | Source (in order) |
+| Content | Cascade (in order) |
 |---|---|
-| Book covers | Open Library Covers API (`covers.openlibrary.org/b/isbn/<ISBN>-L.jpg`, keyless) → publisher page |
-| Movie/show art | Wikipedia page image → studio press page |
-| People photos | Wikimedia Commons ONLY (verify the license; note author + license as an HTML comment in the note) → official government/company portrait pages |
+| Book covers | 1. Open Library by ISBN (`covers.openlibrary.org/b/isbn/<ISBN>-L.jpg`, keyless — try multiple editions' ISBNs) 2. Open Library search API → cover ID 3. publisher page |
+| Movie/show art | 1. en-Wikipedia REST summary (`/api/rest_v1/page/summary/<Title>`) 2. `action=query&prop=pageimages` 3. season/franchise pages 4. other-language Wikipedias (de, fr, uk — often expose the poster when en doesn't) 5. Wikidata claims P18 (image) / P154 (logo) 6. `page/media-list` → Commons-hosted logo, used with `coverFit: contain` 7. typographic fallback tile + tell him |
+| People photos | 1. Wikimedia Commons ONLY (verify license; note author + license as a comment in the note) 2. official government/company portrait pages. Never anything else |
 | Music artwork | Not needed — Apple Music embeds carry their own art |
 | Inline figures | Wikimedia Commons, official docs/press kits, his own screenshots |
+
+**Wide art (logos, banners):** set `coverFit: contain` in the entry frontmatter
+— the card letterboxes it on the tile background instead of cropping. This is
+how a freely-licensed title logo becomes a perfectly good cover when no poster
+is available (see `vault/Shelf/Mr Robot.md`).
+
+**Note:** some APIs are flaky or geo-filtered from sandboxes (iTunes Search
+often returns 0 results). Treat an empty response as "try the next source",
+not "no image exists".
 
 **File conventions:** lowercase slugged names (`mr-robot.jpg`), covers ~600px
 on the long side are plenty, JPG/PNG/WebP all fine.
 
 **Rules:**
+- Always end the image step with either art in place or an explicit one-line
+  report of what was tried — never silently skip.
 - Covers/posters alongside his commentary about that work: standard practice, fine.
 - People photos: licensed sources only, credit recorded. Never grab a random
   Google Images result.

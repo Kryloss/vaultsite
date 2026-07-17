@@ -4,7 +4,8 @@ author: Christopher Nolan
 medium: movie
 date: 2026-07-17
 description: A heist movie where the vault is a person's mind.
-# cover: inception.jpg   ← drop a poster into vault/Shelf/ and uncomment
+cover: inception.jpg
+# cover source: Wikipedia (low-res theatrical poster, fair-use scale)
 ---
 
 ## At a glance

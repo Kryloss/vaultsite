@@ -11,6 +11,8 @@ import ShelfGridClient, {
  *   medium: book | movie | show   (chip grouping; anything goes)
  *   author: Yuval Noah Harari     (or director/creator for film & TV)
  *   cover: sapiens.jpg            (image inside the section folder)
+ *   coverFit: contain             (optional — letterbox wide art like logos
+ *                                  instead of cropping it to fill the card)
  */
 export default function ShelfGrid({ section, entries }: ListProps) {
   if (entries.length === 0) {
@@ -32,6 +34,7 @@ export default function ShelfGrid({ section, entries }: ListProps) {
         ? entry.meta.medium.toLowerCase()
         : undefined,
     coverUrl: resolveCoverUrl(entry.sectionDir, entry.meta.cover),
+    coverFit: entry.meta.coverFit === "contain" ? ("contain" as const) : undefined,
   }));
 
   return <ShelfGridClient sectionSlug={section.slug} items={items} />;

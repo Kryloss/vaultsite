@@ -61,7 +61,9 @@ update), follow **`docs/CONTENT-WORKFLOW.md`** — the full playbook. Core rules
 2. Ask follow-ups only when genuinely ambiguous (section unclear, new category, factual gap) — batch questions, use defaults otherwise.
 3. Publish directly (no `draft: true` unless he asks).
 4. Add cross-site wiki links (`[[Note]]`, `[[Folder/main|Label]]` for sections) — this is expected, not optional.
-5. Write to `vault/<Section>/<Natural Title>.md`, then report path, future URL, links added, and anything you fixed or assumed.
+5. Source images automatically: download covers into the vault folder (batch-ask permission first; `cover: https://…` URL as fallback). Books → Open Library; people → Wikimedia Commons only, license noted. Never random image results, never AI portraits of real people.
+6. Factual notes (People, current events) end with a `## Sources` section (2–4 links used for verification). Skip for opinion/shelf/music notes.
+7. Write to `vault/<Section>/<Natural Title>.md`, then report path, future URL, links added, images fetched + sources, and anything you fixed or assumed.
 
 ## Common tasks
 

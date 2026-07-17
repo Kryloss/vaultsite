@@ -24,6 +24,7 @@ export default function PeopleGrid({ section, entries }: ListProps) {
     <ul className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3">
       {entries.map((entry) => {
         const cover = resolveCoverUrl(entry.sectionDir, entry.meta.cover);
+        const contain = entry.meta.coverFit === "contain";
         return (
           <li key={entry.slug}>
             <Link href={`/${section.slug}/${entry.slug}`} className="group block">
@@ -33,7 +34,11 @@ export default function PeopleGrid({ section, entries }: ListProps) {
                   <img
                     src={cover}
                     alt={entry.title}
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    className={
+                      contain
+                        ? "h-full w-full object-contain p-6"
+                        : "h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    }
                     loading="lazy"
                   />
                 ) : (

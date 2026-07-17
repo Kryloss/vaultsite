@@ -4,7 +4,10 @@ author: Sam Esmail
 medium: show
 date: 2026-07-17
 description: The rare hacker show that hackers actually respect.
-# cover: mr-robot.jpg   ← drop a poster into vault/Shelf/ and uncomment
+cover: mr-robot.png
+coverFit: contain
+# cover source: Wikimedia Commons (Mr._Robot_Logo.svg — freely licensed title logo)
+# to use a poster instead: replace cover with the poster file + delete coverFit
 ---
 
 ## At a glance

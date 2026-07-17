@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Posts/Formatting playground.md",
+                "file": "Now/main.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Formatting playground"
+              "title": "main"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Music/main.md",
+                "file": "Now/main.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Posts/Formatting playground.md",
+                "file": "Now/main.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Formatting playground"
+              "title": "Outgoing links from main"
             }
           },
           {
@@ -163,9 +163,21 @@
               "icon": "lucide-list",
               "title": "Outline"
             }
+          },
+          {
+            "id": "8012d15c23490e42",
+            "type": "leaf",
+            "state": {
+              "type": "file-properties",
+              "state": {
+                "file": "Now/main.md"
+              },
+              "icon": "lucide-info",
+              "title": "File properties for main"
+            }
           }
         ],
-        "currentTab": 1
+        "currentTab": 3
       }
     ],
     "direction": "horizontal",
@@ -185,30 +197,33 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
+    "Posts/Post Sample.md",
+    "People/Mykhailo Fedorov.md",
     "People/main.md",
-    "Now/main.md",
-    "Music/Clancy.md",
-    "Home/main.md",
     "Home/IMG_3260.jpeg",
-    "Posts/main.md",
-    "Music/main.md",
-    "Shelf/Sapiens.md",
-    "People/fedorov.png",
-    "Projects/This website.md",
-    "Posts/Draft example.md",
-    "Posts/Formatting playground.md",
-    "Posts/Security Plus journey.md",
-    "Shelf/Inception.md",
+    "Home/main.md",
+    "Shelf/mr-robot.png",
     "Shelf/Mr Robot.md",
-    "Books/Sapiens.md",
+    "Shelf/Sapiens.md",
     "Shelf/main.md",
+    "Music/main.md",
+    "Music/Clancy.md",
+    "People/fedorov.png",
+    "Shelf/sapiens.jpg",
+    "Shelf/inception.jpg",
+    "Shelf/Inception.md",
+    "Posts/Draft example.md",
+    "Posts/Security Plus journey.md",
+    "Posts/Formatting playground.md",
+    "Now/main.md",
+    "Posts/main.md",
+    "Projects/This website.md",
+    "Books/Sapiens.md",
     "Shelf",
     "Now.md",
     "Now",
     "Books/main.md",
     "Projects/main.md",
-    "People/Mykhailo Fedorov.md",
-    "Posts/Post Sample.md",
     "Posts/Post Sample 1.md",
     "Books",
     "2026-07-16.md",

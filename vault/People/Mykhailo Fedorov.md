@@ -21,4 +21,10 @@ Fedorov is the person who proved a government app doesn't have to feel like a go
 
 Then the full-scale invasion redefined the job. He turned a civil ministry into a wartime tech operation: crowdfunding and scaling drone procurement through the Army of Drones, getting Starlink terminals into the country within days, and building the IT Army out of volunteers. As someone from Ukraine heading into cybersecurity, that arc — from marketing guy to digital minister to defence minister before 35 — is the clearest proof I know that tech skills translate into national resilience.
 
+## Sources
+
+- [Mykhailo Fedorov — Wikipedia](https://en.wikipedia.org/wiki/Mykhailo_Fedorov)
+- [Who is Ukraine's Mykhailo Fedorov? — US News](https://www.usnews.com/news/world/articles/2026-07-16/factbox-who-is-ukraines-mykhailo-fedorov-the-dismissed-defence-minister)
+- [Zelenskyy fires Ukraine's tech-savvy defense minister — NPR](https://www.npr.org/2026/07/16/g-s1-133920/ukraine-defense-minister-fired)
+
 His defence-minister chapter ended abruptly this week; whatever he does next, the playbook he wrote for digital statecraft already outlives the job titles.
