@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Home/main.md",
+                "file": "Shelf/Sapiens.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "main"
+              "title": "Sapiens"
             }
           }
         ]
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Home/main.md",
+                "file": "Shelf/Sapiens.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from main"
+              "title": "Outgoing links from Sapiens"
             }
           },
           {
@@ -185,6 +185,14 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
+    "Music/main.md",
+    "Music/Clancy.md",
+    "Posts/main.md",
+    "People/fedorov.png",
+    "Home/IMG_3260.jpeg",
+    "Projects/This website.md",
+    "Now/main.md",
+    "Home/main.md",
     "Posts/Draft example.md",
     "Posts/Formatting playground.md",
     "Posts/Security Plus journey.md",
@@ -194,27 +202,19 @@
     "Shelf/main.md",
     "Shelf/Sapiens.md",
     "Shelf",
-    "Home/main.md",
     "Now.md",
-    "Now/main.md",
     "Now",
-    "Projects/This website.md",
     "Books/main.md",
     "Projects/main.md",
-    "Music/main.md",
     "People/main.md",
     "People/Mykhailo Fedorov.md",
-    "Posts/main.md",
     "Posts/Post Sample.md",
     "Posts/Post Sample 1.md",
     "Books",
-    "Music/Clancy.md",
-    "People/fedorov.png",
     "2026-07-16.md",
     "2026-07-17.md",
     "Projects",
     "People",
-    "Home/IMG_3260.jpeg",
     "Music",
     "Posts/CleanShot 2026-07-16 at 23.29.25@2x.png"
   ]

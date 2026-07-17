@@ -52,6 +52,17 @@ Kyrylo's portfolio site, published from an Obsidian vault. The `vault/` folder I
 - Styling: Tailwind utility classes + CSS variables defined in `app/globals.css` (`--bg`, `--text`, `--accent`, …). Dark mode via `prefers-color-scheme`. Markdown output styled by the hand-written `.prose` classes in globals.css.
 - TypeScript strict; path alias `@/*` → repo root.
 
+## Content intake (most common task)
+
+When Kyrylo hands you raw content (a post, book/movie thoughts, a project
+update), follow **`docs/CONTENT-WORKFLOW.md`** — the full playbook. Core rules:
+
+1. Light-touch editing only — fix typos/grammar/structure, never his voice or opinions.
+2. Ask follow-ups only when genuinely ambiguous (section unclear, new category, factual gap) — batch questions, use defaults otherwise.
+3. Publish directly (no `draft: true` unless he asks).
+4. Add cross-site wiki links (`[[Note]]`, `[[Folder/main|Label]]` for sections) — this is expected, not optional.
+5. Write to `vault/<Section>/<Natural Title>.md`, then report path, future URL, links added, and anything you fixed or assumed.
+
 ## Common tasks
 
 - **New page style** (e.g. projects grid): see `docs/ADDING-PAGE-TYPES.md`. Component in `components/lists/`, register in `lib/section-types.tsx`, set `type:` in the section's `main.md`.
