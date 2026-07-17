@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Fragment, useEffect, useState, type ReactNode } from "react";
 import {
   PanelIcon,
+  SearchIcon,
   resolveIcon,
   GitHubIcon,
   InstagramIcon,
@@ -12,7 +13,9 @@ import {
   XIcon,
   MailIcon,
 } from "@/components/icons";
+import CommandPalette from "@/components/CommandPalette";
 import type { SocialLink } from "@/lib/site-config";
+import type { SearchItem } from "@/lib/vault";
 
 export interface NavItem {
   slug: string;
@@ -38,20 +41,29 @@ export default function Chrome({
   items,
   socials,
   siteName,
+  searchIndex,
   children,
 }: {
   items: NavItem[];
   socials: SocialLink[];
   siteName: string;
+  searchIndex: SearchItem[];
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const pathname = usePathname();
 
-  // Close the drawer on navigation and on Escape.
+  // Close the drawer on navigation; Escape closes it; Cmd/Ctrl+K opens search.
   useEffect(() => setOpen(false), [pathname]);
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setSearchOpen((v) => !v);
+      }
+    };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
@@ -89,6 +101,15 @@ export default function Chrome({
           className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
         >
           <PanelIcon className="h-[18px] w-[18px]" />
+        </button>
+        <button
+          type="button"
+          aria-label="Search (⌘K)"
+          title="Search (⌘K)"
+          onClick={() => setSearchOpen(true)}
+          className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
+        >
+          <SearchIcon className="h-[17px] w-[17px]" />
         </button>
         <span className="max-w-[70vw] truncate pr-2 text-sm font-medium">
           {crumbs.map((crumb, i) => (
@@ -177,6 +198,12 @@ export default function Chrome({
           </p>
         </div>
       </aside>
+
+      <CommandPalette
+        items={searchIndex}
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+      />
 
       {/* Content — re-animates on each navigation via the pathname key */}
       <main key={pathname} className="page-in min-w-0">

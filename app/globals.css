@@ -148,6 +148,73 @@ body {
   transform: scale(1.01);
 }
 
+/* Content images open in the lightbox (avatars excluded) */
+.prose img:not(.avatar) {
+  cursor: zoom-in;
+}
+
+/* Figures — standalone images with alt text get a caption */
+.prose figure {
+  margin: 1.5rem 0;
+}
+
+.prose figure img {
+  margin: 0;
+}
+
+.prose figcaption {
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--text-tertiary);
+}
+
+/* Obsidian callouts — > [!note] Title */
+.callout {
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--callout-color, var(--text-tertiary));
+  border-radius: 0.75rem;
+  padding: 0.875rem 1.125rem;
+  margin: 1.25rem 0;
+}
+
+.callout .callout-title {
+  font-weight: 600;
+  color: var(--callout-color, var(--text));
+  margin: 0 0 0.25rem;
+}
+
+.callout > :last-child {
+  margin-bottom: 0;
+}
+
+.callout[data-callout="note"],
+.callout[data-callout="info"],
+.callout[data-callout="todo"],
+.callout[data-callout="abstract"] {
+  --callout-color: #3b82f6;
+}
+
+.callout[data-callout="tip"],
+.callout[data-callout="success"],
+.callout[data-callout="check"],
+.callout[data-callout="done"] {
+  --callout-color: #10b981;
+}
+
+.callout[data-callout="warning"],
+.callout[data-callout="question"],
+.callout[data-callout="caution"] {
+  --callout-color: #f59e0b;
+}
+
+.callout[data-callout="danger"],
+.callout[data-callout="error"],
+.callout[data-callout="bug"],
+.callout[data-callout="failure"] {
+  --callout-color: #ef4444;
+}
+
 /* Avatar images — small sized Obsidian embeds like ![[me.jpeg|93]] (≤128px) */
 .prose img.avatar {
   border-radius: 9999px;

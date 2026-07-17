@@ -55,8 +55,22 @@ Kyrylo's portfolio site, published from an Obsidian vault. The `vault/` folder I
 - **New page style** (e.g. projects grid): see `docs/ADDING-PAGE-TYPES.md`. Component in `components/lists/`, register in `lib/section-types.tsx`, set `type:` in the section's `main.md`.
 - **Verify changes**: `npm run build` must pass — it statically generates every page and will surface broken content/code.
 
+## SEO & feeds
+
+- `app/sitemap.ts`, `app/robots.ts`, `app/feed.xml/route.ts` (RSS for Posts) — all statically generated. Canonical URL: `siteUrl` in `lib/site-config.ts` (update when custom domain lands).
+- OG images generated at build via `next/og` — shared renderer in `lib/og.tsx`, route files `app/opengraph-image.tsx` + per-section + per-entry.
+- Favicon: `app/icon.png` (circle-cropped from the owner's avatar) + `app/apple-icon.png`. Regenerate with PIL if the avatar changes.
+
+## Features to know about
+
+- **Drafts**: `draft: true` entries/sections are visible in `npm run dev` with an amber "Draft" badge, excluded from production builds (`SHOW_DRAFTS` in `lib/vault.ts`).
+- **Wiki links** resolve across ALL sections via `getWikiIndex()` (file name, title, or slug — case-insensitive). Unknown targets fall back to same-section slug.
+- **Callouts**: Obsidian `> [!note] Title` → styled `.callout` divs (colors per type in globals.css).
+- **Figures/lightbox**: standalone images with alt text render as figure+figcaption; all non-avatar content images open in `components/Lightbox.tsx` on click.
+- **Reading time**: `readingStats()` shown on posts-type entry pages only.
+- **Search**: Cmd/Ctrl+K palette (`components/CommandPalette.tsx`) over a build-time index from `getSearchIndex()` — fully static, no backend.
+
 ## Planned / future (do not build unless asked)
 
 - Supabase for dynamic features (post views, reactions, AMA). Deliberately not used for content — see `docs/DECISIONS.md` #1.
-- More section types (projects, stack, TIL).
-- RSS feed, sitemap, OG images.
+- More section types (stack, TIL).

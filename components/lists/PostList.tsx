@@ -42,6 +42,11 @@ export default function PostList({ section, entries }: ListProps) {
                   <span className="min-w-0">
                     <span className="block truncate font-medium text-[var(--text)] group-hover:text-[var(--accent)]">
                       {entry.title}
+                      {entry.draft && (
+                        <span className="ml-2 rounded bg-amber-500/15 px-1.5 py-0.5 text-xs font-medium text-amber-500">
+                          Draft
+                        </span>
+                      )}
                     </span>
                     {entry.description && (
                       <span className="mt-0.5 block truncate text-sm text-[var(--text-secondary)]">

@@ -79,6 +79,24 @@ export function MenuIcon({ className }: IconProps) {
   );
 }
 
+export function SearchIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20.5 20.5-4.6-4.6" />
+    </svg>
+  );
+}
+
+export function ClockIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3.5 2" />
+    </svg>
+  );
+}
+
 /** Sidebar-panel icon (brianlovin-style menu affordance). */
 export function PanelIcon({ className }: IconProps) {
   return (
@@ -155,6 +173,9 @@ const byName: Record<string, (p: IconProps) => JSX.Element> = {
   projects: HammerIcon,
   hammer: HammerIcon,
   book: BookIcon,
+  now: ClockIcon,
+  clock: ClockIcon,
+  search: SearchIcon,
   github: GitHubIcon,
   instagram: InstagramIcon,
   linkedin: LinkedInIcon,
@@ -175,6 +196,9 @@ const byEmoji: Record<string, keyof typeof byName> = {
   "🔨": "hammer",
   "📖": "book",
   "📚": "book",
+  "⏳": "clock",
+  "⌛": "clock",
+  "🕐": "clock",
 };
 
 /**

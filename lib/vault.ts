@@ -14,6 +14,9 @@ import matter from "gray-matter";
 
 export const VAULT_DIR = path.join(process.cwd(), "vault");
 
+/** Drafts are visible during `npm run dev` (with a badge), never in production builds. */
+const SHOW_DRAFTS = process.env.NODE_ENV === "development";
+
 export interface Section {
   /** URL slug, e.g. "posts". "home" is rendered at "/" */
   slug: string;
@@ -33,6 +36,8 @@ export interface Section {
    * (e.g. the "music" type reads `playlists:`) without changing this engine.
    */
   meta: Record<string, unknown>;
+  /** True in dev preview when frontmatter has draft:true / published:false. */
+  draft: boolean;
 }
 
 export interface Entry {
@@ -52,6 +57,8 @@ export interface Entry {
    * (e.g. the "people" type reads `cover:`) without changing this engine.
    */
   meta: Record<string, unknown>;
+  /** True in dev preview when frontmatter has draft:true / published:false. */
+  draft: boolean;
 }
 
 /** "How was my day" → "how-was-my-day" */
@@ -78,7 +85,7 @@ export function getSections(): Section[] {
     if (!fs.existsSync(mainPath)) continue;
 
     const { data, content } = matter(fs.readFileSync(mainPath, "utf8"));
-    if (isDraft(data)) continue;
+    if (isDraft(data) && !SHOW_DRAFTS) continue;
 
     sections.push({
       slug: slugify((data.slug as string) ?? entry.name),
@@ -90,6 +97,7 @@ export function getSections(): Section[] {
       type: (data.type as string) ?? "posts",
       content,
       meta: data,
+      draft: isDraft(data),
     });
   }
 
@@ -112,7 +120,7 @@ export function getEntries(section: Section): Entry[] {
     if (file.toLowerCase() === "main.md") continue;
 
     const { data, content } = matter(fs.readFileSync(path.join(dir, file), "utf8"));
-    if (isDraft(data)) continue;
+    if (isDraft(data) && !SHOW_DRAFTS) continue;
 
     const fileName = file.replace(/\.md$/i, "");
     entries.push({
@@ -125,6 +133,7 @@ export function getEntries(section: Section): Entry[] {
       description: data.description as string | undefined,
       content,
       meta: data,
+      draft: isDraft(data),
     });
   }
 
@@ -146,6 +155,83 @@ export function getEntry(sectionSlug: string, entrySlug: string): Entry | undefi
 function formatDateValue(value: unknown): string {
   if (value instanceof Date) return value.toISOString().slice(0, 10);
   return String(value).slice(0, 10);
+}
+
+/** Word count + reading time (≈200 wpm) from raw markdown. */
+export function readingStats(md: string): { words: number; minutes: number } {
+  const words = md
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/[#>*_`|\[\]()!-]/g, " ")
+    .split(/\s+/)
+    .filter(Boolean).length;
+  return { words, minutes: Math.max(1, Math.round(words / 200)) };
+}
+
+/**
+ * Global wiki-link index: lowercase file name / title / slug → URL, across
+ * every section. Lets [[Sapiens]] in a post resolve to /books/sapiens.
+ * First match wins; same-name collisions favor the earliest section by order.
+ */
+export function getWikiIndex(): Map<string, string> {
+  const map = new Map<string, string>();
+  const add = (key: string, href: string) => {
+    const k = key.trim().toLowerCase();
+    if (k && !map.has(k)) map.set(k, href);
+  };
+  for (const section of getSections()) {
+    const base = section.slug === "home" ? "/" : `/${section.slug}`;
+    add(section.dirName, base);
+    add(section.title, base);
+    for (const entry of getEntries(section)) {
+      const href = `/${section.slug}/${entry.slug}`;
+      add(entry.fileName, href);
+      add(entry.title, href);
+      add(entry.slug, href);
+    }
+  }
+  return map;
+}
+
+export interface SearchItem {
+  title: string;
+  section: string;
+  href: string;
+  text: string;
+}
+
+/** Flat index of all pages for the Cmd+K palette (plain text, capped). */
+export function getSearchIndex(): SearchItem[] {
+  const items: SearchItem[] = [];
+  for (const section of getSections()) {
+    items.push({
+      title: section.title,
+      section: "Section",
+      href: section.slug === "home" ? "/" : `/${section.slug}`,
+      text: plainText(section.content),
+    });
+    for (const entry of getEntries(section)) {
+      items.push({
+        title: entry.title,
+        section: section.title,
+        href: `/${section.slug}/${entry.slug}`,
+        text: plainText(`${entry.description ?? ""} ${entry.content}`),
+      });
+    }
+  }
+  return items;
+}
+
+/** Rough markdown → plain text for search matching. */
+function plainText(md: string): string {
+  return md
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/!?\[\[([^\]|]+)(?:\|[^\]]*)?\]\]/g, "$1")
+    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/[#>*_`|]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 1500);
 }
 
 /** "2026-07-16" → "July 16, 2026" (UTC-safe, no timezone drift). */

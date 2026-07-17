@@ -1,16 +1,28 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Chrome from "@/components/Chrome";
-import { getSections, getEntries } from "@/lib/vault";
-import { siteName, socials } from "@/lib/site-config";
+import Lightbox from "@/components/Lightbox";
+import { getSections, getEntries, getSearchIndex } from "@/lib/vault";
+import { siteName, siteUrl, siteDescription, socials } from "@/lib/site-config";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
     default: siteName,
     template: `%s · ${siteName}`,
   },
-  description:
-    "Kyrylo's writing, projects, notes, and the occasional strong opinion.",
+  description: siteDescription,
+  openGraph: {
+    siteName,
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
+  alternates: {
+    types: { "application/rss+xml": "/feed.xml" },
+  },
 };
 
 export default function RootLayout({
@@ -29,9 +41,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Chrome items={items} socials={socials} siteName={siteName}>
+        <Chrome
+          items={items}
+          socials={socials}
+          siteName={siteName}
+          searchIndex={getSearchIndex()}
+        >
           {children}
         </Chrome>
+        <Lightbox />
       </body>
     </html>
   );

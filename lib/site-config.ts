@@ -4,6 +4,12 @@
  */
 export const siteName = "Kyrylo";
 
+/** Canonical URL — update when the custom domain (kryloss.com) is attached. */
+export const siteUrl = "https://vaultsite-eta.vercel.app";
+
+export const siteDescription =
+  "Kyrylo's writing, projects, notes, and the occasional strong opinion.";
+
 export interface SocialLink {
   label: string;
   href: string;

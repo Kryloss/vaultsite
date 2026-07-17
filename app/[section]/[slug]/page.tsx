@@ -7,6 +7,7 @@ import {
   getEntries,
   getEntry,
   displayDate,
+  readingStats,
 } from "@/lib/vault";
 import { renderMarkdown } from "@/lib/markdown";
 
@@ -40,6 +41,7 @@ export default async function EntryPage({ params }: Props) {
   if (!section || !entry) notFound();
 
   const html = await renderMarkdown(entry.content, entry.sectionDir, sectionSlug);
+  const stats = section.type === "posts" ? readingStats(entry.content) : null;
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-14 lg:py-24">
@@ -53,15 +55,23 @@ export default async function EntryPage({ params }: Props) {
       <header className="mt-6">
         <h1 className="text-2xl font-semibold tracking-tight text-[var(--text)]">
           {entry.title}
+          {entry.draft && (
+            <span className="ml-3 inline-block translate-y-[-3px] rounded-md bg-amber-500/15 px-2 py-0.5 align-middle text-xs font-medium text-amber-500">
+              Draft
+            </span>
+          )}
         </h1>
-        {entry.date && (
-          <time
-            dateTime={entry.date}
-            className="mt-2 block text-sm text-[var(--text-tertiary)]"
-          >
-            {displayDate(entry.date)}
-          </time>
-        )}
+        <p className="mt-2 text-sm text-[var(--text-tertiary)]">
+          {entry.date && (
+            <time dateTime={entry.date}>{displayDate(entry.date)}</time>
+          )}
+          {entry.date && stats && " · "}
+          {stats && (
+            <span>
+              {stats.minutes} min read · {stats.words.toLocaleString()} words
+            </span>
+          )}
+        </p>
       </header>
 
       <article
