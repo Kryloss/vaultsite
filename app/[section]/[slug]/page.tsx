@@ -10,6 +10,7 @@ import {
   readingStats,
 } from "@/lib/vault";
 import { renderMarkdown } from "@/lib/markdown";
+import Stars from "@/components/Stars";
 
 interface Props {
   params: Promise<{ section: string; slug: string }>;
@@ -61,15 +62,18 @@ export default async function EntryPage({ params }: Props) {
             </span>
           )}
         </h1>
-        <p className="mt-2 text-sm text-[var(--text-tertiary)]">
+        <p className="mt-2 flex flex-wrap items-center gap-x-2 text-sm text-[var(--text-tertiary)]">
           {entry.date && (
             <time dateTime={entry.date}>{displayDate(entry.date)}</time>
           )}
-          {entry.date && stats && " · "}
+          {entry.date && stats && <span aria-hidden>·</span>}
           {stats && (
             <span>
               {stats.minutes} min read · {stats.words.toLocaleString()} words
             </span>
+          )}
+          {typeof entry.meta.rating === "number" && (
+            <Stars rating={entry.meta.rating} />
           )}
         </p>
       </header>

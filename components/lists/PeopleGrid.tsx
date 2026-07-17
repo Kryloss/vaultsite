@@ -51,7 +51,7 @@ export default function PeopleGrid({ section, entries }: ListProps) {
                 {entry.title}
               </span>
               {entry.description && (
-                <span className="mt-0.5 block text-sm leading-snug text-[var(--text-secondary)]">
+                <span className="mt-0.5 line-clamp-2 block text-sm leading-snug text-[var(--text-secondary)]">
                   {entry.description}
                 </span>
               )}

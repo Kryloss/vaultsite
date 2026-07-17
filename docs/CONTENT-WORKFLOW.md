@@ -68,9 +68,10 @@ description: <one sentence>
 title: <Title>
 author: <author / director / creator>
 medium: book | movie | show
+rating: <0–5, halves allowed — ONLY if he gave one; never invent his rating>
 date: YYYY-MM-DD
 description: <one sentence>
-# cover: <slug>.jpg   ← drop into vault/Shelf/ and uncomment
+cover: <slug>.jpg
 ---
 ## At a glance
 | | |

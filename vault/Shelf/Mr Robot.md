@@ -2,6 +2,7 @@
 title: Mr. Robot
 author: Sam Esmail
 medium: show
+rating: 4.5
 date: 2026-07-17
 description: The rare hacker show that hackers actually respect.
 cover: mr-robot.png

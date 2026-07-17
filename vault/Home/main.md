@@ -12,6 +12,4 @@ Before Starbucks I spent two years at Tim Hortons, the last stretch as a supervi
 
 This site is where I keep my writing, projects, notes, and the occasional strong opinion. It's a work in progress, like me.
 
-[Past version](https://www.kryloss.com)
-
 Curious what I'm up to right now? See [[Now/main|Now]].

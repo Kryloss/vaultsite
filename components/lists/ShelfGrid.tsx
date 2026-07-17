@@ -13,6 +13,7 @@ import ShelfGridClient, {
  *   cover: sapiens.jpg            (image inside the section folder)
  *   coverFit: contain             (optional — letterbox wide art like logos
  *                                  instead of cropping it to fill the card)
+ *   rating: 4.5                   (optional — 0–5 stars, halves allowed)
  */
 export default function ShelfGrid({ section, entries }: ListProps) {
   if (entries.length === 0) {
@@ -35,6 +36,8 @@ export default function ShelfGrid({ section, entries }: ListProps) {
         : undefined,
     coverUrl: resolveCoverUrl(entry.sectionDir, entry.meta.cover),
     coverFit: entry.meta.coverFit === "contain" ? ("contain" as const) : undefined,
+    rating:
+      typeof entry.meta.rating === "number" ? entry.meta.rating : undefined,
   }));
 
   return <ShelfGridClient sectionSlug={section.slug} items={items} />;

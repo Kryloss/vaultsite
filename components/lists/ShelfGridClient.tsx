@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import Stars from "@/components/Stars";
 
 export interface ShelfItem {
   slug: string;
@@ -11,6 +12,8 @@ export interface ShelfItem {
   coverUrl?: string;
   /** "contain" letterboxes wide art (logos) instead of cropping to fill. */
   coverFit?: "contain";
+  /** 0–5, halves allowed. */
+  rating?: number;
 }
 
 /** Pretty labels for common mediums; unknown values are shown capitalized. */
@@ -108,6 +111,9 @@ export default function ShelfGridClient({
                 <span className="mt-0.5 block text-sm leading-snug text-[var(--text-secondary)]">
                   {item.author}
                 </span>
+              )}
+              {typeof item.rating === "number" && (
+                <Stars rating={item.rating} className="mt-1.5" />
               )}
             </Link>
           </li>

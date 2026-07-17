@@ -2,6 +2,7 @@
 title: Inception
 author: Christopher Nolan
 medium: movie
+rating: 5
 date: 2026-07-17
 description: A heist movie where the vault is a person's mind.
 cover: inception.jpg
