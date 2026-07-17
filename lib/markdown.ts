@@ -43,8 +43,15 @@ export function preprocessObsidian(
       const src = assetUrl(sectionDir, file);
       const size = alt?.trim().match(/^(\d+)(?:x(\d+))?$/);
       if (size) {
+        const w = Number(size[1]);
+        // Small sized embeds (≤128px, e.g. ![[me.jpeg|93]]) are treated as
+        // avatars: rendered as a circle, cropped square. Larger sized embeds
+        // keep the regular rounded-rectangle style.
+        if (w <= 128 && !size[2]) {
+          return `<img src="${src}" width="${w}" height="${w}" class="avatar" alt="" />`;
+        }
         const height = size[2] ? ` height="${size[2]}"` : "";
-        return `<img src="${src}" width="${size[1]}"${height} alt="" />`;
+        return `<img src="${src}" width="${w}"${height} alt="" />`;
       }
       return `![${alt ?? ""}](${src})`;
     }

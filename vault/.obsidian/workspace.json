@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Posts/Post Sample 1.md",
+                "file": "Music/Clancy.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Post Sample 1"
+              "title": "Clancy"
             }
           }
         ]
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Posts/Post Sample 1.md",
+                "file": "Music/Clancy.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Post Sample 1"
+              "title": "Outgoing links from Clancy"
             }
           },
           {
@@ -185,19 +185,19 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
-    "Posts/Post Sample.md",
-    "People/Mykhailo Fedorov.png",
-    "Posts/Post Sample 1.md",
-    "2026-07-16.md",
+    "Home/main.md",
     "Posts/main.md",
-    "Projects/main.md",
-    "Projects/This website.md",
-    "People/main.md",
+    "Posts/Post Sample.md",
+    "Posts/Post Sample 1.md",
     "People/Mykhailo Fedorov.md",
+    "Projects/This website.md",
+    "Projects/main.md",
+    "People/fedorov.png",
+    "2026-07-16.md",
+    "People/main.md",
     "2026-07-17.md",
     "Projects",
     "People",
-    "Home/main.md",
     "Music/Clancy.md",
     "Music/main.md",
     "Home/IMG_3260.jpeg",

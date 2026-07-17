@@ -137,6 +137,17 @@ body {
   transform: scale(1.01);
 }
 
+/* Avatar images — small sized Obsidian embeds like ![[me.jpeg|93]] (≤128px) */
+.prose img.avatar {
+  border-radius: 9999px;
+  object-fit: cover;
+  margin: 0 0 1.25rem;
+}
+
+.prose img.avatar:hover {
+  transform: none;
+}
+
 .prose blockquote {
   border-left: 3px solid var(--border);
   padding-left: 1rem;

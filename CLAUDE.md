@@ -42,6 +42,8 @@ Kyrylo's portfolio site, published from an Obsidian vault. The `vault/` folder I
 - Section types: `posts` (default), `music` (Apple Music iframe embeds — `lib/apple-music.ts`, no API key), `people` (cover-image grid; entry `cover:` frontmatter, initials fallback), `projects` (TIL-style inline feed; async list component). Markdown pipeline also auto-embeds standalone Apple Music links.
 - Entry frontmatter is exposed as `entry.meta` (same pattern as `section.meta`) for type-specific keys.
 - Frontmatter (entries): `title`, `date` (YYYY-MM-DD), `description`, `slug`, `draft` (or `published: false`).
+- Sized image embeds ≤128px (e.g. `![[me.jpeg|93]]`) render as circular avatars (`.avatar` class); larger sizes keep the rounded-rectangle style.
+- The `posts` list groups entries by month automatically (months without posts never render).
 - Slugs: `slugify()` in `lib/vault.ts` — keep stable, changing it breaks URLs.
 - Styling: Tailwind utility classes + CSS variables defined in `app/globals.css` (`--bg`, `--text`, `--accent`, …). Dark mode via `prefers-color-scheme`. Markdown output styled by the hand-written `.prose` classes in globals.css.
 - TypeScript strict; path alias `@/*` → repo root.

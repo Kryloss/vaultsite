@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import {
-  MenuIcon,
+  PanelIcon,
   CloseIcon,
   resolveIcon,
   GitHubIcon,
@@ -28,9 +28,9 @@ const socialIcons = {
 };
 
 /**
- * Site chrome, brianlovin-style: sidebar starts hidden and slides in from a
- * menu button; a slim sticky header shows "<Section> · <SiteName>". Content
- * fades up on every navigation (`page-in` keyframes in globals.css).
+ * Site chrome, brianlovin-style: no top bar — just a floating panel icon and
+ * a clickable "<Section> · <SiteName>" breadcrumb in the top left. The sidebar
+ * starts hidden and slides in flat (page background, hairline border only).
  */
 export default function Chrome({
   items,
@@ -64,13 +64,12 @@ export default function Chrome({
 
   const sectionSlug = pathname.split("/")[1] || "home";
   const current = nav.find((i) => i.slug === sectionSlug);
-  const crumb =
-    pathname === "/" || !current ? siteName : `${current.title} · ${siteName}`;
+  const onHome = pathname === "/" || !current || current.slug === "home";
 
   return (
     <>
-      {/* Sticky header: menu button + location breadcrumb, top left */}
-      <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-[var(--border)] bg-[var(--bg)]/85 px-4 py-2.5 backdrop-blur-md">
+      {/* Floating top-left: panel icon + clickable location text */}
+      <div className="fixed left-3 top-3 z-30 flex items-center gap-1 rounded-full bg-[var(--bg)]/75 px-1.5 py-1 backdrop-blur-md">
         <button
           type="button"
           aria-label={open ? "Close menu" : "Open menu"}
@@ -78,30 +77,50 @@ export default function Chrome({
           onClick={() => setOpen((v) => !v)}
           className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
         >
-          {open ? <CloseIcon className="h-[18px] w-[18px]" /> : <MenuIcon className="h-[18px] w-[18px]" />}
+          <PanelIcon className="h-[18px] w-[18px]" />
         </button>
-        <span className="truncate text-sm font-medium text-[var(--text)]">
-          {crumb}
+        <span className="pr-2 text-sm font-medium">
+          {onHome ? (
+            <Link href="/" className="text-[var(--text)] transition-colors hover:text-[var(--accent)]">
+              {siteName}
+            </Link>
+          ) : (
+            <>
+              <Link
+                href={`/${current.slug}`}
+                className="text-[var(--text)] transition-colors hover:text-[var(--accent)]"
+              >
+                {current.title}
+              </Link>
+              <span className="text-[var(--text-tertiary)]"> · </span>
+              <Link
+                href="/"
+                className="text-[var(--text-secondary)] transition-colors hover:text-[var(--accent)]"
+              >
+                {siteName}
+              </Link>
+            </>
+          )}
         </span>
-      </header>
+      </div>
 
       {/* Backdrop */}
       <div
         aria-hidden
         onClick={() => setOpen(false)}
-        className={`fixed inset-0 z-40 bg-black/40 transition-opacity duration-300 ${
+        className={`fixed inset-0 z-40 bg-black/25 transition-opacity duration-300 ${
           open ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       />
 
-      {/* Drawer sidebar — hidden by default, slides in */}
+      {/* Drawer — flat: page background, hairline border, text + icons only */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-[var(--border)] bg-[var(--bg-sidebar)] py-4 shadow-2xl transition-transform duration-300 ease-out ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-[var(--border)] bg-[var(--bg)] py-4 transition-transform duration-300 ease-out ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="flex items-center justify-between px-5 pb-4">
-          <Link href="/" className="text-sm font-semibold text-[var(--text)]">
+          <Link href="/" className="text-[15px] font-semibold text-[var(--text)]">
             {siteName}
           </Link>
           <button
@@ -121,16 +140,16 @@ export default function Chrome({
               <Link
                 key={item.slug}
                 href={item.href}
-                className={`flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm transition-colors duration-150 ${
+                className={`flex items-center gap-3 rounded-md px-2.5 py-[7px] text-[15px] transition-colors duration-150 ${
                   isActive(item.href)
-                    ? "bg-[var(--accent)] font-medium text-white"
+                    ? "bg-[var(--bg-hover)] font-medium text-[var(--text)]"
                     : "text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
                 }`}
               >
                 {Icon ? (
-                  <Icon className="h-4 w-4 shrink-0 opacity-80" />
+                  <Icon className="h-[18px] w-[18px] shrink-0 opacity-75" />
                 ) : item.icon ? (
-                  <span className="w-4 text-center text-sm leading-none">{item.icon}</span>
+                  <span className="w-[18px] text-center text-[15px] leading-none">{item.icon}</span>
                 ) : null}
                 <span>{item.title}</span>
               </Link>

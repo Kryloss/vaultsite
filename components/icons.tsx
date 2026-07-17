@@ -79,6 +79,16 @@ export function MenuIcon({ className }: IconProps) {
   );
 }
 
+/** Sidebar-panel icon (brianlovin-style menu affordance). */
+export function PanelIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
+      <rect x="3" y="4" width="18" height="16" rx="3" />
+      <path d="M9.5 4v16" />
+    </svg>
+  );
+}
+
 export function CloseIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
