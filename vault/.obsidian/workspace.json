@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "People/Mykhailo Fedorov.md",
+                "file": "Posts/Post Sample 1.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Mykhailo Fedorov"
+              "title": "Post Sample 1"
             }
           }
         ]
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "People/Mykhailo Fedorov.md",
+                "file": "Posts/Post Sample 1.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Mykhailo Fedorov"
+              "title": "Outgoing links from Post Sample 1"
             }
           },
           {
@@ -185,13 +185,16 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
-    "People/main.md",
-    "People/Mykhailo Fedorov.md",
-    "2026-07-17.md",
     "Posts/Post Sample.md",
+    "People/Mykhailo Fedorov.png",
+    "Posts/Post Sample 1.md",
+    "2026-07-16.md",
     "Posts/main.md",
     "Projects/main.md",
     "Projects/This website.md",
+    "People/main.md",
+    "People/Mykhailo Fedorov.md",
+    "2026-07-17.md",
     "Projects",
     "People",
     "Home/main.md",
