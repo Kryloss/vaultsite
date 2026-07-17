@@ -19,8 +19,8 @@ export interface SocialLink {
 // ⚠️ Placeholder handles — replace with your real profile URLs.
 export const socials: SocialLink[] = [
   { label: "GitHub", href: "https://github.com/kryloss", icon: "github" },
-  { label: "Instagram", href: "https://instagram.com/kryloss", icon: "instagram" },
-  { label: "LinkedIn", href: "https://www.linkedin.com/in/kryloss", icon: "linkedin" },
-  { label: "X", href: "https://x.com/kryloss", icon: "x" },
-  { label: "Email", href: "mailto:mr.repar07@gmail.com", icon: "mail" },
+  { label: "Instagram", href: "https://instagram.com/kyryloles", icon: "instagram" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/kyrylo-leshchenko-b379383b0", icon: "linkedin" },
+  { label: "X", href: "https://x.com/krylossua", icon: "x" },
+  { label: "Email", href: "mailto:kyryloleshchenko@gmail.com", icon: "mail" },
 ];
