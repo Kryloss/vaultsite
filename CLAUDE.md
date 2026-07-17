@@ -27,7 +27,9 @@ Kyrylo's portfolio site, published from an Obsidian vault. The `vault/` folder I
 | `lib/vault.ts` | Content engine: section/entry discovery, slugs, frontmatter, sorting |
 | `lib/markdown.ts` | Obsidian syntax preprocessing (`![[img]]`, `[[wiki links]]`, relative images) + unified pipeline → HTML |
 | `lib/section-types.tsx` | Registry: section `type` → list component. Extend page styles here |
-| `components/Sidebar.tsx` | Nav (client component; items generated from vault folders in layout) |
+| `components/Chrome.tsx` | Site chrome: sticky header ("Section · Kyrylo" breadcrumb), slide-in drawer sidebar (hidden by default), social links, page transition wrapper |
+| `components/icons.tsx` | Inline SVG icon set; `resolveIcon()` maps vault frontmatter emoji/names → SVGs, unknown emoji render as text |
+| `lib/site-config.ts` | Site name + social links (owner edits URLs here) |
 | `components/lists/` | List-style components, one per section type |
 | `app/page.tsx` | Home = section with slug `home` |
 | `app/[section]/page.tsx` | Section pages (`dynamicParams = false`) |
@@ -37,7 +39,8 @@ Kyrylo's portfolio site, published from an Obsidian vault. The `vault/` folder I
 ## Conventions
 
 - Frontmatter (section `main.md`): `title`, `icon`, `order`, `description`, `type`, `slug` (override), `draft`. Full frontmatter is exposed as `section.meta` so section types can define their own keys (e.g. `music` reads `playlists:`).
-- Section types: `posts` (default), `music` (Apple Music iframe embeds — `lib/apple-music.ts`, no API key). Markdown pipeline also auto-embeds standalone Apple Music links.
+- Section types: `posts` (default), `music` (Apple Music iframe embeds — `lib/apple-music.ts`, no API key), `people` (cover-image grid; entry `cover:` frontmatter, initials fallback), `projects` (TIL-style inline feed; async list component). Markdown pipeline also auto-embeds standalone Apple Music links.
+- Entry frontmatter is exposed as `entry.meta` (same pattern as `section.meta`) for type-specific keys.
 - Frontmatter (entries): `title`, `date` (YYYY-MM-DD), `description`, `slug`, `draft` (or `published: false`).
 - Slugs: `slugify()` in `lib/vault.ts` — keep stable, changing it breaks URLs.
 - Styling: Tailwind utility classes + CSS variables defined in `app/globals.css` (`--bg`, `--text`, `--accent`, …). Dark mode via `prefers-color-scheme`. Markdown output styled by the hand-written `.prose` classes in globals.css.

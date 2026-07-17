@@ -6,26 +6,33 @@
  *
  * TO ADD A NEW PAGE STYLE (see docs/ADDING-PAGE-TYPES.md):
  * 1. Create a list component in components/lists/ that accepts { section, entries }.
+ *    Sync or async server components both work.
  * 2. Register it below under a new key.
  * 3. Set `type: <key>` in the frontmatter of that section's main.md.
  * Nothing else needs to change — routing and rendering are type-agnostic.
  */
-import type { ComponentType } from "react";
+import type { ReactNode } from "react";
 import type { Entry, Section } from "@/lib/vault";
 import PostList from "@/components/lists/PostList";
 import MusicList from "@/components/lists/MusicList";
+import PeopleGrid from "@/components/lists/PeopleGrid";
+import TilList from "@/components/lists/TilList";
 
 export interface ListProps {
   section: Section;
   entries: Entry[];
 }
 
-const registry: Record<string, ComponentType<ListProps>> = {
-  posts: PostList,
+/** Sync or async server component that renders a section's entry list. */
+export type SectionList = (props: ListProps) => ReactNode | Promise<ReactNode>;
+
+const registry: Record<string, SectionList> = {
+  posts: PostList, // title/date rows
   music: MusicList, // Apple Music embeds + notes (reads `playlists:` frontmatter)
-  // projects: ProjectGrid,   ← future example
+  people: PeopleGrid, // square cover-image grid (entries read `cover:` frontmatter)
+  projects: TilList, // full entries rendered inline, TIL-style
 };
 
-export function getListComponent(type: string): ComponentType<ListProps> {
+export function getListComponent(type: string): SectionList {
   return registry[type] ?? PostList;
 }

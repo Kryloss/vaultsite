@@ -31,6 +31,39 @@ html {
   scroll-behavior: smooth;
 }
 
+/* ---------- Motion ---------- */
+
+/* Content fades up on every navigation (applied in components/Chrome.tsx) */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-in {
+  animation: page-in 0.4s cubic-bezier(0.21, 0.47, 0.32, 0.98) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .page-in {
+    animation: none;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
 body {
   background: var(--bg);
   color: var(--text);
@@ -97,6 +130,11 @@ body {
   margin: 1.5rem 0;
   max-width: 100%;
   height: auto;
+  transition: transform 0.3s ease;
+}
+
+.prose img:hover {
+  transform: scale(1.01);
 }
 
 .prose blockquote {

@@ -47,6 +47,11 @@ export interface Entry {
   description?: string;
   /** Raw markdown body */
   content: string;
+  /**
+   * Full frontmatter of the entry — lets section types read their own keys
+   * (e.g. the "people" type reads `cover:`) without changing this engine.
+   */
+  meta: Record<string, unknown>;
 }
 
 /** "How was my day" → "how-was-my-day" */
@@ -119,6 +124,7 @@ export function getEntries(section: Section): Entry[] {
       date: data.date ? String(formatDateValue(data.date)) : undefined,
       description: data.description as string | undefined,
       content,
+      meta: data,
     });
   }
 

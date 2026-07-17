@@ -24,7 +24,8 @@ function encodePath(p: string): string {
   return p.split("/").map(encodeURIComponent).join("/");
 }
 
-function assetUrl(sectionDir: string, file: string): string {
+/** Public URL for a file living inside a section folder (mirrored by sync-assets). */
+export function assetUrl(sectionDir: string, file: string): string {
   return `/vault-assets/${encodePath(sectionDir)}/${encodePath(file.trim())}`;
 }
 
