@@ -1,0 +1,23 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# generated from vault by scripts/sync-assets.mjs — never edit by hand
+public/vault-assets/
+
+# obsidian workspace state (machine-specific)
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.trash/
+
+# env & platform
+.env*
+.vercel/
+
+# os
+.DS_Store
