@@ -1,12 +1,13 @@
 import Link from "next/link";
 import type { ListProps } from "@/lib/section-types";
-import { assetUrl } from "@/lib/markdown";
+import { resolveCoverUrl } from "@/lib/markdown";
 
 /**
  * "people" section type — app-dissection-style grid of square cover cards.
  *
  * Each entry note can set a cover image via frontmatter:
- *   cover: fedorov.jpg      (a file inside the same section folder)
+ *   cover: fedorov.jpg      (a file inside the same section folder — preferred)
+ *   cover: https://…        (remote URL fallback)
  * Without a cover, a tile with the person's initials is shown instead.
  */
 export default function PeopleGrid({ section, entries }: ListProps) {
@@ -22,7 +23,7 @@ export default function PeopleGrid({ section, entries }: ListProps) {
   return (
     <ul className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3">
       {entries.map((entry) => {
-        const cover = cleanCover(entry.meta.cover);
+        const cover = resolveCoverUrl(entry.sectionDir, entry.meta.cover);
         return (
           <li key={entry.slug}>
             <Link href={`/${section.slug}/${entry.slug}`} className="group block">
@@ -30,7 +31,7 @@ export default function PeopleGrid({ section, entries }: ListProps) {
                 {cover ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={assetUrl(entry.sectionDir, cover)}
+                    src={cover}
                     alt={entry.title}
                     className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                     loading="lazy"
@@ -55,12 +56,6 @@ export default function PeopleGrid({ section, entries }: ListProps) {
       })}
     </ul>
   );
-}
-
-/** Accepts "photo.jpg", "![[photo.jpg]]" or "[[photo.jpg]]" from frontmatter. */
-function cleanCover(value: unknown): string | undefined {
-  if (typeof value !== "string" || !value.trim()) return undefined;
-  return value.trim().replace(/^!?\[\[/, "").replace(/\]\]$/, "");
 }
 
 function initials(name: string): string {

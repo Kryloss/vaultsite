@@ -1,5 +1,5 @@
 import type { ListProps } from "@/lib/section-types";
-import { assetUrl } from "@/lib/markdown";
+import { resolveCoverUrl } from "@/lib/markdown";
 import ShelfGridClient, {
   type ShelfItem,
 } from "@/components/lists/ShelfGridClient";
@@ -22,26 +22,17 @@ export default function ShelfGrid({ section, entries }: ListProps) {
     );
   }
 
-  const items: ShelfItem[] = entries.map((entry) => {
-    const cover = cleanCover(entry.meta.cover);
-    return {
-      slug: entry.slug,
-      title: entry.title,
-      author:
-        typeof entry.meta.author === "string" ? entry.meta.author : undefined,
-      medium:
-        typeof entry.meta.medium === "string"
-          ? entry.meta.medium.toLowerCase()
-          : undefined,
-      coverUrl: cover ? assetUrl(entry.sectionDir, cover) : undefined,
-    };
-  });
+  const items: ShelfItem[] = entries.map((entry) => ({
+    slug: entry.slug,
+    title: entry.title,
+    author:
+      typeof entry.meta.author === "string" ? entry.meta.author : undefined,
+    medium:
+      typeof entry.meta.medium === "string"
+        ? entry.meta.medium.toLowerCase()
+        : undefined,
+    coverUrl: resolveCoverUrl(entry.sectionDir, entry.meta.cover),
+  }));
 
   return <ShelfGridClient sectionSlug={section.slug} items={items} />;
-}
-
-/** Accepts "cover.jpg", "![[cover.jpg]]" or "[[cover.jpg]]" from frontmatter. */
-function cleanCover(value: unknown): string | undefined {
-  if (typeof value !== "string" || !value.trim()) return undefined;
-  return value.trim().replace(/^!?\[\[/, "").replace(/\]\]$/, "");
 }

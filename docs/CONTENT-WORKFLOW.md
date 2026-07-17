@@ -31,10 +31,12 @@ the vault. This doc is the playbook. Read CLAUDE.md first for the hard rules.
 3. **Structure** → apply the matching template below.
 4. **Cross-link** → scan the new text AND existing notes for link
    opportunities (see wiki rules). This is a big part of your value.
-5. **Write the file** → `vault/<Section>/<Natural Title>.md`. File name = the
+5. **Source images** → covers for Shelf/People items, inline figures where
+   they help (see "Images & media sourcing" below). Don't skip this step.
+6. **Write the file** → `vault/<Section>/<Natural Title>.md`. File name = the
    title in normal words (spaces fine, no slashes/colons); the engine slugs it.
-6. **Report** → tell him the file path, the URL it will get, links you added,
-   and anything you fixed or assumed.
+7. **Report** → tell him the file path, the URL it will get, links added,
+   images fetched (with their sources), and anything you fixed or assumed.
 
 ## Defaults
 
@@ -110,6 +112,55 @@ shows the first ~1000 characters inline, so front-load the interesting part.
 ### Music note — `vault/Music/<Title>.md`
 Post frontmatter. An Apple Music link pasted on its own line becomes a player —
 keep any he provides on separate lines.
+
+## Images & media sourcing
+
+Fetch images automatically — Kyrylo shouldn't have to hunt for covers.
+
+**Preferred: download into the vault.** Save the file next to the note
+(`vault/Shelf/sapiens.jpg`), set `cover: sapiens.jpg`. Vault files show up in
+Obsidian, sync through git, and never rot. Ask permission before downloading,
+batched in one line ("Downloading 2 covers: sapiens.jpg from Open Library
+(~60 KB), fedorov.jpg from Wikimedia Commons (~120 KB) — OK?").
+
+**Fallback: remote URL.** If a download isn't possible in the session, set
+`cover: https://…` — the site renders it directly. Flag it in your report so
+he knows it's a hotlink that could rot.
+
+**Where to look, per type:**
+
+| Content | Source (in order) |
+|---|---|
+| Book covers | Open Library Covers API (`covers.openlibrary.org/b/isbn/<ISBN>-L.jpg`, keyless) → publisher page |
+| Movie/show art | Wikipedia page image → studio press page |
+| People photos | Wikimedia Commons ONLY (verify the license; note author + license as an HTML comment in the note) → official government/company portrait pages |
+| Music artwork | Not needed — Apple Music embeds carry their own art |
+| Inline figures | Wikimedia Commons, official docs/press kits, his own screenshots |
+
+**File conventions:** lowercase slugged names (`mr-robot.jpg`), covers ~600px
+on the long side are plenty, JPG/PNG/WebP all fine.
+
+**Rules:**
+- Covers/posters alongside his commentary about that work: standard practice, fine.
+- People photos: licensed sources only, credit recorded. Never grab a random
+  Google Images result.
+- Inline figures get a caption (`![[diia-app.jpg|The Diia app in 2020]]`) and,
+  where the license requires, a credit line under the section using it.
+- Never generate fake "covers" or AI portraits of real people.
+
+## Sources section
+
+Notes making factual claims (People, current-events posts) end with:
+
+```md
+## Sources
+
+- [Article title — Publication](https://…)
+- [Mykhailo Fedorov — Wikipedia](https://…)
+```
+
+2–4 links, the ones actually used to verify facts. Skip it for pure-opinion
+posts, shelf thoughts, and music notes — don't pad.
 
 ## Wiki-link rules
 

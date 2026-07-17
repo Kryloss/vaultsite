@@ -36,6 +36,22 @@ export function assetUrl(sectionDir: string, file: string): string {
   return `/vault-assets/${encodePath(sectionDir)}/${encodePath(file.trim())}`;
 }
 
+/**
+ * `cover:` frontmatter → image URL.
+ * Accepts "photo.jpg", "![[photo.jpg]]", "[[photo.jpg]]" (vault files — the
+ * preferred, permanent form) or a full https:// URL (fallback when a file
+ * couldn't be downloaded into the vault). Returns undefined when unset.
+ */
+export function resolveCoverUrl(
+  sectionDir: string,
+  value: unknown
+): string | undefined {
+  if (typeof value !== "string" || !value.trim()) return undefined;
+  const clean = value.trim().replace(/^!?\[\[/, "").replace(/\]\]$/, "");
+  if (/^https?:\/\//i.test(clean)) return clean;
+  return assetUrl(sectionDir, clean);
+}
+
 /** Memoized wiki index (built once per build process). */
 let wikiIndex: Map<string, string> | null = null;
 function wiki(): Map<string, string> {
