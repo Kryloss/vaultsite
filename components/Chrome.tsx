@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { Fragment, useEffect, useState, type ReactNode } from "react";
 import {
   PanelIcon,
-  CloseIcon,
   resolveIcon,
   GitHubIcon,
   InstagramIcon,
   LinkedInIcon,
+  XIcon,
   MailIcon,
 } from "@/components/icons";
 import type { SocialLink } from "@/lib/site-config";
@@ -18,19 +18,21 @@ export interface NavItem {
   slug: string;
   title: string;
   icon?: string;
+  entries: { slug: string; title: string }[];
 }
 
 const socialIcons = {
   github: GitHubIcon,
   instagram: InstagramIcon,
   linkedin: LinkedInIcon,
+  x: XIcon,
   mail: MailIcon,
 };
 
 /**
- * Site chrome, brianlovin-style: no top bar — just a floating panel icon and
- * a clickable "<Section> · <SiteName>" breadcrumb in the top left. The sidebar
- * starts hidden and slides in flat (page background, hairline border only).
+ * Site chrome, brianlovin-style: a floating panel icon plus a clickable
+ * breadcrumb that mirrors the full path — "Post Sample · Posts · Kyrylo".
+ * The sidebar starts hidden, slides in flat, and closes via backdrop/Escape.
  */
 export default function Chrome({
   items,
@@ -62,13 +64,22 @@ export default function Chrome({
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(href + "/");
 
-  const sectionSlug = pathname.split("/")[1] || "home";
-  const current = nav.find((i) => i.slug === sectionSlug);
-  const onHome = pathname === "/" || !current || current.slug === "home";
+  // Breadcrumb: deepest location first — "Entry · Section · SiteName".
+  const [sectionSlug, entrySlug] = pathname.split("/").filter(Boolean);
+  const section = sectionSlug ? nav.find((i) => i.slug === sectionSlug) : undefined;
+  const entry = entrySlug && section
+    ? section.entries.find((e) => e.slug === entrySlug)
+    : undefined;
+
+  const crumbs: { label: string; href: string }[] = [];
+  if (entry && section) crumbs.push({ label: entry.title, href: pathname });
+  if (section && section.slug !== "home")
+    crumbs.push({ label: section.title, href: `/${section.slug}` });
+  crumbs.push({ label: siteName, href: "/" });
 
   return (
     <>
-      {/* Floating top-left: panel icon + clickable location text */}
+      {/* Floating top-left: panel icon + clickable location path */}
       <div className="fixed left-3 top-3 z-30 flex items-center gap-1 rounded-full bg-[var(--bg)]/75 px-1.5 py-1 backdrop-blur-md">
         <button
           type="button"
@@ -79,28 +90,20 @@ export default function Chrome({
         >
           <PanelIcon className="h-[18px] w-[18px]" />
         </button>
-        <span className="pr-2 text-sm font-medium">
-          {onHome ? (
-            <Link href="/" className="text-[var(--text)] transition-colors hover:text-[var(--accent)]">
-              {siteName}
-            </Link>
-          ) : (
-            <>
+        <span className="max-w-[70vw] truncate pr-2 text-sm font-medium">
+          {crumbs.map((crumb, i) => (
+            <Fragment key={crumb.href}>
+              {i > 0 && <span className="text-[var(--text-tertiary)]"> · </span>}
               <Link
-                href={`/${current.slug}`}
-                className="text-[var(--text)] transition-colors hover:text-[var(--accent)]"
+                href={crumb.href}
+                className={`transition-colors hover:text-[var(--accent)] ${
+                  i === 0 ? "text-[var(--text)]" : "text-[var(--text-secondary)]"
+                }`}
               >
-                {current.title}
+                {crumb.label}
               </Link>
-              <span className="text-[var(--text-tertiary)]"> · </span>
-              <Link
-                href="/"
-                className="text-[var(--text-secondary)] transition-colors hover:text-[var(--accent)]"
-              >
-                {siteName}
-              </Link>
-            </>
-          )}
+            </Fragment>
+          ))}
         </span>
       </div>
 
@@ -115,41 +118,33 @@ export default function Chrome({
 
       {/* Drawer — flat: page background, hairline border, text + icons only */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-[var(--border)] bg-[var(--bg)] py-4 transition-transform duration-300 ease-out ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-68 flex-col border-r border-[var(--border)] bg-[var(--bg)] py-5 transition-transform duration-300 ease-out ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between px-5 pb-4">
-          <Link href="/" className="text-[15px] font-semibold text-[var(--text)]">
+        <div className="px-6 pb-5">
+          <Link href="/" className="text-base font-semibold text-[var(--text)]">
             {siteName}
           </Link>
-          <button
-            type="button"
-            aria-label="Close menu"
-            onClick={() => setOpen(false)}
-            className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--text-tertiary)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
-          >
-            <CloseIcon className="h-4 w-4" />
-          </button>
         </div>
 
-        <nav className="flex flex-col gap-0.5 overflow-y-auto px-3">
+        <nav className="flex flex-col gap-1.5 overflow-y-auto px-3">
           {nav.map((item) => {
             const Icon = resolveIcon(item.icon);
             return (
               <Link
                 key={item.slug}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-md px-2.5 py-[7px] text-[15px] transition-colors duration-150 ${
+                className={`flex items-center gap-3.5 rounded-lg px-3 py-2 text-base transition-colors duration-150 ${
                   isActive(item.href)
                     ? "bg-[var(--bg-hover)] font-medium text-[var(--text)]"
                     : "text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
                 }`}
               >
                 {Icon ? (
-                  <Icon className="h-[18px] w-[18px] shrink-0 opacity-75" />
+                  <Icon className="h-5 w-5 shrink-0 opacity-75" />
                 ) : item.icon ? (
-                  <span className="w-[18px] text-center text-[15px] leading-none">{item.icon}</span>
+                  <span className="w-5 text-center text-base leading-none">{item.icon}</span>
                 ) : null}
                 <span>{item.title}</span>
               </Link>
@@ -157,9 +152,9 @@ export default function Chrome({
           })}
         </nav>
 
-        {/* Social links */}
-        <div className="mt-auto px-5 pt-6">
-          <div className="flex items-center gap-1">
+        {/* Social links — plain icons, no background */}
+        <div className="mt-auto px-6 pt-6">
+          <div className="flex items-center gap-4">
             {socials.map((s) => {
               const Icon = socialIcons[s.icon];
               return (
@@ -170,14 +165,14 @@ export default function Chrome({
                   rel="noreferrer"
                   aria-label={s.label}
                   title={s.label}
-                  className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-tertiary)] transition-all duration-150 hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
+                  className="text-[var(--text-tertiary)] transition-colors duration-150 hover:text-[var(--text)]"
                 >
-                  <Icon className="h-[17px] w-[17px]" />
+                  <Icon className="h-[21px] w-[21px]" />
                 </a>
               );
             })}
           </div>
-          <p className="mt-3 text-xs text-[var(--text-tertiary)]">
+          <p className="mt-4 text-xs text-[var(--text-tertiary)]">
             Published from Obsidian
           </p>
         </div>

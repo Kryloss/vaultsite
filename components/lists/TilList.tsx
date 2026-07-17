@@ -2,13 +2,15 @@ import Link from "next/link";
 import type { ListProps } from "@/lib/section-types";
 import { renderMarkdown } from "@/lib/markdown";
 import { displayDate } from "@/lib/vault";
+import ExpandableHtml from "@/components/ExpandableHtml";
+
+/** Entries longer than this (raw markdown chars) get truncated with an expand toggle. */
+const PREVIEW_LIMIT = 1000;
 
 /**
- * "projects" section type — brianlovin.com/til-style feed:
- * every entry's full content is rendered inline on the section page,
- * newest first, with the title linking to the entry's own page.
- *
- * Async server component (it renders markdown at build time).
+ * "projects" section type — TIL-style feed: entries rendered inline, newest
+ * first. Long entries show the first ~1000 characters with a
+ * "Continue reading" toggle that expands in place.
  */
 export default async function TilList({ section, entries }: ListProps) {
   if (entries.length === 0) {
@@ -21,7 +23,14 @@ export default async function TilList({ section, entries }: ListProps) {
   }
 
   const rendered = await Promise.all(
-    entries.map((e) => renderMarkdown(e.content, e.sectionDir, section.slug))
+    entries.map(async (e) => {
+      const full = await renderMarkdown(e.content, e.sectionDir, section.slug);
+      const previewMd = truncateMarkdown(e.content, PREVIEW_LIMIT);
+      const preview = previewMd
+        ? await renderMarkdown(previewMd, e.sectionDir, section.slug)
+        : null;
+      return { full, preview };
+    })
   );
 
   return (
@@ -47,12 +56,42 @@ export default async function TilList({ section, entries }: ListProps) {
               {entry.title}
             </Link>
           </h2>
-          <div
-            className="prose mt-3"
-            dangerouslySetInnerHTML={{ __html: rendered[i] }}
-          />
+          {rendered[i].preview ? (
+            <ExpandableHtml preview={rendered[i].preview} full={rendered[i].full} />
+          ) : (
+            <div
+              className="prose mt-3"
+              dangerouslySetInnerHTML={{ __html: rendered[i].full }}
+            />
+          )}
         </article>
       ))}
     </div>
   );
+}
+
+/**
+ * Cuts markdown at the last paragraph boundary under `limit` characters.
+ * Returns null when no truncation is needed. If the very first paragraph
+ * already exceeds the limit, it is hard-cut at a word boundary.
+ */
+function truncateMarkdown(md: string, limit: number): string | null {
+  const trimmed = md.trim();
+  if (trimmed.length <= limit) return null;
+
+  const blocks = trimmed.split(/\n\s*\n/);
+  const out: string[] = [];
+  let length = 0;
+
+  for (const block of blocks) {
+    if (out.length === 0 && block.length > limit) {
+      return block.slice(0, limit).replace(/\s+\S*$/, "") + "…";
+    }
+    if (length + block.length > limit) break;
+    out.push(block);
+    length += block.length;
+  }
+
+  const preview = out.join("\n\n");
+  return preview.length >= trimmed.length ? null : preview;
 }

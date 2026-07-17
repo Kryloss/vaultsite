@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Chrome from "@/components/Chrome";
-import { getSections } from "@/lib/vault";
+import { getSections, getEntries } from "@/lib/vault";
 import { siteName, socials } from "@/lib/site-config";
 
 export const metadata: Metadata = {
@@ -18,11 +18,12 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Navigation is generated from vault folders at build time.
-  const items = getSections().map(({ slug, title, icon }) => ({
-    slug,
-    title,
-    icon,
+  // Navigation (and breadcrumb titles) generated from the vault at build time.
+  const items = getSections().map((section) => ({
+    slug: section.slug,
+    title: section.title,
+    icon: section.icon,
+    entries: getEntries(section).map(({ slug, title }) => ({ slug, title })),
   }));
 
   return (
