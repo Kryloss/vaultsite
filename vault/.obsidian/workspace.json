@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Music/main.md",
+                "file": "Music/Clancy.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "main"
+              "title": "Clancy"
             }
           }
         ]
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Music/main.md",
+                "file": "Music/Clancy.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from main"
+              "title": "Outgoing links from Clancy"
             }
           },
           {
@@ -185,12 +185,13 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
-    "Home/main.md",
     "Music/main.md",
+    "Music/Clancy.md",
     "Home/IMG_3260.jpeg",
+    "Home/main.md",
     "Posts/Post Sample.md",
+    "Posts/main.md",
     "Music",
-    "Posts/CleanShot 2026-07-16 at 23.29.25@2x.png",
-    "Posts/main.md"
+    "Posts/CleanShot 2026-07-16 at 23.29.25@2x.png"
   ]
 }

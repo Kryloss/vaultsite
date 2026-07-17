@@ -31,3 +31,9 @@ Append new entries at the bottom. Format: number, date, decision, why, revisit-w
 **Decision:** Every route is pre-rendered at build; unknown paths 404 at the CDN.
 **Why:** Fastest possible site, zero runtime dependencies, free tier friendly. Content only changes via git push anyway, which always triggers a rebuild.
 **Revisit when:** Content volume makes builds slow (hundreds of posts) — then consider ISR.
+
+## 6. Apple Music via free iframe embeds, not MusicKit (2026-07-16)
+
+**Decision:** The `music` section type embeds playlists with `embed.music.apple.com` iframes (host swap of a normal share link). Section frontmatter is exposed as `section.meta` so types can read custom keys (`playlists:`).
+**Why:** MusicKit/Apple Music API requires a paid Apple Developer account ($99/yr); iframe embeds are free, need no keys, and auto-match the visitor's light/dark theme. Brian Lovin's /listening (Spotify history sync) would need an API server + cron — out of scope for a static site.
+**Revisit when:** Live "recently played" history is wanted — needs an API route + provider account (Spotify or MusicKit) + Supabase/KV for tokens.
