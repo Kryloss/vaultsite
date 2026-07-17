@@ -1,0 +1,8 @@
+{
+  "newFileLocation": "root",
+  "userIgnoreFilters": [
+    "node_modules",
+    ".next"
+  ],
+  "attachmentFolderPath": "./"
+}

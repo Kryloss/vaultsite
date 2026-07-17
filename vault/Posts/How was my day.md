@@ -12,7 +12,7 @@ This is a sample post. It lives at `vault/Posts/How was my day.md` in the Obsidi
 2. Obsidian Git committed and pushed it to GitHub
 3. Vercel noticed the push and rebuilt the site
 4. It appeared on the Posts page, with its own URL
-
+![[CleanShot 2026-07-16 at 23.29.25@2x.png]]
 ## Things that work in posts
 
 Regular **bold**, *italic*, and `inline code`. Links work too — both regular markdown links and Obsidian-style wiki links.
