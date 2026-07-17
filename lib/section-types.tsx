@@ -13,6 +13,7 @@
 import type { ComponentType } from "react";
 import type { Entry, Section } from "@/lib/vault";
 import PostList from "@/components/lists/PostList";
+import MusicList from "@/components/lists/MusicList";
 
 export interface ListProps {
   section: Section;
@@ -21,8 +22,8 @@ export interface ListProps {
 
 const registry: Record<string, ComponentType<ListProps>> = {
   posts: PostList,
+  music: MusicList, // Apple Music embeds + notes (reads `playlists:` frontmatter)
   // projects: ProjectGrid,   ← future example
-  // links: LinkList,         ← future example
 };
 
 export function getListComponent(type: string): ComponentType<ListProps> {

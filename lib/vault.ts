@@ -28,6 +28,11 @@ export interface Section {
   type: string;
   /** Raw markdown body of main.md */
   content: string;
+  /**
+   * Full frontmatter of main.md — lets section types read their own keys
+   * (e.g. the "music" type reads `playlists:`) without changing this engine.
+   */
+  meta: Record<string, unknown>;
 }
 
 export interface Entry {
@@ -79,6 +84,7 @@ export function getSections(): Section[] {
       order: typeof data.order === "number" ? data.order : 100,
       type: (data.type as string) ?? "posts",
       content,
+      meta: data,
     });
   }
 

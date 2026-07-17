@@ -36,7 +36,8 @@ Kyrylo's portfolio site, published from an Obsidian vault. The `vault/` folder I
 
 ## Conventions
 
-- Frontmatter (section `main.md`): `title`, `icon`, `order`, `description`, `type`, `slug` (override), `draft`.
+- Frontmatter (section `main.md`): `title`, `icon`, `order`, `description`, `type`, `slug` (override), `draft`. Full frontmatter is exposed as `section.meta` so section types can define their own keys (e.g. `music` reads `playlists:`).
+- Section types: `posts` (default), `music` (Apple Music iframe embeds — `lib/apple-music.ts`, no API key). Markdown pipeline also auto-embeds standalone Apple Music links.
 - Frontmatter (entries): `title`, `date` (YYYY-MM-DD), `description`, `slug`, `draft` (or `published: false`).
 - Slugs: `slugify()` in `lib/vault.ts` — keep stable, changing it breaks URLs.
 - Styling: Tailwind utility classes + CSS variables defined in `app/globals.css` (`--bg`, `--text`, `--accent`, …). Dark mode via `prefers-color-scheme`. Markdown output styled by the hand-written `.prose` classes in globals.css.

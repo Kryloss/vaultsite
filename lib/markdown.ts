@@ -17,6 +17,7 @@ import rehypeRaw from "rehype-raw";
 import rehypeSlug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
 import { slugify } from "./vault";
+import { appleMusicEmbedHtml, isAppleMusicUrl } from "./apple-music";
 
 /** Encode each path segment but keep "/" separators. */
 function encodePath(p: string): string {
@@ -32,11 +33,20 @@ export function preprocessObsidian(
   sectionDir: string,
   sectionSlug: string
 ): string {
-  // 1. Obsidian embeds: ![[file.png]] or ![[file.png|alt text]]
+  // 1. Obsidian embeds: ![[file.png]], ![[file.png|alt text]], ![[file.png|300]]
+  //    A purely numeric param is Obsidian's width syntax (`|300` or `|300x200`),
+  //    which needs a raw <img> since markdown has no width attribute.
   md = md.replace(
     /!\[\[([^\]|]+?)(?:\|([^\]]*))?\]\]/g,
-    (_m, file: string, alt?: string) =>
-      `![${alt ?? ""}](${assetUrl(sectionDir, file)})`
+    (_m, file: string, alt?: string) => {
+      const src = assetUrl(sectionDir, file);
+      const size = alt?.trim().match(/^(\d+)(?:x(\d+))?$/);
+      if (size) {
+        const height = size[2] ? ` height="${size[2]}"` : "";
+        return `<img src="${src}" width="${size[1]}"${height} alt="" />`;
+      }
+      return `![${alt ?? ""}](${src})`;
+    }
   );
 
   // 2. Obsidian wiki links: [[Note]] or [[Note|label]] → same-section entry link
@@ -51,6 +61,14 @@ export function preprocessObsidian(
     /!\[([^\]]*)\]\((?!https?:\/\/|\/|data:)([^)\s]+)\)/g,
     (_m, alt: string, src: string) =>
       `![${alt}](${assetUrl(sectionDir, safeDecode(src))})`
+  );
+
+  // 4. Apple Music links standing alone on a line → embedded player.
+  //    Paste a playlist/album/song link from Apple Music (Share → Copy Link)
+  //    on its own line and it renders as the embed widget. Free, no API.
+  md = md.replace(
+    /^\s*<?(https:\/\/music\.apple\.com\/[^\s<>]+)>?\s*$/gm,
+    (m, url: string) => (isAppleMusicUrl(url) ? `\n${appleMusicEmbedHtml(url)}\n` : m)
   );
 
   return md;
