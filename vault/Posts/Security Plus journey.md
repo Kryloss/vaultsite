@@ -3,6 +3,9 @@ title: My Security+ journey
 date: 2026-07-17
 category: Cybersecurity
 description: What I'm studying, how I'm studying it, and what's working.
+aliases:
+  - CompTIA Security+
+  - Security+
 ---
 
 I'm working through the CompTIA Security+ (SY0-701) objectives this summer, between espresso shots. This post is the running log — it gets updated as I go, which is exactly what a site published from an Obsidian vault is good at.
@@ -18,4 +21,4 @@ I'm working through the CompTIA Security+ (SY0-701) objectives this summer, betw
 
 ## Why Security+ first
 
-It's the standard entry ticket: broad, vendor-neutral, and required or preferred for a lot of junior SOC roles. The plan is to pass it before the Cyber Science program at TMU starts, so classes land on prepared ground.
+It's the standard entry ticket: broad, vendor-neutral, and required or preferred for a lot of junior SOC roles. The plan is to pass it before the Cyber Science program at TMU starts, so classes land on prepared ground — it's the top item on [[Now/main|my Now page]] for a reason.

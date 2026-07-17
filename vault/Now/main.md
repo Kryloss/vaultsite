@@ -7,9 +7,12 @@ description: What I'm focused on right now.
 
 *Last updated: July 2026*
 
-- [[Security Plus journey|📖 Studying for CompTIA Security+]]
+- [[Security Plus journey|📖 Studying for CompTIA Security+]] [progress:: 45]
 - ☕ Barista @ Starbucks
-- 🎓 Sacred Heart CHS, class of 2026
+- 🎓 Sacred Heart CHS, class of 2026 [progress:: 75]
+
+<!-- progress bar syntax: [progress:: 45] — number is the percent; renders as a bar on the site, plain text in Obsidian -->
+
 
 ---
 

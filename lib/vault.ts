@@ -168,15 +168,22 @@ export function readingStats(md: string): { words: number; minutes: number } {
 }
 
 /**
- * Global wiki-link index: lowercase file name / title / slug → URL, across
- * every section. Lets [[Sapiens]] in a post resolve to /books/sapiens.
- * First match wins; same-name collisions favor the earliest section by order.
+ * Global wiki-link index: lowercase file name / title / slug / aliases → URL,
+ * across every section. Lets [[Sapiens]] in a post resolve to /shelf/sapiens,
+ * and [[CompTIA Security+]] resolve to a post that declares it in `aliases:`.
+ * Aliases are Obsidian-native frontmatter, so the same link works in both
+ * places. First match wins; collisions favor the earliest section by order.
  */
 export function getWikiIndex(): Map<string, string> {
   const map = new Map<string, string>();
   const add = (key: string, href: string) => {
     const k = key.trim().toLowerCase();
     if (k && !map.has(k)) map.set(k, href);
+  };
+  const addAliases = (meta: Record<string, unknown>, href: string) => {
+    const raw = meta.aliases ?? meta.alias;
+    const list = Array.isArray(raw) ? raw : raw ? [raw] : [];
+    for (const a of list) add(String(a), href);
   };
   for (const section of getSections()) {
     const base = section.slug === "home" ? "/" : `/${section.slug}`;
@@ -186,11 +193,13 @@ export function getWikiIndex(): Map<string, string> {
     // main.md in Obsidian AND resolves to the section page on the site.
     add(`${section.dirName}/main`, base);
     add(`${section.slug}/main`, base);
+    addAliases(section.meta, base);
     for (const entry of getEntries(section)) {
       const href = `/${section.slug}/${entry.slug}`;
       add(entry.fileName, href);
       add(entry.title, href);
       add(entry.slug, href);
+      addAliases(entry.meta, href);
     }
   }
   return map;

@@ -156,12 +156,13 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "Music/Clancy.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of Clancy"
             }
           },
           {
@@ -195,7 +196,7 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "9cd2acf5af766b33",
+  "active": "39f54837ca38c5e3",
   "lastOpenFiles": [
     "People/fedorov.png",
     "Posts/Post Sample.md",

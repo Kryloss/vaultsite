@@ -145,7 +145,18 @@ export function preprocessObsidian(
       `![${alt}](${assetUrl(sectionDir, safeDecode(src))})`
   );
 
-  // 5. Apple Music links standing alone on a line → embedded player.
+  // 5. Inline progress bars: [progress:: 45%] (Dataview-style field — renders
+  //    as plain text in Obsidian, as a styled bar on the site).
+  md = md.replace(/\[progress::\s*(\d{1,3})\s*%?\s*\]/gi, (_m, n: string) => {
+    const v = Math.min(100, Math.max(0, Number(n)));
+    return (
+      `<span class="progress" role="progressbar" aria-valuenow="${v}" aria-valuemin="0" aria-valuemax="100">` +
+      `<span class="progress-fill" style="width:${v}%"></span></span>` +
+      `<span class="progress-label">${v}%</span>`
+    );
+  });
+
+  // 6. Apple Music links standing alone on a line → embedded player.
   md = md.replace(
     /^\s*<?(https:\/\/music\.apple\.com\/[^\s<>]+)>?\s*$/gm,
     (m, url: string) => (isAppleMusicUrl(url) ? `\n${appleMusicEmbedHtml(url)}\n` : m)

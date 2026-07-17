@@ -31,7 +31,7 @@ export default async function HomePage() {
   const posts = getSectionBySlug("posts");
   const recent = posts ? getEntries(posts).slice(0, 4) : [];
   const explore = getSections().filter(
-    (s) => s.slug !== "home" && s.slug !== "posts"
+    (s) => s.slug !== "home" && s.slug !== "posts" && s.slug !== "now"
   );
 
   return (

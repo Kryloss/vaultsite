@@ -56,6 +56,13 @@ export default async function EntryPage({ params }: Props) {
       <header className="mt-6">
         <h1 className="text-2xl font-semibold tracking-tight text-[var(--text)]">
           {entry.title}
+          {typeof entry.meta.rating === "number" && (
+            <Stars
+              rating={entry.meta.rating}
+              size={16}
+              className="ml-3 translate-y-[-2px] align-middle"
+            />
+          )}
           {entry.draft && (
             <span className="ml-3 inline-block translate-y-[-3px] rounded-md bg-amber-500/15 px-2 py-0.5 align-middle text-xs font-medium text-amber-500">
               Draft
@@ -71,9 +78,6 @@ export default async function EntryPage({ params }: Props) {
             <span>
               {stats.minutes} min read · {stats.words.toLocaleString()} words
             </span>
-          )}
-          {typeof entry.meta.rating === "number" && (
-            <Stars rating={entry.meta.rating} />
           )}
         </p>
       </header>

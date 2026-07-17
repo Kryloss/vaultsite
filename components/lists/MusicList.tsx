@@ -28,18 +28,26 @@ export default function MusicList({ section, entries }: ListProps) {
   return (
     <div>
       {playlists.length > 0 ? (
-        <div className="mt-8 flex flex-col gap-6">
+        <div
+          className={`mt-8 grid grid-cols-1 gap-5 ${
+            playlists.length > 1 ? "md:grid-cols-2" : ""
+          }`}
+        >
           {playlists.map((url) => (
-            <iframe
+            <div
               key={url}
-              src={appleMusicEmbedUrl(url)}
-              height={appleMusicEmbedHeight(url)}
-              className="w-full overflow-hidden rounded-xl"
-              style={{ border: 0 }}
-              loading="lazy"
-              allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
-              sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
-            />
+              className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-hover)] shadow-sm transition-shadow duration-300 hover:shadow-md"
+            >
+              <iframe
+                src={appleMusicEmbedUrl(url)}
+                height={appleMusicEmbedHeight(url)}
+                className="block w-full"
+                style={{ border: 0 }}
+                loading="lazy"
+                allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
+                sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
+              />
+            </div>
           ))}
         </div>
       ) : (

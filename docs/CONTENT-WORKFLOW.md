@@ -183,13 +183,39 @@ posts, shelf thoughts, and music notes — don't pad.
 ## Wiki-link rules
 
 - To another note: `[[Note file name]]` or `[[Note file name|shown text]]` —
-  resolves site-wide by file name, title, or slug (case-insensitive).
+  resolves site-wide by file name, title, slug, or alias (case-insensitive).
 - To a SECTION page: always `[[Folder/main|Label]]` (e.g. `[[Now/main|Now]]`).
   Bare `[[Now]]` would create a stray note in Obsidian.
-- Actively add links where the new content mentions an existing note
-  (people, shelf items, other posts) — and mention (don't edit unasked) older
-  notes that could now link back to the new one.
 - Don't force links; 1–4 per note is typical.
+
+**Aliases — give every new note its natural names.** Add an Obsidian-native
+`aliases:` list to the frontmatter with the phrases people would actually
+write: the subject itself, short forms, common spellings. Example: the post
+"My Security+ journey" declares
+
+```yaml
+aliases:
+  - CompTIA Security+
+  - Security+
+```
+
+so `[[CompTIA Security+]]` anywhere on the site (or typed in Obsidian, which
+autocompletes aliases) links straight to it. Think "what phrase will future
+notes use when mentioning this?" — that's the alias list.
+
+**Retro-linking — automatic, both directions.** After writing a new note:
+
+1. Search the vault (grep titles + bodies) for existing text that mentions the
+   new note's subject or aliases.
+2. Where an existing note contains the exact phrase, convert THAT phrase into
+   a wiki link (`CompTIA Security+` → `[[CompTIA Security+]]`, or
+   `[[New Note|existing phrase]]`). Never reword sentences to force a link,
+   never add new sentences to old notes, max one link per phrase per note.
+3. List every retro-edit in the report ("linked 'CompTIA Security+' on Home →
+   new post").
+
+This is the expected behavior — new content should knit itself into the site
+without being asked.
 
 ## Toolbox you may use in content
 
@@ -207,7 +233,9 @@ his claims. Never fabricate facts, quotes, or sources to fill a template gap.
 ## What NOT to do
 
 - Don't touch code, styling, or docs during content work.
-- Don't reorganize or rename existing notes without being asked.
+- Don't reorganize or rename existing notes without being asked. (Exception:
+  retro-linking edits — converting an existing exact phrase into a wiki link —
+  are expected and always reported.)
 - Don't add content he didn't provide (except structure, links, and the
   factual table rows he'd obviously want filled — flag anything you filled).
 - Don't reproduce copyrighted text (book passages, lyrics) — his quotes are
