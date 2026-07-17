@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Shelf/Sapiens.md",
+                "file": "Posts/Formatting playground.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Sapiens"
+              "title": "Formatting playground"
             }
           }
         ]
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Shelf/Sapiens.md",
+                "file": "Posts/Formatting playground.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Sapiens"
+              "title": "Outgoing links from Formatting playground"
             }
           },
           {
@@ -185,14 +185,16 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
-    "Music/main.md",
-    "Music/Clancy.md",
-    "Posts/main.md",
-    "People/fedorov.png",
-    "Home/IMG_3260.jpeg",
-    "Projects/This website.md",
+    "People/main.md",
     "Now/main.md",
+    "Music/Clancy.md",
     "Home/main.md",
+    "Home/IMG_3260.jpeg",
+    "Posts/main.md",
+    "Music/main.md",
+    "Shelf/Sapiens.md",
+    "People/fedorov.png",
+    "Projects/This website.md",
     "Posts/Draft example.md",
     "Posts/Formatting playground.md",
     "Posts/Security Plus journey.md",
@@ -200,13 +202,11 @@
     "Shelf/Mr Robot.md",
     "Books/Sapiens.md",
     "Shelf/main.md",
-    "Shelf/Sapiens.md",
     "Shelf",
     "Now.md",
     "Now",
     "Books/main.md",
     "Projects/main.md",
-    "People/main.md",
     "People/Mykhailo Fedorov.md",
     "Posts/Post Sample.md",
     "Posts/Post Sample 1.md",
