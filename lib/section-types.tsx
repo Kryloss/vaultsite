@@ -16,6 +16,7 @@ import type { Entry, Section } from "@/lib/vault";
 import PostList from "@/components/lists/PostList";
 import MusicList from "@/components/lists/MusicList";
 import PeopleGrid from "@/components/lists/PeopleGrid";
+import BookGrid from "@/components/lists/BookGrid";
 import TilList from "@/components/lists/TilList";
 
 export interface ListProps {
@@ -30,6 +31,7 @@ const registry: Record<string, SectionList> = {
   posts: PostList, // title/date rows
   music: MusicList, // Apple Music embeds + notes (reads `playlists:` frontmatter)
   people: PeopleGrid, // square cover-image grid (entries read `cover:` frontmatter)
+  books: BookGrid, // vertical 2:3 book covers (entries read `cover:` + `author:`)
   projects: TilList, // full entries rendered inline, TIL-style
 };
 

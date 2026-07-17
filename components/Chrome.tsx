@@ -118,7 +118,7 @@ export default function Chrome({
 
       {/* Drawer — flat: page background, hairline border, text + icons only */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-68 flex-col border-r border-[var(--border)] bg-[var(--bg)] py-5 transition-transform duration-300 ease-out ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-56 flex-col border-r border-[var(--border)] bg-[var(--bg)] py-5 transition-transform duration-300 ease-out ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >

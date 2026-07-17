@@ -200,22 +200,46 @@ body {
   line-height: 1.7;
 }
 
+/* Tables — soft card look: rounded container, row dividers only */
 .prose table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   margin: 1.5rem 0;
   font-size: 0.9375rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  overflow: hidden;
 }
 
 .prose th,
 .prose td {
-  border: 1px solid var(--border);
-  padding: 0.5rem 0.75rem;
+  padding: 0.625rem 1rem;
   text-align: left;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.prose tr:last-child td {
+  border-bottom: none;
 }
 
 .prose th {
   color: var(--text);
   font-weight: 600;
+  font-size: 0.875rem;
   background: var(--bg-hover);
+}
+
+/* Key–value tables: first column reads as the label */
+.prose td:first-child {
+  color: var(--text);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Hide fully-empty header rows (Obsidian tables like `| | |`) */
+.prose thead tr:not(:has(th:not(:empty))) {
+  display: none;
 }

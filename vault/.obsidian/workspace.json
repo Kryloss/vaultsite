@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "People/main.md",
+                "file": "Music/main.md",
                 "mode": "source",
                 "source": false
               },
@@ -113,7 +113,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "People/main.md",
+                "file": "Music/main.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
@@ -185,17 +185,20 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
-    "Posts/main.md",
-    "Projects/main.md",
     "People/main.md",
-    "Music/main.md",
-    "Home/main.md",
+    "People/Mykhailo Fedorov.md",
+    "Posts/main.md",
     "Posts/Post Sample.md",
     "Posts/Post Sample 1.md",
+    "Projects/This website.md",
+    "Projects/main.md",
+    "Books/Sapiens.md",
+    "Books/main.md",
+    "Books",
+    "Music/main.md",
+    "Home/main.md",
     "Music/Clancy.md",
     "People/fedorov.png",
-    "People/Mykhailo Fedorov.md",
-    "Projects/This website.md",
     "2026-07-16.md",
     "2026-07-17.md",
     "Projects",

@@ -2,7 +2,6 @@ import Link from "next/link";
 import type { ListProps } from "@/lib/section-types";
 import { renderMarkdown } from "@/lib/markdown";
 import { displayDate } from "@/lib/vault";
-import ExpandableHtml from "@/components/ExpandableHtml";
 
 /** Entries longer than this (raw markdown chars) get truncated with an expand toggle. */
 const PREVIEW_LIMIT = 1000;
@@ -10,7 +9,7 @@ const PREVIEW_LIMIT = 1000;
 /**
  * "projects" section type — TIL-style feed: entries rendered inline, newest
  * first. Long entries show the first ~1000 characters with a
- * "Continue reading" toggle that expands in place.
+ * "Continue reading" link to the entry's own full page.
  */
 export default async function TilList({ section, entries }: ListProps) {
   if (entries.length === 0) {
@@ -57,7 +56,18 @@ export default async function TilList({ section, entries }: ListProps) {
             </Link>
           </h2>
           {rendered[i].preview ? (
-            <ExpandableHtml preview={rendered[i].preview} full={rendered[i].full} />
+            <>
+              <div
+                className="prose mt-3"
+                dangerouslySetInnerHTML={{ __html: rendered[i].preview }}
+              />
+              <Link
+                href={`/${section.slug}/${entry.slug}`}
+                className="mt-3 inline-block text-sm font-medium text-[var(--accent)] transition-opacity hover:opacity-75"
+              >
+                Continue reading →
+              </Link>
+            </>
           ) : (
             <div
               className="prose mt-3"

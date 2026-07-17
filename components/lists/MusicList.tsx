@@ -1,10 +1,11 @@
+import Link from "next/link";
 import type { ListProps } from "@/lib/section-types";
 import {
   appleMusicEmbedUrl,
   appleMusicEmbedHeight,
   isAppleMusicUrl,
 } from "@/lib/apple-music";
-import PostList from "@/components/lists/PostList";
+import { displayDate } from "@/lib/vault";
 
 /**
  * "music" section type — /listening-style page:
@@ -54,7 +55,36 @@ export default function MusicList({ section, entries }: ListProps) {
           <h2 className="mt-12 text-lg font-semibold tracking-tight text-[var(--text)]">
             Notes on what I&rsquo;m hearing
           </h2>
-          <PostList section={section} entries={entries} />
+          {/* Plain rows with full dates — the DD.MM/year grouping is posts-only */}
+          <ul className="mt-2 flex flex-col">
+            {entries.map((entry) => (
+              <li key={entry.slug}>
+                <Link
+                  href={`/${section.slug}/${entry.slug}`}
+                  className="group -mx-3 flex items-baseline justify-between gap-4 rounded-lg px-3 py-2.5 transition-colors hover:bg-[var(--bg-hover)]"
+                >
+                  <span className="min-w-0">
+                    <span className="block truncate font-medium text-[var(--text)] group-hover:text-[var(--accent)]">
+                      {entry.title}
+                    </span>
+                    {entry.description && (
+                      <span className="mt-0.5 block truncate text-sm text-[var(--text-secondary)]">
+                        {entry.description}
+                      </span>
+                    )}
+                  </span>
+                  {entry.date && (
+                    <time
+                      dateTime={entry.date}
+                      className="shrink-0 text-sm tabular-nums text-[var(--text-tertiary)]"
+                    >
+                      {displayDate(entry.date)}
+                    </time>
+                  )}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </>
       )}
     </div>
