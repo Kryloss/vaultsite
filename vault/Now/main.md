@@ -7,7 +7,7 @@ description: What I'm focused on right now.
 
 *Last updated: July 2026*
 
-- 📖 Studying for CompTIA Security+
+- [[Security Plus journey|📖 Studying for CompTIA Security+]]
 - ☕ Barista @ Starbucks
 - 🎓 Sacred Heart CHS, class of 2026
 

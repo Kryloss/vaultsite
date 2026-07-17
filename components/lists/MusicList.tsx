@@ -64,7 +64,7 @@ export default function MusicList({ section, entries }: ListProps) {
                   className="group -mx-3 flex items-baseline justify-between gap-4 rounded-lg px-3 py-2.5 transition-colors hover:bg-[var(--bg-hover)]"
                 >
                   <span className="min-w-0">
-                    <span className="block truncate font-medium text-[var(--text)] group-hover:text-[var(--accent)]">
+                    <span className="block truncate font-medium text-[var(--text)]">
                       {entry.title}
                     </span>
                     {entry.description && (

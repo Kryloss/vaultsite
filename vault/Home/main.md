@@ -14,4 +14,4 @@ This site is where I keep my writing, projects, notes, and the occasional strong
 
 [Past version](https://www.kryloss.com)
 
-Curious what I'm up to right now? See [[Now]].
+Curious what I'm up to right now? See [[Now/main|Now]].

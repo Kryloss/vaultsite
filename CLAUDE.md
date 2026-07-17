@@ -39,7 +39,9 @@ Kyrylo's portfolio site, published from an Obsidian vault. The `vault/` folder I
 ## Conventions
 
 - Frontmatter (section `main.md`): `title`, `icon`, `order`, `description`, `type`, `slug` (override), `draft`. Full frontmatter is exposed as `section.meta` so section types can define their own keys (e.g. `music` reads `playlists:`).
-- Section types: `posts` (default), `music` (Apple Music iframe embeds — `lib/apple-music.ts`, no API key), `people` (cover-image grid; entry `cover:` frontmatter, initials fallback), `books` (2:3 vertical covers; entry `cover:` + `author:` frontmatter, spine-style text fallback), `projects` (TIL-style inline feed; async list component). Markdown pipeline also auto-embeds standalone Apple Music links.
+- Section types: `posts` (default; category filter chips from entry `category:` frontmatter), `music` (Apple Music iframe embeds — `lib/apple-music.ts`, no API key), `people` (cover-image grid; entry `cover:` frontmatter, initials fallback), `shelf` (2:3 vertical covers + medium filter chips; entry `cover:` + `author:` + `medium: book|movie|show`; alias `books`), `projects` (TIL-style inline feed; async list component). Markdown pipeline also auto-embeds standalone Apple Music links.
+- Filterable lists are split server/client: `PostList`→`PostListClient`, `ShelfGrid`→`ShelfGridClient` (server slims entries to serializable rows).
+- Design is monochrome: no blue accent in hovers/active states; `--accent` remains only for the odd functional case. Active chips/nav use text-on-bg inversion.
 - Entry frontmatter is exposed as `entry.meta` (same pattern as `section.meta`) for type-specific keys.
 - Frontmatter (entries): `title`, `date` (YYYY-MM-DD), `description`, `slug`, `draft` (or `published: false`).
 - Sized image embeds ≤128px (e.g. `![[me.jpeg|93]]`) render as circular avatars (`.avatar` class); larger sizes keep the rounded-rectangle style.
@@ -64,7 +66,7 @@ Kyrylo's portfolio site, published from an Obsidian vault. The `vault/` folder I
 ## Features to know about
 
 - **Drafts**: `draft: true` entries/sections are visible in `npm run dev` with an amber "Draft" badge, excluded from production builds (`SHOW_DRAFTS` in `lib/vault.ts`).
-- **Wiki links** resolve across ALL sections via `getWikiIndex()` (file name, title, or slug — case-insensitive). Unknown targets fall back to same-section slug.
+- **Wiki links** resolve across ALL sections via `getWikiIndex()` (file name, title, or slug — case-insensitive). Unknown targets fall back to same-section slug. For links to SECTION pages use `[[Folder/main|Label]]` — it resolves on the site AND opens the right file in Obsidian (bare `[[Now]]` would create a new note there).
 - **Callouts**: Obsidian `> [!note] Title` → styled `.callout` divs (colors per type in globals.css).
 - **Figures/lightbox**: standalone images with alt text render as figure+figcaption; all non-avatar content images open in `components/Lightbox.tsx` on click.
 - **Reading time**: `readingStats()` shown on posts-type entry pages only.

@@ -41,7 +41,7 @@ export default function PeopleGrid({ section, entries }: ListProps) {
                   </div>
                 )}
               </div>
-              <span className="mt-2.5 block font-medium leading-snug text-[var(--text)] group-hover:text-[var(--accent)]">
+              <span className="mt-2.5 block font-medium leading-snug text-[var(--text)]">
                 {entry.title}
               </span>
               {entry.description && (

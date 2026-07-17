@@ -1,9 +1,10 @@
 ---
 title: Sapiens
 author: Yuval Noah Harari
+medium: book
 date: 2026-07-17
 description: A brief history of humankind.
-# cover: sapiens.jpg   ← drop the book cover into vault/Books/ and uncomment
+# cover: sapiens.jpg   ← drop the book cover into vault/Shelf/ and uncomment
 ---
 
 ## At a glance

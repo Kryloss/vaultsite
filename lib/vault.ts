@@ -182,6 +182,10 @@ export function getWikiIndex(): Map<string, string> {
     const base = section.slug === "home" ? "/" : `/${section.slug}`;
     add(section.dirName, base);
     add(section.title, base);
+    // Obsidian-friendly form: [[Folder/main|Label]] opens the section's
+    // main.md in Obsidian AND resolves to the section page on the site.
+    add(`${section.dirName}/main`, base);
+    add(`${section.slug}/main`, base);
     for (const entry of getEntries(section)) {
       const href = `/${section.slug}/${entry.slug}`;
       add(entry.fileName, href);

@@ -4,8 +4,8 @@
  */
 export const siteName = "Kyrylo";
 
-/** Canonical URL — update when the custom domain (kryloss.com) is attached. */
-export const siteUrl = "https://vaultsite-eta.vercel.app";
+/** Canonical URL (custom domain, connected on Vercel). */
+export const siteUrl = "https://kryloss.com";
 
 export const siteDescription =
   "Kyrylo's writing, projects, notes, and the occasional strong opinion.";

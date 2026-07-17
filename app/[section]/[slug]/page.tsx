@@ -47,7 +47,7 @@ export default async function EntryPage({ params }: Props) {
     <div className="mx-auto max-w-2xl px-6 py-14 lg:py-24">
       <Link
         href={`/${section.slug}`}
-        className="text-sm text-[var(--text-tertiary)] transition-colors hover:text-[var(--accent)]"
+        className="text-sm text-[var(--text-tertiary)] transition-colors hover:text-[var(--text)]"
       >
         ← {section.title}
       </Link>

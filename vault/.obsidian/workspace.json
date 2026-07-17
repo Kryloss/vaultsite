@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Books/Sapiens.md",
+                "file": "Home/main.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Sapiens"
+              "title": "main"
             }
           }
         ]
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Books/Sapiens.md",
+                "file": "Home/main.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Sapiens"
+              "title": "Outgoing links from main"
             }
           },
           {
@@ -185,9 +185,17 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
+    "Posts/Draft example.md",
+    "Posts/Formatting playground.md",
+    "Posts/Security Plus journey.md",
+    "Shelf/Inception.md",
+    "Shelf/Mr Robot.md",
+    "Books/Sapiens.md",
+    "Shelf/main.md",
+    "Shelf/Sapiens.md",
+    "Shelf",
     "Home/main.md",
     "Now.md",
-    "Books/Sapiens.md",
     "Now/main.md",
     "Now",
     "Projects/This website.md",

@@ -16,7 +16,7 @@ import type { Entry, Section } from "@/lib/vault";
 import PostList from "@/components/lists/PostList";
 import MusicList from "@/components/lists/MusicList";
 import PeopleGrid from "@/components/lists/PeopleGrid";
-import BookGrid from "@/components/lists/BookGrid";
+import ShelfGrid from "@/components/lists/ShelfGrid";
 import TilList from "@/components/lists/TilList";
 
 export interface ListProps {
@@ -28,10 +28,11 @@ export interface ListProps {
 export type SectionList = (props: ListProps) => ReactNode | Promise<ReactNode>;
 
 const registry: Record<string, SectionList> = {
-  posts: PostList, // title/date rows
+  posts: PostList, // year-grouped rows + category filter chips
   music: MusicList, // Apple Music embeds + notes (reads `playlists:` frontmatter)
   people: PeopleGrid, // square cover-image grid (entries read `cover:` frontmatter)
-  books: BookGrid, // vertical 2:3 book covers (entries read `cover:` + `author:`)
+  shelf: ShelfGrid, // 2:3 covers + medium chips (entries read `cover:`, `author:`, `medium:`)
+  books: ShelfGrid, // legacy alias for shelf
   projects: TilList, // full entries rendered inline, TIL-style
 };
 

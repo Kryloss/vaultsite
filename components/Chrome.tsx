@@ -102,22 +102,13 @@ export default function Chrome({
         >
           <PanelIcon className="h-[18px] w-[18px]" />
         </button>
-        <button
-          type="button"
-          aria-label="Search (⌘K)"
-          title="Search (⌘K)"
-          onClick={() => setSearchOpen(true)}
-          className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
-        >
-          <SearchIcon className="h-[17px] w-[17px]" />
-        </button>
         <span className="max-w-[70vw] truncate pr-2 text-sm font-medium">
           {crumbs.map((crumb, i) => (
             <Fragment key={crumb.href}>
               {i > 0 && <span className="text-[var(--text-tertiary)]"> · </span>}
               <Link
                 href={crumb.href}
-                className={`transition-colors hover:text-[var(--accent)] ${
+                className={`transition-colors hover:text-[var(--text)] ${
                   i === 0 ? "text-[var(--text)]" : "text-[var(--text-secondary)]"
                 }`}
               >
@@ -143,10 +134,22 @@ export default function Chrome({
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="px-6 pb-5">
+        <div className="flex items-center justify-between px-6 pb-5">
           <Link href="/" className="text-base font-semibold text-[var(--text)]">
             {siteName}
           </Link>
+          <button
+            type="button"
+            aria-label="Search (⌘K)"
+            title="Search (⌘K)"
+            onClick={() => {
+              setOpen(false);
+              setSearchOpen(true);
+            }}
+            className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-tertiary)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
+          >
+            <SearchIcon className="h-[17px] w-[17px]" />
+          </button>
         </div>
 
         <nav className="flex flex-col gap-1.5 overflow-y-auto px-3">

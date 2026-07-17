@@ -25,7 +25,7 @@ No database, no CMS. Git is the single source of truth. Publish latency ≈ 1 mi
 `main.md` frontmatter: `title`, `icon` (emoji), `order` (sidebar position), `description`, `type` (list style, default `posts`).
 Entry frontmatter: `title`, `date` (YYYY-MM-DD), `description`, `draft`.
 
-**Section types:** `posts` (title/date rows) · `music` (Apple Music playlist embeds via `playlists:` frontmatter + notes below) · `people` (square cover-image grid; entries set `cover: photo.jpg` frontmatter) · `books` (vertical 2:3 book covers; entries set `cover:` and `author:`) · `projects` (full entries rendered inline, TIL-style). Any Apple Music link pasted alone on a line in any note also becomes an embedded player.
+**Section types:** `posts` (year-grouped rows; entries can set `category:` for filter chips) · `music` (Apple Music playlist embeds via `playlists:` frontmatter + notes below) · `people` (square cover-image grid; entries set `cover: photo.jpg`) · `shelf` (vertical 2:3 covers with Books/Movies/Shows filter; entries set `cover:`, `author:`, `medium: book|movie|show`) · `projects` (full entries rendered inline, TIL-style). Any Apple Music link pasted alone on a line in any note also becomes an embedded player.
 
 ## Local development
 
