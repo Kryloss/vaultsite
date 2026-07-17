@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Books/main.md",
+                "file": "Books/Sapiens.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "main"
+              "title": "Sapiens"
             }
           }
         ]
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Books/main.md",
+                "file": "Books/Sapiens.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from main"
+              "title": "Outgoing links from Sapiens"
             }
           },
           {
@@ -185,6 +185,9 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
+    "Home/main.md",
+    "Projects/This website.md",
+    "Books/main.md",
     "Projects/main.md",
     "Music/main.md",
     "People/main.md",
@@ -192,11 +195,8 @@
     "Posts/main.md",
     "Posts/Post Sample.md",
     "Posts/Post Sample 1.md",
-    "Projects/This website.md",
     "Books/Sapiens.md",
-    "Books/main.md",
     "Books",
-    "Home/main.md",
     "Music/Clancy.md",
     "People/fedorov.png",
     "2026-07-16.md",
