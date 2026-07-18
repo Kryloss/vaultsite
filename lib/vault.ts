@@ -33,6 +33,8 @@ export interface Section {
   type: string;
   /** Raw markdown body of main.md */
   content: string;
+  /** Ukrainian body from an optional sibling `main.uk.md` (toggle-swapped). */
+  contentUk?: string;
   /**
    * Full frontmatter of main.md — lets section types read their own keys
    * (e.g. the "music" type reads `playlists:`) without changing this engine.
@@ -219,7 +221,10 @@ export function getWikiIndex(): Map<string, string> {
 
 export interface SearchItem {
   title: string;
+  /** Ukrainian title (shown + matched when the site is in UK mode). */
+  titleUk?: string;
   section: string;
+  sectionUk?: string;
   href: string;
   text: string;
 }
@@ -230,7 +235,9 @@ export function getSearchIndex(): SearchItem[] {
   for (const section of getSections()) {
     items.push({
       title: section.title,
+      titleUk: section.titleUk,
       section: "Section",
+      sectionUk: "Розділ",
       href: section.slug === "home" ? "/" : `/${section.slug}`,
       // Ukrainian title folded into the text so search matches in both languages.
       text: plainText(`${section.titleUk ?? ""} ${section.content}`),
@@ -238,7 +245,9 @@ export function getSearchIndex(): SearchItem[] {
     for (const entry of getEntries(section)) {
       items.push({
         title: entry.title,
+        titleUk: entry.titleUk,
         section: section.title,
+        sectionUk: section.titleUk,
         href: `/${section.slug}/${entry.slug}`,
         text: plainText(
           `${entry.titleUk ?? ""} ${entry.description ?? ""} ${entry.content}`

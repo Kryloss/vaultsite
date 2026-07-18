@@ -117,21 +117,32 @@ export function CloseIcon({ className }: IconProps) {
 
 /* ---------- flags (for the language toggle) ---------- */
 
+/** Circular Canada roundel — white disc, red side bands, red maple leaf. */
 export function CanadaFlag({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 30 20" className={className} aria-hidden>
-      <rect width="30" height="20" rx="2.5" fill="#fff" />
-      <path d="M0 2.5A2.5 2.5 0 0 1 2.5 0H8v20H2.5A2.5 2.5 0 0 1 0 17.5zM22 0h5.5A2.5 2.5 0 0 1 30 2.5v15a2.5 2.5 0 0 1-2.5 2.5H22z" fill="#d52b1e" />
-      <path fill="#d52b1e" d="M15 4l1.1 2.6 2.7-.6-.9 2.2 1.7 1.2-2.4 1 .2 2.3-2-1.3-2 1.3.2-2.3-2.4-1 1.7-1.2-.9-2.2 2.7.6z" />
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <mask id="ca-round">
+        <circle cx="12" cy="12" r="12" fill="#fff" />
+      </mask>
+      <g mask="url(#ca-round)">
+        <rect width="24" height="24" fill="#fff" />
+        <rect width="6" height="24" fill="#d52b1e" />
+        <rect x="18" width="6" height="24" fill="#d52b1e" />
+        <path
+          fill="#d52b1e"
+          d="M12 5.5l1 2.5 2.5-.6-.8 2 1.8 1.2-2.1.9.2 2.1-1.8-1.1-1.8 1.1.2-2.1-2.1-.9 1.8-1.2-.8-2 2.5.6z"
+        />
+      </g>
     </svg>
   );
 }
 
+/** Circular Ukraine roundel — blue top half, yellow bottom half. */
 export function UkraineFlag({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 30 20" className={className} aria-hidden>
-      <rect width="30" height="20" rx="2.5" fill="#ffd500" />
-      <path d="M0 2.5A2.5 2.5 0 0 1 2.5 0h25A2.5 2.5 0 0 1 30 2.5V10H0z" fill="#005bbb" />
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <path d="M0 12a12 12 0 0 1 24 0z" fill="#005bbb" />
+      <path d="M0 12a12 12 0 0 0 24 0z" fill="#ffd500" />
     </svg>
   );
 }

@@ -165,15 +165,16 @@ export default function Chrome({
               type="button"
               onClick={toggleLang}
               aria-label={
-                lang === "en" ? "Перемкнути на українську" : "Switch to English"
+                lang === "en" ? "Switch to Ukrainian" : "Перемкнути на англійську"
               }
-              title={lang === "en" ? "Українська" : "English"}
+              title={lang === "en" ? "English — switch to Ukrainian" : "Українська — перемкнути на англійську"}
               className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-[var(--bg-hover)]"
             >
+              {/* Shows the CURRENT language's flag */}
               {lang === "en" ? (
-                <UkraineFlag className="h-[15px] w-auto rounded-[3px] ring-1 ring-[var(--border)]" />
+                <CanadaFlag className="h-[13px] w-[13px] rounded-full ring-1 ring-[var(--border)]" />
               ) : (
-                <CanadaFlag className="h-[15px] w-auto rounded-[3px] ring-1 ring-[var(--border)]" />
+                <UkraineFlag className="h-[13px] w-[13px] rounded-full ring-1 ring-[var(--border)]" />
               )}
             </button>
             <button

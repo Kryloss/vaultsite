@@ -44,11 +44,18 @@ export default function CommandPalette({
     if (!q) return items.slice(0, 8);
     const scored = items
       .map((item) => {
-        const title = item.title.toLowerCase();
+        // Match against both language titles + the folded-in text so a query
+        // in either English or Ukrainian finds the page.
+        const titles = [item.title, item.titleUk ?? ""].map((t) =>
+          t.toLowerCase()
+        );
+        const sections = [item.section, item.sectionUk ?? ""].map((s) =>
+          s.toLowerCase()
+        );
         let score = 0;
-        if (title.startsWith(q)) score = 4;
-        else if (title.includes(q)) score = 3;
-        else if (item.section.toLowerCase().includes(q)) score = 2;
+        if (titles.some((t) => t.startsWith(q))) score = 4;
+        else if (titles.some((t) => t.includes(q))) score = 3;
+        else if (sections.some((s) => s.includes(q))) score = 2;
         else if (item.text.toLowerCase().includes(q)) score = 1;
         return { item, score };
       })
@@ -114,9 +121,11 @@ export default function CommandPalette({
                     : "text-[var(--text-secondary)]"
                 }`}
               >
-                <span className="truncate font-medium">{item.title}</span>
+                <span className="truncate font-medium">
+                  {lang === "uk" && item.titleUk ? item.titleUk : item.title}
+                </span>
                 <span className="shrink-0 text-xs text-[var(--text-tertiary)]">
-                  {item.section}
+                  {lang === "uk" && item.sectionUk ? item.sectionUk : item.section}
                 </span>
               </button>
             </li>
