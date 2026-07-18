@@ -45,7 +45,7 @@ export default async function TilList({ section, entries }: ListProps) {
               dateTime={entry.date}
               className="text-sm text-[var(--text-tertiary)]"
             >
-              {displayDate(entry.date)}
+              <T en={displayDate(entry.date)} uk={displayDateUk(entry.date)} />
             </time>
           )}
           <h2 className="mt-1 text-lg font-semibold tracking-tight">
@@ -66,7 +66,7 @@ export default async function TilList({ section, entries }: ListProps) {
                 href={`/${section.slug}/${entry.slug}`}
                 className="mt-3 inline-block text-sm font-medium text-[var(--accent)] transition-opacity hover:opacity-75"
               >
-                Continue reading →
+                <T {...ui.continueReading} />
               </Link>
             </>
           ) : (

@@ -5,8 +5,9 @@ import {
   appleMusicEmbedHeight,
   isAppleMusicUrl,
 } from "@/lib/apple-music";
-import { displayDate } from "@/lib/vault";
+import { displayDate, displayDateUk } from "@/lib/vault";
 import T from "@/components/T";
+import { ui } from "@/lib/ui-strings";
 
 /**
  * "music" section type — /listening-style page:
@@ -53,16 +54,29 @@ export default function MusicList({ section, entries }: ListProps) {
         </div>
       ) : (
         <p className="mt-8 rounded-xl border border-dashed border-[var(--border)] p-4 text-sm text-[var(--text-tertiary)]">
-          No playlist configured yet. In Apple Music: Share → Copy Link on your
-          playlist, then add it under <code>playlists:</code> in this
-          section&rsquo;s main.md frontmatter.
+          <T
+            en={
+              <>
+                No playlist configured yet. In Apple Music: Share → Copy Link on
+                your playlist, then add it under <code>playlists:</code> in this
+                section&rsquo;s main.md frontmatter.
+              </>
+            }
+            uk={
+              <>
+                Список відтворення ще не налаштовано. У Apple Music: Поділитися →
+                Скопіювати посилання на плейлист, потім додайте його під ключем{" "}
+                <code>playlists:</code> у frontmatter файлу main.md цього розділу.
+              </>
+            }
+          />
         </p>
       )}
 
       {entries.length > 0 && (
         <>
           <h2 className="mt-12 text-lg font-semibold tracking-tight text-[var(--text)]">
-            Notes on what I&rsquo;m hearing
+            <T {...ui.notesOnHearing} />
           </h2>
           {/* Plain rows with full dates — the DD.MM/year grouping is posts-only */}
           <ul className="mt-2 flex flex-col">
@@ -87,7 +101,10 @@ export default function MusicList({ section, entries }: ListProps) {
                       dateTime={entry.date}
                       className="shrink-0 text-sm tabular-nums text-[var(--text-tertiary)]"
                     >
-                      {displayDate(entry.date)}
+                      <T
+                        en={displayDate(entry.date)}
+                        uk={displayDateUk(entry.date)}
+                      />
                     </time>
                   )}
                 </Link>

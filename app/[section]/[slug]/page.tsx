@@ -7,9 +7,11 @@ import {
   getEntries,
   getEntry,
   displayDate,
+  displayDateUk,
   readingStats,
 } from "@/lib/vault";
 import { renderMarkdown } from "@/lib/markdown";
+import { ui } from "@/lib/ui-strings";
 import Stars from "@/components/Stars";
 import T from "@/components/T";
 
