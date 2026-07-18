@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { SearchItem } from "@/lib/vault";
+import T from "@/components/T";
+import { ui } from "@/lib/ui-strings";
 
 /**
  * Cmd/Ctrl+K search palette over the static, build-time index of every page.
@@ -20,6 +22,7 @@ export default function CommandPalette({
 }) {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(0);
+  const [lang, setLang] = useState<"en" | "uk">("en");
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -27,6 +30,10 @@ export default function CommandPalette({
     if (open) {
       setQuery("");
       setSelected(0);
+      // The placeholder is a plain attribute, so read the active language here.
+      setLang(
+        (document.documentElement.dataset.lang as "en" | "uk") || "en"
+      );
       // Focus after the element mounts
       requestAnimationFrame(() => inputRef.current?.focus());
     }
@@ -86,13 +93,13 @@ export default function CommandPalette({
               go(results[selected].href);
             }
           }}
-          placeholder="Search pages and posts…"
+          placeholder={ui.searchPlaceholder[lang]}
           className="w-full border-b border-[var(--border)] bg-transparent px-4 py-3.5 text-[15px] text-[var(--text)] outline-none placeholder:text-[var(--text-tertiary)]"
         />
         <ul className="max-h-72 overflow-y-auto py-1.5">
           {results.length === 0 && (
             <li className="px-4 py-6 text-center text-sm text-[var(--text-tertiary)]">
-              No results for &ldquo;{query}&rdquo;
+              <T {...ui.noResultsFor} /> &ldquo;{query}&rdquo;
             </li>
           )}
           {results.map((item, i) => (
@@ -116,7 +123,7 @@ export default function CommandPalette({
           ))}
         </ul>
         <div className="border-t border-[var(--border)] px-4 py-2 text-xs text-[var(--text-tertiary)]">
-          ↑↓ navigate · ↵ open · esc close
+          <T {...ui.searchHint} />
         </div>
       </div>
     </div>

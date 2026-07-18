@@ -17,6 +17,7 @@ import {
 } from "@/components/icons";
 import CommandPalette from "@/components/CommandPalette";
 import T from "@/components/T";
+import { ui } from "@/lib/ui-strings";
 import type { SocialLink } from "@/lib/site-config";
 import type { SearchItem } from "@/lib/vault";
 
@@ -235,7 +236,7 @@ export default function Chrome({
             })}
           </div>
           <p className="mt-4 text-xs text-[var(--text-tertiary)]">
-            Published from Obsidian
+            <T {...ui.publishedFrom} />
           </p>
         </div>
       </aside>

@@ -263,13 +263,18 @@ function plainText(md: string): string {
 }
 
 /** "2026-07-16" → "July 16, 2026" (UTC-safe, no timezone drift). */
-export function displayDate(iso: string): string {
+export function displayDate(iso: string, locale = "en-US"): string {
   const [y, m, d] = iso.split("-").map(Number);
   if (!y || !m || !d) return iso;
-  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("en-US", {
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString(locale, {
     year: "numeric",
     month: "long",
     day: "numeric",
     timeZone: "UTC",
   });
+}
+
+/** "2026-07-16" → "16 липня 2026 р." (Ukrainian long date). */
+export function displayDateUk(iso: string): string {
+  return displayDate(iso, "uk-UA");
 }
