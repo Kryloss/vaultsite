@@ -154,14 +154,10 @@ export default function Chrome({
                 lang === "en" ? "Switch to Ukrainian" : "Перемкнути на англійську"
               }
               title={lang === "en" ? "English — switch to Ukrainian" : "Українська — перемкнути на англійську"}
-              className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-[var(--bg-hover)]"
+              className="flex h-8 w-8 items-center justify-center rounded-md text-base leading-none transition-colors hover:bg-[var(--bg-hover)]"
             >
               {/* Shows the CURRENT language's flag */}
-              {lang === "en" ? (
-                <CanadaFlag className="h-[13px] w-[13px] rounded-full ring-1 ring-[var(--border)]" />
-              ) : (
-                <UkraineFlag className="h-[13px] w-[13px] rounded-full ring-1 ring-[var(--border)]" />
-              )}
+              {lang === "en" ? "🇨🇦" : "🇺🇦"}
             </button>
             <button
               type="button"

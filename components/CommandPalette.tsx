@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import type { SearchItem } from "@/lib/vault";
 import T from "@/components/T";
 import { useLang } from "@/components/useLang";
-import { CanadaFlag, UkraineFlag } from "@/components/icons";
 import { ui } from "@/lib/ui-strings";
 
 /**
@@ -83,7 +82,7 @@ export default function CommandPalette({
         className="w-full max-w-md overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg)] shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center border-b border-[var(--border)] pr-2">
+        <div className="relative border-b border-[var(--border)]">
           <input
             ref={inputRef}
             value={query}
@@ -100,7 +99,7 @@ export default function CommandPalette({
               }
             }}
             placeholder={ui.searchPlaceholder[lang]}
-            className="min-w-0 flex-1 bg-transparent px-4 py-3.5 text-[15px] text-[var(--text)] outline-none placeholder:text-[var(--text-tertiary)]"
+            className="w-full bg-transparent px-4 py-3.5 pr-12 text-[15px] text-[var(--text)] outline-none focus:outline-none focus-visible:outline-none placeholder:text-[var(--text-tertiary)]"
           />
           <button
             type="button"
@@ -109,13 +108,9 @@ export default function CommandPalette({
               lang === "en" ? "Switch to Ukrainian" : "Перемкнути на англійську"
             }
             title={lang === "en" ? "English" : "Українська"}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-[var(--bg-hover)]"
+            className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-base leading-none transition-colors hover:bg-[var(--bg-hover)]"
           >
-            {lang === "en" ? (
-              <CanadaFlag className="h-[14px] w-[14px] rounded-full ring-1 ring-[var(--border)]" />
-            ) : (
-              <UkraineFlag className="h-[14px] w-[14px] rounded-full ring-1 ring-[var(--border)]" />
-            )}
+            {lang === "en" ? "🇨🇦" : "🇺🇦"}
           </button>
         </div>
         <ul className="max-h-72 overflow-y-auto py-1.5">
