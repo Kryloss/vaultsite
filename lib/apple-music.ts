@@ -26,10 +26,14 @@ export function appleMusicEmbedHeight(url: string): number {
 
 /**
  * Feature policy for the embed iframe (matches Apple's official embed).
- * Note: NO `sandbox` attribute. A storage-isolating sandbox (dropping
- * `allow-same-origin` to force a "first visit" every load) was tested on
- * production and leaves Apple's player stuck on its gray skeleton — the player
- * needs same-origin storage to hydrate. See DECISIONS.md #10.
+ *
+ * Reliability note (see DECISIONS.md #10): the embed accumulates stale
+ * localStorage under apple.com that eventually stalls the player on its gray
+ * skeleton (works in a fresh browser, breaks after repeat visits). The iframes
+ * carry the `credentialless` attribute so Chromium loads them in a fresh
+ * ephemeral storage partition every time — a "first visit" each load. NO
+ * `sandbox`: a storage-isolating sandbox was tested and breaks the player,
+ * which needs same-origin storage to hydrate.
  */
 export const APPLE_MUSIC_IFRAME_ALLOW =
   "autoplay *; encrypted-media *; fullscreen *; clipboard-write";

@@ -41,6 +41,8 @@ export default function MusicList({ section, entries }: ListProps) {
               key={url}
               className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-hover)] shadow-sm transition-shadow duration-300 hover:shadow-md"
             >
+              {/* credentialless: fresh ephemeral storage each load (Chromium)
+                  so stale Apple state can't stall the player — see DECISIONS #10 */}
               <iframe
                 src={appleMusicEmbedUrl(url)}
                 height={appleMusicEmbedHeight(url)}
@@ -48,6 +50,7 @@ export default function MusicList({ section, entries }: ListProps) {
                 className="block w-full"
                 style={{ border: 0 }}
                 allow={APPLE_MUSIC_IFRAME_ALLOW}
+                credentialless
               />
               {/* In-widget fallback so a stalled gray embed is never a dead end */}
               <div className="flex justify-end border-t border-[var(--border)] px-3 py-2 text-xs">
