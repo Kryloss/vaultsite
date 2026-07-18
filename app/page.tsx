@@ -30,6 +30,9 @@ export default async function HomePage() {
   }
 
   const html = await renderMarkdown(home.content, home.dirName, home.slug);
+  const htmlUk = home.contentUk
+    ? await renderMarkdown(home.contentUk, home.dirName, home.slug)
+    : null;
 
   const posts = getSectionBySlug("posts");
   const recent = posts ? getEntries(posts).slice(0, 4) : [];
@@ -39,7 +42,20 @@ export default async function HomePage() {
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-14 lg:py-24">
-      <article className="prose" dangerouslySetInnerHTML={{ __html: html }} />
+      {htmlUk ? (
+        <>
+          <article
+            className="prose lang-en"
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+          <article
+            className="prose lang-uk"
+            dangerouslySetInnerHTML={{ __html: htmlUk }}
+          />
+        </>
+      ) : (
+        <article className="prose" dangerouslySetInnerHTML={{ __html: html }} />
+      )}
 
       {recent.length > 0 && (
         <section className="mt-16">

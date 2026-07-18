@@ -93,6 +93,12 @@ export function getSections(): Section[] {
     const { data, content } = matter(fs.readFileSync(mainPath, "utf8"));
     if (isDraft(data) && !SHOW_DRAFTS) continue;
 
+    // Optional Ukrainian body: a sibling main.uk.md (frontmatter stripped).
+    const ukPath = path.join(VAULT_DIR, entry.name, "main.uk.md");
+    const contentUk = fs.existsSync(ukPath)
+      ? matter(fs.readFileSync(ukPath, "utf8")).content
+      : undefined;
+
     sections.push({
       slug: slugify((data.slug as string) ?? entry.name),
       dirName: entry.name,
@@ -103,6 +109,7 @@ export function getSections(): Section[] {
       order: typeof data.order === "number" ? data.order : 100,
       type: (data.type as string) ?? "posts",
       content,
+      contentUk,
       meta: data,
       draft: isDraft(data),
     });
@@ -124,7 +131,8 @@ export function getEntries(section: Section): Entry[] {
 
   for (const file of fs.readdirSync(dir)) {
     if (!file.toLowerCase().endsWith(".md")) continue;
-    if (file.toLowerCase() === "main.md") continue;
+    // Skip the section body and its translations (main.md, main.uk.md, …).
+    if (/^main(\.[a-z]{2})?\.md$/i.test(file)) continue;
 
     const { data, content } = matter(fs.readFileSync(path.join(dir, file), "utf8"));
     if (isDraft(data) && !SHOW_DRAFTS) continue;

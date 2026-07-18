@@ -34,6 +34,9 @@ export default async function SectionPage({ params }: Props) {
   const html = section.content.trim()
     ? await renderMarkdown(section.content, section.dirName, section.slug)
     : "";
+  const htmlUk = section.contentUk?.trim()
+    ? await renderMarkdown(section.contentUk, section.dirName, section.slug)
+    : "";
   const List = getListComponent(section.type);
 
   return (
@@ -50,12 +53,23 @@ export default async function SectionPage({ params }: Props) {
         )}
       </header>
 
-      {html && (
+      {html && htmlUk ? (
+        <>
+          <article
+            className="prose mt-6 lang-en"
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+          <article
+            className="prose mt-6 lang-uk"
+            dangerouslySetInnerHTML={{ __html: htmlUk }}
+          />
+        </>
+      ) : html ? (
         <article
           className="prose mt-6"
           dangerouslySetInnerHTML={{ __html: html }}
         />
-      )}
+      ) : null}
 
       <List section={section} entries={entries} />
     </div>
