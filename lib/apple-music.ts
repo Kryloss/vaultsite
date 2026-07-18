@@ -38,13 +38,12 @@ export function appleMusicEmbedHtml(url: string): string {
   const src = appleMusicEmbedUrl(url);
   const web = url.trim();
   const height = appleMusicEmbedHeight(url);
-  // Static fallback link below the player so a stalled embed is never a dead
-  // end. The interactive "reload" affordance lives in the React
-  // AppleMusicEmbed component used by the music section page.
+  // Card with an in-widget "Open in Apple Music" footer link so a stalled
+  // gray-skeleton embed is never a dead end (mirrors the music-page embed).
   return (
-    `<span class="apple-music-block">` +
-    `<iframe class="apple-music-embed" title="Apple Music player" allow="${APPLE_MUSIC_IFRAME_ALLOW}" height="${height}" style="width:100%;overflow:hidden;border-radius:12px;border:0;" src="${src}"></iframe>` +
-    `<a class="apple-music-fallback" href="${web}" target="_blank" rel="noopener noreferrer">Open in Apple Music ↗</a>` +
-    `</span>`
+    `<div class="apple-music-block">` +
+    `<iframe class="apple-music-embed" title="Apple Music player" allow="${APPLE_MUSIC_IFRAME_ALLOW}" height="${height}" src="${src}"></iframe>` +
+    `<div class="apple-music-footer"><a class="apple-music-fallback" href="${web}" target="_blank" rel="noopener noreferrer">Open in Apple Music ↗</a></div>` +
+    `</div>`
   );
 }

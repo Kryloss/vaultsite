@@ -4,8 +4,8 @@ import {
   appleMusicEmbedUrl,
   appleMusicEmbedHeight,
   isAppleMusicUrl,
+  APPLE_MUSIC_IFRAME_ALLOW,
 } from "@/lib/apple-music";
-import AppleMusicEmbed from "@/components/AppleMusicEmbed";
 import { displayDate, displayDateUk } from "@/lib/vault";
 import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
@@ -37,12 +37,30 @@ export default function MusicList({ section, entries }: ListProps) {
           }`}
         >
           {playlists.map((url) => (
-            <AppleMusicEmbed
+            <div
               key={url}
-              src={appleMusicEmbedUrl(url)}
-              webUrl={url}
-              height={appleMusicEmbedHeight(url)}
-            />
+              className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-hover)] shadow-sm transition-shadow duration-300 hover:shadow-md"
+            >
+              <iframe
+                src={appleMusicEmbedUrl(url)}
+                height={appleMusicEmbedHeight(url)}
+                title="Apple Music player"
+                className="block w-full"
+                style={{ border: 0 }}
+                allow={APPLE_MUSIC_IFRAME_ALLOW}
+              />
+              {/* In-widget fallback so a stalled gray embed is never a dead end */}
+              <div className="flex justify-center border-t border-[var(--border)] px-3 py-2 text-xs">
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text)]"
+                >
+                  <T {...ui.openInAppleMusic} /> ↗
+                </a>
+              </div>
+            </div>
           ))}
         </div>
       ) : (

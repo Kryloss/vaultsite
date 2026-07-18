@@ -191,23 +191,38 @@ body {
   vertical-align: middle;
 }
 
-/* Apple Music auto-embed (markdown pipeline): iframe + static fallback link.
-   The fallback keeps a stalled gray-skeleton embed from being a dead end. */
+/* Apple Music auto-embed (markdown pipeline): iframe in a card with an
+   in-widget "Open in Apple Music" footer link — matches the music page embed.
+   The link keeps a stalled gray-skeleton embed from being a dead end. */
 .apple-music-block {
-  display: block;
   margin: 1.5rem 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--bg-hover);
 }
 
-.apple-music-fallback {
-  display: inline-block;
-  margin-top: 0.4rem;
+.apple-music-embed {
+  display: block;
+  width: 100%;
+  border: 0;
+}
+
+.apple-music-footer {
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.prose a.apple-music-fallback {
   font-size: 0.8125rem;
   font-weight: 500;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   text-decoration: none;
 }
 
-.apple-music-fallback:hover {
+.prose a.apple-music-fallback:hover {
   color: var(--text);
 }
 

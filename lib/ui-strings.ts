@@ -42,7 +42,6 @@ export const ui = {
     en: "Notes on what I’m hearing",
     uk: "Нотатки про почуте",
   },
-  reloadPlayer: { en: "Reload player", uk: "Перезавантажити плеєр" },
   openInAppleMusic: { en: "Open in Apple Music", uk: "Відкрити в Apple Music" },
   continueReading: { en: "Continue reading →", uk: "Читати далі →" },
   emptyState: {
