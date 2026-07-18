@@ -6,8 +6,6 @@ import { Fragment, useEffect, useState, type ReactNode } from "react";
 import {
   PanelIcon,
   SearchIcon,
-  CanadaFlag,
-  UkraineFlag,
   resolveIcon,
   GitHubIcon,
   InstagramIcon,
