@@ -24,22 +24,15 @@ export function appleMusicEmbedHeight(url: string): number {
   return isSong ? 175 : 450;
 }
 
-/** Feature policy for the embed iframe (matches Apple's official embed). */
+/**
+ * Feature policy for the embed iframe (matches Apple's official embed).
+ * Note: NO `sandbox` attribute. A storage-isolating sandbox (dropping
+ * `allow-same-origin` to force a "first visit" every load) was tested on
+ * production and leaves Apple's player stuck on its gray skeleton — the player
+ * needs same-origin storage to hydrate. See DECISIONS.md #10.
+ */
 export const APPLE_MUSIC_IFRAME_ALLOW =
   "autoplay *; encrypted-media *; fullscreen *; clipboard-write";
-
-/**
- * Storage-isolating sandbox. Deliberately omits `allow-same-origin`, which
- * forces the iframe into a fresh, unique opaque origin on every load — so
- * Apple's player can't read cookies/localStorage/IndexedDB persisted from
- * earlier visits. That stale state is what makes the embed work in a clean
- * browser but stall on the gray skeleton after some reloads; denying it makes
- * every load behave like a first visit. `allow-scripts` keeps the player
- * running; popups/forms/presentation cover its controls and "View in Apple
- * Music" hand-off.
- */
-export const APPLE_MUSIC_IFRAME_SANDBOX =
-  "allow-scripts allow-popups allow-forms allow-presentation allow-top-navigation-by-user-activation";
 
 /** iframe HTML string — used by the markdown pipeline to auto-embed pasted links. */
 export function appleMusicEmbedHtml(url: string): string {
@@ -55,7 +48,7 @@ export function appleMusicEmbedHtml(url: string): string {
     `<span class="lang-uk">${ui.openInAppleMusic.uk}</span>`;
   return (
     `<div class="apple-music-block">` +
-    `<iframe class="apple-music-embed" title="Apple Music player" allow="${APPLE_MUSIC_IFRAME_ALLOW}" sandbox="${APPLE_MUSIC_IFRAME_SANDBOX}" height="${height}" src="${src}"></iframe>` +
+    `<iframe class="apple-music-embed" title="Apple Music player" allow="${APPLE_MUSIC_IFRAME_ALLOW}" height="${height}" src="${src}"></iframe>` +
     `<div class="apple-music-footer"><a class="apple-music-fallback" href="${web}" target="_blank" rel="noopener noreferrer">${label} ↗</a></div>` +
     `</div>`
   );
