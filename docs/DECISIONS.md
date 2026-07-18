@@ -55,3 +55,9 @@ Append new entries at the bottom. Format: number, date, decision, why, revisit-w
 **Decision:** Raw content → AI structures it into vault notes per `docs/CONTENT-WORKFLOW.md`. Policy chosen by the owner: light-touch editing (voice preserved), follow-up questions only when genuinely ambiguous, publish directly (no draft gate).
 **Why:** The vault-as-CMS makes AI a natural editor: conventions are mechanical (frontmatter, templates, wiki links) while the writing stays human.
 **Revisit when:** Mistakes reach production — flip the workflow's publishing rule to draft-first.
+
+## 10. Apple Music embed: no sandbox + fallback/reload affordances (2026-07-18)
+
+**Decision:** The Apple Music embed iframe drops the custom `sandbox` attribute (matching Apple's official embed markup) and, on the `music` section page, is wrapped in a client component (`components/AppleMusicEmbed.tsx`) that adds an always-visible "Reload player" button and "Open in Apple Music" fallback link. The markdown auto-embed path (`appleMusicEmbedHtml`) gets a static fallback link only. Shared feature-policy string: `APPLE_MUSIC_IFRAME_ALLOW` in `lib/apple-music.ts`.
+**Why:** The embed intermittently gets stuck on Apple's gray loading skeleton. The stall happens *after* the iframe's `load` event (which fires in ~200ms), inside Apple's cross-origin player JS, so a static site can't detect or auto-fix it. The `sandbox` was the one code-side variable that could block the third-party storage Apple's player needs to hydrate under strict privacy settings; removing it aligns with Apple's supported embed. The reload/fallback affordances turn a stalled gray box from a dead end into a one-click retry or a direct link out.
+**Revisit when:** Apple ships a reliable embed load/error event we can key an auto-retry on, or the stalls stop (then the reload button could be hidden until needed).
