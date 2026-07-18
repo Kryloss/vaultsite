@@ -27,5 +27,5 @@ export function appleMusicEmbedHeight(url: string): number {
 export function appleMusicEmbedHtml(url: string): string {
   const src = appleMusicEmbedUrl(url);
   const height = appleMusicEmbedHeight(url);
-  return `<iframe class="apple-music-embed" allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" height="${height}" style="width:100%;overflow:hidden;border-radius:12px;border:0;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" loading="lazy" src="${src}"></iframe>`;
+  return `<iframe class="apple-music-embed" allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" height="${height}" style="width:100%;overflow:hidden;border-radius:12px;border:0;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation allow-presentation" src="${src}"></iframe>`;
 }

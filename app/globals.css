@@ -49,20 +49,21 @@ html[data-lang="uk"] .lang-uk {
 
 /* ---------- Motion ---------- */
 
-/* Content fades up on every navigation (applied in components/Chrome.tsx) */
+/* Content fades in on every navigation (applied in components/Chrome.tsx).
+   Opacity-only on purpose: a lingering `transform` on this wrapper (it holds
+   the Apple Music iframe) makes cross-origin media iframes paint blank on
+   WebKit (iOS Safari/Chrome) after a reload. No transform → no blank frame. */
 @keyframes page-in {
   from {
     opacity: 0;
-    transform: translateY(10px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
 .page-in {
-  animation: page-in 0.4s cubic-bezier(0.21, 0.47, 0.32, 0.98) both;
+  animation: page-in 0.35s ease both;
 }
 
 @media (prefers-reduced-motion: reduce) {
