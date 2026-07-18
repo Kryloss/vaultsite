@@ -50,7 +50,7 @@ export default function MusicList({ section, entries }: ListProps) {
                 className="block w-full"
                 style={{ border: 0 }}
                 allow={APPLE_MUSIC_IFRAME_ALLOW}
-                credentialless
+                credentialless=""
               />
               {/* In-widget fallback so a stalled gray embed is never a dead end */}
               <div className="flex justify-end border-t border-[var(--border)] px-3 py-2 text-xs">

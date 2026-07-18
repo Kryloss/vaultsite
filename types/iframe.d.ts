@@ -9,6 +9,8 @@ import "react";
  */
 declare module "react" {
   interface IframeHTMLAttributes<T> {
-    credentialless?: boolean;
+    // String, not boolean: React 19 omits an unrecognized boolean attribute
+    // from the HTML, so pass credentialless="" to actually emit it.
+    credentialless?: "";
   }
 }
