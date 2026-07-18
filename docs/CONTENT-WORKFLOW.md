@@ -182,10 +182,12 @@ title_uk: Мій шлях до Security+
   (films/books: use the official localized title — *Inception* → *Початок*;
   people: transliterate — *Mykhailo Fedorov* → *Михайло Федоров*). Keep brand
   and cert names as-is when that's the real usage (*Security+*, *Starbucks*).
-- Body content stays English-only for now. Do NOT translate note bodies unless
-  Kyrylo explicitly asks — the toggle currently swaps titles only.
-- When he later wants full-content translation, the mechanism extends the same
-  way (a parallel `.uk.md` body or inline `<T>` blocks); flag it, don't guess.
+- Note bodies default to English. To translate a section body (e.g. Home),
+  add a sibling `main.uk.md` next to `main.md` with the Ukrainian markdown
+  (no frontmatter needed) — the site shows it when the toggle is on Ukrainian
+  and falls back to English otherwise. Keep image embeds and wiki links
+  identical so they resolve the same; translate only link *labels*
+  (`[[Now/main|Зараз]]`). Only do this when Kyrylo asks for a body translation.
 
 ## Sources section
 
