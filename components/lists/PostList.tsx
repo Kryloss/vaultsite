@@ -1,5 +1,7 @@
 import type { ListProps } from "@/lib/section-types";
 import PostListClient, { type PostRow } from "@/components/lists/PostListClient";
+import T from "@/components/T";
+import { ui } from "@/lib/ui-strings";
 
 /**
  * Default "posts" list (server side): slims entries down to serializable rows
@@ -12,8 +14,7 @@ export default function PostList({ section, entries }: ListProps) {
   if (entries.length === 0) {
     return (
       <p className="mt-10 text-sm text-[var(--text-tertiary)]">
-        Nothing here yet. Add a .md file next to this section&rsquo;s main.md in
-        your vault and it will show up automatically.
+        <T {...ui.emptyState} />
       </p>
     );
   }

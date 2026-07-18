@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import T from "@/components/T";
+import { ui } from "@/lib/ui-strings";
 
 export interface PostRow {
   slug: string;
@@ -39,9 +40,13 @@ export default function PostListClient({
   const filtered = active ? rows.filter((r) => r.category === active) : rows;
   const years = groupByYear(filtered);
 
-  const chip = (label: string, value: string | null) => (
+  const chip = (
+    key: string,
+    label: React.ReactNode,
+    value: string | null
+  ) => (
     <button
-      key={label}
+      key={key}
       type="button"
       onClick={() => setActive(value)}
       className={`rounded-full border px-3 py-1 text-sm transition-colors ${
@@ -58,8 +63,8 @@ export default function PostListClient({
     <div className="mt-4">
       {categories.length > 0 && (
         <div className="mt-6 flex flex-wrap gap-2">
-          {chip("All", null)}
-          {categories.map((c) => chip(c, c))}
+          {chip("__all", <T {...ui.filterAll} />, null)}
+          {categories.map((c) => chip(c, c, c))}
         </div>
       )}
 
@@ -114,7 +119,7 @@ export default function PostListClient({
 
       {filtered.length === 0 && (
         <p className="mt-10 text-sm text-[var(--text-tertiary)]">
-          No posts in this category yet.
+          <T {...ui.nothingInCategory} />
         </p>
       )}
     </div>

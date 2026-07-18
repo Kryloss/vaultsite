@@ -8,6 +8,8 @@ import {
 import { renderMarkdown } from "@/lib/markdown";
 import { resolveIcon } from "@/components/icons";
 import T from "@/components/T";
+import { ui } from "@/lib/ui-strings";
+import { displayDateUk } from "@/lib/vault";
 
 /**
  * Home page — renders vault/Home/main.md, then two generated blocks:
@@ -43,13 +45,13 @@ export default async function HomePage() {
         <section className="mt-16">
           <div className="flex items-baseline justify-between">
             <h2 className="text-lg font-semibold tracking-tight text-[var(--text)]">
-              Recent posts
+              <T {...ui.recentPosts} />
             </h2>
             <Link
               href="/posts"
               className="text-sm text-[var(--text-tertiary)] transition-colors hover:text-[var(--text)]"
             >
-              All posts →
+              <T {...ui.allPosts} />
             </Link>
           </div>
           <ul className="mt-2 flex flex-col">
@@ -67,7 +69,10 @@ export default async function HomePage() {
                       dateTime={entry.date}
                       className="shrink-0 text-sm tabular-nums text-[var(--text-tertiary)]"
                     >
-                      {displayDate(entry.date)}
+                      <T
+                        en={displayDate(entry.date)}
+                        uk={displayDateUk(entry.date)}
+                      />
                     </time>
                   )}
                 </Link>
@@ -80,7 +85,7 @@ export default async function HomePage() {
       {explore.length > 0 && (
         <section className="mt-16">
           <h2 className="text-lg font-semibold tracking-tight text-[var(--text)]">
-            Explore
+            <T {...ui.explore} />
           </h2>
           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {explore.map((section) => {
