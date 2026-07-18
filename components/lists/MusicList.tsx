@@ -5,6 +5,7 @@ import {
   appleMusicEmbedHeight,
   isAppleMusicUrl,
   APPLE_MUSIC_IFRAME_ALLOW,
+  APPLE_MUSIC_IFRAME_SANDBOX,
 } from "@/lib/apple-music";
 import { displayDate, displayDateUk } from "@/lib/vault";
 import T from "@/components/T";
@@ -48,6 +49,7 @@ export default function MusicList({ section, entries }: ListProps) {
                 className="block w-full"
                 style={{ border: 0 }}
                 allow={APPLE_MUSIC_IFRAME_ALLOW}
+                sandbox={APPLE_MUSIC_IFRAME_SANDBOX}
               />
               {/* In-widget fallback so a stalled gray embed is never a dead end */}
               <div className="flex justify-end border-t border-[var(--border)] px-3 py-2 text-xs">
