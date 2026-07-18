@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ListProps } from "@/lib/section-types";
 import { resolveCoverUrl } from "@/lib/markdown";
 import T from "@/components/T";
+import { ui } from "@/lib/ui-strings";
 
 /**
  * "people" section type — app-dissection-style grid of square cover cards.
@@ -15,8 +16,7 @@ export default function PeopleGrid({ section, entries }: ListProps) {
   if (entries.length === 0) {
     return (
       <p className="mt-10 text-sm text-[var(--text-tertiary)]">
-        Nothing here yet. Add a .md file next to this section&rsquo;s main.md in
-        your vault and it will show up automatically.
+        <T {...ui.emptyState} />
       </p>
     );
   }

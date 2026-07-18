@@ -3,6 +3,8 @@ import { resolveCoverUrl } from "@/lib/markdown";
 import ShelfGridClient, {
   type ShelfItem,
 } from "@/components/lists/ShelfGridClient";
+import T from "@/components/T";
+import { ui } from "@/lib/ui-strings";
 
 /**
  * "shelf" section type (server side) — vertical 2:3 covers for books, movies,
@@ -19,8 +21,7 @@ export default function ShelfGrid({ section, entries }: ListProps) {
   if (entries.length === 0) {
     return (
       <p className="mt-10 text-sm text-[var(--text-tertiary)]">
-        Nothing here yet. Add a .md file next to this section&rsquo;s main.md in
-        your vault and it will show up automatically.
+        <T {...ui.emptyState} />
       </p>
     );
   }

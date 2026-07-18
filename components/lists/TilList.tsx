@@ -1,8 +1,9 @@
 import Link from "next/link";
 import type { ListProps } from "@/lib/section-types";
 import { renderMarkdown } from "@/lib/markdown";
-import { displayDate } from "@/lib/vault";
+import { displayDate, displayDateUk } from "@/lib/vault";
 import T from "@/components/T";
+import { ui } from "@/lib/ui-strings";
 
 /** Entries longer than this (raw markdown chars) get truncated with an expand toggle. */
 const PREVIEW_LIMIT = 1000;
@@ -16,8 +17,7 @@ export default async function TilList({ section, entries }: ListProps) {
   if (entries.length === 0) {
     return (
       <p className="mt-10 text-sm text-[var(--text-tertiary)]">
-        Nothing here yet. Add a .md file next to this section&rsquo;s main.md in
-        your vault and it will show up automatically.
+        <T {...ui.emptyState} />
       </p>
     );
   }

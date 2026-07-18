@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import Stars from "@/components/Stars";
 import T from "@/components/T";
+import { ui, type Str } from "@/lib/ui-strings";
 
 export interface ShelfItem {
   slug: string;
@@ -18,15 +19,16 @@ export interface ShelfItem {
   rating?: number;
 }
 
-/** Pretty labels for common mediums; unknown values are shown capitalized. */
-const MEDIUM_LABELS: Record<string, string> = {
-  book: "Books",
-  movie: "Movies",
-  show: "Shows",
+/** Pretty, bilingual labels for common mediums; unknown values shown as-is. */
+const MEDIUM_LABELS: Record<string, Str> = {
+  book: ui.mediumBooks,
+  movie: ui.mediumMovies,
+  show: ui.mediumShows,
 };
 
-function mediumLabel(m: string): string {
-  return MEDIUM_LABELS[m] ?? m.charAt(0).toUpperCase() + m.slice(1);
+function mediumLabel(m: string): Str {
+  const cap = m.charAt(0).toUpperCase() + m.slice(1);
+  return MEDIUM_LABELS[m] ?? { en: cap, uk: cap };
 }
 
 /**
@@ -52,9 +54,9 @@ export default function ShelfGridClient({
 
   const filtered = active ? items.filter((i) => i.medium === active) : items;
 
-  const chip = (label: string, value: string | null) => (
+  const chip = (key: string, label: Str, value: string | null) => (
     <button
-      key={label}
+      key={key}
       type="button"
       onClick={() => setActive(value)}
       className={`rounded-full border px-3 py-1 text-sm transition-colors ${
@@ -63,7 +65,7 @@ export default function ShelfGridClient({
           : "border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-tertiary)] hover:text-[var(--text)]"
       }`}
     >
-      {label}
+      <T {...label} />
     </button>
   );
 
@@ -71,8 +73,8 @@ export default function ShelfGridClient({
     <div>
       {mediums.length > 0 && (
         <div className="mt-6 flex flex-wrap gap-2">
-          {chip("All", null)}
-          {mediums.map((m) => chip(mediumLabel(m), m))}
+          {chip("__all", ui.filterAll, null)}
+          {mediums.map((m) => chip(m, mediumLabel(m), m))}
         </div>
       )}
 
@@ -124,7 +126,7 @@ export default function ShelfGridClient({
 
       {filtered.length === 0 && (
         <p className="mt-10 text-sm text-[var(--text-tertiary)]">
-          Nothing on the shelf in this category yet.
+          <T {...ui.nothingOnShelf} />
         </p>
       )}
     </div>
