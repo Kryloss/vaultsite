@@ -4,6 +4,7 @@ title_uk: Зараз
 icon: ⏳
 order: 1
 description: What I'm focused on right now.
+description_uk: Чим я зайнятий саме зараз.
 ---
 
 *Last updated: July 2026*

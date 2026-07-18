@@ -124,7 +124,7 @@ export default async function HomePage() {
                   </span>
                   {section.description && (
                     <span className="mt-1.5 line-clamp-2 block text-sm leading-snug text-[var(--text-secondary)]">
-                      {section.description}
+                      <T en={section.description} uk={section.descriptionUk} />
                     </span>
                   )}
                 </Link>

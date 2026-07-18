@@ -27,6 +27,8 @@ export interface Section {
   titleUk?: string;
   icon?: string;
   description?: string;
+  /** Ukrainian description from `description_uk:` frontmatter. */
+  descriptionUk?: string;
   /** Sidebar ordering (frontmatter `order`, lower = higher). Default 100. */
   order: number;
   /** Section type — decides how entries are listed. See lib/section-types.tsx */
@@ -106,6 +108,9 @@ export function getSections(): Section[] {
       titleUk: ukTitle(data),
       icon: data.icon as string | undefined,
       description: data.description as string | undefined,
+      descriptionUk: (data.description_uk ?? data.descriptionUk) as
+        | string
+        | undefined,
       order: typeof data.order === "number" ? data.order : 100,
       type: (data.type as string) ?? "posts",
       content,

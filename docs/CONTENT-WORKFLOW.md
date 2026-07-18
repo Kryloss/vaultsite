@@ -177,7 +177,9 @@ title_uk: Мій шлях до Security+
 ```
 
 - Add `title_uk:` to every new note and section `main.md` you create — a
-  professional, natural Ukrainian rendering (not a literal word swap).
+  professional, natural Ukrainian rendering (not a literal word swap). For
+  section `main.md` files also add `description_uk:` (the sidebar/section/home
+  descriptions read it).
 - For proper nouns use the established Ukrainian form when one exists
   (films/books: use the official localized title — *Inception* → *Початок*;
   people: transliterate — *Mykhailo Fedorov* → *Михайло Федоров*). Keep brand

@@ -48,7 +48,7 @@ export default async function SectionPage({ params }: Props) {
         </h1>
         {section.description && (
           <p className="mt-2 text-[var(--text-secondary)]">
-            {section.description}
+            <T en={section.description} uk={section.descriptionUk} />
           </p>
         )}
       </header>
