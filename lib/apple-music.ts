@@ -52,7 +52,7 @@ export function appleMusicEmbedHtml(url: string): string {
     `<span class="lang-uk">${ui.openInAppleMusic.uk}</span>`;
   return (
     `<div class="apple-music-block">` +
-    `<iframe class="apple-music-embed" title="Apple Music player" allow="${APPLE_MUSIC_IFRAME_ALLOW}" height="${height}" src="${src}"></iframe>` +
+    `<iframe class="apple-music-embed" title="Apple Music player" allow="${APPLE_MUSIC_IFRAME_ALLOW}" credentialless height="${height}" src="${src}"></iframe>` +
     `<div class="apple-music-footer"><a class="apple-music-fallback" href="${web}" target="_blank" rel="noopener noreferrer">${label} ↗</a></div>` +
     `</div>`
   );
