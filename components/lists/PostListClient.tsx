@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
 
@@ -40,11 +40,7 @@ export default function PostListClient({
   const filtered = active ? rows.filter((r) => r.category === active) : rows;
   const years = groupByYear(filtered);
 
-  const chip = (
-    key: string,
-    label: React.ReactNode,
-    value: string | null
-  ) => (
+  const chip = (key: string, label: ReactNode, value: string | null) => (
     <button
       key={key}
       type="button"

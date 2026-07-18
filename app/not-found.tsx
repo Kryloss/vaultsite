@@ -1,4 +1,6 @@
 import Link from "next/link";
+import T from "@/components/T";
+import { ui } from "@/lib/ui-strings";
 
 export default function NotFound() {
   return (
@@ -7,13 +9,13 @@ export default function NotFound() {
         404
       </h1>
       <p className="mt-3 text-[var(--text-secondary)]">
-        This page doesn&rsquo;t exist (or the note behind it was unpublished).
+        <T {...ui.notFoundBody} />
       </p>
       <Link
         href="/"
         className="mt-6 inline-block text-sm text-[var(--accent)] hover:underline"
       >
-        ← Back home
+        <T {...ui.backHome} />
       </Link>
     </div>
   );
