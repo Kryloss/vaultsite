@@ -32,7 +32,9 @@ html {
 }
 
 /* ---------- Language toggle (components/T.tsx) ---------- */
-/* English is default; html[data-lang="uk"] flips every bilingual span. */
+/* English is default; html[data-lang="uk"] flips every bilingual node.
+   `revert` restores the element's natural display (inline for spans, block
+   for divs) so both inline text and block content toggle correctly. */
 .lang-uk {
   display: none;
 }
@@ -42,7 +44,7 @@ html[data-lang="uk"] .lang-en {
 }
 
 html[data-lang="uk"] .lang-uk {
-  display: inline;
+  display: revert;
 }
 
 /* ---------- Motion ---------- */
