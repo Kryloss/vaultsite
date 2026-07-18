@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Now/main.md",
+                "file": "Music/Clancy.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "main"
+              "title": "Clancy"
             }
           }
         ]
@@ -198,6 +198,7 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
+    "Now/main.md",
     "Home/main.uk.md",
     "Home/main.md",
     "Music/main.md",
@@ -207,7 +208,6 @@
     "Posts/Post Sample.md",
     "Posts/Post Sample 1.md",
     "Shelf/mr-robot.png",
-    "Now/main.md",
     "People/Mykhailo Fedorov.md",
     "People/main.md",
     "Shelf/Mr Robot.md",
