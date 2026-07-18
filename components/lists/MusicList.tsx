@@ -45,7 +45,6 @@ export default function MusicList({ section, entries }: ListProps) {
                 height={appleMusicEmbedHeight(url)}
                 className="block w-full"
                 style={{ border: 0 }}
-                loading="lazy"
                 allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
                 sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
               />

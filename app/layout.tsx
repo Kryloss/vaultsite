@@ -44,7 +44,9 @@ export default function RootLayout({
   }));
 
   return (
-    <html lang="en">
+    // data-lang is set pre-paint by the inline script below (and toggled at
+    // runtime), so the server HTML intentionally differs — suppress the warning.
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* Restore the language choice before first paint — no flash. */}
         <script

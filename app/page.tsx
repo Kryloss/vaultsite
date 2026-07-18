@@ -8,6 +8,7 @@ import {
 import { renderMarkdown } from "@/lib/markdown";
 import { resolveIcon } from "@/components/icons";
 import T from "@/components/T";
+import SocialLinks from "@/components/SocialLinks";
 import { ui } from "@/lib/ui-strings";
 import { displayDateUk } from "@/lib/vault";
 
@@ -56,6 +57,8 @@ export default async function HomePage() {
       ) : (
         <article className="prose" dangerouslySetInnerHTML={{ __html: html }} />
       )}
+
+      <SocialLinks className="mt-8" />
 
       {recent.length > 0 && (
         <section className="mt-16">
