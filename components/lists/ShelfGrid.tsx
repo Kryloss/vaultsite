@@ -28,6 +28,7 @@ export default function ShelfGrid({ section, entries }: ListProps) {
   const items: ShelfItem[] = entries.map((entry) => ({
     slug: entry.slug,
     title: entry.title,
+    titleUk: entry.titleUk,
     author:
       typeof entry.meta.author === "string" ? entry.meta.author : undefined,
     medium:

@@ -1,5 +1,6 @@
 ---
 title: My Security+ journey
+title_uk: Мій шлях до Security+
 date: 2026-07-17
 category: Cybersecurity
 description: What I'm studying, how I'm studying it, and what's working.

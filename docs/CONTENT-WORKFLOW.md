@@ -166,6 +166,27 @@ on the long side are plenty, JPG/PNG/WebP all fine.
   where the license requires, a credit line under the section using it.
 - Never generate fake "covers" or AI portraits of real people.
 
+## Translation (title_uk)
+
+The site has an English/Ukrainian toggle (flag switch in the sidebar). English
+is primary. Every note carries a Ukrainian **title** in frontmatter:
+
+```yaml
+title: My Security+ journey
+title_uk: Мій шлях до Security+
+```
+
+- Add `title_uk:` to every new note and section `main.md` you create — a
+  professional, natural Ukrainian rendering (not a literal word swap).
+- For proper nouns use the established Ukrainian form when one exists
+  (films/books: use the official localized title — *Inception* → *Початок*;
+  people: transliterate — *Mykhailo Fedorov* → *Михайло Федоров*). Keep brand
+  and cert names as-is when that's the real usage (*Security+*, *Starbucks*).
+- Body content stays English-only for now. Do NOT translate note bodies unless
+  Kyrylo explicitly asks — the toggle currently swaps titles only.
+- When he later wants full-content translation, the mechanism extends the same
+  way (a parallel `.uk.md` body or inline `<T>` blocks); flag it, don't guess.
+
 ## Sources section
 
 Notes making factual claims (People, current-events posts) end with:

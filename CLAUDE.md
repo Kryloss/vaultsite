@@ -63,7 +63,8 @@ update), follow **`docs/CONTENT-WORKFLOW.md`** — the full playbook. Core rules
 4. Add cross-site wiki links (`[[Note]]`, `[[Folder/main|Label]]` for sections) — this is expected, not optional. Give new notes an `aliases:` frontmatter list (natural phrases like "CompTIA Security+"), then retro-link: find exact mentions of the new subject in existing notes and convert those phrases into wiki links (wording untouched, edits reported).
 5. Source images automatically: download covers into the vault folder (batch-ask permission first; `cover: https://…` URL as fallback). Books → Open Library; people → Wikimedia Commons only, license noted. Never random image results, never AI portraits of real people.
 6. Factual notes (People, current events) end with a `## Sources` section (2–4 links used for verification). Skip for opinion/shelf/music notes.
-7. Write to `vault/<Section>/<Natural Title>.md`, then report path, future URL, links added, images fetched + sources, and anything you fixed or assumed.
+7. Add a `title_uk:` frontmatter line with a professional Ukrainian translation of the title (this powers the site's language toggle). Body content stays English-only for now unless he asks.
+8. Write to `vault/<Section>/<Natural Title>.md`, then report path, future URL, links added, images fetched + sources, and anything you fixed or assumed.
 
 ## Common tasks
 
@@ -82,6 +83,7 @@ update), follow **`docs/CONTENT-WORKFLOW.md`** — the full playbook. Core rules
 - **Wiki links** resolve across ALL sections via `getWikiIndex()` (file name, title, slug, or `aliases:` frontmatter — case-insensitive; aliases are Obsidian-native so links work in both places). Unknown targets fall back to same-section slug. For links to SECTION pages use `[[Folder/main|Label]]` — it resolves on the site AND opens the right file in Obsidian (bare `[[Now]]` would create a new note there).
 - **Callouts**: Obsidian `> [!note] Title` → styled `.callout` divs (colors per type in globals.css).
 - **Progress bars**: `[progress:: 45]` inline in any note → styled bar + percent label (plain text in Obsidian). Used on the Now page.
+- **Language toggle**: sidebar flag switch (English default / Ukrainian). `components/T.tsx` renders both languages as spans; CSS on `html[data-lang]` shows the active one (choice persisted in localStorage, restored pre-paint by inline script in `app/layout.tsx`). Titles translate via `title_uk:` frontmatter (`ukTitle()` in `lib/vault.ts`). No routing, no double build. Body content is English-only for now.
 - **Figures/lightbox**: standalone images with alt text render as figure+figcaption; all non-avatar content images open in `components/Lightbox.tsx` on click.
 - **Reading time**: `readingStats()` shown on posts-type entry pages only.
 - **Search**: Cmd/Ctrl+K palette (`components/CommandPalette.tsx`) over a build-time index from `getSearchIndex()` — fully static, no backend.

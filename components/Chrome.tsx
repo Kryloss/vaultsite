@@ -56,7 +56,23 @@ export default function Chrome({
 }) {
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [lang, setLang] = useState<"en" | "uk">("en");
   const pathname = usePathname();
+
+  // Restore + reflect language choice (the attribute is also set pre-paint by
+  // the inline script in app/layout.tsx, so there's no flash on first load).
+  useEffect(() => {
+    const saved = (localStorage.getItem("lang") as "en" | "uk") || "en";
+    setLang(saved);
+    document.documentElement.dataset.lang = saved;
+  }, []);
+
+  const toggleLang = () => {
+    const next = lang === "en" ? "uk" : "en";
+    setLang(next);
+    document.documentElement.dataset.lang = next;
+    localStorage.setItem("lang", next);
+  };
 
   // Close the drawer on navigation; Escape closes it; Cmd/Ctrl+K opens search.
   useEffect(() => setOpen(false), [pathname]);
@@ -87,11 +103,12 @@ export default function Chrome({
     ? section.entries.find((e) => e.slug === entrySlug)
     : undefined;
 
-  const crumbs: { label: string; href: string }[] = [];
-  if (entry && section) crumbs.push({ label: entry.title, href: pathname });
+  const crumbs: { en: string; uk?: string; href: string }[] = [];
+  if (entry && section)
+    crumbs.push({ en: entry.title, uk: entry.titleUk, href: pathname });
   if (section && section.slug !== "home")
-    crumbs.push({ label: section.title, href: `/${section.slug}` });
-  crumbs.push({ label: siteName, href: "/" });
+    crumbs.push({ en: section.title, uk: section.titleUk, href: `/${section.slug}` });
+  crumbs.push({ en: siteName, href: "/" });
 
   return (
     <>
@@ -116,7 +133,7 @@ export default function Chrome({
                   i === 0 ? "text-[var(--text)]" : "text-[var(--text-secondary)]"
                 }`}
               >
-                {crumb.label}
+                <T en={crumb.en} uk={crumb.uk} />
               </Link>
             </Fragment>
           ))}
@@ -142,18 +159,35 @@ export default function Chrome({
           <Link href="/" className="text-base font-semibold text-[var(--text)]">
             {siteName}
           </Link>
-          <button
-            type="button"
-            aria-label="Search (⌘K)"
-            title="Search (⌘K)"
-            onClick={() => {
-              setOpen(false);
-              setSearchOpen(true);
-            }}
-            className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-tertiary)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
-          >
-            <SearchIcon className="h-[17px] w-[17px]" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={toggleLang}
+              aria-label={
+                lang === "en" ? "Перемкнути на українську" : "Switch to English"
+              }
+              title={lang === "en" ? "Українська" : "English"}
+              className="flex h-8 w-8 items-center justify-center rounded-md transition-colors hover:bg-[var(--bg-hover)]"
+            >
+              {lang === "en" ? (
+                <UkraineFlag className="h-[15px] w-auto rounded-[3px] ring-1 ring-[var(--border)]" />
+              ) : (
+                <CanadaFlag className="h-[15px] w-auto rounded-[3px] ring-1 ring-[var(--border)]" />
+              )}
+            </button>
+            <button
+              type="button"
+              aria-label="Search (⌘K)"
+              title="Search (⌘K)"
+              onClick={() => {
+                setOpen(false);
+                setSearchOpen(true);
+              }}
+              className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-tertiary)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
+            >
+              <SearchIcon className="h-[17px] w-[17px]" />
+            </button>
+          </div>
         </div>
 
         <nav className="flex flex-col gap-1.5 overflow-y-auto px-3">
@@ -174,7 +208,7 @@ export default function Chrome({
                 ) : item.icon ? (
                   <span className="w-5 text-center text-base leading-none">{item.icon}</span>
                 ) : null}
-                <span>{item.title}</span>
+                <span><T en={item.title} uk={item.titleUk} /></span>
               </Link>
             );
           })}

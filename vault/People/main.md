@@ -1,5 +1,6 @@
 ---
 title: People
+title_uk: Люди
 icon: 👥
 order: 2
 type: people

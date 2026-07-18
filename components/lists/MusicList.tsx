@@ -6,6 +6,7 @@ import {
   isAppleMusicUrl,
 } from "@/lib/apple-music";
 import { displayDate } from "@/lib/vault";
+import T from "@/components/T";
 
 /**
  * "music" section type — /listening-style page:
@@ -73,7 +74,7 @@ export default function MusicList({ section, entries }: ListProps) {
                 >
                   <span className="min-w-0">
                     <span className="block truncate font-medium text-[var(--text)]">
-                      {entry.title}
+                      <T en={entry.title} uk={entry.titleUk} />
                     </span>
                     {entry.description && (
                       <span className="mt-0.5 block truncate text-sm text-[var(--text-secondary)]">

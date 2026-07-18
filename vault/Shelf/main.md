@@ -1,5 +1,6 @@
 ---
 title: Shelf
+title_uk: Полиця
 icon: 📚
 order: 4
 type: shelf

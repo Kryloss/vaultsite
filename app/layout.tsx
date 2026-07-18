@@ -34,12 +34,26 @@ export default function RootLayout({
   const items = getSections().map((section) => ({
     slug: section.slug,
     title: section.title,
+    titleUk: section.titleUk,
     icon: section.icon,
-    entries: getEntries(section).map(({ slug, title }) => ({ slug, title })),
+    entries: getEntries(section).map(({ slug, title, titleUk }) => ({
+      slug,
+      title,
+      titleUk,
+    })),
   }));
 
   return (
     <html lang="en">
+      <head>
+        {/* Restore the language choice before first paint — no flash. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var l=localStorage.getItem('lang');if(l==='uk')document.documentElement.dataset.lang='uk';}catch(e){}",
+          }}
+        />
+      </head>
       <body>
         <Chrome
           items={items}

@@ -1,5 +1,6 @@
 ---
 title: Mr. Robot
+title_uk: Містер Робот
 author: Sam Esmail
 medium: show
 rating: 4.5

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ListProps } from "@/lib/section-types";
 import { resolveCoverUrl } from "@/lib/markdown";
+import T from "@/components/T";
 
 /**
  * "people" section type — app-dissection-style grid of square cover cards.
@@ -48,7 +49,7 @@ export default function PeopleGrid({ section, entries }: ListProps) {
                 )}
               </div>
               <span className="mt-2.5 block font-medium leading-snug text-[var(--text)]">
-                {entry.title}
+                <T en={entry.title} uk={entry.titleUk} />
               </span>
               {entry.description && (
                 <span className="mt-0.5 line-clamp-2 block text-sm leading-snug text-[var(--text-secondary)]">

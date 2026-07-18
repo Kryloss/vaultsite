@@ -21,6 +21,7 @@ export default function PostList({ section, entries }: ListProps) {
   const rows: PostRow[] = entries.map((entry) => ({
     slug: entry.slug,
     title: entry.title,
+    titleUk: entry.titleUk,
     description: entry.description,
     date: entry.date,
     draft: entry.draft,

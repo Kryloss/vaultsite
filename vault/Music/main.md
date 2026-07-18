@@ -1,5 +1,6 @@
 ---
 title: Music
+title_uk: Музика
 icon: 🎧
 order: 3
 type: music

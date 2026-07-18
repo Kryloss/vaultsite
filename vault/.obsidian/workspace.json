@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Music/Clancy.md",
+                "file": "Music/main.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Clancy"
+              "title": "main"
             }
           }
         ]
@@ -196,19 +196,19 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "39f54837ca38c5e3",
+  "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
+    "Home/main.md",
+    "Home/IMG_3260.jpeg",
+    "Music/Clancy.md",
     "People/fedorov.png",
     "Posts/Post Sample.md",
     "Posts/Post Sample 1.md",
     "Shelf/mr-robot.png",
     "Music/main.md",
-    "Music/Clancy.md",
-    "Home/main.md",
     "Now/main.md",
     "People/Mykhailo Fedorov.md",
     "People/main.md",
-    "Home/IMG_3260.jpeg",
     "Shelf/Mr Robot.md",
     "Shelf/Sapiens.md",
     "Shelf/main.md",

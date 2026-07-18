@@ -1,5 +1,6 @@
 ---
 title: Projects
+title_uk: Проєкти
 icon: 🛠️
 order: 5
 type: projects

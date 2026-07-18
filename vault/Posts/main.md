@@ -1,5 +1,6 @@
 ---
 title: Posts
+title_uk: Дописи
 icon: ✍️
 order: 1
 type: posts

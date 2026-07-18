@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ListProps } from "@/lib/section-types";
 import { renderMarkdown } from "@/lib/markdown";
 import { displayDate } from "@/lib/vault";
+import T from "@/components/T";
 
 /** Entries longer than this (raw markdown chars) get truncated with an expand toggle. */
 const PREVIEW_LIMIT = 1000;
@@ -52,7 +53,7 @@ export default async function TilList({ section, entries }: ListProps) {
               href={`/${section.slug}/${entry.slug}`}
               className="text-[var(--text)] transition-colors hover:text-[var(--text)]"
             >
-              {entry.title}
+              <T en={entry.title} uk={entry.titleUk} />
             </Link>
           </h2>
           {rendered[i].preview ? (

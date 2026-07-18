@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { getSections, getSectionBySlug, getEntries } from "@/lib/vault";
 import { renderMarkdown } from "@/lib/markdown";
 import { getListComponent } from "@/lib/section-types";
+import T from "@/components/T";
 
 interface Props {
   params: Promise<{ section: string }>;
@@ -40,7 +41,7 @@ export default async function SectionPage({ params }: Props) {
       <header>
         <h1 className="text-2xl font-semibold tracking-tight text-[var(--text)]">
           {section.icon && <span className="mr-2">{section.icon}</span>}
-          {section.title}
+          <T en={section.title} uk={section.titleUk} />
         </h1>
         {section.description && (
           <p className="mt-2 text-[var(--text-secondary)]">

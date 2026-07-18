@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import Stars from "@/components/Stars";
+import T from "@/components/T";
 
 export interface ShelfItem {
   slug: string;
   title: string;
+  titleUk?: string;
   author?: string;
   medium?: string;
   coverUrl?: string;
@@ -105,7 +107,7 @@ export default function ShelfGridClient({
                 )}
               </div>
               <span className="mt-2.5 block font-medium leading-snug text-[var(--text)]">
-                {item.title}
+                <T en={item.title} uk={item.titleUk} />
               </span>
               {item.author && (
                 <span className="mt-0.5 block text-sm leading-snug text-[var(--text-secondary)]">

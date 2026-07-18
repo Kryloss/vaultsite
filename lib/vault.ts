@@ -232,14 +232,17 @@ export function getSearchIndex(): SearchItem[] {
       title: section.title,
       section: "Section",
       href: section.slug === "home" ? "/" : `/${section.slug}`,
-      text: plainText(section.content),
+      // Ukrainian title folded into the text so search matches in both languages.
+      text: plainText(`${section.titleUk ?? ""} ${section.content}`),
     });
     for (const entry of getEntries(section)) {
       items.push({
         title: entry.title,
         section: section.title,
         href: `/${section.slug}/${entry.slug}`,
-        text: plainText(`${entry.description ?? ""} ${entry.content}`),
+        text: plainText(
+          `${entry.titleUk ?? ""} ${entry.description ?? ""} ${entry.content}`
+        ),
       });
     }
   }

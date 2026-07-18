@@ -11,6 +11,7 @@ import {
 } from "@/lib/vault";
 import { renderMarkdown } from "@/lib/markdown";
 import Stars from "@/components/Stars";
+import T from "@/components/T";
 
 interface Props {
   params: Promise<{ section: string; slug: string }>;
@@ -50,12 +51,12 @@ export default async function EntryPage({ params }: Props) {
         href={`/${section.slug}`}
         className="text-sm text-[var(--text-tertiary)] transition-colors hover:text-[var(--text)]"
       >
-        ← {section.title}
+        ← <T en={section.title} uk={section.titleUk} />
       </Link>
 
       <header className="mt-6">
         <h1 className="text-2xl font-semibold tracking-tight text-[var(--text)]">
-          {entry.title}
+          <T en={entry.title} uk={entry.titleUk} />
           {typeof entry.meta.rating === "number" && (
             <Stars
               rating={entry.meta.rating}

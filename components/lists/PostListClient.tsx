@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import T from "@/components/T";
 
 export interface PostRow {
   slug: string;
   title: string;
+  titleUk?: string;
   description?: string;
   date?: string;
   draft: boolean;
@@ -75,7 +77,7 @@ export default function PostListClient({
                 >
                   <span className="min-w-0">
                     <span className="block truncate font-medium text-[var(--text)]">
-                      {row.title}
+                      <T en={row.title} uk={row.titleUk} />
                       {row.draft && (
                         <span className="ml-2 rounded bg-amber-500/15 px-1.5 py-0.5 text-xs font-medium text-amber-500">
                           Draft

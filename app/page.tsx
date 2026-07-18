@@ -7,6 +7,7 @@ import {
 } from "@/lib/vault";
 import { renderMarkdown } from "@/lib/markdown";
 import { resolveIcon } from "@/components/icons";
+import T from "@/components/T";
 
 /**
  * Home page — renders vault/Home/main.md, then two generated blocks:
@@ -59,7 +60,7 @@ export default async function HomePage() {
                   className="-mx-3 flex items-baseline justify-between gap-4 rounded-lg px-3 py-2 transition-colors hover:bg-[var(--bg-hover)]"
                 >
                   <span className="truncate font-medium text-[var(--text)]">
-                    {entry.title}
+                    <T en={entry.title} uk={entry.titleUk} />
                   </span>
                   {entry.date && (
                     <time
@@ -98,7 +99,7 @@ export default async function HomePage() {
                         {section.icon}
                       </span>
                     ) : null}
-                    {section.title}
+                    <T en={section.title} uk={section.titleUk} />
                   </span>
                   {section.description && (
                     <span className="mt-1.5 line-clamp-2 block text-sm leading-snug text-[var(--text-secondary)]">

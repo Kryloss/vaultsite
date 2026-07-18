@@ -1,5 +1,6 @@
 ---
 title: Now
+title_uk: Зараз
 icon: ⏳
 order: 1
 description: What I'm focused on right now.

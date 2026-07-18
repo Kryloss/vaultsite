@@ -1,5 +1,6 @@
 ---
 title: Home
+title_uk: Головна
 icon: 🏠
 order: 0
 ---
