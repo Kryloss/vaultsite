@@ -191,6 +191,26 @@ body {
   vertical-align: middle;
 }
 
+/* Apple Music auto-embed (markdown pipeline): iframe + static fallback link.
+   The fallback keeps a stalled gray-skeleton embed from being a dead end. */
+.apple-music-block {
+  display: block;
+  margin: 1.5rem 0;
+}
+
+.apple-music-fallback {
+  display: inline-block;
+  margin-top: 0.4rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  text-decoration: none;
+}
+
+.apple-music-fallback:hover {
+  color: var(--text);
+}
+
 /* Content images open in the lightbox (avatars excluded) */
 .prose img:not(.avatar) {
   cursor: zoom-in;

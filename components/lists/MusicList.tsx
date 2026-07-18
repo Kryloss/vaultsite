@@ -5,6 +5,7 @@ import {
   appleMusicEmbedHeight,
   isAppleMusicUrl,
 } from "@/lib/apple-music";
+import AppleMusicEmbed from "@/components/AppleMusicEmbed";
 import { displayDate, displayDateUk } from "@/lib/vault";
 import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
@@ -36,19 +37,12 @@ export default function MusicList({ section, entries }: ListProps) {
           }`}
         >
           {playlists.map((url) => (
-            <div
+            <AppleMusicEmbed
               key={url}
-              className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-hover)] shadow-sm transition-shadow duration-300 hover:shadow-md"
-            >
-              <iframe
-                src={appleMusicEmbedUrl(url)}
-                height={appleMusicEmbedHeight(url)}
-                className="block w-full"
-                style={{ border: 0 }}
-                allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
-                sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation allow-presentation"
-              />
-            </div>
+              src={appleMusicEmbedUrl(url)}
+              webUrl={url}
+              height={appleMusicEmbedHeight(url)}
+            />
           ))}
         </div>
       ) : (

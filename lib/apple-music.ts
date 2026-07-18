@@ -23,9 +23,28 @@ export function appleMusicEmbedHeight(url: string): number {
   return isSong ? 175 : 450;
 }
 
+/**
+ * Feature policy for the embed iframe. Matches Apple's official embed markup.
+ * Note: we deliberately do NOT set a `sandbox` attribute — Apple's own embed
+ * code ships without one, and a sandbox can block the third-party storage the
+ * player needs to hydrate under strict privacy settings (a cause of the embed
+ * getting stuck on its gray loading skeleton).
+ */
+export const APPLE_MUSIC_IFRAME_ALLOW =
+  "autoplay *; encrypted-media *; fullscreen *; clipboard-write";
+
 /** iframe HTML string — used by the markdown pipeline to auto-embed pasted links. */
 export function appleMusicEmbedHtml(url: string): string {
   const src = appleMusicEmbedUrl(url);
+  const web = url.trim();
   const height = appleMusicEmbedHeight(url);
-  return `<iframe class="apple-music-embed" allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" height="${height}" style="width:100%;overflow:hidden;border-radius:12px;border:0;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation allow-presentation" src="${src}"></iframe>`;
+  // Static fallback link below the player so a stalled embed is never a dead
+  // end. The interactive "reload" affordance lives in the React
+  // AppleMusicEmbed component used by the music section page.
+  return (
+    `<span class="apple-music-block">` +
+    `<iframe class="apple-music-embed" title="Apple Music player" allow="${APPLE_MUSIC_IFRAME_ALLOW}" height="${height}" style="width:100%;overflow:hidden;border-radius:12px;border:0;" src="${src}"></iframe>` +
+    `<a class="apple-music-fallback" href="${web}" target="_blank" rel="noopener noreferrer">Open in Apple Music ↗</a>` +
+    `</span>`
+  );
 }
