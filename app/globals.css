@@ -210,20 +210,20 @@ body {
 
 .apple-music-footer {
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   padding: 0.5rem 0.75rem;
   border-top: 1px solid var(--border);
 }
 
 .prose a.apple-music-fallback {
   font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--text-secondary);
+  font-weight: 400;
+  color: var(--text-tertiary);
   text-decoration: none;
 }
 
 .prose a.apple-music-fallback:hover {
-  color: var(--text);
+  color: var(--text-secondary);
 }
 
 /* Content images open in the lightbox (avatars excluded) */

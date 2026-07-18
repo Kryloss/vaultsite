@@ -50,12 +50,12 @@ export default function MusicList({ section, entries }: ListProps) {
                 allow={APPLE_MUSIC_IFRAME_ALLOW}
               />
               {/* In-widget fallback so a stalled gray embed is never a dead end */}
-              <div className="flex justify-center border-t border-[var(--border)] px-3 py-2 text-xs">
+              <div className="flex justify-end border-t border-[var(--border)] px-3 py-2 text-xs">
                 <a
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text)]"
+                  className="text-[var(--text-tertiary)] transition-colors hover:text-[var(--text-secondary)]"
                 >
                   <T {...ui.openInAppleMusic} /> ↗
                 </a>
