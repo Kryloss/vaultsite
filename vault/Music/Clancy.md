@@ -1,5 +1,5 @@
 ---
-title: "Clancy: the end of a decade-long story"
+title: Clancy
 date: 2026-07-17
 description: Thoughts on Twenty One Pilots closing out the Blurryface–Trench arc.
 ---
