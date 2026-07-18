@@ -12,6 +12,8 @@ import {
   LinkedInIcon,
   XIcon,
   MailIcon,
+  CanadaFlag,
+  UkraineFlag,
 } from "@/components/icons";
 import CommandPalette from "@/components/CommandPalette";
 import T from "@/components/T";
