@@ -115,6 +115,27 @@ export function CloseIcon({ className }: IconProps) {
   );
 }
 
+/* ---------- flags (for the language toggle) ---------- */
+
+export function CanadaFlag({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 30 20" className={className} aria-hidden>
+      <rect width="30" height="20" rx="2.5" fill="#fff" />
+      <path d="M0 2.5A2.5 2.5 0 0 1 2.5 0H8v20H2.5A2.5 2.5 0 0 1 0 17.5zM22 0h5.5A2.5 2.5 0 0 1 30 2.5v15a2.5 2.5 0 0 1-2.5 2.5H22z" fill="#d52b1e" />
+      <path fill="#d52b1e" d="M15 4l1.1 2.6 2.7-.6-.9 2.2 1.7 1.2-2.4 1 .2 2.3-2-1.3-2 1.3.2-2.3-2.4-1 1.7-1.2-.9-2.2 2.7.6z" />
+    </svg>
+  );
+}
+
+export function UkraineFlag({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 30 20" className={className} aria-hidden>
+      <rect width="30" height="20" rx="2.5" fill="#ffd500" />
+      <path d="M0 2.5A2.5 2.5 0 0 1 2.5 0h25A2.5 2.5 0 0 1 30 2.5V10H0z" fill="#005bbb" />
+    </svg>
+  );
+}
+
 /* ---------- brand marks (filled) ---------- */
 
 export function GitHubIcon({ className }: IconProps) {

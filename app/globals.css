@@ -31,6 +31,20 @@ html {
   scroll-behavior: smooth;
 }
 
+/* ---------- Language toggle (components/T.tsx) ---------- */
+/* English is default; html[data-lang="uk"] flips every bilingual span. */
+.lang-uk {
+  display: none;
+}
+
+html[data-lang="uk"] .lang-en {
+  display: none;
+}
+
+html[data-lang="uk"] .lang-uk {
+  display: inline;
+}
+
 /* ---------- Motion ---------- */
 
 /* Content fades up on every navigation (applied in components/Chrome.tsx) */

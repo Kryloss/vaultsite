@@ -6,6 +6,8 @@ import { Fragment, useEffect, useState, type ReactNode } from "react";
 import {
   PanelIcon,
   SearchIcon,
+  CanadaFlag,
+  UkraineFlag,
   resolveIcon,
   GitHubIcon,
   InstagramIcon,
@@ -14,14 +16,16 @@ import {
   MailIcon,
 } from "@/components/icons";
 import CommandPalette from "@/components/CommandPalette";
+import T from "@/components/T";
 import type { SocialLink } from "@/lib/site-config";
 import type { SearchItem } from "@/lib/vault";
 
 export interface NavItem {
   slug: string;
   title: string;
+  titleUk?: string;
   icon?: string;
-  entries: { slug: string; title: string }[];
+  entries: { slug: string; title: string; titleUk?: string }[];
 }
 
 const socialIcons = {

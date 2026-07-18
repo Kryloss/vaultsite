@@ -23,6 +23,8 @@ export interface Section {
   /** Actual folder name in the vault, e.g. "Posts" */
   dirName: string;
   title: string;
+  /** Ukrainian title from `title_uk:` frontmatter, shown when the site is in UK mode. */
+  titleUk?: string;
   icon?: string;
   description?: string;
   /** Sidebar ordering (frontmatter `order`, lower = higher). Default 100. */
@@ -48,6 +50,8 @@ export interface Entry {
   sectionSlug: string;
   sectionDir: string;
   title: string;
+  /** Ukrainian title from `title_uk:` frontmatter, shown when the site is in UK mode. */
+  titleUk?: string;
   date?: string;
   description?: string;
   /** Raw markdown body */
@@ -91,6 +95,7 @@ export function getSections(): Section[] {
       slug: slugify((data.slug as string) ?? entry.name),
       dirName: entry.name,
       title: (data.title as string) ?? entry.name,
+      titleUk: ukTitle(data),
       icon: data.icon as string | undefined,
       description: data.description as string | undefined,
       order: typeof data.order === "number" ? data.order : 100,
@@ -129,6 +134,7 @@ export function getEntries(section: Section): Entry[] {
       sectionSlug: section.slug,
       sectionDir: section.dirName,
       title: (data.title as string) ?? fileName,
+      titleUk: ukTitle(data),
       date: data.date ? String(formatDateValue(data.date)) : undefined,
       description: data.description as string | undefined,
       content,
@@ -155,6 +161,12 @@ export function getEntry(sectionSlug: string, entrySlug: string): Entry | undefi
 function formatDateValue(value: unknown): string {
   if (value instanceof Date) return value.toISOString().slice(0, 10);
   return String(value).slice(0, 10);
+}
+
+/** Ukrainian title from frontmatter (`title_uk:`), if present. */
+export function ukTitle(meta: Record<string, unknown>): string | undefined {
+  const v = meta.title_uk ?? meta.titleUk;
+  return typeof v === "string" && v.trim() ? v.trim() : undefined;
 }
 
 /** Word count + reading time (≈200 wpm) from raw markdown. */
