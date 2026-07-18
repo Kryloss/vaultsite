@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { SearchItem } from "@/lib/vault";
 import T from "@/components/T";
+import { useLang } from "@/components/useLang";
+import { CanadaFlag, UkraineFlag } from "@/components/icons";
 import { ui } from "@/lib/ui-strings";
 
 /**
@@ -22,7 +24,7 @@ export default function CommandPalette({
 }) {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(0);
-  const [lang, setLang] = useState<"en" | "uk">("en");
+  const { lang, toggle: toggleLang } = useLang();
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -30,10 +32,6 @@ export default function CommandPalette({
     if (open) {
       setQuery("");
       setSelected(0);
-      // The placeholder is a plain attribute, so read the active language here.
-      setLang(
-        (document.documentElement.dataset.lang as "en" | "uk") || "en"
-      );
       // Focus after the element mounts
       requestAnimationFrame(() => inputRef.current?.focus());
     }
@@ -85,24 +83,41 @@ export default function CommandPalette({
         className="w-full max-w-md overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg)] shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <input
-          ref={inputRef}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "ArrowDown") {
-              e.preventDefault();
-              setSelected((s) => Math.min(s + 1, results.length - 1));
-            } else if (e.key === "ArrowUp") {
-              e.preventDefault();
-              setSelected((s) => Math.max(s - 1, 0));
-            } else if (e.key === "Enter" && results[selected]) {
-              go(results[selected].href);
+        <div className="flex items-center border-b border-[var(--border)] pr-2">
+          <input
+            ref={inputRef}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowDown") {
+                e.preventDefault();
+                setSelected((s) => Math.min(s + 1, results.length - 1));
+              } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                setSelected((s) => Math.max(s - 1, 0));
+              } else if (e.key === "Enter" && results[selected]) {
+                go(results[selected].href);
+              }
+            }}
+            placeholder={ui.searchPlaceholder[lang]}
+            className="min-w-0 flex-1 bg-transparent px-4 py-3.5 text-[15px] text-[var(--text)] outline-none placeholder:text-[var(--text-tertiary)]"
+          />
+          <button
+            type="button"
+            onClick={toggleLang}
+            aria-label={
+              lang === "en" ? "Switch to Ukrainian" : "Перемкнути на англійську"
             }
-          }}
-          placeholder={ui.searchPlaceholder[lang]}
-          className="w-full border-b border-[var(--border)] bg-transparent px-4 py-3.5 text-[15px] text-[var(--text)] outline-none placeholder:text-[var(--text-tertiary)]"
-        />
+            title={lang === "en" ? "English" : "Українська"}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-[var(--bg-hover)]"
+          >
+            {lang === "en" ? (
+              <CanadaFlag className="h-[14px] w-[14px] rounded-full ring-1 ring-[var(--border)]" />
+            ) : (
+              <UkraineFlag className="h-[14px] w-[14px] rounded-full ring-1 ring-[var(--border)]" />
+            )}
+          </button>
+        </div>
         <ul className="max-h-72 overflow-y-auto py-1.5">
           {results.length === 0 && (
             <li className="px-4 py-6 text-center text-sm text-[var(--text-tertiary)]">

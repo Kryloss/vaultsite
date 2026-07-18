@@ -17,6 +17,7 @@ import {
 } from "@/components/icons";
 import CommandPalette from "@/components/CommandPalette";
 import T from "@/components/T";
+import { useLang } from "@/components/useLang";
 import { ui } from "@/lib/ui-strings";
 import type { SocialLink } from "@/lib/site-config";
 import type { SearchItem } from "@/lib/vault";
@@ -57,23 +58,8 @@ export default function Chrome({
 }) {
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [lang, setLang] = useState<"en" | "uk">("en");
+  const { lang, toggle: toggleLang } = useLang();
   const pathname = usePathname();
-
-  // Restore + reflect language choice (the attribute is also set pre-paint by
-  // the inline script in app/layout.tsx, so there's no flash on first load).
-  useEffect(() => {
-    const saved = (localStorage.getItem("lang") as "en" | "uk") || "en";
-    setLang(saved);
-    document.documentElement.dataset.lang = saved;
-  }, []);
-
-  const toggleLang = () => {
-    const next = lang === "en" ? "uk" : "en";
-    setLang(next);
-    document.documentElement.dataset.lang = next;
-    localStorage.setItem("lang", next);
-  };
 
   // Close the drawer on navigation; Escape closes it; Cmd/Ctrl+K opens search.
   useEffect(() => setOpen(false), [pathname]);

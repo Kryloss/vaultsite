@@ -126,11 +126,12 @@ export function CanadaFlag({ className }: IconProps) {
       </mask>
       <g mask="url(#ca-round)">
         <rect width="24" height="24" fill="#fff" />
-        <rect width="6" height="24" fill="#d52b1e" />
-        <rect x="18" width="6" height="24" fill="#d52b1e" />
+        <rect width="5.5" height="24" fill="#d52b1e" />
+        <rect x="18.5" width="5.5" height="24" fill="#d52b1e" />
+        {/* Symmetric maple leaf with stem */}
         <path
           fill="#d52b1e"
-          d="M12 5.5l1 2.5 2.5-.6-.8 2 1.8 1.2-2.1.9.2 2.1-1.8-1.1-1.8 1.1.2-2.1-2.1-.9 1.8-1.2-.8-2 2.5.6z"
+          d="M12 4l.9 3.3 2.9-1.9-1 3.4 3.3-.6-1.4 2.5 3.9 1-1.5 1.2.6 1.9-3.7-.3.5 3-2.6-2-.3 5.2h-1.6l-.3-5.2-2.6 2 .5-3-3.7.3.6-1.9L4 15.1l3.9-1-1.4-2.5 3.3.6-1-3.4 2.9 1.9z"
         />
       </g>
     </svg>
