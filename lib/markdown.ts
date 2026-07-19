@@ -23,7 +23,9 @@ import remarkRehype from "remark-rehype";
 import rehypeRaw from "rehype-raw";
 import rehypeSlug from "rehype-slug";
 import rehypeStringify from "rehype-stringify";
-import { slugify, getWikiIndex } from "./vault";
+import fs from "fs";
+import path from "path";
+import { slugify, getWikiIndex, getAssetIndex, VAULT_DIR } from "./vault";
 import { appleMusicEmbedHtml, isAppleMusicUrl } from "./apple-music";
 
 /** Encode each path segment but keep "/" separators. */
@@ -60,6 +62,98 @@ function wiki(): Map<string, string> {
 
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+/** basename → /vault-assets URL, from the vault-wide index (any folder). */
+function assetByName(name: string): string | undefined {
+  return getAssetIndex().get(name.trim().toLowerCase());
+}
+
+/** Resolve an image embed: same-folder file if it exists, else vault-wide by name. */
+function resolveImageUrl(sectionDir: string, file: string): string {
+  const clean = file.trim();
+  const local = path.join(VAULT_DIR, sectionDir, clean);
+  if (fs.existsSync(local)) return assetUrl(sectionDir, clean);
+  return assetByName(path.basename(clean)) ?? assetUrl(sectionDir, clean);
+}
+
+/** "diagram.svg" → "diagram.dark.svg" (dark-theme variant filename), if any. */
+function darkVariantUrl(file: string): string | undefined {
+  const m = file.trim().match(/^(.*)\.(svg|png|jpe?g|webp)$/i);
+  if (!m) return undefined;
+  return assetByName(`${m[1]}.dark.${m[2]}`);
+}
+
+/**
+ * Resolve an Excalidraw embed (`![[Drawing.excalidraw]]`) to its exported
+ * image(s). The Obsidian Excalidraw plugin's Auto-export writes a sibling SVG;
+ * exporting both themes gives light/dark files we can swap. Falls back to a
+ * single SVG/PNG, then to nothing (drawing not exported yet).
+ */
+function resolveExcalidraw(name: string): {
+  light?: string;
+  dark?: string;
+  src?: string;
+} {
+  const base = name
+    .trim()
+    .replace(/\.md$/i, "")
+    .replace(/\.excalidraw$/i, "");
+  const idx = getAssetIndex();
+  const find = (cands: string[]) => {
+    for (const c of cands) {
+      const u = idx.get(c.toLowerCase());
+      if (u) return u;
+    }
+    return undefined;
+  };
+  const light = find([`${base}.excalidraw.light.svg`, `${base}.light.svg`]);
+  const dark = find([`${base}.excalidraw.dark.svg`, `${base}.dark.svg`]);
+  if (light || dark) return { light, dark };
+  const src = find([
+    `${base}.excalidraw.svg`,
+    `${base}.svg`,
+    `${base}.excalidraw.png`,
+    `${base}.png`,
+  ]);
+  return { src };
+}
+
+/** A themed <img> pair (dark swapped via CSS) or a single one. */
+function themedImg(
+  light: string,
+  dark: string | undefined,
+  alt: string,
+  extraClass = ""
+): string {
+  const a = escapeHtml(alt);
+  const cls = extraClass ? ` ${extraClass}` : "";
+  if (dark && dark !== light) {
+    return (
+      `<img class="only-light${cls}" src="${light}" alt="${a}" loading="lazy" />` +
+      `<img class="only-dark${cls}" src="${dark}" alt="${a}" loading="lazy" />`
+    );
+  }
+  return `<img class="${extraClass}" src="${light}" alt="${a}" loading="lazy" />`;
+}
+
+/** `![[Drawing.excalidraw|Caption]]` → a themed figure (caption from alt). */
+function excalidrawHtml(target: string, alt?: string): string {
+  const { light, dark, src } = resolveExcalidraw(target);
+  const caption = alt && !/^\d+(x\d+)?$/.test(alt.trim()) ? alt.trim() : "";
+  const cap = caption ? `<figcaption>${escapeHtml(caption)}</figcaption>` : "";
+  const primary = light ?? src;
+  if (primary) {
+    const darkFor = light ? dark : undefined;
+    return `<figure class="excalidraw">${themedImg(
+      primary,
+      darkFor,
+      caption
+    )}${cap}</figure>`;
+  }
+  return `<span class="excalidraw-missing">⚠️ Drawing “${escapeHtml(
+    target
+  )}” isn’t exported yet — turn on Auto-export SVG in the Excalidraw plugin (see docs/EXCALIDRAW.md).</span>`;
 }
 
 /**
@@ -106,11 +200,18 @@ export function preprocessObsidian(
   // 1. Callouts first (they restructure blockquote syntax).
   md = transformCallouts(md);
 
-  // 2. Obsidian embeds: ![[file.png]], ![[file.png|alt text]], ![[file.png|300]]
+  // 2a. Excalidraw drawings: ![[Drawing.excalidraw]] / ![[Drawing.excalidraw.md]]
+  //     → the exported SVG (theme-aware if light + dark were exported).
+  md = md.replace(
+    /!\[\[([^\]|]+?\.excalidraw(?:\.md)?)(?:\|([^\]]*))?\]\]/gi,
+    (_m, target: string, alt?: string) => excalidrawHtml(target, alt)
+  );
+
+  // 2b. Obsidian embeds: ![[file.png]], ![[file.png|alt text]], ![[file.png|300]]
   md = md.replace(
     /!\[\[([^\]|]+?)(?:\|([^\]]*))?\]\]/g,
     (_m, file: string, alt?: string) => {
-      const src = assetUrl(sectionDir, file);
+      const src = resolveImageUrl(sectionDir, file);
       const size = alt?.trim().match(/^(\d+)(?:x(\d+))?$/);
       if (size) {
         const w = Number(size[1]);
@@ -121,6 +222,13 @@ export function preprocessObsidian(
         }
         const height = size[2] ? ` height="${size[2]}"` : "";
         return `<img src="${src}" width="${w}"${height} alt="" />`;
+      }
+      // A sibling <name>.dark.<ext> file → theme-swapped figure.
+      const dark = darkVariantUrl(file);
+      if (dark) {
+        return `\n<figure>${themedImg(src, dark, alt ?? "")}${
+          alt ? `<figcaption>${escapeHtml(alt)}</figcaption>` : ""
+        }</figure>\n`;
       }
       return `![${alt ?? ""}](${src})`;
     }

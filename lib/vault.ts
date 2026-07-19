@@ -138,6 +138,8 @@ export function getEntries(section: Section): Entry[] {
     if (!file.toLowerCase().endsWith(".md")) continue;
     // Skip the section body and its translations (main.md, main.uk.md, …).
     if (/^main(\.[a-z]{2})?\.md$/i.test(file)) continue;
+    // Skip Excalidraw drawing source files (they render as embeds, not pages).
+    if (/\.excalidraw\.md$/i.test(file)) continue;
 
     const { data, content } = matter(fs.readFileSync(path.join(dir, file), "utf8"));
     if (isDraft(data) && !SHOW_DRAFTS) continue;
@@ -229,6 +231,37 @@ export function getWikiIndex(): Map<string, string> {
       addAliases(entry.meta, href);
     }
   }
+  return map;
+}
+
+/**
+ * Vault-wide asset index: lowercase basename → public /vault-assets URL, for
+ * every non-markdown file. Lets embeds resolve a file by name regardless of
+ * which folder it lives in (Excalidraw drawings often sit in a central folder).
+ * First match wins on duplicate names.
+ */
+let _assetIndex: Map<string, string> | null = null;
+export function getAssetIndex(): Map<string, string> {
+  if (_assetIndex) return _assetIndex;
+  const map = new Map<string, string>();
+  const walk = (dir: string) => {
+    if (!fs.existsSync(dir)) return;
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (e.name.startsWith(".")) continue;
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) walk(full);
+      else if (!e.name.toLowerCase().endsWith(".md")) {
+        const rel = path.relative(VAULT_DIR, full);
+        const url =
+          "/vault-assets/" +
+          rel.split(path.sep).map(encodeURIComponent).join("/");
+        const key = e.name.toLowerCase();
+        if (!map.has(key)) map.set(key, url);
+      }
+    }
+  };
+  walk(VAULT_DIR);
+  _assetIndex = map;
   return map;
 }
 
