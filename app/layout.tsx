@@ -48,8 +48,12 @@ export default function RootLayout({
     // runtime), so the server HTML intentionally differs — suppress the warning.
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Restore the language choice before first paint — no flash. */}
+        {/* Restore the language choice before first paint — no flash.
+            suppressHydrationWarning: browser extensions (e.g. Noir) rewrite
+            this inline script before React hydrates, which would otherwise
+            trip a dev-only hydration warning. */}
         <script
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html:
               "try{var l=localStorage.getItem('lang');if(l==='uk')document.documentElement.dataset.lang='uk';}catch(e){}",

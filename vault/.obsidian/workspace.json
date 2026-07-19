@@ -11,12 +11,14 @@
             "id": "9cd2acf5af766b33",
             "type": "leaf",
             "state": {
-              "type": "image",
+              "type": "markdown",
               "state": {
-                "file": "Posts/secplus-domains.svg"
+                "file": "Posts/Draft example.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-image",
-              "title": "secplus-domains"
+              "icon": "lucide-file",
+              "title": "Draft example"
             }
           }
         ]
@@ -197,25 +199,25 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
+    "People/main.md",
     "Posts/First certification.uk.md",
-    "Posts/secplus-domains.uk.svg",
+    "Posts/First certification.md",
+    "Posts/Formatting playground.md",
+    "Posts/Post Sample.md",
     "Posts/secplus-domains.svg",
+    "Posts/secplus-domains.uk.svg",
     "Posts/rendering-pipeline.uk.svg",
     "Posts/rendering-pipeline.svg",
-    "Posts/First certification.md",
     "Posts/secplus-plan.uk.svg",
     "Posts/secplus-plan.svg",
     "Posts/Security+ journey.md",
     "Now/main.md",
-    "People/main.md",
     "People/Mykhailo Fedorov.md",
     "Posts/main.md",
     "Home/main.uk.md",
     "Projects/publishing-pipeline.uk.svg",
     "Projects/publishing-pipeline.svg",
     "Projects/This website.md",
-    "Posts/Formatting playground.md",
-    "Posts/Post Sample.md",
     "Posts/Post Sample 1.md",
     "Posts/Draft example.md",
     "Music/Clancy.md",
@@ -235,7 +237,6 @@
     "Projects/main.md",
     "Books",
     "2026-07-16.md",
-    "2026-07-17.md",
     "Projects",
     "People",
     "Music"
