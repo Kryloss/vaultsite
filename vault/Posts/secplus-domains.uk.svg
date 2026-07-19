@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" role="img" aria-label="Вага доменів на іспиті SY0-701: загальні концепції 12%, загрози та вразливості 22%, архітектура 18%, операції безпеки 28%, управління програмою 20%.">
+  <style>
+    .lbl { fill: #33373d; font-size: 13px; font-weight: 500; }
+    .val { fill: #33373d; font-size: 12px; font-weight: 700; }
+    .foot{ fill: #6b7280; font-size: 11px; }
+    .bar { fill: #d3d6db; }
+    .barhi { fill: #33373d; }
+    @media (prefers-color-scheme: dark) {
+      .lbl { fill: #e6e8eb; }
+      .val { fill: #f2f3f5; }
+      .foot{ fill: #9aa0aa; }
+      .bar { fill: #3a3e45; }
+      .barhi { fill: #e6e8eb; }
+    }
+  </style>
+
+  <text class="lbl" x="12" y="50">1 · Загальні концепції безпеки</text>
+  <rect class="bar" x="252" y="35" width="171" height="22" rx="6" />
+  <text class="val" x="433" y="51">12%</text>
+
+  <text class="lbl" x="12" y="100">2 · Загрози та вразливості</text>
+  <rect class="bar" x="252" y="85" width="314" height="22" rx="6" />
+  <text class="val" x="576" y="101">22%</text>
+
+  <text class="lbl" x="12" y="150">3 · Архітектура безпеки</text>
+  <rect class="bar" x="252" y="135" width="257" height="22" rx="6" />
+  <text class="val" x="519" y="151">18%</text>
+
+  <text class="lbl" x="12" y="200">4 · Операції безпеки</text>
+  <rect class="barhi" x="252" y="185" width="400" height="22" rx="6" />
+  <text class="val" x="662" y="201">28%</text>
+
+  <text class="lbl" x="12" y="250">5 · Управління програмою</text>
+  <rect class="bar" x="252" y="235" width="286" height="22" rx="6" />
+  <text class="val" x="548" y="251">20%</text>
+
+  <text class="foot" x="12" y="288">Частка іспиту · CompTIA SY0-701 · найважчий домен — операції безпеки</text>
+</svg>

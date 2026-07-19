@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 160" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" role="img" aria-label="Study plan: Phase 1 Messer videos, notes and quizzes (Jun 13 to Jul 14), then Phase 2 Dion course and practice exams (Jul 15 to Aug 8), then the exam on Aug 10.">
+  <style>
+    .box   { fill: none; stroke: #33373d; stroke-width: 1.5; }
+    .solid { fill: #33373d; stroke: #33373d; stroke-width: 1.5; }
+    .title { fill: #33373d; font-size: 15px; font-weight: 700; }
+    .sub   { fill: #6b7280; font-size: 11px; }
+    .det   { fill: #6b7280; font-size: 11px; }
+    .inv   { fill: #ffffff; }
+    .subinv{ fill: #cfd2d8; font-size: 11px; }
+    .arw   { stroke: #9aa0aa; stroke-width: 1.5; fill: none; }
+    .ah    { fill: #9aa0aa; }
+    @media (prefers-color-scheme: dark) {
+      .box   { stroke: #c8ccd2; }
+      .solid { fill: #e6e8eb; stroke: #e6e8eb; }
+      .title { fill: #f2f3f5; }
+      .sub, .det { fill: #9aa0aa; }
+      .inv   { fill: #0a0a0a; }
+      .subinv{ fill: #4a4e57; }
+      .arw   { stroke: #6b7280; }
+      .ah    { fill: #6b7280; }
+    }
+  </style>
+  <defs>
+    <marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path class="ah" d="M0 0 L6 3 L0 6 Z" />
+    </marker>
+  </defs>
+
+  <rect class="box" x="10" y="38" width="280" height="84" rx="12" />
+  <text class="title" x="150" y="70" text-anchor="middle">Phase 1 · Messer</text>
+  <text class="sub"   x="150" y="89" text-anchor="middle">Jun 13 – Jul 14</text>
+  <text class="det"   x="150" y="107" text-anchor="middle">videos · notes · domain quizzes</text>
+
+  <line class="arw" x1="292" y1="80" x2="316" y2="80" marker-end="url(#ah)" />
+
+  <rect class="box" x="320" y="38" width="280" height="84" rx="12" />
+  <text class="title" x="460" y="70" text-anchor="middle">Phase 2 · Dion</text>
+  <text class="sub"   x="460" y="89" text-anchor="middle">Jul 15 – Aug 8</text>
+  <text class="det"   x="460" y="107" text-anchor="middle">course · practice exams</text>
+
+  <line class="arw" x1="602" y1="80" x2="624" y2="80" marker-end="url(#ah)" />
+
+  <rect class="solid" x="628" y="38" width="82" height="84" rx="12" />
+  <text class="title inv" x="669" y="76" text-anchor="middle">Exam</text>
+  <text class="subinv"    x="669" y="94" text-anchor="middle">Aug 10</text>
+</svg>
