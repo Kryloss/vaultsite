@@ -60,6 +60,8 @@ export interface Entry {
   description?: string;
   /** Raw markdown body */
   content: string;
+  /** Ukrainian body from an optional sibling `<name>.uk.md` (toggle-swapped). */
+  contentUk?: string;
   /**
    * Full frontmatter of the entry — lets section types read their own keys
    * (e.g. the "people" type reads `cover:`) without changing this engine.
@@ -140,11 +142,18 @@ export function getEntries(section: Section): Entry[] {
     if (/^main(\.[a-z]{2})?\.md$/i.test(file)) continue;
     // Skip Excalidraw drawing source files (they render as embeds, not pages).
     if (/\.excalidraw\.md$/i.test(file)) continue;
+    // Skip entry translation siblings (Foo.uk.md) — attached to Foo.md below.
+    if (/\.uk\.md$/i.test(file)) continue;
 
     const { data, content } = matter(fs.readFileSync(path.join(dir, file), "utf8"));
     if (isDraft(data) && !SHOW_DRAFTS) continue;
 
     const fileName = file.replace(/\.md$/i, "");
+    // Optional Ukrainian body: a sibling <name>.uk.md (frontmatter stripped).
+    const ukPath = path.join(dir, `${fileName}.uk.md`);
+    const contentUk = fs.existsSync(ukPath)
+      ? matter(fs.readFileSync(ukPath, "utf8")).content
+      : undefined;
     entries.push({
       slug: slugify((data.slug as string) ?? fileName),
       fileName,
@@ -155,6 +164,7 @@ export function getEntries(section: Section): Entry[] {
       date: data.date ? String(formatDateValue(data.date)) : undefined,
       description: data.description as string | undefined,
       content,
+      contentUk,
       meta: data,
       draft: isDraft(data),
     });

@@ -45,6 +45,9 @@ export default async function EntryPage({ params }: Props) {
   if (!section || !entry) notFound();
 
   const html = await renderMarkdown(entry.content, entry.sectionDir, sectionSlug);
+  const htmlUk = entry.contentUk
+    ? await renderMarkdown(entry.contentUk, entry.sectionDir, sectionSlug)
+    : null;
   const stats = section.type === "posts" ? readingStats(entry.content) : null;
 
   return (
@@ -88,10 +91,23 @@ export default async function EntryPage({ params }: Props) {
         </p>
       </header>
 
-      <article
-        className="prose mt-8"
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
+      {htmlUk ? (
+        <>
+          <article
+            className="prose mt-8 lang-en"
+            dangerouslySetInnerHTML={{ __html: html }}
+          />
+          <article
+            className="prose mt-8 lang-uk"
+            dangerouslySetInnerHTML={{ __html: htmlUk }}
+          />
+        </>
+      ) : (
+        <article
+          className="prose mt-8"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+      )}
     </div>
   );
 }

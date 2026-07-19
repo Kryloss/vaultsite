@@ -166,30 +166,44 @@ on the long side are plenty, JPG/PNG/WebP all fine.
   where the license requires, a credit line under the section using it.
 - Never generate fake "covers" or AI portraits of real people.
 
-## Translation (title_uk)
+## Translation — ALL content, every time
 
 The site has an English/Ukrainian toggle (flag switch in the sidebar). English
-is primary. Every note carries a Ukrainian **title** in frontmatter:
+is primary, but **every piece of content ships in both languages** — title,
+description, AND the full body. Translating only the title is not enough.
+
+For every note you create or edit, produce two things:
+
+**1. The title (frontmatter).**
 
 ```yaml
 title: My Security+ journey
 title_uk: Мій шлях до Security+
 ```
 
-- Add `title_uk:` to every new note and section `main.md` you create — a
-  professional, natural Ukrainian rendering (not a literal word swap). For
-  section `main.md` files also add `description_uk:` (the sidebar/section/home
-  descriptions read it).
-- For proper nouns use the established Ukrainian form when one exists
-  (films/books: use the official localized title — *Inception* → *Початок*;
-  people: transliterate — *Mykhailo Fedorov* → *Михайло Федоров*). Keep brand
-  and cert names as-is when that's the real usage (*Security+*, *Starbucks*).
-- Note bodies default to English. To translate a section body (e.g. Home),
-  add a sibling `main.uk.md` next to `main.md` with the Ukrainian markdown
-  (no frontmatter needed) — the site shows it when the toggle is on Ukrainian
-  and falls back to English otherwise. Keep image embeds and wiki links
-  identical so they resolve the same; translate only link *labels*
-  (`[[Now/main|Зараз]]`). Only do this when Kyrylo asks for a body translation.
+Add `title_uk:` to every note and section `main.md`. For section `main.md`
+files also add `description_uk:` (the sidebar/section/home descriptions read it).
+
+**2. The body (a sibling `.uk.md` file).**
+
+- Post/entry `Foo.md` → translated body in `Foo.uk.md`.
+- Section `main.md` → translated body in `main.uk.md`.
+- The `.uk.md` file is **body only, no frontmatter**. The site shows it in
+  Ukrainian mode and falls back to English if it's missing.
+- Translate professionally and naturally — convey meaning and voice, never a
+  literal word swap. Keep the SAME headings structure, callout types, wiki-link
+  targets, image/diagram embeds, and `[progress:: n]` values; translate the
+  prose, the callout titles, and the link *labels* (`[[Now/main|Зараз]]`).
+- Diagram embeds stay identical (their `EN :: UK` caption + `.uk.svg` sibling
+  already handle language — see Diagrams).
+
+**Proper nouns:** use the established Ukrainian form when one exists (films/books:
+official localized title — *Inception* → *Початок*; people: transliterate —
+*Mykhailo Fedorov* → *Михайло Федоров*). Keep brand, product, and cert names
+as-is when that's the real usage (*Security+*, *Starbucks*, *Obsidian*, *CompTIA*).
+
+This is not optional and not "only when asked" — a note without its `.uk.md`
+body is unfinished. Report both files in your summary.
 
 ## Diagrams
 
