@@ -9,7 +9,7 @@ description_uk: Чим я зайнятий саме зараз.
 
 *Last updated: July 2026*
 
-- [[Security Plus journey|📖 Studying for CompTIA Security+]] [progress:: 45]
+- [[Security+ journey|📖 Studying for CompTIA Security+]] [progress:: 45]
 - ☕ Barista @ Starbucks
 - 🎓 Sacred Heart CHS, class of 2026 [progress:: 75]
 

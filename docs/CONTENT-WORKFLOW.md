@@ -191,6 +191,38 @@ title_uk: Мій шлях до Security+
   identical so they resolve the same; translate only link *labels*
   (`[[Now/main|Зараз]]`). Only do this when Kyrylo asks for a body translation.
 
+## Diagrams
+
+When a post or project would be clearer with a picture — a flow, an
+architecture, a sequence, a comparison — offer a diagram (or make one when
+asked). Full reference: `docs/EXCALIDRAW.md`.
+
+**Default output: a self-theming SVG file.** Write it to the section folder and
+embed it like an image:
+
+```md
+![[<note-slug>-<topic>.svg|A short caption]]
+```
+
+Rules for the SVG:
+
+- Transparent background; no outer `<rect>` fill.
+- Include an internal `<style>` with a `@media (prefers-color-scheme: dark)`
+  block that recolors strokes/text for dark mode — so ONE file works on both
+  themes (copy the pattern in `vault/Projects/publishing-pipeline.svg`).
+- Neutral, legible palette: strokes/labels ~`#33373d` light / ~`#e6e8eb` dark,
+  secondary text grey, thin arrows with a marker head. Rounded rectangles.
+- Keep it simple and readable — a handful of labelled nodes, not a blueprint.
+- Add `role="img"` and an `aria-label` describing the diagram.
+
+This renders on the site immediately (no Obsidian export step) and adapts to the
+reader's theme. Report the file path and where you embedded it.
+
+**If Kyrylo wants to hand-edit the diagram in Excalidraw:** say so — he can open
+the SVG in the Excalidraw plugin, or draw his own and embed `![[Name.excalidraw]]`
+(needs Auto-export SVG on; see EXCALIDRAW.md). Don't hand-author Excalidraw
+scene JSON — it won't render on the site without the plugin's export.
+
 ## Sources section
 
 Notes making factual claims (People, current-events posts) end with:

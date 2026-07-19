@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "People/Mykhailo Fedorov.md",
+                "file": "Posts/Security+ journey.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Mykhailo Fedorov"
+              "title": "Security+ journey"
             }
           }
         ]
@@ -53,7 +53,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "plus",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -74,7 +74,8 @@
               "title": "Bookmarks"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -193,11 +194,21 @@
       "templates:Insert template": false,
       "command-palette:Open command palette": false,
       "bases:Create new base": false,
-      "obsidian-git:Open Git source control": false
+      "obsidian-git:Open Git source control": false,
+      "obsidian-excalidraw-plugin:New drawing": false
     }
   },
-  "active": "9cd2acf5af766b33",
+  "active": "6876c43f39168e01",
   "lastOpenFiles": [
+    "Posts/Formatting playground.md",
+    "Posts/main.md",
+    "Posts/Post Sample.md",
+    "Posts/Post Sample 1.md",
+    "Projects/publishing-pipeline.svg",
+    "Projects/This website.md",
+    "Posts/Security+ journey.md",
+    "Posts/Draft example.md",
+    "People/Mykhailo Fedorov.md",
     "Music/Clancy.md",
     "Now/main.md",
     "Home/main.uk.md",
@@ -205,10 +216,7 @@
     "Music/main.md",
     "Home/IMG_3260.jpeg",
     "People/fedorov.png",
-    "Posts/Post Sample.md",
-    "Posts/Post Sample 1.md",
     "Shelf/mr-robot.png",
-    "People/Mykhailo Fedorov.md",
     "People/main.md",
     "Shelf/Mr Robot.md",
     "Shelf/Sapiens.md",
@@ -216,11 +224,6 @@
     "Shelf/sapiens.jpg",
     "Shelf/inception.jpg",
     "Shelf/Inception.md",
-    "Posts/Draft example.md",
-    "Posts/Security Plus journey.md",
-    "Posts/Formatting playground.md",
-    "Posts/main.md",
-    "Projects/This website.md",
     "Books/Sapiens.md",
     "Shelf",
     "Now.md",

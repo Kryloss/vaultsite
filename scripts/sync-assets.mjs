@@ -27,7 +27,11 @@ function walk(dir) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
       walk(full);
-    } else if (!entry.name.toLowerCase().endsWith(".md")) {
+    } else if (
+      !entry.name.toLowerCase().endsWith(".md") &&
+      // Skip Excalidraw source JSON (`*.excalidraw`); we ship the exported SVG.
+      !entry.name.toLowerCase().endsWith(".excalidraw")
+    ) {
       const rel = path.relative(VAULT, full);
       const dest = path.join(OUT, rel);
       fs.mkdirSync(path.dirname(dest), { recursive: true });

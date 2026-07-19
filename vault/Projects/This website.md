@@ -6,6 +6,8 @@ description: A portfolio published straight from an Obsidian vault.
 
 The site you're reading is itself the first project. It's a Next.js site where my Obsidian vault **is** the CMS: create a folder with a `main.md` and it becomes a page in the sidebar; drop a note into that folder and it becomes a post with its own URL. Hitting save in Obsidian auto-commits to GitHub, Vercel rebuilds, and the change is live in about a minute.
 
+![[publishing-pipeline.svg|How a note becomes a page]]
+
 A few decisions I'm happy with:
 
 - **No database.** Content is markdown in git — versioned, portable, free.

@@ -231,6 +231,49 @@ body {
   cursor: zoom-in;
 }
 
+/* Theme-swapped images (Excalidraw light/dark exports, *.dark.* variants) */
+.only-dark {
+  display: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .only-light {
+    display: none;
+  }
+  .only-dark {
+    display: revert;
+  }
+}
+
+/* Excalidraw drawings — transparent, centered, no frame (the drawing is art) */
+.prose figure.excalidraw {
+  margin: 1.75rem 0;
+  text-align: center;
+}
+
+.prose figure.excalidraw img {
+  display: inline-block;
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto;
+  border: none;
+  border-radius: 0;
+}
+
+.prose figure.excalidraw img:hover {
+  transform: none;
+}
+
+.excalidraw-missing {
+  display: block;
+  margin: 1.25rem 0;
+  border: 1px dashed var(--border);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text-tertiary);
+}
+
 /* Figures — standalone images with alt text get a caption */
 .prose figure {
   margin: 1.5rem 0;

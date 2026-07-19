@@ -64,7 +64,8 @@ update), follow **`docs/CONTENT-WORKFLOW.md`** — the full playbook. Core rules
 5. Source images automatically: download covers into the vault folder (batch-ask permission first; `cover: https://…` URL as fallback). Books → Open Library; people → Wikimedia Commons only, license noted. Never random image results, never AI portraits of real people.
 6. Factual notes (People, current events) end with a `## Sources` section (2–4 links used for verification). Skip for opinion/shelf/music notes.
 7. Add a `title_uk:` frontmatter line with a professional Ukrainian translation of the title (this powers the site's language toggle). Body content stays English-only for now unless he asks.
-8. Write to `vault/<Section>/<Natural Title>.md`, then report path, future URL, links added, images fetched + sources, and anything you fixed or assumed.
+8. Offer a diagram when a post/project would benefit; generate it as a self-theming `.svg` (see `docs/CONTENT-WORKFLOW.md` → Diagrams). Never hand-author Excalidraw scene JSON.
+9. Write to `vault/<Section>/<Natural Title>.md`, then report path, future URL, links added, images fetched + sources, and anything you fixed or assumed.
 
 ## Common tasks
 
@@ -83,6 +84,7 @@ update), follow **`docs/CONTENT-WORKFLOW.md`** — the full playbook. Core rules
 - **Wiki links** resolve across ALL sections via `getWikiIndex()` (file name, title, slug, or `aliases:` frontmatter — case-insensitive; aliases are Obsidian-native so links work in both places). Unknown targets fall back to same-section slug. For links to SECTION pages use `[[Folder/main|Label]]` — it resolves on the site AND opens the right file in Obsidian (bare `[[Now]]` would create a new note there).
 - **Callouts**: Obsidian `> [!note] Title` → styled `.callout` divs (colors per type in globals.css).
 - **Progress bars**: `[progress:: 45]` inline in any note → styled bar + percent label (plain text in Obsidian). Used on the Now page.
+- **Diagrams**: `![[Drawing.excalidraw]]` embeds resolve to the Excalidraw plugin's exported SVG (theme-aware if light+dark exported); AI diagrams are self-theming `.svg` files embedded like images. Resolver: `getAssetIndex()` in `lib/vault.ts` (basename→URL, vault-wide) + `resolveExcalidraw`/`themedImg` in `lib/markdown.ts`. `.dark.<ext>` sibling → theme swap for any image. `.excalidraw.md` excluded from pages; `.excalidraw` JSON not shipped. Full guide: `docs/EXCALIDRAW.md`; AI workflow: `docs/CONTENT-WORKFLOW.md`.
 - **Language toggle**: sidebar flag switch (English default / Ukrainian). `components/T.tsx` renders both languages as spans; CSS on `html[data-lang]` shows the active one (choice persisted in localStorage, restored pre-paint by inline script in `app/layout.tsx`). Titles translate via `title_uk:` frontmatter (`ukTitle()` in `lib/vault.ts`). Fixed UI strings live in `lib/ui-strings.ts` (`ui` dict of `{en, uk}` pairs — spread into `<T {...ui.key} />`; add a key there instead of hard-coding English). Dates: `displayDate` / `displayDateUk` wrapped in `<T>`. No routing, no double build. Section bodies can be translated with a sibling `main.uk.md` (read into `section.contentUk`, rendered in a `.lang-uk` block) — Home uses this; entry bodies stay English-only for now.
 - **Figures/lightbox**: standalone images with alt text render as figure+figcaption; all non-avatar content images open in `components/Lightbox.tsx` on click.
 - **Reading time**: `readingStats()` shown on posts-type entry pages only.
