@@ -61,6 +61,14 @@ An Apple Music link pasted alone on a line becomes a player:
 
 https://music.apple.com/us/album/clancy/1733370881
 
+## Diagrams
+
+Two kinds, both fully static. Draw in Excalidraw and embed `![[Name.excalidraw]]`, or use a self-theming SVG like the one below — it recolours itself for light and dark mode. Here's the whole pipeline that renders this very post:
+
+![[rendering-pipeline.svg|From an Obsidian note to a static page — every syntax on this page passes through here :: Від нотатки Obsidian до статичної сторінки — увесь синтаксис на цій сторінці проходить сюди]]
+
+Full guide: see the Excalidraw docs in the repo. Ask the AI for a diagram and it drops one in.
+
 ## Drafts
 
 Add `draft: true` to any note's frontmatter and it shows up locally with an amber badge but never gets published. There's one in this folder right now — you can only see it in `npm run dev`.

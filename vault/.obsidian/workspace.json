@@ -11,14 +11,12 @@
             "id": "9cd2acf5af766b33",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "image",
               "state": {
-                "file": "Posts/Security+ journey.md",
-                "mode": "source",
-                "source": false
+                "file": "Posts/rendering-pipeline.uk.svg"
               },
-              "icon": "lucide-file",
-              "title": "Security+ journey"
+              "icon": "lucide-image",
+              "title": "rendering-pipeline.uk"
             }
           }
         ]
@@ -53,7 +51,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "plus",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -74,8 +72,7 @@
               "title": "Bookmarks"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -198,15 +195,18 @@
       "obsidian-excalidraw-plugin:New drawing": false
     }
   },
-  "active": "6876c43f39168e01",
+  "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
+    "Posts/rendering-pipeline.svg",
+    "Posts/rendering-pipeline.uk.svg",
+    "Posts/Security+ journey.md",
+    "Projects/publishing-pipeline.uk.svg",
+    "Projects/publishing-pipeline.svg",
+    "Projects/This website.md",
     "Posts/Formatting playground.md",
     "Posts/main.md",
     "Posts/Post Sample.md",
     "Posts/Post Sample 1.md",
-    "Projects/publishing-pipeline.svg",
-    "Projects/This website.md",
-    "Posts/Security+ journey.md",
     "Posts/Draft example.md",
     "People/Mykhailo Fedorov.md",
     "Music/Clancy.md",

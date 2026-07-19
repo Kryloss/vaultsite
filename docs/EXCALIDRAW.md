@@ -60,6 +60,27 @@ the "This website" project). This is the format the AI workflow generates — se
 Beyond Excalidraw, any embed gets a theme swap for free: if `chart.png` has a
 sibling `chart.dark.png`, embedding `![[chart.png]]` shows the right one per theme.
 
+## Translated diagrams (English / Ukrainian)
+
+Diagrams swap with the site's language toggle, just like text. Add a Ukrainian
+sibling and the site shows the right one automatically:
+
+| Kind | English file | Ukrainian sibling |
+|---|---|---|
+| Self-theming SVG | `diagram.svg` | `diagram.uk.svg` |
+| Excalidraw drawing | `Drawing.excalidraw` (→ exports) | `Drawing.uk.excalidraw` (→ exports) |
+
+- Embed the **English** name as usual — `![[diagram.svg]]` or
+  `![[Drawing.excalidraw]]`. The resolver finds the `.uk` sibling on its own.
+- Each language still gets its own light/dark handling (self-theming SVGs theme
+  internally; Excalidraw uses `.uk.light.svg` / `.uk.dark.svg`).
+- **Bilingual caption:** put both languages in the alt, split by `::` —
+  `![[diagram.svg|How it works :: Як це працює]]`. Only the active one shows.
+
+If no `.uk` sibling exists, the English diagram shows in both languages (fine
+for language-neutral pictures). Working examples: `vault/Projects/publishing-pipeline.svg`
+(+`.uk.svg`) and `vault/Posts/rendering-pipeline.svg` (+`.uk.svg`).
+
 ## How it resolves (for maintainers)
 
 - `lib/vault.ts → getAssetIndex()` maps every non-md file's basename to its

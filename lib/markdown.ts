@@ -84,21 +84,72 @@ function darkVariantUrl(file: string): string | undefined {
   return assetByName(`${m[1]}.dark.${m[2]}`);
 }
 
+/** "diagram.svg" → "diagram.uk.svg" (Ukrainian-variant filename). */
+function langVariantName(file: string): string | undefined {
+  const m = file.trim().match(/^(.*)\.([a-z0-9]+)$/i);
+  if (!m) return undefined;
+  return `${m[1]}.uk.${m[2]}`;
+}
+
+/** Does an embeddable file exist (same-folder or anywhere in the vault)? */
+function assetExists(sectionDir: string, file: string): boolean {
+  const clean = file.trim();
+  if (fs.existsSync(path.join(VAULT_DIR, sectionDir, clean))) return true;
+  return getAssetIndex().has(path.basename(clean).toLowerCase());
+}
+
+/** Split an embed caption "English :: Українською" into parts (size params skipped). */
+function captionParts(alt?: string): { en: string; uk?: string } {
+  if (!alt) return { en: "" };
+  const t = alt.trim();
+  if (/^\d+(x\d+)?$/.test(t)) return { en: "" };
+  const [en, uk] = t.split("::").map((s) => s.trim());
+  return { en, uk: uk || undefined };
+}
+
+/**
+ * A diagram figure with theme (light/dark) AND language (en/uk) swaps.
+ * Each side is a {light, dark?} image set; `uk` omitted → single-language.
+ */
+function diagramFigure(
+  en: { light: string; dark?: string },
+  uk: { light: string; dark?: string } | undefined,
+  alt: string | undefined,
+  figClass: string
+): string {
+  const { en: capEn, uk: capUk } = captionParts(alt);
+  const cap = capEn
+    ? capUk
+      ? `<figcaption><span class="lang-en">${escapeHtml(
+          capEn
+        )}</span><span class="lang-uk">${escapeHtml(capUk)}</span></figcaption>`
+      : `<figcaption>${escapeHtml(capEn)}</figcaption>`
+    : "";
+  const cls = figClass ? ` class="${figClass}"` : "";
+  if (uk) {
+    return `<figure${cls}><span class="lang-en">${themedImg(
+      en.light,
+      en.dark,
+      capEn
+    )}</span><span class="lang-uk">${themedImg(
+      uk.light,
+      uk.dark,
+      capUk ?? capEn
+    )}</span>${cap}</figure>`;
+  }
+  return `<figure${cls}>${themedImg(en.light, en.dark, capEn)}${cap}</figure>`;
+}
+
 /**
  * Resolve an Excalidraw embed (`![[Drawing.excalidraw]]`) to its exported
  * image(s). The Obsidian Excalidraw plugin's Auto-export writes a sibling SVG;
  * exporting both themes gives light/dark files we can swap. Falls back to a
  * single SVG/PNG, then to nothing (drawing not exported yet).
  */
-function resolveExcalidraw(name: string): {
-  light?: string;
-  dark?: string;
-  src?: string;
-} {
-  const base = name
-    .trim()
-    .replace(/\.md$/i, "")
-    .replace(/\.excalidraw$/i, "");
+type ExcalSide = { light?: string; dark?: string; src?: string };
+
+/** Resolve one language's exported files for a drawing base name. */
+function resolveExcalidrawOne(base: string): ExcalSide {
   const idx = getAssetIndex();
   const find = (cands: string[]) => {
     for (const c of cands) {
@@ -119,6 +170,32 @@ function resolveExcalidraw(name: string): {
   return { src };
 }
 
+/**
+ * Resolve an Excalidraw embed to its exported image(s) for both languages.
+ * English base `Drawing`, Ukrainian sibling `Drawing.uk` — each exporting
+ * light/dark (or a single SVG/PNG). The Obsidian Excalidraw plugin's
+ * Auto-export writes these siblings when you save the drawing.
+ */
+function resolveExcalidraw(name: string): { en: ExcalSide; uk?: ExcalSide } {
+  const base = name
+    .trim()
+    .replace(/\.md$/i, "")
+    .replace(/\.excalidraw$/i, "");
+  const en = resolveExcalidrawOne(base);
+  const uk = resolveExcalidrawOne(`${base}.uk`);
+  const ukHas = uk.light || uk.dark || uk.src;
+  return { en, uk: ukHas ? uk : undefined };
+}
+
+/** Normalize an ExcalSide to {light, dark} (src → light), or undefined if empty. */
+function excalSideToImg(
+  s: ExcalSide
+): { light: string; dark?: string } | undefined {
+  const primary = s.light ?? s.src;
+  if (!primary) return undefined;
+  return { light: primary, dark: s.light ? s.dark : undefined };
+}
+
 /** A themed <img> pair (dark swapped via CSS) or a single one. */
 function themedImg(
   light: string,
@@ -137,20 +214,12 @@ function themedImg(
   return `<img class="${extraClass}" src="${light}" alt="${a}" loading="lazy" />`;
 }
 
-/** `![[Drawing.excalidraw|Caption]]` → a themed figure (caption from alt). */
+/** `![[Drawing.excalidraw|Caption]]` → theme- and language-aware figure. */
 function excalidrawHtml(target: string, alt?: string): string {
-  const { light, dark, src } = resolveExcalidraw(target);
-  const caption = alt && !/^\d+(x\d+)?$/.test(alt.trim()) ? alt.trim() : "";
-  const cap = caption ? `<figcaption>${escapeHtml(caption)}</figcaption>` : "";
-  const primary = light ?? src;
-  if (primary) {
-    const darkFor = light ? dark : undefined;
-    return `<figure class="excalidraw">${themedImg(
-      primary,
-      darkFor,
-      caption
-    )}${cap}</figure>`;
-  }
+  const { en, uk } = resolveExcalidraw(target);
+  const enImg = excalSideToImg(en);
+  const ukImg = uk ? excalSideToImg(uk) : undefined;
+  if (enImg) return diagramFigure(enImg, ukImg, alt, "excalidraw");
   return `<span class="excalidraw-missing">⚠️ Drawing “${escapeHtml(
     target
   )}” isn’t exported yet — turn on Auto-export SVG in the Excalidraw plugin (see docs/EXCALIDRAW.md).</span>`;
@@ -223,12 +292,29 @@ export function preprocessObsidian(
         const height = size[2] ? ` height="${size[2]}"` : "";
         return `<img src="${src}" width="${w}"${height} alt="" />`;
       }
-      // A sibling <name>.dark.<ext> file → theme-swapped figure.
-      const dark = darkVariantUrl(file);
-      if (dark) {
-        return `\n<figure>${themedImg(src, dark, alt ?? "")}${
-          alt ? `<figcaption>${escapeHtml(alt)}</figcaption>` : ""
-        }</figure>\n`;
+      // Theme (<name>.dark.<ext>) and language (<name>.uk.<ext>) variants.
+      const enDark = darkVariantUrl(file);
+      const ukName = langVariantName(file);
+      const hasUk = ukName ? assetExists(sectionDir, ukName) : false;
+      const isSvg = /\.svg$/i.test(file.trim());
+      const caps = captionParts(alt);
+
+      // SVG diagrams (borderless), or any embed that has a dark/uk variant, or
+      // a bilingual "en :: uk" caption → render as a swap-aware figure.
+      if (isSvg || enDark || hasUk || caps.uk) {
+        const uk =
+          hasUk && ukName
+            ? {
+                light: resolveImageUrl(sectionDir, ukName),
+                dark: darkVariantUrl(ukName),
+              }
+            : undefined;
+        return `\n${diagramFigure(
+          { light: src, dark: enDark },
+          uk,
+          alt,
+          isSvg ? "excalidraw" : ""
+        )}\n`;
       }
       return `![${alt ?? ""}](${src})`;
     }

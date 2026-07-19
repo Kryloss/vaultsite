@@ -218,6 +218,17 @@ Rules for the SVG:
 This renders on the site immediately (no Obsidian export step) and adapts to the
 reader's theme. Report the file path and where you embedded it.
 
+**Always make it bilingual** (the site has a language toggle):
+
+1. Write the English SVG (`<name>.svg`) and a Ukrainian twin (`<name>.uk.svg`)
+   — same layout, translated labels. Translate prose labels; keep literal
+   syntax tokens (`![[img]]`, `[progress:: 45]`) and technical names
+   (`remark`, `rehype`) as-is.
+2. Embed the English name only — `![[<name>.svg|English caption :: Український підпис]]`.
+   The `::` splits the caption; the resolver finds the `.uk.svg` sibling itself.
+
+Copy the pair `vault/Posts/rendering-pipeline.svg` / `.uk.svg` as a reference.
+
 **If Kyrylo wants to hand-edit the diagram in Excalidraw:** say so — he can open
 the SVG in the Excalidraw plugin, or draw his own and embed `![[Name.excalidraw]]`
 (needs Auto-export SVG on; see EXCALIDRAW.md). Don't hand-author Excalidraw

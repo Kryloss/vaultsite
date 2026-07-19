@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 150" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" role="img" aria-label="Конвеєр публікації: Obsidian → GitHub → Vercel → живий сайт">
+  <style>
+    .box { fill: none; stroke: #33373d; stroke-width: 1.5; }
+    .lbl { fill: #33373d; font-size: 15px; font-weight: 600; }
+    .sub { fill: #6b7280; font-size: 11px; }
+    .arw { stroke: #9aa0aa; stroke-width: 1.5; fill: none; }
+    .ah  { fill: #9aa0aa; }
+    @media (prefers-color-scheme: dark) {
+      .box { stroke: #c8ccd2; }
+      .lbl { fill: #e6e8eb; }
+      .sub { fill: #9aa0aa; }
+      .arw { stroke: #6b7280; }
+      .ah  { fill: #6b7280; }
+    }
+  </style>
+  <defs>
+    <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path class="ah" d="M0 0 L6 3 L0 6 Z" />
+    </marker>
+  </defs>
+
+  <!-- boxes -->
+  <rect class="box" x="10"  y="45" width="150" height="60" rx="12" />
+  <rect class="box" x="190" y="45" width="150" height="60" rx="12" />
+  <rect class="box" x="370" y="45" width="150" height="60" rx="12" />
+  <rect class="box" x="550" y="45" width="160" height="60" rx="12" />
+
+  <!-- labels -->
+  <text class="lbl" x="85"  y="72" text-anchor="middle">Obsidian</text>
+  <text class="sub" x="85"  y="90" text-anchor="middle">пишеш нотатку</text>
+  <text class="lbl" x="265" y="72" text-anchor="middle">GitHub</text>
+  <text class="sub" x="265" y="90" text-anchor="middle">автопуш у git</text>
+  <text class="lbl" x="445" y="72" text-anchor="middle">Vercel</text>
+  <text class="sub" x="445" y="90" text-anchor="middle">статична збірка</text>
+  <text class="lbl" x="630" y="72" text-anchor="middle">kryloss.com</text>
+  <text class="sub" x="630" y="90" text-anchor="middle">онлайн за ~1 хв</text>
+
+  <!-- arrows -->
+  <line class="arw" x1="162" y1="75" x2="186" y2="75" marker-end="url(#arrowhead)" />
+  <line class="arw" x1="342" y1="75" x2="366" y2="75" marker-end="url(#arrowhead)" />
+  <line class="arw" x1="522" y1="75" x2="546" y2="75" marker-end="url(#arrowhead)" />
+</svg>
