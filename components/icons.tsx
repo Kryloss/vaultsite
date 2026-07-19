@@ -71,6 +71,34 @@ export function BookIcon({ className }: IconProps) {
   );
 }
 
+export function ArrowIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
+      <path d="M5 12h14M13 6l6 6-6 6" />
+    </svg>
+  );
+}
+
+export function CoffeeIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
+      <path d="M4 8h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5Z" />
+      <path d="M17 9h1.5a2.5 2.5 0 0 1 0 5H17" />
+      <path d="M7 3.5c-.5.7-.5 1.3 0 2M11 3.5c-.5.7-.5 1.3 0 2" />
+    </svg>
+  );
+}
+
+export function SchoolIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
+      <path d="M12 4 2 9l10 5 10-5Z" />
+      <path d="M6 11.5V16c0 1.1 2.7 2.5 6 2.5s6-1.4 6-2.5v-4.5" />
+      <path d="M22 9v5" />
+    </svg>
+  );
+}
+
 export function MenuIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
@@ -206,6 +234,9 @@ const byName: Record<string, (p: IconProps) => JSX.Element> = {
   projects: HammerIcon,
   hammer: HammerIcon,
   book: BookIcon,
+  coffee: CoffeeIcon,
+  school: SchoolIcon,
+  graduation: SchoolIcon,
   now: ClockIcon,
   clock: ClockIcon,
   search: SearchIcon,
@@ -229,6 +260,8 @@ const byEmoji: Record<string, keyof typeof byName> = {
   "🔨": "hammer",
   "📖": "book",
   "📚": "book",
+  "☕": "coffee",
+  "🎓": "school",
   "⏳": "clock",
   "⌛": "clock",
   "🕐": "clock",

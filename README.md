@@ -27,7 +27,7 @@ Entry frontmatter: `title`, `date` (YYYY-MM-DD), `description`, `draft`.
 
 **Diagrams:** embed Excalidraw drawings with `![[Name.excalidraw]]` (turn on the plugin's Auto-export SVG; light+dark exports become theme-aware). AI-made diagrams are self-theming `.svg` files embedded like images. See [docs/EXCALIDRAW.md](./docs/EXCALIDRAW.md).
 
-**Section types:** `posts` (year-grouped rows; entries can set `category:` for filter chips) · `music` (Apple Music playlist embeds via `playlists:` frontmatter + notes below) · `people` (square cover-image grid; entries set `cover: photo.jpg`) · `shelf` (vertical 2:3 covers with Books/Movies/Shows filter; entries set `cover:`, `author:`, `medium: book|movie|show`) · `projects` (full entries rendered inline, TIL-style). Any Apple Music link pasted alone on a line in any note also becomes an embedded player.
+**Section types:** `posts` (year-grouped rows; entries can set `category:` for filter chips) · `music` (Apple Music playlist embeds via `playlists:` frontmatter + notes below) · `people` (square cover-image grid; entries set `cover: photo.jpg`) · `shelf` (vertical 2:3 covers with Books/Movies/Shows filter; entries set `cover:`, `author:`, `medium: book|movie|show`) · `projects` (full entries rendered inline, TIL-style) · `now` (status cards from an `items:` list in main.md — a nownownow-style page). Any Apple Music link pasted alone on a line in any note also becomes an embedded player.
 
 ## Local development
 

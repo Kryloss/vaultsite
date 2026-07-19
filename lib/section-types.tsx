@@ -18,6 +18,7 @@ import MusicList from "@/components/lists/MusicList";
 import PeopleGrid from "@/components/lists/PeopleGrid";
 import ShelfGrid from "@/components/lists/ShelfGrid";
 import TilList from "@/components/lists/TilList";
+import NowList from "@/components/lists/NowList";
 
 export interface ListProps {
   section: Section;
@@ -34,6 +35,7 @@ const registry: Record<string, SectionList> = {
   shelf: ShelfGrid, // 2:3 covers + medium chips (entries read `cover:`, `author:`, `medium:`)
   books: ShelfGrid, // legacy alias for shelf
   projects: TilList, // full entries rendered inline, TIL-style
+  now: NowList, // nownownow-style status cards from `items:` frontmatter
 };
 
 export function getListComponent(type: string): SectionList {
