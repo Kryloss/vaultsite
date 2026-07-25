@@ -26,6 +26,8 @@ Kyrylo's portfolio site, published from an Obsidian vault. The `vault/` folder I
 | `vault/` | Content (Obsidian vault lives at repo root; this is the content subfolder) |
 | `lib/vault.ts` | Content engine: section/entry discovery, slugs, frontmatter, sorting |
 | `lib/markdown.ts` | Obsidian syntax preprocessing (`![[img]]`, `[[wiki links]]`, relative images) + unified pipeline → HTML |
+| `lib/highlight.ts` | Shiki build-time syntax highlighting (explicit language list, dual light/dark themes as CSS vars) |
+| `lib/previews.ts` | Build-time href → preview index behind link hover cards |
 | `lib/section-types.tsx` | Registry: section `type` → list component. Extend page styles here |
 | `components/Chrome.tsx` | Site chrome: sticky header ("Section · Kyrylo" breadcrumb), slide-in drawer sidebar (hidden by default), social links, page transition wrapper |
 | `components/icons.tsx` | Inline SVG icon set; `resolveIcon()` maps vault frontmatter emoji/names → SVGs, unknown emoji render as text |
@@ -89,6 +91,8 @@ update), follow **`docs/CONTENT-WORKFLOW.md`** — the full playbook. Core rules
 - **Figures/lightbox**: standalone images with alt text render as figure+figcaption; all non-avatar content images open in `components/Lightbox.tsx` on click.
 - **Reading time**: `readingStats()` shown on posts-type entry pages only.
 - **Search**: Cmd/Ctrl+K palette (`components/CommandPalette.tsx`) over a build-time index from `getSearchIndex()` — fully static, no backend.
+- **Code blocks**: highlighted at build time by Shiki (`lib/highlight.ts` + the `rehypeCodeBlocks` step in `lib/markdown.ts`), wrapped in `<figure class="code-block">`. Optional filename header via ` ```bash title="scan.sh" ` (a bare `scan.sh` after the language works too). Languages must be listed in `LANGS` in `lib/highlight.ts` — unknown ones fall back to plain text. Copy button injected by `components/CodeCopy.tsx`. Zero client-side highlighting JS.
+- **Link hover previews**: internal links in `.prose` show a preview card on hover — title, excerpt, date, cover — from `getLinkPreviews()` in `lib/previews.ts`, passed to `components/LinkPreview.tsx` from the layout. Pointer devices only; the card is non-interactive.
 
 ## Planned / future (do not build unless asked)
 

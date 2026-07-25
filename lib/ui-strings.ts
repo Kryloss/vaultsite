@@ -62,6 +62,10 @@ export const ui = {
   minRead: { en: "min read", uk: "хв читання" },
   words: { en: "words", uk: "слів" },
 
+  // code blocks
+  copyCode: { en: "Copy code", uk: "Копіювати код" },
+  copiedCode: { en: "Copied", uk: "Скопійовано" },
+
   // 404
   notFoundBody: {
     en: "This page doesn’t exist (or the note behind it was unpublished).",

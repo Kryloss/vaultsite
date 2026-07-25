@@ -417,6 +417,150 @@ function rehypeFigures() {
     walk(tree);
   };
 }
+/**
+ * rehype step: carry a fence's info string (```bash title="scan.sh") onto the
+ * <code> element as a real attribute.
+ *
+ * Must run BEFORE rehype-raw: mdast-util-to-hast parks the meta in the node's
+ * `data`, but rehype-raw re-serializes and re-parses the whole tree, and `data`
+ * doesn't survive that round trip. Attributes do.
+ */
+function rehypeCodeMeta() {
+  return (tree: any) => {
+    const walk = (node: any) => {
+      if (!node.children) return;
+      for (const child of node.children) {
+        if (
+          child.type === "element" &&
+          child.tagName === "code" &&
+          typeof child.data?.meta === "string" &&
+          child.data.meta.trim()
+        ) {
+          child.properties = {
+            ...(child.properties ?? {}),
+            "data-meta": child.data.meta,
+          };
+        }
+        walk(child);
+      }
+    };
+    walk(tree);
+  };
+}
+
+/**
+ * rehype step: syntax-highlight every fenced code block at build time and wrap
+ * it in <figure class="code-block">, with an optional header showing the
+ * filename (```bash title="scan.sh") and the language. The copy button is added
+ * client-side by components/CodeCopy.tsx so it never appears without JS.
+ *
+ * Async on purpose — Shiki loads its grammars lazily; unified awaits the
+ * returned promise.
+ */
+function rehypeCodeBlocks() {
+  return async (tree: any) => {
+    // Collect first, transform after: highlighting is async and we must not
+    // mutate the tree while walking it.
+    const jobs: { parent: any; node: any; code: string; lang?: string; meta?: string }[] =
+      [];
+
+    const textOf = (node: any): string => {
+      if (node.type === "text") return String(node.value ?? "");
+      if (!node.children) return "";
+      return node.children.map(textOf).join("");
+    };
+
+    const walk = (node: any) => {
+      if (!node.children) return;
+      for (const child of node.children) {
+        if (child.type === "element" && child.tagName === "pre") {
+          const codeEl = child.children?.find(
+            (c: any) => c.type === "element" && c.tagName === "code"
+          );
+          if (codeEl) {
+            const raw = codeEl.properties?.className;
+            const classes = Array.isArray(raw)
+              ? raw.map(String)
+              : raw
+                ? [String(raw)]
+                : [];
+            const langClass = classes.find((c) => c.startsWith("language-"));
+            jobs.push({
+              parent: node,
+              node: child,
+              code: textOf(codeEl).replace(/\n$/, ""),
+              lang: langClass?.slice("language-".length),
+              // Set by rehypeCodeMeta above. rehype-raw re-parses the tree and
+              // renames the attribute to hast's camelCase form, so check both;
+              // `data.meta` covers a pipeline without rehype-raw.
+              meta:
+                (codeEl.properties?.dataMeta as string | undefined) ??
+                (codeEl.properties?.["data-meta"] as string | undefined) ??
+                codeEl.data?.meta,
+            });
+            continue; // don't descend into the code block
+          }
+        }
+        walk(child);
+      }
+    };
+    walk(tree);
+
+    await Promise.all(
+      jobs.map(async (job) => {
+        const pre = await highlightToHast(job.code, job.lang);
+        if (!pre) return;
+
+        // Shiki already sets tabindex="0" on the <pre> (keyboard scrolling of
+        // overflow), so don't add a second one.
+
+        const { title } = parseCodeMeta(job.meta);
+        const label = langLabel(job.lang);
+        const children: any[] = [];
+
+        if (title || label) {
+          const bits: any[] = [];
+          if (title) {
+            bits.push({
+              type: "element",
+              tagName: "span",
+              properties: { className: ["code-file"] },
+              children: [{ type: "text", value: title }],
+            });
+          }
+          if (label) {
+            bits.push({
+              type: "element",
+              tagName: "span",
+              properties: { className: ["code-lang"] },
+              children: [{ type: "text", value: label }],
+            });
+          }
+          children.push({
+            type: "element",
+            tagName: "figcaption",
+            properties: { className: ["code-head"] },
+            children: bits,
+          });
+        }
+        children.push(pre);
+
+        const figure = {
+          type: "element",
+          tagName: "figure",
+          properties: {
+            className: ["code-block"],
+            ...(label ? { "data-lang": label } : {}),
+          },
+          children,
+        };
+
+        const i = job.parent.children.indexOf(job.node);
+        if (i !== -1) job.parent.children[i] = figure;
+      })
+    );
+  };
+}
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 export async function renderMarkdown(
@@ -429,8 +573,10 @@ export async function renderMarkdown(
     .use(remarkParse)
     .use(remarkGfm)
     .use(remarkRehype, { allowDangerousHtml: true })
+    .use(rehypeCodeMeta)
     .use(rehypeRaw)
     .use(rehypeFigures)
+    .use(rehypeCodeBlocks)
     .use(rehypeSlug)
     .use(rehypeStringify)
     .process(pre);

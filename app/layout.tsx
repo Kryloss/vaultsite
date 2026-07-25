@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Chrome from "@/components/Chrome";
 import Lightbox from "@/components/Lightbox";
+import CodeCopy from "@/components/CodeCopy";
+import LinkPreview from "@/components/LinkPreview";
 import { getSections, getEntries, getSearchIndex } from "@/lib/vault";
+import { getLinkPreviews } from "@/lib/previews";
 import { siteName, siteUrl, siteDescription, socials } from "@/lib/site-config";
 
 export const metadata: Metadata = {
@@ -70,6 +73,8 @@ export default function RootLayout({
           {children}
         </Chrome>
         <Lightbox />
+        <CodeCopy />
+        <LinkPreview previews={getLinkPreviews()} />
       </body>
     </html>
   );

@@ -388,6 +388,135 @@ body {
   line-height: 1.7;
 }
 
+/* ---------- Highlighted code blocks (lib/highlight.ts) ----------
+   Fenced code is highlighted at build time by Shiki and wrapped in
+   <figure class="code-block">. The figure carries the card look; the inner
+   <pre> drops its own border/background so the two don't double up. */
+.prose figure.code-block {
+  position: relative;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.prose figure.code-block pre {
+  background: none;
+  border: none;
+  border-radius: 0;
+  margin: 0;
+}
+
+/* Header bar: filename on the left (```bash title="scan.sh"), language on the
+   right. Overrides the centered caption style used by image figures. */
+.prose figure.code-block figcaption.code-head {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0;
+  padding: 0.5rem 0.875rem 0.5rem 1.25rem;
+  padding-right: 2.75rem; /* clear of the copy button */
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  font-size: 0.8125rem;
+  color: var(--text-tertiary);
+}
+
+.prose .code-file {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--text-secondary);
+}
+
+.prose .code-lang {
+  margin-left: auto;
+  font-size: 0.75rem;
+  text-transform: lowercase;
+}
+
+/* Shiki emits --shiki-light / --shiki-dark per token (defaultColor: false),
+   so the theme swap is pure CSS and matches the site's dark mode. */
+.prose .shiki,
+.prose .shiki span {
+  color: var(--shiki-light);
+  background: transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+  .prose .shiki,
+  .prose .shiki span {
+    color: var(--shiki-dark);
+  }
+}
+
+/* Copy button — injected by components/CodeCopy.tsx, so it only exists with JS */
+.prose .code-copy {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  background: var(--code-bg);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.prose figure.code-block:hover .code-copy,
+.prose .code-copy:focus-visible {
+  opacity: 1;
+}
+
+.prose .code-copy:hover {
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.prose .code-copy.is-copied {
+  opacity: 1;
+  color: var(--text);
+}
+
+/* No hover on touch — show the button permanently instead of never. */
+@media (hover: none) {
+  .prose .code-copy {
+    opacity: 1;
+  }
+}
+
+.prose .code-copy svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.prose .code-copy svg + svg,
+.prose .code-copy.is-copied svg:first-of-type {
+  display: none;
+}
+
+.prose .code-copy.is-copied svg + svg {
+  display: block;
+}
+
+/* Accessible name only — the .lang-en/.lang-uk pair means exactly one
+   language is exposed to screen readers (the other is display:none). */
+.prose .code-copy-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* Tables — soft card look: rounded container, row dividers only */
 .prose table {
   width: 100%;
@@ -430,4 +559,82 @@ body {
 /* Hide fully-empty header rows (Obsidian tables like `| | |`) */
 .prose thead tr:not(:has(th:not(:empty))) {
   display: none;
+}
+
+/* ---------- Link hover previews (components/LinkPreview.tsx) ----------
+   Fixed-position card shown on hover of an internal link inside .prose.
+   pointer-events: none — it's a preview, never a target. */
+@keyframes preview-in {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.link-preview {
+  position: fixed;
+  z-index: 60; /* under the lightbox (70) */
+  display: flex;
+  gap: 0.75rem;
+  width: 320px;
+  max-width: calc(100vw - 24px);
+  padding: 0.875rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--bg);
+  box-shadow: 0 8px 30px rgb(0 0 0 / 0.12);
+  pointer-events: none;
+  animation: preview-in 0.14s ease both;
+}
+
+@media (prefers-color-scheme: dark) {
+  .link-preview {
+    box-shadow: 0 8px 30px rgb(0 0 0 / 0.5);
+  }
+}
+
+.link-preview-cover {
+  flex: none;
+  width: 44px;
+  height: 66px;
+  border-radius: 0.375rem;
+  object-fit: cover;
+  background: var(--bg-hover);
+}
+
+.link-preview-body {
+  min-width: 0; /* let the text truncate instead of stretching the card */
+}
+
+.link-preview-meta {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.link-preview-title {
+  margin: 0.125rem 0 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.link-preview-excerpt {
+  margin: 0.3125rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
 }
