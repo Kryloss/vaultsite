@@ -198,7 +198,102 @@ function excalSideToImg(
   return { light: primary, dark: s.light ? s.dark : undefined };
 }
 
-/** A themed <img> pair (dark swapped via CSS) or a single one. */
+/** Largest SVG we're willing to paste into the HTML (keeps pages lean). */
+const MAX_INLINE_SVG = 64 * 1024;
+
+/** "/vault-assets/Posts/x.svg" → the file's real path inside the vault. */
+function vaultPathFromUrl(url: string): string | undefined {
+  if (!url.startsWith("/vault-assets/")) return undefined;
+  const rel = url
+    .slice("/vault-assets/".length)
+    .split("/")
+    .map(safeDecode)
+    .join(path.sep);
+  const full = path.join(VAULT_DIR, rel);
+  return fs.existsSync(full) ? full : undefined;
+}
+
+/**
+ * Prefix every selector in an SVG's <style> with `scope` so an inlined diagram
+ * can't leak its generic class names (.bar, .lbl, .val…) onto the page or onto
+ * another diagram. Handles plain rules and rules nested in @media.
+ */
+function scopeSvgCss(css: string, scope: string): string {
+  return css.replace(
+    /(^|[{}])([^{}@]+?)\{/g,
+    (_m, pre: string, selectors: string) =>
+      pre +
+      selectors
+        .split(",")
+        .map((s) => (s.trim() ? `${scope} ${s.trim()}` : s))
+        .join(", ") +
+      "{"
+  );
+}
+
+/**
+ * Self-theming SVG diagrams are pasted into the page instead of loaded through
+ * <img src>.
+ *
+ * Why: an <img>-referenced SVG renders in an isolated document that the browser
+ * rasterizes once and caches. Its internal `prefers-color-scheme` is resolved at
+ * that first decode and never re-evaluated, so a diagram can get stuck in the
+ * wrong theme — and which one breaks shifts around, because lazy loading and
+ * `display: none` (the language toggle) make different images decode at
+ * different moments. Inlined, the media query is just page CSS: always live,
+ * always correct, and it re-themes instantly with the language toggle.
+ *
+ * Only applies to SVGs that actually self-theme. Excalidraw's two-file exports
+ * (`.light.svg` + `.dark.svg`) keep using <img> — they swap via CSS `display`,
+ * which was never affected by this.
+ */
+function inlineSelfThemingSvg(url: string, alt: string): string | undefined {
+  const file = vaultPathFromUrl(url);
+  if (!file || !/\.svg$/i.test(file)) return undefined;
+
+  let svg: string;
+  try {
+    if (fs.statSync(file).size > MAX_INLINE_SVG) return undefined;
+    svg = fs.readFileSync(file, "utf8");
+  } catch {
+    return undefined;
+  }
+  if (!/prefers-color-scheme/i.test(svg)) return undefined;
+
+  // Strip anything that can't live inside an HTML body.
+  svg = svg
+    .replace(/<\?xml[\s\S]*?\?>/gi, "")
+    .replace(/<!DOCTYPE[\s\S]*?>/gi, "")
+    .replace(/<!--[\s\S]*?-->/g, "")
+    .trim();
+
+  const open = svg.match(/^<svg\b[^>]*>/i);
+  if (!open) return undefined;
+
+  // Stable id derived from the filename, so builds are deterministic.
+  const id = `d-${slugify(path.basename(file).replace(/\.svg$/i, ""))}`;
+  svg = svg.replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gi, (_m, css: string) => {
+    return `<style>${scopeSvgCss(css, `#${id}`)}</style>`;
+  });
+
+  // Re-open the root tag with our id/class, keeping viewBox, role, aria-label.
+  const attrs = open[0]
+    .replace(/^<svg\b/i, "")
+    .replace(/\/?>$/, "")
+    .replace(/\s(id|class)="[^"]*"/gi, "");
+  const a = escapeHtml(alt);
+  const labelled = /aria-label=/i.test(attrs);
+  return (
+    svg.replace(
+      open[0],
+      `<svg id="${id}" class="diagram"${attrs}${
+        labelled || !a ? "" : ` role="img" aria-label="${a}"`
+      }>`
+    ) || undefined
+  );
+}
+
+/** A themed <img> pair (dark swapped via CSS), a single one, or an inline SVG. */
 function themedImg(
   light: string,
   dark: string | undefined,
@@ -213,6 +308,10 @@ function themedImg(
       `<img class="only-dark${cls}" src="${dark}" alt="${a}" loading="lazy" />`
     );
   }
+  // Single-file diagrams that theme themselves must be inlined — see above.
+  const inlined = inlineSelfThemingSvg(light, alt);
+  if (inlined) return inlined;
+
   return `<img class="${extraClass}" src="${light}" alt="${a}" loading="lazy" />`;
 }
 

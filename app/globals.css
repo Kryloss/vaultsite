@@ -275,6 +275,17 @@ body {
   transform: none;
 }
 
+/* Self-theming diagrams are inlined into the page rather than loaded via
+   <img> (see lib/markdown.ts → inlineSelfThemingSvg), so their internal
+   prefers-color-scheme stays live instead of being frozen at first decode. */
+.prose svg.diagram {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
 .excalidraw-missing {
   display: block;
   margin: 1.25rem 0;

@@ -1,6 +1,6 @@
 {
   "commitMessage": "vault: {{date}}",
-  "autoCommitMessage": "{{date}}",
+  "autoCommitMessage": "Version {{date}}",
   "commitMessageScript": "",
   "commitDateFormat": "YYYY-MM-DD HH:mm:ss",
   "autoSaveInterval": 10,

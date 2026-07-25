@@ -13,10 +13,10 @@
             "state": {
               "type": "image",
               "state": {
-                "file": "Posts/secplus-domains.uk.svg"
+                "file": "Posts/secplus-plan.uk.svg"
               },
               "icon": "lucide-image",
-              "title": "secplus-domains.uk"
+              "title": "secplus-plan.uk"
             }
           }
         ]
@@ -197,8 +197,9 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
-    "Posts/secplus-domains.svg",
+    "Posts/secplus-plan.svg",
     "Posts/secplus-domains.uk.svg",
+    "Posts/secplus-domains.svg",
     "Posts/rendering-pipeline.uk.svg",
     "Posts/rendering-pipeline.svg",
     "Posts/Post Sample.md",
@@ -216,7 +217,6 @@
     "People/main.md",
     "Posts/First certification.md",
     "Posts/secplus-plan.uk.svg",
-    "Posts/secplus-plan.svg",
     "Posts/Security+ journey.md",
     "Now/main.md",
     "Posts/Post Sample 1.md",

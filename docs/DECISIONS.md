@@ -56,7 +56,18 @@ Append new entries at the bottom. Format: number, date, decision, why, revisit-w
 **Why:** Rendering live Excalidraw scenes needs the Excalidraw React app + canvas + fonts — too heavy for a static build. Exported SVG is identical, instant, and git-friendly. Self-theming SVG lets AI diagrams appear with no export step and adapt to the theme. Keeps decision #5 (fully static) intact.
 **Revisit when:** Interactive/animated diagrams are wanted (embed an `.excalidraw.json` + client renderer), or a diagram needs to read live page CSS (use inline SVG instead of `<img>`).
 
-**Required companion — `color-scheme: light dark` (2026-07-24):** self-theming SVGs silently broke (light theme on a dark page) because `app/globals.css` never declared the `color-scheme` property. An SVG loaded via `<img src>` renders in its own isolated document and resolves its internal `prefers-color-scheme` from the *embedder's used color scheme* — and a page that only repaints itself with `prefers-color-scheme` media queries still has a used scheme of light. It was truthfully reporting "I am a light page" to every embedded diagram. One line on `:root` fixes it for all of them. Keep that line: it is load-bearing for every self-theming SVG, not cosmetic.
+**Correction — self-theming SVGs must be inlined, not `<img>`-embedded (2026-07-24):** diagrams were rendering in the wrong theme (light artwork on the dark page), and *which* diagram broke moved around between reloads and between the two language versions of the same page.
+
+Two fixes were applied, in order:
+
+1. **`color-scheme: light dark` on `:root`** — genuinely missing, and worth keeping. The site only ever repainted itself with `prefers-color-scheme` media queries, so its *used* color scheme stayed light, which is what gets propagated to embedded content. **But this did not fix the diagrams** — it treated a real bug that wasn't this one. Kept for correctness (and for scrollbars/form controls in dark mode); not load-bearing here.
+2. **Inlining the SVG into the page** (`inlineSelfThemingSvg` in `lib/markdown.ts`) — the actual fix. An `<img>`-referenced SVG renders in an isolated document that the browser **rasterizes once and caches**; its internal `prefers-color-scheme` is resolved at that first decode and never re-evaluated. That explains the wandering symptom: lazy loading and the language toggle's `display: none` make different images decode at different moments, so each one freezes whichever theme happened to be current. Inlined, the media query is ordinary page CSS — live, correct, and it re-themes instantly with the language toggle and with the OS setting.
+
+**Scope of the change:** only SVGs whose source actually contains `prefers-color-scheme` are inlined (capped at 64 kB). Excalidraw's two-file exports (`.light.svg` + `.dark.svg`) keep the `<img>` path — they swap via CSS `display` and were never affected. Inlined styles are namespaced to `#d-<filename>` by `scopeSvgCss`, since generic class names like `.bar` / `.lbl` would otherwise become global and collide between diagrams.
+
+**Trade-off accepted:** inlined diagrams are no longer `<img>` elements, so they don't open in the lightbox. They're already full-width, so this costs little.
+
+**Lesson for future diagrams:** `prefers-color-scheme` inside an SVG is only reliable when that SVG is part of the document. Through `<img>`, treat it as frozen at first paint.
 
 ## 9. AI content-intake workflow (2026-07-17)
 
