@@ -9,6 +9,7 @@ import {
   displayDate,
   displayDateUk,
   readingStats,
+  parseCategories,
 } from "@/lib/vault";
 import { renderMarkdown } from "@/lib/markdown";
 import { ui } from "@/lib/ui-strings";
@@ -49,6 +50,7 @@ export default async function EntryPage({ params }: Props) {
     ? await renderMarkdown(entry.contentUk, entry.sectionDir, sectionSlug)
     : null;
   const stats = section.type === "posts" ? readingStats(entry.content) : null;
+  const categories = parseCategories(entry.meta);
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-14 lg:py-24">
@@ -89,6 +91,16 @@ export default async function EntryPage({ params }: Props) {
             </span>
           )}
         </p>
+
+        {/* `categories:` frontmatter → #tags. Names are raw strings, shown the
+            same in both languages (like the posts' category chips). */}
+        {categories.length > 0 && (
+          <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-[var(--text-tertiary)]">
+            {categories.map((c) => (
+              <span key={c}>#{c}</span>
+            ))}
+          </p>
+        )}
       </header>
 
       {htmlUk ? (

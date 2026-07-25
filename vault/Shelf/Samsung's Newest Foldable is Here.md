@@ -3,6 +3,7 @@ title: Samsung's Newest Foldable is Here!
 title_uk: Новий складаний смартфон Samsung уже тут!
 author: WVFRM Podcast
 medium: video
+categories: [Tech]
 video: https://www.youtube.com/watch?v=WVsG3daysEM
 date: 2026-07-25
 description: "The Waveform crew's first take on Samsung's latest folding phone."

@@ -66,12 +66,14 @@ description: <one sentence>
 ```md
 ---
 title: <Title>
-author: <author / director / creator>
-medium: book | movie | show
+author: <author / director / creator / channel>
+medium: book | movie | show | video
+categories: [<one or more — see the vocabularies below>]
 rating: <0–5, halves allowed — ONLY if he gave one; never invent his rating>
 date: YYYY-MM-DD
 description: <one sentence>
-cover: <slug>.jpg
+cover: <slug>.jpg          # videos: omit — the thumbnail comes from `video:`
+video: <youtube url>       # medium: video only
 ---
 ## At a glance
 | | |
@@ -87,6 +89,23 @@ cover: <slug>.jpg
 <his quotes as blockquotes — NEVER add quotes from the work yourself; if he
 provides none, omit this section or leave a placeholder he can fill>
 ```
+
+#**Shelf categories.** `categories:` is multi-valued — an item shows under each
+one. They drive the filter chips on `/shelf/type/<medium>` and render as
+`#tags` under the entry title; the shelf section page shows neither. Reuse an
+existing name where it fits (grep other entries) rather than inventing a
+near-duplicate — "Sci-Fi" and "Science Fiction" would become two chips.
+Starting vocabularies per medium:
+
+| Medium | Categories |
+|---|---|
+| video | Entertainment, Politics, Tech, Education, Music, PopSci |
+| movie | Sci-Fi, Thriller, Drama, Action, Comedy, Documentary |
+| show | Drama, Thriller, Comedy, Sci-Fi, Documentary, Anime |
+| book | Nonfiction, Fiction, History, Science, Tech, Biography |
+
+Genre classification is factual, so assign these yourself — unlike `rating:`,
+which is his and never invented.
 
 ### Person — `vault/People/<Full Name>.md`
 ```md

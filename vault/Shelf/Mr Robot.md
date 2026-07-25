@@ -3,6 +3,7 @@ title: Mr. Robot
 title_uk: Містер Робот
 author: Sam Esmail
 medium: show
+categories: [Thriller, Tech]
 rating: 4.5
 date: 2026-07-17
 description: The rare hacker show that hackers actually respect.

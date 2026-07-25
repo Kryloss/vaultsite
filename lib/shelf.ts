@@ -5,7 +5,7 @@
  * Everything here runs at build time; the shelf has no client-side state since
  * the medium rows replaced the old filter chips.
  */
-import { slugify, type Entry, type Section } from "./vault";
+import { parseCategories, slugify, type Entry, type Section } from "./vault";
 import { resolveCoverUrl } from "./markdown";
 import { youtubeId, youtubeThumbnail } from "./youtube";
 import { ui, type Str } from "./ui-strings";
@@ -21,8 +21,10 @@ export interface ShelfItem {
   coverFit?: "contain";
   /** 0–5, halves allowed. */
   rating?: number;
-  /** Renders as a wide 16:9 card with a play badge instead of a 2:3 cover. */
+  /** Renders as a 16:9 card instead of a 2:3 cover. */
   isVideo?: boolean;
+  /** `categories:` frontmatter — filter chips on the medium page. */
+  categories: string[];
 }
 
 export interface ShelfGroup {
@@ -89,7 +91,16 @@ export function toShelfItem(entry: Entry): ShelfItem {
     rating:
       typeof entry.meta.rating === "number" ? entry.meta.rating : undefined,
     isVideo: medium === "video" || medium === "youtube" || Boolean(videoId),
+    categories: parseCategories(entry.meta),
   };
+}
+
+/** Every category used within one medium, in first-seen order. */
+export function groupCategories(group: ShelfGroup): string[] {
+  const seen: string[] = [];
+  for (const item of group.items)
+    for (const c of item.categories) if (!seen.includes(c)) seen.push(c);
+  return seen.sort((a, b) => a.localeCompare(b));
 }
 
 /** Group a section's entries into medium rows, in display order. */

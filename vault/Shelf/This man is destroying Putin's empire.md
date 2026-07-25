@@ -3,6 +3,7 @@ title: This man is destroying Putin's empire
 title_uk: Ця людина руйнує імперію путіна
 author: Caolan Robertson
 medium: video
+categories: [Politics]
 video: https://www.youtube.com/watch?v=3DA7EXbf_d4
 date: 2026-07-25
 description: "A field interview from Caolan Robertson's Ukraine reporting."

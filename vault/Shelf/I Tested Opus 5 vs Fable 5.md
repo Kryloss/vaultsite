@@ -3,6 +3,7 @@ title: I Tested Opus 5 vs. Fable 5. What You Need to Know.
 title_uk: Я протестував Opus 5 проти Fable 5. Що варто знати.
 author: Nate Herk | AI Automation
 medium: video
+categories: [Tech, Education]
 video: https://www.youtube.com/watch?v=2J3uX8iRNng
 date: 2026-07-25
 description: "A side-by-side run of two Claude models on the same tasks."

@@ -3,6 +3,7 @@ title: Inception
 title_uk: Початок
 author: Christopher Nolan
 medium: movie
+categories: [Sci-Fi, Thriller]
 rating: 5
 date: 2026-07-17
 description: A heist movie where the vault is a person's mind.

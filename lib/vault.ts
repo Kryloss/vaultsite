@@ -190,6 +190,33 @@ function formatDateValue(value: unknown): string {
   return String(value).slice(0, 10);
 }
 
+/**
+ * `categories:` frontmatter → a clean list. Accepts a YAML list or a
+ * comma-separated string, so both of these work in Obsidian:
+ *
+ *   categories: [Tech, Education]
+ *   categories: Tech, Education
+ *
+ * Rendered as #tags on the entry page and used for the filter chips on shelf
+ * medium pages. Only the plural key is read — the posts' single `category:`
+ * drives its own chips and is deliberately left alone, so adding this feature
+ * changed nothing on existing post pages.
+ */
+export function parseCategories(meta: Record<string, unknown>): string[] {
+  const raw = meta.categories;
+  const list = Array.isArray(raw)
+    ? raw
+    : typeof raw === "string"
+      ? raw.split(",")
+      : [];
+  const out: string[] = [];
+  for (const value of list) {
+    const name = String(value).trim();
+    if (name && !out.includes(name)) out.push(name);
+  }
+  return out;
+}
+
 /** Ukrainian title from frontmatter (`title_uk:`), if present. */
 export function ukTitle(meta: Record<string, unknown>): string | undefined {
   const v = meta.title_uk ?? meta.titleUk;

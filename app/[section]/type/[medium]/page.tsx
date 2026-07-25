@@ -2,10 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSections, getSectionBySlug, getEntries } from "@/lib/vault";
-import { isShelfSection, shelfGroupBySlug, shelfMediumSlugs } from "@/lib/shelf";
-import ShelfCard from "@/components/lists/ShelfCard";
+import {
+  groupCategories,
+  isShelfSection,
+  shelfGroupBySlug,
+  shelfMediumSlugs,
+} from "@/lib/shelf";
+import ShelfTypeClient from "@/components/lists/ShelfTypeClient";
 import T from "@/components/T";
-import { ui } from "@/lib/ui-strings";
 
 interface Props {
   params: Promise<{ section: string; medium: string }>;
@@ -68,20 +72,11 @@ export default async function ShelfMediumPage({ params }: Props) {
         </h1>
       </header>
 
-      {/* Every card in here is the same shape, so a plain grid is safe. */}
-      <ul
-        className={`mt-8 grid gap-x-5 gap-y-10 ${
-          group.items.some((i) => i.isVideo)
-            ? "grid-cols-1 sm:grid-cols-2"
-            : "grid-cols-2 sm:grid-cols-3"
-        }`}
-      >
-        {group.items.map((item) => (
-          <li key={item.slug}>
-            <ShelfCard item={item} sectionSlug={section.slug} />
-          </li>
-        ))}
-      </ul>
+      <ShelfTypeClient
+        sectionSlug={section.slug}
+        items={group.items}
+        categories={groupCategories(group)}
+      />
     </div>
   );
 }
