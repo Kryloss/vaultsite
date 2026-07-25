@@ -43,6 +43,11 @@ export const ui = {
   mediumShows: { en: "Shows", uk: "Серіали" },
   mediumVideos: { en: "Videos", uk: "Відео" },
 
+  // shelf rows
+  shelfEverythingElse: { en: "Everything else", uk: "Інше" },
+  seeAll: { en: "See all", uk: "Усі" },
+  backToShelf: { en: "Back to", uk: "Назад до" },
+
   // lists
   notesOnHearing: {
     en: "Notes on what I’m hearing",

@@ -1,18 +1,23 @@
+import Link from "next/link";
 import type { ListProps } from "@/lib/section-types";
-import { resolveCoverUrl } from "@/lib/markdown";
-import { youtubeId, youtubeThumbnail } from "@/lib/youtube";
-import ShelfGridClient, {
-  type ShelfItem,
-} from "@/components/lists/ShelfGridClient";
+import { shelfGroups } from "@/lib/shelf";
+import ShelfCard from "@/components/lists/ShelfCard";
 import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
 
 /**
- * "shelf" section type (server side) — vertical 2:3 covers for books, movies,
- * and TV shows, plus wide 16:9 cards for YouTube videos, with medium filter
- * chips. Entry frontmatter:
+ * "shelf" section type — one horizontally-scrolling row per medium (videos,
+ * movies, shows, books), Netflix style. Each row header links to
+ * /<section>/type/<medium>, which lists everything of that type in a grid.
  *
- *   medium: book | movie | show | video   (chip grouping; anything goes)
+ * Rows exist because mixing 16:9 video cards and 2:3 covers in one grid leaves
+ * vertical holes: a grid row is as tall as its tallest item. Grouping by medium
+ * means every row holds one shape.
+ *
+ * Fully server-rendered — the medium rows replaced the old filter chips, so
+ * there's no client-side state left. Entry frontmatter:
+ *
+ *   medium: book | movie | show | video   (row grouping; anything goes)
  *   author: Yuval Noah Harari     (or director/creator/channel)
  *   cover: sapiens.jpg            (image inside the section folder)
  *   coverFit: contain             (optional — letterbox wide art like logos
@@ -30,35 +35,59 @@ export default function ShelfGrid({ section, entries }: ListProps) {
     );
   }
 
-  const items: ShelfItem[] = entries.map((entry) => {
-    const medium =
-      typeof entry.meta.medium === "string"
-        ? entry.meta.medium.toLowerCase()
-        : undefined;
+  const groups = shelfGroups(entries);
 
-    // `video:` (or a `url:`) pointing at YouTube gives us the thumbnail for
-    // free — an explicit `cover:` still wins if one is set.
-    const link = entry.meta.video ?? entry.meta.url;
-    const videoId = typeof link === "string" ? youtubeId(link) : undefined;
-    const cover = resolveCoverUrl(entry.sectionDir, entry.meta.cover);
+  return (
+    <div className="mt-8 flex flex-col gap-6">
+      {groups.map((group) => (
+        <section key={group.medium}>
+          <h2 className="text-lg font-semibold tracking-tight text-[var(--text)]">
+            {/* "Everything else" has no medium page to link to. The chevron is
+                shown even for a single item so the page stays discoverable. */}
+            {group.medium === "unsorted" ? (
+              <T {...group.label} />
+            ) : (
+              <Link
+                href={`/${section.slug}/type/${group.slug}`}
+                className="group inline-flex items-center gap-0.5"
+              >
+                <T {...group.label} />
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden
+                  className="h-[18px] w-[18px] shrink-0 translate-y-px text-[var(--text-tertiary)] transition-all duration-150 group-hover:translate-x-0.5 group-hover:text-[var(--text)]"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m9 6 6 6-6 6" />
+                </svg>
+              </Link>
+            )}
+          </h2>
 
-    return {
-      slug: entry.slug,
-      title: entry.title,
-      titleUk: entry.titleUk,
-      author:
-        typeof entry.meta.author === "string" ? entry.meta.author : undefined,
-      medium,
-      coverUrl: cover ?? (videoId ? youtubeThumbnail(videoId) : undefined),
-      coverFit:
-        entry.meta.coverFit === "contain" ? ("contain" as const) : undefined,
-      rating:
-        typeof entry.meta.rating === "number" ? entry.meta.rating : undefined,
-      // Wide card + play badge. Driven by the medium so an entry still reads as
-      // a video even if the link lives in the body rather than frontmatter.
-      isVideo: medium === "video" || medium === "youtube" || Boolean(videoId),
-    };
-  });
-
-  return <ShelfGridClient sectionSlug={section.slug} items={items} />;
+          {/* Horizontal scroller. Cards are fixed-width flex children; videos
+              get a wider box because they're 16:9 rather than 2:3. */}
+          <ul className="shelf-row mt-3 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-1">
+            {group.items.map((item) => (
+              <li
+                key={item.slug}
+                className={`shrink-0 snap-start ${
+                  item.isVideo ? "w-[280px]" : "w-[150px]"
+                }`}
+              >
+                <ShelfCard
+                  item={item}
+                  sectionSlug={section.slug}
+                  showRating={false}
+                />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
+  );
 }

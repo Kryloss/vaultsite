@@ -226,6 +226,18 @@ body {
   color: var(--text-secondary);
 }
 
+/* Shelf medium rows (components/lists/ShelfGrid.tsx) — horizontal scrollers.
+   The scrollbar is hidden because the rows are short and the cards are
+   obviously cut off at the edge; momentum scroll and snap do the rest. */
+.shelf-row {
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.shelf-row::-webkit-scrollbar {
+  display: none;
+}
+
 /* YouTube embeds — a bare youtube.com/youtu.be link on its own line becomes
    a player (lib/youtube.ts). Served from youtube-nocookie.com, so nothing is
    set until the visitor presses play. */
