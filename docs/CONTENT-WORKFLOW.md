@@ -24,9 +24,9 @@ the vault. This doc is the playbook. Read CLAUDE.md first for the hard rules.
 ## Step by step
 
 1. **Classify** → which section? Posts (writing/opinions/TILs), Shelf (books,
-   movies, shows), People (profiles), Projects (things he built), Music
-   (album/track thoughts), Now (rare — current-status updates edit
-   `Now/main.md` in place).
+   movies, shows, YouTube videos), People (profiles), Projects (things he
+   built), Music (album/track thoughts), Now (rare — current-status updates
+   edit `Now/main.md` in place).
 2. **Clarify** → only if rule 2 triggers. Batch all questions at once.
 3. **Structure** → apply the matching template below.
 4. **Cross-link** → scan the new text AND existing notes for link
@@ -90,11 +90,12 @@ video: <youtube url>       # medium: video only
 provides none, omit this section or leave a placeholder he can fill>
 ```
 
-#**Shelf categories.** `categories:` is multi-valued — an item shows under each
-one. They drive the filter chips on `/shelf/type/<medium>` and render as
-`#tags` under the entry title; the shelf section page shows neither. Reuse an
-existing name where it fits (grep other entries) rather than inventing a
-near-duplicate — "Sci-Fi" and "Science Fiction" would become two chips.
+**Shelf categories.** `categories:` is multi-valued — an item appears under
+each one. They drive the filter chips on `/shelf/type/<medium>` and render as
+clickable chips above the date on the entry page (each one opens its medium
+page with that category pre-selected). The shelf section page shows neither.
+Reuse an existing name where it fits (grep other entries) rather than inventing
+a near-duplicate — "Sci-Fi" and "Science Fiction" would become two chips.
 Starting vocabularies per medium:
 
 | Medium | Categories |
@@ -106,6 +107,45 @@ Starting vocabularies per medium:
 
 Genre classification is factual, so assign these yourself — unlike `rating:`,
 which is his and never invented.
+
+### Video shelf item — `vault/Shelf/<Title>.md`
+
+Same template as above with `medium: video`. Differences worth knowing:
+
+```md
+---
+title: <exact video title, as YouTube has it>
+title_uk: <translated title>
+author: <channel name>
+medium: video
+categories: [Tech, Education]
+video: https://www.youtube.com/watch?v=<id>
+date: YYYY-MM-DD
+description: "<one sentence>"
+description_uk: "<one sentence>"
+---
+## At a glance
+| | |
+|---|---|
+| Channel | … |
+| Topic | … |
+| Released | <the video's upload date — NOT the day he watched it> |
+
+<the video URL, alone on its own line — it becomes an embedded player>
+
+## Why it's on the shelf
+<his thoughts — leave an HTML comment placeholder if he gave none>
+```
+
+- **No `cover:`.** The thumbnail is derived from the video ID at build time.
+- **Get the title and channel from the horse's mouth**, not from a search
+  result — YouTube's oEmbed endpoint is keyless and exact:
+  `https://www.youtube.com/oembed?url=<video url>&format=json`
+- **`Released` is the upload date.** oEmbed does NOT return it and watch pages
+  don't fetch cleanly, so it usually can't be verified from here. Leave `—` and
+  ask him for it rather than guessing — and never quietly reuse today's date,
+  which is the day *he* watched it, not the day it went up.
+- The row layout uses 16:9 cards for videos; nothing else needs configuring.
 
 ### Person — `vault/People/<Full Name>.md`
 ```md
@@ -322,8 +362,14 @@ without being asked.
 
 Callouts `> [!note|tip|warning|danger] Title`, tables, fenced code blocks,
 `![[img.jpg]]` embeds (`|caption`, `|400` width, ≤128 = circular avatar),
-auto-embedding Apple Music links. The full demo lives at
-`vault/Posts/Formatting playground.md`.
+auto-embedding Apple Music **and YouTube** links (a bare link alone on a line
+becomes a player). The full demo lives at `vault/Posts/Formatting playground.md`.
+
+**Code blocks** are syntax-highlighted at build time. Add a filename header
+with ` ```bash title="scan.sh" ` (a bare ` ```bash scan.sh ` works too). The
+language must be listed in `LANGS` in `lib/highlight.ts` — unknown ones fall
+back to plain text rather than failing the build, so check that list before
+using something exotic.
 
 ## Fact handling
 

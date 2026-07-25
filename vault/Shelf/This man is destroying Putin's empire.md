@@ -17,7 +17,7 @@ description_uk: "Інтерв'ю з циклу репортажів Каолан
 | Channel | Caolan Robertson |
 | Who he is | Irish journalist, reporting from Ukraine since 2022 and living there full-time since mid-2024 |
 | Recognition | Ukraine's Order of Merit, 3rd Class (June 2026); Honorary Ambassador Award for Digital Diplomacy (2025) |
-| Watched | July 25, 2026 |
+| Released | — |
 
 https://www.youtube.com/watch?v=3DA7EXbf_d4
 

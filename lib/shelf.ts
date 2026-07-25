@@ -95,12 +95,33 @@ export function toShelfItem(entry: Entry): ShelfItem {
   };
 }
 
-/** Every category used within one medium, in first-seen order. */
+/** Every category used within one medium, alphabetical. */
 export function groupCategories(group: ShelfGroup): string[] {
   const seen: string[] = [];
   for (const item of group.items)
     for (const c of item.categories) if (!seen.includes(c)) seen.push(c);
   return seen.sort((a, b) => a.localeCompare(b));
+}
+
+/** "Sci-Fi" → "sci-fi" (the URL segment). */
+export function categorySlug(category: string): string {
+  return slugify(category);
+}
+
+/** Resolve a category URL segment back to its display name. */
+export function categoryFromSlug(
+  group: ShelfGroup,
+  slug: string
+): string | undefined {
+  return groupCategories(group).find((c) => categorySlug(c) === slug);
+}
+
+/** Items in a group carrying `category`. */
+export function itemsInCategory(
+  group: ShelfGroup,
+  category: string
+): ShelfItem[] {
+  return group.items.filter((i) => i.categories.includes(category));
 }
 
 /** Group a section's entries into medium rows, in display order. */

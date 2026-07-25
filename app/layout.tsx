@@ -7,7 +7,12 @@ import LinkPreview from "@/components/LinkPreview";
 import { getSections, getEntries, getSearchIndex } from "@/lib/vault";
 import { getLinkPreviews } from "@/lib/previews";
 import { resistanceDay } from "@/lib/resistance";
-import { isShelfSection, shelfGroups } from "@/lib/shelf";
+import {
+  categorySlug,
+  groupCategories,
+  isShelfSection,
+  shelfGroups,
+} from "@/lib/shelf";
 import { siteName, siteUrl, siteDescription, socials } from "@/lib/site-config";
 
 export const metadata: Metadata = {
@@ -56,6 +61,10 @@ export default function RootLayout({
               slug: g.slug,
               title: g.label.en,
               titleUk: g.label.uk,
+              categories: groupCategories(g).map((c) => ({
+                slug: categorySlug(c),
+                title: c,
+              })),
             }))
         : undefined,
     };

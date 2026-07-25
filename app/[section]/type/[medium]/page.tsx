@@ -2,13 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSections, getSectionBySlug, getEntries } from "@/lib/vault";
-import {
-  groupCategories,
-  isShelfSection,
-  shelfGroupBySlug,
-  shelfMediumSlugs,
-} from "@/lib/shelf";
-import ShelfTypeClient from "@/components/lists/ShelfTypeClient";
+import { isShelfSection, shelfGroupBySlug, shelfMediumSlugs } from "@/lib/shelf";
+import ShelfTypeView from "@/components/lists/ShelfTypeView";
 import T from "@/components/T";
 
 interface Props {
@@ -63,20 +58,7 @@ export default async function ShelfMediumPage({ params }: Props) {
         ← <T en={section.title} uk={section.titleUk} />
       </Link>
 
-      <header className="mt-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-[var(--text)]">
-          <T {...group.label} />
-          <span className="ml-2.5 align-middle text-base font-normal text-[var(--text-tertiary)]">
-            {group.items.length}
-          </span>
-        </h1>
-      </header>
-
-      <ShelfTypeClient
-        sectionSlug={section.slug}
-        items={group.items}
-        categories={groupCategories(group)}
-      />
+      <ShelfTypeView sectionSlug={section.slug} group={group} />
     </div>
   );
 }

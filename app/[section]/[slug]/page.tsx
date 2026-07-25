@@ -12,6 +12,7 @@ import {
   parseCategories,
 } from "@/lib/vault";
 import { renderMarkdown } from "@/lib/markdown";
+import { categorySlug, isShelfSection, mediumSlug } from "@/lib/shelf";
 import { ui } from "@/lib/ui-strings";
 import Stars from "@/components/Stars";
 import T from "@/components/T";
@@ -52,6 +53,16 @@ export default async function EntryPage({ params }: Props) {
   const stats = section.type === "posts" ? readingStats(entry.content) : null;
   const categories = parseCategories(entry.meta);
 
+  // Shelf entries link each category to its medium page, pre-filtered.
+  const medium =
+    typeof entry.meta.medium === "string"
+      ? entry.meta.medium.toLowerCase()
+      : undefined;
+  const categoryHref = (category: string) =>
+    isShelfSection(section) && medium
+      ? `/${section.slug}/type/${mediumSlug(medium)}/${categorySlug(category)}`
+      : undefined;
+
   return (
     <div className="mx-auto max-w-2xl px-6 py-14 lg:py-24">
       <Link
@@ -77,7 +88,35 @@ export default async function EntryPage({ params }: Props) {
             </span>
           )}
         </h1>
-        <p className="mt-2 flex flex-wrap items-center gap-x-2 text-sm text-[var(--text-tertiary)]">
+        {/* `categories:` frontmatter, styled like the filter chips they lead
+            to. On a shelf entry each one opens its medium page with that
+            category pre-selected; elsewhere there's no such page, so they
+            render as plain chips. Names are raw strings, identical in both
+            languages (same as the posts' category chips). */}
+        {categories.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {categories.map((c) => {
+              const href = categoryHref(c);
+              const base =
+                "rounded-full border border-[var(--border)] px-3 py-1 text-sm text-[var(--text-secondary)] transition-colors";
+              return href ? (
+                <Link
+                  key={c}
+                  href={href}
+                  className={`${base} hover:border-[var(--text-tertiary)] hover:text-[var(--text)]`}
+                >
+                  {c}
+                </Link>
+              ) : (
+                <span key={c} className={base}>
+                  {c}
+                </span>
+              );
+            })}
+          </div>
+        )}
+
+        <p className="mt-3 flex flex-wrap items-center gap-x-2 text-sm text-[var(--text-tertiary)]">
           {entry.date && (
             <time dateTime={entry.date}>
               <T en={displayDate(entry.date)} uk={displayDateUk(entry.date)} />
@@ -92,15 +131,6 @@ export default async function EntryPage({ params }: Props) {
           )}
         </p>
 
-        {/* `categories:` frontmatter → #tags. Names are raw strings, shown the
-            same in both languages (like the posts' category chips). */}
-        {categories.length > 0 && (
-          <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm text-[var(--text-tertiary)]">
-            {categories.map((c) => (
-              <span key={c}>#{c}</span>
-            ))}
-          </p>
-        )}
       </header>
 
       {htmlUk ? (

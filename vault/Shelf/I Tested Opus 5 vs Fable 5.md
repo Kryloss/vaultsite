@@ -16,7 +16,7 @@ description_uk: "Порівняння двох моделей Claude на одн
 |---|---|
 | Channel | Nate Herk \| AI Automation |
 | Topic | Anthropic's Claude Opus 5 and Claude Fable 5, compared on the same prompts |
-| Watched | July 25, 2026 |
+| Released | — |
 
 https://www.youtube.com/watch?v=2J3uX8iRNng
 

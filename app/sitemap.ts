@@ -1,6 +1,11 @@
 import type { MetadataRoute } from "next";
 import { getSections, getEntries } from "@/lib/vault";
-import { isShelfSection, shelfMediumSlugs } from "@/lib/shelf";
+import {
+  categorySlug,
+  groupCategories,
+  isShelfSection,
+  shelfGroups,
+} from "@/lib/shelf";
 import { siteUrl } from "@/lib/site-config";
 
 export const dynamic = "force-static";
@@ -20,14 +25,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }
     const entries = getEntries(section);
 
-    // Shelf medium pages, e.g. /shelf/type/videos
+    // Shelf medium + category pages, e.g. /shelf/type/videos[/tech]
     if (isShelfSection(section)) {
-      for (const medium of shelfMediumSlugs(entries)) {
+      for (const group of shelfGroups(entries)) {
+        if (group.medium === "unsorted") continue;
         urls.push({
-          url: `${siteUrl}/${section.slug}/type/${medium}`,
+          url: `${siteUrl}/${section.slug}/type/${group.slug}`,
           changeFrequency: "weekly",
           priority: 0.7,
         });
+        for (const category of groupCategories(group)) {
+          urls.push({
+            url: `${siteUrl}/${section.slug}/type/${group.slug}/${categorySlug(category)}`,
+            changeFrequency: "weekly",
+            priority: 0.5,
+          });
+        }
       }
     }
 

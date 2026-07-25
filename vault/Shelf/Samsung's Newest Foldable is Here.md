@@ -16,7 +16,7 @@ description_uk: "Перші враження команди Waveform від но
 |---|---|
 | Channel | WVFRM Podcast (Waveform) |
 | Topic | Hands-on with Samsung's newest foldable |
-| Watched | July 25, 2026 |
+| Released | — |
 
 https://www.youtube.com/watch?v=WVsG3daysEM
 

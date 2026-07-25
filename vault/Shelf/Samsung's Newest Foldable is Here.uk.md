@@ -4,7 +4,7 @@
 |---|---|
 | Канал | WVFRM Podcast (Waveform) |
 | Тема | Огляд нового складаного смартфона Samsung |
-| Переглянуто | 25 липня 2026 |
+| Оприлюднено | — |
 
 https://www.youtube.com/watch?v=WVsG3daysEM
 
