@@ -387,11 +387,53 @@ function transformCallouts(md: string): string {
   return out.join("\n");
 }
 
+/* Sentinels for masked code (Unicode private-use area — never real content). */
+const MASK_OPEN = "";
+const MASK_CLOSE = "";
+
+/**
+ * Hide fenced blocks and inline code spans behind placeholders so the Obsidian
+ * preprocessing regexes below can't rewrite them.
+ *
+ * Without this, a note that *documents* the syntax gets mangled: writing
+ * `` `![[Name.excalidraw]]` `` in backticks still matched the embed regex, so
+ * the code span ended up containing generated HTML instead of the literal text
+ * the author typed.
+ */
+function maskCode(md: string): { text: string; slots: string[] } {
+  const slots: string[] = [];
+  const stash = (m: string) => `${MASK_OPEN}${slots.push(m) - 1}${MASK_CLOSE}`;
+
+  // Strip any pre-existing sentinels so indices can't be spoofed by content.
+  let text = md.split(MASK_OPEN).join("").split(MASK_CLOSE).join("");
+
+  // Fenced blocks first — they may legitimately contain backticks.
+  text = text.replace(
+    /^[ \t]*(`{3,}|~{3,})[^\n]*\n[\s\S]*?^[ \t]*\1[ \t]*$/gm,
+    stash
+  );
+  // Then inline spans, bounded to a single line.
+  text = text.replace(/(`+)(?:(?!\1)[^\n])+\1/g, stash);
+
+  return { text, slots };
+}
+
+function unmaskCode(text: string, slots: string[]): string {
+  return text.replace(
+    new RegExp(`${MASK_OPEN}(\\d+)${MASK_CLOSE}`, "g"),
+    (_m, i: string) => slots[Number(i)] ?? ""
+  );
+}
+
 export function preprocessObsidian(
   md: string,
   sectionDir: string,
   sectionSlug: string
 ): string {
+  // 0. Take code out of play — everything below is regex over the raw text.
+  const { text, slots } = maskCode(md);
+  md = text;
+
   // 1. Callouts first (they restructure blockquote syntax).
   md = transformCallouts(md);
 
@@ -482,7 +524,8 @@ export function preprocessObsidian(
     (m, url: string) => (isAppleMusicUrl(url) ? `\n${appleMusicEmbedHtml(url)}\n` : m)
   );
 
-  return md;
+  // 7. Put the code back, untouched, for remark to parse normally.
+  return unmaskCode(md, slots);
 }
 
 function safeDecode(s: string): string {

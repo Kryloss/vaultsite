@@ -26,6 +26,8 @@ Append new entries at the bottom. Format: number, date, decision, why, revisit-w
 **Why:** Two small, readable regexes vs. an AST plugin dependency. Wiki links resolve within the same section only.
 **Revisit when:** Cross-section wiki links or embed transclusion (`![[Other Note]]` embedding note content) are needed.
 
+**Code is masked first (2026-07-24):** the known cost of regex-over-raw-text is that it has no idea what a code span is, so a note *documenting* the syntax got rewritten — `` `![[Name.excalidraw]]` `` in backticks was substituted for generated HTML, and the reader saw a `<span class="excalidraw-missing">` tag inside a code block. `maskCode()` now swaps fenced blocks and inline spans for private-use-area sentinels before step 1 and `unmaskCode()` restores them after step 6, so code reaches remark exactly as typed. This is the main reason to eventually move to a real remark plugin: an AST walker gets this for free.
+
 ## 5. Fully static generation, `dynamicParams = false` (2026-07-16)
 
 **Decision:** Every route is pre-rendered at build; unknown paths 404 at the CDN.

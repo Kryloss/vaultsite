@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Posts/Formatting playground.md",
+                "file": "Home/main.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Formatting playground"
+              "title": "main"
             }
           }
         ]
@@ -197,8 +197,9 @@
       "obsidian-excalidraw-plugin:New drawing": false
     }
   },
-  "active": "4e6d28c414c0125d",
+  "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
+    "Posts/Formatting playground.md",
     "Posts/secplus-domains.svg",
     "Posts/rendering-pipeline.uk.svg",
     "Posts/secplus-plan.svg",
@@ -206,7 +207,6 @@
     "Posts/rendering-pipeline.svg",
     "Posts/secplus-domains.uk.svg",
     "Posts/First certification.uk.md",
-    "Posts/Formatting playground.md",
     "Posts/main.md",
     "Posts/Post Sample.md",
     "Posts/Draft example.md",

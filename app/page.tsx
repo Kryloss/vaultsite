@@ -61,7 +61,7 @@ export default async function HomePage() {
       <SocialLinks className="mt-8" />
 
       {recent.length > 0 && (
-        <section className="mt-16">
+        <section className="mt-10">
           <div className="flex items-baseline justify-between">
             <h2 className="text-lg font-semibold tracking-tight text-[var(--text)]">
               <T {...ui.recentPosts} />
@@ -102,7 +102,7 @@ export default async function HomePage() {
       )}
 
       {explore.length > 0 && (
-        <section className="mt-16">
+        <section className="mt-10">
           <h2 className="text-lg font-semibold tracking-tight text-[var(--text)]">
             <T {...ui.explore} />
           </h2>

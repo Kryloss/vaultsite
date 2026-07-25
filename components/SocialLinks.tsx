@@ -18,7 +18,7 @@ const socialIcons = {
 /** Row of social icon links, sourced from lib/site-config. */
 export default function SocialLinks({ className = "" }: { className?: string }) {
   return (
-    <div className={`flex items-center gap-4 ${className}`}>
+    <div className={`flex items-center gap-7 ${className}`}>
       {socials.map((s) => {
         const Icon = socialIcons[s.icon];
         return (
@@ -31,7 +31,7 @@ export default function SocialLinks({ className = "" }: { className?: string }) 
             title={s.label}
             className="text-[var(--text-tertiary)] transition-colors duration-150 hover:text-[var(--text)]"
           >
-            <Icon className="h-5 w-5" />
+            <Icon className="h-[30px] w-[30px]" />
             <span className="sr-only">{s.label}</span>
           </a>
         );
