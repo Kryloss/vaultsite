@@ -19,7 +19,7 @@ export const ui = {
   /** {n} is replaced with the day number — see components/ResistanceDay.tsx */
   resistanceDay: {
     en: "Day {n} of Ukraine’s resistance",
-    uk: "{n}-й день спротиву України",
+    uk: "{n}-й день українського спротиву",
   },
   searchPlaceholder: {
     en: "Search pages and posts…",

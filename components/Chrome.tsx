@@ -222,7 +222,8 @@ export default function Chrome({
               );
             })}
           </div>
-          <p className="mt-4 text-xs text-[var(--text-tertiary)]">
+          {/* Sized to fit the w-56 sidebar on one line — see lib/resistance.ts */}
+          <p className="mt-4 whitespace-nowrap text-[11px] tracking-tight text-[var(--text-tertiary)]">
             <ResistanceDay initial={resistanceDay} />
           </p>
         </div>
