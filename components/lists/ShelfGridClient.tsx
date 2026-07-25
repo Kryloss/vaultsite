@@ -82,11 +82,18 @@ export default function ShelfGridClient({
         </div>
       )}
 
-      {/* `dense` lets 2:3 cards backfill the gaps left by full-width video
-          cards, so the grid doesn't grow holes when mediums are mixed. */}
-      <ul className="mt-8 grid grid-cols-2 gap-x-5 gap-y-10 [grid-auto-flow:dense] sm:grid-cols-3">
+      {/* Videos take a whole row. A grid row is as tall as its tallest item, so
+          a short 16:9 card sharing a row with a tall 2:3 poster would leave a
+          void beneath it — giving videos the full width means they never share
+          a row with anything. No `dense` packing on purpose: with nothing to
+          work around it would only pull later items forward, breaking the
+          newest-first order. */}
+      <ul className="mt-8 grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3">
         {filtered.map((item) => (
-          <li key={item.slug} className={item.isVideo ? "col-span-2" : undefined}>
+          <li
+            key={item.slug}
+            className={item.isVideo ? "col-span-2 sm:col-span-3" : undefined}
+          >
             <Link href={`/${sectionSlug}/${item.slug}`} className="group block">
               <div
                 className={`relative overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--bg-hover)] shadow-sm transition-shadow duration-300 group-hover:shadow-md ${
