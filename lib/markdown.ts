@@ -247,7 +247,10 @@ function scopeSvgCss(css: string, scope: string): string {
  * (`.light.svg` + `.dark.svg`) keep using <img> — they swap via CSS `display`,
  * which was never affected by this.
  */
-function inlineSelfThemingSvg(url: string, alt: string): string | undefined {
+function inlineSelfThemingSvg(
+  url: string,
+  altEscaped: string
+): string | undefined {
   const file = vaultPathFromUrl(url);
   if (!file || !/\.svg$/i.test(file)) return undefined;
 
@@ -281,16 +284,40 @@ function inlineSelfThemingSvg(url: string, alt: string): string | undefined {
     .replace(/^<svg\b/i, "")
     .replace(/\/?>$/, "")
     .replace(/\s(id|class)="[^"]*"/gi, "");
-  const a = escapeHtml(alt);
+  const a = altEscaped;
   const labelled = /aria-label=/i.test(attrs);
-  return (
-    svg.replace(
-      open[0],
-      `<svg id="${id}" class="diagram"${attrs}${
-        labelled || !a ? "" : ` role="img" aria-label="${a}"`
-      }>`
-    ) || undefined
+  const out = svg.replace(
+    open[0],
+    `<svg id="${id}" class="diagram"${attrs}${
+      labelled || !a ? "" : ` role="img" aria-label="${a}"`
+    }>`
   );
+
+  // One line, for tidiness and so nothing downstream can mistake a blank line
+  // inside the markup for a block boundary.
+  return out.replace(/\s*\r?\n\s*/g, " ") || undefined;
+}
+
+/**
+ * Swap <img src="…self-theming.svg"> for the SVG itself, in the FINAL HTML.
+ *
+ * This has to run after the whole pipeline, not during preprocessing. The
+ * preprocessing steps (wiki links, progress bars, Apple Music embeds…) are
+ * regexes over the document text — inline the SVG any earlier and those regexes
+ * happily rewrite the diagram's own labels. A diagram that documents this very
+ * syntax (`[progress:: 45]`, `[[x.excalidraw]]`) then gets HTML spans injected
+ * into its markup, and a `<span>` inside SVG content makes the HTML parser
+ * break out of foreign content — the diagram renders half-drawn with the rest
+ * spilling onto the page as text.
+ */
+function inlineDiagrams(html: string): string {
+  return html.replace(/<img\b[^>]*>/gi, (tag) => {
+    const src = tag.match(/\ssrc="([^"]+)"/i)?.[1];
+    if (!src || !/\.svg$/i.test(src)) return tag;
+    // alt is already HTML-escaped here — pass it through as-is.
+    const alt = tag.match(/\salt="([^"]*)"/i)?.[1] ?? "";
+    return inlineSelfThemingSvg(src, alt) ?? tag;
+  });
 }
 
 /** A themed <img> pair (dark swapped via CSS), a single one, or an inline SVG. */
@@ -308,10 +335,8 @@ function themedImg(
       `<img class="only-dark${cls}" src="${dark}" alt="${a}" loading="lazy" />`
     );
   }
-  // Single-file diagrams that theme themselves must be inlined — see above.
-  const inlined = inlineSelfThemingSvg(light, alt);
-  if (inlined) return inlined;
-
+  // Self-theming SVGs stay <img> here and are swapped for inline markup by
+  // inlineDiagrams() once the pipeline is done — see the note there.
   return `<img class="${extraClass}" src="${light}" alt="${a}" loading="lazy" />`;
 }
 
@@ -679,5 +704,6 @@ export async function renderMarkdown(
     .use(rehypeSlug)
     .use(rehypeStringify)
     .process(pre);
-  return String(file);
+  // Last step on purpose — see inlineDiagrams().
+  return inlineDiagrams(String(file));
 }

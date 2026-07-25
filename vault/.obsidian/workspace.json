@@ -11,12 +11,14 @@
             "id": "9cd2acf5af766b33",
             "type": "leaf",
             "state": {
-              "type": "image",
+              "type": "markdown",
               "state": {
-                "file": "Posts/secplus-plan.uk.svg"
+                "file": "Posts/Formatting playground.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-image",
-              "title": "secplus-plan.uk"
+              "icon": "lucide-file",
+              "title": "Formatting playground"
             }
           }
         ]
@@ -195,17 +197,17 @@
       "obsidian-excalidraw-plugin:New drawing": false
     }
   },
-  "active": "9cd2acf5af766b33",
+  "active": "4e6d28c414c0125d",
   "lastOpenFiles": [
-    "Posts/secplus-plan.svg",
-    "Posts/rendering-pipeline.svg",
-    "Posts/rendering-pipeline.uk.svg",
     "Posts/secplus-domains.svg",
+    "Posts/rendering-pipeline.uk.svg",
+    "Posts/secplus-plan.svg",
+    "Posts/secplus-plan.uk.svg",
+    "Posts/rendering-pipeline.svg",
     "Posts/secplus-domains.uk.svg",
     "Posts/First certification.uk.md",
     "Posts/Formatting playground.md",
     "Posts/main.md",
-    "Posts/secplus-plan.uk.svg",
     "Posts/Post Sample.md",
     "Posts/Draft example.md",
     "People/Mykhailo Fedorov.md",
