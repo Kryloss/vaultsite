@@ -3,6 +3,7 @@ import ShelfCard from "@/components/lists/ShelfCard";
 import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
 import {
+  categoryLabel,
   categorySlug,
   groupCategories,
   itemsInCategory,
@@ -55,7 +56,9 @@ export default function ShelfTypeView({
       <header className="mt-6">
         <h1 className="text-2xl font-semibold tracking-tight text-[var(--text)]">
           <T {...group.label} />
-          <span className="ml-2.5 align-middle text-base font-normal text-[var(--text-tertiary)]">
+          {/* Inherits the heading's size, weight and tracking — only the
+              colour separates it from the title. */}
+          <span className="ml-2.5 text-[var(--text-tertiary)]">
             {items.length}
           </span>
         </h1>
@@ -65,7 +68,11 @@ export default function ShelfTypeView({
         <div className="mt-6 flex flex-wrap gap-2">
           {chip(<T {...ui.filterAll} />, base, !activeCategory)}
           {categories.map((c) =>
-            chip(c, `${base}/${categorySlug(c)}`, c === activeCategory)
+            chip(
+              <T {...categoryLabel(c)} />,
+              `${base}/${categorySlug(c)}`,
+              c === activeCategory
+            )
           )}
         </div>
       )}

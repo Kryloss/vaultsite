@@ -91,9 +91,10 @@ provides none, omit this section or leave a placeholder he can fill>
 ```
 
 **Shelf categories.** `categories:` is multi-valued — an item appears under
-each one. They drive the filter chips on `/shelf/type/<medium>` and render as
-clickable chips above the date on the entry page (each one opens its medium
-page with that category pre-selected). The shelf section page shows neither.
+each one. Every category becomes its own page at
+`/shelf/type/<medium>/<category>`, reachable from the chips on the medium page
+and from the chips above the date on an entry page. The shelf section page
+shows neither.
 Reuse an existing name where it fits (grep other entries) rather than inventing
 a near-duplicate — "Sci-Fi" and "Science Fiction" would become two chips.
 Starting vocabularies per medium:
@@ -107,6 +108,13 @@ Starting vocabularies per medium:
 
 Genre classification is factual, so assign these yourself — unlike `rating:`,
 which is his and never invented.
+
+Write categories in **English only**. Ukrainian names live in `CATEGORY_LABELS`
+(`lib/shelf.ts`) and are applied everywhere the category is shown — chips, entry
+page, breadcrumb. A category with no entry there falls back to the English
+string in both languages, so add one when you introduce a new category. URL
+slugs are always built from the English name, so a translation never changes a
+page's address.
 
 ### Video shelf item — `vault/Shelf/<Title>.md`
 

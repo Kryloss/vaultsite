@@ -30,13 +30,7 @@ export interface NavItem {
   icon?: string;
   entries: { slug: string; title: string; titleUk?: string }[];
   /** Shelf-type sections only: medium pages at /<slug>/type/<medium>. */
-  mediums?: {
-    slug: string;
-    title: string;
-    titleUk?: string;
-    /** Category pages one level deeper: /<slug>/type/<medium>/<category>. */
-    categories?: { slug: string; title: string }[];
-  }[];
+  mediums?: { slug: string; title: string; titleUk?: string }[];
 }
 
 const socialIcons = {
@@ -98,17 +92,11 @@ export default function Chrome({
   // Breadcrumb: deepest location first — "Entry · Section · SiteName".
   // Two shapes live under a section: /<section>/<entry> and the shelf's medium
   // pages, /<section>/type/<medium> (see lib/shelf.ts).
-  const [sectionSlug, second, third, fourth] = pathname
-    .split("/")
-    .filter(Boolean);
+  const [sectionSlug, second, third] = pathname.split("/").filter(Boolean);
   const section = sectionSlug ? nav.find((i) => i.slug === sectionSlug) : undefined;
   const medium =
     second === "type" && third
       ? section?.mediums?.find((m) => m.slug === third)
-      : undefined;
-  const category =
-    medium && fourth
-      ? medium.categories?.find((c) => c.slug === fourth)
       : undefined;
   const entry =
     !medium && second && section
@@ -116,15 +104,15 @@ export default function Chrome({
       : undefined;
 
   const crumbs: { en: string; uk?: string; href: string }[] = [];
-  if (category && medium && section) {
-    crumbs.push({ en: category.title, href: pathname });
+  // Category pages (/…/type/<medium>/<category>) stop at the medium — the
+  // category is visible as the active chip on the page itself, so repeating
+  // it here only made the breadcrumb longer.
+  if (medium && section)
     crumbs.push({
       en: medium.title,
       uk: medium.titleUk,
       href: `/${section.slug}/type/${medium.slug}`,
     });
-  } else if (medium && section)
-    crumbs.push({ en: medium.title, uk: medium.titleUk, href: pathname });
   else if (entry && section)
     crumbs.push({ en: entry.title, uk: entry.titleUk, href: pathname });
   if (section && section.slug !== "home")

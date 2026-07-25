@@ -12,7 +12,12 @@ import {
   parseCategories,
 } from "@/lib/vault";
 import { renderMarkdown } from "@/lib/markdown";
-import { categorySlug, isShelfSection, mediumSlug } from "@/lib/shelf";
+import {
+  categoryLabel,
+  categorySlug,
+  isShelfSection,
+  mediumSlug,
+} from "@/lib/shelf";
 import { ui } from "@/lib/ui-strings";
 import Stars from "@/components/Stars";
 import T from "@/components/T";
@@ -105,11 +110,11 @@ export default async function EntryPage({ params }: Props) {
                   href={href}
                   className={`${base} hover:border-[var(--text-tertiary)] hover:text-[var(--text)]`}
                 >
-                  {c}
+                  <T {...categoryLabel(c)} />
                 </Link>
               ) : (
                 <span key={c} className={base}>
-                  {c}
+                  <T {...categoryLabel(c)} />
                 </span>
               );
             })}
