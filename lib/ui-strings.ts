@@ -41,6 +41,7 @@ export const ui = {
   mediumBooks: { en: "Books", uk: "Книги" },
   mediumMovies: { en: "Movies", uk: "Фільми" },
   mediumShows: { en: "Shows", uk: "Серіали" },
+  mediumVideos: { en: "Videos", uk: "Відео" },
 
   // lists
   notesOnHearing: {

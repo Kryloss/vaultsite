@@ -28,6 +28,7 @@ import fs from "fs";
 import path from "path";
 import { slugify, getWikiIndex, getAssetIndex, VAULT_DIR } from "./vault";
 import { appleMusicEmbedHtml, isAppleMusicUrl } from "./apple-music";
+import { youtubeEmbedHtml, youtubeId } from "./youtube";
 import { highlightToHast, parseCodeMeta, langLabel } from "./highlight";
 
 /** Encode each path segment but keep "/" separators. */
@@ -524,7 +525,16 @@ export function preprocessObsidian(
     (m, url: string) => (isAppleMusicUrl(url) ? `\n${appleMusicEmbedHtml(url)}\n` : m)
   );
 
-  // 7. Put the code back, untouched, for remark to parse normally.
+  // 7. YouTube links standing alone on a line → embedded player.
+  md = md.replace(
+    /^\s*<?(https?:\/\/(?:www\.|m\.)?(?:youtube\.com|youtu\.be)\/[^\s<>]+)>?\s*$/gm,
+    (m, url: string) => {
+      const id = youtubeId(url);
+      return id ? `\n${youtubeEmbedHtml(id)}\n` : m;
+    }
+  );
+
+  // 8. Put the code back, untouched, for remark to parse normally.
   return unmaskCode(md, slots);
 }
 

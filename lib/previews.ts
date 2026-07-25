@@ -45,6 +45,9 @@ function excerpt(md: string): string {
     // Keep the readable half of links: [[Note|label]] and [text](url).
     .replace(/\[\[([^\]|]+)(?:\|([^\]]*))?\]\]/g, (_m, t, l) => l || t)
     .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+    // Bare URLs (a pasted YouTube/Apple Music link becomes an embed on the
+    // page, so it's noise in a one-line excerpt).
+    .replace(/https?:\/\/\S+/g, " ")
     .replace(/^>\s?\[![a-z]+\][+-]?\s*/gim, "")
     .replace(/[#>*_`|]/g, " ")
     .replace(/\s+/g, " ")

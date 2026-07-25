@@ -226,6 +226,24 @@ body {
   color: var(--text-secondary);
 }
 
+/* YouTube embeds — a bare youtube.com/youtu.be link on its own line becomes
+   a player (lib/youtube.ts). Served from youtube-nocookie.com, so nothing is
+   set until the visitor presses play. */
+.youtube-block {
+  margin: 1.5rem 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--bg-hover);
+}
+
+.youtube-embed {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+}
+
 /* Content images open in the lightbox (avatars excluded) */
 .prose img:not(.avatar) {
   cursor: zoom-in;

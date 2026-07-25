@@ -17,6 +17,8 @@ export interface ShelfItem {
   coverFit?: "contain";
   /** 0–5, halves allowed. */
   rating?: number;
+  /** Renders as a wide 16:9 card with a play badge instead of a 2:3 cover. */
+  isVideo?: boolean;
 }
 
 /** Pretty, bilingual labels for common mediums; unknown values shown as-is. */
@@ -24,6 +26,8 @@ const MEDIUM_LABELS: Record<string, Str> = {
   book: ui.mediumBooks,
   movie: ui.mediumMovies,
   show: ui.mediumShows,
+  video: ui.mediumVideos,
+  youtube: ui.mediumVideos,
 };
 
 function mediumLabel(m: string): Str {
@@ -78,11 +82,17 @@ export default function ShelfGridClient({
         </div>
       )}
 
-      <ul className="mt-8 grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3">
+      {/* `dense` lets 2:3 cards backfill the gaps left by full-width video
+          cards, so the grid doesn't grow holes when mediums are mixed. */}
+      <ul className="mt-8 grid grid-cols-2 gap-x-5 gap-y-10 [grid-auto-flow:dense] sm:grid-cols-3">
         {filtered.map((item) => (
-          <li key={item.slug}>
+          <li key={item.slug} className={item.isVideo ? "col-span-2" : undefined}>
             <Link href={`/${sectionSlug}/${item.slug}`} className="group block">
-              <div className="aspect-[2/3] overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--bg-hover)] shadow-sm transition-shadow duration-300 group-hover:shadow-md">
+              <div
+                className={`relative overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--bg-hover)] shadow-sm transition-shadow duration-300 group-hover:shadow-md ${
+                  item.isVideo ? "aspect-video" : "aspect-[2/3]"
+                }`}
+              >
                 {item.coverUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -106,6 +116,21 @@ export default function ShelfGridClient({
                     </span>
                     <span className="h-px w-8 bg-[var(--border)]" />
                   </div>
+                )}
+                {item.isVideo && (
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 flex items-center justify-center"
+                  >
+                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-black/55 backdrop-blur-[2px] transition-transform duration-300 group-hover:scale-110">
+                      <svg
+                        viewBox="0 0 24 24"
+                        className="ml-0.5 h-5 w-5 fill-white"
+                      >
+                        <path d="M8 5.14v13.72L19 12z" />
+                      </svg>
+                    </span>
+                  </span>
                 )}
               </div>
               <span className="mt-2.5 block font-medium leading-snug text-[var(--text)]">
