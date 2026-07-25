@@ -2,17 +2,6 @@
 
 /* Design tokens — light by default, dark follows system preference. */
 :root {
-  /* Declares that this page supports both schemes, so the browser's *used*
-     color scheme actually becomes dark under a dark system preference — not
-     just our own `prefers-color-scheme` media queries repainting it.
-     This matters beyond UA widgets: an SVG loaded through <img src> renders in
-     its own isolated document and inherits the embedder's used color scheme to
-     resolve its internal `prefers-color-scheme`. Without this line the page
-     reports "light" to those images, so self-theming diagrams
-     (docs/EXCALIDRAW.md) render light-on-dark. Also fixes scrollbars and form
-     controls in dark mode. */
-  color-scheme: light dark;
-
   --bg: #ffffff;
   --bg-sidebar: #fbfbfa;
   --bg-hover: #f4f4f5;
