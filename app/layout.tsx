@@ -6,6 +6,7 @@ import CodeCopy from "@/components/CodeCopy";
 import LinkPreview from "@/components/LinkPreview";
 import { getSections, getEntries, getSearchIndex } from "@/lib/vault";
 import { getLinkPreviews } from "@/lib/previews";
+import { resistanceDay } from "@/lib/resistance";
 import { siteName, siteUrl, siteDescription, socials } from "@/lib/site-config";
 
 export const metadata: Metadata = {
@@ -69,6 +70,7 @@ export default function RootLayout({
           socials={socials}
           siteName={siteName}
           searchIndex={getSearchIndex()}
+          resistanceDay={resistanceDay()}
         >
           {children}
         </Chrome>

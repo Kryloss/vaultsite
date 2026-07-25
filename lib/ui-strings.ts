@@ -16,6 +16,11 @@ export interface Str {
 export const ui = {
   // chrome / sidebar
   publishedFrom: { en: "Published from Obsidian", uk: "Опубліковано з Obsidian" },
+  /** {n} is replaced with the day number — see components/ResistanceDay.tsx */
+  resistanceDay: {
+    en: "Day {n} of Ukraine’s resistance",
+    uk: "{n}-й день спротиву України",
+  },
   searchPlaceholder: {
     en: "Search pages and posts…",
     uk: "Пошук сторінок і дописів…",

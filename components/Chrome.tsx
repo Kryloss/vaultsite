@@ -16,6 +16,7 @@ import {
   UkraineFlag,
 } from "@/components/icons";
 import CommandPalette from "@/components/CommandPalette";
+import ResistanceDay from "@/components/ResistanceDay";
 import T from "@/components/T";
 import { useLang } from "@/components/useLang";
 import { ui } from "@/lib/ui-strings";
@@ -48,12 +49,15 @@ export default function Chrome({
   socials,
   siteName,
   searchIndex,
+  resistanceDay,
   children,
 }: {
   items: NavItem[];
   socials: SocialLink[];
   siteName: string;
   searchIndex: SearchItem[];
+  /** Build-time day count for the sidebar line — see lib/resistance.ts */
+  resistanceDay: number;
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -219,7 +223,7 @@ export default function Chrome({
             })}
           </div>
           <p className="mt-4 text-xs text-[var(--text-tertiary)]">
-            <T {...ui.publishedFrom} />
+            <ResistanceDay initial={resistanceDay} />
           </p>
         </div>
       </aside>
