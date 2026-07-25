@@ -31,7 +31,7 @@ export default function SocialLinks({ className = "" }: { className?: string }) 
             title={s.label}
             className="text-[var(--text-tertiary)] transition-colors duration-150 hover:text-[var(--text)]"
           >
-            <Icon className="h-[30px] w-[30px]" />
+            <Icon className="h-[35px] w-[35px]" />
             <span className="sr-only">{s.label}</span>
           </a>
         );
