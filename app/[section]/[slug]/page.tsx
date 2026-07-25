@@ -58,7 +58,9 @@ export default async function EntryPage({ params }: Props) {
   const stats = section.type === "posts" ? readingStats(entry.content) : null;
   const categories = parseCategories(entry.meta);
 
-  // Shelf entries link each category to its medium page, pre-filtered.
+  // Category chips link back to the section, pre-filtered. Shelf entries get
+  // their medium's category page; everything else (posts) gets the section
+  // page with `?category=`, which its list reads on arrival.
   const medium =
     typeof entry.meta.medium === "string"
       ? entry.meta.medium.toLowerCase()
@@ -66,7 +68,7 @@ export default async function EntryPage({ params }: Props) {
   const categoryHref = (category: string) =>
     isShelfSection(section) && medium
       ? `/${section.slug}/type/${mediumSlug(medium)}/${categorySlug(category)}`
-      : undefined;
+      : `/${section.slug}?category=${encodeURIComponent(category)}`;
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-14 lg:py-24">
@@ -100,24 +102,15 @@ export default async function EntryPage({ params }: Props) {
             languages (same as the posts' category chips). */}
         {categories.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2">
-            {categories.map((c) => {
-              const href = categoryHref(c);
-              const base =
-                "rounded-full border border-[var(--border)] px-3 py-1 text-sm text-[var(--text-secondary)] transition-colors";
-              return href ? (
-                <Link
-                  key={c}
-                  href={href}
-                  className={`${base} hover:border-[var(--text-tertiary)] hover:text-[var(--text)]`}
-                >
-                  <T {...categoryLabel(c)} />
-                </Link>
-              ) : (
-                <span key={c} className={base}>
-                  <T {...categoryLabel(c)} />
-                </span>
-              );
-            })}
+            {categories.map((c) => (
+              <Link
+                key={c}
+                href={categoryHref(c)}
+                className="rounded-full border border-[var(--border)] px-3 py-1 text-sm text-[var(--text-secondary)] transition-colors hover:border-[var(--text-tertiary)] hover:text-[var(--text)]"
+              >
+                <T {...categoryLabel(c)} />
+              </Link>
+            ))}
           </div>
         )}
 

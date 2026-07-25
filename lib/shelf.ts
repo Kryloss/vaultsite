@@ -9,6 +9,10 @@ import { parseCategories, slugify, type Entry, type Section } from "./vault";
 import { resolveCoverUrl } from "./markdown";
 import { youtubeId, youtubeThumbnail } from "./youtube";
 import { ui, type Str } from "./ui-strings";
+import { categoryLabel } from "./categories";
+
+// Re-exported so server callers can keep importing it from here.
+export { categoryLabel };
 
 export interface ShelfItem {
   slug: string;
@@ -44,49 +48,6 @@ const MEDIUM_LABELS: Record<string, Str> = {
   video: ui.mediumVideos,
   youtube: ui.mediumVideos,
 };
-
-/**
- * Ukrainian names for the category vocabulary in docs/CONTENT-WORKFLOW.md.
- * Anything missing falls back to the English string in both languages, so a
- * new `categories:` value never breaks — it just reads the same either way
- * until it's given a translation here.
- *
- * Keys are matched case-insensitively; URL slugs stay English, so adding a
- * translation never changes a page's address.
- */
-const CATEGORY_LABELS: Record<string, Str> = {
-  // video
-  entertainment: { en: "Entertainment", uk: "Розваги" },
-  politics: { en: "Politics", uk: "Політика" },
-  tech: { en: "Tech", uk: "Технології" },
-  education: { en: "Education", uk: "Освіта" },
-  music: { en: "Music", uk: "Музика" },
-  popsci: { en: "PopSci", uk: "Наукпоп" },
-  // movie / show
-  "sci-fi": { en: "Sci-Fi", uk: "Фантастика" },
-  thriller: { en: "Thriller", uk: "Трилер" },
-  drama: { en: "Drama", uk: "Драма" },
-  action: { en: "Action", uk: "Бойовик" },
-  comedy: { en: "Comedy", uk: "Комедія" },
-  documentary: { en: "Documentary", uk: "Документальне" },
-  anime: { en: "Anime", uk: "Аніме" },
-  // book
-  nonfiction: { en: "Nonfiction", uk: "Нонфікшн" },
-  fiction: { en: "Fiction", uk: "Художня література" },
-  history: { en: "History", uk: "Історія" },
-  science: { en: "Science", uk: "Наука" },
-  biography: { en: "Biography", uk: "Біографія" },
-};
-
-/** Bilingual label for a category name from frontmatter. */
-export function categoryLabel(category: string): Str {
-  return (
-    CATEGORY_LABELS[category.trim().toLowerCase()] ?? {
-      en: category,
-      uk: category,
-    }
-  );
-}
 
 /**
  * Row order on the section page. Mediums not listed here follow, sorted

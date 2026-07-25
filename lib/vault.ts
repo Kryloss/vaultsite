@@ -197,13 +197,12 @@ function formatDateValue(value: unknown): string {
  *   categories: [Tech, Education]
  *   categories: Tech, Education
  *
- * Rendered as #tags on the entry page and used for the filter chips on shelf
- * medium pages. Only the plural key is read — the posts' single `category:`
- * drives its own chips and is deliberately left alone, so adding this feature
- * changed nothing on existing post pages.
+ * Drives the category chips on an entry page, the shelf medium pages, and the
+ * posts filter. The posts' single `category:` is accepted as a one-item list
+ * so both sections share one code path.
  */
 export function parseCategories(meta: Record<string, unknown>): string[] {
-  const raw = meta.categories;
+  const raw = meta.categories ?? meta.category;
   const list = Array.isArray(raw)
     ? raw
     : typeof raw === "string"

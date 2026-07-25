@@ -49,8 +49,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const group = shelfGroupBySlug(getEntries(section), medium);
   const name = group ? categoryFromSlug(group, category) : undefined;
   if (!group || !name) return {};
+  // Same title as the unfiltered medium page — the category shows as the
+  // active chip on the page, and repeating it in the tab was noise.
   return {
-    title: `${name} · ${group.label.en} · ${section.title}`,
+    title: `${group.label.en} · ${section.title}`,
     description: section.description,
   };
 }
