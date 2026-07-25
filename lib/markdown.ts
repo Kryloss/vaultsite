@@ -11,7 +11,8 @@
  * 5. Standalone Apple Music links → embedded players
  *
  * Post-processing (rehype): standalone images with alt text become
- * <figure> + <figcaption> (skipping avatars).
+ * <figure> + <figcaption> (skipping avatars); fenced code blocks are
+ * syntax-highlighted at build time (see lib/highlight.ts).
  *
  * Assets resolve because scripts/sync-assets.mjs mirrors every non-.md vault
  * file into public/vault-assets/ before dev/build.
@@ -27,6 +28,7 @@ import fs from "fs";
 import path from "path";
 import { slugify, getWikiIndex, getAssetIndex, VAULT_DIR } from "./vault";
 import { appleMusicEmbedHtml, isAppleMusicUrl } from "./apple-music";
+import { highlightToHast, parseCodeMeta, langLabel } from "./highlight";
 
 /** Encode each path segment but keep "/" separators. */
 function encodePath(p: string): string {
