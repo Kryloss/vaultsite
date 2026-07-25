@@ -45,8 +45,6 @@ export const ui = {
 
   // shelf rows
   shelfEverythingElse: { en: "Everything else", uk: "Інше" },
-  seeAll: { en: "See all", uk: "Усі" },
-  backToShelf: { en: "Back to", uk: "Назад до" },
 
   // lists
   notesOnHearing: {

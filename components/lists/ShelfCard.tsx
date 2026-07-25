@@ -57,18 +57,6 @@ export default function ShelfCard({
             <span className="h-px w-8 bg-[var(--border)]" />
           </div>
         )}
-        {item.isVideo && (
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-0 flex items-center justify-center"
-          >
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-black/55 backdrop-blur-[2px] transition-transform duration-300 group-hover:scale-110">
-              <svg viewBox="0 0 24 24" className="ml-0.5 h-5 w-5 fill-white">
-                <path d="M8 5.14v13.72L19 12z" />
-              </svg>
-            </span>
-          </span>
-        )}
       </div>
       <span className="mt-2.5 block font-medium leading-snug text-[var(--text)]">
         <T en={item.title} uk={item.titleUk} />

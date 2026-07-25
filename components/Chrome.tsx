@@ -29,6 +29,8 @@ export interface NavItem {
   titleUk?: string;
   icon?: string;
   entries: { slug: string; title: string; titleUk?: string }[];
+  /** Shelf-type sections only: medium pages at /<slug>/type/<medium>. */
+  mediums?: { slug: string; title: string; titleUk?: string }[];
 }
 
 const socialIcons = {
@@ -88,14 +90,23 @@ export default function Chrome({
     href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(href + "/");
 
   // Breadcrumb: deepest location first — "Entry · Section · SiteName".
-  const [sectionSlug, entrySlug] = pathname.split("/").filter(Boolean);
+  // Two shapes live under a section: /<section>/<entry> and the shelf's medium
+  // pages, /<section>/type/<medium> (see lib/shelf.ts).
+  const [sectionSlug, second, third] = pathname.split("/").filter(Boolean);
   const section = sectionSlug ? nav.find((i) => i.slug === sectionSlug) : undefined;
-  const entry = entrySlug && section
-    ? section.entries.find((e) => e.slug === entrySlug)
-    : undefined;
+  const medium =
+    second === "type" && third
+      ? section?.mediums?.find((m) => m.slug === third)
+      : undefined;
+  const entry =
+    !medium && second && section
+      ? section.entries.find((e) => e.slug === second)
+      : undefined;
 
   const crumbs: { en: string; uk?: string; href: string }[] = [];
-  if (entry && section)
+  if (medium && section)
+    crumbs.push({ en: medium.title, uk: medium.titleUk, href: pathname });
+  else if (entry && section)
     crumbs.push({ en: entry.title, uk: entry.titleUk, href: pathname });
   if (section && section.slug !== "home")
     crumbs.push({ en: section.title, uk: section.titleUk, href: `/${section.slug}` });

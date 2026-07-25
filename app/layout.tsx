@@ -7,6 +7,7 @@ import LinkPreview from "@/components/LinkPreview";
 import { getSections, getEntries, getSearchIndex } from "@/lib/vault";
 import { getLinkPreviews } from "@/lib/previews";
 import { resistanceDay } from "@/lib/resistance";
+import { isShelfSection, shelfGroups } from "@/lib/shelf";
 import { siteName, siteUrl, siteDescription, socials } from "@/lib/site-config";
 
 export const metadata: Metadata = {
@@ -35,17 +36,30 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   // Navigation (and breadcrumb titles) generated from the vault at build time.
-  const items = getSections().map((section) => ({
-    slug: section.slug,
-    title: section.title,
-    titleUk: section.titleUk,
-    icon: section.icon,
-    entries: getEntries(section).map(({ slug, title, titleUk }) => ({
-      slug,
-      title,
-      titleUk,
-    })),
-  }));
+  const items = getSections().map((section) => {
+    const entries = getEntries(section);
+    return {
+      slug: section.slug,
+      title: section.title,
+      titleUk: section.titleUk,
+      icon: section.icon,
+      entries: entries.map(({ slug, title, titleUk }) => ({
+        slug,
+        title,
+        titleUk,
+      })),
+      // Lets the breadcrumb name /<section>/type/<medium> pages.
+      mediums: isShelfSection(section)
+        ? shelfGroups(entries)
+            .filter((g) => g.medium !== "unsorted")
+            .map((g) => ({
+              slug: g.slug,
+              title: g.label.en,
+              titleUk: g.label.uk,
+            }))
+        : undefined,
+    };
+  });
 
   return (
     // data-lang is set pre-paint by the inline script below (and toggled at
