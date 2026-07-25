@@ -56,6 +56,8 @@ Append new entries at the bottom. Format: number, date, decision, why, revisit-w
 **Why:** Rendering live Excalidraw scenes needs the Excalidraw React app + canvas + fonts — too heavy for a static build. Exported SVG is identical, instant, and git-friendly. Self-theming SVG lets AI diagrams appear with no export step and adapt to the theme. Keeps decision #5 (fully static) intact.
 **Revisit when:** Interactive/animated diagrams are wanted (embed an `.excalidraw.json` + client renderer), or a diagram needs to read live page CSS (use inline SVG instead of `<img>`).
 
+**Required companion — `color-scheme: light dark` (2026-07-24):** self-theming SVGs silently broke (light theme on a dark page) because `app/globals.css` never declared the `color-scheme` property. An SVG loaded via `<img src>` renders in its own isolated document and resolves its internal `prefers-color-scheme` from the *embedder's used color scheme* — and a page that only repaints itself with `prefers-color-scheme` media queries still has a used scheme of light. It was truthfully reporting "I am a light page" to every embedded diagram. One line on `:root` fixes it for all of them. Keep that line: it is load-bearing for every self-theming SVG, not cosmetic.
+
 ## 9. AI content-intake workflow (2026-07-17)
 
 **Decision:** Raw content → AI structures it into vault notes per `docs/CONTENT-WORKFLOW.md`. Policy chosen by the owner: light-touch editing (voice preserved), follow-up questions only when genuinely ambiguous, publish directly (no draft gate).

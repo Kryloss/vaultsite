@@ -11,14 +11,12 @@
             "id": "9cd2acf5af766b33",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "image",
               "state": {
-                "file": "Posts/Formatting playground.md",
-                "mode": "source",
-                "source": false
+                "file": "Posts/secplus-domains.uk.svg"
               },
-              "icon": "lucide-file",
-              "title": "Formatting playground"
+              "icon": "lucide-image",
+              "title": "secplus-domains.uk"
             }
           }
         ]
@@ -199,24 +197,24 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
+    "Posts/secplus-domains.svg",
+    "Posts/secplus-domains.uk.svg",
+    "Posts/rendering-pipeline.uk.svg",
+    "Posts/rendering-pipeline.svg",
+    "Posts/Post Sample.md",
+    "Posts/Formatting playground.md",
     "Posts/main.md",
     "Posts/Draft example.md",
     "People/Mykhailo Fedorov.md",
-    "Posts/Post Sample.md",
     "Posts/First certification.uk.md",
     "People/fedorov.png",
     "Shelf/Sapiens.md",
     "Projects/This website.md",
     "Projects/publishing-pipeline.uk.svg",
     "Projects/publishing-pipeline.svg",
-    "Posts/secplus-domains.uk.svg",
-    "Posts/secplus-domains.svg",
-    "Posts/Formatting playground.md",
     "Home/main.uk.md",
     "People/main.md",
     "Posts/First certification.md",
-    "Posts/rendering-pipeline.uk.svg",
-    "Posts/rendering-pipeline.svg",
     "Posts/secplus-plan.uk.svg",
     "Posts/secplus-plan.svg",
     "Posts/Security+ journey.md",
