@@ -35,6 +35,8 @@ const CATEGORY_LABELS: Record<string, Str> = {
   history: { en: "History", uk: "Історія" },
   science: { en: "Science", uk: "Наука" },
   biography: { en: "Biography", uk: "Біографія" },
+  fantasy: { en: "Fantasy", uk: "Фентезі" },
+  philosophy: { en: "Philosophy", uk: "Філософія" },
   // posts
   cybersecurity: { en: "Cybersecurity", uk: "Кібербезпека" },
   meta: { en: "Meta", uk: "Про сайт" },

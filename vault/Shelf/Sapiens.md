@@ -1,11 +1,16 @@
 ---
 title: Sapiens
+title_uk: "Sapiens: Людина розумна"
+aliases:
+  - "Sapiens: A Brief History of Humankind"
+  - Людина розумна
 author: Yuval Noah Harari
 medium: book
 categories: [Nonfiction, History, Science]
 rating: 4.5
 date: 2026-07-17
 description: A brief history of humankind.
+description_uk: Коротка історія людства.
 cover: sapiens.jpg
 # cover source: Open Library covers API, ISBN 9780062316097
 ---
