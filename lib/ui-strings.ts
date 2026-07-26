@@ -88,8 +88,6 @@ export const ui = {
   currentlyWatching: { en: "Watching", uk: "Дивлюся" },
   wantToRead: { en: "To read", uk: "Прочитати" },
   wantToWatch: { en: "To watch", uk: "Подивитись" },
-  shelfInProgress: { en: "In progress", uk: "У процесі" },
-  shelfUpNext: { en: "Up next", uk: "Далі в черзі" },
   quotesCategory: { en: "Quotes", uk: "Цитати" },
   quotesEmpty: {
     en: "No quotes saved yet — add a > blockquote to a book’s note.",

@@ -379,6 +379,12 @@ function transformCallouts(md: string, idPrefix = ""): string {
   const lines = md.split("\n");
   const out: string[] = [];
   let spoilerN = 0;
+  // The overlay is empty, so it needs an accessible name. The id prefix is the
+  // only signal here for which language this pass is rendering — see the
+  // idPrefix note in renderWithHeadings().
+  const revealLabel = idPrefix.startsWith("uk-")
+    ? "Показати спойлер"
+    : "Reveal spoiler";
   for (let i = 0; i < lines.length; i++) {
     const m = lines[i].match(/^>\s*\[!(\w+)\][+-]?\s*(.*)$/);
     if (!m) {
@@ -396,21 +402,32 @@ function transformCallouts(md: string, idPrefix = ""): string {
     }
     i = j - 1;
 
-    // `> [!spoiler]` blurs its body until the title is clicked. A checkbox and
-    // its label do the toggling, so there's no JavaScript and no dead control
-    // for anyone without it. In Obsidian it stays an ordinary callout.
+    // `> [!spoiler]` blurs its body until the blurred text itself is clicked.
+    //
+    // The label is a transparent overlay sitting on top of the body rather
+    // than wrapping it: <label> only accepts phrasing content, and the body is
+    // arbitrary markdown — paragraphs, lists, images. Overlaying keeps the
+    // HTML valid and still makes the whole passage the target. It's removed
+    // once revealed, so the text underneath stays selectable and any links in
+    // it work. A checkbox does the toggling, so there's no JavaScript and no
+    // dead control for anyone without it; in Obsidian it stays a plain callout.
     if (type === "spoiler") {
       const id = `${idPrefix}sp-${++spoilerN}`;
       out.push(
         `<div class="callout spoiler-callout" data-callout="spoiler">`,
         "",
         `<input type="checkbox" id="${id}" class="spoiler-toggle" />`,
-        `<label for="${id}" class="callout-title">${escapeHtml(title)}</label>`,
-        `<div class="spoiler-body">`,
+        `<p class="callout-title">${escapeHtml(title)}</p>`,
+        `<span class="spoiler-reveal">`,
+        `<span class="spoiler-body">`,
         "",
         ...body,
         "",
-        `</div>`,
+        `</span>`,
+        `<label for="${id}" class="spoiler-cover" aria-label="${escapeHtml(
+          revealLabel
+        )}"></label>`,
+        `</span>`,
         "",
         `</div>`
       );

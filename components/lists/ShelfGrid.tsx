@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ListProps } from "@/lib/section-types";
-import { shelfGroups, shelfHighlights } from "@/lib/shelf";
+import { shelfGroups } from "@/lib/shelf";
 import ShelfCard from "@/components/lists/ShelfCard";
 import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
@@ -35,19 +35,16 @@ export default function ShelfGrid({ section, entries }: ListProps) {
     );
   }
 
-  // "Up next" leads, across every medium. In-progress items are badged in
-  // place instead — see shelfHighlights().
-  const groups = [...shelfHighlights(entries), ...shelfGroups(entries)];
+  const groups = shelfGroups(entries);
 
   return (
     <div className="mt-8 flex flex-col gap-6">
       {groups.map((group) => (
         <section key={group.medium}>
           <h2 className="text-lg font-semibold tracking-tight text-[var(--text)]">
-            {/* "Everything else" and "Up next" have no medium page to link
-                to. The chevron is shown even for a single item so the page
-                stays discoverable. */}
-            {group.medium === "unsorted" || group.medium === "queued" ? (
+            {/* "Everything else" has no medium page to link to. The chevron is
+                shown even for a single item so the page stays discoverable. */}
+            {group.medium === "unsorted" ? (
               <T {...group.label} />
             ) : (
               <Link

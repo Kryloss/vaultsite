@@ -148,25 +148,13 @@ export function toShelfItem(entry: Entry): ShelfItem {
   };
 }
 
-/**
- * The "Up next" row, pinned above the medium rows.
- *
- * Only queued items get a row. In-progress ones don't need one: they're
- * already badged in their medium row, and a second copy a few hundred pixels
- * above said nothing new. A queued item has no other home — it's the one thing
- * you'd come to a shelf to check.
- *
- * Deliberately separate from shelfGroups() — display-only, and it must never
- * reach shelfMediumSlugs(), or this would generate a page at
- * /shelf/type/queueds.
+/*
+ * No status rows. Reading state shows as a badge on the cover, in the medium
+ * row the item already lives in — a separate "Up next" or "In progress" row
+ * duplicated cards a few hundred pixels apart and made the shelf longer
+ * without making anything easier to find. The rows are one medium each, and
+ * they stay that way.
  */
-export function shelfHighlights(entries: Entry[]): ShelfGroup[] {
-  const queued = entries.map(toShelfItem).filter((i) => i.status === "queued");
-  if (queued.length === 0) return [];
-  return [
-    { medium: "queued", slug: "queued", label: ui.shelfUpNext, items: queued },
-  ];
-}
 
 /** Every category used within one medium, alphabetical. */
 export function groupCategories(group: ShelfGroup): string[] {

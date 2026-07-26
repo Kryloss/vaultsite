@@ -1000,22 +1000,58 @@ body {
 }
 
 .spoiler-callout .callout-title {
-  cursor: pointer;
   margin: 0 0 0.5rem;
   font-weight: 600;
 }
 
-.spoiler-callout .spoiler-body {
+/* The blurred passage is the target, not the title. .spoiler-cover is a
+   transparent label laid over it — see the note in lib/markdown.ts for why
+   it overlays rather than wraps. */
+.spoiler-reveal {
+  display: block;
+  position: relative;
+}
+
+.spoiler-body {
+  display: block;
   filter: blur(6px);
-  pointer-events: none;
   user-select: none;
   transition: filter 200ms ease;
 }
 
-.spoiler-callout .spoiler-toggle:checked ~ .spoiler-body {
+.spoiler-body > :first-child {
+  margin-top: 0;
+}
+
+.spoiler-body > :last-child {
+  margin-bottom: 0;
+}
+
+.spoiler-cover {
+  position: absolute;
+  inset: -0.25rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+}
+
+.spoiler-cover:hover {
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+/* Revealed: drop the blur and take the overlay away entirely, so the text is
+   selectable and any links inside it are clickable. */
+.spoiler-callout .spoiler-toggle:checked ~ .spoiler-reveal .spoiler-body {
   filter: none;
-  pointer-events: auto;
   user-select: auto;
+}
+
+.spoiler-callout .spoiler-toggle:checked ~ .spoiler-reveal .spoiler-cover {
+  display: none;
+}
+
+.spoiler-callout .spoiler-toggle:focus-visible ~ .spoiler-reveal .spoiler-cover {
+  outline: 2px solid var(--text-secondary);
+  outline-offset: 0;
 }
 
 .callout[data-callout="spoiler"] {
