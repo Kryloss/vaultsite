@@ -801,64 +801,6 @@ body {
 
 /* ---------- Entry footer (components/EntryFooter.tsx) ---------- */
 
-.entry-footer-title {
-  margin: 0 0 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  color: var(--text-tertiary);
-}
-
-.entry-related {
-  margin-top: 3.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--border);
-}
-
-.entry-related ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 0.5rem;
-}
-
-.related-card {
-  display: block;
-  padding: 0.75rem 0.875rem;
-  border: 1px solid var(--border);
-  border-radius: 0.625rem;
-  text-decoration: none;
-  transition: border-color 120ms ease, background-color 120ms ease;
-}
-
-.related-card:hover {
-  border-color: var(--text-tertiary);
-  background: var(--bg-hover);
-}
-
-.related-title {
-  display: block;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  line-height: 1.4;
-  color: var(--text);
-}
-
-.related-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.25rem;
-  font-size: 0.75rem;
-  color: var(--text-tertiary);
-}
-
-.related-tags > span::before {
-  content: "#";
-  opacity: 0.6;
-}
-
 /* One line tall: arrows at the outer edges of the column, titles filling
    inward. A lone "next" still sits right — EntryFooter renders an empty span
    in the first slot. */
@@ -867,7 +809,9 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
-  margin-top: 2.5rem;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
 }
 
 .sibling {

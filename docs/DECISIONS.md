@@ -186,13 +186,15 @@ Two fixes were applied, in order:
 
 **It can never break a build:** if sharp is missing or an image is unreadable, that key is simply absent and the card renders exactly as before. sharp is now declared in `devDependencies` rather than relied on as a transitive Next dependency — **run `npm install` once** to record it.
 
-## 20. Related entries are same-section only (2026-07-26)
+## 20. Entry footers carry prev/next only (2026-07-26)
 
-**Decision:** `lib/related.ts` ranks siblings by how many `categories:` they share with the current note, tie-broken by the section's existing order, and scopes the search to the same section. Prev/next comes from the same ordering `getEntries` already produces.
+**Decision:** `lib/siblings.ts` gives each entry the notes either side of it, using the ordering `getEntries()` already produces. Rendered by `components/EntryFooter.tsx` as a single row — a chevron at each edge of the column, the neighbour's title filling inward.
 
-**Why not cross-section:** a book and a blog post both tagged "Tech" aren't meaningfully related, and the connection that *is* meaningful — an explicit `[[link]]` between them — is already surfaced by backlinks (#16). Keeping the two mechanisms distinct means neither is noisy.
+**Related-by-category was built and removed the same day:** it ranked same-section notes by shared `categories:`. The owner's call was that categories are already surfaced everywhere else — as chips on the entry, on the section list, and as their own pages on the shelf — so a "Related" block restated what the reader could already see, and cost a card-sized chunk of vertical space to do it.
 
-**Revisit when:** categories grow a hierarchy, or a note wants to pin its own related list via frontmatter.
+**Why the row is shaped this way:** the first version was two bordered cards stacked under the article, which added ~140px of height to every page. The arrows-at-the-edges form is one line, and reads as navigation rather than as more content. Titles always render and ellipsis when short on room; "Previous"/"Next" survive as `sr-only` text, since an arrow alone means nothing read aloud.
+
+**Revisit when:** sections grow large enough that stepping one note at a time stops being useful.
 
 ## 21. Backlinks reverted — decision #16 is no longer in effect (2026-07-26)
 

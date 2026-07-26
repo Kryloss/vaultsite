@@ -70,7 +70,6 @@ export const ui = {
   draft: { en: "Draft", uk: "Чернетка" },
   minRead: { en: "min read", uk: "хв читання" },
   words: { en: "words", uk: "слів" },
-  relatedEntries: { en: "Related", uk: "Схоже" },
   previousEntry: { en: "Previous", uk: "Попереднє" },
   nextEntry: { en: "Next", uk: "Наступне" },
   /** Accessible name of the "#" link beside a heading (see lib/toc.ts). */

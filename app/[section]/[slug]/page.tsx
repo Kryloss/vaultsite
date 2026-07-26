@@ -12,7 +12,7 @@ import {
   parseCategories,
 } from "@/lib/vault";
 import { renderWithHeadings } from "@/lib/markdown";
-import { getSiblings, getRelated } from "@/lib/related";
+import { getSiblings } from "@/lib/siblings";
 import {
   categoryLabel,
   categorySlug,
@@ -71,7 +71,6 @@ export default async function EntryPage({ params }: Props) {
   const stats = section.type === "posts" ? readingStats(entry.content) : null;
   const categories = parseCategories(entry.meta);
   const { prev, next } = getSiblings(section.slug, entry.slug);
-  const related = getRelated(section.slug, entry.slug);
   const showToc = en.headings.length >= MIN_TOC_HEADINGS;
 
   // Category chips link back to the section, pre-filtered. Shelf entries get
@@ -165,8 +164,7 @@ export default async function EntryPage({ params }: Props) {
         />
       )}
 
-      {/* Reading order: more on this subject, then where to go next. */}
-      <EntryFooter related={related} prev={prev} next={next} />
+      <EntryFooter prev={prev} next={next} />
 
       {showToc && <Toc en={en.headings} uk={uk?.headings} />}
     </div>
