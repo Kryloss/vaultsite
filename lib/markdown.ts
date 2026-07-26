@@ -101,6 +101,23 @@ function assetExists(sectionDir: string, file: string): boolean {
   return getAssetIndex().has(path.basename(clean).toLowerCase());
 }
 
+/**
+ * Is this match the only thing on its line?
+ *
+ * Raw HTML we emit needs blank lines around it when it stands alone, because a
+ * line starting with a tag opens a markdown HTML block that runs to the next
+ * blank line — swallowing whatever follows. That's how `![[me.jpg|93]]` on the
+ * line above a `# Heading` turned the heading into literal text. Inline embeds
+ * (mid-sentence) must NOT get the newlines, or they'd break the paragraph.
+ */
+function standalone(src: string, offset: number, length: number): boolean {
+  const lineStart = src.lastIndexOf("\n", offset - 1) + 1;
+  const nlAfter = src.indexOf("\n", offset + length);
+  const before = src.slice(lineStart, offset).trim();
+  const after = src.slice(offset + length, nlAfter === -1 ? undefined : nlAfter).trim();
+  return before === "" && after === "";
+}
+
 /** Split an embed caption "English :: Українською" into parts (size params skipped). */
 function captionParts(alt?: string): { en: string; uk?: string } {
   if (!alt) return { en: "" };
@@ -448,18 +465,30 @@ export function preprocessObsidian(
   // 2b. Obsidian embeds: ![[file.png]], ![[file.png|alt text]], ![[file.png|300]]
   md = md.replace(
     /!\[\[([^\]|]+?)(?:\|([^\]]*))?\]\]/g,
-    (_m, file: string, alt?: string) => {
+    (
+      _m: string,
+      file: string,
+      alt: string | undefined,
+      offset: number,
+      whole: string
+    ) => {
       const src = resolveImageUrl(sectionDir, file);
       const size = alt?.trim().match(/^(\d+)(?:x(\d+))?$/);
+      // A tag alone on a line opens a markdown HTML block that eats the lines
+      // after it, so pad it out — but only when it really is alone.
+      const block = (html: string) =>
+        standalone(whole, offset, _m.length) ? `\n${html}\n` : html;
       if (size) {
         const w = Number(size[1]);
         // Small sized embeds (≤128px, e.g. ![[me.jpeg|93]]) are avatars:
         // circular, square-cropped. Larger ones keep the regular style.
         if (w <= 128 && !size[2]) {
-          return `<img src="${src}" width="${w}" height="${w}" class="avatar" alt="" />`;
+          return block(
+            `<img src="${src}" width="${w}" height="${w}" class="avatar" alt="" />`
+          );
         }
         const height = size[2] ? ` height="${size[2]}"` : "";
-        return `<img src="${src}" width="${w}"${height} alt="" />`;
+        return block(`<img src="${src}" width="${w}"${height} alt="" />`);
       }
       // Theme (<name>.dark.<ext>) and language (<name>.uk.<ext>) variants.
       const enDark = darkVariantUrl(file);
