@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import T from "@/components/T";
+import { useLang } from "@/components/useLang";
 import type { Heading } from "@/lib/toc";
 
 /**
@@ -40,6 +41,7 @@ export default function Toc({
   en: Heading[];
   uk?: Heading[];
 }) {
+  const { lang } = useLang();
   const [active, setActive] = useState("");
   /**
    * The heading the reader jumped to, held until they scroll again.
@@ -59,7 +61,9 @@ export default function Toc({
 
     const measure = () => {
       frame = 0;
-      if (held.current) return; // pinned to the heading that was jumped to
+      // Not `if (held.current)` — "" is a real value here, meaning pinned to
+      // the top of the page. Only null means nothing is held.
+      if (held.current !== null) return;
       let current = "";
       for (const id of list) {
         const el = document.getElementById(id);
@@ -81,7 +85,7 @@ export default function Toc({
      * is exactly what keeps the highlight still until they take over.
      */
     const release = () => {
-      if (!held.current) return;
+      if (held.current === null) return;
       held.current = null;
       onScroll();
     };
@@ -154,6 +158,21 @@ export default function Toc({
     history.pushState(null, "", `#${id}`);
   };
 
+  /**
+   * The title row behaves like the heading links, but its target is the top of
+   * the page rather than an element. `href="#"` means the same thing without
+   * JavaScript, so the fallback is correct rather than dead.
+   */
+  const jumpTop = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    held.current = "";
+    setActive("");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    // Drop any lingering #heading so a reload lands at the top too.
+    history.pushState(null, "", location.pathname + location.search);
+  };
+
   const list = (headings: Heading[], langClass: string) => (
     <ul className={langClass}>
       {headings.map((h) => (
@@ -172,12 +191,18 @@ export default function Toc({
 
   return (
     <nav className="toc-rail" aria-label="Table of contents">
-      {/* The note's title, so the rail is anchored to something rather than
-          floating as a bare list. Rendered here only — it is NOT part of the
-          Cmd+K index, which already has this page as its own result. */}
-      <p className="toc-title">
+      {/* The note's title as the first row of the outline — jumps to the top,
+          and highlights whenever you're above the first heading. Rendered here
+          only: it is NOT in the Cmd+K index, which already has this page. */}
+      <a
+        href="#"
+        onClick={jumpTop}
+        /* Truncated to one line — the tooltip carries the rest. */
+        title={lang === "uk" && titleUk ? titleUk : title}
+        className={active === "" ? "toc-link toc-top is-active" : "toc-link toc-top"}
+      >
         <T en={title} uk={titleUk} />
-      </p>
+      </a>
       {/* Without a translated body there's one outline, shown in both modes. */}
       {uk ? (
         <>

@@ -757,6 +757,7 @@ body {
   max-height: calc(100vh - 12rem);
   overflow-y: auto;
   overscroll-behavior: contain;
+  border-left: 1px solid var(--border);
   font-size: 0.8125rem;
   line-height: 1.5;
 }
@@ -767,25 +768,12 @@ body {
   }
 }
 
-/* The note's title above the outline. Clamped to two lines so a long one
-   can't push the list off the bottom of a short viewport. */
-.toc-title {
-  margin: 0 0 0.75rem;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  line-height: 1.4;
-  color: var(--text);
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-}
-
+/* The vertical rule lives on the rail, not the list, so the title row and the
+   headings share one continuous line. */
 .toc-rail ul {
   margin: 0;
   padding: 0;
   list-style: none;
-  border-left: 1px solid var(--border);
 }
 
 .toc-rail li[data-level="3"] {
@@ -811,6 +799,21 @@ body {
   border-left-color: var(--text);
   color: var(--text);
   font-weight: 500;
+}
+
+/* The note's title: the first row of the outline, not a header above it.
+   Only a step heavier than a heading link — enough to read as the parent,
+   not enough to pull the eye off the section you're actually in.
+
+   One line, ellipsised. The rail is a fixed 13rem and titles are arbitrary
+   length, so wrapping is the difference between a tidy row and three lines of
+   heading before the outline even starts. Full text is in the tooltip. */
+.toc-top {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 /* ---------- Shelf status badge (components/lists/ShelfCard.tsx) ---------- */
