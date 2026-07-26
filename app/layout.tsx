@@ -6,6 +6,8 @@ import Lightbox from "@/components/Lightbox";
 import CodeCopy from "@/components/CodeCopy";
 import HeadingAnchors from "@/components/HeadingAnchors";
 import LinkPreview from "@/components/LinkPreview";
+import JsonLd from "@/components/JsonLd";
+import { siteJsonLd } from "@/lib/jsonld";
 import { getSections, getEntries, getSearchIndex } from "@/lib/vault";
 import { getLinkPreviews } from "@/lib/previews";
 import { resistanceDay } from "@/lib/resistance";
@@ -106,6 +108,7 @@ export default function RootLayout({
           {children}
         </Chrome>
         <Lightbox />
+        <JsonLd data={siteJsonLd()} />
         <CodeCopy />
         <HeadingAnchors />
         <LinkPreview previews={getLinkPreviews()} />

@@ -2,6 +2,7 @@ import Link from "next/link";
 import ShelfCard from "@/components/lists/ShelfCard";
 import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
+import QuotesView from "@/components/lists/QuotesView";
 import {
   categoryLabel,
   categorySlug,
@@ -9,6 +10,7 @@ import {
   itemsInCategory,
   type ShelfGroup,
 } from "@/lib/shelf";
+import type { BookQuotes } from "@/lib/quotes";
 
 /**
  * A shelf medium page: heading, category chips, grid. Shared by
@@ -25,17 +27,29 @@ export default function ShelfTypeView({
   sectionSlug,
   group,
   activeCategory,
+  quotes,
+  showQuotes = false,
 }: {
   sectionSlug: string;
   group: ShelfGroup;
   /** undefined = "All" */
   activeCategory?: string;
+  /**
+   * Books only. A synthetic category — it comes from the blockquotes inside
+   * notes rather than from `categories:` frontmatter — so it gets its own chip
+   * and its own view instead of joining the grid.
+   */
+  quotes?: BookQuotes[];
+  /** True on /…/books/quotes: render the quotes instead of the cover grid. */
+  showQuotes?: boolean;
 }) {
   const categories = groupCategories(group);
   const items = activeCategory
     ? itemsInCategory(group, activeCategory)
     : group.items;
   const base = `/${sectionSlug}/type/${group.slug}`;
+  const hasQuotes = Boolean(quotes && quotes.length > 0);
+  const quoteCount = quotes?.reduce((n, b) => n + b.quotes.length, 0) ?? 0;
 
   const chip = (label: React.ReactNode, href: string, isActive: boolean) => (
     <Link
@@ -59,14 +73,14 @@ export default function ShelfTypeView({
           {/* Inherits the heading's size, weight and tracking — only the
               colour separates it from the title. */}
           <span className="ml-2.5 text-[var(--text-tertiary)]">
-            {items.length}
+            {showQuotes ? quoteCount : items.length}
           </span>
         </h1>
       </header>
 
-      {categories.length > 0 && (
+      {(categories.length > 0 || hasQuotes) && (
         <div className="mt-6 flex flex-wrap gap-2">
-          {chip(<T {...ui.filterAll} />, base, !activeCategory)}
+          {chip(<T {...ui.filterAll} />, base, !activeCategory && !showQuotes)}
           {categories.map((c) =>
             chip(
               <T {...categoryLabel(c)} />,
@@ -74,28 +88,37 @@ export default function ShelfTypeView({
               c === activeCategory
             )
           )}
+          {/* Last, and only when there's something behind it. */}
+          {hasQuotes &&
+            chip(<T {...ui.quotesCategory} />, `${base}/quotes`, showQuotes)}
         </div>
       )}
 
-      {/* Every card here is the same shape, so a plain grid is safe. */}
-      <ul
-        className={`mt-8 grid gap-x-5 gap-y-10 ${
-          group.items.some((i) => i.isVideo)
-            ? "grid-cols-1 sm:grid-cols-2"
-            : "grid-cols-2 sm:grid-cols-3"
-        }`}
-      >
-        {items.map((item) => (
-          <li key={item.slug}>
-            <ShelfCard item={item} sectionSlug={sectionSlug} />
-          </li>
-        ))}
-      </ul>
+      {showQuotes ? (
+        <QuotesView sectionSlug={sectionSlug} books={quotes ?? []} />
+      ) : (
+        <>
+          {/* Every card here is the same shape, so a plain grid is safe. */}
+          <ul
+            className={`mt-8 grid gap-x-5 gap-y-10 ${
+              group.items.some((i) => i.isVideo)
+                ? "grid-cols-1 sm:grid-cols-2"
+                : "grid-cols-2 sm:grid-cols-3"
+            }`}
+          >
+            {items.map((item) => (
+              <li key={item.slug}>
+                <ShelfCard item={item} sectionSlug={sectionSlug} />
+              </li>
+            ))}
+          </ul>
 
-      {items.length === 0 && (
-        <p className="mt-10 text-sm text-[var(--text-tertiary)]">
-          <T {...ui.nothingOnShelf} />
-        </p>
+          {items.length === 0 && (
+            <p className="mt-10 text-sm text-[var(--text-tertiary)]">
+              <T {...ui.nothingOnShelf} />
+            </p>
+          )}
+        </>
       )}
     </div>
   );

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSections, getSectionBySlug, getEntries } from "@/lib/vault";
 import { isShelfSection, shelfGroupBySlug, shelfMediumSlugs } from "@/lib/shelf";
+import { getBookQuotes } from "@/lib/quotes";
 import ShelfTypeView from "@/components/lists/ShelfTypeView";
 import T from "@/components/T";
 
@@ -46,7 +47,8 @@ export default async function ShelfMediumPage({ params }: Props) {
   const section = getSectionBySlug(sectionSlug);
   if (!section || !isShelfSection(section)) notFound();
 
-  const group = shelfGroupBySlug(getEntries(section), medium);
+  const entries = getEntries(section);
+  const group = shelfGroupBySlug(entries, medium);
   if (!group) notFound();
 
   return (
@@ -58,7 +60,13 @@ export default async function ShelfMediumPage({ params }: Props) {
         ← <T en={section.title} uk={section.titleUk} />
       </Link>
 
-      <ShelfTypeView sectionSlug={section.slug} group={group} />
+      {/* Passed so the Quotes chip shows here too — the page it leads to is
+          /books/quotes, handled by the [category] route. */}
+      <ShelfTypeView
+        sectionSlug={section.slug}
+        group={group}
+        quotes={group.medium === "book" ? getBookQuotes(entries) : undefined}
+      />
     </div>
   );
 }

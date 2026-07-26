@@ -10,8 +10,12 @@ import {
   shelfGroupBySlug,
   shelfGroups,
 } from "@/lib/shelf";
+import { getBookQuotes } from "@/lib/quotes";
 import ShelfTypeView from "@/components/lists/ShelfTypeView";
 import T from "@/components/T";
+
+/** URL segment for the synthetic Quotes category — see lib/quotes.ts. */
+const QUOTES_SLUG = "quotes";
 
 interface Props {
   params: Promise<{ section: string; medium: string; category: string }>;
@@ -32,13 +36,25 @@ export function generateStaticParams() {
     .flatMap((section) =>
       shelfGroups(getEntries(section))
         .filter((g) => g.medium !== "unsorted")
-        .flatMap((group) =>
-          groupCategories(group).map((category) => ({
+        .flatMap((group) => {
+          const params = groupCategories(group).map((category) => ({
             section: section.slug,
             medium: group.slug,
             category: categorySlug(category),
-          }))
-        )
+          }));
+          // The synthetic Quotes page, only where books actually carry quotes.
+          if (
+            group.medium === "book" &&
+            getBookQuotes(getEntries(section)).length > 0
+          ) {
+            params.push({
+              section: section.slug,
+              medium: group.slug,
+              category: QUOTES_SLUG,
+            });
+          }
+          return params;
+        })
     );
 }
 
@@ -62,11 +78,16 @@ export default async function ShelfCategoryPage({ params }: Props) {
   const section = getSectionBySlug(sectionSlug);
   if (!section || !isShelfSection(section)) notFound();
 
-  const group = shelfGroupBySlug(getEntries(section), medium);
+  const entries = getEntries(section);
+  const group = shelfGroupBySlug(entries, medium);
   if (!group) notFound();
 
-  const name = categoryFromSlug(group, category);
-  if (!name) notFound();
+  const quotes = group.medium === "book" ? getBookQuotes(entries) : undefined;
+  const showQuotes = category === QUOTES_SLUG && Boolean(quotes?.length);
+
+  // Quotes isn't a real category, so it won't resolve through the frontmatter.
+  const name = showQuotes ? undefined : categoryFromSlug(group, category);
+  if (!name && !showQuotes) notFound();
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-14 lg:py-24">
@@ -81,6 +102,8 @@ export default async function ShelfCategoryPage({ params }: Props) {
         sectionSlug={section.slug}
         group={group}
         activeCategory={name}
+        quotes={quotes}
+        showQuotes={showQuotes}
       />
     </div>
   );

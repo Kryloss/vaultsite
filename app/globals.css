@@ -960,6 +960,135 @@ body {
   border-radius: 0;
 }
 
+/* ---------- Spoilers (lib/markdown.ts) ---------- */
+
+/* Checkbox + label does the toggling, so a spoiler reveals with no JavaScript
+   and never renders as a dead control. The input is off-screen rather than
+   display:none, which would take it out of the tab order. */
+.spoiler-toggle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.spoiler-inline label {
+  cursor: pointer;
+}
+
+.spoiler-inline label > span {
+  border-radius: 0.1875rem;
+  background: var(--bg-hover);
+  color: transparent;
+  text-shadow: 0 0 0.5rem var(--text-secondary);
+  transition: color 160ms ease, text-shadow 160ms ease, background-color 160ms ease;
+  /* Stops the hidden text being swept up by a selection or a copy. */
+  user-select: none;
+}
+
+.spoiler-toggle:checked + label > span {
+  background: transparent;
+  color: inherit;
+  text-shadow: none;
+  user-select: auto;
+}
+
+.spoiler-toggle:focus-visible + label > span {
+  outline: 2px solid var(--text-secondary);
+  outline-offset: 2px;
+}
+
+.spoiler-callout .callout-title {
+  cursor: pointer;
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+}
+
+.spoiler-callout .spoiler-body {
+  filter: blur(6px);
+  pointer-events: none;
+  user-select: none;
+  transition: filter 200ms ease;
+}
+
+.spoiler-callout .spoiler-toggle:checked ~ .spoiler-body {
+  filter: none;
+  pointer-events: auto;
+  user-select: auto;
+}
+
+.callout[data-callout="spoiler"] {
+  border-color: var(--border);
+  background: var(--bg-hover);
+}
+
+/* ---------- Quotes collection (components/lists/QuotesView.tsx) ---------- */
+
+.quote-source {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.quote-source a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.quote-source a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.quote-author {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: var(--text-tertiary);
+}
+
+/* The passage is the content here, so it gets prose size — bigger than the
+   book it came from, which is only a label. */
+.pull-quote {
+  margin: 0;
+  padding: 0.125rem 0 0.125rem 1rem;
+  border-left: 2px solid var(--border);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+
+/* ---------- Note maturity (lib/maturity.ts) ---------- */
+
+.maturity {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+}
+
+/* ---------- 404 suggestions (components/NotFoundSuggestions.tsx) ------- */
+
+.backlink-ish {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 -0.625rem;
+  padding: 0.4375rem 0.625rem;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  transition: background-color 120ms ease;
+}
+
+.backlink-ish:hover {
+  background: var(--bg-hover);
+}
+
 /* ---------- Shelf status badge (components/lists/ShelfCard.tsx) ---------- */
 
 /* Sits on the artwork, so it needs its own backdrop to stay legible over

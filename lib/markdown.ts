@@ -375,9 +375,10 @@ function excalidrawHtml(target: string, alt?: string): string {
  * Obsidian callouts → styled divs. The body is emitted as markdown between
  * raw HTML tags (separated by blank lines) so the pipeline still parses it.
  */
-function transformCallouts(md: string): string {
+function transformCallouts(md: string, idPrefix = ""): string {
   const lines = md.split("\n");
   const out: string[] = [];
+  let spoilerN = 0;
   for (let i = 0; i < lines.length; i++) {
     const m = lines[i].match(/^>\s*\[!(\w+)\][+-]?\s*(.*)$/);
     if (!m) {
@@ -394,6 +395,28 @@ function transformCallouts(md: string): string {
       j++;
     }
     i = j - 1;
+
+    // `> [!spoiler]` blurs its body until the title is clicked. A checkbox and
+    // its label do the toggling, so there's no JavaScript and no dead control
+    // for anyone without it. In Obsidian it stays an ordinary callout.
+    if (type === "spoiler") {
+      const id = `${idPrefix}sp-${++spoilerN}`;
+      out.push(
+        `<div class="callout spoiler-callout" data-callout="spoiler">`,
+        "",
+        `<input type="checkbox" id="${id}" class="spoiler-toggle" />`,
+        `<label for="${id}" class="callout-title">${escapeHtml(title)}</label>`,
+        `<div class="spoiler-body">`,
+        "",
+        ...body,
+        "",
+        `</div>`,
+        "",
+        `</div>`
+      );
+      continue;
+    }
+
     out.push(
       `<div class="callout" data-callout="${type}">`,
       "",
@@ -448,14 +471,15 @@ function unmaskCode(text: string, slots: string[]): string {
 export function preprocessObsidian(
   md: string,
   sectionDir: string,
-  sectionSlug: string
+  sectionSlug: string,
+  idPrefix = ""
 ): string {
   // 0. Take code out of play — everything below is regex over the raw text.
   const { text, slots } = maskCode(md);
   md = text;
 
   // 1. Callouts first (they restructure blockquote syntax).
-  md = transformCallouts(md);
+  md = transformCallouts(md, idPrefix);
 
   // 2a. Excalidraw drawings: ![[Drawing.excalidraw]] / ![[Drawing.excalidraw.md]]
   //     → the exported SVG (theme-aware if light + dark were exported).
@@ -547,6 +571,20 @@ export function preprocessObsidian(
       `<span class="progress" role="progressbar" aria-valuenow="${v}" aria-valuemin="0" aria-valuemax="100">` +
       `<span class="progress-fill" style="width:${v}%"></span></span>` +
       `<span class="progress-label">${v}%</span>`
+    );
+  });
+
+  // 5b. Inline spoilers: ||hidden|| → blurred until clicked. Same checkbox
+  //     mechanism as the [!spoiler] callout, so it needs no JavaScript.
+  //     Bounded to one line and no inner pipes, so table rows can't match.
+  let inlineN = 0;
+  md = md.replace(/\|\|([^|\n]+)\|\|/g, (_m, text: string) => {
+    const id = `${idPrefix}spi-${++inlineN}`;
+    return (
+      `<span class="spoiler-inline">` +
+      `<input type="checkbox" id="${id}" class="spoiler-toggle" />` +
+      `<label for="${id}"><span>${escapeHtml(text)}</span></label>` +
+      `</span>`
     );
   });
 
@@ -794,7 +832,9 @@ export async function renderWithHeadings(
   sectionSlug: string,
   options: RenderOptions = {}
 ): Promise<{ html: string; headings: Heading[] }> {
-  const pre = preprocessObsidian(md, sectionDir, sectionSlug);
+  // idPrefix also namespaces spoiler checkbox ids — both languages ship in one
+  // document, so an unprefixed id would toggle the other language's spoiler.
+  const pre = preprocessObsidian(md, sectionDir, sectionSlug, options.idPrefix);
   const headings: Heading[] = [];
   const file = await unified()
     .use(remarkParse)

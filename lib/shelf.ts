@@ -31,9 +31,11 @@ export interface ShelfItem {
   /** Renders as a 16:9 card instead of a 2:3 cover. */
   isVideo?: boolean;
   /**
-   * Set when `status:` marks this as unfinished — "Reading" for books,
-   * "Watching" for anything screen-based. Undefined means finished.
+   * Reading state from `status:`. Undefined means finished, which is the
+   * common case and stays unlabelled so the shelf isn't covered in pills.
    */
+  status?: "progress" | "queued";
+  /** Badge text for `status` — verb matched to the medium. */
   statusLabel?: Str;
   /** `categories:` frontmatter — filter chips on the medium page. */
   categories: string[];
@@ -77,8 +79,11 @@ export function mediumSlug(medium: string): string {
   return slugify(medium.endsWith("s") ? medium : `${medium}s`);
 }
 
-/** `status:` values that mean "not finished with this yet". */
+/** `status:` values that mean "part-way through". */
 const IN_PROGRESS = new Set(["reading", "watching", "current", "in-progress"]);
+
+/** `status:` values that mean "haven't started — it's in the queue". */
+const QUEUED = new Set(["want", "queued", "queue", "to-read", "to-watch", "backlog", "planned"]);
 
 /** Mediums you watch rather than read — decides which verb the badge uses. */
 const WATCHED = new Set(["movie", "show", "video", "youtube"]);
@@ -96,14 +101,31 @@ export function toShelfItem(entry: Entry): ShelfItem {
   const videoId = typeof link === "string" ? youtubeId(link) : undefined;
   const cover = resolveCoverUrl(entry.sectionDir, entry.meta.cover);
 
-  // `status: reading` (or watching / current / in-progress) badges the card.
-  // Any other value — or none — reads as finished, which is the common case
-  // and stays unlabelled so the shelf isn't covered in pills.
-  const status =
+  // `status:` badges the card and pins it to a row at the top of the shelf.
+  // Anything unrecognised — or nothing at all — reads as finished.
+  const raw =
     typeof entry.meta.status === "string"
       ? entry.meta.status.trim().toLowerCase()
       : undefined;
-  const inProgress = status ? IN_PROGRESS.has(status) : false;
+  const status: ShelfItem["status"] = !raw
+    ? undefined
+    : IN_PROGRESS.has(raw)
+      ? "progress"
+      : QUEUED.has(raw)
+        ? "queued"
+        : undefined;
+  // Books are read, everything screen-shaped is watched.
+  const watched = (medium && WATCHED.has(medium)) || Boolean(videoId);
+  const statusLabel =
+    status === "progress"
+      ? watched
+        ? ui.currentlyWatching
+        : ui.currentlyReading
+      : status === "queued"
+        ? watched
+          ? ui.wantToWatch
+          : ui.wantToRead
+        : undefined;
 
   return {
     slug: entry.slug,
@@ -120,13 +142,33 @@ export function toShelfItem(entry: Entry): ShelfItem {
     rating:
       typeof entry.meta.rating === "number" ? entry.meta.rating : undefined,
     isVideo: medium === "video" || medium === "youtube" || Boolean(videoId),
-    statusLabel: inProgress
-      ? (medium && WATCHED.has(medium)) || videoId
-        ? ui.currentlyWatching
-        : ui.currentlyReading
-      : undefined,
+    status,
+    statusLabel,
     categories: parseCategories(entry.meta),
   };
+}
+
+/**
+ * Cross-medium rows pinned above the medium rows: what's open right now, then
+ * what's queued.
+ *
+ * Deliberately separate from shelfGroups() — these are display-only and must
+ * never reach shelfMediumSlugs(), or "In progress" would generate a page at
+ * /shelf/type/in-progresses. Items appear here *and* in their medium row,
+ * which is how every streaming shelf behaves.
+ */
+export function shelfHighlights(entries: Entry[]): ShelfGroup[] {
+  const items = entries.map(toShelfItem);
+  const rows: ShelfGroup[] = [];
+
+  const row = (status: ShelfItem["status"], slug: string, label: Str) => {
+    const picked = items.filter((i) => i.status === status);
+    if (picked.length > 0) rows.push({ medium: slug, slug, label, items: picked });
+  };
+
+  row("progress", "in-progress", ui.shelfInProgress);
+  row("queued", "queued", ui.shelfUpNext);
+  return rows;
 }
 
 /** Every category used within one medium, alphabetical. */

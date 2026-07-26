@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ListProps } from "@/lib/section-types";
-import { shelfGroups } from "@/lib/shelf";
+import { shelfGroups, shelfHighlights } from "@/lib/shelf";
 import ShelfCard from "@/components/lists/ShelfCard";
 import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
@@ -35,16 +35,22 @@ export default function ShelfGrid({ section, entries }: ListProps) {
     );
   }
 
-  const groups = shelfGroups(entries);
+  // What's open and what's queued come first, across every medium — the two
+  // things you'd actually want off a shelf. They repeat inside their medium
+  // rows below, which is how every streaming shelf behaves.
+  const groups = [...shelfHighlights(entries), ...shelfGroups(entries)];
 
   return (
     <div className="mt-8 flex flex-col gap-6">
       {groups.map((group) => (
         <section key={group.medium}>
           <h2 className="text-lg font-semibold tracking-tight text-[var(--text)]">
-            {/* "Everything else" has no medium page to link to. The chevron is
-                shown even for a single item so the page stays discoverable. */}
-            {group.medium === "unsorted" ? (
+            {/* "Everything else" and the status rows have no medium page to
+                link to. The chevron is shown even for a single item so the
+                page stays discoverable. */}
+            {group.medium === "unsorted" ||
+            group.medium === "in-progress" ||
+            group.medium === "queued" ? (
               <T {...group.label} />
             ) : (
               <Link

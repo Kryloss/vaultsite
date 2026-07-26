@@ -26,6 +26,9 @@ import Toc from "@/components/Toc";
 import EntryFooter from "@/components/EntryFooter";
 import CopyMarkdown from "@/components/CopyMarkdown";
 import ReadingProgress from "@/components/ReadingProgress";
+import JsonLd from "@/components/JsonLd";
+import { entryJsonLd } from "@/lib/jsonld";
+import { maturityOf } from "@/lib/maturity";
 
 /** Below this many h2/h3 an outline is noise, not navigation. */
 const MIN_TOC_HEADINGS = 3;
@@ -89,6 +92,7 @@ export default async function EntryPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-14 lg:py-24">
+      <JsonLd data={entryJsonLd(section, entry)} />
       <ReadingProgress />
       <Link
         href={`/${section.slug}`}
@@ -145,6 +149,14 @@ export default async function EntryPage({ params }: Props) {
             <span>
               {stats.minutes} <T {...ui.minRead} /> ·{" "}
               {stats.words.toLocaleString()} <T {...ui.words} />
+            </span>
+          )}
+          {/* Maturity is a writing idea, so it rides with the writing stats.
+              Unset notes fall back to Seedling — see lib/maturity.ts. */}
+          {stats && (
+            <span className="maturity">
+              <span aria-hidden>{maturityOf(entry.meta).icon}</span>
+              <T {...maturityOf(entry.meta).label} />
             </span>
           )}
         </p>

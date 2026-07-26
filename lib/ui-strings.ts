@@ -86,6 +86,20 @@ export const ui = {
   // shelf status
   currentlyReading: { en: "Reading", uk: "Читаю" },
   currentlyWatching: { en: "Watching", uk: "Дивлюся" },
+  wantToRead: { en: "To read", uk: "Прочитати" },
+  wantToWatch: { en: "To watch", uk: "Подивитись" },
+  shelfInProgress: { en: "In progress", uk: "У процесі" },
+  shelfUpNext: { en: "Up next", uk: "Далі в черзі" },
+  quotesCategory: { en: "Quotes", uk: "Цитати" },
+  quotesEmpty: {
+    en: "No quotes saved yet — add a > blockquote to a book’s note.",
+    uk: "Цитат поки немає — додайте > цитату в нотатку книги.",
+  },
+
+  // note maturity
+  maturitySeedling: { en: "Seedling", uk: "Паросток" },
+  maturityBudding: { en: "Budding", uk: "Розвивається" },
+  maturityEvergreen: { en: "Evergreen", uk: "Вічнозелена" },
 
   // 404
   notFoundBody: {
@@ -93,4 +107,5 @@ export const ui = {
     uk: "Цієї сторінки не існує (або нотатку за нею знято з публікації).",
   },
   backHome: { en: "← Back home", uk: "← На головну" },
+  didYouMean: { en: "Did you mean…", uk: "Можливо, ви шукали…" },
 } satisfies Record<string, Str>;
