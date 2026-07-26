@@ -6,12 +6,12 @@ aliases:
   - Нова версія
 author: Andrey Doronichev
 medium: book
-categories: [Nonfiction]
+categories:
+  - Nonfiction
 date: 2026-07-25
-description: A former Google product lead on reinventing yourself when the old version stops fitting.
-description_uk: Колишній продуктовий керівник Google — про те, як перезібрати себе, коли стара версія більше не пасує.
-cover: new-version.jpg
-# cover source: nv.doronichev.com (publisher's own cover file, cover_20260530.png)
+description: Product strategy and startup frameworks, pointed at yourself.
+description_uk: Продуктові стратегії та стартап-фреймворки, спрямовані на себе самого.
+cover: new-version.jpeg
 ---
 
 ## At a glance
@@ -20,9 +20,9 @@ cover: new-version.jpg
 |---|---|
 | Author | Andrey Doronichev |
 | Published | 2026 |
-| One-liner | What to do when the life you built still works but no longer fits |
+| One-liner | Ship a new version of yourself the way you'd ship a product |
 
-Written for people starting over — in a new country, a new industry, or a career that AI is about to rearrange — by the entrepreneur who ran YouTube Mobile as a product lead at Google. Available in Ukrainian, Russian and English editions.
+A personal development guide by Silicon Valley tech entrepreneur Andrey Doronichev, applying product-building strategies and startup frameworks to self-transformation and personal growth. Written for people whose current life still works but no longer fits — a new country, a new industry, or a career AI is about to rearrange. Available in Ukrainian, Russian and English editions.
 
 ## Why it's on the shelf
 
