@@ -70,6 +70,13 @@ export const ui = {
   draft: { en: "Draft", uk: "Чернетка" },
   minRead: { en: "min read", uk: "хв читання" },
   words: { en: "words", uk: "слів" },
+  onThisPage: { en: "On this page", uk: "На цій сторінці" },
+  mentionedIn: { en: "Mentioned in", uk: "Згадується в" },
+  /** Accessible name of the "#" link beside a heading (see lib/toc.ts). */
+  headingAnchor: {
+    en: "Link to this heading",
+    uk: "Посилання на цей заголовок",
+  },
 
   // code blocks
   copyCode: { en: "Copy code", uk: "Копіювати код" },

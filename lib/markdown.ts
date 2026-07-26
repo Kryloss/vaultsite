@@ -12,7 +12,8 @@
  *
  * Post-processing (rehype): standalone images with alt text become
  * <figure> + <figcaption> (skipping avatars); fenced code blocks are
- * syntax-highlighted at build time (see lib/highlight.ts).
+ * syntax-highlighted at build time (see lib/highlight.ts); headings get ids,
+ * "#" anchors and an outline for the table of contents (see lib/toc.ts).
  *
  * Assets resolve because scripts/sync-assets.mjs mirrors every non-.md vault
  * file into public/vault-assets/ before dev/build.
@@ -30,6 +31,7 @@ import { slugify, getWikiIndex, getAssetIndex, VAULT_DIR } from "./vault";
 import { appleMusicEmbedHtml, isAppleMusicUrl } from "./apple-music";
 import { youtubeEmbedHtml, youtubeId } from "./youtube";
 import { highlightToHast, parseCodeMeta, langLabel } from "./highlight";
+import { rehypeHeadings, type Heading } from "./toc";
 
 /** Encode each path segment but keep "/" separators. */
 function encodePath(p: string): string {
@@ -769,12 +771,29 @@ function rehypeCodeBlocks() {
 }
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
-export async function renderMarkdown(
+export interface RenderOptions {
+  /**
+   * Prefix for heading ids. An entry's Ukrainian body renders as a second
+   * <article> in the same document, so its ids need their own namespace —
+   * see lib/toc.ts.
+   */
+  idPrefix?: string;
+  /** Localized accessible name for the "#" anchor beside each heading. */
+  anchorLabel?: string;
+}
+
+/**
+ * Render markdown AND report the h2/h3 outline, for pages that show a table of
+ * contents. Everything else calls renderMarkdown() and ignores the headings.
+ */
+export async function renderWithHeadings(
   md: string,
   sectionDir: string,
-  sectionSlug: string
-): Promise<string> {
+  sectionSlug: string,
+  options: RenderOptions = {}
+): Promise<{ html: string; headings: Heading[] }> {
   const pre = preprocessObsidian(md, sectionDir, sectionSlug);
+  const headings: Heading[] = [];
   const file = await unified()
     .use(remarkParse)
     .use(remarkGfm)
@@ -784,8 +803,20 @@ export async function renderMarkdown(
     .use(rehypeFigures)
     .use(rehypeCodeBlocks)
     .use(rehypeSlug)
+    // After rehype-slug on purpose — it needs the ids rehype-slug mints.
+    .use(rehypeHeadings, { ...options, collect: headings })
     .use(rehypeStringify)
     .process(pre);
   // Last step on purpose — see inlineDiagrams().
-  return inlineDiagrams(String(file));
+  return { html: inlineDiagrams(String(file)), headings };
+}
+
+export async function renderMarkdown(
+  md: string,
+  sectionDir: string,
+  sectionSlug: string,
+  options: RenderOptions = {}
+): Promise<string> {
+  const { html } = await renderWithHeadings(md, sectionDir, sectionSlug, options);
+  return html;
 }

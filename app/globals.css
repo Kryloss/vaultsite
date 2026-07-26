@@ -688,3 +688,157 @@ body {
   -webkit-line-clamp: 3;
   overflow: hidden;
 }
+
+/* ---------- Heading anchors (lib/toc.ts) ---------- */
+
+/* Sits in the container's left padding, so it never reflows the heading.
+   Hidden until the heading is hovered or the link itself is focused. */
+.prose :is(h2, h3, h4) {
+  position: relative;
+}
+
+.prose a.heading-anchor {
+  position: absolute;
+  top: 0;
+  left: -1.1em;
+  width: 1.1em;
+  font-weight: 400;
+  color: var(--text-tertiary);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 120ms ease, color 120ms ease;
+  /* Keeps the "#" out of copied text when a heading is selected. */
+  user-select: none;
+}
+
+.prose :is(h2, h3, h4):hover a.heading-anchor,
+.prose a.heading-anchor:focus-visible {
+  opacity: 1;
+}
+
+.prose a.heading-anchor:hover {
+  color: var(--text);
+}
+
+/* No hover on touch, and no room in the padding on small screens either. */
+@media (max-width: 639px), (hover: none) {
+  .prose a.heading-anchor {
+    display: none;
+  }
+}
+
+/* ---------- Table of contents (components/Toc.tsx) ---------- */
+
+/* A fixed rail beside the article. The page is a centered max-w-2xl column
+   (half-width 21rem), so the rail starts one rem-gap past its right edge and
+   only appears once the viewport can hold both without crowding. */
+.toc-rail {
+  display: none;
+  position: fixed;
+  top: 9rem;
+  left: calc(50% + 22rem);
+  width: 13rem;
+  max-height: calc(100vh - 12rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+@media (min-width: 1280px) {
+  .toc-rail {
+    display: block;
+  }
+}
+
+.toc-title {
+  margin: 0 0 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--text-tertiary);
+}
+
+.toc-rail ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-left: 1px solid var(--border);
+}
+
+.toc-rail li[data-level="3"] {
+  padding-left: 0.75rem;
+}
+
+.toc-link {
+  display: block;
+  padding: 0.25rem 0 0.25rem 0.75rem;
+  /* Overlaps the ul's border so the active marker replaces it. */
+  margin-left: -1px;
+  border-left: 1px solid transparent;
+  color: var(--text-tertiary);
+  text-decoration: none;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.toc-link:hover {
+  color: var(--text-secondary);
+}
+
+.toc-link.is-active {
+  border-left-color: var(--text);
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* ---------- Backlinks (components/Backlinks.tsx) ---------- */
+
+.backlinks {
+  margin-top: 3.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.backlinks-title {
+  margin: 0 0 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--text-tertiary);
+}
+
+.backlinks ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.backlink {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0 -0.625rem;
+  padding: 0.4375rem 0.625rem;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  transition: background-color 120ms ease;
+}
+
+.backlink:hover {
+  background: var(--bg-hover);
+}
+
+.backlink-title {
+  font-size: 0.9375rem;
+  color: var(--text);
+}
+
+.backlink-section {
+  flex: none;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}

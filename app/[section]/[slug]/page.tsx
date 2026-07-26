@@ -11,7 +11,8 @@ import {
   readingStats,
   parseCategories,
 } from "@/lib/vault";
-import { renderMarkdown } from "@/lib/markdown";
+import { renderWithHeadings } from "@/lib/markdown";
+import { backlinksFor } from "@/lib/backlinks";
 import {
   categoryLabel,
   categorySlug,
@@ -21,6 +22,11 @@ import {
 import { ui } from "@/lib/ui-strings";
 import Stars from "@/components/Stars";
 import T from "@/components/T";
+import Toc from "@/components/Toc";
+import Backlinks from "@/components/Backlinks";
+
+/** Below this many h2/h3 an outline is noise, not navigation. */
+const MIN_TOC_HEADINGS = 3;
 
 interface Props {
   params: Promise<{ section: string; slug: string }>;
@@ -51,12 +57,21 @@ export default async function EntryPage({ params }: Props) {
   const entry = getEntry(sectionSlug, slug);
   if (!section || !entry) notFound();
 
-  const html = await renderMarkdown(entry.content, entry.sectionDir, sectionSlug);
-  const htmlUk = entry.contentUk
-    ? await renderMarkdown(entry.contentUk, entry.sectionDir, sectionSlug)
+  // The Ukrainian body renders as a second <article> in the same document, so
+  // its heading ids are namespaced to keep "#setup" unambiguous — see lib/toc.ts.
+  const en = await renderWithHeadings(entry.content, entry.sectionDir, sectionSlug, {
+    anchorLabel: ui.headingAnchor.en,
+  });
+  const uk = entry.contentUk
+    ? await renderWithHeadings(entry.contentUk, entry.sectionDir, sectionSlug, {
+        idPrefix: "uk-",
+        anchorLabel: ui.headingAnchor.uk,
+      })
     : null;
   const stats = section.type === "posts" ? readingStats(entry.content) : null;
   const categories = parseCategories(entry.meta);
+  const backlinks = backlinksFor(`/${section.slug}/${entry.slug}`);
+  const showToc = en.headings.length >= MIN_TOC_HEADINGS;
 
   // Category chips link back to the section, pre-filtered. Shelf entries get
   // their medium's category page; everything else (posts) gets the section
@@ -131,23 +146,27 @@ export default async function EntryPage({ params }: Props) {
 
       </header>
 
-      {htmlUk ? (
+      {uk ? (
         <>
           <article
             className="prose mt-8 lang-en"
-            dangerouslySetInnerHTML={{ __html: html }}
+            dangerouslySetInnerHTML={{ __html: en.html }}
           />
           <article
             className="prose mt-8 lang-uk"
-            dangerouslySetInnerHTML={{ __html: htmlUk }}
+            dangerouslySetInnerHTML={{ __html: uk.html }}
           />
         </>
       ) : (
         <article
           className="prose mt-8"
-          dangerouslySetInnerHTML={{ __html: html }}
+          dangerouslySetInnerHTML={{ __html: en.html }}
         />
       )}
+
+      <Backlinks links={backlinks} />
+
+      {showToc && <Toc en={en.headings} uk={uk?.headings} />}
     </div>
   );
 }
