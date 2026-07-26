@@ -40,6 +40,7 @@ const CATEGORY_LABELS: Record<string, Str> = {
   // posts
   cybersecurity: { en: "Cybersecurity", uk: "Кібербезпека" },
   meta: { en: "Meta", uk: "Про сайт" },
+  ukraine: { en: "Ukraine", uk: "Україна" },
 };
 
 /** Bilingual label for a category name from frontmatter. */
