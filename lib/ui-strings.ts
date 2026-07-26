@@ -70,7 +70,6 @@ export const ui = {
   draft: { en: "Draft", uk: "Чернетка" },
   minRead: { en: "min read", uk: "хв читання" },
   words: { en: "words", uk: "слів" },
-  mentionedIn: { en: "Mentioned in", uk: "Згадується в" },
   relatedEntries: { en: "Related", uk: "Схоже" },
   previousEntry: { en: "Previous", uk: "Попереднє" },
   nextEntry: { en: "Next", uk: "Наступне" },

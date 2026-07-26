@@ -64,7 +64,7 @@ export function getSiblings(
  * Ranked by how many categories overlap, then by the section's existing order
  * so the newer of two equal matches wins. Scoped to the same section on
  * purpose: a book and a blog post sharing the tag "Tech" aren't meaningfully
- * related, and cross-section connections are already covered by backlinks.
+ * related, and `[[wiki links]]` already carry the connections that are.
  */
 export function getRelated(
   sectionSlug: string,

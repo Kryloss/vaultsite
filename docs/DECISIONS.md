@@ -193,3 +193,11 @@ Two fixes were applied, in order:
 **Why not cross-section:** a book and a blog post both tagged "Tech" aren't meaningfully related, and the connection that *is* meaningful — an explicit `[[link]]` between them — is already surfaced by backlinks (#16). Keeping the two mechanisms distinct means neither is noisy.
 
 **Revisit when:** categories grow a hierarchy, or a note wants to pin its own related list via frontmatter.
+
+## 21. Backlinks reverted — decision #16 is no longer in effect (2026-07-26)
+
+**Decision:** the "Mentioned in" block is off entry pages. `lib/backlinks.ts`, `components/Backlinks.tsx`, the `mentionedIn` string and the `.backlinks*` styles were all deleted the same day they were added, at the owner's request.
+
+**Why it's recorded rather than quietly dropped:** #16 above reads as live architecture otherwise, and the next person to touch the entry page shouldn't go looking for a module that isn't there.
+
+**Bringing it back:** the reasoning in #16 still holds — the inversion is ~60 lines on top of `getWikiIndex()`, and the deleted files are in git history at the preceding commit. Entry footers now carry related entries and prev/next only (#20).

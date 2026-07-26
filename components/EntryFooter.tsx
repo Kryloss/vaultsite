@@ -52,13 +52,20 @@ export default function EntryFooter({
         </section>
       )}
 
+      {/* One slim row rather than two stacked cards — the arrows sit at the
+          outer edges of the column and the titles fill inward, sharing the
+          width and ellipsing when it runs short. */}
       {(prev || next) && (
         <nav className="entry-siblings" aria-label="Neighbouring entries">
-          {/* The empty span keeps a lone "next" pushed to the right edge. */}
+          {/* Empty span keeps a lone "next" pinned to the right edge. */}
           {prev ? (
             <Link href={prev.href} className="sibling sibling-prev">
-              <span className="sibling-label">
-                ← <T {...ui.previousEntry} />
+              <span className="sibling-arrow" aria-hidden>
+                ‹
+              </span>
+              {/* The arrow alone has no meaning read aloud. */}
+              <span className="sr-only">
+                <T {...ui.previousEntry} />
               </span>
               <span className="sibling-title">
                 <T en={prev.title} uk={prev.titleUk} />
@@ -69,11 +76,14 @@ export default function EntryFooter({
           )}
           {next && (
             <Link href={next.href} className="sibling sibling-next">
-              <span className="sibling-label">
-                <T {...ui.nextEntry} /> →
+              <span className="sr-only">
+                <T {...ui.nextEntry} />
               </span>
               <span className="sibling-title">
                 <T en={next.title} uk={next.titleUk} />
+              </span>
+              <span className="sibling-arrow" aria-hidden>
+                ›
               </span>
             </Link>
           )}
