@@ -121,6 +121,12 @@ export default function Toc({ en, uk }: { en: Heading[]; uk?: Heading[] }) {
    * navigation that would fire a second, competing jump. `block: "start"`
    * still honours the headings' scroll-margin-top, so the target clears the
    * floating header exactly as it did before.
+   *
+   * Deliberately animates even under `prefers-reduced-motion` (owner's call):
+   * the rest of the site still honours that setting — `html` drops to
+   * `scroll-behavior: auto` and `.page-in` stops animating — so this is the
+   * one interaction that overrides it. The travel is what shows where in the
+   * page you landed; without it the jump reads as a page swap.
    */
   const jump = (id: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
     // Leave modified clicks alone — open-in-new-tab still works.
@@ -132,8 +138,7 @@ export default function Toc({ en, uk }: { en: Heading[]; uk?: Heading[] }) {
     held.current = id;
     setActive(id);
 
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    el.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
     history.pushState(null, "", `#${id}`);
   };
 

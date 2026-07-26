@@ -3,6 +3,7 @@ import "./globals.css";
 import Chrome from "@/components/Chrome";
 import Lightbox from "@/components/Lightbox";
 import CodeCopy from "@/components/CodeCopy";
+import HeadingAnchors from "@/components/HeadingAnchors";
 import LinkPreview from "@/components/LinkPreview";
 import { getSections, getEntries, getSearchIndex } from "@/lib/vault";
 import { getLinkPreviews } from "@/lib/previews";
@@ -90,6 +91,7 @@ export default function RootLayout({
         </Chrome>
         <Lightbox />
         <CodeCopy />
+        <HeadingAnchors />
         <LinkPreview previews={getLinkPreviews()} />
       </body>
     </html>
