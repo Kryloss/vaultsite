@@ -1,16 +1,26 @@
-import Link from "next/link";
+import { Suspense } from "react";
 import type { ListProps } from "@/lib/section-types";
 import { resolveCoverUrl } from "@/lib/markdown";
+import { parseCategories } from "@/lib/vault";
+import PeopleCards, { type PersonRow } from "@/components/lists/PeopleCards";
+import PeopleGridClient from "@/components/lists/PeopleGridClient";
 import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
 
 /**
- * "people" section type — app-dissection-style grid of square cover cards.
+ * "people" section type (server side) — app-dissection-style grid of square
+ * cover cards, with category filter chips.
  *
- * Each entry note can set a cover image via frontmatter:
+ * Each entry note can set:
  *   cover: fedorov.jpg      (a file inside the same section folder — preferred)
  *   cover: https://…        (remote URL fallback)
+ *   categories: [Ukraine, Tech]   (or a single `category:`)
  * Without a cover, a tile with the person's initials is shown instead.
+ *
+ * Filtering works exactly like the posts list: chips are links to
+ * `?category=…`, read by the client half via useSearchParams(), so a chip on a
+ * person's own page lands here pre-filtered. See DECISIONS #14 for why these
+ * aren't separate pages the way the shelf's categories are.
  */
 export default function PeopleGrid({ section, entries }: ListProps) {
   if (entries.length === 0) {
@@ -21,53 +31,36 @@ export default function PeopleGrid({ section, entries }: ListProps) {
     );
   }
 
-  return (
-    <ul className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3">
-      {entries.map((entry) => {
-        const cover = resolveCoverUrl(entry.sectionDir, entry.meta.cover);
-        const contain = entry.meta.coverFit === "contain";
-        return (
-          <li key={entry.slug}>
-            <Link href={`/${section.slug}/${entry.slug}`} className="group block">
-              <div className="aspect-square overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-hover)]">
-                {cover ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={cover}
-                    alt={entry.title}
-                    className={
-                      contain
-                        ? "h-full w-full object-contain p-6"
-                        : "h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    }
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-3xl font-semibold text-[var(--text-tertiary)]">
-                    {initials(entry.title)}
-                  </div>
-                )}
-              </div>
-              <span className="mt-2.5 block font-medium leading-snug text-[var(--text)]">
-                <T en={entry.title} uk={entry.titleUk} />
-              </span>
-              {entry.description && (
-                <span className="mt-0.5 line-clamp-2 block text-sm leading-snug text-[var(--text-secondary)]">
-                  {entry.description}
-                </span>
-              )}
-            </Link>
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
+  const rows: PersonRow[] = entries.map((entry) => ({
+    slug: entry.slug,
+    title: entry.title,
+    titleUk: entry.titleUk,
+    description: entry.description,
+    cover: resolveCoverUrl(entry.sectionDir, entry.meta.cover),
+    contain: entry.meta.coverFit === "contain" || undefined,
+    categories: parseCategories(entry.meta),
+  }));
 
-function initials(name: string): string {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? "")
-    .join("");
+  const categories: string[] = [];
+  for (const row of rows)
+    for (const c of row.categories)
+      if (!categories.includes(c)) categories.push(c);
+
+  // The client half uses useSearchParams(), which Next requires behind a
+  // Suspense boundary and renders on the client. The fallback is the same grid
+  // unfiltered, so the static HTML still contains everyone.
+  return (
+    <Suspense
+      fallback={
+        <PeopleCards
+          sectionSlug={section.slug}
+          rows={rows}
+          categories={categories}
+          active={null}
+        />
+      }
+    >
+      <PeopleGridClient sectionSlug={section.slug} rows={rows} />
+    </Suspense>
+  );
 }
