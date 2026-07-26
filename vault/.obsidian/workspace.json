@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Posts/Draft example.md",
+                "file": "Shelf/Mr Robot.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Draft example"
+              "title": "Mr Robot"
             }
           }
         ]
@@ -199,11 +199,18 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
+    "Shelf/Sapiens.md",
+    "Shelf/Samsung's Newest Foldable is Here.uk.md",
+    "Shelf/mr-robot.png",
+    "Shelf/Mr Robot.md",
+    "Shelf/Inception.md",
+    "Shelf/I Tested Opus 5 vs Fable 5.uk.md",
+    "Projects/main.md",
+    "Posts/Draft example.md",
     "Home/main.md",
     "Home/IMG_3260.jpeg",
     "Shelf/main.md",
     "Shelf/This man is destroying Putin's empire.uk.md",
-    "Shelf/Samsung's Newest Foldable is Here.uk.md",
     "People/main.md",
     "Home/main.uk.md",
     "People/fedorov.png",
@@ -212,15 +219,12 @@
     "Posts/main.md",
     "Posts/Post Sample.md",
     "Posts/First certification.md",
-    "Posts/Draft example.md",
     "People/Mykhailo Fedorov.md",
     "Posts/First certification.uk.md",
     "Posts/Security+ journey.md",
     "Projects/This website.md",
     "Projects/publishing-pipeline.svg",
     "Projects/publishing-pipeline.uk.svg",
-    "Shelf/I Tested Opus 5 vs Fable 5.uk.md",
-    "Shelf/Inception.md",
     "Shelf/inception.jpg",
     "Shelf/I Tested Opus 5 vs Fable 5.md",
     "Posts/rendering-pipeline.uk.svg",
@@ -230,10 +234,6 @@
     "Posts/secplus-domains.svg",
     "Posts/secplus-plan.svg",
     "Posts/secplus-plan.uk.svg",
-    "Posts/rendering-pipeline.svg",
-    "Shelf/Sapiens.md",
-    "Posts/Post Sample 1.md",
-    "Music/Clancy.md",
     "Shelf",
     "Now",
     "Books",
