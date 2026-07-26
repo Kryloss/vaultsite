@@ -25,7 +25,11 @@ import { siteName, siteUrl, siteDescription, socials } from "@/lib/site-config";
 const inter = Inter({
   subsets: ["latin", "latin-ext", "cyrillic"],
   display: "swap",
-  variable: "--font-sans",
+  // NOT --font-sans: Tailwind v4 defines that as a theme token holding the
+  // system stack, and both land on the same element (<html> is :root), so
+  // which one won came down to stylesheet order. globals.css points
+  // Tailwind's token at this one instead — one name, one owner.
+  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {

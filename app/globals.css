@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* Inter (loaded by next/font in app/layout.tsx as --font-inter) becomes the
+   sans everywhere, so `font-sans` utilities and the body rule below can't
+   disagree. The system stack stays as the fallback during the font swap. */
+@theme {
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
 /* Design tokens — light by default, dark follows system preference. */
 :root {
   --bg: #ffffff;
@@ -95,10 +103,14 @@ html[data-lang="uk"] .lang-uk {
 body {
   background: var(--bg);
   color: var(--text);
-  /* --font-sans is Inter, loaded by next/font in app/layout.tsx. The system
-     stack stays behind it as the fallback for the swap period. */
-  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Resolves to Inter + the system fallbacks via the @theme block up top. */
+  font-family: var(--font-sans);
+  /* Inter sets looser default tracking than the system font it replaced
+     (-apple-system / SF Pro), which reads as gappy at body sizes. Inter's own
+     guidance is to tighten it; -0.011em is the usual starting point for ~16px
+     and this sits a step past it. Dial toward 0 for airier text; much below
+     -0.025em starts to cramp the Cyrillic. */
+  letter-spacing: -0.02em;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -119,7 +131,9 @@ body {
 .prose h4 {
   color: var(--text);
   font-weight: 600;
-  letter-spacing: -0.01em;
+  /* Tracking wants to go more negative as size goes up — headings need more
+     than the body correction to look like the same typeface. */
+  letter-spacing: -0.03em;
   scroll-margin-top: 5rem;
 }
 

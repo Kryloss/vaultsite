@@ -165,3 +165,31 @@ Two fixes were applied, in order:
 **Anchors are off in the RSS feed** (`anchors: false`) — a bare fragment link means nothing in a reader.
 
 **Revisit when:** headings need stable ids across renames for permalink purposes, or the TOC should cover h4.
+
+## 18. Inter self-hosted via next/font, owning Tailwind's `--font-sans` (2026-07-26)
+
+**Decision:** Inter replaces the system stack, loaded by `next/font/google` in `app/layout.tsx` with the `latin`, `latin-ext` and `cyrillic` subsets, exposed as `--font-inter`. `globals.css` then points Tailwind's `--font-sans` theme token at it in an `@theme` block, and `body` just reads `var(--font-sans)`.
+
+**Why the Cyrillic subset is mandatory:** every note ships a Ukrainian translation. Without it those bodies fall back to a system font and the page silently changes typeface when you hit the language toggle. This also ruled out several fonts that would otherwise have suited the design reference — Geist and Newsreader are Latin-only.
+
+**Why not name the variable `--font-sans` directly:** that was the first attempt, and it worked *by accident*. Tailwind v4 defines `--font-sans` as a theme token containing the system stack, and next/font defines its variable on a class on `<html>` — which is also `:root`. Same element, same specificity, so the winner was whichever rule Next happened to emit later in the bundle. Inter won, but nothing guaranteed it would keep winning across a Next or Tailwind upgrade. Giving the font its own name and explicitly overriding the token means one variable has one owner.
+
+**Revisit when:** a serif for article bodies is wanted — add a second `next/font` call and scope it to `.prose` rather than swapping this one.
+
+## 19. Blur-up placeholders as CSS backgrounds, generated in sync-assets (2026-07-26)
+
+**Decision:** `scripts/sync-assets.mjs` shells every raster vault image through sharp at 16px and writes `.blur-manifest.json` (public URL → ~150-byte base64 WebP). `lib/blur.ts` reads it at build time; `ShelfCard` and `PeopleCards` set the placeholder as the `<img>`'s own `background-image`.
+
+**Why background-image and not a second element:** the real image paints over its own background as soon as it decodes, so there's no swap to orchestrate — no client JS, no `onLoad`, no state, and nothing to go wrong with `loading="lazy"`. `background-size` mirrors the card's `object-fit`, or a `coverFit: contain` image would sit on a stretched blur.
+
+**Why the values are passed as props:** `lib/blur.ts` touches `fs`, and `PeopleCards` renders inside a client component. Importing it there would drag the server chain into the browser bundle — the same failure as decision #15.
+
+**It can never break a build:** if sharp is missing or an image is unreadable, that key is simply absent and the card renders exactly as before. sharp is now declared in `devDependencies` rather than relied on as a transitive Next dependency — **run `npm install` once** to record it.
+
+## 20. Related entries are same-section only (2026-07-26)
+
+**Decision:** `lib/related.ts` ranks siblings by how many `categories:` they share with the current note, tie-broken by the section's existing order, and scopes the search to the same section. Prev/next comes from the same ordering `getEntries` already produces.
+
+**Why not cross-section:** a book and a blog post both tagged "Tech" aren't meaningfully related, and the connection that *is* meaningful — an explicit `[[link]]` between them — is already surfaced by backlinks (#16). Keeping the two mechanisms distinct means neither is noisy.
+
+**Revisit when:** categories grow a hierarchy, or a note wants to pin its own related list via frontmatter.
