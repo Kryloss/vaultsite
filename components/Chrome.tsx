@@ -20,7 +20,7 @@ import ResistanceDay from "@/components/ResistanceDay";
 import T from "@/components/T";
 import { useLang } from "@/components/useLang";
 import { ui } from "@/lib/ui-strings";
-import type { SocialLink } from "@/lib/site-config";
+import { homeName, type SocialLink } from "@/lib/site-config";
 import type { SearchItem } from "@/lib/vault";
 
 export interface NavItem {
@@ -155,8 +155,13 @@ export default function Chrome({
   if (section && section.slug !== "home" && segments.length > 1)
     crumbs.push({ en: section.title, uk: section.titleUk, href: `/${section.slug}` });
   // Home has no parent, so the site name stands alone there rather than
-  // leaving the bar empty.
-  crumbs.push({ en: siteName, href: "/" });
+  // leaving the bar empty — and switches to the surname, since it's naming
+  // the page rather than trailing a path. See lib/site-config.ts.
+  crumbs.push(
+    segments.length === 0
+      ? { ...homeName, href: "/" }
+      : { en: siteName, href: "/" }
+  );
 
   return (
     <>
