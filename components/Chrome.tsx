@@ -28,7 +28,6 @@ export interface NavItem {
   title: string;
   titleUk?: string;
   icon?: string;
-  entries: { slug: string; title: string; titleUk?: string }[];
   /** Shelf-type sections only: medium pages at /<slug>/type/<medium>. */
   mediums?: { slug: string; title: string; titleUk?: string }[];
 }
@@ -43,7 +42,8 @@ const socialIcons = {
 
 /**
  * Site chrome, brianlovin-style: a floating panel icon plus a clickable
- * breadcrumb that mirrors the full path — "Post Sample · Posts · Kyrylo".
+ * breadcrumb naming the current page's ancestors — a post under Posts reads
+ * "Posts · Kyrylo", not "Post Sample · Posts · Kyrylo".
  * The sidebar starts hidden, slides in flat, and closes via backdrop/Escape.
  */
 export default function Chrome({
@@ -128,34 +128,34 @@ export default function Chrome({
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(href + "/");
 
-  // Breadcrumb: deepest location first — "Entry · Section · SiteName".
+  // Breadcrumb: where the current page SITS, not what it is. Its own title is
+  // already the <h1> directly below, so naming it here said the same thing
+  // twice — the deepest crumb is the current page's parent.
+  //
   // Two shapes live under a section: /<section>/<entry> and the shelf's medium
   // pages, /<section>/type/<medium> (see lib/shelf.ts).
-  const [sectionSlug, second, third] = pathname.split("/").filter(Boolean);
+  const segments = pathname.split("/").filter(Boolean);
+  const [sectionSlug, second, third] = segments;
   const section = sectionSlug ? nav.find((i) => i.slug === sectionSlug) : undefined;
   const medium =
     second === "type" && third
       ? section?.mediums?.find((m) => m.slug === third)
       : undefined;
-  const entry =
-    !medium && second && section
-      ? section.entries.find((e) => e.slug === second)
-      : undefined;
 
   const crumbs: { en: string; uk?: string; href: string }[] = [];
-  // Category pages (/…/type/<medium>/<category>) stop at the medium — the
-  // category is visible as the active chip on the page itself, so repeating
-  // it here only made the breadcrumb longer.
-  if (medium && section)
+  // Only a category page (/…/type/<medium>/<category>) sits inside a medium.
+  // On the medium page itself the medium is the current page, so it's dropped.
+  if (medium && section && segments.length > 3)
     crumbs.push({
       en: medium.title,
       uk: medium.titleUk,
       href: `/${section.slug}/type/${medium.slug}`,
     });
-  else if (entry && section)
-    crumbs.push({ en: entry.title, uk: entry.titleUk, href: pathname });
-  if (section && section.slug !== "home")
+  // Likewise: skipped on the section's own page, which sits at the root.
+  if (section && section.slug !== "home" && segments.length > 1)
     crumbs.push({ en: section.title, uk: section.titleUk, href: `/${section.slug}` });
+  // Home has no parent, so the site name stands alone there rather than
+  // leaving the bar empty.
   crumbs.push({ en: siteName, href: "/" });
 
   return (

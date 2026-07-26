@@ -65,11 +65,6 @@ export default function RootLayout({
       title: section.title,
       titleUk: section.titleUk,
       icon: section.icon,
-      entries: entries.map(({ slug, title, titleUk }) => ({
-        slug,
-        title,
-        titleUk,
-      })),
       // Lets the breadcrumb name /<section>/type/<medium> pages.
       mediums: isShelfSection(section)
         ? shelfGroups(entries)

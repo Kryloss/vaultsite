@@ -49,7 +49,7 @@ Kyrylo's portfolio site, published from an Obsidian vault. The `vault/` folder I
 - Sized image embeds ≤128px (e.g. `![[me.jpeg|93]]`) render as circular avatars (`.avatar` class); larger sizes keep the rounded-rectangle style.
 - The `posts` list groups entries by year (empty years never render); row dates are DD.MM. This date treatment is posts-only — other types show full dates.
 - The `projects` list truncates entries over 1000 markdown chars; "Continue reading" links to the entry's own page.
-- Breadcrumb shows the full path ("Entry · Section · Kyrylo"), each part clickable — entry titles are passed to `Chrome` via layout.
+- Breadcrumb names the current page's ANCESTORS, not itself ("Posts · Kyrylo" on a post) — the page's own title is already its `<h1>`. Each part is clickable. On home, and on a section's own page, only the site name remains.
 - Slugs: `slugify()` in `lib/vault.ts` — keep stable, changing it breaks URLs.
 - Styling: Tailwind utility classes + CSS variables defined in `app/globals.css` (`--bg`, `--text`, `--accent`, …). Dark mode via `prefers-color-scheme`. Markdown output styled by the hand-written `.prose` classes in globals.css.
 - TypeScript strict; path alias `@/*` → repo root.
