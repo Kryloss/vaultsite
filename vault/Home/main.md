@@ -5,7 +5,7 @@ icon: 🏠
 order: 0
 ---
 ![[IMG_3260.jpeg|93]]
-# Hey, I'm Kyrylo. 👋
+# Hey, I'm Kyrylo.  
 
 I'm a student in Ontario, Canada, working my way toward a career in cybersecurity. I was born in Kramatorsk, Ukraine, in 2007, and these days I split my time between school, pulling espresso shots at Starbucks, and studying for the [[CompTIA Security+]].
 

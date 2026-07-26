@@ -41,8 +41,8 @@ the vault. This doc is the playbook. Read CLAUDE.md first for the hard rules.
 ## Defaults
 
 - `date:` today (his timezone; YYYY-MM-DD).
-- `category:` reuse an existing one when it fits (check other posts' frontmatter);
-  ask before inventing a new one.
+- `category:`/`categories:` reuse an existing one when it fits (grep other
+  entries); ask before inventing a new one. See Categories.
 - `description:` write one — a single sentence in his voice, no marketing tone.
 - `cover:`/images: if he mentions an image he'll add later, include the
   commented line: `# cover: name.jpg   ← drop into vault/<Section>/ and uncomment`.
@@ -90,31 +90,7 @@ video: <youtube url>       # medium: video only
 provides none, omit this section or leave a placeholder he can fill>
 ```
 
-**Shelf categories.** `categories:` is multi-valued — an item appears under
-each one. Every category becomes its own page at
-`/shelf/type/<medium>/<category>`, reachable from the chips on the medium page
-and from the chips above the date on an entry page. The shelf section page
-shows neither.
-Reuse an existing name where it fits (grep other entries) rather than inventing
-a near-duplicate — "Sci-Fi" and "Science Fiction" would become two chips.
-Starting vocabularies per medium:
-
-| Medium | Categories |
-|---|---|
-| video | Entertainment, Politics, Tech, Education, Music, PopSci |
-| movie | Sci-Fi, Thriller, Drama, Action, Comedy, Documentary |
-| show | Drama, Thriller, Comedy, Sci-Fi, Documentary, Anime |
-| book | Nonfiction, Fiction, History, Science, Tech, Biography |
-
-Genre classification is factual, so assign these yourself — unlike `rating:`,
-which is his and never invented.
-
-Write categories in **English only**. Ukrainian names live in `CATEGORY_LABELS`
-(`lib/shelf.ts`) and are applied everywhere the category is shown — chips, entry
-page, breadcrumb. A category with no entry there falls back to the English
-string in both languages, so add one when you introduce a new category. URL
-slugs are always built from the English name, so a translation never changes a
-page's address.
+See **Categories** below — Shelf, Posts and People all use the same key.
 
 ### Video shelf item — `vault/Shelf/<Title>.md`
 
@@ -159,7 +135,9 @@ description_uk: "<one sentence>"
 ```md
 ---
 title: <Full Name>
+title_uk: <transliterated name>
 date: YYYY-MM-DD
+categories: [<optional — see Categories below>]
 description: <one-line who-they-are>
 # cover: <name>.png   ← square photo into vault/People/ and uncomment
 ---
@@ -184,6 +162,53 @@ shows the first ~1000 characters inline, so front-load the interesting part.
 ### Music note — `vault/Music/<Title>.md`
 Post frontmatter. An Apple Music link pasted on its own line becomes a player —
 keep any he provides on separate lines.
+
+## Categories
+
+Shelf items, posts and people all take the same frontmatter key. It is
+multi-valued — an entry appears under every category it lists:
+
+```yaml
+categories: [Tech, Education]
+categories: Tech, Education     # comma-separated works too
+category: Cybersecurity         # a single value; posts use this form
+```
+
+Where they show up:
+
+| Section | On the entry page | On the section page |
+|---|---|---|
+| Shelf | chips above the date → `/shelf/type/<medium>/<category>` | chips on each medium page; the shelf front page shows none |
+| Posts | chips above the date → `/posts?category=<name>` | filter chips |
+| People | chips above the date → `/people?category=<name>` | filter chips |
+
+Only the shelf's categories are real pages. Posts and People filter from a
+query string in the browser (decision #14), which means those filtered views
+aren't crawlable, have no page of their own, and don't work with JS disabled.
+Nothing to do about it when writing content — just don't expect
+`/posts?category=X` to behave like a permanent URL.
+
+**Naming.** Reuse an existing name where it fits (grep other entries) rather
+than inventing a near-duplicate — "Sci-Fi" and "Science Fiction" would become
+two separate chips. Starting vocabularies:
+
+| Section | Categories |
+|---|---|
+| video | Entertainment, Politics, Tech, Education, Music, PopSci |
+| movie | Sci-Fi, Thriller, Drama, Action, Comedy, Documentary |
+| show | Drama, Thriller, Comedy, Sci-Fi, Documentary, Anime |
+| book | Nonfiction, Fiction, History, Science, Tech, Biography |
+| post | Cybersecurity, Meta (`Meta` = posts about the site itself) |
+| person | none established yet — ask before starting one |
+
+Genre and topic classification is factual, so assign these yourself — unlike
+`rating:`, which is his and never invented.
+
+**Always English in frontmatter.** Ukrainian names live in `CATEGORY_LABELS`
+(`lib/categories.ts`) and apply everywhere a category is shown. A category
+missing from that file falls back to the English string in both languages, so
+add an entry there whenever you introduce a new category. URL slugs are built
+from the English name, so adding a translation never changes an address.
 
 ## Images & media sourcing
 
