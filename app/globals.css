@@ -751,14 +751,6 @@ body {
   }
 }
 
-.toc-title {
-  margin: 0 0 0.625rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  color: var(--text-tertiary);
-}
-
 .toc-rail ul {
   margin: 0;
   padding: 0;
