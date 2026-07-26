@@ -9,6 +9,8 @@ export interface PersonRow {
   titleUk?: string;
   description?: string;
   cover?: string;
+  /** Base64 blur-up placeholder for `cover` — see lib/blur.ts. */
+  coverBlur?: string;
   contain?: boolean;
   /** From `categories:` or `category:` frontmatter. */
   categories: string[];
@@ -78,6 +80,18 @@ export default function PeopleCards({
                       row.contain
                         ? "h-full w-full object-contain p-6"
                         : "h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    }
+                    // Blur-up placeholder as the image's own background — see
+                    // the matching note in ShelfCard.tsx and lib/blur.ts.
+                    style={
+                      row.coverBlur
+                        ? {
+                            backgroundImage: `url("${row.coverBlur}")`,
+                            backgroundSize: row.contain ? "contain" : "cover",
+                            backgroundPosition: "center",
+                            backgroundRepeat: "no-repeat",
+                          }
+                        : undefined
                     }
                     loading="lazy"
                   />

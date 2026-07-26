@@ -13,6 +13,7 @@ import {
 } from "@/lib/vault";
 import { renderWithHeadings } from "@/lib/markdown";
 import { backlinksFor } from "@/lib/backlinks";
+import { getSiblings, getRelated } from "@/lib/related";
 import {
   categoryLabel,
   categorySlug,
@@ -24,6 +25,7 @@ import Stars from "@/components/Stars";
 import T from "@/components/T";
 import Toc from "@/components/Toc";
 import Backlinks from "@/components/Backlinks";
+import EntryFooter from "@/components/EntryFooter";
 
 /** Below this many h2/h3 an outline is noise, not navigation. */
 const MIN_TOC_HEADINGS = 3;
@@ -71,6 +73,8 @@ export default async function EntryPage({ params }: Props) {
   const stats = section.type === "posts" ? readingStats(entry.content) : null;
   const categories = parseCategories(entry.meta);
   const backlinks = backlinksFor(`/${section.slug}/${entry.slug}`);
+  const { prev, next } = getSiblings(section.slug, entry.slug);
+  const related = getRelated(section.slug, entry.slug);
   const showToc = en.headings.length >= MIN_TOC_HEADINGS;
 
   // Category chips link back to the section, pre-filtered. Shelf entries get
@@ -164,6 +168,9 @@ export default async function EntryPage({ params }: Props) {
         />
       )}
 
+      {/* Reading order: more on this subject, then where to go next in the
+          section, then how this note connects back to the rest of the vault. */}
+      <EntryFooter related={related} prev={prev} next={next} />
       <Backlinks links={backlinks} />
 
       {showToc && <Toc en={en.headings} uk={uk?.headings} />}

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import Chrome from "@/components/Chrome";
 import Lightbox from "@/components/Lightbox";
@@ -10,6 +11,22 @@ import { getLinkPreviews } from "@/lib/previews";
 import { resistanceDay } from "@/lib/resistance";
 import { isShelfSection, shelfGroups } from "@/lib/shelf";
 import { siteName, siteUrl, siteDescription, socials } from "@/lib/site-config";
+
+/**
+ * Inter, self-hosted by next/font — the files are fetched at build time and
+ * served from our own origin, so there's no Google request from the visitor,
+ * no extra DNS, and no layout shift from a late-arriving webfont.
+ *
+ * The Cyrillic subset is not optional here: every note carries a Ukrainian
+ * translation, and without it those pages fall back to a system font and read
+ * as a different typeface. `latin-ext` covers the Ukrainian transliterations
+ * and the odd European name.
+ */
+const inter = Inter({
+  subsets: ["latin", "latin-ext", "cyrillic"],
+  display: "swap",
+  variable: "--font-sans",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -65,7 +82,7 @@ export default function RootLayout({
   return (
     // data-lang is set pre-paint by the inline script below (and toggled at
     // runtime), so the server HTML intentionally differs — suppress the warning.
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
       <head>
         {/* Restore the language choice before first paint — no flash.
             suppressHydrationWarning: browser extensions (e.g. Noir) rewrite

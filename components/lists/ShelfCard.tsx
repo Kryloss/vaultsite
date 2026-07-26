@@ -43,6 +43,21 @@ export default function ShelfCard({
                 ? "h-full w-full object-contain p-6"
                 : "h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
             }
+            // Blur-up: the placeholder is the image's OWN background, so the
+            // real cover paints straight over it with no JS and no swap.
+            // Sizing mirrors object-fit or a letterboxed cover would sit on a
+            // stretched blur. See lib/blur.ts.
+            style={
+              item.coverBlur
+                ? {
+                    backgroundImage: `url("${item.coverBlur}")`,
+                    backgroundSize:
+                      item.coverFit === "contain" ? "contain" : "cover",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
+                  }
+                : undefined
+            }
             loading="lazy"
           />
         ) : (

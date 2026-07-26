@@ -95,8 +95,10 @@ html[data-lang="uk"] .lang-uk {
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  /* --font-sans is Inter, loaded by next/font in app/layout.tsx. The system
+     stack stays behind it as the fallback for the swap period. */
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -781,6 +783,112 @@ body {
   border-left-color: var(--text);
   color: var(--text);
   font-weight: 500;
+}
+
+/* ---------- Entry footer (components/EntryFooter.tsx) ---------- */
+
+.entry-footer-title {
+  margin: 0 0 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--text-tertiary);
+}
+
+.entry-related {
+  margin-top: 3.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.entry-related ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.related-card {
+  display: block;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid var(--border);
+  border-radius: 0.625rem;
+  text-decoration: none;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.related-card:hover {
+  border-color: var(--text-tertiary);
+  background: var(--bg-hover);
+}
+
+.related-title {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.related-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.related-tags > span::before {
+  content: "#";
+  opacity: 0.6;
+}
+
+/* Two columns on wide screens, stacked on narrow. A lone "next" still sits
+   right, because EntryFooter renders an empty span in the first cell. */
+.entry-siblings {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+
+@media (min-width: 640px) {
+  .entry-siblings {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.sibling {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid var(--border);
+  border-radius: 0.625rem;
+  text-decoration: none;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.sibling:hover {
+  border-color: var(--text-tertiary);
+  background: var(--bg-hover);
+}
+
+.sibling-next {
+  text-align: right;
+}
+
+.sibling-label {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.sibling-title {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text);
 }
 
 /* ---------- Backlinks (components/Backlinks.tsx) ---------- */

@@ -71,6 +71,9 @@ export const ui = {
   minRead: { en: "min read", uk: "хв читання" },
   words: { en: "words", uk: "слів" },
   mentionedIn: { en: "Mentioned in", uk: "Згадується в" },
+  relatedEntries: { en: "Related", uk: "Схоже" },
+  previousEntry: { en: "Previous", uk: "Попереднє" },
+  nextEntry: { en: "Next", uk: "Наступне" },
   /** Accessible name of the "#" link beside a heading (see lib/toc.ts). */
   headingAnchor: {
     en: "Link to this heading",

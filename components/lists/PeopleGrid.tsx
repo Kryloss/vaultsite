@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { ListProps } from "@/lib/section-types";
 import { resolveCoverUrl } from "@/lib/markdown";
+import { blurFor } from "@/lib/blur";
 import { parseCategories } from "@/lib/vault";
 import PeopleCards, { type PersonRow } from "@/components/lists/PeopleCards";
 import PeopleGridClient from "@/components/lists/PeopleGridClient";
@@ -37,6 +38,7 @@ export default function PeopleGrid({ section, entries }: ListProps) {
     titleUk: entry.titleUk,
     description: entry.description,
     cover: resolveCoverUrl(entry.sectionDir, entry.meta.cover),
+    coverBlur: blurFor(resolveCoverUrl(entry.sectionDir, entry.meta.cover)),
     contain: entry.meta.coverFit === "contain" || undefined,
     categories: parseCategories(entry.meta),
   }));
