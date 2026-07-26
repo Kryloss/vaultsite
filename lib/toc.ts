@@ -30,6 +30,8 @@ export interface HeadingOptions {
   collect?: Heading[];
   /** Localized accessible name for the "#" link. */
   anchorLabel?: string;
+  /** Set false where an in-page link makes no sense — the RSS feed. */
+  anchors?: boolean;
 }
 
 /** Headings that get an id + anchor. h1 is skipped — it reads as a title. */
@@ -60,7 +62,12 @@ function anchorNode(id: string, label: string): any {
 }
 
 export function rehypeHeadings(options: HeadingOptions = {}) {
-  const { idPrefix, collect, anchorLabel = "Link to this heading" } = options;
+  const {
+    idPrefix,
+    collect,
+    anchorLabel = "Link to this heading",
+    anchors = true,
+  } = options;
 
   return (tree: any) => {
     const walk = (node: any) => {
@@ -86,7 +93,7 @@ export function rehypeHeadings(options: HeadingOptions = {}) {
           collect.push({ id, text, level: Number(child.tagName.slice(1)) });
         }
 
-        child.children.push(anchorNode(id, anchorLabel));
+        if (anchors) child.children.push(anchorNode(id, anchorLabel));
       }
     };
     walk(tree);

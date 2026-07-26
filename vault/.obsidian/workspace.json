@@ -11,12 +11,14 @@
             "id": "9cd2acf5af766b33",
             "type": "leaf",
             "state": {
-              "type": "image",
+              "type": "markdown",
               "state": {
-                "file": "Shelf/new-version.jpeg"
+                "file": "Posts/First certification.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-image",
-              "title": "new-version"
+              "icon": "lucide-file",
+              "title": "First certification"
             }
           }
         ]
@@ -197,6 +199,9 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
+    "Music/main.md",
+    "Shelf/Jonathan Livingston Seagull.uk.md",
+    "Shelf/new-version.jpeg",
     "Posts/I made propaganda for my Religion class.uk.md",
     "Posts/I made propaganda for my Religion class.md",
     "Posts/war-newspaper.pdf",
@@ -211,14 +216,12 @@
     "Posts/war-newspaper-01.webp",
     "Shelf/New Version.md",
     "Shelf/New Version.uk.md",
-    "Shelf/new-version.jpeg",
     "Shelf/This man is destroying Putin's empire.md",
     "Shelf/Illustrated History of Ukraine's Independence.uk.md",
     "Shelf/Illustrated History of Ukraine's Independence.md",
     "Shelf/Footprints on the Road.uk.md",
     "Shelf/Footprints on the Road.md",
     "Shelf/Sapiens.uk.md",
-    "Shelf/Jonathan Livingston Seagull.uk.md",
     "Shelf/Jonathan Livingston Seagull.md",
     "Shelf/The Witcher - The Last Wish.md",
     "Shelf/The Witcher - Sword of Destiny.uk.md",
@@ -233,7 +236,6 @@
     "Shelf/The Little Prince.md",
     "Shelf/The Witcher - The Last Wish.uk.md",
     "Shelf/This man is destroying Putin's empire.uk.md",
-    "Shelf/Samsung's Newest Foldable is Here.uk.md",
     "Shelf",
     "Now",
     "Books",

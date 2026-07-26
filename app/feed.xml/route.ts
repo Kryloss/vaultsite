@@ -23,8 +23,12 @@ export async function GET() {
   const items = await Promise.all(
     entries.map(async (entry) => {
       const url = `${siteUrl}/posts/${entry.slug}`;
+      // No heading anchors in the feed: a bare "#" fragment link means nothing
+      // in a reader, which strips the page they'd point into anyway.
       const html = (
-        await renderMarkdown(entry.content, entry.sectionDir, "posts")
+        await renderMarkdown(entry.content, entry.sectionDir, "posts", {
+          anchors: false,
+        })
       ).replaceAll('src="/vault-assets', `src="${siteUrl}/vault-assets`);
       return `    <item>
       <title>${xmlEscape(entry.title)}</title>

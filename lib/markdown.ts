@@ -780,6 +780,8 @@ export interface RenderOptions {
   idPrefix?: string;
   /** Localized accessible name for the "#" anchor beside each heading. */
   anchorLabel?: string;
+  /** Set false where an in-page link makes no sense — the RSS feed. */
+  anchors?: boolean;
 }
 
 /**

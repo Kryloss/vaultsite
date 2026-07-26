@@ -30,9 +30,16 @@ export default async function HomePage() {
     );
   }
 
-  const html = await renderMarkdown(home.content, home.dirName, home.slug);
+  const html = await renderMarkdown(home.content, home.dirName, home.slug, {
+    anchorLabel: ui.headingAnchor.en,
+  });
+  // Ukrainian body shares this document — its heading ids get their own
+  // namespace so anchors can't collide. See lib/toc.ts.
   const htmlUk = home.contentUk
-    ? await renderMarkdown(home.contentUk, home.dirName, home.slug)
+    ? await renderMarkdown(home.contentUk, home.dirName, home.slug, {
+        idPrefix: "uk-",
+        anchorLabel: ui.headingAnchor.uk,
+      })
     : null;
 
   const posts = getSectionBySlug("posts");

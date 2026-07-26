@@ -24,10 +24,14 @@ export default async function TilList({ section, entries }: ListProps) {
 
   const rendered = await Promise.all(
     entries.map(async (e) => {
-      const full = await renderMarkdown(e.content, e.sectionDir, section.slug);
+      // Every entry's body lands in ONE document here, so each gets its own
+      // heading-id namespace — otherwise two entries with a "Setup" heading
+      // would mint the same anchor. See lib/toc.ts.
+      const opts = { idPrefix: `${e.slug}-` };
+      const full = await renderMarkdown(e.content, e.sectionDir, section.slug, opts);
       const previewMd = truncateMarkdown(e.content, PREVIEW_LIMIT);
       const preview = previewMd
-        ? await renderMarkdown(previewMd, e.sectionDir, section.slug)
+        ? await renderMarkdown(previewMd, e.sectionDir, section.slug, opts)
         : null;
       return { full, preview };
     })

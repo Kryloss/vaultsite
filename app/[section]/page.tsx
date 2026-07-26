@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { getSections, getSectionBySlug, getEntries } from "@/lib/vault";
 import { renderMarkdown } from "@/lib/markdown";
 import { getListComponent } from "@/lib/section-types";
+import { ui } from "@/lib/ui-strings";
 import T from "@/components/T";
 
 interface Props {
@@ -32,10 +33,17 @@ export default async function SectionPage({ params }: Props) {
 
   const entries = getEntries(section);
   const html = section.content.trim()
-    ? await renderMarkdown(section.content, section.dirName, section.slug)
+    ? await renderMarkdown(section.content, section.dirName, section.slug, {
+        anchorLabel: ui.headingAnchor.en,
+      })
     : "";
+  // Both bodies share this document, so the Ukrainian one needs its own id
+  // namespace — same reasoning as entry pages, see lib/toc.ts.
   const htmlUk = section.contentUk?.trim()
-    ? await renderMarkdown(section.contentUk, section.dirName, section.slug)
+    ? await renderMarkdown(section.contentUk, section.dirName, section.slug, {
+        idPrefix: "uk-",
+        anchorLabel: ui.headingAnchor.uk,
+      })
     : "";
   const List = getListComponent(section.type);
 
