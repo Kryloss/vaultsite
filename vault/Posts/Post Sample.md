@@ -2,6 +2,7 @@
 title: Post Sample
 date: 2026-07-16
 description: A first post to prove the whole pipeline works.
+maturity: budding
 ---
 
 This is a sample post. It lives at `vault/Posts/How was my day.md` in the Obsidian vault and was published automatically — no build steps, no copying files around.

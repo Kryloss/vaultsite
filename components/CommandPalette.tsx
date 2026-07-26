@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { SearchItem } from "@/lib/vault";
 import T from "@/components/T";
 import { useLang } from "@/components/useLang";
+import { similarity } from "@/lib/fuzzy";
 import { ui } from "@/lib/ui-strings";
 
 /**
@@ -36,13 +37,15 @@ export default function CommandPalette({
     }
   }, [open]);
 
-  const results = useMemo(() => {
+  const { results, fuzzy } = useMemo(() => {
     // Heading results exist once per language (each has its own anchor); show
     // only the active one. Page results carry no `lang` and always show.
     const pool = items.filter((i) => !i.lang || i.lang === lang);
     const q = query.trim().toLowerCase();
     // With no query, lead with pages rather than a wall of headings.
-    if (!q) return pool.filter((i) => !i.lang).slice(0, 8);
+    if (!q) {
+      return { results: pool.filter((i) => !i.lang).slice(0, 8), fuzzy: false };
+    }
     const scored = pool
       .map((item) => {
         // Match against both language titles + the folded-in text so a query
@@ -65,7 +68,28 @@ export default function CommandPalette({
       })
       .filter((r) => r.score > 0)
       .sort((a, b) => b.score - a.score);
-    return scored.slice(0, 8).map((r) => r.item);
+
+    if (scored.length > 0) {
+      return { results: scored.slice(0, 8).map((r) => r.item), fuzzy: false };
+    }
+
+    // Nothing matched literally — most often a typo. Fall back to trigram
+    // similarity against titles so "certifcation" still finds the post, and
+    // label the results so they don't read as exact matches.
+    const near = pool
+      .filter((i) => !i.lang)
+      .map((item) => ({
+        item,
+        score: Math.max(
+          similarity(q, item.title),
+          item.titleUk ? similarity(q, item.titleUk) : 0
+        ),
+      }))
+      .filter((r) => r.score > 0.2)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5);
+
+    return { results: near.map((r) => r.item), fuzzy: near.length > 0 };
   }, [query, items, lang]);
 
   useEffect(() => setSelected(0), [results.length, query]);
@@ -124,6 +148,13 @@ export default function CommandPalette({
           {results.length === 0 && (
             <li className="px-4 py-6 text-center text-sm text-[var(--text-tertiary)]">
               <T {...ui.noResultsFor} /> &ldquo;{query}&rdquo;
+            </li>
+          )}
+          {/* These came from a similarity pass, not a real match — say so, or
+              a near-miss reads as though it contained what you typed. */}
+          {fuzzy && (
+            <li className="px-4 pb-1 pt-2 text-xs text-[var(--text-tertiary)]">
+              <T {...ui.didYouMean} />
             </li>
           )}
           {results.map((item, i) => (

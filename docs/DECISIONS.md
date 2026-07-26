@@ -203,3 +203,25 @@ Two fixes were applied, in order:
 **Why it's recorded rather than quietly dropped:** #16 above reads as live architecture otherwise, and the next person to touch the entry page shouldn't go looking for a module that isn't there.
 
 **Bringing it back:** the reasoning in #16 still holds — the inversion is ~60 lines on top of `getWikiIndex()`, and the deleted files are in git history at the preceding commit. Entry footers now carry related entries and prev/next only (#20).
+
+## 22. Quotes are a synthetic shelf category (2026-07-26)
+
+**Decision:** `/shelf/type/books/quotes` is a real static page, but "Quotes" is not a real category — it comes from the blockquotes inside book notes (`lib/quotes.ts`), not from `categories:` frontmatter. The chip renders last and only when quotes exist; the route resolves it before `categoryFromSlug()`, which would never find it.
+
+**Why a category rather than its own page:** it belongs next to the books it came from, and reusing the medium page means the chips, count and heading all work with no new layout. `QuotesView` replaces the cover grid because the passage is the content — a grid of covers would bury it.
+
+**Bilingual pairing is by index, and refuses when the counts differ.** Attaching translations positionally is only safe when both bodies quote the same number of passages; otherwise the quotes are shown in English only rather than mismatched.
+
+**One thing that was tried and removed:** stripping a trailing "— Attribution" from each quote. It also ate the second half of any quote containing an em dash. Quotes are now stored verbatim — silently truncating someone's words is much worse than an occasional redundant byline.
+
+## 23. Spoilers and status rows (2026-07-26)
+
+**Spoilers** are a checkbox and its label (`||inline||`, and `> [!spoiler]` for a block), so they reveal with no JavaScript and never render as a dead control. In Obsidian a spoiler callout is just an ordinary callout. Their ids run through the same `idPrefix` as headings — both languages ship in one document, so an unprefixed id would have made the English spoiler toggle the Ukrainian one.
+
+**Shelf status rows** (`shelfHighlights()`) are deliberately separate from `shelfGroups()`. They're display-only and must never reach `shelfMediumSlugs()`, or "In progress" would generate a page at `/shelf/type/in-progresses`. Items appear both in a status row and in their medium row, which is how every streaming shelf behaves.
+
+## 24. Note maturity defaults to seedling (2026-07-26)
+
+**Decision:** `maturity: seedling | budding | evergreen` on an entry; anything unset or unrecognised falls back to seedling, so every note shows a badge from day one rather than the feature being invisible until the vault is retagged.
+
+**Why it's on posts only:** it rides with the reading stats, which are already posts-only. A book on a shelf doesn't have a draft stage.

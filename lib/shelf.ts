@@ -149,26 +149,23 @@ export function toShelfItem(entry: Entry): ShelfItem {
 }
 
 /**
- * Cross-medium rows pinned above the medium rows: what's open right now, then
- * what's queued.
+ * The "Up next" row, pinned above the medium rows.
  *
- * Deliberately separate from shelfGroups() — these are display-only and must
- * never reach shelfMediumSlugs(), or "In progress" would generate a page at
- * /shelf/type/in-progresses. Items appear here *and* in their medium row,
- * which is how every streaming shelf behaves.
+ * Only queued items get a row. In-progress ones don't need one: they're
+ * already badged in their medium row, and a second copy a few hundred pixels
+ * above said nothing new. A queued item has no other home — it's the one thing
+ * you'd come to a shelf to check.
+ *
+ * Deliberately separate from shelfGroups() — display-only, and it must never
+ * reach shelfMediumSlugs(), or this would generate a page at
+ * /shelf/type/queueds.
  */
 export function shelfHighlights(entries: Entry[]): ShelfGroup[] {
-  const items = entries.map(toShelfItem);
-  const rows: ShelfGroup[] = [];
-
-  const row = (status: ShelfItem["status"], slug: string, label: Str) => {
-    const picked = items.filter((i) => i.status === status);
-    if (picked.length > 0) rows.push({ medium: slug, slug, label, items: picked });
-  };
-
-  row("progress", "in-progress", ui.shelfInProgress);
-  row("queued", "queued", ui.shelfUpNext);
-  return rows;
+  const queued = entries.map(toShelfItem).filter((i) => i.status === "queued");
+  if (queued.length === 0) return [];
+  return [
+    { medium: "queued", slug: "queued", label: ui.shelfUpNext, items: queued },
+  ];
 }
 
 /** Every category used within one medium, alphabetical. */

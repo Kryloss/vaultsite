@@ -1025,6 +1025,28 @@ body {
 
 /* ---------- Quotes collection (components/lists/QuotesView.tsx) ---------- */
 
+/* The Quotes chip isn't a category — it opens a different kind of page. A
+   dashed edge and a leading quote mark separate it from the filter chips
+   beside it without adding colour to a monochrome design. */
+.chip-quotes {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.375rem;
+  border-style: dashed;
+}
+
+.chip-quotes > [aria-hidden] {
+  font-size: 1.125em;
+  line-height: 0;
+  transform: translateY(0.2em);
+}
+
+.chip-count {
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.65;
+}
+
 .quote-source {
   display: flex;
   flex-wrap: wrap;

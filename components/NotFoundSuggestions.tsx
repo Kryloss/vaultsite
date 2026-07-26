@@ -5,6 +5,7 @@ import Link from "next/link";
 import T from "@/components/T";
 import { useLang } from "@/components/useLang";
 import { ui } from "@/lib/ui-strings";
+import { similarity } from "@/lib/fuzzy";
 import type { SearchItem } from "@/lib/vault";
 
 /**
@@ -27,27 +28,6 @@ function terms(pathname: string): string[] {
     .flatMap((seg) => decodeURIComponent(seg).split("-"))
     .map((w) => w.toLowerCase())
     .filter((w) => w.length > 2 && !STOPWORDS.has(w));
-}
-
-/**
- * Overlap of character trigrams — catches transpositions and dropped letters
- * ("certifcation" → "certification") that a substring match misses entirely,
- * without pulling in a fuzzy-search dependency.
- */
-function trigrams(s: string): Set<string> {
-  const padded = ` ${s.toLowerCase().replace(/[^a-z0-9Ѐ-ӿ]+/g, " ")} `;
-  const out = new Set<string>();
-  for (let i = 0; i < padded.length - 2; i++) out.add(padded.slice(i, i + 3));
-  return out;
-}
-
-function similarity(a: string, b: string): number {
-  const A = trigrams(a);
-  const B = trigrams(b);
-  if (A.size === 0 || B.size === 0) return 0;
-  let shared = 0;
-  for (const g of A) if (B.has(g)) shared++;
-  return shared / Math.max(A.size, B.size);
 }
 
 export default function NotFoundSuggestions({ items }: { items: SearchItem[] }) {

@@ -51,11 +51,16 @@ export default function ShelfTypeView({
   const hasQuotes = Boolean(quotes && quotes.length > 0);
   const quoteCount = quotes?.reduce((n, b) => n + b.quotes.length, 0) ?? 0;
 
-  const chip = (label: React.ReactNode, href: string, isActive: boolean) => (
+  const chip = (
+    label: React.ReactNode,
+    href: string,
+    isActive: boolean,
+    extra = ""
+  ) => (
     <Link
       key={href}
       href={href}
-      className={`rounded-full border px-3 py-1 text-sm transition-colors ${
+      className={`rounded-full border px-3 py-1 text-sm transition-colors ${extra} ${
         isActive
           ? "border-[var(--text)] bg-[var(--text)] font-medium text-[var(--bg)]"
           : "border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-tertiary)] hover:text-[var(--text)]"
@@ -88,9 +93,20 @@ export default function ShelfTypeView({
               c === activeCategory
             )
           )}
-          {/* Last, and only when there's something behind it. */}
+          {/* Last, and only when there's something behind it. Set apart from
+              the frontmatter categories because it isn't one — it leads to a
+              different kind of page, not a filtered grid. */}
           {hasQuotes &&
-            chip(<T {...ui.quotesCategory} />, `${base}/quotes`, showQuotes)}
+            chip(
+              <>
+                <span aria-hidden>”</span>
+                <T {...ui.quotesCategory} />
+                <span className="chip-count">{quoteCount}</span>
+              </>,
+              `${base}/quotes`,
+              showQuotes,
+              "chip-quotes"
+            )}
         </div>
       )}
 

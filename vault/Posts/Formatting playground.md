@@ -3,6 +3,7 @@ title: Formatting playground
 date: 2026-07-16
 category: Meta
 description: Every tool this site supports, demonstrated in one post.
+maturity: evergreen
 ---
 
 A living demo of everything you can use in a note. Steal from it freely, or delete it once you know the toolbox.
@@ -72,3 +73,24 @@ Full guide: see the Excalidraw docs in the repo. Ask the AI for a diagram and it
 ## Drafts
 
 Add `draft: true` to any note's frontmatter and it shows up locally with an amber badge but never gets published. There's one in this folder right now — you can only see it in `npm run dev`.
+
+## Spoilers
+
+Two ways to hide something until the reader asks for it. Inline, wrap it in
+double pipes: the twist is that ||Elliot was the narrator all along||. In
+Obsidian it stays plain text; on the site it's blurred until clicked.
+
+For anything longer, use a spoiler callout — an ordinary callout in Obsidian,
+click-to-reveal here:
+
+> [!spoiler] How the film ends
+> The top is still spinning when the screen cuts to black, and Nolan has
+> refused to say whether it falls.
+
+Neither needs JavaScript — they're a checkbox and a label underneath.
+
+## Note maturity
+
+Every post carries a growth stage, shown next to the reading time. Add
+`maturity: seedling`, `budding` or `evergreen` to a note's frontmatter. Leave
+it out and the note reads as a seedling — this post is marked `evergreen`.
