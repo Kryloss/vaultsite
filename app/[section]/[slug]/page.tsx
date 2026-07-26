@@ -25,6 +25,7 @@ import T from "@/components/T";
 import Toc from "@/components/Toc";
 import EntryFooter from "@/components/EntryFooter";
 import CopyMarkdown from "@/components/CopyMarkdown";
+import ReadingProgress from "@/components/ReadingProgress";
 
 /** Below this many h2/h3 an outline is noise, not navigation. */
 const MIN_TOC_HEADINGS = 3;
@@ -88,6 +89,7 @@ export default async function EntryPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-14 lg:py-24">
+      <ReadingProgress />
       <Link
         href={`/${section.slug}`}
         className="text-sm text-[var(--text-tertiary)] transition-colors hover:text-[var(--text)]"

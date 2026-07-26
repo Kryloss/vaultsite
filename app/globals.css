@@ -816,6 +816,144 @@ body {
   color: var(--text-secondary);
 }
 
+/* ---------- Breadcrumb bar (components/Chrome.tsx) ---------- */
+
+.crumbs {
+  max-width: 70vw;
+  overflow: hidden;
+  padding-right: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: max-width 220ms ease, opacity 140ms ease, padding-right 220ms ease;
+}
+
+/* Phones only: scrolling down leaves just the menu button. Wider screens have
+   the room, and the breadcrumb there isn't covering anything. Animating
+   max-width rather than width because the content sizes itself. */
+@media (max-width: 639px) {
+  .crumbs.is-collapsed {
+    max-width: 0;
+    padding-right: 0;
+    opacity: 0;
+  }
+}
+
+/* ---------- Reading progress (components/ReadingProgress.tsx) ---------- */
+
+/* scaleX from the left edge — transform only, so scrolling costs no layout.
+   Sits under the drawer (40/50) and the palette (60). */
+.reading-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 35;
+  height: 2px;
+  background: var(--text);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+}
+
+/* ---------- Mobile table of contents (components/Toc.tsx) ---------- */
+
+/* Same chip as the breadcrumb bar in Chrome.tsx — rounded-full, translucent
+   background, blurred backdrop — mirrored to the bottom of the screen. */
+.toc-bar {
+  position: fixed;
+  left: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  max-width: calc(100vw - 1.5rem);
+  padding: 0.4375rem 0.875rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 75%, transparent);
+  backdrop-filter: blur(12px);
+  transition: background-color 120ms ease;
+}
+
+.toc-bar:hover {
+  background: color-mix(in srgb, var(--bg-hover) 88%, transparent);
+}
+
+/* The rail owns wide screens; the pill owns everything below it. */
+@media (min-width: 1280px) {
+  .toc-bar {
+    display: none;
+  }
+}
+
+/* Where you are in the document — and the tap target itself. */
+.toc-bar-label {
+  overflow: hidden;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toc-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgb(0 0 0 / 0.25);
+}
+
+.toc-sheet {
+  position: fixed;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: 3.75rem;
+  z-index: 45;
+  max-height: 60vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.875rem;
+  background: var(--bg);
+  box-shadow: 0 10px 40px rgb(0 0 0 / 0.18);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+@media (prefers-color-scheme: dark) {
+  .toc-sheet {
+    box-shadow: 0 10px 40px rgb(0 0 0 / 0.55);
+  }
+}
+
+/* No vertical rule in the sheet — rows are full-width tap targets instead. */
+.toc-sheet ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.toc-sheet .toc-link {
+  margin-left: 0;
+  padding: 0.5rem 0.625rem;
+  border-left: 0;
+  border-radius: 0.5rem;
+}
+
+.toc-sheet .toc-link.is-active {
+  background: var(--bg-hover);
+}
+
+.toc-sheet li[data-level="3"] {
+  padding-left: 0.875rem;
+}
+
+.toc-sheet-top {
+  margin-bottom: 0.25rem;
+  padding-bottom: 0.625rem;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+}
+
 /* ---------- Shelf status badge (components/lists/ShelfCard.tsx) ---------- */
 
 /* Sits on the artwork, so it needs its own backdrop to stay legible over

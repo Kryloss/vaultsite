@@ -64,8 +64,47 @@ export default function Chrome({
 }) {
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  /** Phones only: drop the breadcrumb while reading downward. */
+  const [compact, setCompact] = useState(false);
   const { lang, toggle: toggleLang } = useLang();
   const pathname = usePathname();
+
+  /**
+   * Collapse the bar to just its button when the reader scrolls down, restore
+   * it when they scroll back up or reach the top. The breadcrumb says where
+   * you are, which matters when you arrive and stops mattering once you're
+   * reading — and on a phone it's the widest thing covering the article.
+   *
+   * Direction-based rather than position-based, so it comes back the moment
+   * you look for it instead of only at the top of the page.
+   */
+  useEffect(() => {
+    let last = window.scrollY;
+    let frame = 0;
+
+    const measure = () => {
+      frame = 0;
+      const y = window.scrollY;
+      const delta = y - last;
+      // Ignore sub-pixel jitter and rubber-banding, or it flickers.
+      if (Math.abs(delta) < 6) return;
+      last = y;
+      setCompact(y > 72 && delta > 0);
+    };
+
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(measure);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, []);
+
+  // A new page starts at the top, so the breadcrumb should be showing.
+  useEffect(() => setCompact(false), [pathname]);
 
   // Close the drawer on navigation; Escape closes it; Cmd/Ctrl+K opens search.
   useEffect(() => setOpen(false), [pathname]);
@@ -132,7 +171,7 @@ export default function Chrome({
         >
           <PanelIcon className="h-[18px] w-[18px]" />
         </button>
-        <span className="max-w-[70vw] truncate pr-2 text-sm font-medium">
+        <span className={`crumbs${compact ? " is-collapsed" : ""}`}>
           {crumbs.map((crumb, i) => (
             <Fragment key={crumb.href}>
               {i > 0 && <span className="text-[var(--text-tertiary)]"> · </span>}

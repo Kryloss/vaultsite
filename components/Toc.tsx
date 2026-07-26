@@ -6,9 +6,14 @@ import { useLang } from "@/components/useLang";
 import type { Heading } from "@/lib/toc";
 
 /**
- * Table of contents — a fixed rail to the right of the article on wide screens,
- * hidden below the width where it would crowd the text (see .toc-rail in
- * globals.css).
+ * Table of contents, in two presentations driven by one piece of state:
+ *
+ * - **Wide screens** — a fixed rail to the right of the article.
+ * - **Narrow screens** — a floating pill at the bottom, built like the
+ *   breadcrumb bar in Chrome.tsx: same rounded-full blurred chip, an icon
+ *   button, and truncated text saying where you are. Tapping it opens the
+ *   outline. The rail has no room to exist below 1280px, which is exactly
+ *   where a long post needs it most.
  *
  * Bilingual like everything else: both outlines ship in the HTML and CSS shows
  * the active one. The scroll-spy walks the merged list and skips anything whose
@@ -35,7 +40,7 @@ export default function Toc({
   en,
   uk,
 }: {
-  /** The note's own title, shown in bold above the outline. */
+  /** The note's own title — the first row, and the jump-to-top target. */
   title: string;
   titleUk?: string;
   en: Heading[];
@@ -43,6 +48,7 @@ export default function Toc({
 }) {
   const { lang } = useLang();
   const [active, setActive] = useState("");
+  const [open, setOpen] = useState(false);
   /**
    * The heading the reader jumped to, held until they scroll again.
    *
@@ -51,6 +57,9 @@ export default function Toc({
    * of the page, which can't scroll far enough to reach the top — leaves the
    * clicked item unhighlighted. Smooth scrolling makes it worse, since the spy
    * runs through every heading on the way down.
+   *
+   * `""` is a real value meaning "pinned to the top of the page"; only `null`
+   * means nothing is held.
    */
   const held = useRef<string | null>(null);
   const ids = [...en, ...(uk ?? [])].map((h) => h.id).join(",");
@@ -61,8 +70,6 @@ export default function Toc({
 
     const measure = () => {
       frame = 0;
-      // Not `if (held.current)` — "" is a real value here, meaning pinned to
-      // the top of the page. Only null means nothing is held.
       if (held.current !== null) return;
       let current = "";
       for (const id of list) {
@@ -91,6 +98,7 @@ export default function Toc({
     };
 
     const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
       if (SCROLL_KEYS.has(e.key)) release();
     };
 
@@ -153,6 +161,7 @@ export default function Toc({
     e.preventDefault();
     held.current = id;
     setActive(id);
+    setOpen(false);
 
     el.scrollIntoView({ behavior: "smooth", block: "start" });
     history.pushState(null, "", `#${id}`);
@@ -168,10 +177,29 @@ export default function Toc({
     e.preventDefault();
     held.current = "";
     setActive("");
+    setOpen(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
     // Drop any lingering #heading so a reload lands at the top too.
     history.pushState(null, "", location.pathname + location.search);
   };
+
+  const localTitle = lang === "uk" && titleUk ? titleUk : title;
+
+  /** Text for the pill: the section you're in, or the note title at the top. */
+  const hereLabel =
+    [...en, ...(uk ?? [])].find((h) => h.id === active)?.text ?? localTitle;
+
+  const topLink = (extra = "") => (
+    <a
+      href="#"
+      onClick={jumpTop}
+      /* Truncated to one line — the tooltip carries the rest. */
+      title={localTitle}
+      className={`toc-link toc-top${extra}${active === "" ? " is-active" : ""}`}
+    >
+      <T en={title} uk={titleUk} />
+    </a>
+  );
 
   const list = (headings: Heading[], langClass: string) => (
     <ul className={langClass}>
@@ -189,20 +217,8 @@ export default function Toc({
     </ul>
   );
 
-  return (
-    <nav className="toc-rail" aria-label="Table of contents">
-      {/* The note's title as the first row of the outline — jumps to the top,
-          and highlights whenever you're above the first heading. Rendered here
-          only: it is NOT in the Cmd+K index, which already has this page. */}
-      <a
-        href="#"
-        onClick={jumpTop}
-        /* Truncated to one line — the tooltip carries the rest. */
-        title={lang === "uk" && titleUk ? titleUk : title}
-        className={active === "" ? "toc-link toc-top is-active" : "toc-link toc-top"}
-      >
-        <T en={title} uk={titleUk} />
-      </a>
+  const outline = (
+    <>
       {/* Without a translated body there's one outline, shown in both modes. */}
       {uk ? (
         <>
@@ -212,6 +228,46 @@ export default function Toc({
       ) : (
         list(en, "")
       )}
-    </nav>
+    </>
+  );
+
+  return (
+    <>
+      <nav className="toc-rail" aria-label="Table of contents">
+        {/* The note's title as the first row of the outline — jumps to the top,
+            and highlights whenever you're above the first heading. Rendered
+            here only: it is NOT in the Cmd+K index, which already has this
+            page as its own result. */}
+        {topLink()}
+        {outline}
+      </nav>
+
+      {/* Narrow screens: the same outline behind a breadcrumb-style pill.
+          The label IS the control — no icon, since the text already says
+          what tapping it will show. */}
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-label={lang === "uk" ? "Зміст сторінки" : "Table of contents"}
+        className="toc-bar"
+      >
+        <span className="toc-bar-label">{hereLabel}</span>
+      </button>
+
+      {open && (
+        <>
+          <div
+            className="toc-sheet-backdrop"
+            aria-hidden
+            onClick={() => setOpen(false)}
+          />
+          <nav className="toc-sheet" aria-label="Table of contents">
+            {topLink(" toc-sheet-top")}
+            {outline}
+          </nav>
+        </>
+      )}
+    </>
   );
 }
