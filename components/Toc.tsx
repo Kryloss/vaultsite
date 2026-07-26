@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import T from "@/components/T";
 import type { Heading } from "@/lib/toc";
 
 /**
@@ -27,7 +28,18 @@ const SCROLL_KEYS = new Set([
   " ",
 ]);
 
-export default function Toc({ en, uk }: { en: Heading[]; uk?: Heading[] }) {
+export default function Toc({
+  title,
+  titleUk,
+  en,
+  uk,
+}: {
+  /** The note's own title, shown in bold above the outline. */
+  title: string;
+  titleUk?: string;
+  en: Heading[];
+  uk?: Heading[];
+}) {
   const [active, setActive] = useState("");
   /**
    * The heading the reader jumped to, held until they scroll again.
@@ -159,9 +171,13 @@ export default function Toc({ en, uk }: { en: Heading[]; uk?: Heading[] }) {
   );
 
   return (
-    // No visible "On this page" heading by design — the rail reads as an
-    // outline on sight, and aria-label carries it for screen readers.
     <nav className="toc-rail" aria-label="Table of contents">
+      {/* The note's title, so the rail is anchored to something rather than
+          floating as a bare list. Rendered here only — it is NOT part of the
+          Cmd+K index, which already has this page as its own result. */}
+      <p className="toc-title">
+        <T en={title} uk={titleUk} />
+      </p>
       {/* Without a translated body there's one outline, shown in both modes. */}
       {uk ? (
         <>

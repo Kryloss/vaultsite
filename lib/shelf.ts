@@ -30,6 +30,11 @@ export interface ShelfItem {
   rating?: number;
   /** Renders as a 16:9 card instead of a 2:3 cover. */
   isVideo?: boolean;
+  /**
+   * Set when `status:` marks this as unfinished — "Reading" for books,
+   * "Watching" for anything screen-based. Undefined means finished.
+   */
+  statusLabel?: Str;
   /** `categories:` frontmatter — filter chips on the medium page. */
   categories: string[];
 }
@@ -72,6 +77,12 @@ export function mediumSlug(medium: string): string {
   return slugify(medium.endsWith("s") ? medium : `${medium}s`);
 }
 
+/** `status:` values that mean "not finished with this yet". */
+const IN_PROGRESS = new Set(["reading", "watching", "current", "in-progress"]);
+
+/** Mediums you watch rather than read — decides which verb the badge uses. */
+const WATCHED = new Set(["movie", "show", "video", "youtube"]);
+
 /** Frontmatter → the shape the cards render from. */
 export function toShelfItem(entry: Entry): ShelfItem {
   const medium =
@@ -84,6 +95,15 @@ export function toShelfItem(entry: Entry): ShelfItem {
   const link = entry.meta.video ?? entry.meta.url;
   const videoId = typeof link === "string" ? youtubeId(link) : undefined;
   const cover = resolveCoverUrl(entry.sectionDir, entry.meta.cover);
+
+  // `status: reading` (or watching / current / in-progress) badges the card.
+  // Any other value — or none — reads as finished, which is the common case
+  // and stays unlabelled so the shelf isn't covered in pills.
+  const status =
+    typeof entry.meta.status === "string"
+      ? entry.meta.status.trim().toLowerCase()
+      : undefined;
+  const inProgress = status ? IN_PROGRESS.has(status) : false;
 
   return {
     slug: entry.slug,
@@ -100,6 +120,11 @@ export function toShelfItem(entry: Entry): ShelfItem {
     rating:
       typeof entry.meta.rating === "number" ? entry.meta.rating : undefined,
     isVideo: medium === "video" || medium === "youtube" || Boolean(videoId),
+    statusLabel: inProgress
+      ? (medium && WATCHED.has(medium)) || videoId
+        ? ui.currentlyWatching
+        : ui.currentlyReading
+      : undefined,
     categories: parseCategories(entry.meta),
   };
 }

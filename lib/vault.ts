@@ -11,6 +11,7 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import GithubSlugger from "github-slugger";
 
 export const VAULT_DIR = path.join(process.cwd(), "vault");
 
@@ -309,6 +310,55 @@ export interface SearchItem {
   sectionUk?: string;
   href: string;
   text: string;
+  /**
+   * Set on heading results only, which exist once per language because each
+   * language's heading has its own anchor. The palette shows the matching one.
+   * Page results leave this undefined and show in both.
+   */
+  lang?: "en" | "uk";
+}
+
+/**
+ * Section headings inside a note, as jump-to-anchor search results.
+ *
+ * The ids have to match what rehype-slug minted at render time or the jump
+ * lands nowhere, so this uses the same github-slugger — including its
+ * per-document duplicate handling — rather than the site's own slugify(),
+ * which strips Cyrillic entirely and would break every Ukrainian anchor.
+ */
+function headingItems(
+  md: string,
+  lang: "en" | "uk",
+  pageTitle: string,
+  href: string
+): SearchItem[] {
+  // Fenced code can contain lines starting with # that aren't headings.
+  const body = md.replace(
+    /^[ \t]*(`{3,}|~{3,})[^\n]*\n[\s\S]*?^[ \t]*\1[ \t]*$/gm,
+    ""
+  );
+  const slugger = new GithubSlugger();
+  const items: SearchItem[] = [];
+
+  for (const m of body.matchAll(/^(#{2,3})[ \t]+(.+?)[ \t]*#*$/gm)) {
+    // Slug the text as it will RENDER: wiki links collapse to their label,
+    // markdown links to their text, emphasis markers disappear.
+    const text = m[2]
+      .replace(/\[\[([^\]|]+?)(?:\|([^\]]*))?\]\]/g, (_x, t, l) => l || t)
+      .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+      .replace(/[*_`]/g, "")
+      .trim();
+    if (!text) continue;
+    const id = slugger.slug(text);
+    items.push({
+      title: text,
+      section: pageTitle,
+      href: `${href}#${lang === "uk" ? `uk-${id}` : id}`,
+      text,
+      lang,
+    });
+  }
+  return items;
 }
 
 /** Flat index of all pages for the Cmd+K palette (plain text, capped). */
@@ -325,16 +375,30 @@ export function getSearchIndex(): SearchItem[] {
       text: plainText(`${section.titleUk ?? ""} ${section.content}`),
     });
     for (const entry of getEntries(section)) {
+      const href = `/${section.slug}/${entry.slug}`;
       items.push({
         title: entry.title,
         titleUk: entry.titleUk,
         section: section.title,
         sectionUk: section.titleUk,
-        href: `/${section.slug}/${entry.slug}`,
+        href,
         text: plainText(
           `${entry.titleUk ?? ""} ${entry.description ?? ""} ${entry.content}`
         ),
       });
+      // Headings become their own results, labelled with the note they're in,
+      // so Cmd+K reaches a section of a long post and not just the post.
+      items.push(...headingItems(entry.content, "en", entry.title, href));
+      if (entry.contentUk) {
+        items.push(
+          ...headingItems(
+            entry.contentUk,
+            "uk",
+            entry.titleUk ?? entry.title,
+            href
+          )
+        );
+      }
     }
   }
   return items;

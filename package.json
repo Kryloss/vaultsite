@@ -10,6 +10,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "github-slugger": "^2.0.0",
     "gray-matter": "^4.0.3",
     "next": "^15.3.0",
     "react": "^19.1.0",

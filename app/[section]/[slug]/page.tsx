@@ -24,6 +24,7 @@ import Stars from "@/components/Stars";
 import T from "@/components/T";
 import Toc from "@/components/Toc";
 import EntryFooter from "@/components/EntryFooter";
+import CopyMarkdown from "@/components/CopyMarkdown";
 
 /** Below this many h2/h3 an outline is noise, not navigation. */
 const MIN_TOC_HEADINGS = 3;
@@ -109,6 +110,8 @@ export default async function EntryPage({ params }: Props) {
               <T {...ui.draft} />
             </span>
           )}
+          {/* Raw vault source, in whichever language is showing. */}
+          <CopyMarkdown en={entry.content} uk={entry.contentUk} />
         </h1>
         {/* `categories:` frontmatter, styled like the filter chips they lead
             to. On a shelf entry each one opens its medium page with that
@@ -166,7 +169,14 @@ export default async function EntryPage({ params }: Props) {
 
       <EntryFooter prev={prev} next={next} />
 
-      {showToc && <Toc en={en.headings} uk={uk?.headings} />}
+      {showToc && (
+        <Toc
+          title={entry.title}
+          titleUk={entry.titleUk}
+          en={en.headings}
+          uk={uk?.headings}
+        />
+      )}
     </div>
   );
 }

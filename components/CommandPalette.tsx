@@ -37,9 +37,13 @@ export default function CommandPalette({
   }, [open]);
 
   const results = useMemo(() => {
+    // Heading results exist once per language (each has its own anchor); show
+    // only the active one. Page results carry no `lang` and always show.
+    const pool = items.filter((i) => !i.lang || i.lang === lang);
     const q = query.trim().toLowerCase();
-    if (!q) return items.slice(0, 8);
-    const scored = items
+    // With no query, lead with pages rather than a wall of headings.
+    if (!q) return pool.filter((i) => !i.lang).slice(0, 8);
+    const scored = pool
       .map((item) => {
         // Match against both language titles + the folded-in text so a query
         // in either English or Ukrainian finds the page.
@@ -54,12 +58,15 @@ export default function CommandPalette({
         else if (titles.some((t) => t.includes(q))) score = 3;
         else if (sections.some((s) => s.includes(q))) score = 2;
         else if (item.text.toLowerCase().includes(q)) score = 1;
+        // A page outranks one of its own headings at equal strength, so
+        // searching a post's name still opens the post first.
+        if (score > 0 && item.lang) score -= 0.5;
         return { item, score };
       })
       .filter((r) => r.score > 0)
       .sort((a, b) => b.score - a.score);
     return scored.slice(0, 8).map((r) => r.item);
-  }, [query, items]);
+  }, [query, items, lang]);
 
   useEffect(() => setSelected(0), [results.length, query]);
 

@@ -72,6 +72,13 @@ export default function ShelfCard({
             <span className="h-px w-8 bg-[var(--border)]" />
           </div>
         )}
+        {/* Overlaid on the cover so it reads at a glance while scanning a row,
+            and costs no extra height under the title. */}
+        {item.statusLabel && (
+          <span className="shelf-status">
+            <T {...item.statusLabel} />
+          </span>
+        )}
       </div>
       <span className="mt-2.5 block font-medium leading-snug text-[var(--text)]">
         <T en={item.title} uk={item.titleUk} />

@@ -81,6 +81,11 @@ export const ui = {
   // code blocks
   copyCode: { en: "Copy code", uk: "Копіювати код" },
   copiedCode: { en: "Copied", uk: "Скопійовано" },
+  copyMarkdown: { en: "Copy as Markdown", uk: "Копіювати як Markdown" },
+
+  // shelf status
+  currentlyReading: { en: "Reading", uk: "Читаю" },
+  currentlyWatching: { en: "Watching", uk: "Дивлюся" },
 
   // 404
   notFoundBody: {
