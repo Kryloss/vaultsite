@@ -388,7 +388,7 @@ export function getSearchIndex(): SearchItem[] {
       ),
     });
     if (resumeData) {
-      // A dedicated "Résумé" result — typing "resume" wouldn't otherwise hit
+      // A dedicated "Résumé" result — typing "resume" wouldn't otherwise hit
       // anything, since the section itself is titled "Now" / "Зараз". Jumps
       // to the block's own heading (id="resume" on the wrapper in Resume.tsx),
       // not the page top, so it lands past the status cards.

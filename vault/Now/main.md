@@ -8,29 +8,16 @@ description: What I'm focused on right now.
 description_uk: Чим я зайнятий саме зараз.
 updated: July 2026
 updated_uk: липень 2026
-items:
-  - icon: book
-    label: Studying for CompTIA Security+
-    label_uk: Готуюся до CompTIA Security+
-    note: Working through the SY0-701 objectives before TMU starts
-    note_uk: Проходжу цілі SY0-701 до початку навчання в TMU
+goals:
+  - label: Pass the CompTIA Security+ exam
+    label_uk: Скласти іспит CompTIA Security+
     link: My Security+ journey
-  - icon: graduation
-    label: Starting Cyber Science at TMU in September
-    label_uk: У вересні починаю Cyber Science у TMU
-    note: Finished Sacred Heart CHS in June — first year begins September 2026
-    note_uk: Закінчив Sacred Heart CHS у червні — перший курс починається у вересні 2026
-  - icon: coffee
-    label: Barista @ Starbucks
-    label_uk: Бариста в Starbucks
-    note: Pulling espresso through most of the summer
-    note_uk: Готую еспресо майже все літо
-  - icon: hammer
-    label: Building this site
-    label_uk: Розвиваю цей сайт
-    note: Published straight from my Obsidian vault
-    note_uk: Публікується просто з мого сховища Obsidian
-    link: This website
+  - label: Land a co-op placement in first year
+    label_uk: Потрапити на co-op вже на першому курсі
+    note: Requires at least a 3.0 GPA
+    note_uk: Потрібен середній бал (GPA) не нижче 3.0
+  - label: Find a tech-related job
+    label_uk: Знайти роботу, пов'язану з технологіями
 resume:
   summary: "Dependable team leader with two years of supervision and customer-service experience, now moving into cybersecurity. Calm under pressure, organized, and quick to take on unfamiliar work."
   summary_uk: "Надійний командний лідер із дворічним досвідом керівництва змінами та роботи з клієнтами, який зараз рухається в бік кібербезпеки. Спокійний під тиском, організований, швидко беруся за незнайоме."
