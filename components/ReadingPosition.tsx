@@ -93,6 +93,19 @@ export default function ReadingPosition() {
     let lastY = window.scrollY;
 
     /**
+     * Whether this visit has produced a scroll at all. Nothing is written
+     * without one — and crucially, nothing is DELETED without one either.
+     *
+     * `persist` runs on unmount, and React StrictMode (on by default in the
+     * App Router's dev server) mounts every component, unmounts it, and mounts
+     * it again. So arriving at a note ran the cleanup immediately, at
+     * `scrollY: 0`, which read as "started again" and wiped the saved mark
+     * before the offer could be made. In development the feature deleted its
+     * own data on arrival, every single time.
+     */
+    let scrolled = false;
+
+    /**
      * Deferred a frame: on a client-side navigation the router's own scroll
      * reset hasn't necessarily happened when this effect first runs, so
      * checking "did they arrive at the top" immediately can read the *previous*
@@ -121,6 +134,7 @@ export default function ReadingPosition() {
      * reader stops or leaves.
      */
     const persist = () => {
+      if (!scrolled) return; // see `scrolled` above — a visit with no scroll
       const positions = read();
       // Near the top means "started again" — drop the mark rather than leaving
       // a stale one that offers to send them back two lines.
@@ -132,6 +146,7 @@ export default function ReadingPosition() {
     let frame = 0;
     let save = 0;
     const onScroll = () => {
+      scrolled = true;
       window.clearTimeout(save);
       save = window.setTimeout(persist, SAVE_DEBOUNCE);
       if (frame) return;
