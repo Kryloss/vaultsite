@@ -121,12 +121,11 @@ export default function ReadingPosition() {
      * reader stops or leaves.
      */
     const persist = () => {
-      const y = window.scrollY;
       const positions = read();
       // Near the top means "started again" — drop the mark rather than leaving
       // a stale one that offers to send them back two lines.
-      if (y < vh * MIN_DEPTH) delete positions[pathname];
-      else positions[pathname] = { y, t: Date.now() };
+      if (lastY < vh * MIN_DEPTH) delete positions[pathname];
+      else positions[pathname] = { y: lastY, t: Date.now() };
       write(positions);
     };
 
@@ -138,7 +137,8 @@ export default function ReadingPosition() {
       if (frame) return;
       frame = requestAnimationFrame(() => {
         frame = 0;
-        if (window.scrollY > DISMISS_AFTER) {
+        lastY = window.scrollY;
+        if (lastY > DISMISS_AFTER) {
           moved.current = true;
           setOffer(null);
         }
@@ -152,6 +152,7 @@ export default function ReadingPosition() {
     window.addEventListener("pagehide", persist);
     return () => {
       if (frame) cancelAnimationFrame(frame);
+      cancelAnimationFrame(decide);
       window.clearTimeout(save);
       // Leaving for another page in the app is a departure too.
       persist();

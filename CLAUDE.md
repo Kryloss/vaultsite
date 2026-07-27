@@ -80,6 +80,7 @@ update), follow **`docs/CONTENT-WORKFLOW.md`** — the full playbook. Core rules
 ## SEO & feeds
 
 - `app/sitemap.ts`, `app/robots.ts`, `app/feed.xml/route.ts` (RSS for Posts) — all statically generated. Canonical URL: `siteUrl` in `lib/site-config.ts` (update when custom domain lands).
+- JSON-LD in `lib/jsonld.ts`: `siteJsonLd()` (Person + `sameAs` socials, WebSite) in the layout, `entryJsonLd()` per note, `breadcrumbJsonLd()` on section and entry pages (home has none — it's the root of every trail).
 - OG images generated at build via `next/og` — shared renderer in `lib/og.tsx`, route files `app/opengraph-image.tsx` + per-section + per-entry.
 - Favicon: `app/icon.png` (circle-cropped from the owner's avatar) + `app/apple-icon.png`. Regenerate with PIL if the avatar changes.
 

@@ -423,3 +423,13 @@ Four small movements, each solving a legibility problem rather than decorating o
 **One localStorage key holds a map of path → position**, pruned to the twenty most recent and thirty days. A key per note would leave a pile in the reader's browser that nothing ever cleans up.
 
 **Saving is debounced and separate from the scroll handler.** The first version read, parsed and wrote the whole map inside the scroll callback, which is precisely the kind of synchronous work that makes a page feel heavy while scrolling. The position only has to be correct when the reader stops or leaves, so it writes 400ms after scrolling settles, on unmount, and on `pagehide` — which covers closing the tab, going back, and iOS suspending it, none of which `beforeunload` reliably does.
+
+## 40. BreadcrumbList, and the bug it turned up in reading position (2026-07-27)
+
+**`breadcrumbJsonLd()` emits the trail from the site root to the current page**, on section pages and entry pages. It's what lets a search result print "kryloss.com › Posts › Security+ journey" instead of a bare URL. Two levels is the whole hierarchy: a note's subfolder is filing, not structure, and deliberately isn't in its URL either (#27) — putting it in the trail would describe a path that doesn't exist. The last crumb carries no `item`, per schema.org's guidance, since it would link to itself. Home emits none: it's the root of every trail and has none of its own. English names only — a crumb is one string, both languages ship in the same document, and English is what the canonical URL already uses.
+
+**Reading position (#39) never worked, and the reason is worth recording.** `persist()` read `window.scrollY` at the moment it ran, and it also runs on unmount. On an in-app navigation the router has already scrolled the window back to the top by then, so leaving a note saw `0`, decided the reader had "started again", and deleted the mark — every note, every time. The fix is to persist the last position observed *by the scroll handler* rather than a live read.
+
+**A second, quieter version of the same mistake:** the decision about whether to offer at all checked `window.scrollY < 100` synchronously on mount, which on a client-side navigation can still be reading the *previous* page's scroll position. That check now waits a frame.
+
+Both are the same class of bug — treating the scroll position as a fact you can read at any time, when during a navigation it belongs to a page that no longer exists.
