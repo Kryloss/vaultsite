@@ -243,7 +243,13 @@ export function getEntries(section: Section): Entry[] {
   }
 
   return entries.sort((a, b) => {
-    if (a.date && b.date) return b.date.localeCompare(a.date);
+    // Title breaks a date tie. Without it the order of same-day notes fell out
+    // of readdir(), which is filesystem order — it differed between a laptop
+    // and the Vercel builder, and shifted again the moment notes were filed
+    // into subfolders. Nothing visible depended on it, but the search index
+    // did, so it's pinned here.
+    if (a.date && b.date)
+      return b.date.localeCompare(a.date) || a.title.localeCompare(b.title);
     if (a.date) return -1;
     if (b.date) return 1;
     return a.title.localeCompare(b.title);
