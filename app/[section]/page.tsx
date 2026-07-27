@@ -5,6 +5,8 @@ import { renderMarkdown } from "@/lib/markdown";
 import { getListComponent } from "@/lib/section-types";
 import { ui } from "@/lib/ui-strings";
 import T from "@/components/T";
+import JsonLd from "@/components/JsonLd";
+import { breadcrumbJsonLd } from "@/lib/jsonld";
 
 interface Props {
   params: Promise<{ section: string }>;
@@ -49,6 +51,7 @@ export default async function SectionPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-14 lg:py-24">
+      <JsonLd data={breadcrumbJsonLd(section)} />
       <header>
         <h1 className="text-2xl font-semibold tracking-tight text-[var(--text)]">
           {section.icon && <span className="mr-2">{section.icon}</span>}

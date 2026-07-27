@@ -29,7 +29,7 @@ import CopyMarkdown from "@/components/CopyMarkdown";
 import ReadingProgress from "@/components/ReadingProgress";
 import ReadingPosition from "@/components/ReadingPosition";
 import JsonLd from "@/components/JsonLd";
-import { entryJsonLd } from "@/lib/jsonld";
+import { breadcrumbJsonLd, entryJsonLd } from "@/lib/jsonld";
 import { maturityOf } from "@/lib/maturity";
 
 /** Below this many h2/h3 an outline is noise, not navigation. */
@@ -104,6 +104,7 @@ export default async function EntryPage({ params }: Props) {
       }
     >
       <JsonLd data={entryJsonLd(section, entry)} />
+      <JsonLd data={breadcrumbJsonLd(section, entry)} />
       <ReadingProgress />
       <ReadingPosition />
       <Link

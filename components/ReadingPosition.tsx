@@ -81,19 +81,37 @@ export default function ReadingPosition() {
 
     const vh = document.documentElement.clientHeight;
     const saved = read()[pathname];
-    const startedAtTop = window.scrollY < 100;
     const hasHash = window.location.hash.length > 1;
 
-    if (
-      saved &&
-      startedAtTop &&
-      !hasHash &&
-      saved.y > vh * MIN_DEPTH &&
-      // The note may have been rewritten shorter since the visit.
-      saved.y < document.documentElement.scrollHeight - vh
-    ) {
-      setOffer(saved.y);
-    }
+    /**
+     * The position last observed. `persist` uses this rather than reading
+     * `window.scrollY` when it runs, because it also runs on unmount — and on
+     * an in-app navigation the router has already scrolled the window back to
+     * the top by then. Reading live would have seen 0 and deleted the mark on
+     * the way out of every note, so nothing was ever remembered.
+     */
+    let lastY = window.scrollY;
+
+    /**
+     * Deferred a frame: on a client-side navigation the router's own scroll
+     * reset hasn't necessarily happened when this effect first runs, so
+     * checking "did they arrive at the top" immediately can read the *previous*
+     * page's scroll position and silently decline to offer.
+     */
+    const decide = requestAnimationFrame(() => {
+      lastY = window.scrollY;
+      if (
+        saved &&
+        !moved.current &&
+        window.scrollY < 100 &&
+        !hasHash &&
+        saved.y > vh * MIN_DEPTH &&
+        // The note may have been rewritten shorter since the visit.
+        saved.y < document.documentElement.scrollHeight - vh
+      ) {
+        setOffer(saved.y);
+      }
+    });
 
     /**
      * Saving is debounced, and separate from the scroll handler on purpose:

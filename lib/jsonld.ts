@@ -59,6 +59,50 @@ function reviewWrapper(item: any, rating: number, url: string): any {
   };
 }
 
+/**
+ * The trail from the site root to this page, which is what lets a search
+ * result print "kryloss.com › Posts › Security+ journey" instead of a bare
+ * URL. Two levels is the whole hierarchy here — a note's subfolder inside a
+ * section is filing, not structure, and deliberately isn't in its URL either
+ * (DECISIONS #27), so putting it in the trail would describe a path that
+ * doesn't exist.
+ *
+ * English names only: a breadcrumb is one string per item, both languages ship
+ * in the same document, and English is what the canonical URL and every other
+ * bit of metadata already uses.
+ */
+export function breadcrumbJsonLd(
+  section: Section,
+  entry?: Entry
+): object | null {
+  // Home is the root of the trail, so it has no trail of its own.
+  if (section.slug === "home") return null;
+
+  const crumbs: { name: string; url: string }[] = [
+    { name: siteName, url: siteUrl },
+    { name: section.title, url: `${siteUrl}/${section.slug}` },
+  ];
+  if (entry) {
+    crumbs.push({
+      name: entry.title,
+      url: `${siteUrl}/${section.slug}/${entry.slug}`,
+    });
+  }
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: crumbs.map((crumb, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: crumb.name,
+      // The last crumb is the page you're on; schema.org's guidance is to
+      // leave it without an `item`, since it would link to itself.
+      ...(i < crumbs.length - 1 ? { item: crumb.url } : {}),
+    })),
+  };
+}
+
 /** Structured data for one entry page, or null when there's nothing to say. */
 export function entryJsonLd(section: Section, entry: Entry): object | null {
   const url = `${siteUrl}/${section.slug}/${entry.slug}`;
