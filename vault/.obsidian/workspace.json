@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Now/main.md",
+                "file": "Home/main.uk.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "main"
+              "title": "main.uk"
             }
           }
         ],
@@ -214,12 +214,12 @@
   },
   "active": "2fc290c3cf89daec",
   "lastOpenFiles": [
+    "Home/main.md",
+    "Home/main.uk.md",
+    "Now/main.md",
     "Now/main.uk.md",
     "People/Mykhailo Fedorov.md",
-    "Home/main.uk.md",
-    "Home/main.md",
     "Music/main.md",
-    "Now/main.md",
     "Shelf/the-little-prince.jpg",
     "Shelf/The Order of Time.uk.md",
     "Shelf/The Hero with a Thousand Faces.uk.md",

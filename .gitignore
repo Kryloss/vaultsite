@@ -19,6 +19,10 @@ public/vault-assets/
 .env*
 .vercel/
 
+# python (scripts/build-resume-pdf.py)
+__pycache__/
+*.pyc
+
 # os
 .DS_Store
 

@@ -288,6 +288,10 @@ files also add `description_uk:` (the sidebar/section/home descriptions read it)
   prose, the callout titles, and the link *labels* (`[[Now/main|Зараз]]`).
 - Diagram embeds stay identical (their `EN :: UK` caption + `.uk.svg` sibling
   already handle language — see Diagrams).
+- `vault/Now/main.uk.md` is parsed, not rendered: keep the same headings in the
+  same order and the same number of goals, rows and bullets as `main.md` —
+  values pair up by position. Checkboxes, `#current` and `→` links come from
+  the English file, so only the words need translating (see DECISIONS #26).
 
 **Proper nouns:** use the established Ukrainian form when one exists (films/books:
 official localized title — *Inception* → *Початок*; people: transliterate —
