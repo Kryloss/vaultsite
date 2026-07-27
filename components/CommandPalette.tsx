@@ -26,6 +26,21 @@ import { ui, type Str } from "@/lib/ui-strings";
  * An action that needed a backend wouldn't belong here.
  */
 
+/**
+ * The vault file behind the page, in the language being read — written onto
+ * the entry page's wrapper as a data attribute. A note without a translation
+ * falls back to the English source rather than offering a link to nothing.
+ */
+function sourcePath(lang: "en" | "uk"): string | undefined {
+  if (typeof document === "undefined") return undefined;
+  const el = document.querySelector<HTMLElement>("[data-vault-source]");
+  if (!el) return undefined;
+  return (
+    (lang === "uk" ? el.dataset.vaultSourceUk : undefined) ??
+    el.dataset.vaultSource
+  );
+}
+
 interface Action {
   id: string;
   label: Str;
@@ -379,7 +394,13 @@ export default function CommandPalette({
           ))}
         </ul>
         <div className="border-t border-[var(--border)] px-4 py-2 text-xs text-[var(--text-tertiary)]">
-          {flash ? <T {...ui.actionDone} /> : <T {...ui.searchHint} />}
+          {flash ? (
+            <T {...ui.actionDone} />
+          ) : scoped ? (
+            <T {...ui.searchThisPage} />
+          ) : (
+            <T {...ui.searchHint} />
+          )}
         </div>
           </>
         )}

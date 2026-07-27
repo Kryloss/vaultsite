@@ -93,28 +93,50 @@ export default function ReadingPosition() {
       setOffer(saved.y);
     }
 
+    /**
+     * Saving is debounced, and separate from the scroll handler on purpose:
+     * localStorage reads and writes are synchronous and JSON-parsing the map
+     * on every animation frame is exactly the kind of thing that makes a page
+     * feel heavy while scrolling. The position only has to be right when the
+     * reader stops or leaves.
+     */
+    const persist = () => {
+      const y = window.scrollY;
+      const positions = read();
+      // Near the top means "started again" — drop the mark rather than leaving
+      // a stale one that offers to send them back two lines.
+      if (y < vh * MIN_DEPTH) delete positions[pathname];
+      else positions[pathname] = { y, t: Date.now() };
+      write(positions);
+    };
+
     let frame = 0;
+    let save = 0;
     const onScroll = () => {
+      window.clearTimeout(save);
+      save = window.setTimeout(persist, SAVE_DEBOUNCE);
       if (frame) return;
       frame = requestAnimationFrame(() => {
         frame = 0;
-        const y = window.scrollY;
-        if (y > DISMISS_AFTER) moved.current = true;
-        if (moved.current) setOffer(null);
-
-        const positions = read();
-        // Near the top means "started again" — drop the mark rather than
-        // leaving a stale one that offers to send them back two lines.
-        if (y < vh * MIN_DEPTH) delete positions[pathname];
-        else positions[pathname] = { y, t: Date.now() };
-        write(positions);
+        if (window.scrollY > DISMISS_AFTER) {
+          moved.current = true;
+          setOffer(null);
+        }
       });
     };
 
+    // A closed tab never fires the debounce. `pagehide` covers closing, a
+    // back-navigation, and iOS putting the tab to sleep, which `beforeunload`
+    // does not.
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("pagehide", persist);
     return () => {
       if (frame) cancelAnimationFrame(frame);
+      window.clearTimeout(save);
+      // Leaving for another page in the app is a departure too.
+      persist();
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("pagehide", persist);
     };
   }, [pathname]);
 
