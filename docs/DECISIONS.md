@@ -261,3 +261,19 @@ Two fixes were applied, in order:
 **Parsing is forgiving on purpose.** An unrecognized heading is skipped with a `console.warn`, never thrown. A typo in a note must not be able to fail a Vercel build — that would hold back every other content change in the same push, whereas a missing block is visible on the page the moment it's opened.
 
 **`scripts/build-resume-pdf.py` gained a ~60-line English-only twin of the parser** rather than importing anything from the TypeScript side: it already had its own renderer, and the alternative (having Node emit JSON for Python to read) puts a build step between the note and the PDF. Verified the same way — the dict it now parses is identical to the one it used to load from YAML.
+
+## 27. Sections can have subfolders; they mean nothing to the URL (2026-07-26)
+
+**Decision:** `getEntries()` walks a section's subfolders, so `vault/Shelf/Books/Sapiens.md` is an entry exactly as `vault/Shelf/Sapiens.md` was. The shelf is now filed by medium (`Books/`, `Movies/`, `Shows/`, `Videos/`), each note's cover beside it, and the loose media under Posts moved to `Posts/attachments/`. Only top-level folders of `vault/` are scanned by `getSections()`, so a subfolder can never become a page.
+
+**URLs are untouched, and that's the point.** A slug comes from the file name, never the path — `/shelf/sapiens` before, `/shelf/sapiens` after. Filing is an Obsidian-side concern (16 shelf notes and 13 covers in one flat folder was the actual complaint), and it has to stay one, or reorganizing a vault would silently break every link and every search result pointing at it.
+
+**Three things had to move with it:**
+
+- `resolveCoverUrl()` used to build `/vault-assets/<section>/<file>` by string concatenation, which 404s the moment the cover isn't directly in the section folder. It now resolves like an image embed does — the note's own folder first, then vault-wide by file name — so `cover: sapiens.jpg` finds the file wherever it is. `entry.sectionDir` carries the note's real folder (`Shelf/Books`) for the same reason.
+- **Entry sort got a title tiebreak on equal dates.** Every shelf note shares one of two dates, so their order came out of `readdir()` — filesystem order, which differs between a laptop and the Vercel builder and shifted again when the notes moved into folders. Nothing visible depended on it (rows are grouped and sorted downstream), but the Cmd+K index did.
+- **`entryMedium()`** reads `medium:` frontmatter and falls back to the folder name (`Movies/` → `movie`), so a note dropped into the right folder needs no frontmatter to appear in the right row. Frontmatter always wins; only folder names that name a known medium count, so `attachments/` or `Drafts/` stay inert. The four readers of `entry.meta.medium` (shelf, quotes, JSON-LD, entry page) share it.
+
+**Verified by building before and after and comparing all 52 prerendered pages: every one renders an identical DOM.** The only intended differences are asset URLs, which now carry the subfolder (`/vault-assets/Shelf/Books/sapiens.jpg`), plus one hard-coded link in the war-newspaper post that had to be repointed at `Posts/attachments/`. Nothing links to those asset paths from outside the site.
+
+**Not done: renaming files to match.** Covers keep their download names (`the-last-wish.jpg`) and notes keep their titles. The folder already says what a thing is; renaming would churn the git history for nothing.

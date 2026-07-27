@@ -19,8 +19,9 @@ Git is the single source of truth. The deployed site never reads the filesystem 
 
 ## Content model
 
-- **Section** = folder in `vault/` containing `main.md`. Gets a route (`/posts`), a sidebar item, and a list of its entries. The folder `Home` is special only in that its slug `home` renders at `/`.
-- **Entry** = any other `.md` file in a section folder. Gets a route `/<section>/<slug>`.
+- **Section** = TOP-LEVEL folder in `vault/` containing `main.md`. Gets a route (`/posts`), a sidebar item, and a list of its entries. The folder `Home` is special only in that its slug `home` renders at `/`.
+- **Entry** = any other `.md` file in a section folder, including inside its subfolders. Gets a route `/<section>/<slug>`.
+- **Subfolders are filing, not structure.** `vault/Shelf/Books/Sapiens.md` is still `/shelf/sapiens` — the slug comes from the file name, so notes can be reorganized in Obsidian without breaking URLs, and only top-level folders can ever become sections. Images sit beside their note; `entry.sectionDir` carries the note's own folder so they resolve. The one exception to "means nothing": a shelf note with no `medium:` inherits it from its folder (`lib/shelf.ts` → `entryMedium()`).
 - Slug = slugified folder/file name, overridable via frontmatter `slug`.
 - `draft: true` (or `published: false`) hides sections or entries.
 - A section's body is markdown, rendered as prose above its list — except `type: now`, whose body IS its data: `lib/now-content.ts` parses the goals checklist and the résumé out of it into `section.meta.goals` / `section.meta.resume`. See DECISIONS #26.

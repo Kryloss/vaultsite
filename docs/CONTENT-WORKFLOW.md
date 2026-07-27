@@ -35,6 +35,11 @@ the vault. This doc is the playbook. Read CLAUDE.md first for the hard rules.
    they help (see "Images & media sourcing" below). Don't skip this step.
 6. **Write the file** → `vault/<Section>/<Natural Title>.md`. File name = the
    title in normal words (spaces fine, no slashes/colons); the engine slugs it.
+   Where a section has subfolders, use the matching one — a book goes in
+   `vault/Shelf/Books/`, a film in `Movies/`, a series in `Shows/`, a YouTube
+   note in `Videos/` — and put its cover image in that same folder. Loose media
+   for a post goes in `vault/Posts/attachments/`. Subfolders never change a
+   URL (`Shelf/Books/Sapiens.md` is still `/shelf/sapiens`), so file by meaning.
 7. **Report** → tell him the file path, the URL it will get, links added,
    images fetched (with their sources), and anything you fixed or assumed.
 
@@ -45,7 +50,7 @@ the vault. This doc is the playbook. Read CLAUDE.md first for the hard rules.
   entries); ask before inventing a new one. See Categories.
 - `description:` write one — a single sentence in his voice, no marketing tone.
 - `cover:`/images: if he mentions an image he'll add later, include the
-  commented line: `# cover: name.jpg   ← drop into vault/<Section>/ and uncomment`.
+  commented line: `# cover: name.jpg   ← drop in beside this note and uncomment`.
 - Titles: his working title if he gave one; otherwise derive from content, plain
   and specific — nothing clickbaity.
 
@@ -62,7 +67,7 @@ description: <one sentence>
 <his text, structured with ## headings if long>
 ```
 
-### Shelf item — `vault/Shelf/<Title>.md`
+### Shelf item — `vault/Shelf/<Books|Movies|Shows|Videos>/<Title>.md`
 ```md
 ---
 title: <Title>
@@ -92,7 +97,7 @@ provides none, omit this section or leave a placeholder he can fill>
 
 See **Categories** below — Shelf, Posts and People all use the same key.
 
-### Video shelf item — `vault/Shelf/<Title>.md`
+### Video shelf item — `vault/Shelf/Videos/<Title>.md`
 
 Same template as above with `medium: video`. Differences worth knowing:
 
@@ -215,7 +220,7 @@ from the English name, so adding a translation never changes an address.
 Fetch images automatically — Kyrylo shouldn't have to hunt for covers.
 
 **Preferred: download into the vault.** Save the file next to the note
-(`vault/Shelf/sapiens.jpg`), set `cover: sapiens.jpg`. Vault files show up in
+(`vault/Shelf/Books/sapiens.jpg`, beside the note), set `cover: sapiens.jpg`. Vault files show up in
 Obsidian, sync through git, and never rot. Ask permission before downloading,
 batched in one line ("Downloading 2 covers: sapiens.jpg from Open Library
 (~60 KB), fedorov.jpg from Wikimedia Commons (~120 KB) — OK?").
@@ -239,7 +244,7 @@ after one attempt is not.
 **Wide art (logos, banners):** set `coverFit: contain` in the entry frontmatter
 — the card letterboxes it on the tile background instead of cropping. This is
 how a freely-licensed title logo becomes a perfectly good cover when no poster
-is available (see `vault/Shelf/Mr Robot.md`).
+is available (see `vault/Shelf/Shows/Mr Robot.md`).
 
 **Note:** some APIs are flaky or geo-filtered from sandboxes (iTunes Search
 often returns 0 results). Treat an empty response as "try the next source",
@@ -337,7 +342,7 @@ reader's theme. Report the file path and where you embedded it.
 2. Embed the English name only — `![[<name>.svg|English caption :: Український підпис]]`.
    The `::` splits the caption; the resolver finds the `.uk.svg` sibling itself.
 
-Copy the pair `vault/Posts/rendering-pipeline.svg` / `.uk.svg` as a reference.
+Copy the pair `vault/Posts/attachments/rendering-pipeline.svg` / `.uk.svg` as a reference.
 
 **If Kyrylo wants to hand-edit the diagram in Excalidraw:** say so — he can open
 the SVG in the Excalidraw plugin, or draw his own and embed `![[Name.excalidraw]]`
