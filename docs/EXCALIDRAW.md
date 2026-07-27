@@ -51,7 +51,7 @@ step. Drop the file in a section folder and embed it like any image:
 ![[publishing-pipeline.svg|How a note becomes a page]]
 ```
 
-A working example lives at `vault/Projects/publishing-pipeline.svg` (embedded in
+A working example lives at `vault/Projects/attachments/publishing-pipeline.svg` (embedded in
 the "This website" project). This is the format the AI workflow generates — see
 `docs/CONTENT-WORKFLOW.md`.
 
@@ -78,7 +78,7 @@ sibling and the site shows the right one automatically:
   `![[diagram.svg|How it works :: Як це працює]]`. Only the active one shows.
 
 If no `.uk` sibling exists, the English diagram shows in both languages (fine
-for language-neutral pictures). Working examples: `vault/Projects/publishing-pipeline.svg`
+for language-neutral pictures). Working examples: `vault/Projects/attachments/publishing-pipeline.svg`
 (+`.uk.svg`) and `vault/Posts/rendering-pipeline.svg` (+`.uk.svg`).
 
 ## How it resolves (for maintainers)

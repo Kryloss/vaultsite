@@ -37,9 +37,11 @@ the vault. This doc is the playbook. Read CLAUDE.md first for the hard rules.
    title in normal words (spaces fine, no slashes/colons); the engine slugs it.
    Where a section has subfolders, use the matching one — a book goes in
    `vault/Shelf/Books/`, a film in `Movies/`, a series in `Shows/`, a YouTube
-   note in `Videos/` — and put its cover image in that same folder. Loose media
-   for a post goes in `vault/Posts/attachments/`. Subfolders never change a
-   URL (`Shelf/Books/Sapiens.md` is still `/shelf/sapiens`), so file by meaning.
+   note in `Videos/` — with its cover in that folder's `covers/`. Media for a
+   post goes in `vault/Posts/attachments/`, diagrams in
+   `vault/Projects/attachments/`, scaffolding notes in `vault/Posts/Examples/`.
+   Subfolders never change a URL (`Shelf/Books/Sapiens.md` is still
+   `/shelf/sapiens`), so file by meaning.
 7. **Report** → tell him the file path, the URL it will get, links added,
    images fetched (with their sources), and anything you fixed or assumed.
 
@@ -50,7 +52,7 @@ the vault. This doc is the playbook. Read CLAUDE.md first for the hard rules.
   entries); ask before inventing a new one. See Categories.
 - `description:` write one — a single sentence in his voice, no marketing tone.
 - `cover:`/images: if he mentions an image he'll add later, include the
-  commented line: `# cover: name.jpg   ← drop in beside this note and uncomment`.
+  commented line: `# cover: name.jpg   ← drop into the section's covers/ folder and uncomment`.
 - Titles: his working title if he gave one; otherwise derive from content, plain
   and specific — nothing clickbaity.
 
@@ -220,10 +222,11 @@ from the English name, so adding a translation never changes an address.
 Fetch images automatically — Kyrylo shouldn't have to hunt for covers.
 
 **Preferred: download into the vault.** Save the file next to the note
-(`vault/Shelf/Books/sapiens.jpg`, beside the note), set `cover: sapiens.jpg`. Vault files show up in
+(`vault/Shelf/Books/covers/sapiens.jpg`), set `cover: sapiens.jpg` — the file
+name is enough, the engine finds it anywhere in the vault. Vault files show up in
 Obsidian, sync through git, and never rot. Ask permission before downloading,
 batched in one line ("Downloading 2 covers: sapiens.jpg from Open Library
-(~60 KB), fedorov.jpg from Wikimedia Commons (~120 KB) — OK?").
+(~60 KB), mykhailo-fedorov.jpg from Wikimedia Commons (~120 KB) — OK?").
 
 **Fallback: remote URL.** If a download isn't possible in the session, set
 `cover: https://…` — the site renders it directly. Flag it in your report so
@@ -324,7 +327,7 @@ Rules for the SVG:
 - Transparent background; no outer `<rect>` fill.
 - Include an internal `<style>` with a `@media (prefers-color-scheme: dark)`
   block that recolors strokes/text for dark mode — so ONE file works on both
-  themes (copy the pattern in `vault/Projects/publishing-pipeline.svg`).
+  themes (copy the pattern in `vault/Projects/attachments/publishing-pipeline.svg`).
 - Neutral, legible palette: strokes/labels ~`#33373d` light / ~`#e6e8eb` dark,
   secondary text grey, thin arrows with a marker head. Rounded rectangles.
 - Keep it simple and readable — a handful of labelled nodes, not a blueprint.
@@ -405,7 +408,7 @@ without being asked.
 Callouts `> [!note|tip|warning|danger] Title`, tables, fenced code blocks,
 `![[img.jpg]]` embeds (`|caption`, `|400` width, ≤128 = circular avatar),
 auto-embedding Apple Music **and YouTube** links (a bare link alone on a line
-becomes a player). The full demo lives at `vault/Posts/Formatting playground.md`.
+becomes a player). The full demo lives at `vault/Posts/Examples/Formatting playground.md`.
 
 **Code blocks** are syntax-highlighted at build time. Add a filename header
 with ` ```bash title="scan.sh" ` (a bare ` ```bash scan.sh ` works too). The

@@ -6,7 +6,7 @@ Context file for AI models working on this repo. Read this first, then `docs/ARC
 
 Kyrylo's portfolio site, published from an Obsidian vault. The `vault/` folder IS the CMS: TOP-LEVEL folders → section pages, `.md` files inside them → entries with their own URLs. Pipeline: Obsidian Git → GitHub → Vercel auto-deploy. Fully static (SSG), no database, no runtime fs access.
 
-Sections may hold subfolders (`vault/Shelf/Books/`, `vault/Posts/attachments/`) — they're filing, for the owner's benefit in Obsidian. A subfolder never becomes a page and never appears in a URL: an entry's slug comes from its file name, so a note can move between folders without breaking its address.
+Sections may hold subfolders (`vault/Shelf/Books/`, `vault/Shelf/Books/covers/`, `vault/Posts/attachments/`) — they're filing, for the owner's benefit in Obsidian. A subfolder never becomes a page and never appears in a URL: an entry's slug comes from its file name, so a note can move between folders without breaking its address.
 
 ## Owner context
 
@@ -25,7 +25,7 @@ Sections may hold subfolders (`vault/Shelf/Books/`, `vault/Posts/attachments/`) 
 
 | Path | Role |
 |---|---|
-| `vault/` | Content (Obsidian vault lives at repo root; this is the content subfolder). Sections may nest subfolders — `Shelf/Books|Movies|Shows|Videos/`, `Posts/attachments/` |
+| `vault/` | Content (Obsidian vault lives at repo root; this is the content subfolder). Sections may nest subfolders — `Shelf/<Medium>/` + `<Medium>/covers/`, `Posts/attachments/`, `Posts/Examples/` (scaffolding notes), `Projects/attachments/` |
 | `lib/vault.ts` | Content engine: section/entry discovery, slugs, frontmatter, sorting |
 | `lib/now-content.ts` | Parses the Now page's body (goals checklist + résumé) into structured data |
 | `lib/markdown.ts` | Obsidian syntax preprocessing (`![[img]]`, `[[wiki links]]`, relative images) + unified pipeline → HTML |
@@ -70,7 +70,7 @@ update), follow **`docs/CONTENT-WORKFLOW.md`** — the full playbook. Core rules
 6. Factual notes (People, current events) end with a `## Sources` section (2–4 links used for verification). Skip for opinion/shelf/music notes.
 7. Translate ALL content, both languages: `title_uk:` in frontmatter AND a full professional Ukrainian body in a sibling `<name>.uk.md` (posts) / `main.uk.md` (sections), body-only, same structure/links/embeds. A note without its `.uk.md` is unfinished. See `docs/CONTENT-WORKFLOW.md → Translation`.
 8. Offer a diagram when a post/project would benefit; generate it as a self-theming `.svg` (see `docs/CONTENT-WORKFLOW.md` → Diagrams). Never hand-author Excalidraw scene JSON.
-9. Write to `vault/<Section>/<Natural Title>.md` — or the matching subfolder where one exists (`vault/Shelf/Books/…`, `vault/Shelf/Movies|Shows|Videos/…`), with the note's images beside it; loose media in Posts goes in `vault/Posts/attachments/`. Then report path, future URL, links added, images fetched + sources, and anything you fixed or assumed.
+9. Write to `vault/<Section>/<Natural Title>.md` — or the matching subfolder where one exists (`vault/Shelf/Books/…`, `vault/Shelf/Movies|Shows|Videos/…`), its cover in that folder's `covers/`; loose media goes in the section's `attachments/`. Then report path, future URL, links added, images fetched + sources, and anything you fixed or assumed.
 
 ## Common tasks
 
