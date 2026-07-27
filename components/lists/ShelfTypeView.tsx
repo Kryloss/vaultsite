@@ -86,6 +86,16 @@ export default function ShelfTypeView({
       {(categories.length > 0 || hasQuotes) && (
         <div className="mt-6 flex flex-wrap gap-2">
           {chip(<T {...ui.filterAll} />, base, !activeCategory && !showQuotes)}
+          {/* Straight after All, and only when there's something behind it.
+              Set apart typographically rather than by ornament, because it
+              isn't a category — it opens a different kind of page. */}
+          {hasQuotes &&
+            chip(
+              <T {...ui.quotesCategory} />,
+              `${base}/quotes`,
+              showQuotes,
+              "chip-quotes"
+            )}
           {categories.map((c) =>
             chip(
               <T {...categoryLabel(c)} />,
@@ -93,20 +103,6 @@ export default function ShelfTypeView({
               c === activeCategory
             )
           )}
-          {/* Last, and only when there's something behind it. Set apart from
-              the frontmatter categories because it isn't one — it leads to a
-              different kind of page, not a filtered grid. */}
-          {hasQuotes &&
-            chip(
-              <>
-                <span aria-hidden>”</span>
-                <T {...ui.quotesCategory} />
-                <span className="chip-count">{quoteCount}</span>
-              </>,
-              `${base}/quotes`,
-              showQuotes,
-              "chip-quotes"
-            )}
         </div>
       )}
 

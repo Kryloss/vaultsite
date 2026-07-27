@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Lora } from "next/font/google";
 import "./globals.css";
 import Chrome from "@/components/Chrome";
 import Lightbox from "@/components/Lightbox";
@@ -32,6 +32,20 @@ const inter = Inter({
   // which one won came down to stylesheet order. globals.css points
   // Tailwind's token at this one instead — one name, one owner.
   variable: "--font-inter",
+});
+
+/**
+ * Lora, italic only — the quotes voice.
+ *
+ * A serif set against Inter is what makes a quoted passage read as someone
+ * else's words rather than more of the page. Only the italic is loaded, since
+ * that's the only cut used; Cyrillic is included for the same reason as above.
+ */
+const lora = Lora({
+  subsets: ["latin", "latin-ext", "cyrillic"],
+  style: ["italic"],
+  display: "swap",
+  variable: "--font-serif",
 });
 
 export const metadata: Metadata = {
@@ -83,7 +97,11 @@ export default function RootLayout({
   return (
     // data-lang is set pre-paint by the inline script below (and toggled at
     // runtime), so the server HTML intentionally differs — suppress the warning.
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${inter.variable} ${lora.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         {/* Restore the language choice before first paint — no flash.
             suppressHydrationWarning: browser extensions (e.g. Noir) rewrite

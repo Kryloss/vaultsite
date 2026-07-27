@@ -1061,26 +1061,15 @@ body {
 
 /* ---------- Quotes collection (components/lists/QuotesView.tsx) ---------- */
 
-/* The Quotes chip isn't a category — it opens a different kind of page. A
-   dashed edge and a leading quote mark separate it from the filter chips
-   beside it without adding colour to a monochrome design. */
+/* The Quotes chip isn't a category — it opens a different kind of page. It's
+   set apart by voice rather than ornament: the same italic serif the quotes
+   themselves are set in, so the chip previews where it leads. */
 .chip-quotes {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0.375rem;
-  border-style: dashed;
-}
-
-.chip-quotes > [aria-hidden] {
-  font-size: 1.125em;
-  line-height: 0;
-  transform: translateY(0.2em);
-}
-
-.chip-count {
-  font-size: 0.6875rem;
-  font-variant-numeric: tabular-nums;
-  opacity: 0.65;
+  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+  font-style: italic;
+  /* Serifs read small next to Inter at the same size. */
+  font-size: 0.9375rem;
+  letter-spacing: 0;
 }
 
 .quote-source {
@@ -1111,13 +1100,18 @@ body {
 }
 
 /* The passage is the content here, so it gets prose size — bigger than the
-   book it came from, which is only a label. */
+   book it came from, which is only a label. Set in an italic serif against
+   the site's sans, so a quotation reads as someone else's words. */
 .pull-quote {
   margin: 0;
   padding: 0.125rem 0 0.125rem 1rem;
   border-left: 2px solid var(--border);
-  font-size: 1.0625rem;
-  line-height: 1.65;
+  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  /* Inter's tracking correction doesn't apply to a serif. */
+  letter-spacing: 0;
   color: var(--text-secondary);
 }
 
