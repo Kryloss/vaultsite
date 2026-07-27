@@ -25,12 +25,14 @@
             "id": "2fc290c3cf89daec",
             "type": "leaf",
             "state": {
-              "type": "pdf",
+              "type": "markdown",
               "state": {
-                "file": "Now/Kyrylo Leshchenko Resume.pdf"
+                "file": "Now/main.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-file-text",
-              "title": "Kyrylo Leshchenko Resume"
+              "icon": "lucide-file",
+              "title": "main"
             }
           }
         ],
@@ -212,12 +214,13 @@
   },
   "active": "2fc290c3cf89daec",
   "lastOpenFiles": [
+    "Music/main.md",
+    "Now/Kyrylo Leshchenko Resume.pdf",
     "Shelf/Queue example.uk.md",
     "Shelf/sword-of-destiny.jpg",
     "Shelf/The Order of Time.md",
     "Shelf/The Witcher - The Last Wish.uk.md",
     "Shelf/This man is destroying Putin's empire.uk.md",
-    "Now/Kyrylo Leshchenko Resume.pdf",
     "Now/main.md",
     "Shelf/Sapiens.md",
     "Shelf/Queue example.md",
@@ -229,7 +232,6 @@
     "Shelf/Untitled.md",
     "Shelf/Footprints on the Road.uk.md",
     "Posts/First certification.md",
-    "Music/main.md",
     "Shelf/Jonathan Livingston Seagull.uk.md",
     "Shelf/new-version.jpeg",
     "Posts/I made propaganda for my Religion class.uk.md",

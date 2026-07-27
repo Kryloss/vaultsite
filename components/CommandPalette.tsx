@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import type { SearchItem } from "@/lib/vault";
 import T from "@/components/T";
 import { useLang } from "@/components/useLang";
-import { similarity } from "@/lib/fuzzy";
+import { similarity, fold } from "@/lib/fuzzy";
 import { ui } from "@/lib/ui-strings";
 
 /**
@@ -41,7 +41,8 @@ export default function CommandPalette({
     // Heading results exist once per language (each has its own anchor); show
     // only the active one. Page results carry no `lang` and always show.
     const pool = items.filter((i) => !i.lang || i.lang === lang);
-    const q = query.trim().toLowerCase();
+    // Accent-stripped so "resume" matches "Résumé" — see lib/fuzzy.ts → fold().
+    const q = fold(query.trim());
     // With no query, lead with pages rather than a wall of headings.
     if (!q) {
       return { results: pool.filter((i) => !i.lang).slice(0, 8), fuzzy: false };
@@ -50,17 +51,13 @@ export default function CommandPalette({
       .map((item) => {
         // Match against both language titles + the folded-in text so a query
         // in either English or Ukrainian finds the page.
-        const titles = [item.title, item.titleUk ?? ""].map((t) =>
-          t.toLowerCase()
-        );
-        const sections = [item.section, item.sectionUk ?? ""].map((s) =>
-          s.toLowerCase()
-        );
+        const titles = [item.title, item.titleUk ?? ""].map(fold);
+        const sections = [item.section, item.sectionUk ?? ""].map(fold);
         let score = 0;
         if (titles.some((t) => t.startsWith(q))) score = 4;
         else if (titles.some((t) => t.includes(q))) score = 3;
         else if (sections.some((s) => s.includes(q))) score = 2;
-        else if (item.text.toLowerCase().includes(q)) score = 1;
+        else if (fold(item.text).includes(q)) score = 1;
         // A page outranks one of its own headings at equal strength, so
         // searching a post's name still opens the post first.
         if (score > 0 && item.lang) score -= 0.5;

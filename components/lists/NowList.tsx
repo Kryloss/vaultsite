@@ -3,8 +3,15 @@ import type { ReactNode } from "react";
 import type { ListProps } from "@/lib/section-types";
 import { resolveIcon, ClockIcon, ArrowIcon } from "@/components/icons";
 import { getWikiIndex } from "@/lib/vault";
+import type { ResumeData } from "@/lib/resume";
+import { resumeHeadings } from "@/lib/resume";
 import Resume from "@/components/Resume";
+import Toc from "@/components/Toc";
 import T from "@/components/T";
+
+/** Below this many résumé blocks a rail/pill is noise, not navigation — same
+ *  threshold the entry page uses for markdown headings (app/[section]/[slug]/page.tsx). */
+const MIN_TOC_HEADINGS = 3;
 
 interface NowItem {
   icon?: string;
@@ -37,6 +44,9 @@ export default function NowList({ section }: ListProps) {
   const updated = section.meta.updated as string | undefined;
   const updatedUk = (section.meta.updated_uk as string | undefined) ?? updated;
   const wiki = getWikiIndex();
+  const resumeData = section.meta.resume as ResumeData | undefined;
+  const headings = resumeData ? resumeHeadings(resumeData) : { en: [], uk: [] };
+  const showToc = headings.en.length >= MIN_TOC_HEADINGS;
 
   const hrefFor = (link?: string): string | undefined => {
     if (!link) return undefined;
@@ -149,6 +159,18 @@ export default function NowList({ section }: ListProps) {
 
       {/* Optional `resume:` frontmatter block — see components/Resume.tsx */}
       <Resume section={section} />
+
+      {/* Same rail/pill as an entry page's outline, keyed to the résumé's
+          own blocks (lib/resume.ts) rather than markdown headings, since this
+          page's body is intentionally empty — see NowList's doc comment. */}
+      {showToc && (
+        <Toc
+          title={section.title}
+          titleUk={section.titleUk}
+          en={headings.en}
+          uk={headings.uk}
+        />
+      )}
     </div>
   );
 }

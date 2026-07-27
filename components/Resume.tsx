@@ -44,7 +44,9 @@ export default function Resume({ section }: { section: Section }) {
     : undefined;
 
   return (
-    <section className="mt-16 border-t border-[var(--border)] pt-10">
+    // id gives search (lib/vault.ts → getSearchIndex) and Toc's title row
+    // somewhere to land that isn't the page's very top.
+    <section id="resume" className="mt-16 scroll-mt-20 border-t border-[var(--border)] pt-10">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-lg font-semibold tracking-tight text-[var(--text)]">
           <T {...ui.resume} />
@@ -150,7 +152,7 @@ function Block({
   children: ReactNode;
 }) {
   return (
-    <div id={id} className="mt-9 scroll-mt-24 sm:grid sm:grid-cols-[104px_1fr] sm:gap-x-5">
+    <div id={id} className="mt-9 scroll-mt-20 sm:grid sm:grid-cols-[104px_1fr] sm:gap-x-5">
       <h3 className="text-[11px] font-semibold uppercase leading-[1.4] tracking-[0.1em] text-[var(--text-tertiary)] sm:pt-[3px]">
         {label}
       </h3>

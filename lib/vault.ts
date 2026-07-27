@@ -12,6 +12,9 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import GithubSlugger from "github-slugger";
+import type { ResumeData } from "@/lib/resume";
+import { resumeHeadings, resumeSearchText } from "@/lib/resume";
+import { ui } from "@/lib/ui-strings";
 
 export const VAULT_DIR = path.join(process.cwd(), "vault");
 
@@ -365,15 +368,60 @@ function headingItems(
 export function getSearchIndex(): SearchItem[] {
   const items: SearchItem[] = [];
   for (const section of getSections()) {
+    const href = section.slug === "home" ? "/" : `/${section.slug}`;
+    // A résumé (the "now" type's optional `resume:` key — see lib/resume.ts)
+    // has no markdown body to search, so its text is folded in here and its
+    // blocks (Experience, Education, …) get their own jump-to-anchor results,
+    // the same way headingItems() does for an entry's markdown headings.
+    const resumeData = section.meta.resume as ResumeData | undefined;
     items.push({
       title: section.title,
       titleUk: section.titleUk,
       section: "Section",
       sectionUk: "Розділ",
-      href: section.slug === "home" ? "/" : `/${section.slug}`,
+      href,
       // Ukrainian title folded into the text so search matches in both languages.
-      text: plainText(`${section.titleUk ?? ""} ${section.content}`),
+      text: plainText(
+        `${section.titleUk ?? ""} ${section.content} ${
+          resumeData ? resumeSearchText(resumeData) : ""
+        }`
+      ),
     });
+    if (resumeData) {
+      // A dedicated "Résумé" result — typing "resume" wouldn't otherwise hit
+      // anything, since the section itself is titled "Now" / "Зараз". Jumps
+      // to the block's own heading (id="resume" on the wrapper in Resume.tsx),
+      // not the page top, so it lands past the status cards.
+      items.push({
+        title: ui.resume.en,
+        titleUk: ui.resume.uk,
+        section: section.title,
+        sectionUk: section.titleUk,
+        href: `${href}#resume`,
+        text: plainText(resumeSearchText(resumeData)),
+      });
+      const { en, uk } = resumeHeadings(resumeData);
+      for (const h of en) {
+        items.push({
+          title: h.text,
+          section: section.title,
+          sectionUk: section.titleUk,
+          href: `${href}#${h.id}`,
+          text: h.text,
+          lang: "en",
+        });
+      }
+      for (const h of uk) {
+        items.push({
+          title: h.text,
+          section: section.titleUk ?? section.title,
+          sectionUk: section.titleUk,
+          href: `${href}#${h.id}`,
+          text: h.text,
+          lang: "uk",
+        });
+      }
+    }
     for (const entry of getEntries(section)) {
       const href = `/${section.slug}/${entry.slug}`;
       items.push({

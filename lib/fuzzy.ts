@@ -12,9 +12,22 @@
 /** Cyrillic is kept alongside Latin — half this site is Ukrainian. */
 const NOT_WORD = /[^a-z0-9Ѐ-ӿ]+/g;
 
+/**
+ * Strips accents so "resume" matches "Résumé" and "cafe" matches "café" —
+ * plain ASCII is the more likely thing someone types into search. NFD
+ * decomposition only affects Latin diacritics here; Ukrainian letters (е.g.
+ * "ї", "й") are their own base code points and pass through unchanged.
+ */
+export function fold(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase();
+}
+
 export function trigrams(value: string): Set<string> {
   // Padding makes the first and last letters count, so a wrong initial is felt.
-  const padded = ` ${value.toLowerCase().replace(NOT_WORD, " ").trim()} `;
+  const padded = ` ${fold(value).replace(NOT_WORD, " ").trim()} `;
   const out = new Set<string>();
   for (let i = 0; i < padded.length - 2; i++) out.add(padded.slice(i, i + 3));
   return out;
