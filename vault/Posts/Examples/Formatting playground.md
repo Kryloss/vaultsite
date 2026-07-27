@@ -96,3 +96,20 @@ Neither needs JavaScript — they're a checkbox and a label underneath.
 Every post carries a growth stage, shown next to the reading time. Add
 `maturity: seedling`, `budding` or `evergreen` to a note's frontmatter. Leave
 it out and the note reads as a seedling — this post is marked `evergreen`.
+
+## Footnotes and sidenotes
+
+Write an ordinary Obsidian footnote[^1] and it renders twice: as a note in the
+left margin on a wide screen, and as the usual list at the bottom of the page
+on a narrow one. Never both — the margin is only used where there's room for
+it, and the right-hand gutter already belongs to the table of contents.
+
+They can hold links and emphasis[^links], and a reference can sit anywhere a
+word can.
+
+[^1]: The reference is written `[^1]` in the sentence and the note itself goes
+    on its own line, anywhere in the file — Obsidian renders it as a footnote
+    too, so nothing about this is site-only syntax.
+
+[^links]: Like this one, pointing at [[This website]] — the hover preview works
+    inside a sidenote exactly as it does in the body.

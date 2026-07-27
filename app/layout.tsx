@@ -7,6 +7,8 @@ import CodeCopy from "@/components/CodeCopy";
 import HeadingAnchors from "@/components/HeadingAnchors";
 import LinkPreview from "@/components/LinkPreview";
 import JsonLd from "@/components/JsonLd";
+import SelectionLink from "@/components/SelectionLink";
+import { Analytics } from "@vercel/analytics/next";
 import { siteJsonLd } from "@/lib/jsonld";
 import { getSections, getEntries, getSearchIndex } from "@/lib/vault";
 import { getLinkPreviews } from "@/lib/previews";
@@ -107,6 +109,10 @@ export default function RootLayout({
     >
       <head>
         {/* Restore the language choice before first paint — no flash.
+            `?lang=` in the URL wins over the stored preference and is NOT
+            written back to localStorage: a shared link should open in the
+            language it was written in (see components/SelectionLink.tsx)
+            without permanently changing the reader's own choice.
             suppressHydrationWarning: browser extensions (e.g. Noir) rewrite
             this inline script before React hydrates, which would otherwise
             trip a dev-only hydration warning. */}
@@ -114,7 +120,7 @@ export default function RootLayout({
           suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html:
-              "try{var l=localStorage.getItem('lang');if(l==='uk')document.documentElement.dataset.lang='uk';}catch(e){}",
+              "try{var q=new URLSearchParams(location.search).get('lang');var l=q||localStorage.getItem('lang');if(l==='uk')document.documentElement.dataset.lang='uk';}catch(e){}",
           }}
         />
       </head>
@@ -133,6 +139,11 @@ export default function RootLayout({
         <CodeCopy />
         <HeadingAnchors />
         <LinkPreview previews={getLinkPreviews()} />
+        <SelectionLink />
+        {/* Vercel Analytics: page views only, no cookies and no cross-site
+            identifier, so there's nothing to consent to. It injects a script
+            tag on Vercel and is a no-op in local dev. */}
+        <Analytics />
       </body>
     </html>
   );

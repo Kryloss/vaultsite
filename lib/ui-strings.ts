@@ -83,6 +83,18 @@ export const ui = {
   copiedCode: { en: "Copied", uk: "Скопійовано" },
   copyMarkdown: { en: "Copy as Markdown", uk: "Копіювати як Markdown" },
 
+  // selection → text-fragment link (components/SelectionLink.tsx)
+  copyLinkToSelection: {
+    en: "Copy link to selection",
+    uk: "Скопіювати посилання на вибране",
+  },
+  linkCopied: { en: "Link copied", uk: "Посилання скопійовано" },
+
+  // lightbox (components/Lightbox.tsx)
+  previousImage: { en: "Previous image", uk: "Попереднє зображення" },
+  nextImage: { en: "Next image", uk: "Наступне зображення" },
+  closeImage: { en: "Close", uk: "Закрити" },
+
   // shelf status
   currentlyReading: { en: "Reading", uk: "Читаю" },
   currentlyWatching: { en: "Watching", uk: "Дивлюся" },

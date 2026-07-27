@@ -13,7 +13,8 @@
  * Post-processing (rehype): standalone images with alt text become
  * <figure> + <figcaption> (skipping avatars); fenced code blocks are
  * syntax-highlighted at build time (see lib/highlight.ts); headings get ids,
- * "#" anchors and an outline for the table of contents (see lib/toc.ts).
+ * "#" anchors and an outline for the table of contents (see lib/toc.ts);
+ * GFM footnotes are mirrored into margin sidenotes (see rehypeSidenotes).
  *
  * Assets resolve because scripts/sync-assets.mjs mirrors every non-.md vault
  * file into public/vault-assets/ before dev/build.
@@ -827,6 +828,144 @@ function rehypeCodeBlocks() {
     );
   };
 }
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/**
+ * rehype step: mirror every GFM footnote (`[^1]`) into a margin **sidenote**
+ * placed right after its reference, so a wide screen can show the note beside
+ * the sentence that raised it instead of sending the reader to the bottom.
+ *
+ * The footnote list remark-gfm builds is left exactly where it is — CSS hides
+ * one or the other (`.sidenote` below 1280px, `section.footnotes.all-sidenoted`
+ * above), the same show-one-hide-the-other trick the language toggle uses. That
+ * keeps the note reachable without JS, in print, and in a feed reader, and it
+ * keeps the `↩` backref working for anyone who lands there from a narrow
+ * screen. Duplicated text in the DOM is the price; it is not indexed twice,
+ * since the Cmd+K index is built from the raw markdown, not from this HTML.
+ *
+ * **Only all-paragraph footnotes are converted.** A sidenote has to live inside
+ * the `<p>` that holds its reference, so its content must be phrasing — a
+ * footnote containing a list or a code block would produce invalid HTML that
+ * the browser silently reparses into a different tree. Those are skipped, and
+ * skipping even one drops the `all-sidenoted` class so the bottom list stays
+ * visible at every width. Nothing is ever lost, worst case it just isn't in
+ * the margin.
+ *
+ * Sidenotes sit in the LEFT margin because the table-of-contents rail
+ * (components/Toc.tsx) already owns the right one at exactly the same
+ * breakpoint.
+ */
+function rehypeSidenotes() {
+  const clone = (n: any) => JSON.parse(JSON.stringify(n));
+
+  const isEl = (n: any, tag: string) => n?.type === "element" && n.tagName === tag;
+
+  /** hast renames `data-footnotes` → `dataFootnotes` (and rehype-raw keeps it). */
+  const hasFlag = (node: any, camel: string, dashed: string) =>
+    node?.properties?.[camel] !== undefined ||
+    node?.properties?.[dashed] !== undefined;
+
+  return (tree: any) => {
+    // 1. Find the footnote list remark-gfm appended to the document.
+    let section: any = null;
+    const findSection = (node: any) => {
+      if (section || !node.children) return;
+      for (const c of node.children) {
+        if (isEl(c, "section") && hasFlag(c, "dataFootnotes", "data-footnotes")) {
+          section = c;
+          return;
+        }
+        findSection(c);
+      }
+    };
+    findSection(tree);
+    if (!section) return;
+
+    const list = section.children?.find((c: any) => isEl(c, "ol"));
+    if (!list) return;
+
+    // 2. Index each definition by the id its reference points at. Paragraphs
+    //    become <span class="sn-p"> (block-level via CSS) and the trailing
+    //    backref arrow is dropped — it only makes sense at the bottom.
+    const defs = new Map<string, any[]>();
+    for (const li of list.children) {
+      if (!isEl(li, "li")) continue;
+      const id = li.properties?.id;
+      if (typeof id !== "string") continue;
+
+      const paras = li.children.filter(
+        (c: any) => c.type !== "text" || c.value.trim()
+      );
+      if (!paras.length || !paras.every((c: any) => isEl(c, "p"))) continue;
+
+      const body = paras.map((p: any) => ({
+        type: "element",
+        tagName: "span",
+        properties: { className: ["sn-p"] },
+        children: clone(p.children).filter(
+          (c: any) =>
+            !(
+              isEl(c, "a") && hasFlag(c, "dataFootnoteBackref", "data-footnote-backref")
+            )
+        ),
+      }));
+      defs.set(id, body);
+    }
+    if (!defs.size) return;
+
+    // 3. Insert a sidenote after every reference that has a definition.
+    let converted = 0;
+    let refs = 0;
+    const walk = (node: any) => {
+      if (!node.children) return;
+      const out: any[] = [];
+      for (const child of node.children) {
+        out.push(child);
+        if (isEl(child, "sup")) {
+          const a = child.children?.find(
+            (c: any) => isEl(c, "a") && hasFlag(c, "dataFootnoteRef", "data-footnote-ref")
+          );
+          const href = a?.properties?.href;
+          if (typeof href === "string" && href.startsWith("#")) {
+            refs++;
+            const body = defs.get(decodeURIComponent(href.slice(1)));
+            if (body) {
+              converted++;
+              const num = a.children?.[0]?.value ?? "";
+              out.push({
+                type: "element",
+                tagName: "span",
+                properties: { className: ["sidenote"], role: "note" },
+                children: [
+                  {
+                    type: "element",
+                    tagName: "span",
+                    properties: { className: ["sidenote-num"], ariaHidden: "true" },
+                    children: [{ type: "text", value: String(num) }],
+                  },
+                  ...clone(body),
+                ],
+              });
+            }
+          }
+          continue; // never descend into a <sup>
+        }
+        walk(child);
+      }
+      node.children = out;
+    };
+    walk(tree);
+
+    // Every reference got a margin copy → the bottom list is now redundant on
+    // wide screens. One holdout and it stays, or that note would vanish.
+    if (converted && converted === refs) {
+      const cls = section.properties.className;
+      section.properties.className = [
+        ...(Array.isArray(cls) ? cls : cls ? [String(cls)] : []),
+        "all-sidenoted",
+      ];
+    }
+  };
+}
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 export interface RenderOptions {
@@ -859,10 +998,19 @@ export async function renderWithHeadings(
   const file = await unified()
     .use(remarkParse)
     .use(remarkGfm)
-    .use(remarkRehype, { allowDangerousHtml: true })
+    .use(remarkRehype, {
+      allowDangerousHtml: true,
+      // Footnote ids ("user-content-fn-1") are minted from the note's own
+      // numbering, and an entry ships BOTH languages in one document — without
+      // a per-language prefix the Ukrainian body would redefine every English
+      // footnote id and `↩` would jump into the wrong article. Same reasoning
+      // as the heading ids in lib/toc.ts (DECISIONS.md #17).
+      clobberPrefix: `${options.idPrefix ?? ""}user-content-`,
+    })
     .use(rehypeCodeMeta)
     .use(rehypeRaw)
     .use(rehypeFigures)
+    .use(rehypeSidenotes)
     .use(rehypeCodeBlocks)
     .use(rehypeSlug)
     // After rehype-slug on purpose — it needs the ids rehype-slug mints.
