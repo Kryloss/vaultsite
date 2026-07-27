@@ -1,7 +1,9 @@
 ---
 title: Post Sample
+title_uk: Зразковий допис
 date: 2026-07-16
 description: A first post to prove the whole pipeline works.
+description_uk: Перший допис, щоб довести, що весь конвеєр працює.
 maturity: budding
 ---
 

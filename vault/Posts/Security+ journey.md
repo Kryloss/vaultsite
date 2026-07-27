@@ -4,6 +4,7 @@ title_uk: Мій шлях до Security+
 date: 2026-07-17
 category: Cybersecurity
 description: What I'm studying, how I'm studying it, and what's working.
+description_uk: Що я вчу, як я це вчу і що справді працює.
 aliases:
   - CompTIA Security+
   - Security+

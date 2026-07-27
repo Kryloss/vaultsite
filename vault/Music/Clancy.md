@@ -2,6 +2,7 @@
 title: Clancy
 date: 2026-07-17
 description: Thoughts on Twenty One Pilots closing out the Blurryface–Trench arc.
+description_uk: Думки про те, як Twenty One Pilots закривають арку Blurryface–Trench.
 ---
 
 *Clancy* (2024) wraps up the storyline the band started with *Blurryface* back in 2015 — a whole fictional universe about the city of Dema, its escapee Clancy, and the Bishops chasing him. Knowing the lore isn't required, but it rewards people who've been paying attention for ten years, which is a rare thing in pop music.

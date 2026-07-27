@@ -7,6 +7,7 @@ categories: [Thriller, Tech]
 rating: 4.5
 date: 2026-07-17
 description: The rare hacker show that hackers actually respect.
+description_uk: Рідкісний серіал про хакерів, який поважають самі хакери.
 cover: mr-robot.png
 coverFit: contain
 # cover source: Wikimedia Commons (Mr._Robot_Logo.svg — freely licensed title logo)

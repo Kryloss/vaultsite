@@ -4,6 +4,7 @@ title_uk: Перша сертифікація
 date: 2026-07-19
 category: Cybersecurity
 description: Why CompTIA Security+ is my first real credential — and the study system I built to pass it.
+description_uk: Чому CompTIA Security+ — моє перше справжнє посвідчення, і система підготовки, яку я під нього збудував.
 aliases:
   - Security+ SY0-701
 draft: false

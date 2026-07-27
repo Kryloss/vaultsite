@@ -1,8 +1,10 @@
 ---
 title: Formatting playground
+title_uk: Майданчик форматування
 date: 2026-07-16
 category: Meta
 description: Every tool this site supports, demonstrated in one post.
+description_uk: Усі інструменти, які підтримує сайт, показані в одному дописі.
 maturity: evergreen
 ---
 

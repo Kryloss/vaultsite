@@ -1,7 +1,9 @@
 ---
 title: This website
+title_uk: Цей сайт
 date: 2026-07-17
 description: A portfolio published straight from an Obsidian vault.
+description_uk: Портфоліо, що публікується напряму зі сховища Obsidian.
 ---
 
 The site you're reading is itself the first project. It's a Next.js site where my Obsidian vault **is** the CMS: create a folder with a `main.md` and it becomes a page in the sidebar; drop a note into that folder and it becomes a post with its own URL. Hitting save in Obsidian auto-commits to GitHub, Vercel rebuilds, and the change is live in about a minute.

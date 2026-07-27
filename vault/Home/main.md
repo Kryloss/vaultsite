@@ -3,6 +3,8 @@ title: Home
 title_uk: Головна
 icon: 🏠
 order: 0
+description: Student in Ontario heading into cybersecurity — notes, projects, and what I'm reading.
+description_uk: Студент з Онтаріо на шляху в кібербезпеку — нотатки, проєкти та що я читаю.
 ---
 ![[me.jpeg|93]]
 # Hey, I'm Kyrylo Leshchenko.  

@@ -7,6 +7,7 @@ categories: [Sci-Fi, Thriller]
 rating: 5
 date: 2026-07-17
 description: A heist movie where the vault is a person's mind.
+description_uk: Фільм-пограбування, де сейфом є людський розум.
 cover: inception.jpg
 # cover source: Wikipedia (low-res theatrical poster, fair-use scale)
 ---

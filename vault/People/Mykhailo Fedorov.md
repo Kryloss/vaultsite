@@ -3,6 +3,7 @@ title: Mykhailo Fedorov
 title_uk: Михайло Федоров
 date: 2026-07-17
 description: The minister who put Ukraine's government in a smartphone.
+description_uk: Міністр, який помістив українську державу в смартфон.
 cover: mykhailo-fedorov.png
 category: Ukraine
 ---
