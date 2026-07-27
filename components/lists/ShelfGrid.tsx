@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ListProps } from "@/lib/section-types";
 import { shelfGroups } from "@/lib/shelf";
 import ShelfCard from "@/components/lists/ShelfCard";
+import ShelfRow from "@/components/lists/ShelfRow";
 import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
 
@@ -69,8 +70,9 @@ export default function ShelfGrid({ section, entries }: ListProps) {
           </h2>
 
           {/* Horizontal scroller. Cards are fixed-width flex children; videos
-              get a wider box because they're 16:9 rather than 2:3. */}
-          <ul className="shelf-row mt-3 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-1">
+              get a wider box because they're 16:9 rather than 2:3. ShelfRow
+              adds the edge fade that says the row continues off-screen. */}
+          <ShelfRow className="shelf-row stagger mt-3 flex snap-x snap-proximity gap-5 overflow-x-auto pb-1">
             {group.items.map((item) => (
               <li
                 key={item.slug}
@@ -85,7 +87,7 @@ export default function ShelfGrid({ section, entries }: ListProps) {
                 />
               </li>
             ))}
-          </ul>
+          </ShelfRow>
         </section>
       ))}
     </div>

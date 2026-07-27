@@ -13,7 +13,16 @@ import T from "./T";
  * hydration has nothing to disagree about. The effect then re-checks in the
  * browser, which keeps the count right between deploys — the site is fully
  * static, so the baked-in number would otherwise freeze until the next build.
+ *
+ * The line links to a donation jar. Deliberately styled as nothing: it
+ * inherits colour and carries no underline, no hover state and no external-link
+ * marker, so the sidebar looks exactly as it did — the line is a quiet offer to
+ * anyone who thinks to click it, not a call to action.
  */
+
+/** monobank jar. Owner-editable, like the socials in lib/site-config.ts. */
+const DONATE_URL = "https://send.monobank.ua/jar/2JbpBYkhMv";
+
 export default function ResistanceDay({ initial }: { initial: number }) {
   const [day, setDay] = useState(initial);
 
@@ -23,9 +32,16 @@ export default function ResistanceDay({ initial }: { initial: number }) {
 
   const n = String(day);
   return (
-    <T
-      en={ui.resistanceDay.en.replace("{n}", n)}
-      uk={ui.resistanceDay.uk.replace("{n}", n)}
-    />
+    <a
+      href={DONATE_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-inherit no-underline"
+    >
+      <T
+        en={ui.resistanceDay.en.replace("{n}", n)}
+        uk={ui.resistanceDay.uk.replace("{n}", n)}
+      />
+    </a>
   );
 }

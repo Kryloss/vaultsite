@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Fragment, useEffect, useState, type ReactNode } from "react";
+import { Fragment, useCallback, useEffect, useState, type ReactNode } from "react";
 import {
   PanelIcon,
   SearchIcon,
@@ -16,6 +16,7 @@ import {
   UkraineFlag,
 } from "@/components/icons";
 import CommandPalette from "@/components/CommandPalette";
+import Shortcuts from "@/components/Shortcuts";
 import ResistanceDay from "@/components/ResistanceDay";
 import T from "@/components/T";
 import { useLang } from "@/components/useLang";
@@ -119,6 +120,8 @@ export default function Chrome({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  const openSearch = useCallback(() => setSearchOpen(true), []);
 
   const nav = items.map((item) => ({
     ...item,
@@ -296,6 +299,11 @@ export default function Chrome({
         open={searchOpen}
         onClose={() => setSearchOpen(false)}
       />
+
+      {/* Mounted here rather than in the layout because it needs the same nav
+          list the sidebar shows — `g 1…9` follows that order. `openSearch` is
+          memoized so its key listener isn't torn down on every render. */}
+      <Shortcuts items={items} onSearch={openSearch} />
 
       {/* Content — re-animates on each navigation via the pathname key */}
       <main key={pathname} className="page-in min-w-0">

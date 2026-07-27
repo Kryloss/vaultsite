@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export type Lang = "en" | "uk";
 
@@ -22,7 +22,10 @@ export function useLang() {
     return () => window.removeEventListener("langchange", read);
   }, []);
 
-  const setLang = (next: Lang) => {
+  // Both memoized: components/Shortcuts.tsx keeps `toggle` in a key-listener
+  // dependency array, and a fresh function each render would tear that
+  // listener down — taking any half-typed `g` chord with it.
+  const setLang = useCallback((next: Lang) => {
     document.documentElement.dataset.lang = next;
     try {
       localStorage.setItem("lang", next);
@@ -30,7 +33,12 @@ export function useLang() {
       /* ignore */
     }
     window.dispatchEvent(new Event("langchange"));
-  };
+  }, []);
 
-  return { lang, setLang, toggle: () => setLang(lang === "en" ? "uk" : "en") };
+  const toggle = useCallback(
+    () => setLang(lang === "en" ? "uk" : "en"),
+    [lang, setLang]
+  );
+
+  return { lang, setLang, toggle };
 }

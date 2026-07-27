@@ -132,11 +132,18 @@ export default function SelectionLink() {
   const copy = async () => {
     const frag = textFragment(text.current);
     // The reader's language is a client-side preference (components/T.tsx), so
-    // it has to ride along in the URL or a Ukrainian passage would open on an
-    // English page — and the fragment, matching words that are display:none,
-    // would highlight nothing. app/layout.tsx's pre-paint script reads it.
-    const uk = document.documentElement.dataset.lang === "uk";
-    const base = `${location.origin}${location.pathname}${uk ? "?lang=uk" : ""}`;
+    // it has to ride along in the URL: a text fragment can only match text the
+    // browser is actually showing, and the other language is sitting in the
+    // same document under `display: none`. app/layout.tsx's pre-paint script
+    // reads the param, so the right language is up before the match runs.
+    //
+    // ALWAYS written, including `?lang=en`. Leaving it off for English looks
+    // tidier but breaks the link for anyone whose own stored preference is
+    // Ukrainian — their setting would win, the page would come up in Ukrainian,
+    // and the English fragment would match nothing. A shared link has to pin
+    // the language it was written in, not inherit the reader's.
+    const lang = document.documentElement.dataset.lang === "uk" ? "uk" : "en";
+    const base = `${location.origin}${location.pathname}?lang=${lang}`;
     const url = frag && base.length + frag.length <= MAX_URL ? base + frag : base;
 
     if (await copyText(url)) {

@@ -11,12 +11,14 @@
             "id": "9cd2acf5af766b33",
             "type": "leaf",
             "state": {
-              "type": "image",
+              "type": "markdown",
               "state": {
-                "file": "Posts/attachments/war-newspaper-01.webp"
+                "file": "Posts/First certification.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-image",
-              "title": "war-newspaper-01"
+              "icon": "lucide-file",
+              "title": "First certification"
             }
           }
         ]
@@ -197,6 +199,12 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
+    "Posts/First certification.uk.md",
+    "Posts/attachments/secplus-plan.svg",
+    "Posts/attachments/secplus-domains.svg",
+    "Posts/attachments/rendering-pipeline.uk.svg",
+    "Shelf/Books/Sapiens.uk.md",
+    "Posts/attachments/war-newspaper-01.webp",
     "Posts/Examples/Formatting playground.uk.md",
     "Posts/Examples/Draft example.uk.md",
     "Posts/Examples/Post Sample.uk.md",
@@ -207,10 +215,8 @@
     "People/Mykhailo Fedorov.uk.md",
     "Music/main.uk.md",
     "Music/Clancy.uk.md",
-    "Posts/attachments/secplus-plan.svg",
     "Posts/attachments/secplus-plan.uk.svg",
     "Shelf/Books/The Witcher - The Last Wish.md",
-    "Posts/First certification.uk.md",
     "Shelf/Books/Jonathan Livingston Seagull.uk 1.md",
     "Shelf/Books/New Version.uk.md",
     "Posts/main.md",
@@ -225,8 +231,6 @@
     "Shelf/Books/New Version.md",
     "People/Mykhailo Fedorov.md",
     "People/mykhailo-fedorov.png",
-    "Posts/I made propaganda for my Religion class.md",
-    "Shelf/Books/The Hero with a Thousand Faces.md",
     "Now/Kyrylo Leshchenko Resume.pdf",
     "Posts/Examples",
     "Shelf/Shows/covers/mr-robot.png",
@@ -234,9 +238,6 @@
     "Shelf/Movies/covers/inception.jpg",
     "Shelf/Movies/covers",
     "Shelf/Books/covers/the-order-of-time.jpg",
-    "Shelf/Books/covers/the-old-man-and-the-sea.jpg",
-    "Shelf/Books/covers/the-little-prince.jpg",
-    "Shelf/Books/covers/the-last-wish.jpg",
     "Shelf/Books/covers",
     "Projects/attachments",
     "Posts/attachments/war-newspaper.pdf",

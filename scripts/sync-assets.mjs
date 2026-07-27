@@ -3,20 +3,27 @@
  * preserving folder structure, so images pasted into Obsidian notes are
  * served by Next.js at /vault-assets/<Folder>/<file>.
  *
- * Also writes .blur-manifest.json: a tiny blurred placeholder for every raster
- * image, keyed by its public URL. lib/blur.ts reads it at build time and the
- * cover components paint it as a CSS background, so a card shows a soft
- * impression of its image instead of an empty box while the real file loads.
+ * Also writes .image-manifest.json, keyed by public URL, holding two things
+ * per raster image:
  *
- * Runs automatically before `next dev` and `next build` (predev/prebuild).
- * public/vault-assets/ is gitignored — it is fully regenerated each run.
+ * - `blur` — a ~300-byte placeholder the cover components paint as a CSS
+ *   background, so a card shows a soft impression instead of an empty box
+ *   while the real file loads.
+ * - `w` / `h` — the image's real pixel size, which lib/markdown.ts stamps onto
+ *   every content <img> as width/height attributes. Without them the browser
+ *   doesn't know how tall an image will be until it arrives, so it reserves no
+ *   space and every paragraph below jumps down the moment it does.
+ *
+ * Both are read at build time by lib/blur.ts. Runs automatically before
+ * `next dev` and `next build` (predev/prebuild). public/vault-assets/ is
+ * gitignored — it is fully regenerated each run.
  */
 import fs from "node:fs";
 import path from "node:path";
 
 const VAULT = path.join(process.cwd(), "vault");
 const OUT = path.join(process.cwd(), "public", "vault-assets");
-const BLUR_MANIFEST = path.join(process.cwd(), ".blur-manifest.json");
+const MANIFEST_PATH = path.join(process.cwd(), ".image-manifest.json");
 
 /** Raster formats sharp can downsample. SVGs are already tiny; GIFs animate. */
 const RASTER = /\.(jpe?g|png|webp|avif)$/i;
@@ -64,40 +71,53 @@ function publicUrl(rel) {
 }
 
 /**
- * Placeholders are a nicety, never a build blocker: if sharp is missing or an
- * image is corrupt, the manifest just doesn't get that entry and the card
- * renders exactly as it did before.
+ * Both the placeholder and the dimensions are a nicety, never a build blocker:
+ * if sharp is missing or an image is corrupt, the manifest just doesn't get
+ * that entry and the page renders exactly as it did before.
  */
-async function writeBlurManifest() {
+async function writeImageManifest() {
   let sharp;
   try {
     ({ default: sharp } = await import("sharp"));
   } catch {
-    console.warn("[sync-assets] sharp unavailable — skipping blur placeholders");
-    fs.writeFileSync(BLUR_MANIFEST, "{}");
+    console.warn("[sync-assets] sharp unavailable — skipping image manifest");
+    fs.writeFileSync(MANIFEST_PATH, "{}");
     return;
   }
 
   const manifest = {};
   await Promise.all(
     images.map(async ({ full, rel }) => {
+      const entry = {};
+      // Read the size first and independently: a file sharp can measure but
+      // not re-encode should still contribute its dimensions.
+      try {
+        const { width, height } = await sharp(full).metadata();
+        if (width && height) {
+          entry.w = width;
+          entry.h = height;
+        }
+      } catch {
+        /* unreadable image — no dimensions */
+      }
       try {
         const buf = await sharp(full)
           .resize(LQIP_PX, LQIP_PX, { fit: "inside" })
           .webp({ quality: 40 })
           .toBuffer();
-        manifest[publicUrl(rel)] =
-          `data:image/webp;base64,${buf.toString("base64")}`;
+        entry.blur = `data:image/webp;base64,${buf.toString("base64")}`;
       } catch {
-        /* unreadable image — no placeholder, no failure */
+        /* unreadable image — no placeholder */
       }
+      if (Object.keys(entry).length) manifest[publicUrl(rel)] = entry;
     })
   );
 
-  fs.writeFileSync(BLUR_MANIFEST, JSON.stringify(manifest));
+  fs.writeFileSync(MANIFEST_PATH, JSON.stringify(manifest));
+  const sized = Object.values(manifest).filter((e) => e.w).length;
   console.log(
-    `[sync-assets] wrote ${Object.keys(manifest).length} blur placeholder(s)`
+    `[sync-assets] wrote ${Object.keys(manifest).length} image entr(ies), ${sized} with dimensions`
   );
 }
 
-await writeBlurManifest();
+await writeImageManifest();

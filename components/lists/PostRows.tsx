@@ -61,7 +61,7 @@ export default function PostRows({
           <h2 className="mt-10 text-xl font-semibold tracking-tight tabular-nums text-[var(--text)]">
             {year.label}
           </h2>
-          <ul className="mt-2 flex flex-col">
+          <ul className="stagger mt-2 flex flex-col">
             {year.items.map((row) => (
               <li key={row.slug}>
                 <Link

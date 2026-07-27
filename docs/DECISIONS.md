@@ -279,3 +279,133 @@ Two fixes were applied, in order:
 **Not done: renaming files to match.** Covers keep their download names (`the-last-wish.jpg`) and notes keep their titles. The folder already says what a thing is; renaming would churn the git history for nothing.
 
 **Second pass, same day:** covers moved out of the note folders into a `covers/` subfolder per medium (`Shelf/Books/covers/`), which halves what you see when you open Books — 22 notes instead of 33 mixed files. `cover: sapiens.jpg` still finds it: the file name alone is enough, since resolution falls back to the vault-wide asset index. `Projects/attachments/` matches `Posts/attachments/`, and the three scaffolding notes (Post Sample, Formatting playground, Draft example) moved to `Posts/Examples/` — still published, still at their old URLs, just not sitting among real writing. Two opaque file names were fixed at the same time: `IMG_3260.jpeg` → `me.jpeg` and `fedorov.png` → `mykhailo-fedorov.png`, with their two embeds and one `cover:` key updated. All 52 pages verified to render an identical DOM afterwards.
+
+## 28. Footnotes render twice — as sidenotes and as a list (2026-07-27)
+
+**Decision:** an Obsidian footnote (`[^1]`) is emitted both as the list remark-gfm builds at the bottom of the note and as a `<span class="sidenote">` in the left margin, inserted right after its reference by `rehypeSidenotes` in `lib/markdown.ts`. CSS shows exactly one: the margin copy from 1280px up, the bottom list below it and in print.
+
+**Why duplicate rather than move.** A sidenote is a layout idea, not a content one, and this site has to keep working without JavaScript, in an RSS reader, and on paper — all places where "the margin" doesn't exist. Rendering both and letting a media query pick is the same show-one-hide-the-other trick `components/T.tsx` already uses for the two languages, and it means the `↩` backref keeps working for anyone who arrives at the bottom list from a narrow screen. The duplicated text is not indexed twice: Cmd+K is built from the raw markdown (`getSearchIndex()`), not from this HTML.
+
+**Left margin, because the right one is taken.** `components/Toc.tsx` appears at exactly the same 1280px breakpoint on the right. The sidenote's geometry is derived from the rail's so the two sit the same distance out from the text column — see the comment in `globals.css`.
+
+**Only all-paragraph footnotes are converted.** The sidenote lives inside the `<p>` holding its reference, so its contents must be phrasing; a footnote containing a list or a code block would serialize to invalid HTML that the browser silently reparses into a different tree. Those are skipped, and one skip drops the `all-sidenoted` class so the bottom list stays visible at every width. The feature degrades a note at a time, never loses one.
+
+**Two id namespaces had to be fixed for the bilingual build.** Both languages ship in one document (decision #17), and footnote ids are minted from the note's own numbering, so the Ukrainian body was redefining every English `user-content-fn-N`. `remark-rehype`'s `clobberPrefix` now carries the same `uk-` prefix the headings use. Its screen-reader-only `<h2 id="footnote-label">` is not covered by that option, so `rehypeSidenotes` renames it and repoints every reference's `aria-describedby` (stored by hast as a token *array*, not a string). That heading is also skipped by `rehypeHeadings` — it isn't part of a note's outline, and anchoring it put "Footnotes" in the table of contents and in Cmd+K.
+
+## 29. Selecting text offers a link to the selection (2026-07-27)
+
+**Decision:** selecting a passage inside `.prose` raises a pill that copies a URL with a **text fragment** (`#:~:text=…`) — `components/SelectionLink.tsx`.
+
+**Why a fragment and not an anchor:** the site is fully static (#5) and the vault has no stable per-sentence id to point at. A fragment is derived from the words themselves, so nothing is stored, nothing needs regenerating when a note is edited, and a browser without support (Firefox, currently) still opens the right page. Long selections are linked by their first and last five words rather than in full, which keeps the URL short and survives a light edit in the middle.
+
+**`?lang=` was added for it, and is always written — including `?lang=en`.** Language is a client-side preference with no routing (`components/T.tsx`), so a Ukrainian passage shared as a bare URL would open in English, and the fragment — matching words that are `display: none` — would highlight nothing. Omitting the param for English looks tidier and is wrong for the same reason in reverse: a reader whose stored preference is Ukrainian would open an English link in Ukrainian and match nothing. A shared link pins the language it was written in rather than inheriting the reader's. The pre-paint script in `app/layout.tsx` lets the URL win over the stored preference **without writing it back**: a link someone followed once shouldn't silently change the language of every page they read afterwards.
+
+**What it does not do is translate.** A link made from a Ukrainian sentence lands on the Ukrainian page, not on the English counterpart of that sentence — there is no sentence-level alignment between a note and its `.uk.md` sibling, and nothing in the pipeline builds one. Only headings are positionally aligned between the two files, so the most a cross-language jump could ever be is section-accurate. Not built; the note is here so the next person doesn't rediscover the constraint.
+
+**Pointer devices only,** like the hover previews (#12): a touch selection already raises the OS's own share sheet, and a floating button fighting it is a fight nobody wins.
+
+## 30. The lightbox is a gallery (2026-07-27)
+
+**Decision:** opening a figure collects every other visible figure on the page in document order, so ← / → (and on-screen arrows, shown only when there's more than one) step through a note's images without closing and reopening.
+
+**The list is rebuilt on every open, never cached.** The language toggle hides half the document with `display: none`, and a note's Ukrainian copy of a figure must not turn up in the middle of an English reader's gallery — so the collector filters on what is actually laid out (`offsetParent` / `getClientRects()`), which is only knowable at the moment of the click.
+
+**Arrow keys are bound only while the overlay is open,** so they keep their normal meaning — caret movement, browser history — on the page itself.
+
+## 31. Vercel Analytics, and nothing else (2026-07-27)
+
+**Decision:** `@vercel/analytics` is mounted in the root layout. Page views only, no cookie, no cross-site identifier, so there is no consent banner to add and nothing about the site stops being static.
+
+**It puts one `BAILOUT_TO_CLIENT_SIDE_RENDERING` template in every prerendered page** — the component reads the search params, so its own subtree renders on the client. Verified that this is all it does: all 52 pages were diffed against a build from before, and apart from that placeholder and the new footnote markup, every one is byte-identical.
+
+## 32. Image dimensions come from the same pass as the blur placeholders (2026-07-27)
+
+**Decision:** `scripts/sync-assets.mjs` now records each raster image's real pixel size alongside its placeholder, in a manifest renamed `.image-manifest.json`. A rehype step (`rehypeImageSize` in `lib/markdown.ts`) stamps `width`/`height` onto every content image that doesn't already carry them.
+
+**What it fixes:** an `<img>` with no intrinsic size occupies zero height until it decodes, so every image on a page shoves the text below it down on arrival — on a slow connection the paragraph being read slides out from under the reader. With the attributes present, the existing `max-width: 100%` + `height: auto` in `globals.css` turns them into an aspect ratio and the box is reserved at the right shape from first paint.
+
+**A rehype step, not a change to the `<img>` builders**, because images reach the tree three ways: Obsidian embeds (raw HTML from `preprocessObsidian`), standard markdown (built by remark), and hand-written tags in a note. One step after `rehype-raw` sees all three. Explicitly sized embeds (`![[me.jpeg|93]]`) are left alone — that syntax has already said what it wants, and overriding it would un-crop the avatars.
+
+**One manifest, not two:** sharp is already opened per image for the placeholder, and `metadata()` is free at that point. The two reads are independent, so an image sharp can measure but not re-encode still contributes its dimensions. Missing manifest, missing sharp, or a corrupt file all degrade to exactly the previous behaviour.
+
+**Not done: shrinking the files themselves.** Measured while adding this — 4.3 MB of raster in the vault, and the worst offenders are a 1000×1000 PNG photograph at 1.3 MB (should be a JPEG or WebP, and is a `cover:` on a page that shows it small), a 1218×1218 avatar at 203 KB that renders at 93 px, and book covers at 1706×2504 that render about 200 px wide. Fixing that properly means serving derivatives rather than the vault's own files, which changes what every asset URL points at. Deliberately left for a separate decision.
+
+## 33. Speculation rules prefetch, never prerender (2026-07-27)
+
+**Decision:** the layout ships a `speculationrules` script that **prefetches** same-origin documents at `moderate` eagerness (roughly: the pointer has settled on a link).
+
+**Prerender was the obvious choice and is the wrong one here.** Prerendering also *runs* the page, and `@vercel/analytics` (decision #31) does not check `document.prerendering` before reporting — checked, the string appears nowhere in the package. Every hovered link would have counted as a visit, and the analytics would have quietly become fiction months before anyone noticed. Prefetch moves bytes and executes nothing.
+
+**The win is real but small, and worth writing down so it isn't re-litigated:** Next already prefetches route payloads for in-app clicks, so this only covers what its router never sees — a middle click, a new tab, the first navigation after landing. It was cheap and it is not a substitute for making the images smaller.
+
+## 34. Keyboard shortcuts read the page instead of being handed it (2026-07-27)
+
+**Decision:** `components/Shortcuts.tsx` binds `[` / `]` (previous / next entry), `g` then `h` or `1…9` (home, or the nth section in sidebar order), `/` (search) and `?` (the cheat sheet).
+
+**Prev/next is looked up in the DOM** — `a.sibling-prev` / `a.sibling-next`, the links `components/EntryFooter.tsx` already renders from `lib/siblings.ts`. The component is mounted globally, where per-entry data doesn't exist, and threading those two hrefs down through the layout would create a second source of truth that can disagree with the visible links. Same event-delegation approach as `Lightbox` and `CodeCopy`.
+
+**Digits, not initials.** Posts, People and Projects all begin with P. Any letter scheme either collides or needs a hand-maintained table that goes stale the moment a section is added to the vault; the numbers follow the nav order the sidebar already shows, and the sheet prints the real names beside them.
+
+**The listener must not be re-subscribed on render.** A half-typed `g` lives in the handler's closure, so `sections` is memoized and the handler never reads `sheet` state (Escape closes unconditionally — a no-op when it's already shut). Chrome memoizes the `onSearch` it passes for the same reason. Keys are ignored while typing in a field or with a modifier held.
+
+## 35. Cmd+K runs commands, not just searches (2026-07-27)
+
+**Decision:** the palette's list now holds actions as well as pages — switch language, copy the page as Markdown, copy a link to it, open a random note — matched by the same query and reachable with the same arrow keys.
+
+**Pages always sort above actions.** Typing a note's name has to open the note; a command sharing a word with it must never intercept that.
+
+**"Copy as Markdown" clicks the existing button** (`button.copy-md`) rather than receiving the note's source. The palette is global; passing every entry's raw markdown into it would put that text in the page a second time, and the button already handles picking the right language. The action hides itself when no such button is on the page.
+
+**`when` can only be asked in the browser.** A client component is still rendered once on the server to produce the static HTML, and a DOM check there threw during the build. Guarded rather than deferred to an effect: the palette renders nothing until it is opened, which cannot happen before hydration.
+
+**Left alone: the reading progress bar.** The plan had been to replace its scroll listener with a CSS scroll-driven animation. It measures the *article* and stops early at a closing "Sources" heading, and neither behaviour survives `animation-timeline` — CSS can only measure a box. Worth noting that images inside the article *do* currently count toward the bar; whether they should is a separate question about what "progress" means, not a performance one.
+
+## 36. The reading bar pauses at media rather than being driven by it (2026-07-27)
+
+**Decision:** every block counts toward the article's length, media included, but *when* a block pays out differs. Text pays out continuously — crossing half a paragraph advances the bar by half that paragraph. A figure, embed or diagram pays out **all at once at its bottom edge**: while it's passing the bar holds still, and when it has finished it takes its whole height in one step. With the easing below, that step reads as a glide rather than a jump.
+
+**Media is worth half a pixel to prose's one** (`MEDIA_WEIGHT` in `lib/reading-progress.ts`). A full-width image is several times the height of the paragraph introducing it and nowhere near several times the attention, so counting it one-for-one made a photo-essay's bar almost entirely picture: on the war-newspaper post, text accounted for 15% of the bar at full weight and 26% at half. The constant is one number with the two extremes covered by tests — raise it toward 1 to track the page more literally, drop it to 0 to ignore media entirely, which is what the version before this did.
+
+**Why not simply exclude media** — which is what that first version did. Dropping figures from the total made the bar honest about reading but wrong about the article: the war-newspaper post is nine full-page scans, and a bar that ignored them was measuring a small fraction of the page while the reader scrolled through all of it. Between two scans sat a one-line caption that moved the bar a tenth of its length, because that caption was a tenth of everything being counted. Holding at each image and paying out afterwards keeps both properties: the scans are part of the journey, and no amount of scrolling past artwork *drives* the indicator.
+
+**The read line is the TOP of the viewport, and the finish line is the article's end reaching the BOTTOM of it** (`finishAt()`). A block pays out as it scrolls off the top, so the bar answers "how much have I put behind me", and it completes when the last line comes into view rather than a screen-height later.
+
+**Both halves of that were arrived at by getting them wrong.** Measuring at the bottom edge — "how much have I *seen*" — opens the bar a quarter full on a tall screen, because a quarter of the article is genuinely visible before any scrolling. The fix for that was to subtract whatever the first screenful was worth, which is correct arithmetic and a much worse bug: an opening that fits on one screen is then declared read before the reader has scrolled, so scrolling through it earns nothing. On the war-newspaper post the entire introduction — the paragraph that gives the piece its title — was worth **0%** of the bar, and the symptom was invisible unless you happened to watch the bar during the opening. Measuring at the top edge needs no correction term: at scroll zero nothing has passed, so the bar starts empty by construction.
+
+**Both failure modes are now regression tests** (`progress starts at zero on any viewport`, `an opening screenful still counts`), along with a monotonicity check — none of these can be caught by looking at a built page, only by reading the numbers back.
+
+**`finish` is measured in `measure()`, not per frame** — it only changes when the layout does, and that function already runs on exactly those occasions.
+
+**The arithmetic moved to `lib/reading-progress.ts` and is tested.** It is the one behaviour on this site that can't be checked by looking at a built page: a wrong answer shows up only as a bar filling at the wrong rate. `npm test` runs Node's own test runner over `lib/*.test.ts` — no framework, no dependency, nothing to keep up to date. (`allowImportingTsExtensions` is on so Node's type stripping can resolve the import; nothing is ever emitted.)
+
+**Cheaper per frame than the version it replaces, not more expensive.** The old one re-read the article's geometry on every animation frame; this measures once and caches, and a `ResizeObserver` on `.prose` re-measures when lazy images or embeds arrive and shift what's below them. A scroll frame is now one number and two style writes.
+
+**Motion is deliberate.** The bar eases toward the scroll position rather than tracking it exactly (`EASE = 0.18`), so it keeps gliding for a moment after the scroll stops — that trailing motion is most of what makes it feel attached to the page rather than snapped to it. A point of light rides the leading edge, and the whole bar fades in only once there is progress to report, so a short page never shows a stub. All of it collapses under `prefers-reduced-motion`: no easing, no glow.
+
+**Implementation notes worth keeping:** the component writes one custom property, `--p`, and both child elements read it, so a frame does no layout and no paint beyond the compositor. The glow sits outside the scaled fill — inside it, it would be stretched into a smear at low progress — and is positioned with `left: calc(var(--p) * 100%)` rather than a `translateX` of `100vw`, because a percentage translate resolves against the dot's own 2px width and `100vw` counts a scrollbar the bar itself doesn't. `contain: layout` keeps that `left` from being able to touch the page.
+
+## 37. `l` switches language, and the resistance line is a donation link (2026-07-27)
+
+**`l`** joins the shortcuts in decision #34. `useLang`'s `setLang`/`toggle` are now memoized: `Shortcuts` keeps `toggle` in a key-listener dependency array, and a fresh function each render would tear that listener down, taking any half-typed `g` chord with it.
+
+**The sidebar's "Day N of Ukraine's resistance" links to a monobank jar** (`DONATE_URL` in `components/ResistanceDay.tsx`), styled as nothing at all — inherited colour, no underline, no hover state, no external-link marker. The sidebar looks exactly as it did. That's the point: it's a quiet offer to anyone who thinks to click the line, not a call to action bolted onto a statement.
+
+## 38. Motion pass: entrances, edges, and one marker that moves (2026-07-27)
+
+Four small movements, each solving a legibility problem rather than decorating one. Every one of them is off under `prefers-reduced-motion`.
+
+**Lists arrive one item at a time** (`.stagger` in `globals.css`). The delays are `nth-child` rules rather than an inline `--i` per row, so a list component gains a class name and no server-rendered `style` attributes; delays cap at twelve items and every later row shares the last one, so a long archive doesn't take three seconds to finish. Applied to posts, people, the shelf rows, the medium grids and the projects feed.
+
+**The reduced-motion override is `animation: none`, not a shorter duration.** The blanket rule at the top of `globals.css` collapses `animation-duration` only, and these run with `both` fill from `opacity: 0` — so a shortened animation still leaves each row invisible for the length of its *delay*. Under the blanket rule alone the twelfth row would have blinked in a third of a second late, which is precisely the effect someone enabling that setting is trying to avoid. Print gets the same override for the same reason.
+
+**Shelf rows fade at whichever edge has more to come** (`components/lists/ShelfRow.tsx`). The row hides its scrollbar, which looks clean and removes the only signal that it continues off-screen; material dissolving at the edge puts that signal back without adding a control. A row whose contents fit fades neither edge — a fade at the last cover of a short row suggests content that isn't there.
+
+- **The mask is on a wrapper, not on the scroller.** A mask on a scrolling element travels with its content, so the fade would slide away with the covers instead of staying at the edge.
+- **A client component for four lines of state, deliberately.** The CSS-only version is a scroll-driven animation (`animation-timeline: scroll()`), which is lovely and Chromium-only today — on Safari and Firefox the rows would keep exactly the problem this exists to fix. Revisit when those timelines are broadly supported.
+- Snapping moved from `snap-mandatory` to `snap-proximity`: mandatory fights a reader who wants to nudge a row a little.
+
+**The table of contents highlight is one marker that slides** rather than a border switching on and off per row. Its position is read from the live DOM (`offsetTop`/`offsetHeight` of the active link) rather than computed from the heading list, because both languages' outlines are in the rail with one of them `display: none`, rows wrap to two lines at some titles, and the rail itself scrolls — the element's own offsets already account for all three. **Both outlines mark the same heading active**, so the lookup takes the first match that is actually laid out; matching the hidden one parks the marker at zero. The mobile sheet keeps the old per-row border: it has no marker, and a panel you just opened has nothing to slide from.
+
+**Dialogs animate out as well as in.** The drawer already did — it was always mounted and translated. The command palette, the shortcut sheet and the mobile contents sheet were conditionally rendered, and React cannot transition an element it has already removed, so they could only ever blink. They now stay mounted and are shown by `data-open`, with `visibility` in the transition (delayed on the way out so the fade finishes first) and `inert` when closed to keep them out of the tab order and the accessibility tree.
+
+**Their contents still wait for the first open.** Keeping three dialogs mounted put ~11 KB of markup into every page's static HTML — the palette's default eight results, the shortcut table, and a third copy of the note's outline — for panels most readers never open. An `everOpen` flag renders the contents on first open and keeps them afterwards, so the exit animation still has something to animate. Down to ~2.8 KB per page, which is the rest of this session's work rather than the dialogs.

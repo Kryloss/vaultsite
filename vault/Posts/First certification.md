@@ -10,7 +10,7 @@ aliases:
 draft: false
 ---
 
-Everyone starts somewhere. For me, the first real step into cybersecurity isn't a job or a degree — it's a certification I haven't earned yet: **CompTIA Security+ (SY0-701)**. It's the vendor-neutral entry ticket, the one a lot of junior security roles list as required or preferred, and the thing I want in hand before [[Mykhailo Fedorov|the kind of work]] I'm aiming for at TMU actually begins.
+Everyone starts somewhere. For me, the first real step into cybersecurity isn't a job or a degree — it's a certification I haven't earned yet: **CompTIA Security+ (SY0-701)**. Entry ticket, the one a lot of junior security roles list as required or preferred, and the thing I want in hand before [[Mykhailo Fedorov|the kind of work]] I'm aiming for at TMU actually begins.
 
 This post is less about the material and more about how I'm going after it — because the honest lesson so far is that passing an exam like this is a systems problem, not a motivation problem.
 

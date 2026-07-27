@@ -90,6 +90,19 @@ export const ui = {
   },
   linkCopied: { en: "Link copied", uk: "Посилання скопійовано" },
 
+  // keyboard shortcuts (components/Shortcuts.tsx)
+  shortcutSheet: { en: "Keyboard shortcuts", uk: "Клавіатурні скорочення" },
+  shortcutHome: { en: "Home", uk: "Головна" },
+  shortcutSearch: { en: "Search", uk: "Пошук" },
+
+  // command palette actions (components/CommandPalette.tsx)
+  actionToggleLang: { en: "Switch language", uk: "Змінити мову" },
+  actionCopyMarkdown: { en: "Copy page as Markdown", uk: "Копіювати сторінку як Markdown" },
+  actionCopyLink: { en: "Copy link to this page", uk: "Копіювати посилання на сторінку" },
+  actionRandom: { en: "Open a random note", uk: "Відкрити випадкову нотатку" },
+  actionsGroup: { en: "Actions", uk: "Дії" },
+  actionDone: { en: "Done", uk: "Готово" },
+
   // lightbox (components/Lightbox.tsx)
   previousImage: { en: "Previous image", uk: "Попереднє зображення" },
   nextImage: { en: "Next image", uk: "Наступне зображення" },

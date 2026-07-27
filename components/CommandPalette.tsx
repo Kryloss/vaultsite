@@ -1,18 +1,38 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { SearchItem } from "@/lib/vault";
 import T from "@/components/T";
 import { useLang } from "@/components/useLang";
 import { similarity, fold } from "@/lib/fuzzy";
-import { ui } from "@/lib/ui-strings";
+import { copyText } from "@/lib/clipboard";
+import { ui, type Str } from "@/lib/ui-strings";
 
 /**
- * Cmd/Ctrl+K search palette over the static, build-time index of every page.
+ * Cmd/Ctrl+K palette over the static, build-time index of every page.
  * No backend — the index arrives as props from the server layout.
  * Opened by hotkey (handled in Chrome) or the search button.
+ *
+ * It finds pages AND runs commands. The actions live in the same list as the
+ * results and are matched by the same query, so there's one box to learn
+ * rather than a search box plus a scattering of buttons that only exist on
+ * some pages. They sort below page matches: typing a note's name must always
+ * open the note.
+ *
+ * Every action is something the site can already do without a server — switch
+ * language, copy the page's vault source, copy a link, jump somewhere random.
+ * An action that needed a backend wouldn't belong here.
  */
+
+interface Action {
+  id: string;
+  label: Str;
+  /** Return true to keep the palette open (e.g. to show a "Done" flash). */
+  run: () => void | Promise<void>;
+  /** Hidden when false — "copy this page" makes no sense on a section list. */
+  when?: () => boolean;
+}
 export default function CommandPalette({
   items,
   open,
@@ -24,18 +44,34 @@ export default function CommandPalette({
 }) {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(0);
+  /** Brief "Done" in the footer after a copy, so it isn't silent. */
+  const [flash, setFlash] = useState(false);
+  /**
+   * The shell stays mounted so it can animate shut, but its contents wait for
+   * the first open. Rendering the default eight results into the static HTML
+   * of every page cost ~11 KB each, for markup nobody sees until they press
+   * ⌘K — and once they have, it stays for the exit animation.
+   */
+  const [everOpen, setEverOpen] = useState(false);
+  useEffect(() => {
+    if (open) setEverOpen(true);
+  }, [open]);
   const { lang, toggle: toggleLang } = useLang();
   const inputRef = useRef<HTMLInputElement>(null);
+  const flashTimer = useRef<number | undefined>(undefined);
   const router = useRouter();
 
   useEffect(() => {
     if (open) {
       setQuery("");
       setSelected(0);
+      setFlash(false);
       // Focus after the element mounts
       requestAnimationFrame(() => inputRef.current?.focus());
     }
   }, [open]);
+
+  useEffect(() => () => window.clearTimeout(flashTimer.current), []);
 
   const { results, fuzzy } = useMemo(() => {
     // Heading results exist once per language (each has its own anchor); show
@@ -89,27 +125,130 @@ export default function CommandPalette({
     return { results: near.map((r) => r.item), fuzzy: near.length > 0 };
   }, [query, items, lang]);
 
-  useEffect(() => setSelected(0), [results.length, query]);
+  const go = useCallback(
+    (href: string) => {
+      onClose();
+      router.push(href);
+    },
+    [onClose, router]
+  );
 
-  if (!open) return null;
+  /**
+   * Runnable commands. `when` hides the ones that need a page-specific control
+   * to exist — "copy as Markdown" clicks the button beside an entry's title
+   * (components/CopyMarkdown.tsx) rather than duplicating the note's source
+   * into this component, which would put the same text in the page twice.
+   */
+  const actions = useMemo<Action[]>(
+    () => [
+      {
+        id: "lang",
+        label: ui.actionToggleLang,
+        run: () => {
+          toggleLang();
+          onClose();
+        },
+      },
+      {
+        id: "copy-md",
+        label: ui.actionCopyMarkdown,
+        when: () => !!document.querySelector("button.copy-md"),
+        run: () => {
+          document.querySelector<HTMLButtonElement>("button.copy-md")?.click();
+        },
+      },
+      {
+        id: "copy-link",
+        label: ui.actionCopyLink,
+        // Carries the language for the same reason SelectionLink does — a
+        // shared URL should open in the language it was copied from.
+        run: () =>
+          copyText(`${location.origin}${location.pathname}?lang=${lang}`).then(
+            () => undefined
+          ),
+      },
+      {
+        id: "random",
+        label: ui.actionRandom,
+        run: () => {
+          // Pages only: a heading result would land mid-note at an anchor.
+          const pages = items.filter(
+            (i) => !i.lang && i.href !== window.location.pathname
+          );
+          if (!pages.length) return;
+          go(pages[Math.floor(Math.random() * pages.length)].href);
+        },
+      },
+    ],
+    [items, lang, toggleLang, onClose, go]
+  );
 
-  const go = (href: string) => {
-    onClose();
-    router.push(href);
+  /** Actions matching the query, in both languages. Empty query shows all. */
+  const actionResults = useMemo(() => {
+    // A client component is still rendered once on the server to produce the
+    // static HTML, and `when` reaches into the DOM — so it can only be asked
+    // in the browser. Harmless: the palette renders nothing until it's opened,
+    // which can't happen before hydration.
+    const available = actions.filter(
+      (a) => !a.when || (typeof document !== "undefined" && a.when())
+    );
+    const q = fold(query.trim());
+    if (!q) return available;
+    return available.filter((a) =>
+      [a.label.en, a.label.uk].some((l) => fold(l).includes(q))
+    );
+  }, [actions, query]);
+
+  /**
+   * One flat list so ↑↓ crosses the boundary without special cases. Pages
+   * always come first: typing a note's name must open the note, never run a
+   * command that happens to share a word with it.
+   */
+  const rows = useMemo(
+    () => [
+      ...results.map((item) => ({ kind: "page" as const, item })),
+      ...actionResults.map((action) => ({ kind: "action" as const, action })),
+    ],
+    [results, actionResults]
+  );
+
+  useEffect(() => setSelected(0), [rows.length, query]);
+
+  const runRow = async (row: (typeof rows)[number]) => {
+    if (row.kind === "page") return go(row.item.href);
+    await row.action.run();
+    // A copy leaves no visible trace, so acknowledge it before closing.
+    if (row.action.id.startsWith("copy")) {
+      setFlash(true);
+      window.clearTimeout(flashTimer.current);
+      flashTimer.current = window.setTimeout(() => {
+        setFlash(false);
+        onClose();
+      }, 900);
+    }
   };
 
   return (
+    /* Always rendered and shown by `data-open`, so it can animate on the way
+       out as well as in — React can't transition an element it has already
+       removed. `inert` keeps the closed dialog out of the tab order and away
+       from screen readers, which `visibility: hidden` alone wouldn't
+       guarantee across browsers. */
     <div
       role="dialog"
       aria-modal="true"
       aria-label="Search"
-      className="fixed inset-0 z-[60] flex items-start justify-center bg-black/30 px-4 pt-[18vh] backdrop-blur-sm"
+      data-open={open}
+      inert={!open}
+      className="overlay fixed inset-0 z-[60] flex items-start justify-center bg-black/30 px-4 pt-[18vh] backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg)] shadow-2xl"
+        className="overlay-panel w-full max-w-md overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg)] shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
+        {everOpen && (
+          <>
         <div className="relative border-b border-[var(--border)]">
           <input
             ref={inputRef}
@@ -118,12 +257,12 @@ export default function CommandPalette({
             onKeyDown={(e) => {
               if (e.key === "ArrowDown") {
                 e.preventDefault();
-                setSelected((s) => Math.min(s + 1, results.length - 1));
+                setSelected((s) => Math.min(s + 1, rows.length - 1));
               } else if (e.key === "ArrowUp") {
                 e.preventDefault();
                 setSelected((s) => Math.max(s - 1, 0));
-              } else if (e.key === "Enter" && results[selected]) {
-                go(results[selected].href);
+              } else if (e.key === "Enter" && rows[selected]) {
+                runRow(rows[selected]);
               }
             }}
             placeholder={ui.searchPlaceholder[lang]}
@@ -142,7 +281,7 @@ export default function CommandPalette({
           </button>
         </div>
         <ul className="max-h-72 overflow-y-auto py-1.5">
-          {results.length === 0 && (
+          {rows.length === 0 && (
             <li className="px-4 py-6 text-center text-sm text-[var(--text-tertiary)]">
               <T {...ui.noResultsFor} /> &ldquo;{query}&rdquo;
             </li>
@@ -154,11 +293,20 @@ export default function CommandPalette({
               <T {...ui.didYouMean} />
             </li>
           )}
-          {results.map((item, i) => (
-            <li key={item.href}>
+          {rows.map((row, i) => (
+            <li
+              key={row.kind === "page" ? row.item.href : `action:${row.action.id}`}
+            >
+              {/* A divider label above the first action, so a command doesn't
+                  read as another page with an odd name. */}
+              {row.kind === "action" && i === results.length && (
+                <p className="px-4 pb-1 pt-2 text-xs text-[var(--text-tertiary)]">
+                  <T {...ui.actionsGroup} />
+                </p>
+              )}
               <button
                 type="button"
-                onClick={() => go(item.href)}
+                onClick={() => runRow(row)}
                 onMouseEnter={() => setSelected(i)}
                 className={`flex w-full items-baseline justify-between gap-3 px-4 py-2.5 text-left text-[15px] transition-colors ${
                   i === selected
@@ -166,19 +314,33 @@ export default function CommandPalette({
                     : "text-[var(--text-secondary)]"
                 }`}
               >
-                <span className="truncate font-medium">
-                  {lang === "uk" && item.titleUk ? item.titleUk : item.title}
-                </span>
-                <span className="shrink-0 text-xs text-[var(--text-tertiary)]">
-                  {lang === "uk" && item.sectionUk ? item.sectionUk : item.section}
-                </span>
+                {row.kind === "page" ? (
+                  <>
+                    <span className="truncate font-medium">
+                      {lang === "uk" && row.item.titleUk
+                        ? row.item.titleUk
+                        : row.item.title}
+                    </span>
+                    <span className="shrink-0 text-xs text-[var(--text-tertiary)]">
+                      {lang === "uk" && row.item.sectionUk
+                        ? row.item.sectionUk
+                        : row.item.section}
+                    </span>
+                  </>
+                ) : (
+                  <span className="truncate">
+                    <T {...row.action.label} />
+                  </span>
+                )}
               </button>
             </li>
           ))}
         </ul>
         <div className="border-t border-[var(--border)] px-4 py-2 text-xs text-[var(--text-tertiary)]">
-          <T {...ui.searchHint} />
+          {flash ? <T {...ui.actionDone} /> : <T {...ui.searchHint} />}
         </div>
+          </>
+        )}
       </div>
     </div>
   );

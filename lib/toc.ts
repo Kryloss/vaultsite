@@ -72,6 +72,19 @@ export function rehypeHeadings(options: HeadingOptions = {}) {
   return (tree: any) => {
     const walk = (node: any) => {
       if (!node.children) return;
+      // The footnote list carries a screen-reader-only <h2>Footnotes</h2>
+      // that remark-gfm generates and owns (its id is what every reference's
+      // aria-describedby points at). It is not part of the note's outline:
+      // anchoring it would put "Footnotes" in the table of contents and in
+      // Cmd+K, and re-prefixing its id would break those references.
+      if (
+        node.type === "element" &&
+        node.tagName === "section" &&
+        (node.properties?.dataFootnotes !== undefined ||
+          node.properties?.["data-footnotes"] !== undefined)
+      ) {
+        return;
+      }
       for (const child of node.children) {
         if (child.type !== "element") continue;
         if (!ANCHORED.has(child.tagName)) {

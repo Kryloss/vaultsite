@@ -38,7 +38,7 @@ export default async function TilList({ section, entries }: ListProps) {
   );
 
   return (
-    <div className="mt-10 flex flex-col gap-12">
+    <div className="stagger mt-10 flex flex-col gap-12">
       {entries.map((entry, i) => (
         <article
           key={entry.slug}

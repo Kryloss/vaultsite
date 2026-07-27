@@ -76,6 +76,42 @@ html[data-lang="uk"] .lang-uk {
   animation: page-in 0.35s ease both;
 }
 
+/* Lists arrive one item at a time. `.stagger` goes on the container; the
+   delays are nth-child rules rather than an inline `--i` per item, so a list
+   component only gains a class name and no server-rendered style attributes.
+
+   Capped at twelve: past that the wait is longer than the payoff, and every
+   later item shares the last delay so a long archive doesn't take three
+   seconds to finish appearing. */
+@keyframes item-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.stagger > * {
+  animation: item-in 0.32s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation-delay: 360ms;
+}
+
+.stagger > *:nth-child(1) { animation-delay: 0ms; }
+.stagger > *:nth-child(2) { animation-delay: 30ms; }
+.stagger > *:nth-child(3) { animation-delay: 60ms; }
+.stagger > *:nth-child(4) { animation-delay: 90ms; }
+.stagger > *:nth-child(5) { animation-delay: 120ms; }
+.stagger > *:nth-child(6) { animation-delay: 150ms; }
+.stagger > *:nth-child(7) { animation-delay: 180ms; }
+.stagger > *:nth-child(8) { animation-delay: 210ms; }
+.stagger > *:nth-child(9) { animation-delay: 240ms; }
+.stagger > *:nth-child(10) { animation-delay: 270ms; }
+.stagger > *:nth-child(11) { animation-delay: 300ms; }
+.stagger > *:nth-child(12) { animation-delay: 330ms; }
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -83,11 +119,26 @@ html[data-lang="uk"] .lang-uk {
   .page-in {
     animation: none;
   }
+  /* `animation: none`, not a shortened duration: the blanket rule below only
+     collapses the DURATION, and these run with `both` fill from opacity 0 —
+     so a shortened animation still leaves each item invisible for the length
+     of its DELAY. The twelfth row would blink in a third of a second late. */
+  .stagger > * {
+    animation: none;
+  }
   *,
   *::before,
   *::after {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
+  }
+}
+
+/* Same reasoning as reduced motion: a delayed fade-in has no meaning on paper,
+   and `both` fill would print the later rows blank. */
+@media print {
+  .stagger > * {
+    animation: none;
   }
 }
 
@@ -247,6 +298,41 @@ body {
 /* Shelf medium rows (components/lists/ShelfGrid.tsx) — horizontal scrollers.
    The scrollbar is hidden because the rows are short and the cards are
    obviously cut off at the edge; momentum scroll and snap do the rest. */
+/* Edge fade on a shelf row (components/lists/ShelfRow.tsx sets data-edge).
+   The mask is on the WRAPPER, not the scroller: a mask on a scrolling element
+   travels with its content, so the fade would slide away with the covers.
+
+   `middle` fades both sides, `start`/`end` only the side with more to come,
+   `none` (everything fits) fades neither — a fade at the last cover of a short
+   row would suggest content that isn't there. */
+.shelf-row-wrap {
+  --fade: 2.5rem;
+  transition: mask-image 200ms ease;
+}
+
+.shelf-row-wrap[data-edge="start"] {
+  mask-image: linear-gradient(
+    to right,
+    #000 0,
+    #000 calc(100% - var(--fade)),
+    transparent 100%
+  );
+}
+
+.shelf-row-wrap[data-edge="end"] {
+  mask-image: linear-gradient(to right, transparent 0, #000 var(--fade), #000 100%);
+}
+
+.shelf-row-wrap[data-edge="middle"] {
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--fade),
+    #000 calc(100% - var(--fade)),
+    transparent 100%
+  );
+}
+
 .shelf-row {
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
@@ -703,8 +789,12 @@ body {
     float: left;
     clear: left;
     width: 12rem;
-    /* width + gutter — pushes the whole box past the column's left edge. */
-    margin-left: -14rem;
+    /* Mirrors the .toc-rail's geometry. The article is a centred max-w-2xl
+       (21rem half) with px-6, so text runs to 19.5rem either side of centre,
+       and the rail's left edge sits at 22rem — a 2.5rem gutter. Pulling the
+       note 14.5rem left of the text edge (12rem wide + 2.5rem gutter) lands
+       its right edge at -22rem: the two rails are the same distance out. */
+    margin-left: -14.5rem;
     margin-bottom: 0.75rem;
     font-size: 0.8125rem;
     line-height: 1.55;
@@ -745,6 +835,57 @@ body {
   .prose section.footnotes.all-sidenoted {
     display: block;
   }
+}
+
+/* ---------- Dialog overlays (command palette, shortcut sheet) ----------
+
+   Both stay mounted and are shown by `data-open`, so they can animate out as
+   well as in — React can't transition an element it has already unmounted.
+   `visibility` transitions with no duration but a delay, so it flips at the
+   end of the fade on the way out and immediately on the way in. */
+.overlay {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 160ms ease,
+    visibility 0s linear 160ms;
+}
+
+.overlay[data-open="true"] {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+/* The panel travels a little further and faster than its backdrop, which is
+   what makes it read as arriving rather than just appearing. */
+.overlay-panel {
+  transform: translateY(-8px) scale(0.98);
+  transition: transform 200ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.overlay[data-open="true"] .overlay-panel {
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay-panel {
+    transform: none;
+  }
+}
+
+/* ---------- Keyboard shortcut keys (components/Shortcuts.tsx) ---------- */
+.shortcut-key {
+  min-width: 1.5rem;
+  padding: 0.125rem 0.375rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  text-align: center;
 }
 
 /* ---------- Lightbox gallery controls (components/Lightbox.tsx) ----------
@@ -996,6 +1137,40 @@ body {
   font-weight: 500;
 }
 
+/* In the rail the highlight is one sliding marker instead, so the per-link
+   border stays transparent there. The mobile sheet keeps the border — it has
+   no marker, and a sheet you just opened has nothing to slide from. */
+.toc-rail .toc-link.is-active {
+  border-left-color: transparent;
+}
+
+/* The marker itself. Positioned by components/Toc.tsx via --y (the active
+   row's offsetTop) and --h (its height, so it matches a row that wrapped to
+   two lines). Starts hidden and is revealed once placed, or it would slide
+   down from the top of the rail on every page load. */
+.toc-marker {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: var(--h, 1.5rem);
+  /* Sits over the rail's own border-left, like the link borders it replaces. */
+  margin-left: -1px;
+  background: var(--text);
+  opacity: 0;
+  transform: translateY(var(--y, 0));
+  transition:
+    transform 260ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    height 260ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity 160ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toc-marker {
+    transition: opacity 160ms ease;
+  }
+}
+
 /* The note's title: the first row of the outline, not a header above it.
    Only a step heavier than a heading link — enough to read as the parent,
    not enough to pull the eye off the section you're actually in.
@@ -1039,14 +1214,63 @@ body {
 
 /* scaleX from the left edge — transform only, so scrolling costs no layout.
    Sits under the drawer (40/50) and the palette (60). */
+/* Reading progress (components/ReadingProgress.tsx).
+
+   The component writes one custom property, --p (0…1), and both children read
+   it. Everything below is a transform or an opacity, so a scroll frame does no
+   layout and no paint beyond the compositor. */
 .reading-progress {
   position: fixed;
   inset: 0 0 auto 0;
   z-index: 35;
   height: 2px;
+  pointer-events: none;
+  /* Confines the head's `left` to this element — the page can't be reflowed by
+     it. NOT `paint`, which would clip the glow's shadow to the 2px box. */
+  contain: layout;
+  --p: 0;
+  /* Fades in once there's progress to report — see paint() in the component.
+     Slower out than in: appearing should be quiet, vanishing shouldn't blink. */
+  opacity: 0;
+  transition: opacity 260ms ease;
+}
+
+.reading-progress-fill {
+  position: absolute;
+  inset: 0;
   background: var(--text);
   transform-origin: 0 50%;
-  transform: scaleX(0);
+  transform: scaleX(var(--p));
+}
+
+/* A soft point of light at the leading edge. It sits OUTSIDE the scaled fill —
+   inside it, the glow would be stretched into a smear at low progress.
+
+   `left` as a percentage of the bar rather than a translate of 100vw: a
+   percentage translate would resolve against the dot's own 2px width, and
+   100vw counts the scrollbar the bar itself doesn't, which drifts the glow
+   past the end of the fill. Layout cost is confined by `contain` above. */
+.reading-progress-head {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--p) * 100%);
+  width: 2px;
+  height: 2px;
+  border-radius: 9999px;
+  background: var(--text);
+  box-shadow: 0 0 6px 2px var(--text);
+  opacity: calc(var(--p) * 0.85);
+  transform: translate(-50%, -50%);
+}
+
+/* The glow reads as motion; without movement it's just a dot on the end. */
+@media (prefers-reduced-motion: reduce) {
+  .reading-progress-head {
+    display: none;
+  }
+  .reading-progress {
+    transition: none;
+  }
 }
 
 /* ---------- Mobile table of contents (components/Toc.tsx) ---------- */
@@ -1091,10 +1315,21 @@ body {
 
 /* Invisible on purpose — it exists only to catch a tap outside. Dimming the
    page made opening the outline feel like a modal, which it isn't. */
+/* The sheet and its backdrop are always in the DOM and shown by `data-open`
+   — see the note in components/Toc.tsx. `visibility` is part of the
+   transition so the closed sheet is genuinely gone rather than merely
+   transparent, and it flips at the END of the fade rather than the start. */
 .toc-sheet-backdrop {
   position: fixed;
   inset: 0;
   z-index: 40;
+  visibility: hidden;
+  transition: visibility 0s linear 200ms;
+}
+
+.toc-sheet-backdrop[data-open="true"] {
+  visibility: visible;
+  transition-delay: 0s;
 }
 
 /* Sized to its content and anchored above the pill, so it reads as the pill
@@ -1105,6 +1340,15 @@ body {
   left: 0.75rem;
   bottom: 3.5rem;
   z-index: 45;
+  /* Grows out of the pill below it. */
+  transform-origin: 0 100%;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px) scale(0.97);
+  transition:
+    opacity 180ms ease,
+    transform 200ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    visibility 0s linear 200ms;
   width: max-content;
   max-width: min(18rem, calc(100vw - 1.5rem));
   max-height: 45vh;
@@ -1118,6 +1362,13 @@ body {
   box-shadow: 0 6px 20px rgb(0 0 0 / 0.08);
   font-size: 0.875rem;
   line-height: 1.45;
+}
+
+.toc-sheet[data-open="true"] {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition-delay: 0s;
 }
 
 @media (prefers-color-scheme: dark) {

@@ -49,6 +49,8 @@ export default function Toc({
   const { lang } = useLang();
   const [active, setActive] = useState("");
   const [open, setOpen] = useState(false);
+  /** The sheet's contents wait for the first open — see the note below. */
+  const [everOpen, setEverOpen] = useState(false);
   /**
    * The heading the reader jumped to, held until they scroll again.
    *
@@ -62,6 +64,7 @@ export default function Toc({
    * means nothing is held.
    */
   const held = useRef<string | null>(null);
+  const railRef = useRef<HTMLElement>(null);
   const ids = [...en, ...(uk ?? [])].map((h) => h.id).join(",");
 
   useEffect(() => {
@@ -183,6 +186,52 @@ export default function Toc({
     history.pushState(null, "", location.pathname + location.search);
   };
 
+  /**
+   * Move the rail's marker onto whichever row is active.
+   *
+   * Measured from the DOM rather than computed from the heading list: the two
+   * languages' outlines are both in the rail with one of them `display: none`,
+   * rows wrap to two lines at some titles, and the rail itself scrolls. The
+   * live element's own `offsetTop` already accounts for all of that.
+   *
+   * Runs after paint on `active` and `lang`, which is exactly when the target
+   * row can have moved. The height is set as well as the offset so the marker
+   * matches a two-line row.
+   */
+  useEffect(() => {
+    const rail = railRef.current;
+    if (!rail) return;
+
+    const place = () => {
+      const marker = rail.querySelector<HTMLElement>(".toc-marker");
+      if (!marker) return;
+      // BOTH outlines are in the rail and both mark the same heading active,
+      // so take the first one that is actually laid out — a display:none row
+      // has no offsetParent, and matching it would park the marker at 0.
+      const current = Array.from(
+        rail.querySelectorAll<HTMLElement>("a.toc-link.is-active")
+      ).find((el) => el.offsetParent !== null);
+      // Nothing active: fade out where it is rather than jumping to the top.
+      if (!current) {
+        marker.style.opacity = "0";
+        return;
+      }
+      marker.style.setProperty("--y", `${current.offsetTop}px`);
+      marker.style.setProperty("--h", `${current.offsetHeight}px`);
+      marker.style.opacity = "1";
+    };
+
+    place();
+    // Fonts landing late change row heights under the marker.
+    const ro = new ResizeObserver(place);
+    ro.observe(rail);
+    return () => ro.disconnect();
+  }, [active, lang]);
+
+  useEffect(() => {
+    if (open) setEverOpen(true);
+  }, [open]);
+
   const localTitle = lang === "uk" && titleUk ? titleUk : title;
 
   /** Text for the pill: the section you're in, or the note title at the top. */
@@ -233,7 +282,12 @@ export default function Toc({
 
   return (
     <>
-      <nav className="toc-rail" aria-label="Table of contents">
+      <nav ref={railRef} className="toc-rail" aria-label="Table of contents">
+        {/* One marker that slides between rows, rather than a border switching
+            on and off per link. The rail is a fixed element, so this absolutely
+            positioned span is measured against it and scrolls with its content.
+            Hidden until it has been positioned once — see the effect below. */}
+        <span className="toc-marker" aria-hidden />
         {/* The note's title as the first row of the outline — jumps to the top,
             and highlights whenever you're above the first heading. Rendered
             here only: it is NOT in the Cmd+K index, which already has this
@@ -255,19 +309,32 @@ export default function Toc({
         <span className="toc-bar-label">{hereLabel}</span>
       </button>
 
-      {open && (
-        <>
-          <div
-            className="toc-sheet-backdrop"
-            aria-hidden
-            onClick={() => setOpen(false)}
-          />
-          <nav className="toc-sheet" aria-label="Table of contents">
+      {/* Always rendered, shown by `data-open`, rather than mounted on demand:
+          an element React has already removed can't animate on the way out, so
+          conditional rendering can only ever blink. `inert` keeps the closed
+          sheet away from the keyboard and from screen readers. */}
+      <div
+        className="toc-sheet-backdrop"
+        data-open={open}
+        aria-hidden
+        onClick={() => setOpen(false)}
+      />
+      <nav
+        className="toc-sheet"
+        data-open={open}
+        inert={!open}
+        aria-label="Table of contents"
+      >
+        {/* A third copy of the outline in every page's HTML, for a panel most
+            readers never open — so it waits for the first tap, then stays so
+            it can animate shut. */}
+        {everOpen && (
+          <>
             {topLink(" toc-sheet-top")}
             {outline}
-          </nav>
-        </>
-      )}
+          </>
+        )}
+      </nav>
     </>
   );
 }

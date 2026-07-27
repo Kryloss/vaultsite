@@ -33,6 +33,7 @@ import { appleMusicEmbedHtml, isAppleMusicUrl } from "./apple-music";
 import { youtubeEmbedHtml, youtubeId } from "./youtube";
 import { highlightToHast, parseCodeMeta, langLabel } from "./highlight";
 import { rehypeHeadings, type Heading } from "./toc";
+import { dimsFor } from "./blur";
 
 /** Encode each path segment but keep "/" separators. */
 function encodePath(p: string): string {
@@ -830,6 +831,51 @@ function rehypeCodeBlocks() {
 }
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
+ * rehype step: stamp `width` and `height` on every vault image that doesn't
+ * already carry them.
+ *
+ * Without an intrinsic size the browser reserves no space for an image, so
+ * every image on a page pushes the text below it down the moment it decodes —
+ * on a slow connection that means the paragraph you're reading slides out from
+ * under you. With the attributes present, `max-width: 100%` + `height: auto`
+ * in globals.css turns them into an aspect ratio, the box is reserved at the
+ * right shape immediately, and nothing moves.
+ *
+ * A rehype step rather than a tweak to the `<img>` builders, because images
+ * reach the tree three different ways — Obsidian embeds (`![[x.png]]`, raw
+ * HTML), standard markdown (`![alt](x.png)`, built by remark), and hand-written
+ * `<img>` in a note. This runs after rehype-raw, so it sees all three.
+ *
+ * Sizes come from the manifest scripts/sync-assets.mjs writes; a remote cover
+ * or an image sharp couldn't read simply doesn't get attributes, exactly as
+ * before.
+ */
+function rehypeImageSize() {
+  return (tree: any) => {
+    const walk = (node: any) => {
+      if (!node.children) return;
+      for (const child of node.children) {
+        if (child.type === "element" && child.tagName === "img") {
+          const p = child.properties ?? (child.properties = {});
+          // An explicitly sized embed (`![[me.jpeg|93]]`) already said what it
+          // wants — overriding it would resize the avatar.
+          if (p.width === undefined && p.height === undefined) {
+            const dims = dimsFor(typeof p.src === "string" ? p.src : undefined);
+            if (dims) {
+              p.width = dims.w;
+              p.height = dims.h;
+            }
+          }
+          continue;
+        }
+        walk(child);
+      }
+    };
+    walk(tree);
+  };
+}
+
+/**
  * rehype step: mirror every GFM footnote (`[^1]`) into a margin **sidenote**
  * placed right after its reference, so a wide screen can show the note beside
  * the sentence that raised it instead of sending the reader to the bottom.
@@ -854,7 +900,7 @@ function rehypeCodeBlocks() {
  * (components/Toc.tsx) already owns the right one at exactly the same
  * breakpoint.
  */
-function rehypeSidenotes() {
+function rehypeSidenotes({ idPrefix = "" }: { idPrefix?: string } = {}) {
   const clone = (n: any) => JSON.parse(JSON.stringify(n));
 
   const isEl = (n: any, tag: string) => n?.type === "element" && n.tagName === tag;
@@ -882,6 +928,16 @@ function rehypeSidenotes() {
 
     const list = section.children?.find((c: any) => isEl(c, "ol"));
     if (!list) return;
+
+    // `clobberPrefix` namespaces the fn-/fnref- ids but not the list's own
+    // screen-reader label, whose id is hard-coded by mdast-util-to-hast. Both
+    // languages ship in one document, so prefix it here — and repoint the
+    // aria-describedby on every reference at the prefixed id — or the two
+    // copies collide and Ukrainian references describe the English list.
+    const LABEL = "footnote-label";
+    const labelId = `${idPrefix}${LABEL}`;
+    const heading = section.children.find((c: any) => c.properties?.id === LABEL);
+    if (heading) heading.properties.id = labelId;
 
     // 2. Index each definition by the id its reference points at. Paragraphs
     //    become <span class="sn-p"> (block-level via CSS) and the trailing
@@ -927,6 +983,16 @@ function rehypeSidenotes() {
           const href = a?.properties?.href;
           if (typeof href === "string" && href.startsWith("#")) {
             refs++;
+            // hast stores aria-describedby as a space-separated token LIST,
+            // so this is an array, not a string.
+            for (const key of ["ariaDescribedBy", "aria-describedby"]) {
+              const v = a.properties[key];
+              if (Array.isArray(v)) {
+                a.properties[key] = v.map((t: string) => (t === LABEL ? labelId : t));
+              } else if (v === LABEL) {
+                a.properties[key] = labelId;
+              }
+            }
             const body = defs.get(decodeURIComponent(href.slice(1)));
             if (body) {
               converted++;
@@ -1010,7 +1076,8 @@ export async function renderWithHeadings(
     .use(rehypeCodeMeta)
     .use(rehypeRaw)
     .use(rehypeFigures)
-    .use(rehypeSidenotes)
+    .use(rehypeImageSize)
+    .use(rehypeSidenotes, { idPrefix: options.idPrefix })
     .use(rehypeCodeBlocks)
     .use(rehypeSlug)
     // After rehype-slug on purpose — it needs the ids rehype-slug mints.

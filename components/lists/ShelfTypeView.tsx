@@ -112,7 +112,7 @@ export default function ShelfTypeView({
         <>
           {/* Every card here is the same shape, so a plain grid is safe. */}
           <ul
-            className={`mt-8 grid gap-x-5 gap-y-10 ${
+            className={`stagger mt-8 grid gap-x-5 gap-y-10 ${
               group.items.some((i) => i.isVideo)
                 ? "grid-cols-1 sm:grid-cols-2"
                 : "grid-cols-2 sm:grid-cols-3"

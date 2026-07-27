@@ -123,6 +123,34 @@ export default function RootLayout({
               "try{var q=new URLSearchParams(location.search).get('lang');var l=q||localStorage.getItem('lang');if(l==='uk')document.documentElement.dataset.lang='uk';}catch(e){}",
           }}
         />
+        {/* Speculation rules: once the pointer rests on an internal link, fetch
+            that document in the background so a hard navigation — a new tab, a
+            middle click, the first click after landing — has nothing left to
+            download.
+
+            `prefetch`, deliberately NOT `prerender`. Prerendering also RUNS the
+            page, and @vercel/analytics doesn't check `document.prerendering`
+            before reporting, so every hovered link would count as a visit and
+            the numbers would quietly become fiction. Prefetch moves bytes and
+            executes nothing.
+
+            The win here is modest and worth stating: Next already prefetches
+            route payloads for in-app clicks, so this covers the cases its own
+            router never sees. Ignored by browsers that don't support it. */}
+        <script
+          type="speculationrules"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              prefetch: [
+                {
+                  source: "document",
+                  where: { and: [{ href_matches: "/*" }] },
+                  eagerness: "moderate",
+                },
+              ],
+            }),
+          }}
+        />
       </head>
       <body>
         <Chrome
