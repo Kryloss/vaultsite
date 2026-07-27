@@ -225,3 +225,15 @@ Two fixes were applied, in order:
 **Decision:** `maturity: seedling | budding | evergreen` on an entry; anything unset or unrecognised falls back to seedling, so every note shows a badge from day one rather than the feature being invisible until the vault is retagged.
 
 **Why it's on posts only:** it rides with the reading stats, which are already posts-only. A book on a shelf doesn't have a draft stage.
+
+## 25. The résumé is frontmatter on the Now page, and the PDF is generated from it (2026-07-26)
+
+**Decision:** the résumé lives in a `resume:` key in `vault/Now/main.md` and renders through `components/Resume.tsx`, which `NowList` mounts under the status cards. It is not a section type, not an entry, and not a page of its own.
+
+**Why it sits on Now:** a résumé answers the same question the Now page does — what is he doing at the moment — and the two would go stale together if kept apart. Structured frontmatter (the same escape hatch `music` uses for `playlists:`) keeps every string translatable via `_uk` siblings, which a markdown body could not do without a second file to maintain.
+
+**`scripts/build-resume-pdf.py` reads that same frontmatter** and renders the downloadable PDF with WeasyPrint, so the page and the file can't drift. It is run by hand, not wired into `prebuild`: it needs Python and WeasyPrint, and a missing dependency must never be able to break `npm run build` or a Vercel deploy. The generated PDF sits in `vault/Now/`, so `sync-assets.mjs` publishes it and `getAssetIndex()` resolves the download button's href.
+
+**Phone number and street address exist only in that script's `PRIVATE` dict.** They belong on a résumé sent to an employer, not on a public page indexed by search engines — the site shows email and city.
+
+**Bullet convention:** points are plain strings written `Label — detail`; the component and the PDF script both split on the em dash to bold the lead-in. Keeps the frontmatter readable in Obsidian instead of nesting an object per bullet.

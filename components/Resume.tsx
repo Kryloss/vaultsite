@@ -99,7 +99,7 @@ export default function Resume({ section }: { section: Section }) {
 
       {data.experience?.length ? (
         <Block label={<T {...ui.resumeExperience} />}>
-          <Timeline rows={data.experience} />
+          <Timeline rows={data.experience} badge />
         </Block>
       ) : null}
 
@@ -174,7 +174,12 @@ function Block({ label, children }: { label: ReactNode; children: ReactNode }) {
   );
 }
 
-function Timeline({ rows }: { rows: ResumeRow[] }) {
+/**
+ * `badge` adds the "Current" pill next to whatever is ongoing. Experience wants
+ * it; education and certifications already say "From Sept 2026" / "In progress"
+ * in their own period column, so there the filled dot carries it alone.
+ */
+function Timeline({ rows, badge = false }: { rows: ResumeRow[]; badge?: boolean }) {
   const wiki = getWikiIndex();
   const hrefFor = (link?: string): string | undefined => {
     if (!link) return undefined;
@@ -216,7 +221,7 @@ function Timeline({ rows }: { rows: ResumeRow[] }) {
                 ) : (
                   title
                 )}
-                {row.current && (
+                {badge && row.current && (
                   <span className="ml-2 align-[2px] rounded-full bg-[var(--bg-hover)] px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[var(--text-secondary)]">
                     <T {...ui.resumeCurrent} />
                   </span>
@@ -282,7 +287,8 @@ function splitPoint(text: string): ReactNode {
   return (
     <>
       <span className="font-medium text-[var(--text)]">{text.slice(0, i)}</span>
-      <span className="text-[var(--text-secondary)]">{text.slice(i + 1)}</span>
+      {/* slice from the space, not past it, so the dash keeps its breathing room */}
+      <span className="text-[var(--text-secondary)]">{text.slice(i)}</span>
     </>
   );
 }
