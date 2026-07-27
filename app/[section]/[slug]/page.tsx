@@ -27,6 +27,7 @@ import Toc from "@/components/Toc";
 import EntryFooter from "@/components/EntryFooter";
 import CopyMarkdown from "@/components/CopyMarkdown";
 import ReadingProgress from "@/components/ReadingProgress";
+import ReadingPosition from "@/components/ReadingPosition";
 import JsonLd from "@/components/JsonLd";
 import { entryJsonLd } from "@/lib/jsonld";
 import { maturityOf } from "@/lib/maturity";
@@ -89,9 +90,22 @@ export default async function EntryPage({ params }: Props) {
       : `/${section.slug}?category=${encodeURIComponent(category)}`;
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-14 lg:py-24">
+    /* The note's own vault paths ride on the page so page-agnostic components
+       can find them — the Cmd+K "open on GitHub" action reads these rather
+       than having every entry's file path threaded through the layout. Same
+       read-the-page approach as the prev/next shortcuts. */
+    <div
+      className="mx-auto max-w-2xl px-6 py-14 lg:py-24"
+      data-vault-source={`vault/${entry.sectionDir}/${entry.fileName}.md`}
+      data-vault-source-uk={
+        entry.contentUk
+          ? `vault/${entry.sectionDir}/${entry.fileName}.uk.md`
+          : undefined
+      }
+    >
       <JsonLd data={entryJsonLd(section, entry)} />
       <ReadingProgress />
+      <ReadingPosition />
       <Link
         href={`/${section.slug}`}
         className="text-sm text-[var(--text-tertiary)] transition-colors hover:text-[var(--text)]"

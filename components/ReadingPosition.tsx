@@ -1,0 +1,153 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import T from "@/components/T";
+import { ui } from "@/lib/ui-strings";
+
+/**
+ * Remembers how far into a long note you got, and offers to take you back.
+ *
+ * **It never scrolls on its own.** Restoring the position automatically is the
+ * version of this feature everyone builds first and everyone regrets: you open
+ * a link someone sent you, read two lines, and the page yanks you into the
+ * middle of a paragraph you don't recognise. The offer is a small pill you can
+ * ignore, and ignoring it costs nothing — it hides itself once you start
+ * reading anyway.
+ *
+ * Deliberately quiet about when it appears at all:
+ *
+ * - only past `MIN_DEPTH` — being a screen and a half in is what makes a
+ *   position worth remembering; anything less and you can find it by scrolling
+ * - only when you arrive at the top, so it never argues with the browser's own
+ *   scroll restoration on a back-navigation
+ * - never when the URL carries a `#heading`, which is already an instruction
+ *   about where to land
+ * - never when the note has since become shorter than the saved position,
+ *   which means it was edited and the offset is meaningless
+ *
+ * Storage is one localStorage key holding a map of path → { y, t }, pruned to
+ * the most recent `KEEP` notes. A per-path key would leave a growing pile of
+ * entries in the reader's browser that nothing ever cleans up.
+ */
+
+const KEY = "reading-positions";
+/** Notes remembered at once. Oldest are dropped first. */
+const KEEP = 20;
+/** Forget a position after this long — you've lost the thread by then. */
+const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
+/** Don't offer to restore anything shallower than this. */
+const MIN_DEPTH = 1.5;
+/** Stop offering once the reader has scrolled this far under their own steam. */
+const DISMISS_AFTER = 400;
+
+type Positions = Record<string, { y: number; t: number }>;
+
+function read(): Positions {
+  try {
+    const raw = localStorage.getItem(KEY);
+    return raw ? (JSON.parse(raw) as Positions) : {};
+  } catch {
+    return {}; // private mode, quota, or somebody else's data in our key
+  }
+}
+
+function write(positions: Positions) {
+  try {
+    const fresh = Date.now() - MAX_AGE_MS;
+    const kept = Object.entries(positions)
+      .filter(([, v]) => v.t > fresh)
+      .sort((a, b) => b[1].t - a[1].t)
+      .slice(0, KEEP);
+    localStorage.setItem(KEY, JSON.stringify(Object.fromEntries(kept)));
+  } catch {
+    /* storage full or blocked — the feature simply doesn't remember */
+  }
+}
+
+export default function ReadingPosition() {
+  const pathname = usePathname();
+  const [offer, setOffer] = useState<number | null>(null);
+  /** Set once the reader has moved themselves, so the pill stops competing. */
+  const moved = useRef(false);
+
+  const hide = useCallback(() => setOffer(null), []);
+
+  useEffect(() => {
+    moved.current = false;
+    setOffer(null);
+
+    const vh = document.documentElement.clientHeight;
+    const saved = read()[pathname];
+    const startedAtTop = window.scrollY < 100;
+    const hasHash = window.location.hash.length > 1;
+
+    if (
+      saved &&
+      startedAtTop &&
+      !hasHash &&
+      saved.y > vh * MIN_DEPTH &&
+      // The note may have been rewritten shorter since the visit.
+      saved.y < document.documentElement.scrollHeight - vh
+    ) {
+      setOffer(saved.y);
+    }
+
+    let frame = 0;
+    const onScroll = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        const y = window.scrollY;
+        if (y > DISMISS_AFTER) moved.current = true;
+        if (moved.current) setOffer(null);
+
+        const positions = read();
+        // Near the top means "started again" — drop the mark rather than
+        // leaving a stale one that offers to send them back two lines.
+        if (y < vh * MIN_DEPTH) delete positions[pathname];
+        else positions[pathname] = { y, t: Date.now() };
+        write(positions);
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [pathname]);
+
+  if (offer === null) return null;
+
+  return (
+    <div className="resume-reading">
+      <button
+        type="button"
+        onClick={() => {
+          window.scrollTo({ top: offer, behavior: "smooth" });
+          hide();
+        }}
+        className="resume-reading-go"
+      >
+        <T {...ui.resumeReading} />
+      </button>
+      <button
+        type="button"
+        onClick={hide}
+        aria-label={ui.dismiss.en}
+        className="resume-reading-close"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M18 6 6 18M6 6l12 12"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        </svg>
+      </button>
+    </div>
+  );
+}

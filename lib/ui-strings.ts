@@ -90,6 +90,13 @@ export const ui = {
   },
   linkCopied: { en: "Link copied", uk: "Посилання скопійовано" },
 
+  // reading position (components/ReadingPosition.tsx)
+  resumeReading: {
+    en: "Pick up where you left off",
+    uk: "Продовжити з місця зупинки",
+  },
+  dismiss: { en: "Dismiss", uk: "Сховати" },
+
   // keyboard shortcuts (components/Shortcuts.tsx)
   shortcutSheet: { en: "Keyboard shortcuts", uk: "Клавіатурні скорочення" },
   shortcutHome: { en: "Home", uk: "Головна" },

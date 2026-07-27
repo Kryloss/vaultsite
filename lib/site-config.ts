@@ -16,6 +16,15 @@ export const homeName = { en: "Leshchenko", uk: "Лещенко" };
 /** Canonical URL (custom domain, connected on Vercel). */
 export const siteUrl = "https://kryloss.com";
 
+/**
+ * Public repo, used by the Cmd+K "open this note on GitHub" action to link at
+ * a note's raw vault source. Set to an empty string to drop the action — the
+ * palette hides it when there's nothing to point at.
+ */
+export const repoUrl = "https://github.com/Kryloss/vaultsite";
+/** Branch the site deploys from — the one a note's source should be read on. */
+export const repoBranch = "main";
+
 export const siteDescription =
   "Kyrylo's writing, projects, notes, and the occasional strong opinion.";
 
