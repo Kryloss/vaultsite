@@ -26,22 +26,26 @@ interface GoalItem {
 }
 
 /**
- * "now" section type — a nownownow-style page rendered from structured
- * frontmatter (no bullet list to style). main.md frontmatter:
+ * "now" section type — a nownownow-style page rendered from structured data
+ * (no bullet list to style). main.md keeps the flat keys in frontmatter:
  *
  *   type: now
  *   updated: July 2026        # optional, shown as a pill
  *   updated_uk: липень 2026
- *   goals:
- *     - label: Pass the CompTIA Security+ exam
- *       label_uk: Скласти іспит CompTIA Security+
- *       link: Security+ journey   # optional wiki target / URL → card is a link
- *       note: optional sub-label, e.g. a requirement
- *       note_uk: …
- *       done: true               # optional — fills the checkbox in
+ *   resume_file: …            # optional, the PDF the download button points at
  *
- * The optional `resume:` key (see lib/resume.ts) renders the resume block
- * below the goals.
+ * and writes the goals as a task list in the BODY, where Obsidian can edit
+ * them — `lib/now-content.ts` parses that back into `meta.goals`:
+ *
+ *   ## Goals
+ *
+ *   - [ ] Pass the CompTIA Security+ exam → [[My Security+ journey]]
+ *       - Requires at least a 3.0 GPA     ← indented bullet = sub-label
+ *   - [x] Find a tech-related job         ← done, checkbox fills in
+ *
+ * A `## Résumé` section in the same body (see lib/resume.ts) renders the résumé
+ * block below the goals. A hand-written `goals:`/`resume:` frontmatter block
+ * still works — see docs/DECISIONS.md #26.
  */
 export default function NowList({ section }: ListProps) {
   const goals = (Array.isArray(section.meta.goals)

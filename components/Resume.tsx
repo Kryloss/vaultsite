@@ -8,31 +8,31 @@ import { ui } from "@/lib/ui-strings";
 import T from "@/components/T";
 
 /**
- * Résumé block, rendered under the Now cards from a `resume:` key in the
- * section's main.md frontmatter (same escape hatch the `music` type uses for
- * `playlists:` — see lib/vault.ts → Section.meta).
+ * Résumé block, rendered under the Now cards from `section.meta.resume` — the
+ * same escape hatch the `music` type uses for `playlists:` (see lib/vault.ts →
+ * Section.meta), except this one is written as markdown in the body of
+ * `vault/Now/main.md` and parsed by lib/now-content.ts:
  *
- *   resume:
- *     summary: One-paragraph intro
- *     summary_uk: …
- *     file: Kyrylo Leshchenko Resume.pdf   # any file in the vault → download button
- *     experience:
- *       - role: Barista
- *         org: Starbucks
- *         meta: Upper Canada Mall, Newmarket   # location / sub-label
- *         period: Oct 2025 — present
- *         current: true                        # dot fills in, "Current" pill
- *         link: Some note                      # optional wiki target or URL
- *         points: ["Label — detail", …]        # the em dash splits lead-in from detail
- *     education: [ … same shape … ]
- *     certifications: [ … same shape … ]
- *     skills: ["Label — detail", …]
- *     languages: ["English — fluent", …]
- *     contact: { email, location, location_uk }
+ *   ## Résumé
  *
- * Every field takes a `_uk` sibling (`role_uk`, `points_uk`, `skills_uk`, …);
- * where one is missing the English text renders in both languages, which is
- * exactly what we want for names like "Starbucks" or "CompTIA Security+".
+ *   One-paragraph summary, right under the heading.
+ *
+ *   ### Experience                          ← Experience | Education |
+ *                                             Certifications | Strengths |
+ *                                             Languages | Contact
+ *   #### Barista · Starbucks                ← role · org ("→ [[Note]]" links it)
+ *   *Oct 2025 — present* · Upper Canada Mall, Newmarket #current
+ *      ↑ italics = the date column   ↑ sub-label       ↑ fills the dot,
+ *                                                       adds the "Current" pill
+ *   - **Customer service** — Serves every customer…   ← points; the em dash
+ *                                                       splits lead-in from detail
+ *
+ * Ukrainian comes from the sibling main.uk.md, merged by position into the
+ * `_uk` fields below (`role_uk`, `points_uk`, `skills_uk`, …). Where a
+ * translation is missing — or identical, like "Starbucks" — the English text
+ * renders in both languages, which is exactly what we want.
+ *
+ * `resume_file:` in frontmatter names a file in the vault → download button.
  */
 
 export default function Resume({ section }: { section: Section }) {

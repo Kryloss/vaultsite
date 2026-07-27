@@ -14,6 +14,8 @@ import matter from "gray-matter";
 import GithubSlugger from "github-slugger";
 import type { ResumeData } from "@/lib/resume";
 import { resumeHeadings, resumeSearchText } from "@/lib/resume";
+import type { NowContent } from "@/lib/now-content";
+import { parseNow } from "@/lib/now-content";
 import { ui } from "@/lib/ui-strings";
 
 export const VAULT_DIR = path.join(process.cwd(), "vault");
@@ -107,6 +109,16 @@ export function getSections(): Section[] {
       ? matter(fs.readFileSync(ukPath, "utf8")).content
       : undefined;
 
+    const type = (data.type as string) ?? "posts";
+    // The "now" type writes its goals and résumé as markdown rather than YAML
+    // (Obsidian can't edit nested frontmatter) — lib/now-content.ts turns the
+    // body back into the same `goals`/`resume` shapes the page has always read,
+    // leaving only an optional intro paragraph as prose.
+    const now =
+      type === "now"
+        ? parseNow(content, contentUk, (m) => console.warn(`[now] ${entry.name}: ${m}`))
+        : undefined;
+
     sections.push({
       slug: slugify((data.slug as string) ?? entry.name),
       dirName: entry.name,
@@ -118,10 +130,10 @@ export function getSections(): Section[] {
         | string
         | undefined,
       order: typeof data.order === "number" ? data.order : 100,
-      type: (data.type as string) ?? "posts",
-      content,
-      contentUk,
-      meta: data,
+      type,
+      content: now ? now.intro : content,
+      contentUk: now ? now.introUk : contentUk,
+      meta: now ? nowMeta(data, now) : data,
       draft: isDraft(data),
     });
   }
@@ -129,6 +141,28 @@ export function getSections(): Section[] {
   return sections.sort(
     (a, b) => a.order - b.order || a.title.localeCompare(b.title)
   );
+}
+
+/**
+ * Frontmatter merged with what lib/now-content.ts read out of the body, so the
+ * Now page and the résumé PDF script keep consuming `meta.goals` / `meta.resume`
+ * exactly as they did when those were YAML. The body wins where it has
+ * something to say; a hand-written `goals:`/`resume:` block still works, which
+ * keeps the old format valid. `resume_file:` stays flat in frontmatter — one
+ * file name is the kind of thing Obsidian's Properties panel edits well.
+ */
+function nowMeta(
+  data: Record<string, unknown>,
+  now: NowContent
+): Record<string, unknown> {
+  const meta = { ...data };
+  if (now.goals.length) meta.goals = now.goals;
+  if (now.resume) {
+    const file = (data.resume_file ??
+      (data.resume as ResumeData | undefined)?.file) as string | undefined;
+    meta.resume = file ? { ...now.resume, file } : now.resume;
+  }
+  return meta;
 }
 
 export function getSectionBySlug(slug: string): Section | undefined {

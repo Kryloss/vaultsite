@@ -23,6 +23,7 @@ Git is the single source of truth. The deployed site never reads the filesystem 
 - **Entry** = any other `.md` file in a section folder. Gets a route `/<section>/<slug>`.
 - Slug = slugified folder/file name, overridable via frontmatter `slug`.
 - `draft: true` (or `published: false`) hides sections or entries.
+- A section's body is markdown, rendered as prose above its list — except `type: now`, whose body IS its data: `lib/now-content.ts` parses the goals checklist and the résumé out of it into `section.meta.goals` / `section.meta.resume`. See DECISIONS #26.
 
 ## Rendering pipeline (lib/markdown.ts)
 
