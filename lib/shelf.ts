@@ -88,12 +88,29 @@ const QUEUED = new Set(["want", "queued", "queue", "to-read", "to-watch", "backl
 /** Mediums you watch rather than read — decides which verb the badge uses. */
 const WATCHED = new Set(["movie", "show", "video", "youtube"]);
 
+/**
+ * A note's medium: `medium:` frontmatter, or — when that's missing — the
+ * subfolder it's filed in, so dropping a note into `vault/Shelf/Movies/` is
+ * enough to make it a movie. Frontmatter always wins; a note at the section
+ * root with no `medium:` still lands in the "unsorted" row as before.
+ *
+ * The one reader of `entry.folder` (lib/vault.ts) — everywhere else in the
+ * codebase, folders are organizational only.
+ */
+export function entryMedium(entry: Entry): string | undefined {
+  if (typeof entry.meta.medium === "string" && entry.meta.medium.trim())
+    return entry.meta.medium.trim().toLowerCase();
+  if (!entry.folder) return undefined;
+  // "Books" → "book". Only the last path segment counts, and only for folder
+  // names that name a medium — anything else is just a filing cabinet.
+  const name = entry.folder.split("/").pop()!.toLowerCase();
+  const singular = name.replace(/s$/, "");
+  return MEDIUM_LABELS[singular] ? singular : undefined;
+}
+
 /** Frontmatter → the shape the cards render from. */
 export function toShelfItem(entry: Entry): ShelfItem {
-  const medium =
-    typeof entry.meta.medium === "string"
-      ? entry.meta.medium.toLowerCase()
-      : undefined;
+  const medium = entryMedium(entry);
 
   // `video:` (or `url:`) pointing at YouTube gives us the thumbnail for free —
   // an explicit `cover:` still wins if one is set.

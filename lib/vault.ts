@@ -58,7 +58,16 @@ export interface Entry {
   /** File name without extension, e.g. "How was my day" */
   fileName: string;
   sectionSlug: string;
+  /**
+   * Folder the note lives in, relative to vault/ — "Shelf", or "Shelf/Books"
+   * for a note filed in a subfolder. Used to resolve images that sit beside it.
+   */
   sectionDir: string;
+  /**
+   * Subfolder inside the section, if any ("Books"). Organizational only: it
+   * never affects the URL. `lib/shelf.ts` reads it as a fallback `medium:`.
+   */
+  folder?: string;
   title: string;
   /** Ukrainian title from `title_uk:` frontmatter, shown when the site is in UK mode. */
   titleUk?: string;
@@ -169,20 +178,41 @@ export function getSectionBySlug(slug: string): Section | undefined {
   return getSections().find((s) => s.slug === slug);
 }
 
+/**
+ * Every note file in a section, including ones filed in subfolders.
+ *
+ * Subfolders are for the owner's benefit in Obsidian — `Shelf/Books/`,
+ * `Shelf/Movies/` — and mean nothing to the URL: a note's slug comes from its
+ * file name, so moving a note between folders never changes its address. Only
+ * top-level folders of vault/ are sections (see getSections), so a subfolder
+ * can never become a page of its own. Dot-folders are skipped, which is what
+ * keeps .obsidian and .trash out.
+ */
+function noteFiles(dir: string, sub = ""): { file: string; dir: string; sub: string }[] {
+  const out: { file: string; dir: string; sub: string }[] = [];
+  for (const item of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (item.name.startsWith(".")) continue;
+    if (item.isDirectory()) {
+      out.push(...noteFiles(path.join(dir, item.name), path.join(sub, item.name)));
+      continue;
+    }
+    if (!item.name.toLowerCase().endsWith(".md")) continue;
+    // Skip the section body and its translations (main.md, main.uk.md, …).
+    if (/^main(\.[a-z]{2})?\.md$/i.test(item.name)) continue;
+    // Skip Excalidraw drawing source files (they render as embeds, not pages).
+    if (/\.excalidraw\.md$/i.test(item.name)) continue;
+    // Skip entry translation siblings (Foo.uk.md) — attached to Foo.md below.
+    if (/\.uk\.md$/i.test(item.name)) continue;
+    out.push({ file: item.name, dir, sub });
+  }
+  return out;
+}
+
 /** Entries of a section: every .md except main.md, drafts excluded, newest first. */
 export function getEntries(section: Section): Entry[] {
-  const dir = path.join(VAULT_DIR, section.dirName);
   const entries: Entry[] = [];
 
-  for (const file of fs.readdirSync(dir)) {
-    if (!file.toLowerCase().endsWith(".md")) continue;
-    // Skip the section body and its translations (main.md, main.uk.md, …).
-    if (/^main(\.[a-z]{2})?\.md$/i.test(file)) continue;
-    // Skip Excalidraw drawing source files (they render as embeds, not pages).
-    if (/\.excalidraw\.md$/i.test(file)) continue;
-    // Skip entry translation siblings (Foo.uk.md) — attached to Foo.md below.
-    if (/\.uk\.md$/i.test(file)) continue;
-
+  for (const { file, dir, sub } of noteFiles(path.join(VAULT_DIR, section.dirName))) {
     const { data, content } = matter(fs.readFileSync(path.join(dir, file), "utf8"));
     if (isDraft(data) && !SHOW_DRAFTS) continue;
 
@@ -196,7 +226,11 @@ export function getEntries(section: Section): Entry[] {
       slug: slugify((data.slug as string) ?? fileName),
       fileName,
       sectionSlug: section.slug,
-      sectionDir: section.dirName,
+      // The note's own folder, so images beside it resolve exactly (a cover in
+      // Shelf/Books/ isn't in Shelf/) — POSIX separators, since this ends up in
+      // a URL. Notes at the section root keep the plain section folder name.
+      sectionDir: sub ? [section.dirName, ...sub.split(path.sep)].join("/") : section.dirName,
+      folder: sub ? sub.split(path.sep).join("/") : undefined,
       title: (data.title as string) ?? fileName,
       titleUk: ukTitle(data),
       date: data.date ? String(formatDateValue(data.date)) : undefined,

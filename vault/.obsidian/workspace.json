@@ -13,30 +13,15 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Shelf/Footprints on the Road.md",
+                "file": "Posts/First certification.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Footprints on the Road"
-            }
-          },
-          {
-            "id": "2fc290c3cf89daec",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Home/main.uk.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "main.uk"
+              "title": "First certification"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -212,51 +197,53 @@
       "obsidian-excalidraw-plugin:New drawing": false
     }
   },
-  "active": "2fc290c3cf89daec",
+  "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
-    "Home/main.md",
-    "Home/main.uk.md",
-    "Now/main.md",
-    "Now/main.uk.md",
-    "People/Mykhailo Fedorov.md",
-    "Music/main.md",
-    "Shelf/the-little-prince.jpg",
-    "Shelf/The Order of Time.uk.md",
-    "Shelf/The Hero with a Thousand Faces.uk.md",
-    "Shelf/The Witcher - Sword of Destiny.uk.md",
-    "Shelf/Sapiens.md",
-    "People/main.md",
-    "People/fedorov.png",
+    "Posts/secplus-domains.uk.svg",
+    "Posts/war-newspaper-01.webp",
+    "Posts/attachments/war-newspaper.pdf",
+    "Posts/attachments/war-newspaper-09.webp",
+    "Posts/attachments/war-newspaper-08.webp",
+    "Posts/attachments/war-newspaper-07.webp",
+    "Posts/attachments/war-newspaper-06.webp",
+    "Posts/attachments/war-newspaper-05.webp",
+    "Posts/attachments/war-newspaper-04.webp",
+    "Posts/attachments/war-newspaper-03.webp",
+    "Posts/attachments/war-newspaper-02.webp",
+    "Posts/attachments/war-newspaper-01.webp",
+    "Posts/attachments",
+    "Shelf/Shows/Mr Robot.md",
+    "Shelf/Shows",
+    "Shelf/Movies/Inception.md",
+    "Shelf/Movies",
+    "Shelf/Videos/This man is destroying Putin's empire.uk.md",
+    "Shelf/Videos/This man is destroying Putin's empire.md",
+    "Shelf/Videos/Samsung's Newest Foldable is Here.uk.md",
+    "Shelf/Videos/Samsung's Newest Foldable is Here.md",
+    "Shelf/Videos/I Tested Opus 5 vs Fable 5.uk.md",
+    "Shelf/Videos/I Tested Opus 5 vs Fable 5.md",
+    "Shelf/Videos",
+    "Shelf/Books/The Witcher - The Last Wish.uk.md",
+    "Shelf/Books/The Witcher - The Last Wish.md",
+    "Shelf/Books/The Witcher - Sword of Destiny.uk.md",
+    "Shelf/Books/The Witcher - Sword of Destiny.md",
+    "Shelf/Books/The Order of Time.uk.md",
+    "Shelf/Books/The Order of Time.md",
+    "Shelf/Books/The Old Man and the Sea.uk.md",
+    "Shelf/Books/The Old Man and the Sea.md",
+    "Shelf/Books/The Little Prince.uk.md",
+    "Shelf/Books/The Little Prince.md",
+    "Shelf/Books/The Hero with a Thousand Faces.uk.md",
+    "Shelf/Books/The Hero with a Thousand Faces.md",
+    "Shelf/Books/Sapiens.uk.md",
+    "Shelf/Books/Sapiens.md",
+    "Shelf/Books/New Version.uk.md",
+    "Shelf/Books/New Version.md",
+    "Shelf/Books/Jonathan Livingston Seagull.uk.md",
+    "Shelf/Books",
     "Now/Kyrylo Leshchenko Resume.pdf",
-    "Shelf/Illustrated History of Ukraine's Independence.md",
-    "Shelf/Inception.md",
-    "Shelf/New Version.uk.md",
-    "Shelf/jonathan-livingston-seagull.jpg",
-    "Shelf/sapiens.jpg",
-    "Shelf/Samsung's Newest Foldable is Here.md",
-    "Shelf/The Little Prince.uk.md",
-    "Shelf/The Hero with a Thousand Faces.md",
-    "Shelf/The Little Prince.md",
-    "Shelf/Footprints on the Road.uk.md",
-    "Shelf/Footprints on the Road.md",
-    "Shelf/footprints-on-the-road.jpg",
-    "Shelf/I Tested Opus 5 vs Fable 5.uk.md",
-    "Shelf/I Tested Opus 5 vs Fable 5.md",
-    "Shelf/inception.jpg",
-    "Shelf/Queue example.uk.md",
-    "Shelf/sword-of-destiny.jpg",
-    "Shelf/The Order of Time.md",
-    "Shelf/The Witcher - The Last Wish.uk.md",
-    "Shelf/This man is destroying Putin's empire.uk.md",
-    "Shelf/new-version.jpeg",
     "Posts/war-newspaper.pdf",
-    "Posts/war-newspaper-09.webp",
-    "Posts/war-newspaper-08.webp",
     "Shelf",
-    "Now",
-    "Books",
-    "Projects",
-    "People",
-    "Music"
+    "Now"
   ]
 }

@@ -7,6 +7,7 @@
  * markdown but an aside to a reader.
  */
 import { type Entry } from "./vault";
+import { entryMedium } from "./shelf";
 
 export interface BookQuotes {
   slug: string;
@@ -68,11 +69,7 @@ export function getBookQuotes(entries: Entry[]): BookQuotes[] {
   const out: BookQuotes[] = [];
 
   for (const entry of entries) {
-    const medium =
-      typeof entry.meta.medium === "string"
-        ? entry.meta.medium.toLowerCase()
-        : undefined;
-    if (medium !== "book") continue;
+    if (entryMedium(entry) !== "book") continue;
 
     const en = extractQuotes(entry.content);
     if (en.length === 0) continue;

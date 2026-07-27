@@ -16,6 +16,7 @@ import { getSiblings } from "@/lib/siblings";
 import {
   categoryLabel,
   categorySlug,
+  entryMedium,
   isShelfSection,
   mediumSlug,
 } from "@/lib/shelf";
@@ -81,10 +82,7 @@ export default async function EntryPage({ params }: Props) {
   // Category chips link back to the section, pre-filtered. Shelf entries get
   // their medium's category page; everything else (posts) gets the section
   // page with `?category=`, which its list reads on arrival.
-  const medium =
-    typeof entry.meta.medium === "string"
-      ? entry.meta.medium.toLowerCase()
-      : undefined;
+  const medium = entryMedium(entry);
   const categoryHref = (category: string) =>
     isShelfSection(section) && medium
       ? `/${section.slug}/type/${mediumSlug(medium)}/${categorySlug(category)}`

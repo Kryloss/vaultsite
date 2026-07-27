@@ -56,7 +56,10 @@ export function resolveCoverUrl(
   if (typeof value !== "string" || !value.trim()) return undefined;
   const clean = value.trim().replace(/^!?\[\[/, "").replace(/\]\]$/, "");
   if (/^https?:\/\//i.test(clean)) return clean;
-  return assetUrl(sectionDir, clean);
+  // Resolved like an embed — the note's own folder first, then anywhere in the
+  // vault by name. Covers travel with their notes, so a book filed under
+  // Shelf/Books/ has its jpg there too, not in Shelf/.
+  return resolveImageUrl(sectionDir, clean);
 }
 
 /** Memoized wiki index (built once per build process). */

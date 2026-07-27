@@ -63,7 +63,7 @@ The last page is the works cited, which matters more than it looks. The whole ar
 ![[war-newspaper-09.webp|Page 9 — works cited :: Сторінка 9 — джерела]]
 
 > [!tip] Read the whole thing
-> The newspaper is nine pages, designed to be read at full size: **[download the PDF](/vault-assets/Posts/war-newspaper.pdf)** (2.3 MB).
+> The newspaper is nine pages, designed to be read at full size: **[download the PDF](/vault-assets/Posts/attachments/war-newspaper.pdf)** (2.3 MB).
 
 ## Kramatorsk
 

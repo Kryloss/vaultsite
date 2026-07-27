@@ -8,6 +8,7 @@
  */
 import { siteName, siteUrl, socials } from "./site-config";
 import { resolveCoverUrl } from "./markdown";
+import { entryMedium } from "./shelf";
 import type { Entry, Section } from "./vault";
 
 /** The author of everything here — referenced by @id rather than repeated. */
@@ -62,10 +63,7 @@ function reviewWrapper(item: any, rating: number, url: string): any {
 export function entryJsonLd(section: Section, entry: Entry): object | null {
   const url = `${siteUrl}/${section.slug}/${entry.slug}`;
   const image = abs(resolveCoverUrl(entry.sectionDir, entry.meta.cover));
-  const medium =
-    typeof entry.meta.medium === "string"
-      ? entry.meta.medium.toLowerCase()
-      : undefined;
+  const medium = entryMedium(entry);
 
   // People: the note is about a person, so the page describes one.
   if (section.type === "people") {
