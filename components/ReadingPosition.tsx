@@ -40,6 +40,8 @@ const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 const MIN_DEPTH = 1.5;
 /** Stop offering once the reader has scrolled this far under their own steam. */
 const DISMISS_AFTER = 400;
+/** Quiet time before the position is written — see `persist` below. */
+const SAVE_DEBOUNCE = 400;
 
 type Positions = Record<string, { y: number; t: number }>;
 
