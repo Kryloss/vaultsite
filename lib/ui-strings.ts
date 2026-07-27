@@ -99,6 +99,17 @@ export const ui = {
   maturityBudding: { en: "Budding", uk: "Розвивається" },
   maturityEvergreen: { en: "Evergreen", uk: "Вічнозелена" },
 
+  // résumé (now page)
+  resume: { en: "Résumé", uk: "Резюме" },
+  resumeDownload: { en: "Download PDF", uk: "Завантажити PDF" },
+  resumeExperience: { en: "Experience", uk: "Досвід" },
+  resumeEducation: { en: "Education", uk: "Освіта" },
+  resumeCertifications: { en: "Certifications", uk: "Сертифікації" },
+  resumeSkills: { en: "Strengths", uk: "Сильні сторони" },
+  resumeLanguages: { en: "Languages", uk: "Мови" },
+  resumeContact: { en: "Contact", uk: "Контакти" },
+  resumeCurrent: { en: "Current", uk: "Зараз" },
+
   // 404
   notFoundBody: {
     en: "This page doesn’t exist (or the note behind it was unpublished).",

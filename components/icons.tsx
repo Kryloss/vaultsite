@@ -221,6 +221,26 @@ export function MailIcon({ className }: IconProps) {
   );
 }
 
+export function DownloadIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
+      <path d="M12 3v12" />
+      <path d="m7.5 10.5 4.5 4.5 4.5-4.5" />
+      <path d="M4 17.5V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1.5" />
+    </svg>
+  );
+}
+
+export function BriefcaseIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
+      <rect x="2.5" y="7" width="19" height="13" rx="2.5" />
+      <path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7" />
+      <path d="M2.5 12.5h19" />
+    </svg>
+  );
+}
+
 /* ---------- resolution ---------- */
 
 const byName: Record<string, (p: IconProps) => JSX.Element> = {
@@ -244,6 +264,9 @@ const byName: Record<string, (p: IconProps) => JSX.Element> = {
   instagram: InstagramIcon,
   linkedin: LinkedInIcon,
   mail: MailIcon,
+  briefcase: BriefcaseIcon,
+  work: BriefcaseIcon,
+  download: DownloadIcon,
 };
 
 const byEmoji: Record<string, keyof typeof byName> = {

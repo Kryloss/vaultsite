@@ -6,6 +6,8 @@
 @theme {
   --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Lora italic, used for quotations. Same one-name-one-owner rule as above. */
+  --font-serif: var(--font-lora), Georgia, "Times New Roman", serif;
 }
 
 /* Design tokens — light by default, dark follows system preference. */
@@ -1065,7 +1067,7 @@ body {
    set apart by voice rather than ornament: the same italic serif the quotes
    themselves are set in, so the chip previews where it leads. */
 .chip-quotes {
-  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-style: italic;
   /* Serifs read small next to Inter at the same size. */
   font-size: 0.9375rem;
@@ -1106,7 +1108,7 @@ body {
   margin: 0;
   padding: 0.125rem 0 0.125rem 1rem;
   border-left: 2px solid var(--border);
-  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+  font-family: var(--font-serif);
   font-style: italic;
   font-size: 1.125rem;
   line-height: 1.6;

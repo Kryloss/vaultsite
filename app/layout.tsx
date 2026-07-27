@@ -45,7 +45,10 @@ const lora = Lora({
   subsets: ["latin", "latin-ext", "cyrillic"],
   style: ["italic"],
   display: "swap",
-  variable: "--font-serif",
+  // NOT --font-serif, for the same reason Inter isn't --font-sans: Tailwind
+  // v4 owns that token too, both land on <html>, and the winner would come
+  // down to stylesheet order. globals.css points the token at this one.
+  variable: "--font-lora",
 });
 
 export const metadata: Metadata = {

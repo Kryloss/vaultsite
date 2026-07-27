@@ -25,14 +25,12 @@
             "id": "2fc290c3cf89daec",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "pdf",
               "state": {
-                "file": "Shelf/Sapiens.md",
-                "mode": "source",
-                "source": false
+                "file": "Now/Kyrylo Leshchenko Resume.pdf"
               },
-              "icon": "lucide-file",
-              "title": "Sapiens"
+              "icon": "lucide-file-text",
+              "title": "Kyrylo Leshchenko Resume"
             }
           }
         ],
@@ -214,13 +212,15 @@
   },
   "active": "2fc290c3cf89daec",
   "lastOpenFiles": [
+    "Now/main.md",
+    "Now/Kyrylo Leshchenko Resume.pdf",
+    "Shelf/Sapiens.md",
     "Shelf/Queue example.uk.md",
     "Shelf/Queue example.md",
     "Shelf/sapiens.jpg",
     "Shelf/Sapiens.uk.md",
     "Shelf/The Order of Time.md",
     "Shelf/The Order of Time.uk.md",
-    "Shelf/Sapiens.md",
     "Shelf/Sapiens 1.md",
     "Shelf/Footprints on the Road.md",
     "Shelf/Untitled.md",
@@ -249,8 +249,6 @@
     "Shelf/The Witcher - The Last Wish.md",
     "Shelf/The Witcher - Sword of Destiny.uk.md",
     "Shelf/The Old Man and the Sea.uk.md",
-    "Shelf/The Hero with a Thousand Faces.md",
-    "Shelf/The Old Man and the Sea.md",
     "Shelf",
     "Now",
     "Books",

@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import type { ListProps } from "@/lib/section-types";
 import { resolveIcon, ClockIcon, ArrowIcon } from "@/components/icons";
 import { getWikiIndex } from "@/lib/vault";
+import Resume from "@/components/Resume";
 import T from "@/components/T";
 
 interface NowItem {
@@ -145,6 +146,9 @@ export default function NowList({ section }: ListProps) {
           }
         />
       </p>
+
+      {/* Optional `resume:` frontmatter block — see components/Resume.tsx */}
+      <Resume section={section} />
     </div>
   );
 }
