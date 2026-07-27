@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import type { Section } from "@/lib/vault";
 import { getAssetIndex, getWikiIndex } from "@/lib/vault";
+import type { ResumeData, ResumeRow } from "@/lib/resume";
 import { DownloadIcon, MailIcon } from "@/components/icons";
 import { ui } from "@/lib/ui-strings";
 import T from "@/components/T";
@@ -33,37 +34,6 @@ import T from "@/components/T";
  * where one is missing the English text renders in both languages, which is
  * exactly what we want for names like "Starbucks" or "CompTIA Security+".
  */
-
-interface ResumeRow {
-  role?: string;
-  role_uk?: string;
-  org?: string;
-  org_uk?: string;
-  meta?: string;
-  meta_uk?: string;
-  period?: string;
-  period_uk?: string;
-  note?: string;
-  note_uk?: string;
-  current?: boolean;
-  link?: string;
-  points?: string[];
-  points_uk?: string[];
-}
-
-interface ResumeData {
-  summary?: string;
-  summary_uk?: string;
-  file?: string;
-  experience?: ResumeRow[];
-  education?: ResumeRow[];
-  certifications?: ResumeRow[];
-  skills?: string[];
-  skills_uk?: string[];
-  languages?: string[];
-  languages_uk?: string[];
-  contact?: { email?: string; location?: string; location_uk?: string };
-}
 
 export default function Resume({ section }: { section: Section }) {
   const data = section.meta.resume as ResumeData | undefined;
@@ -98,25 +68,25 @@ export default function Resume({ section }: { section: Section }) {
       )}
 
       {data.experience?.length ? (
-        <Block label={<T {...ui.resumeExperience} />}>
+        <Block id="experience" label={<T {...ui.resumeExperience} />}>
           <Timeline rows={data.experience} badge />
         </Block>
       ) : null}
 
       {data.education?.length ? (
-        <Block label={<T {...ui.resumeEducation} />}>
+        <Block id="education" label={<T {...ui.resumeEducation} />}>
           <Timeline rows={data.education} />
         </Block>
       ) : null}
 
       {data.certifications?.length ? (
-        <Block label={<T {...ui.resumeCertifications} />}>
+        <Block id="certifications" label={<T {...ui.resumeCertifications} />}>
           <Timeline rows={data.certifications} />
         </Block>
       ) : null}
 
       {data.skills?.length ? (
-        <Block label={<T {...ui.resumeSkills} />}>
+        <Block id="strengths" label={<T {...ui.resumeSkills} />}>
           <ul className="flex flex-col gap-2.5">
             {data.skills.map((s, i) => (
               <li key={i} className="text-sm leading-relaxed">
@@ -128,7 +98,7 @@ export default function Resume({ section }: { section: Section }) {
       ) : null}
 
       {data.languages?.length ? (
-        <Block label={<T {...ui.resumeLanguages} />}>
+        <Block id="languages" label={<T {...ui.resumeLanguages} />}>
           <ul className="flex flex-wrap gap-2">
             {data.languages.map((l, i) => (
               <li
@@ -143,7 +113,7 @@ export default function Resume({ section }: { section: Section }) {
       ) : null}
 
       {data.contact?.email && (
-        <Block label={<T {...ui.resumeContact} />}>
+        <Block id="contact" label={<T {...ui.resumeContact} />}>
           <a
             href={`mailto:${data.contact.email}`}
             className="inline-flex items-center gap-2 text-sm text-[var(--text-secondary)] underline decoration-[var(--text-tertiary)] underline-offset-4 transition-colors hover:text-[var(--text)]"
@@ -162,10 +132,25 @@ export default function Resume({ section }: { section: Section }) {
   );
 }
 
-/** Small-caps label in a left column on wide screens, stacked on mobile. */
-function Block({ label, children }: { label: ReactNode; children: ReactNode }) {
+/**
+ * Small-caps label in a left column on wide screens, stacked on mobile.
+ *
+ * `id` matches an entry in lib/resume.ts → RESUME_BLOCKS, which is how
+ * components/lists/NowList.tsx's <Toc> and the Cmd+K search results (lib/vault.ts)
+ * land here. `scroll-mt-24` keeps the fixed header from covering the heading
+ * on arrival — the same margin the markdown headings get in lib/toc.ts.
+ */
+function Block({
+  id,
+  label,
+  children,
+}: {
+  id: string;
+  label: ReactNode;
+  children: ReactNode;
+}) {
   return (
-    <div className="mt-9 sm:grid sm:grid-cols-[104px_1fr] sm:gap-x-5">
+    <div id={id} className="mt-9 scroll-mt-24 sm:grid sm:grid-cols-[104px_1fr] sm:gap-x-5">
       <h3 className="text-[11px] font-semibold uppercase leading-[1.4] tracking-[0.1em] text-[var(--text-tertiary)] sm:pt-[3px]">
         {label}
       </h3>

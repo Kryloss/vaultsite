@@ -101,7 +101,7 @@ export const ui = {
 
   // résumé (now page)
   resume: { en: "Résumé", uk: "Резюме" },
-  resumeDownload: { en: "Download PDF", uk: "Завантажити PDF" },
+  resumeDownload: { en: "PDF", uk: "PDF" },
   resumeExperience: { en: "Experience", uk: "Досвід" },
   resumeEducation: { en: "Education", uk: "Освіта" },
   resumeCertifications: { en: "Certifications", uk: "Сертифікації" },

@@ -46,11 +46,11 @@ resume:
       current: true
       points:
         - "Customer service — Serves every customer attentively enough that they come back, and remembers the regulars' orders."
-        - "Pace under pressure — Handles high-volume rushes without letting drink quality or store standards slip."
+        - "Standards — Follows recipes and store procedure to the letter, so every drink matches what the customer ordered."
         - "Team collaboration — Keeps the floor moving through peak hours and steps in wherever the team is short."
       points_uk:
         - "Робота з клієнтами — Обслуговує кожного гостя так уважно, що люди повертаються, і пам'ятає замовлення постійних відвідувачів."
-        - "Темп під тиском — Витримує години пік, не втрачаючи ні якості напоїв, ні стандартів закладу."
+        - "Стандарти — Точно дотримується рецептур і процедур закладу, тож кожен напій відповідає замовленню."
         - "Командна робота — Тримає темп у години пік і підставляє плече там, де команді бракує рук."
     - role: "Supervisor"
       role_uk: "Супервайзер"
@@ -115,13 +115,13 @@ resume:
     - "Адаптивність — Швидко вчиться, впевнено береться за незнайомі завдання й нові умови."
     - "Техніка — Працює і з залізом, і з софтом, зі щирою цікавістю до того, що відбувається всередині; сам розробляє цей сайт."
   languages:
-    - "English — fluent"
-    - "Ukrainian — native"
-    - "Russian — fluent"
+    - "English"
+    - "Ukrainian"
+    - "Russian"
   languages_uk:
-    - "Англійська — вільно"
-    - "Українська — рідна"
-    - "Російська — вільно"
+    - "Англійська"
+    - "Українська"
+    - "Російська"
   contact:
     email: kyryloleshchenko@gmail.com
     location: "Newmarket, Ontario"

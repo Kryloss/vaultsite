@@ -234,6 +234,6 @@ Two fixes were applied, in order:
 
 **`scripts/build-resume-pdf.py` reads that same frontmatter** and renders the downloadable PDF with WeasyPrint, so the page and the file can't drift. It is run by hand, not wired into `prebuild`: it needs Python and WeasyPrint, and a missing dependency must never be able to break `npm run build` or a Vercel deploy. The generated PDF sits in `vault/Now/`, so `sync-assets.mjs` publishes it and `getAssetIndex()` resolves the download button's href.
 
-**Phone number and street address exist only in that script's `PRIVATE` dict.** They belong on a résumé sent to an employer, not on a public page indexed by search engines — the site shows email and city.
+**No phone number and no street address anywhere in this repo.** The PDF is downloadable from a public page, so it carries exactly what the page carries: email and city, both read from `contact:` in the frontmatter. A first version kept them in a `PRIVATE` dict inside the script, reasoning that the PDF is what employers see — but the PDF *is* the public page, so that only moved the exposure one click away. Add personal contact details by hand to a copy sent to an employer.
 
 **Bullet convention:** points are plain strings written `Label — detail`; the component and the PDF script both split on the em dash to bold the lead-in. Keeps the frontmatter readable in Obsidian instead of nesting an object per bullet.

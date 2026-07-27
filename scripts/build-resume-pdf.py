@@ -3,8 +3,8 @@
 vault/Now/main.md.
 
 Single source of truth: the Now page and the PDF read the same frontmatter, so
-editing the note updates both. Private details (phone, street address) live
-only in PRIVATE below — they stay out of the vault and off the website.
+editing the note updates both — including the contact line, which is email and
+city only. Nothing personal goes in this file; see the note above `contact`.
 
 Run manually after editing the resume frontmatter (NOT part of the build):
 
@@ -26,10 +26,9 @@ VAULT = Path(__file__).resolve().parent.parent / "vault"
 SRC = VAULT / "Now" / "main.md"
 OUT = VAULT / "Now" / "Kyrylo Leshchenko Resume.pdf"
 
-PRIVATE = {
-    "phone": "+1 (416) 876-8096",
-    "address": "257 Plymouth Trail, Newmarket, ON L3Y 6G6",
-}
+# No phone number and no street address, here or in the vault. This PDF is
+# downloadable from a public page, so it carries exactly what the page carries:
+# email and city. Add the rest by hand to a copy you send to an employer.
 
 text = SRC.read_text(encoding="utf-8")
 fm = re.match(r"^---\n(.*?)\n---", text, re.S)
@@ -75,14 +74,7 @@ def section(label, body):
 
 contact = r.get("contact", {})
 contact_line = " · ".join(
-    filter(
-        None,
-        [
-            E(contact.get("email", "")),
-            E(PRIVATE["phone"]),
-            E(PRIVATE["address"]),
-        ],
-    )
+    E(v) for v in (contact.get("email"), contact.get("location")) if v
 )
 
 blocks = [
