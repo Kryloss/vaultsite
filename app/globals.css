@@ -874,6 +874,67 @@ body {
   }
 }
 
+/* ---------- "Pick up where you left off" (components/ReadingPosition.tsx) ----
+   Bottom-right so it can't collide with the mobile contents pill, which sits
+   bottom-left. Same translucent chip material as the rest of the chrome. */
+.resume-reading {
+  position: fixed;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  padding: 0.25rem 0.25rem 0.25rem 0.875rem;
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.08);
+  font-size: 0.8125rem;
+  animation: item-in 0.32s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation-delay: 600ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  .resume-reading {
+    box-shadow: 0 6px 20px rgb(0 0 0 / 0.4);
+  }
+}
+
+.resume-reading-go {
+  padding: 0.25rem 0;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 120ms ease;
+}
+
+.resume-reading-go:hover {
+  color: var(--text);
+}
+
+.resume-reading-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.resume-reading-close:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.resume-reading-close svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
 /* ---------- Keyboard shortcut keys (components/Shortcuts.tsx) ---------- */
 .shortcut-key {
   min-width: 1.5rem;

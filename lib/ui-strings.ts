@@ -107,6 +107,8 @@ export const ui = {
   actionCopyMarkdown: { en: "Copy page as Markdown", uk: "Копіювати сторінку як Markdown" },
   actionCopyLink: { en: "Copy link to this page", uk: "Копіювати посилання на сторінку" },
   actionRandom: { en: "Open a random note", uk: "Відкрити випадкову нотатку" },
+  actionGithub: { en: "Open this note on GitHub", uk: "Відкрити нотатку на GitHub" },
+  searchThisPage: { en: "Searching this page", uk: "Пошук на цій сторінці" },
   actionsGroup: { en: "Actions", uk: "Дії" },
   actionDone: { en: "Done", uk: "Готово" },
 

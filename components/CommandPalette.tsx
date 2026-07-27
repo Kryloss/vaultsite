@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { repoBranch, repoUrl } from "@/lib/site-config";
 import type { SearchItem } from "@/lib/vault";
 import T from "@/components/T";
 import { useLang } from "@/components/useLang";
@@ -60,6 +61,7 @@ export default function CommandPalette({
   const inputRef = useRef<HTMLInputElement>(null);
   const flashTimer = useRef<number | undefined>(undefined);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (open) {
@@ -73,15 +75,35 @@ export default function CommandPalette({
 
   useEffect(() => () => window.clearTimeout(flashTimer.current), []);
 
+  /**
+   * A leading `>` scopes the search to the page you're on — its own entry plus
+   * every heading in it. A long note is the one place where the global index
+   * is the wrong index: you know which note you're in, you just can't find the
+   * section. `>` alone (no query) lists the note's outline.
+   *
+   * The prefix rather than scoping automatically on a long page: an implicit
+   * mode that silently hides most of your results is worse than one keystroke.
+   */
+  const scoped = query.startsWith(">");
+
   const { results, fuzzy } = useMemo(() => {
     // Heading results exist once per language (each has its own anchor); show
     // only the active one. Page results carry no `lang` and always show.
-    const pool = items.filter((i) => !i.lang || i.lang === lang);
+    let pool = items.filter((i) => !i.lang || i.lang === lang);
+    if (scoped) {
+      const here = pathname.replace(/\/$/, "") || "/";
+      pool = pool.filter((i) => (i.href.split("#")[0].replace(/\/$/, "") || "/") === here);
+    }
     // Accent-stripped so "resume" matches "Résumé" — see lib/fuzzy.ts → fold().
-    const q = fold(query.trim());
-    // With no query, lead with pages rather than a wall of headings.
+    const q = fold((scoped ? query.slice(1) : query).trim());
+    // With no query, lead with pages rather than a wall of headings — except
+    // when scoped, where the headings ARE the answer: `>` on its own prints
+    // the note's outline.
     if (!q) {
-      return { results: pool.filter((i) => !i.lang).slice(0, 8), fuzzy: false };
+      return {
+        results: (scoped ? pool : pool.filter((i) => !i.lang)).slice(0, 8),
+        fuzzy: false,
+      };
     }
     const scored = pool
       .map((item) => {
@@ -123,7 +145,7 @@ export default function CommandPalette({
       .slice(0, 5);
 
     return { results: near.map((r) => r.item), fuzzy: near.length > 0 };
-  }, [query, items, lang]);
+  }, [query, items, lang, scoped, pathname]);
 
   const go = useCallback(
     (href: string) => {
@@ -166,6 +188,26 @@ export default function CommandPalette({
           copyText(`${location.origin}${location.pathname}?lang=${lang}`).then(
             () => undefined
           ),
+      },
+      {
+        id: "github",
+        label: ui.actionGithub,
+        // The entry page carries its own vault paths as data attributes; no
+        // repo configured, or not on an entry, and the action doesn't exist.
+        when: () => !!repoUrl && !!sourcePath(lang),
+        run: () => {
+          const path = sourcePath(lang);
+          if (!path) return;
+          window.open(
+            `${repoUrl}/blob/${repoBranch}/${path
+              .split("/")
+              .map(encodeURIComponent)
+              .join("/")}`,
+            "_blank",
+            "noopener,noreferrer"
+          );
+          onClose();
+        },
       },
       {
         id: "random",
