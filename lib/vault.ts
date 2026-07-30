@@ -263,7 +263,7 @@ export function getEntry(sectionSlug: string, entrySlug: string): Entry | undefi
 }
 
 /** Normalizes frontmatter dates (Date objects or strings) to YYYY-MM-DD. */
-function formatDateValue(value: unknown): string {
+export function formatDateValue(value: unknown): string {
   if (value instanceof Date) return value.toISOString().slice(0, 10);
   return String(value).slice(0, 10);
 }

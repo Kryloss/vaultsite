@@ -34,9 +34,14 @@ export function youtubeWatchUrl(id: string): string {
   return `https://www.youtube.com/watch?v=${id}`;
 }
 
+/** Player URL — the iframe's `src`, and the `embedUrl` of a VideoObject. */
+export function youtubeEmbedUrl(id: string): string {
+  return `https://www.youtube-nocookie.com/embed/${id}`;
+}
+
 /** Embed iframe HTML — used by the markdown pipeline to auto-embed links. */
 export function youtubeEmbedHtml(id: string): string {
-  const src = `https://www.youtube-nocookie.com/embed/${id}`;
+  const src = youtubeEmbedUrl(id);
   return (
     `<div class="youtube-block">` +
     `<iframe class="youtube-embed" src="${src}" title="YouTube video player" ` +

@@ -9,7 +9,13 @@
 import { siteName, siteUrl, socials } from "./site-config";
 import { resolveCoverUrl } from "./markdown";
 import { entryMedium } from "./shelf";
-import type { Entry, Section } from "./vault";
+import {
+  youtubeEmbedUrl,
+  youtubeId,
+  youtubeThumbnail,
+  youtubeWatchUrl,
+} from "./youtube";
+import { formatDateValue, type Entry, type Section } from "./vault";
 
 /** The author of everything here — referenced by @id rather than repeated. */
 const PERSON_ID = `${siteUrl}/#person`;
@@ -21,7 +27,14 @@ function abs(path?: string): string | undefined {
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-/** schema.org type for a shelf entry, from its `medium:`. */
+/**
+ * schema.org type for a shelf entry, from its `medium:`.
+ *
+ * Videos are deliberately NOT typed VideoObject here: that type has required
+ * fields this function can't see, and Google reports a partial VideoObject as
+ * an error rather than ignoring it. `videoObject()` below builds the complete
+ * one when the note has what it needs; this is the fallback when it doesn't.
+ */
 function shelfType(medium?: string): string {
   switch (medium) {
     case "book":
@@ -30,12 +43,47 @@ function shelfType(medium?: string): string {
       return "Movie";
     case "show":
       return "TVSeries";
-    case "video":
-    case "youtube":
-      return "VideoObject";
     default:
       return "CreativeWork";
   }
+}
+
+/**
+ * A complete VideoObject for a shelf note whose `video:` points at YouTube —
+ * or null, when the note can't fill in everything Google requires.
+ *
+ * Required by Google: `name`, `description`, `thumbnailUrl`, `uploadDate`
+ * (plus `contentUrl` or `embedUrl`, which is only a recommendation but is free
+ * here). Three of those come from the note and the video ID. `uploadDate` is
+ * the video's own publication date, which nothing on this site knows — the
+ * note's `date:` is when Kyrylo shelved it, so using it would state something
+ * false — and deriving it needs the YouTube Data API, which the shelf
+ * deliberately does without. So it's an explicit `uploaded:` frontmatter key,
+ * and a note without one simply describes itself as a CreativeWork: no rich
+ * result, but no invalid markup either.
+ *
+ * (DECISIONS #39 — this is what the Search Console "Missing field
+ * thumbnailUrl / uploadDate" report was about.)
+ */
+function videoObject(entry: Entry, image?: string): any | null {
+  const link = entry.meta.video ?? entry.meta.url;
+  const id = typeof link === "string" ? youtubeId(link) : undefined;
+  const uploaded = entry.meta.uploaded
+    ? formatDateValue(entry.meta.uploaded)
+    : undefined;
+  if (!id || !uploaded || !entry.description) return null;
+
+  return {
+    "@type": "VideoObject",
+    name: entry.title,
+    description: entry.description,
+    // An explicit `cover:` wins, since that's the art the note actually shows;
+    // otherwise the video ID gives us YouTube's own thumbnail for free.
+    thumbnailUrl: image ?? youtubeThumbnail(id),
+    uploadDate: uploaded,
+    embedUrl: youtubeEmbedUrl(id),
+    url: youtubeWatchUrl(id),
+  };
 }
 
 /**
@@ -126,7 +174,7 @@ export function entryJsonLd(section: Section, entry: Entry): object | null {
 
   // Shelf: the book/film itself, wrapped in a Review when it's rated.
   if (section.type === "shelf" || section.type === "books") {
-    const work: any = {
+    const work: any = videoObject(entry, image) ?? {
       "@type": shelfType(medium),
       name: entry.title,
       ...(entry.description ? { description: entry.description } : {}),
