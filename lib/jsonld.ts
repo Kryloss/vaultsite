@@ -81,8 +81,12 @@ function videoObject(entry: Entry, image?: string): any | null {
     // otherwise the video ID gives us YouTube's own thumbnail for free.
     thumbnailUrl: image ?? youtubeThumbnail(id),
     uploadDate: uploaded,
+    // The player, not the media file: `contentUrl` wants a real video file,
+    // which YouTube doesn't hand out. Either satisfies Google.
     embedUrl: youtubeEmbedUrl(id),
-    url: youtubeWatchUrl(id),
+    // The video lives on YouTube too — `url` is left to the caller, which
+    // fills in this note's own address like it does for every other medium.
+    sameAs: youtubeWatchUrl(id),
   };
 }
 
