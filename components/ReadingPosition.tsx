@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import T from "@/components/T";
+import { BookOpenIcon } from "@/components/icons";
 import { ui } from "@/lib/ui-strings";
 
 /**
@@ -178,34 +179,31 @@ export default function ReadingPosition() {
 
   if (offer === null) return null;
 
+  /**
+   * One chip, built exactly like the mobile contents pill in Toc.tsx — same
+   * rounded-full translucent material, same blur, same hover. It sits at the
+   * bottom of the same column the contents rail occupies, so on a wide screen
+   * the two read as one family of controls beside the article rather than two
+   * unrelated things stuck to opposite corners of the window.
+   *
+   * No dismiss button: matching that pill means one control, and the offer
+   * already withdraws itself the moment you scroll (`DISMISS_AFTER`). Escape
+   * closes it for anyone who wants it gone without moving.
+   */
   return (
-    <div className="resume-reading">
-      <button
-        type="button"
-        onClick={() => {
-          window.scrollTo({ top: offer, behavior: "smooth" });
-          hide();
-        }}
-        className="resume-reading-go"
-      >
+    <button
+      type="button"
+      onClick={() => {
+        window.scrollTo({ top: offer, behavior: "smooth" });
+        hide();
+      }}
+      onKeyDown={(e) => e.key === "Escape" && hide()}
+      className="resume-reading"
+    >
+      <BookOpenIcon className="resume-reading-icon" />
+      <span className="resume-reading-label">
         <T {...ui.resumeReading} />
-      </button>
-      <button
-        type="button"
-        onClick={hide}
-        aria-label={ui.dismiss.en}
-        className="resume-reading-close"
-      >
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M18 6 6 18M6 6l12 12"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
-        </svg>
-      </button>
-    </div>
+      </span>
+    </button>
   );
 }

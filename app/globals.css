@@ -874,9 +874,12 @@ body {
   }
 }
 
-/* ---------- "Pick up where you left off" (components/ReadingPosition.tsx) ----
-   Bottom-right so it can't collide with the mobile contents pill, which sits
-   bottom-left. Same translucent chip material as the rest of the chrome. */
+/* ---------- "Continue" (components/ReadingPosition.tsx) ----------
+
+   The same chip as .toc-bar below — rounded-full, translucent, blurred — so
+   the two read as one family rather than two unrelated things stuck to the
+   window. Below 1280px it takes the bottom-RIGHT corner, since the contents
+   pill owns the bottom-left. */
 .resume-reading {
   position: fixed;
   right: 0.75rem;
@@ -884,55 +887,47 @@ body {
   z-index: 30;
   display: flex;
   align-items: center;
-  gap: 0.125rem;
-  padding: 0.25rem 0.25rem 0.25rem 0.875rem;
-  border: 1px solid var(--border);
-  border-radius: 9999px;
-  background: color-mix(in srgb, var(--bg) 80%, transparent);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 6px 20px rgb(0 0 0 / 0.08);
-  font-size: 0.8125rem;
+  gap: 0.4375rem;
+  max-width: calc(100vw - 1.5rem);
+  padding: 0.4375rem 0.875rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 75%, transparent);
+  backdrop-filter: blur(12px);
+  cursor: pointer;
+  transition: background-color 120ms ease;
   animation: item-in 0.32s cubic-bezier(0.22, 0.61, 0.36, 1) both;
   animation-delay: 600ms;
 }
 
-@media (prefers-color-scheme: dark) {
+.resume-reading:hover {
+  background: color-mix(in srgb, var(--bg-hover) 88%, transparent);
+}
+
+/* From 1280px the contents rail exists, and this drops to the foot of that
+   same column — beside the article instead of out at the window's edge.
+   `left` matches .toc-rail exactly; see the geometry note there. */
+@media (min-width: 1280px) {
   .resume-reading {
-    box-shadow: 0 6px 20px rgb(0 0 0 / 0.4);
+    left: calc(50% + 22rem);
+    right: auto;
+    max-width: 13rem;
   }
 }
 
-.resume-reading-go {
-  padding: 0.25rem 0;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: color 120ms ease;
-}
-
-.resume-reading-go:hover {
-  color: var(--text);
-}
-
-.resume-reading-close {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 9999px;
+.resume-reading-icon {
+  width: 0.9375rem;
+  height: 0.9375rem;
+  flex-shrink: 0;
   color: var(--text-tertiary);
-  cursor: pointer;
-  transition: color 120ms ease, background 120ms ease;
 }
 
-.resume-reading-close:hover {
-  background: var(--bg-hover);
+.resume-reading-label {
+  overflow: hidden;
+  font-size: 0.875rem;
+  font-weight: 500;
   color: var(--text);
-}
-
-.resume-reading-close svg {
-  width: 0.875rem;
-  height: 0.875rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ---------- Keyboard shortcut keys (components/Shortcuts.tsx) ---------- */

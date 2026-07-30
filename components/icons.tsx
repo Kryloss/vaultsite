@@ -71,6 +71,16 @@ export function BookIcon({ className }: IconProps) {
   );
 }
 
+/** An open book — "you were reading this". Used by ReadingPosition. */
+export function BookOpenIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
+      <path d="M12 7.5A4.5 4.5 0 0 0 7.5 3H2.5v14H8a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5.5V3H16.5A4.5 4.5 0 0 0 12 7.5Z" />
+      <path d="M12 7.5V21" />
+    </svg>
+  );
+}
+
 export function ArrowIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>

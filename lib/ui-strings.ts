@@ -91,11 +91,8 @@ export const ui = {
   linkCopied: { en: "Link copied", uk: "Посилання скопійовано" },
 
   // reading position (components/ReadingPosition.tsx)
-  resumeReading: {
-    en: "Pick up where you left off",
-    uk: "Продовжити з місця зупинки",
-  },
-  dismiss: { en: "Dismiss", uk: "Сховати" },
+  /** The pill's whole label. Short on purpose — the icon carries the rest. */
+  resumeReading: { en: "Continue", uk: "Продовжити" },
 
   // keyboard shortcuts (components/Shortcuts.tsx)
   shortcutSheet: { en: "Keyboard shortcuts", uk: "Клавіатурні скорочення" },
