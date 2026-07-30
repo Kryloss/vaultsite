@@ -111,7 +111,8 @@ author: <channel name>
 medium: video
 categories: [Tech, Education]
 video: https://www.youtube.com/watch?v=<id>
-date: YYYY-MM-DD
+uploaded: YYYY-MM-DD      # the VIDEO's publish date, from YouTube — ask if unsure
+date: YYYY-MM-DD          # the day it went on the shelf
 description: "<one sentence>"
 description_uk: "<one sentence>"
 ---
