@@ -62,7 +62,7 @@ function shelfType(medium?: string): string {
  * and a note without one simply describes itself as a CreativeWork: no rich
  * result, but no invalid markup either.
  *
- * (DECISIONS #39 — this is what the Search Console "Missing field
+ * (DECISIONS #41 — this is what the Search Console "Missing field
  * thumbnailUrl / uploadDate" report was about.)
  */
 function videoObject(entry: Entry, image?: string): any | null {

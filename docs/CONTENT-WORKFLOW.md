@@ -133,10 +133,13 @@ description_uk: "<one sentence>"
 - **Get the title and channel from the horse's mouth**, not from a search
   result — YouTube's oEmbed endpoint is keyless and exact:
   `https://www.youtube.com/oembed?url=<video url>&format=json`
-- **`Released` is the upload date.** oEmbed does NOT return it and watch pages
-  don't fetch cleanly, so it usually can't be verified from here. Leave `—` and
-  ask him for it rather than guessing — and never quietly reuse today's date,
-  which is the day *he* watched it, not the day it went up.
+- **`Released` is the upload date, and so is `uploaded:`.** oEmbed does NOT
+  return it and watch pages don't fetch cleanly, so it usually can't be
+  verified from here. Leave both blank and ask him rather than guessing — and
+  never quietly reuse today's date, which is the day *he* watched it, not the
+  day it went up. The frontmatter key earns its keep: with `uploaded:` the page
+  ships a full `VideoObject` and can appear as a video result in Google;
+  without it the note falls back to a plain `CreativeWork` (DECISIONS #41).
 - The row layout uses 16:9 cards for videos; nothing else needs configuring.
 
 ### Person — `vault/People/<Full Name>.md`

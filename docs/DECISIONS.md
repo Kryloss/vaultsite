@@ -439,3 +439,13 @@ Four small movements, each solving a legibility problem rather than decorating o
 **A second, quieter version of the same mistake:** the decision about whether to offer at all checked `window.scrollY < 100` synchronously on mount, which on a client-side navigation can still be reading the *previous* page's scroll position. That check now waits a frame.
 
 Both are the same class of bug — treating the scroll position as a fact you can read at any time, when during a navigation it belongs to a page that no longer exists.
+
+## 41. A video is only a VideoObject once it can prove it (2026-07-30)
+
+Search Console reported three Videos structured-data issues on the site — "Missing field `thumbnailUrl`", "Missing field `uploadDate`", and "Either `contentUrl` or `embedUrl` should be specified" — one per note in `vault/Shelf/Videos/`. The cause was `shelfType()` in `lib/jsonld.ts` mapping `medium: video` to `VideoObject` and then filling in the same generic fields it uses for a book: `name`, `description`, `image`, `author`. `VideoObject` has required properties that a `Book` doesn't, and Google treats a partial one as an error rather than ignoring it — so the markup was strictly worse than no markup at all.
+
+**Type is now decided by what the note can actually supply, not by its `medium:`.** `videoObject()` builds the complete object — `name`, `description`, `thumbnailUrl`, `uploadDate`, `embedUrl` — or returns null, and null falls back to `CreativeWork`. Nothing can emit a half-populated `VideoObject` any more, which is the property worth keeping: the next medium added to the shelf can't reintroduce this bug by accident.
+
+**`uploadDate` is a new `uploaded:` frontmatter key, because it's the one field the site can't derive.** The thumbnail comes free from the video ID and the embed URL is a string template, but a video's publication date needs the YouTube Data API — a key, a quota, and a build-time network call, all of which the shelf deliberately does without (it runs on oEmbed and `i.ytimg.com` alone). The note's own `date:` is *not* a stand-in: that's the day it went on the shelf, and using it would state something false about someone else's video to a search engine. So it's asked for and written down, and a note without it simply doesn't claim to be a video.
+
+**`embedUrl`, not `contentUrl`.** `contentUrl` wants an actual media file; YouTube doesn't hand one out. `embedUrl` points at the same `youtube-nocookie.com` player the page already embeds, and Google accepts either. The watch URL goes in `sameAs` rather than `url`, so `url` stays the note's own address — consistent with every other shelf type, and with the `Review` wrapper that goes around rated entries.
