@@ -20,11 +20,12 @@ import { ui } from "@/lib/ui-strings";
  *
  * - only past `MIN_DEPTH` — being a screen and a half in is what makes a
  *   position worth remembering; anything less and you can find it by scrolling
- * - only when you arrive at the top, so it never argues with the browser's own
- *   scroll restoration on a back-navigation. Note that this is why the pill is
- *   rarer on a phone than on a desktop: mobile browsers restore scroll on
- *   reload and on back, and when they've already put you where you were there
- *   is nothing left to offer
+ * - only when you land somewhere other than the mark itself, so it never
+ *   argues with the browser's own scroll restoration. On a phone that
+ *   restoration usually lands exactly on the saved position, in which case
+ *   there is genuinely nothing to offer — but a restoration that lands
+ *   somewhere ELSE still gets the offer, which the old "must arrive at the
+ *   top" rule refused
  * - never when the URL carries a `#heading`, which is already an instruction
  *   about where to land
  * - never when the note has since become shorter than the saved position,
@@ -42,6 +43,15 @@ const KEEP = 20;
 const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 /** Don't offer to restore anything shallower than this. */
 const MIN_DEPTH = 1.5;
+
+/**
+ * Land within this fraction of a screen of the saved mark and the offer stays
+ * quiet — the reader is already there, and "Continue" would scroll them a
+ * couple of lines. Half a screen, because a browser's restored position and
+ * the one we wrote can differ by a little when images settle at a different
+ * height than they did last time.
+ */
+const ALREADY_THERE = 0.5;
 /**
  * Keys that mean "the reader is moving the page themselves" — the same set
  * components/Toc.tsx uses, and for the same reason: a scroll event says the
@@ -152,10 +162,23 @@ export default function ReadingPosition() {
     const decide = window.setTimeout(() => {
       lastY = window.scrollY;
       const pageHeight = document.documentElement.scrollHeight;
+      /**
+       * How far the reader landed from the mark. The gate used to be "arrived
+       * near the top", which is a statement about the page rather than about
+       * whether the offer is useful — and iOS Safari restores scroll on back
+       * and reload, so it landed the reader exactly on their saved position
+       * and then declined to offer *because they weren't at the top*. The
+       * conclusion was right (nothing to offer) but the reasoning only worked
+       * by accident: a browser restoring to a DIFFERENT place, which is the
+       * common case when a note has been edited or opened at another width,
+       * was refused just as firmly.
+       */
+      const distance = saved ? Math.abs(window.scrollY - saved.y) : 0;
+
       const gates = {
         "has saved position": !!saved,
         "reader hasn't scrolled yet": !moved.current,
-        "arrived near the top": window.scrollY < 100,
+        "not already at the mark": !saved || distance > vh * ALREADY_THERE,
         "no #heading in the URL": !hasHash,
         "saved deeper than 1.5 screens": !!saved && saved.y > vh * MIN_DEPTH,
         "note still long enough": !!saved && saved.y < pageHeight - vh,
@@ -171,6 +194,7 @@ export default function ReadingPosition() {
           `keys ${Object.keys(read()).length}`,
           `scrollY ${Math.round(window.scrollY)} · vh ${vh} · page ${pageHeight}`,
           `needs y > ${Math.round(vh * MIN_DEPTH)}`,
+          `distance from mark ${Math.round(distance)} (needs > ${Math.round(vh * ALREADY_THERE)})`,
           ...Object.entries(gates).map(([k, v]) => `${v ? "PASS" : "FAIL"} ${k}`),
         ]);
       }
