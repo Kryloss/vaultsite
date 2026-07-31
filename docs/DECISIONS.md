@@ -524,3 +524,35 @@ The command palette had `role="dialog"`, `aria-modal` and focus handling; the si
 `npm test` gained `scripts/test-resolve.mjs`, a loader hook teaching Node the `@/` alias and extensionless imports. Writing extensions into every import would have made the source worse in order to make testing possible. `lib/*.ts` also stopped mixing `@/lib/x` and `./x` for its own siblings — one convention, and the relative one is what the rest of the folder already used.
 
 New coverage: the Now page's parser (which turns hand-written markdown into structured data by shape-matching, and fails silently) and the shelf's URL vocabulary plus `slugify` (which decides addresses that already exist in the wild). Writing the first one immediately corrected a claim in CLAUDE.md — `#current` sits at the end of the period line, not on a line of its own.
+
+## 44. Motion that knows where it's going (2026-07-30)
+
+Four movements, one API. `lib/view-transition.ts` holds the capability check and the rules; everything else calls it.
+
+**Nothing intercepts anything unless it can do better.** Firefox has no `startViewTransition`, and `prefers-reduced-motion` opts out entirely (a transition can't be shortened to nothing — it either animates or it doesn't). In both cases the helper runs the update and returns, `<Link>` behaves exactly as it did, and the CSS-only `.page-in` fade stays in charge. **A missing animation must never become a missing navigation**, which is the whole reason the check lives in one place instead of at three call sites.
+
+### Page transitions are hand-rolled, and that was the choice
+
+Next has `experimental.viewTransition`, and it switches the app onto React's experimental channel to get it. For a repo whose stated goal is "simple, documented, low-maintenance", swapping the React build for an unreleased one to animate a page change is a bad trade. So `components/PageTransitions.tsx` intercepts the click itself.
+
+- **The click is caught in the CAPTURE phase on `document`**, which runs before React's delegated handlers — so Next's `Link` never sees it and can't start a second navigation.
+- **The transition is handed a promise that settles when the route has rendered**, which is what lets an asynchronous client navigation behave like a document swap. `usePathname()` changing is the signal. There's a 700ms timeout behind it: the API freezes the page until its callback settles, so a render that never lands must not be able to freeze the site. Pages are static and prefetched; it should never fire.
+- **Direction comes from how you moved** — a link is forward, `popstate` is back — and lands on `<html data-nav>`, which picks the keyframes. On `popstate` the URL has already changed but React hasn't re-rendered, so the snapshot taken in that handler is still the old page, which is exactly what it needs.
+- **The title travels.** A list row's title and the entry's `<h1>` are the same words, so they share `view-transition-name: entry-title` for the length of the animation and the browser tweens between them. Rows opt in with `data-vt-title`; the name is applied at click time and removed when the animation finishes, because **two rendered elements may never share a name** — leaving it set would break the next transition rather than this one, which is the kind of bug that gets found weeks later.
+
+### The shelf fade is gone
+
+#38 added a fade at whichever edge had more to scroll, to replace the scrollbar the rows hide. It was pretty and it was passive: it announced that there was more and offered nothing to do about it, while dimming the covers it was drawing attention to. Two controls replace it and both can be acted on.
+
+- **Drag-to-scroll** on mouse pointers only. A trackpad already swipes a row sideways; a mouse has no way at all. Touch is left to the browser, since taking the pointer would trade momentum scrolling for something worse.
+- **It becomes a drag only after ~6px of movement**, and the click that ends one is swallowed — the cover under the pointer at the end of a swipe is not the cover you meant to open.
+- **That swallow needed a flag on `<html>`.** `PageTransitions` listens in the capture phase on `document`, which fires before any React handler, so it would have navigated before the row could cancel. `data-row-drag` is checked there and set here. Two features that never import each other still have to agree about one click.
+- **Arrows** page by 80% of the visible width, appear on hover, and each hides at its own end. They're buttons, so a keyboard can reach the row — which the fade never allowed.
+
+### The lightbox zooms
+
+The clicked figure and the overlay's copy are the same picture, so they share a name and the browser grows one into the other.
+
+- **`flushSync` around the state update**, or React would still be scheduling the render when the API takes its "after" snapshot and there would be nothing to animate to.
+- **The name is moved, not copied.** The thumbnail is still on the page underneath the overlay; it releases the name inside the same callback that applies it to the overlay, and takes it back on the way out. Same uniqueness rule as the title morph, arrived at from the opposite direction.
+- **Neither snapshot cross-fades** — showing two copies of one picture at two sizes while they travel looks like a double exposure. The group's growth carries the whole effect.

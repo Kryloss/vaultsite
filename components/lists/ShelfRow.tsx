@@ -114,6 +114,11 @@ export default function ShelfRow({
       // Captured only once it's really a drag, so a plain click is untouched.
       el.setPointerCapture(e.pointerId);
       el.classList.add("is-dragging");
+      /* components/PageTransitions.tsx listens for clicks in the CAPTURE phase
+         on `document`, which runs before any React handler — including the
+         swallow below. Without this flag it would navigate to whichever cover
+         the drag happened to end on. */
+      document.documentElement.dataset.rowDrag = "1";
     }
     el.scrollLeft = start.current.scroll - dx;
   };
@@ -124,6 +129,12 @@ export default function ShelfRow({
     if (!el) return;
     if (el.hasPointerCapture?.(e.pointerId)) el.releasePointerCapture(e.pointerId);
     el.classList.remove("is-dragging");
+    // A drag that ends outside a link produces no click, so nothing would
+    // clear the flag. Drop it once the click that might follow has passed.
+    window.setTimeout(() => {
+      moved.current = false;
+      delete document.documentElement.dataset.rowDrag;
+    }, 0);
   };
 
   /**
@@ -133,6 +144,7 @@ export default function ShelfRow({
   const onClickCapture = (e: React.MouseEvent) => {
     if (!moved.current) return;
     moved.current = false;
+    delete document.documentElement.dataset.rowDrag;
     e.preventDefault();
     e.stopPropagation();
   };

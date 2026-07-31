@@ -99,6 +99,9 @@ export default function PageTransitions() {
 
     const onClick = (e: MouseEvent) => {
       if (!isPlainClick(e)) return;
+      // A shelf row is mid-drag and about to swallow this click itself —
+      // see components/lists/ShelfRow.tsx.
+      if (root.dataset.rowDrag) return;
       const target = e.target;
       if (!(target instanceof Element)) return;
       const a = target.closest("a");
