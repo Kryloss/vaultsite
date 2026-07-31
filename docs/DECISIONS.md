@@ -449,3 +449,23 @@ Search Console reported three Videos structured-data issues on the site — "Mis
 **`uploadDate` is a new `uploaded:` frontmatter key, because it's the one field the site can't derive.** The thumbnail comes free from the video ID and the embed URL is a string template, but a video's publication date needs the YouTube Data API — a key, a quota, and a build-time network call, all of which the shelf deliberately does without (it runs on oEmbed and `i.ytimg.com` alone). The note's own `date:` is *not* a stand-in: that's the day it went on the shelf, and using it would state something false about someone else's video to a search engine. So it's asked for and written down, and a note without it simply doesn't claim to be a video.
 
 **`embedUrl`, not `contentUrl`.** `contentUrl` wants an actual media file; YouTube doesn't hand one out. `embedUrl` points at the same `youtube-nocookie.com` player the page already embeds, and Google accepts either. The watch URL goes in `sameAs` rather than `url`, so `url` stays the note's own address — consistent with every other shelf type, and with the `Review` wrapper that goes around rated entries.
+
+## 42. A series is a relationship, not a place (2026-07-30)
+
+`series: Road to Security+` in an entry's frontmatter puts "Part 2 of 5" beside its date and a list of every part above the prev/next row. Two posts use it today; the machinery is in `lib/series.ts`.
+
+**No `/series/<name>` route.** The obvious next step is a page per series, and it's the wrong one: the list of parts already *is* that page, and it's on every part, where the reader actually is. A route would mean new slugs to keep stable (#27's argument about subfolders applies — a series is a relationship between notes, not a location), a sitemap entry and an OG image per series, and a second place the name has to be spelled correctly. If a series ever grows past the handful of parts a panel can hold, that's when it earns a page.
+
+**The name is the identity — there is no id.** Matching normalises case and runs of whitespace and nothing else, so a genuine typo produces a second series rather than silently dropping a note from the first. That failure is visible in the rendered list ("Part 1 of 1" — which renders as nothing at all, see below), where a fuzzy match would quietly glue two unrelated arcs together. The name is also the panel's heading, so it's a string that has to be right anyway.
+
+**Ordering is oldest-first, which is the opposite of every list on the site.** Sections sort newest-first because that's right for browsing; a series is read from the start. `part:` exists only for what dates can't express — two parts published the same day, or one written late and backdated — and notes carrying it sort ahead of notes that don't, so numbering half a series still puts those parts where you said.
+
+**A single-part series renders nothing.** "Part 1 of 1" is a label with no navigation in it, and every series is a one-parter for however long it takes to write the second note. It appears the moment it means something.
+
+**Drafts are not parts.** The index is built from `getEntries()`, which already drops drafts in production, so an unfinished part doesn't renumber the published ones — but it *is* numbered in `next dev`, where drafts are visible, which is the preview you want while writing it.
+
+**Vault-wide rather than per section.** Wiki links already resolve across sections, and an arc that begins as a post and ends as a project is exactly what a series is for. The parts carry their own section in the href, so nothing assumes they share one.
+
+**`series_uk:` is written once, on whichever part you were editing.** The lookup takes the first part that defines it. Repeating the name on all five parts is five chances for them to disagree, and the panel can only show one.
+
+**The index is rebuilt per call**, like `getWikiIndex()` and unlike `getAssetIndex()`. The vault is sixty notes; a cache would buy nothing at build time and go stale on every save in `next dev`, which is where the frontmatter is actually being typed.

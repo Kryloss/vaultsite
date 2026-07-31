@@ -174,6 +174,27 @@ shows the first ~1000 characters inline, so front-load the interesting part.
 Post frontmatter. An Apple Music link pasted on its own line becomes a player —
 keep any he provides on separate lines.
 
+## Series — notes that are one arc
+
+When a note continues an earlier one, give both the same `series:` name:
+
+```yaml
+series: Road to Security+
+series_uk: Шлях до Security+   # write this on ONE part only
+part: 2                        # only if date order is wrong
+```
+
+The name is matched literally (case and spacing aside) — a typo makes a second
+series, so copy it from the existing part rather than retyping it. Order is
+oldest-first automatically; `part:` is for same-day publications or a note
+written out of order. Ukrainian bodies are `.uk.md` files with no frontmatter,
+so `series_uk:` goes in the English file like every other `_uk` key.
+
+Ask before inventing a series. Two notes on the same topic aren't necessarily
+parts of one — a series says *read these in order*, and applying it to a pair
+of standalone posts tells the reader the first one is required reading when it
+isn't.
+
 ## Categories
 
 Shelf items, posts and people all take the same frontmatter key. It is
