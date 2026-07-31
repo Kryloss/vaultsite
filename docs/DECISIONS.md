@@ -556,3 +556,37 @@ The clicked figure and the overlay's copy are the same picture, so they share a 
 - **`flushSync` around the state update**, or React would still be scheduling the render when the API takes its "after" snapshot and there would be nothing to animate to.
 - **The name is moved, not copied.** The thumbnail is still on the page underneath the overlay; it releases the name inside the same callback that applies it to the overlay, and takes it back on the way out. Same uniqueness rule as the title morph, arrived at from the opposite direction.
 - **Neither snapshot cross-fades** — showing two copies of one picture at two sizes while they travel looks like a double exposure. The group's growth carries the whole effect.
+
+## 45. Reverting the navigation transitions, and what replaced the shelf arrows (2026-07-30)
+
+**#44's page transitions are gone. They felt laggy, and the design says why.** The API holds the outgoing frame on screen until its callback settles, and on a client-side navigation that callback can only settle once React has rendered the new route. So every link click bought a freeze of however long the render took, in exchange for a 260ms slide — and a freeze before motion reads as lag no matter how short it is, because the page has stopped responding while looking identical.
+
+The mechanism wasn't wrong; the trade was. `.page-in` fades on a key change and never waits for anything, which is why it never felt slow. Removed: `components/PageTransitions.tsx`, the `::view-transition-*(root)` rules, `html[data-nav]`, the `entry-title` shared element and the `data-vt-title` opt-in on list rows — and, with them, the `data-row-drag` flag the shelf needed only because a capture-phase click listener existed.
+
+**`lib/view-transition.ts` stays, for the lightbox.** Nothing is awaited there: `flushSync` updates the DOM inside the callback, so the transition starts on the next frame. The API is a good fit for a same-document state change and a poor one for a route change, which is the actual lesson.
+
+**The shelf arrows went too, one build after arriving.** #44 replaced the edge fade with drag plus hover arrows, on the reasoning that a control beats a hint. Half of that held: dragging is what people reach for, and it stays. The arrows were furniture — two floating buttons over the covers, for a gesture the row already supports, appearing on hover in a place the eye is already scanning. A row that hides its scrollbar and offers no edge treatment is quieter than either version, and the grab cursor carries the affordance.
+
+That does leave the row without a static signal that it continues — the thing the fade existed for. It's a deliberate loss: the fade dimmed the covers it was pointing at, and the arrows cost more attention than they returned. If it needs solving again, the answer is a peeking half-cover at the edge rather than something drawn on top.
+
+## 46. Recents, time remaining, and grain (2026-07-30)
+
+**⌘K opens onto where you've been.** An empty query used to show the first eight pages of the index — the same eight for everyone, every time. `lib/recents.ts` keeps the last twelve paths in one localStorage key (same discipline as ReadingPosition: a bounded list under one key, never a key per page) and the palette leads with up to five of them under a "Recent" heading, with the rest of the site below under "Pages".
+
+- **Paths are stored, not titles.** They're resolved against the search index at display time, so a renamed note shows its new name and a deleted one simply isn't found.
+- **The current page is filtered out.** Offering to navigate to where you already are wastes the first row, which is the one under the cursor when the panel opens.
+- **`>` scoped search skips recents entirely** — that mode asks "where in this page", and a list of other pages is an answer to a different question.
+
+**Minutes left, bottom-right.** The header says how long the whole note takes; the pill says how much of it is in front of you, and it sits opposite the contents pill so the pair reads as a set: one says where you are, the other how much is left.
+
+- **It's driven by the number the progress bar is already drawing**, so the two can never disagree. It's a prop on `ReadingProgress` rather than a component of its own for exactly that reason.
+- **The DOM is touched only when the minute changes**, not on every frame of a 60fps ease.
+- **It stays quiet below 6% and above 97%**: before that it would repeat the header's estimate, and after it "0 min left" arrives while the reader is still finishing a sentence. Rounded up, so a part-minute reads as a minute rather than as nothing.
+- **It keeps the window's corner at every width**, unlike `.resume-reading`, which moves inboard under the contents rail from 1280px (#39). Two pills that can both be on screen shouldn't want the same spot.
+
+**Grain.** One tile of `feTurbulence` fixed over the window at 2.8% opacity, 4.5% in dark mode. Large flat areas of a single colour are what make a monochrome page read as unstyled rather than deliberate; this gives the background a surface without introducing a colour, a border or a shape.
+
+- **Generated by an inline SVG filter, not shipped as an image** — ~300 bytes of markup instead of a request, and it can't be the wrong resolution on a retina screen.
+- **The tile is 160px**, which is not a round power of two on purpose: at 64px the repeat is a visible grid.
+- **Fixed, not scrolling.** Grain that moves with the content is a texture on the content; grain that stays is a texture on the screen, which is the effect wanted.
+- **z-index 1** — above the page, below the drawer, palette and lightbox. Those are surfaces of their own and should sit on top of it. `pointer-events: none`, and hidden in print, where paper has its own.
