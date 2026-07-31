@@ -1688,6 +1688,35 @@ body {
   background: var(--bg-hover);
 }
 
+/* ---------- Skip link (components/Chrome.tsx) ---------- */
+
+/* Off-screen rather than display:none — a hidden element can't be focused,
+   and being focusable is the entire point. It arrives as the same blurred
+   chip as the floating breadcrumb it sits on top of. */
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 60;
+  padding: 0.4375rem 0.875rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+  text-decoration: none;
+  /* Out of the layout and out of sight until focused. */
+  transform: translateY(-200%);
+  transition: transform 160ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.skip-link:focus-visible {
+  transform: none;
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
 /* ---------- Series (components/Series.tsx) ---------- */
 
 .series-anchor {

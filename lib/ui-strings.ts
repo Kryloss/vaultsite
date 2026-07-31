@@ -70,6 +70,8 @@ export const ui = {
   draft: { en: "Draft", uk: "Чернетка" },
   minRead: { en: "min read", uk: "хв читання" },
   words: { en: "words", uk: "слів" },
+  /** First link on every page, visible only when focused. */
+  skipToContent: { en: "Skip to content", uk: "Перейти до вмісту" },
   previousEntry: { en: "Previous", uk: "Попереднє" },
   nextEntry: { en: "Next", uk: "Наступне" },
   /** Accessible name of the "#" link beside a heading (see lib/toc.ts). */

@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Fragment, useCallback, useEffect, useState, type ReactNode } from "react";
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   PanelIcon,
   SearchIcon,
@@ -63,6 +70,8 @@ export default function Chrome({
 }) {
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const drawerRef = useRef<HTMLElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   /** Phones only: drop the breadcrumb while reading downward. */
   const [compact, setCompact] = useState(false);
   const { lang, toggle: toggleLang } = useLang();
@@ -104,6 +113,60 @@ export default function Chrome({
 
   // A new page starts at the top, so the breadcrumb should be showing.
   useEffect(() => setCompact(false), [pathname]);
+
+  /**
+   * Focus follows the drawer, and comes back when it closes.
+   *
+   * It's a modal panel over a backdrop, so the keyboard has to go in with it:
+   * without this, opening the menu left focus on the button behind the
+   * overlay and the first Tab landed somewhere invisible. `inert` on the
+   * closed drawer does the other half — a panel translated off-screen is
+   * still focusable, so every page used to begin with a tab through seven
+   * links nobody could see.
+   *
+   * Focus is only restored if it's still inside the drawer at the time:
+   * closing by clicking a link navigates, and yanking focus back to the menu
+   * button would undo the browser's own reset.
+   */
+  useEffect(() => {
+    if (!open) return;
+    const drawer = drawerRef.current;
+    if (!drawer) return;
+
+    const previous = document.activeElement as HTMLElement | null;
+    const focusables = () =>
+      Array.from(
+        drawer.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      );
+
+    focusables()[0]?.focus();
+
+    // Tab wraps inside the panel rather than walking into the hidden page.
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const list = focusables();
+      if (list.length === 0) return;
+      const first = list[0];
+      const last = list[list.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      if (drawer.contains(document.activeElement)) {
+        (previous ?? menuButtonRef.current)?.focus();
+      }
+    };
+  }, [open]);
 
   // Close the drawer on navigation; Escape closes it; Cmd/Ctrl+K opens search.
   useEffect(() => setOpen(false), [pathname]);
@@ -166,12 +229,22 @@ export default function Chrome({
 
   return (
     <>
+      {/* First thing in the tab order, invisible until it has focus: the site
+          chrome is a menu button, a breadcrumb and a search box before any
+          article begins, and a keyboard reader shouldn't have to walk them on
+          every page. */}
+      <a href="#main" className="skip-link">
+        <T {...ui.skipToContent} />
+      </a>
+
       {/* Floating top-left: panel icon + clickable location path */}
       <div className="fixed left-3 top-3 z-30 flex items-center gap-1 rounded-full bg-[var(--bg)]/75 px-1.5 py-1 backdrop-blur-md">
         <button
+          ref={menuButtonRef}
           type="button"
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
+          aria-controls="site-menu"
           onClick={() => setOpen((v) => !v)}
           className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
         >
@@ -205,6 +278,15 @@ export default function Chrome({
 
       {/* Drawer — flat: page background, hairline border, text + icons only */}
       <aside
+        ref={drawerRef}
+        id="site-menu"
+        /* A panel over a backdrop that takes the keyboard with it is a modal
+           dialog, whatever it looks like. `inert` keeps the closed one out of
+           the tab order and the accessibility tree entirely. */
+        role="dialog"
+        aria-modal="true"
+        aria-label={lang === "uk" ? "Меню сайту" : "Site menu"}
+        inert={!open}
         className={`fixed inset-y-0 left-0 z-50 flex w-56 flex-col border-r border-[var(--border)] bg-[var(--bg)] py-5 transition-transform duration-300 ease-out ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
@@ -308,7 +390,7 @@ export default function Chrome({
       <Shortcuts items={items} onSearch={openSearch} />
 
       {/* Content — re-animates on each navigation via the pathname key */}
-      <main key={pathname} className="page-in min-w-0">
+      <main id="main" key={pathname} className="page-in min-w-0">
         {children}
       </main>
     </>
