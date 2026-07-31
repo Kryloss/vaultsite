@@ -243,23 +243,25 @@ export default function Chrome({
           </div>
         </div>
 
-        <nav className="flex flex-col gap-1.5 overflow-y-auto px-3">
+        <nav className="flex flex-col gap-3 overflow-y-auto px-3">
           {nav.map((item) => {
             const Icon = resolveIcon(item.icon);
             return (
               <Link
                 key={item.slug}
                 href={item.href}
-                className={`flex items-center gap-3.5 rounded-lg px-3 py-2 text-base transition-colors duration-150 ${
+                className={`flex items-center gap-3.5 rounded-lg px-3 py-2 text-lg transition-colors duration-150 ${
                   isActive(item.href)
                     ? "bg-[var(--bg-hover)] font-medium text-[var(--text)]"
                     : "text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
                 }`}
               >
+                {/* The emoji fallback matches the SVG box so both alignments
+                    share one column — see resolveIcon() in components/icons.tsx. */}
                 {Icon ? (
-                  <Icon className="h-5 w-5 shrink-0 opacity-75" />
+                  <Icon className="h-6 w-6 shrink-0 opacity-75" />
                 ) : item.icon ? (
-                  <span className="w-5 text-center text-base leading-none">{item.icon}</span>
+                  <span className="w-6 shrink-0 text-center text-lg leading-none">{item.icon}</span>
                 ) : null}
                 <span><T en={item.title} uk={item.titleUk} /></span>
               </Link>
