@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Posts/First certification.md",
+                "file": "Music/main.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "First certification"
+              "title": "main"
             }
           }
         ]
@@ -199,6 +199,7 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
+    "Posts/First certification.md",
     "Posts/First certification.uk.md",
     "Posts/attachments/secplus-plan.svg",
     "Posts/attachments/secplus-domains.svg",
