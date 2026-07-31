@@ -116,7 +116,8 @@ export default async function EntryPage({ params }: Props) {
     >
       <JsonLd data={entryJsonLd(section, entry)} />
       <JsonLd data={breadcrumbJsonLd(section, entry)} />
-      <ReadingProgress />
+      {/* `minutes` also drives the time-remaining pill — posts only. */}
+      <ReadingProgress minutes={stats?.minutes} />
       <ReadingPosition />
       {/* Hover cards for the internal links in THIS note only — see
           previewsInHtml() in lib/previews.ts. */}

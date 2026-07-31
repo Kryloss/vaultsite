@@ -96,6 +96,9 @@ export const ui = {
   /** The pill's whole label. Short on purpose — the icon carries the rest. */
   resumeReading: { en: "Continue", uk: "Продовжити" },
 
+  /** Follows the number in the time-remaining pill: "4 min left". */
+  minLeft: { en: "min left", uk: "хв лишилось" },
+
   // keyboard shortcuts (components/Shortcuts.tsx)
   shortcutSheet: { en: "Keyboard shortcuts", uk: "Клавіатурні скорочення" },
   shortcutHome: { en: "Home", uk: "Головна" },
