@@ -76,88 +76,15 @@ html[data-lang="uk"] .lang-uk {
   animation: page-in 0.35s ease both;
 }
 
-/* ---------- View transitions (components/PageTransitions.tsx) ---------- */
+/* ---------- View transitions (components/Lightbox.tsx) ---------- */
 
-/* Where the API is available the whole page transitions, so the CSS-only fade
-   above would be a second animation on top of it. `data-vt` is set by the
-   component only when it has decided to take over. */
-html[data-vt="on"] .page-in {
-  animation: none;
-}
+/* Navigations used to run through this API too, and it was reverted — see
+   docs/DECISIONS.md #45. The lightbox keeps it: nothing is being waited on
+   there, so it opens on the next frame rather than after a route renders.
 
-/* Forward moves the page left — you're going further in. Back reverses it.
-   The travel is small on purpose: enough to say which way, not enough to
-   read as a slide-deck. */
-@keyframes vt-leave {
-  to {
-    opacity: 0;
-    transform: translateX(calc(-1 * var(--vt-travel)));
-  }
-}
-
-@keyframes vt-enter {
-  from {
-    opacity: 0;
-    transform: translateX(var(--vt-travel));
-  }
-}
-
-::view-transition-old(root),
-::view-transition-new(root) {
-  /* The default is a cross-fade; these replace it entirely. */
-  animation-duration: 260ms;
-  animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
-  animation-fill-mode: both;
-  /* Both snapshots occupy the same space, so neither pushes the other. */
-  mix-blend-mode: normal;
-}
-
-::view-transition-old(root) {
-  --vt-travel: 1.25rem;
-  animation-name: vt-leave;
-}
-
-::view-transition-new(root) {
-  --vt-travel: 1.25rem;
-  animation-name: vt-enter;
-}
-
-/* Going back retraces the way you came. */
-html[data-nav="back"]::view-transition-old(root) {
-  --vt-travel: -1.25rem;
-}
-
-html[data-nav="back"]::view-transition-new(root) {
-  --vt-travel: -1.25rem;
-}
-
-/* The title is the one thing both pages have, so it moves rather than
-   dissolving — the row you clicked becomes the heading you're reading. It is
-   NOT faded: a group that only travels reads as the same object moving. */
-::view-transition-old(entry-title),
-::view-transition-new(entry-title) {
-  animation: none;
-  mix-blend-mode: normal;
-  height: 100%;
-}
-
-::view-transition-group(entry-title) {
-  animation-duration: 300ms;
-  animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
-  /* Above the page snapshots, or it would travel underneath them. */
-  z-index: 1;
-}
-
-/* An entry's heading is the receiving end of that morph. Only entry pages
-   carry the class, so the name stays unique. */
-.entry-title {
-  view-transition-name: entry-title;
-}
-
-/* The lightbox zoom (components/Lightbox.tsx). The two snapshots are the same
-   picture at two sizes, so cross-fading them would show a double image while
-   they travel — the new one is simply shown, and the group's growth does the
-   work. Slightly slower than a page change: it covers more distance. */
+   The two snapshots are the same picture at two sizes, so cross-fading them
+   would show a double image while they travel — the new one is simply shown
+   and the group's growth does the work. */
 ::view-transition-old(lightbox-figure) {
   animation: none;
   opacity: 0;
@@ -403,13 +330,19 @@ body {
    `none` (everything fits) fades neither — a fade at the last cover of a short
    row would suggest content that isn't there. */
 .shelf-row-wrap {
-  /* Anchors the arrows, which sit over the row's own edges. */
   position: relative;
 }
 
 .shelf-row {
-  /* A row you can grab. The cursor is the only hint the fade never gave. */
+  /* A row you can grab. With the scrollbar hidden and the old edge fade gone
+     (DECISIONS #44, #45), the cursor is the whole affordance. */
   cursor: grab;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.shelf-row::-webkit-scrollbar {
+  display: none;
 }
 
 .shelf-row.is-dragging {
@@ -425,72 +358,6 @@ body {
   /* Chrome starts a native image drag from an <img> inside a link otherwise. */
   -webkit-user-drag: none;
   pointer-events: none;
-}
-
-/* Arrows sit half over the row's edge, appear when the row is hovered or a
-   keyboard reaches them, and vanish at the end they'd do nothing at. */
-.shelf-arrow {
-  position: absolute;
-  top: 50%;
-  z-index: 2;
-  display: grid;
-  place-items: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  translate: 0 -50%;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 2px 10px rgb(0 0 0 / 0.08);
-  color: var(--text);
-  opacity: 0;
-  transition: opacity 160ms ease, background-color 120ms ease, scale 120ms ease;
-}
-
-.shelf-arrow svg {
-  width: 1.125rem;
-  height: 1.125rem;
-}
-
-.shelf-arrow.is-prev {
-  left: -0.5rem;
-}
-
-.shelf-arrow.is-next {
-  right: -0.5rem;
-}
-
-.shelf-row-wrap:hover .shelf-arrow,
-.shelf-arrow:focus-visible {
-  opacity: 1;
-}
-
-.shelf-arrow:hover {
-  background: var(--bg);
-  scale: 1.06;
-}
-
-@media (prefers-color-scheme: dark) {
-  .shelf-arrow {
-    box-shadow: 0 2px 10px rgb(0 0 0 / 0.5);
-  }
-}
-
-/* No hover on a touch screen, and a finger already swipes the row. */
-@media (hover: none) {
-  .shelf-arrow {
-    display: none;
-  }
-}
-
-.shelf-row {
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-
-.shelf-row::-webkit-scrollbar {
-  display: none;
 }
 
 /* YouTube embeds — a bare youtube.com/youtu.be link on its own line becomes

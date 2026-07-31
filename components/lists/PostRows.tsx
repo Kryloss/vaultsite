@@ -69,10 +69,7 @@ export default function PostRows({
                   className="group -mx-3 flex items-baseline justify-between gap-4 rounded-lg px-3 py-2.5 transition-colors hover:bg-[var(--bg-hover)]"
                 >
                   <span className="min-w-0">
-                    <span
-                      data-vt-title
-                      className="block truncate font-medium text-[var(--text)]"
-                    >
+                    <span className="block truncate font-medium text-[var(--text)]">
                       <T en={row.title} uk={row.titleUk} />
                       {row.draft && (
                         <span className="ml-2 rounded bg-amber-500/15 px-1.5 py-0.5 text-xs font-medium text-amber-500">

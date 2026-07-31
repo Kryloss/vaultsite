@@ -97,7 +97,7 @@ export default async function HomePage() {
                   href={`/posts/${entry.slug}`}
                   className="-mx-3 flex items-baseline justify-between gap-4 rounded-lg px-3 py-2 transition-colors hover:bg-[var(--bg-hover)]"
                 >
-                  <span data-vt-title className="truncate font-medium text-[var(--text)]">
+                  <span className="truncate font-medium text-[var(--text)]">
                     <T en={entry.title} uk={entry.titleUk} />
                   </span>
                   {entry.date && (
