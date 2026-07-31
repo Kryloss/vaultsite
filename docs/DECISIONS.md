@@ -452,7 +452,13 @@ Search Console reported three Videos structured-data issues on the site — "Mis
 
 ## 42. A series is a relationship, not a place (2026-07-30)
 
-`series: Road to Security+` in an entry's frontmatter puts "Part 2 of 5" beside its date and a list of every part above the prev/next row. Two posts use it today; the machinery is in `lib/series.ts`.
+`series: Road to Security+` in an entry's frontmatter puts a "Part 2 of 5" badge beside its date, which opens the list of every part. Two posts use it today; the machinery is in `lib/series.ts`.
+
+**The list is a popover, not a panel.** It shipped as a card above the prev/next row first, and that was the wrong trade: five links the reader mostly doesn't need, permanently occupying the end of every part. Behind the badge the information is one tap away and costs no column. Construction is copied from the mobile contents sheet (#38) — always mounted and shown by `data-open` so it animates shut as well as open, `inert` when closed, an invisible backdrop for the click-outside, and contents that wait for the first open, which is what keeps it out of every part's static HTML. It's anchored to the badge rather than fixed to a corner, so it reads as the badge opening; below 640px it becomes a bottom sheet, because the badge sits in a metadata row that wraps and a panel hung off its left edge is one long title away from running off-screen.
+
+**`components/Series.tsx` is a client component, so the data arrives pre-formatted.** `getSeries()` returns dates already rendered in both languages and the "Part 2 of 5" pair already built. The alternative is importing `displayDate()` — and with it `lib/vault.ts`, and with it `fs` — into the browser bundle. Same server-slims-the-rows split as `PostList` → `PostListClient`, and the reason the `Series` type is imported `import type` rather than plainly.
+
+**The header's metadata row became a `<div>`.** It was a `<p>`, and a `<nav>` isn't allowed inside one: a browser parsing the static HTML closes the paragraph early, producing a DOM that doesn't match what React rendered. Nothing about that row was ever a paragraph.
 
 **No `/series/<name>` route.** The obvious next step is a page per series, and it's the wrong one: the list of parts already *is* that page, and it's on every part, where the reader actually is. A route would mean new slugs to keep stable (#27's argument about subfolders applies — a series is a relationship between notes, not a location), a sitemap entry and an OG image per series, and a second place the name has to be spelled correctly. If a series ever grows past the handful of parts a panel can hold, that's when it earns a page.
 
