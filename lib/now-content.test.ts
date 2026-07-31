@@ -58,10 +58,8 @@ test("a résumé block reads its rows", () => {
       "### Experience",
       "",
       "#### Barista · Coffee Place",
-      "",
-      "*2025 — now* · Toronto",
-      "",
-      "#current",
+      // `#current` rides on the period line, not a line of its own.
+      "*2025 — now* · Toronto #current",
     ].join("\n")
   );
   assert.ok(resume, "expected a résumé");
