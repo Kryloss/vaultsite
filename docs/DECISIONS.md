@@ -600,3 +600,11 @@ The offer withdrew itself when `scrollY` passed 400px — a statement about the 
 **The decision also waits 250ms instead of one frame.** Browser restoration lands after the first frame, and on mobile several frames later, so the arrival check was reading a position that was about to change. Nothing is visible in that window — the pill's entrance animation is delayed longer than the wait.
 
 **It is still rarer on a phone, and that part is correct.** The offer is only made when you arrive near the top; if the browser has already put you back where you were, there is nothing to offer. The feature exists for the case the browser doesn't handle — a fresh visit to a note you read days ago — and that is now reachable on mobile rather than being cancelled a frame after load.
+
+## 48. A diagnostic you can read off a phone (2026-07-31)
+
+"Continue" appeared on `localhost` and not on `kryloss.com`, on the same iPhone, on the same commit. That symptom has two completely different causes and they look identical from outside: the code is broken in the production build, or nothing was ever saved on that origin — localStorage is per-origin, so a position stored on `localhost:3000` does not exist on `kryloss.com`, and a first visit to a note can only save, never offer.
+
+Settling it needs the four gate values at the moment the decision runs, and on iOS there is no console to read them in. So `?rp=debug` prints them on the page: the stored entry for this path, how many paths are stored at all, the viewport and page heights, the threshold, and PASS/FAIL for each of the four conditions. It renders whether or not the offer was made — the interesting case is the one where it wasn't.
+
+**Opt-in, and therefore permanent.** It costs a normal visit nothing (no markup, one query-string read), and this is a feature whose whole job is to not appear, which makes "is it broken or is it working?" a question that will come up again. A temporary `console.log` would have answered it once.
