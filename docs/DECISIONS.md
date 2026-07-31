@@ -479,3 +479,48 @@ Search Console reported three Videos structured-data issues on the site — "Mis
 **`series_uk:` is written once, on whichever part you were editing.** The lookup takes the first part that defines it. Repeating the name on all five parts is five chances for them to disagree, and the panel can only show one.
 
 **The index is rebuilt per call**, like `getWikiIndex()` and unlike `getAssetIndex()`. The vault is sixty notes; a cache would buy nothing at build time and go stale on every save in `next dev`, which is where the frontmatter is actually being typed.
+
+## 43. The audit pass: what every page was carrying (2026-07-30)
+
+A look at the built output rather than the source, and most of what it turned up was weight.
+
+### The search index stopped being a prop
+
+`app/layout.tsx` called `getSearchIndex()` and passed it to the palette, and `getLinkPreviews()` and passed it to the hover cards. Both are client components, so both indexes went into the RSC payload of **every** page — the full plain text of the whole vault, in every document, twice (once rendered, once for hydration). `music.html`, a page with a few embeds on it, was **184 KB**. The Security+ post contained, verbatim, sentences from the propaganda post.
+
+- **The index is now a file**: `app/search-index.json/route.ts`, `force-static`, fetched by `components/useSearchIndex.ts` the first time ⌘K opens and cached in a module-level variable. A reader who never searches never downloads it; one who does downloads it once for the whole session. It warms on pointer-enter over the search button, so the panel usually opens onto results.
+- **Previews are filtered per page instead.** `previewsInHtml()` scans the page's *rendered* HTML — by then `[[wiki links]]` are real hrefs — and passes only the matching entries. A note linking to two others carries two, not sixty. A fetch would have worked here too, but hovering is latency-sensitive in a way that pressing ⌘K isn't.
+- Result: first-certification **249 KB → 119 KB**, music **184 KB → 34 KB**, home **206 KB → 56 KB**. More to the point, the floor no longer rises with every note published.
+
+### Two scaffolding notes were live
+
+`Post Sample` and `Formatting playground` had no `draft: true`, so they were on the site, in the sitemap, in the RSS feed and in search. They're reference material for writing notes, not writing. Marked draft — still visible in `npm run dev`, gone from the build.
+
+### Canonicals, and the `?lang=uk` problem they solve
+
+There was no `<link rel="canonical">` anywhere, and `components/SelectionLink.tsx` hands out links carrying `?lang=uk`. To a crawler each of those was a separate copy of the note. `pageMeta()` in `lib/metadata.ts` now sets the canonical and `og:url` on every page, and `og:type=article` with `article:published_time` on notes.
+
+**It re-declares things the layout already sets, on purpose.** Next merges metadata *shallowly*: a page that sets `alternates` replaces the layout's, dropping the RSS `<link>`; one that sets `openGraph` drops `og:site_name` and `og:locale`. Doing this by hand per page would have quietly removed them from exactly the pages that got the most attention.
+
+### `lang="uk"` on the Ukrainian half
+
+`<html lang="en">` never changes — it's the document's primary language and the canonical URL's, and the toggle is CSS, not routing. But the Ukrainian spans carried no language at all, so a screen reader announced Cyrillic with an English voice. One attribute in `components/T.tsx`, plus the `.uk` article bodies and the contents rail. The English span needs none: it inherits.
+
+### Responsive images
+
+`me.jpeg` is 208 KB and is painted as a 93px avatar. `mykhailo-fedorov.png` is 1.34 MB behind a grid card. `sync-assets.mjs` now writes 256/672/1344px WebP copies beside each raster and a ready-made `srcset` into the manifest; that avatar fetches 4 KB and the portrait 11 KB.
+
+- **The originals are never touched.** They're the owner's files, and a browser choosing from a `srcset` never fetches `src` anyway — so the full-resolution copy stays available without anyone paying for it.
+- **The widths mean something**: 256 is a small cover at 2×, 672 is the prose column exactly (`max-w-2xl`), 1344 is that column on a 2× display. Nothing on the site is ever painted wider.
+- **Every `srcset` ships with a `sizes`.** Without one the browser assumes `100vw` and picks the largest candidate — worse than offering no choice at all. A sized embed knows its box (`93px`); everything else describes the column.
+- WebP for the variants even when the source is PNG: it keeps transparency, and the original remains as the last candidate.
+
+### The drawer is a dialog
+
+The command palette had `role="dialog"`, `aria-modal` and focus handling; the sidebar had none of it — and, translated off-screen, its seven links were still in the tab order, so every page began with a tab through invisible navigation. It's now `inert` when closed, traps Tab while open, and returns focus to the menu button on close *unless* focus has already left with a navigation. A skip link sits first in the tab order.
+
+### Tests can reach the whole of `lib/` now
+
+`npm test` gained `scripts/test-resolve.mjs`, a loader hook teaching Node the `@/` alias and extensionless imports. Writing extensions into every import would have made the source worse in order to make testing possible. `lib/*.ts` also stopped mixing `@/lib/x` and `./x` for its own siblings — one convention, and the relative one is what the rest of the folder already used.
+
+New coverage: the Now page's parser (which turns hand-written markdown into structured data by shape-matching, and fails silently) and the shelf's URL vocabulary plus `slugify` (which decides addresses that already exist in the wild). Writing the first one immediately corrected a claim in CLAUDE.md — `#current` sits at the end of the period line, not on a line of its own.
