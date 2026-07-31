@@ -384,31 +384,85 @@ body {
    `none` (everything fits) fades neither — a fade at the last cover of a short
    row would suggest content that isn't there. */
 .shelf-row-wrap {
-  --fade: 2.5rem;
-  transition: mask-image 200ms ease;
+  /* Anchors the arrows, which sit over the row's own edges. */
+  position: relative;
 }
 
-.shelf-row-wrap[data-edge="start"] {
-  mask-image: linear-gradient(
-    to right,
-    #000 0,
-    #000 calc(100% - var(--fade)),
-    transparent 100%
-  );
+.shelf-row {
+  /* A row you can grab. The cursor is the only hint the fade never gave. */
+  cursor: grab;
 }
 
-.shelf-row-wrap[data-edge="end"] {
-  mask-image: linear-gradient(to right, transparent 0, #000 var(--fade), #000 100%);
+.shelf-row.is-dragging {
+  cursor: grabbing;
+  /* Mid-drag the covers are cargo, not links: no text selection, no ghost
+     images, and no snap fighting the pointer. */
+  user-select: none;
+  scroll-snap-type: none;
+  scroll-behavior: auto;
 }
 
-.shelf-row-wrap[data-edge="middle"] {
-  mask-image: linear-gradient(
-    to right,
-    transparent 0,
-    #000 var(--fade),
-    #000 calc(100% - var(--fade)),
-    transparent 100%
-  );
+.shelf-row.is-dragging a {
+  /* Chrome starts a native image drag from an <img> inside a link otherwise. */
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+/* Arrows sit half over the row's edge, appear when the row is hovered or a
+   keyboard reaches them, and vanish at the end they'd do nothing at. */
+.shelf-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  translate: 0 -50%;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 10px rgb(0 0 0 / 0.08);
+  color: var(--text);
+  opacity: 0;
+  transition: opacity 160ms ease, background-color 120ms ease, scale 120ms ease;
+}
+
+.shelf-arrow svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.shelf-arrow.is-prev {
+  left: -0.5rem;
+}
+
+.shelf-arrow.is-next {
+  right: -0.5rem;
+}
+
+.shelf-row-wrap:hover .shelf-arrow,
+.shelf-arrow:focus-visible {
+  opacity: 1;
+}
+
+.shelf-arrow:hover {
+  background: var(--bg);
+  scale: 1.06;
+}
+
+@media (prefers-color-scheme: dark) {
+  .shelf-arrow {
+    box-shadow: 0 2px 10px rgb(0 0 0 / 0.5);
+  }
+}
+
+/* No hover on a touch screen, and a finger already swipes the row. */
+@media (hover: none) {
+  .shelf-arrow {
+    display: none;
+  }
 }
 
 .shelf-row {
