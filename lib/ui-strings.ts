@@ -109,6 +109,8 @@ export const ui = {
   actionGithub: { en: "Open this note on GitHub", uk: "Відкрити нотатку на GitHub" },
   searchThisPage: { en: "Searching this page", uk: "Пошук на цій сторінці" },
   actionsGroup: { en: "Actions", uk: "Дії" },
+  recentGroup: { en: "Recent", uk: "Нещодавні" },
+  pagesGroup: { en: "Pages", uk: "Сторінки" },
   actionDone: { en: "Done", uk: "Готово" },
 
   // lightbox (components/Lightbox.tsx)

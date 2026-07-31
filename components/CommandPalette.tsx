@@ -6,6 +6,7 @@ import { repoBranch, repoUrl } from "@/lib/site-config";
 import T from "@/components/T";
 import { useLang } from "@/components/useLang";
 import { useSearchIndex } from "@/components/useSearchIndex";
+import { recentPaths, remember } from "@/lib/recents";
 import { similarity, fold } from "@/lib/fuzzy";
 import { copyText } from "@/lib/clipboard";
 import { ui, type Str } from "@/lib/ui-strings";
@@ -74,6 +75,9 @@ export default function CommandPalette({
   /* The index is fetched on that same first open — nobody who never searches
      downloads it, and nobody who does waits twice. */
   const items = useSearchIndex(everOpen);
+  /* Recording lives here because the palette is the only thing that reads it
+     and is mounted on every page anyway (via components/Chrome.tsx). */
+  useEffect(() => remember(pathname), [pathname]);
   const { lang, toggle: toggleLang } = useLang();
   const inputRef = useRef<HTMLInputElement>(null);
   const flashTimer = useRef<number | undefined>(undefined);
@@ -103,7 +107,7 @@ export default function CommandPalette({
    */
   const scoped = query.startsWith(">");
 
-  const { results, fuzzy } = useMemo(() => {
+  const { results, fuzzy, recent } = useMemo(() => {
     // Heading results exist once per language (each has its own anchor); show
     // only the active one. Page results carry no `lang` and always show.
     let pool = items.filter((i) => !i.lang || i.lang === lang);
@@ -117,9 +121,24 @@ export default function CommandPalette({
     // when scoped, where the headings ARE the answer: `>` on its own prints
     // the note's outline.
     if (!q) {
+      // Scoped (`>` alone) means "the outline of this page" — recents would be
+      // answering a different question.
+      if (scoped) return { results: pool.slice(0, 8), fuzzy: false, recent: 0 };
+
+      const pages = pool.filter((i) => !i.lang);
+      const byHref = new Map(pages.map((p) => [p.href, p]));
+      // Where you've been, then the rest of the site to fill the panel — the
+      // empty palette used to show the same eight pages to everyone.
+      const recents = recentPaths(pathname)
+        .map((href) => byHref.get(href))
+        .filter((p): p is (typeof pages)[number] => p !== undefined)
+        .slice(0, 5);
+      const seen = new Set(recents.map((p) => p.href));
+      const rest = pages.filter((p) => !seen.has(p.href));
       return {
-        results: (scoped ? pool : pool.filter((i) => !i.lang)).slice(0, 8),
+        results: [...recents, ...rest].slice(0, 8),
         fuzzy: false,
+        recent: recents.length,
       };
     }
     const scored = pool
@@ -142,7 +161,7 @@ export default function CommandPalette({
       .sort((a, b) => b.score - a.score);
 
     if (scored.length > 0) {
-      return { results: scored.slice(0, 8).map((r) => r.item), fuzzy: false };
+      return { results: scored.slice(0, 8).map((r) => r.item), fuzzy: false, recent: 0 };
     }
 
     // Nothing matched literally — most often a typo. Fall back to trigram
@@ -161,7 +180,7 @@ export default function CommandPalette({
       .sort((a, b) => b.score - a.score)
       .slice(0, 5);
 
-    return { results: near.map((r) => r.item), fuzzy: near.length > 0 };
+    return { results: near.map((r) => r.item), fuzzy: near.length > 0, recent: 0 };
   }, [query, items, lang, scoped, pathname]);
 
   const go = useCallback(
@@ -356,6 +375,20 @@ export default function CommandPalette({
             <li
               key={row.kind === "page" ? row.item.href : `action:${row.action.id}`}
             >
+              {/* Group labels. "Recent" only appears on an empty query, where
+                  the first rows are pages you've actually been on; the rest of
+                  the site follows under its own heading so the boundary is
+                  visible rather than implied by order alone. */}
+              {recent > 0 && i === 0 && (
+                <p className="px-4 pb-1 pt-2 text-xs text-[var(--text-tertiary)]">
+                  <T {...ui.recentGroup} />
+                </p>
+              )}
+              {recent > 0 && i === recent && (
+                <p className="px-4 pb-1 pt-2 text-xs text-[var(--text-tertiary)]">
+                  <T {...ui.pagesGroup} />
+                </p>
+              )}
               {/* A divider label above the first action, so a command doesn't
                   read as another page with an odd name. */}
               {row.kind === "action" && i === results.length && (
