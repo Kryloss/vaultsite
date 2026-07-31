@@ -21,7 +21,10 @@ import { ui } from "@/lib/ui-strings";
  * - only past `MIN_DEPTH` — being a screen and a half in is what makes a
  *   position worth remembering; anything less and you can find it by scrolling
  * - only when you arrive at the top, so it never argues with the browser's own
- *   scroll restoration on a back-navigation
+ *   scroll restoration on a back-navigation. Note that this is why the pill is
+ *   rarer on a phone than on a desktop: mobile browsers restore scroll on
+ *   reload and on back, and when they've already put you where you were there
+ *   is nothing left to offer
  * - never when the URL carries a `#heading`, which is already an instruction
  *   about where to land
  * - never when the note has since become shorter than the saved position,
@@ -39,8 +42,30 @@ const KEEP = 20;
 const MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 /** Don't offer to restore anything shallower than this. */
 const MIN_DEPTH = 1.5;
-/** Stop offering once the reader has scrolled this far under their own steam. */
-const DISMISS_AFTER = 400;
+/**
+ * Keys that mean "the reader is moving the page themselves" — the same set
+ * components/Toc.tsx uses, and for the same reason: a scroll event says the
+ * page moved, not who moved it.
+ */
+const SCROLL_KEYS = new Set([
+  "ArrowUp",
+  "ArrowDown",
+  "PageUp",
+  "PageDown",
+  "Home",
+  "End",
+  " ",
+]);
+
+/**
+ * Wait this long before deciding whether to offer.
+ *
+ * A browser restoring its own scroll position does it after the first frame,
+ * and on mobile often several frames later — so the original one-rAF check
+ * ran too early to see it. Nothing is visible yet either way: the pill's
+ * entrance animation is delayed longer than this.
+ */
+const DECIDE_AFTER = 250;
 /** Quiet time before the position is written — see `persist` below. */
 const SAVE_DEBOUNCE = 400;
 
@@ -107,16 +132,20 @@ export default function ReadingPosition() {
     let scrolled = false;
 
     /**
-     * Deferred a frame: on a client-side navigation the router's own scroll
-     * reset hasn't necessarily happened when this effect first runs, so
-     * checking "did they arrive at the top" immediately can read the *previous*
-     * page's scroll position and silently decline to offer.
+     * Deferred, not immediate: on a client-side navigation the router's own
+     * scroll reset hasn't necessarily happened when this effect first runs, so
+     * checking "did they arrive at the top" straight away can read the
+     * *previous* page's position. A browser restoring its own scroll takes
+     * longer still — see DECIDE_AFTER.
      */
-    const decide = requestAnimationFrame(() => {
+    const decide = window.setTimeout(() => {
       lastY = window.scrollY;
       if (
         saved &&
         !moved.current &&
+        // Still at the top: if the browser has put the reader back where they
+        // were — which is what every mobile browser does on reload and back —
+        // there is nothing to offer, and this correctly says nothing.
         window.scrollY < 100 &&
         !hasHash &&
         saved.y > vh * MIN_DEPTH &&
@@ -125,7 +154,7 @@ export default function ReadingPosition() {
       ) {
         setOffer(saved.y);
       }
-    });
+    }, DECIDE_AFTER);
 
     /**
      * Saving is debounced, and separate from the scroll handler on purpose:
@@ -154,25 +183,47 @@ export default function ReadingPosition() {
       frame = requestAnimationFrame(() => {
         frame = 0;
         lastY = window.scrollY;
-        if (lastY > DISMISS_AFTER) {
-          moved.current = true;
-          setOffer(null);
-        }
       });
+    };
+
+    /**
+     * The reader took over — withdraw the offer.
+     *
+     * This used to be "scrollY has passed 400px", which is a statement about
+     * the page rather than the person, and a browser restoring its own scroll
+     * position satisfies it instantly. On every mobile browser that meant the
+     * pill was killed by the same restoration that made it worth showing, so
+     * it never appeared on a phone at all. `wheel`, `touchmove` and the scroll
+     * keys are all things a reader does; scroll restoration fires none of them.
+     */
+    const takeOver = () => {
+      moved.current = true;
+      setOffer(null);
+    };
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") return setOffer(null);
+      if (SCROLL_KEYS.has(e.key)) takeOver();
     };
 
     // A closed tab never fires the debounce. `pagehide` covers closing, a
     // back-navigation, and iOS putting the tab to sleep, which `beforeunload`
     // does not.
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("wheel", takeOver, { passive: true });
+    window.addEventListener("touchmove", takeOver, { passive: true });
+    window.addEventListener("keydown", onKey);
     window.addEventListener("pagehide", persist);
     return () => {
       if (frame) cancelAnimationFrame(frame);
-      cancelAnimationFrame(decide);
+      window.clearTimeout(decide);
       window.clearTimeout(save);
       // Leaving for another page in the app is a departure too.
       persist();
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("wheel", takeOver);
+      window.removeEventListener("touchmove", takeOver);
+      window.removeEventListener("keydown", onKey);
       window.removeEventListener("pagehide", persist);
     };
   }, [pathname]);
@@ -187,8 +238,8 @@ export default function ReadingPosition() {
    * unrelated things stuck to opposite corners of the window.
    *
    * No dismiss button: matching that pill means one control, and the offer
-   * already withdraws itself the moment you scroll (`DISMISS_AFTER`). Escape
-   * closes it for anyone who wants it gone without moving.
+   * already withdraws itself the moment the reader scrolls under their own
+   * steam. Escape closes it for anyone who wants it gone without moving.
    */
   return (
     <button
