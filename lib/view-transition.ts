@@ -56,7 +56,9 @@ export function withViewTransition(update: () => void | Promise<void>): Promise<
  * back a cleanup rather than leaving it set.
  */
 export function nameFor(el: Element | null | undefined, name: string): () => void {
-  if (!(el instanceof HTMLElement)) return () => {};
+  // SVG diagrams are lightbox subjects too, and SVGElement is not an
+  // HTMLElement — both have `style`, which is all this needs.
+  if (!(el instanceof HTMLElement) && !(el instanceof SVGElement)) return () => {};
   el.style.viewTransitionName = name;
   return () => {
     el.style.viewTransitionName = "";

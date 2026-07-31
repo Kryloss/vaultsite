@@ -1,7 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { ui } from "@/lib/ui-strings";
+import { nameFor, withViewTransition } from "@/lib/view-transition";
 import T from "./T";
 
 /**
@@ -31,7 +33,26 @@ import T from "./T";
  * The caption comes from the figure's `<figcaption>` when there is one, so the
  * language toggle's `.lang-en` / `.lang-uk` spans keep working inside the
  * overlay; it falls back to the image's alt text.
+ *
+ * **It opens as a zoom, not a fade.** The figure you clicked and the figure in
+ * the overlay are the same picture, so they share a `view-transition-name` and
+ * the browser tweens one into the other — the image grows out of the page
+ * instead of a second copy appearing over it. Two details make that work:
+ *
+ * - The update runs inside `flushSync`, so the DOM has really changed before
+ *   the API takes its "after" snapshot. Without it React would still be
+ *   scheduling the render and the transition would capture nothing.
+ * - The name is moved rather than copied. The thumbnail is still on the page
+ *   underneath the overlay, and two elements sharing one transition name is an
+ *   error — so the thumbnail's is released as the overlay's is applied, and
+ *   handed back on the way out.
+ *
+ * Where the API is missing, or under `prefers-reduced-motion`, the same code
+ * just sets state and the overlay appears — see lib/view-transition.ts.
  */
+
+/** The shared name carried by the clicked figure and the overlay's copy. */
+const ZOOM = "lightbox-figure";
 
 type Shown =
   | { kind: "img"; src: string; alt: string; caption: string | null }
@@ -96,10 +117,24 @@ export default function Lightbox() {
   /** Index into the gallery captured when the lightbox opened. */
   const [items, setItems] = useState<Element[]>([]);
   const [index, setIndex] = useState(0);
+  /** The page element the overlay grew out of — where it shrinks back to. */
+  const origin = useRef<Element | null>(null);
 
   const close = useCallback(() => {
-    setShown(null);
-    setItems([]);
+    const from = origin.current;
+    let release = () => {};
+    void withViewTransition(() => {
+      flushSync(() => {
+        setShown(null);
+        setItems([]);
+      });
+      // Named only now: while the overlay existed it held the name, and the
+      // two may never both have it. This is where the zoom lands.
+      release = nameFor(from, ZOOM);
+    }).then(() => {
+      release();
+      origin.current = null;
+    });
   }, []);
 
   /** Move `delta` places through the gallery, wrapping around both ends. */
@@ -132,9 +167,19 @@ export default function Lightbox() {
 
       e.preventDefault();
       const list = gallery();
-      setItems(list);
-      setIndex(Math.max(list.indexOf(el), 0));
-      setShown(described);
+      origin.current = el;
+      const release = nameFor(el, ZOOM);
+
+      void withViewTransition(() => {
+        flushSync(() => {
+          setItems(list);
+          setIndex(Math.max(list.indexOf(el), 0));
+          setShown(described);
+        });
+        // The overlay now carries the name; the thumbnail must give it up
+        // before the "after" snapshot is taken.
+        release();
+      });
     };
 
     document.addEventListener("click", onClick);
@@ -204,10 +249,12 @@ export default function Lightbox() {
         <img
           src={shown.src}
           alt={shown.alt}
+          style={{ viewTransitionName: ZOOM }}
           className="max-h-[85vh] max-w-full rounded-lg object-contain"
         />
       ) : (
         <div
+          style={{ viewTransitionName: ZOOM }}
           className="lightbox-diagram flex max-h-[85vh] w-full max-w-5xl items-center justify-center"
           dangerouslySetInnerHTML={{ __html: shown.markup }}
         />

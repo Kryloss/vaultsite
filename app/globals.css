@@ -154,6 +154,25 @@ html[data-nav="back"]::view-transition-new(root) {
   view-transition-name: entry-title;
 }
 
+/* The lightbox zoom (components/Lightbox.tsx). The two snapshots are the same
+   picture at two sizes, so cross-fading them would show a double image while
+   they travel — the new one is simply shown, and the group's growth does the
+   work. Slightly slower than a page change: it covers more distance. */
+::view-transition-old(lightbox-figure) {
+  animation: none;
+  opacity: 0;
+}
+
+::view-transition-new(lightbox-figure) {
+  animation: none;
+}
+
+::view-transition-group(lightbox-figure) {
+  animation-duration: 320ms;
+  animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+  z-index: 2;
+}
+
 /* Lists arrive one item at a time. `.stagger` goes on the container; the
    delays are nth-child rules rather than an inline `--i` per item, so a list
    component only gains a class name and no server-rendered style attributes.
