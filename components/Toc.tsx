@@ -300,10 +300,10 @@ export default function Toc({
       </nav>
 
       {/* Narrow screens: the same outline behind a breadcrumb-style pill.
-          On a phone it sits in the top-right corner as three lines and unfurls
-          the current heading only while the reader is scrolling down — see
-          `html[data-scroll]` in globals.css. Above that width the label is the
-          whole control and the icon is hidden, as it always was. */}
+          On a phone it is just the three-line icon, in the top-right corner
+          and sized to match the floating bar opposite it; the label is hidden
+          there and the sheet hangs underneath. Above that width the label is
+          the whole control and the icon is hidden, as it always was. */}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
