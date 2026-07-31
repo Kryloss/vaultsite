@@ -5,6 +5,9 @@ date: 2026-07-16
 description: A first post to prove the whole pipeline works.
 description_uk: Перший допис, щоб довести, що весь конвеєр працює.
 maturity: budding
+# Scaffolding, not writing — kept for reference in Obsidian, out of the
+# published site, the sitemap, the RSS feed and search.
+draft: true
 ---
 
 This is a sample post. It lives at `vault/Posts/How was my day.md` in the Obsidian vault and was published automatically — no build steps, no copying files around.
