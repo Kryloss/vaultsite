@@ -13,6 +13,10 @@
  *   every content <img> as width/height attributes. Without them the browser
  *   doesn't know how tall an image will be until it arrives, so it reserves no
  *   space and every paragraph below jumps down the moment it does.
+ * - `srcset` — narrower WebP copies written beside the original, so a phone
+ *   downloads a 40 KB cover instead of the 1.3 MB PNG that was pasted into
+ *   the note. The originals are never touched: they're the owner's files, and
+ *   a browser that picks from a srcset never fetches the `src` anyway.
  *
  * Both are read at build time by lib/blur.ts. Runs automatically before
  * `next dev` and `next build` (predev/prebuild). public/vault-assets/ is
@@ -29,6 +33,22 @@ const MANIFEST_PATH = path.join(process.cwd(), ".image-manifest.json");
 const RASTER = /\.(jpe?g|png|webp|avif)$/i;
 /** Placeholder edge length. Big enough to suggest the composition, ~300 bytes. */
 const LQIP_PX = 16;
+
+/**
+ * Widths to emit beside each raster image.
+ *
+ * 256 is the avatar and the small cover at 2× (`![[me.jpeg|93]]` was pulling
+ * 208 KB for a 93px circle). 672 is the prose column exactly — see max-w-2xl
+ * in the page layouts. 1344 is that column on a 2× display, which is the
+ * widest anything on the site is ever painted.
+ */
+const WIDTHS = [256, 672, 1344];
+
+/**
+ * Don't emit a variant that's within this factor of the source width: two
+ * near-identical files cost a build and buy nothing.
+ */
+const MIN_SHRINK = 1.15;
 
 fs.rmSync(OUT, { recursive: true, force: true });
 
@@ -86,6 +106,8 @@ async function writeImageManifest() {
   }
 
   const manifest = {};
+  let variantCount = 0;
+
   await Promise.all(
     images.map(async ({ full, rel }) => {
       const entry = {};
@@ -99,6 +121,32 @@ async function writeImageManifest() {
         }
       } catch {
         /* unreadable image — no dimensions */
+      }
+
+      // Narrower copies, written beside the original in public/vault-assets
+      // (regenerated every run, so nothing accumulates). WebP for all of them
+      // — it handles transparency, so a PNG logo survives the trip.
+      if (entry.w) {
+        const candidates = [];
+        for (const width of WIDTHS) {
+          if (entry.w < width * MIN_SHRINK) continue;
+          const relOut = rel.replace(/\.[^.]+$/, `-${width}w.webp`);
+          try {
+            await sharp(full)
+              .resize({ width })
+              .webp({ quality: 78 })
+              .toFile(path.join(OUT, relOut));
+            candidates.push(`${publicUrl(relOut)} ${width}w`);
+            variantCount++;
+          } catch {
+            /* couldn't re-encode this one — the others still stand */
+          }
+        }
+        if (candidates.length) {
+          // The original goes last, at its true width, so a display wide
+          // enough to want it can still have it.
+          entry.srcset = [...candidates, `${publicUrl(rel)} ${entry.w}w`].join(", ");
+        }
       }
       try {
         const buf = await sharp(full)
@@ -116,7 +164,7 @@ async function writeImageManifest() {
   fs.writeFileSync(MANIFEST_PATH, JSON.stringify(manifest));
   const sized = Object.values(manifest).filter((e) => e.w).length;
   console.log(
-    `[sync-assets] wrote ${Object.keys(manifest).length} image entr(ies), ${sized} with dimensions`
+    `[sync-assets] wrote ${Object.keys(manifest).length} image entr(ies), ${sized} with dimensions, ${variantCount} resized variant(s)`
   );
 }
 
