@@ -123,6 +123,16 @@ export default function Chrome({
 
   // A new page starts at the top, so the breadcrumb should be showing.
   useEffect(() => setCompact(false), [pathname]);
+
+  /**
+   * Publish the scroll direction on <html> so CSS elsewhere can react to it
+   * without a second listener or a shared context. components/Toc.tsx uses it
+   * to unfurl the contents pill on a phone while the reader is heading down
+   * the page — the same moment this bar drops the breadcrumb.
+   */
+  useEffect(() => {
+    document.documentElement.dataset.scroll = compact ? "down" : "up";
+  }, [compact]);
   // …and carries no reading estimate until the new article publishes one.
   useEffect(() => setTimeLeft(null), [pathname]);
 

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import T from "@/components/T";
 import { useLang } from "@/components/useLang";
+import { MenuIcon } from "@/components/icons";
 import type { Heading } from "@/lib/toc";
 
 /**
@@ -299,8 +300,10 @@ export default function Toc({
       </nav>
 
       {/* Narrow screens: the same outline behind a breadcrumb-style pill.
-          The label IS the control — no icon, since the text already says
-          what tapping it will show. */}
+          On a phone it sits in the top-right corner as three lines and unfurls
+          the current heading only while the reader is scrolling down — see
+          `html[data-scroll]` in globals.css. Above that width the label is the
+          whole control and the icon is hidden, as it always was. */}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -308,6 +311,7 @@ export default function Toc({
         aria-label={lang === "uk" ? "Зміст сторінки" : "Table of contents"}
         className="toc-bar"
       >
+        <MenuIcon className="toc-bar-icon" />
         <span className="toc-bar-label">{hereLabel}</span>
       </button>
 
