@@ -18,6 +18,8 @@
  */
 import type { Str } from "./ui-strings";
 import {
+  displayDate,
+  displayDateUk,
   getEntries,
   getEntry,
   getSectionBySlug,
@@ -26,11 +28,22 @@ import {
   type Section,
 } from "./vault";
 
+/**
+ * A part, ready to render.
+ *
+ * Dates arrive already formatted because components/Series.tsx is a CLIENT
+ * component — the popover needs state — and lib/vault.ts reads the filesystem.
+ * Importing displayDate() there would drag `fs` into the browser bundle. Same
+ * server-slims-the-rows split as PostList → PostListClient.
+ */
 export interface SeriesPart {
   href: string;
   title: string;
   titleUk?: string;
+  /** Machine-readable, for <time datetime>. */
   date?: string;
+  dateLabel?: string;
+  dateLabelUk?: string;
   /** 1-based position in the series. */
   number: number;
   /** True for the note currently being read. */
@@ -46,6 +59,8 @@ export interface Series {
   index: number;
   /** parts.length, spelled out because every caller wants both numbers. */
   total: number;
+  /** "Part 2 of 5", both languages — built here so the client needn't. */
+  partLabel: Str;
 }
 
 /**
@@ -174,11 +189,14 @@ export function getSeries(sectionSlug: string, entrySlug: string): Series | null
     nameUk,
     total: members.length,
     index: i + 1,
+    partLabel: seriesPartLabel(i + 1, members.length),
     parts: members.map((m, n) => ({
       href: `/${m.section.slug}/${m.entry.slug}`,
       title: m.entry.title,
       titleUk: m.entry.titleUk,
       date: m.entry.date,
+      dateLabel: m.entry.date ? displayDate(m.entry.date) : undefined,
+      dateLabelUk: m.entry.date ? displayDateUk(m.entry.date) : undefined,
       number: n + 1,
       current: n === i,
     })),
