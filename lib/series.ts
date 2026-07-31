@@ -18,8 +18,6 @@
  */
 import type { Str } from "./ui-strings";
 import {
-  displayDate,
-  displayDateUk,
   getEntries,
   getEntry,
   getSectionBySlug,
@@ -29,21 +27,16 @@ import {
 } from "./vault";
 
 /**
- * A part, ready to render.
+ * A part, ready to render — a number, a name and a link, and nothing else.
  *
- * Dates arrive already formatted because components/Series.tsx is a CLIENT
- * component — the popover needs state — and lib/vault.ts reads the filesystem.
- * Importing displayDate() there would drag `fs` into the browser bundle. Same
- * server-slims-the-rows split as PostList → PostListClient.
+ * No date: the popover is a place to go, not a thing to read, and the reading
+ * order is already carried by the numbering. Dates only made each row wider
+ * and gave the eye a second column to skip.
  */
 export interface SeriesPart {
   href: string;
   title: string;
   titleUk?: string;
-  /** Machine-readable, for <time datetime>. */
-  date?: string;
-  dateLabel?: string;
-  dateLabelUk?: string;
   /** 1-based position in the series. */
   number: number;
   /** True for the note currently being read. */
@@ -59,7 +52,14 @@ export interface Series {
   index: number;
   /** parts.length, spelled out because every caller wants both numbers. */
   total: number;
-  /** "Part 2 of 5", both languages — built here so the client needn't. */
+  /**
+   * "Part 2 of 5", both languages, built here rather than in the component.
+   *
+   * components/Series.tsx is a CLIENT component (the popover needs state) and
+   * this module reaches the filesystem — so everything it needs at runtime is
+   * computed on this object and the type is imported `import type`. Same
+   * server-slims-the-rows split as PostList → PostListClient.
+   */
   partLabel: Str;
 }
 
@@ -194,9 +194,6 @@ export function getSeries(sectionSlug: string, entrySlug: string): Series | null
       href: `/${m.section.slug}/${m.entry.slug}`,
       title: m.entry.title,
       titleUk: m.entry.titleUk,
-      date: m.entry.date,
-      dateLabel: m.entry.date ? displayDate(m.entry.date) : undefined,
-      dateLabelUk: m.entry.date ? displayDateUk(m.entry.date) : undefined,
       number: n + 1,
       current: n === i,
     })),
