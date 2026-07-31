@@ -590,3 +590,13 @@ That does leave the row without a static signal that it continues — the thing 
 - **The tile is 160px**, which is not a round power of two on purpose: at 64px the repeat is a visible grid.
 - **Fixed, not scrolling.** Grain that moves with the content is a texture on the content; grain that stays is a texture on the screen, which is the effect wanted.
 - **z-index 1** — above the page, below the drawer, palette and lightbox. Those are surfaces of their own and should sit on top of it. `pointer-events: none`, and hidden in print, where paper has its own.
+
+## 47. Why "Continue" never appeared on a phone (2026-07-30)
+
+The offer withdrew itself when `scrollY` passed 400px — a statement about the page, not about the person. Every mobile browser restores its own scroll position on reload and on back, and that restoration fires `scroll` like anything else, so the pill was killed by the same event that made it worth showing. On a phone it effectively never appeared.
+
+**Dismissal now keys on reader-generated input** — `wheel`, `touchmove` and the scroll keys — which is the distinction `components/Toc.tsx` already draws for its highlight (#38), and for exactly this reason: a scroll event says the page moved, not who moved it. Scroll restoration fires none of them.
+
+**The decision also waits 250ms instead of one frame.** Browser restoration lands after the first frame, and on mobile several frames later, so the arrival check was reading a position that was about to change. Nothing is visible in that window — the pill's entrance animation is delayed longer than the wait.
+
+**It is still rarer on a phone, and that part is correct.** The offer is only made when you arrive near the top; if the browser has already put you back where you were, there is nothing to offer. The feature exists for the case the browser doesn't handle — a fresh visit to a note you read days ago — and that is now reachable on mobile rather than being cancelled a frame after load.
