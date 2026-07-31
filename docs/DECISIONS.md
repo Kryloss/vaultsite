@@ -633,19 +633,14 @@ The two labels answer the same question at different moments. "Posts · Kyrylo" 
 - **`null` is a real value** meaning "nothing to report" — too early, finished, or not a timed article — and it's published on unmount too, so the chrome doesn't keep showing the last article's number after you navigate away.
 - **The swap is CSS, not conditional rendering.** `data-compact` on the bar animates `max-width` and opacity the same way the breadcrumb already collapses, so the two cross over rather than one popping in after the other disappears.
 
-## 51. The phone's two corners (2026-07-31)
+## 51. The phone's top corners (2026-07-31)
 
-The contents pill moves to the **top-right** on phones and furls up into three lines. It unfurls the current heading only while the reader is scrolling **down** — the same moment the breadcrumb opposite it gives way to the time remaining (#50). The two corners now change together:
+The contents pill moves to the **top-right** on a phone and is only ever the three-line icon — no label, at any scroll position. The bottom of the screen is now empty, which is where the reading-position pill lives and where a thumb rests.
 
-| | top-left | top-right |
-|---|---|---|
-| At rest / scrolling up | breadcrumb | ☰ |
-| Scrolling down | time remaining | ☰ current heading |
+**It's sized from the bar opposite it, not from its own contents.** The floating bar at the top-left is a 2rem button inside 0.25rem of padding — 2.5rem tall — so this is built the same way: 0.25rem of padding around a 2rem icon square holding an 18px glyph, exactly the proportions of the menu button. Two chips in two corners have to agree on their height or they read as unrelated things that happen to be near each other.
 
-Both corners answer "where am I" when you arrive and "how am I doing" once you're reading, and neither is ever wider than it needs to be. It also frees the bottom of the screen entirely, which is where the reading-position pill lives and where a thumb rests.
+**It briefly unfurled the current heading while scrolling down, and that was removed.** The idea was symmetry with the left bar, which swaps breadcrumb for time remaining (#50). In practice it meant a chip changing width in the corner of the eye, reporting something the reader hadn't asked for, while they were reading. The heading is one tap away inside the sheet. `html[data-scroll]` was added to drive it and has been removed with it — nothing reads it now.
 
-**Nothing above 640px changes.** From 640 to 1279px the pill stays at the bottom-left with its label always showing; from 1280px the rail takes over and the pill doesn't exist. The icon is `display: none` outside the phone range, so the "label IS the control" design survives everywhere it was already working.
+**The sheet hangs directly under the icon.** It used to rise from a chip at the bottom-left, so both the anchor and the `transform-origin` inverted; a panel that grows from the wrong corner reads as a different element arriving rather than the one you pressed. On a phone it's also narrower (13.5rem), shorter (55vh) and tighter than on a laptop, with one line per heading — it's an index, so it should cover a corner of the article rather than the article.
 
-**The direction comes from `html[data-scroll]`, and the swap is pure CSS.** `Chrome` already tracks scroll direction for its own bar; it now writes that to the document element, and `Toc` reads it without a listener, a prop, or a context — the component has no idea this is happening. One scroll handler drives both corners, which is also what keeps them in step: two independent listeners with their own thresholds would drift apart by a frame and read as sloppiness.
-
-**The sheet flips with the pill.** It used to rise from a chip at the bottom-left; it now hangs from one at the top-right, so both the anchor and the `transform-origin` invert. A panel that grows from the wrong corner reads as a different element arriving rather than the one you pressed opening.
+**Nothing above 640px changes.** From 640 to 1279px the pill stays bottom-left with its label; from 1280px the rail takes over and the pill doesn't exist. The icon is `display: none` outside the phone range, so the "the label IS the control" design survives everywhere it was already working.
