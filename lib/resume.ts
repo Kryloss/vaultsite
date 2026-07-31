@@ -10,8 +10,8 @@
  * same reasoning as lib/toc.ts collecting real markdown headings: one source
  * of truth for "what sections exist and what are they called."
  */
-import type { Str } from "@/lib/ui-strings";
-import { ui } from "@/lib/ui-strings";
+import type { Str } from "./ui-strings";
+import { ui } from "./ui-strings";
 
 export interface ResumeRow {
   role?: string;

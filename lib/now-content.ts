@@ -36,8 +36,8 @@
  * build-log warning rather than throwing, so a typo in the note can never take
  * a deploy down — it just leaves that block off the page, where it's obvious.
  */
-import type { ResumeData, ResumeRow } from "@/lib/resume";
-import { RESUME_BLOCKS } from "@/lib/resume";
+import type { ResumeData, ResumeRow } from "./resume";
+import { RESUME_BLOCKS } from "./resume";
 
 export interface NowGoal {
   label: string;

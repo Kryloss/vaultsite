@@ -12,11 +12,11 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import GithubSlugger from "github-slugger";
-import type { ResumeData } from "@/lib/resume";
-import { resumeHeadings, resumeSearchText } from "@/lib/resume";
-import type { NowContent } from "@/lib/now-content";
-import { parseNow } from "@/lib/now-content";
-import { ui } from "@/lib/ui-strings";
+import type { ResumeData } from "./resume";
+import { resumeHeadings, resumeSearchText } from "./resume";
+import type { NowContent } from "./now-content";
+import { parseNow } from "./now-content";
+import { ui } from "./ui-strings";
 
 export const VAULT_DIR = path.join(process.cwd(), "vault");
 
