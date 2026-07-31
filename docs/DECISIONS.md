@@ -608,3 +608,15 @@ The offer withdrew itself when `scrollY` passed 400px — a statement about the 
 Settling it needs the four gate values at the moment the decision runs, and on iOS there is no console to read them in. So `?rp=debug` prints them on the page: the stored entry for this path, how many paths are stored at all, the viewport and page heights, the threshold, and PASS/FAIL for each of the four conditions. It renders whether or not the offer was made — the interesting case is the one where it wasn't.
 
 **Opt-in, and therefore permanent.** It costs a normal visit nothing (no markup, one query-string read), and this is a feature whose whole job is to not appear, which makes "is it broken or is it working?" a question that will come up again. A temporary `console.log` would have answered it once.
+
+## 49. "Arrived at the top" was the wrong question (2026-07-31)
+
+The `?rp=debug` panel from #48 settled it in two readings. Nothing was broken: the position was being written correctly on production (`saved y=2018`), and the offer was refused because iOS Safari had restored the scroll to **exactly** 2018 — so the gate "arrived near the top" failed.
+
+The conclusion was right and the reasoning was luck. What the rule was supposed to express is *don't offer to take the reader somewhere they already are*; what it actually tested is *did the page load at the top*. Those agree only when the browser restores to precisely the saved mark. A restoration that lands somewhere **else** — a note edited since, a window opened at a different width, images settling to a different height — was refused just as firmly, and that's the case where the offer is most useful.
+
+**The gate is now the distance between where you landed and where the mark is**, and it has to be more than half a screen. Landing on the mark stays silent, landing anywhere else offers.
+
+This is the second time this feature has been fixed by replacing a measurement of the page with a statement about the reader — #47 was the same shape (dismissing on `scrollY > 400` rather than on the reader actually scrolling). Worth remembering when the next condition gets written: **ask what the rule is for, then test that, not the thing that usually correlates with it.**
+
+**And the pill is still supposed to stay quiet on a phone that restores you exactly where you were.** That's not a bug to chase; it means the browser did the job first. To see it fire on iOS, arrive at the note fresh — from a link, the palette, or a new tab — rather than by reloading the page you were already on.
