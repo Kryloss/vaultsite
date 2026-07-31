@@ -25,6 +25,7 @@ import {
 import CommandPalette from "@/components/CommandPalette";
 import { warmSearchIndex } from "@/components/useSearchIndex";
 import Shortcuts from "@/components/Shortcuts";
+import PageTransitions from "@/components/PageTransitions";
 import ResistanceDay from "@/components/ResistanceDay";
 import T from "@/components/T";
 import { useLang } from "@/components/useLang";
@@ -388,6 +389,9 @@ export default function Chrome({
           list the sidebar shows — `g 1…9` follows that order. `openSearch` is
           memoized so its key listener isn't torn down on every render. */}
       <Shortcuts items={items} onSearch={openSearch} />
+
+      {/* Animates route changes where the browser can — see the component. */}
+      <PageTransitions />
 
       {/* Content — re-animates on each navigation via the pathname key */}
       <main id="main" key={pathname} className="page-in min-w-0">

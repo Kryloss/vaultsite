@@ -129,7 +129,9 @@ export default async function EntryPage({ params }: Props) {
       </Link>
 
       <header className="mt-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-[var(--text)]">
+        {/* `entry-title` is the landing point of the view transition that
+            starts from the list row you clicked — see globals.css. */}
+        <h1 className="entry-title text-2xl font-semibold tracking-tight text-[var(--text)]">
           <T en={entry.title} uk={entry.titleUk} />
           {typeof entry.meta.rating === "number" && (
             <Stars

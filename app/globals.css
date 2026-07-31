@@ -76,6 +76,84 @@ html[data-lang="uk"] .lang-uk {
   animation: page-in 0.35s ease both;
 }
 
+/* ---------- View transitions (components/PageTransitions.tsx) ---------- */
+
+/* Where the API is available the whole page transitions, so the CSS-only fade
+   above would be a second animation on top of it. `data-vt` is set by the
+   component only when it has decided to take over. */
+html[data-vt="on"] .page-in {
+  animation: none;
+}
+
+/* Forward moves the page left — you're going further in. Back reverses it.
+   The travel is small on purpose: enough to say which way, not enough to
+   read as a slide-deck. */
+@keyframes vt-leave {
+  to {
+    opacity: 0;
+    transform: translateX(calc(-1 * var(--vt-travel)));
+  }
+}
+
+@keyframes vt-enter {
+  from {
+    opacity: 0;
+    transform: translateX(var(--vt-travel));
+  }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  /* The default is a cross-fade; these replace it entirely. */
+  animation-duration: 260ms;
+  animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+  animation-fill-mode: both;
+  /* Both snapshots occupy the same space, so neither pushes the other. */
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  --vt-travel: 1.25rem;
+  animation-name: vt-leave;
+}
+
+::view-transition-new(root) {
+  --vt-travel: 1.25rem;
+  animation-name: vt-enter;
+}
+
+/* Going back retraces the way you came. */
+html[data-nav="back"]::view-transition-old(root) {
+  --vt-travel: -1.25rem;
+}
+
+html[data-nav="back"]::view-transition-new(root) {
+  --vt-travel: -1.25rem;
+}
+
+/* The title is the one thing both pages have, so it moves rather than
+   dissolving — the row you clicked becomes the heading you're reading. It is
+   NOT faded: a group that only travels reads as the same object moving. */
+::view-transition-old(entry-title),
+::view-transition-new(entry-title) {
+  animation: none;
+  mix-blend-mode: normal;
+  height: 100%;
+}
+
+::view-transition-group(entry-title) {
+  animation-duration: 300ms;
+  animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+  /* Above the page snapshots, or it would travel underneath them. */
+  z-index: 1;
+}
+
+/* An entry's heading is the receiving end of that morph. Only entry pages
+   carry the class, so the name stays unique. */
+.entry-title {
+  view-transition-name: entry-title;
+}
+
 /* Lists arrive one item at a time. `.stagger` goes on the container; the
    delays are nth-child rules rather than an inline `--i` per item, so a list
    component only gains a class name and no server-rendered style attributes.
