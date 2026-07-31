@@ -1443,13 +1443,11 @@ body::after {
   }
 }
 
-/* Three lines: the control when the label is furled away. Phones only — at
-   wider widths the label is the whole control, as it always was. */
+/* Three lines: the whole control on a phone. Hidden at wider widths, where
+   the label is the control, as it always was. */
 .toc-bar-icon {
   display: none;
   flex: none;
-  width: 1.0625rem;
-  height: 1.0625rem;
   color: var(--text-secondary);
 }
 
@@ -1463,46 +1461,44 @@ body::after {
   white-space: nowrap;
 }
 
-/* Phones: the contents pill moves to the top-right corner and furls up into
-   its three lines. It unfurls the current heading only while the reader is
-   scrolling DOWN — the same moment the breadcrumb opposite it gives way to
-   the time remaining, so the two corners swap together and the top of the
-   screen never carries four things at once.
+/* Phones: the contents pill is the three-line icon in the top-right corner,
+   and nothing else — no label, at any scroll position. The heading it used to
+   unfurl is one tap away inside the sheet, and a chip that changes width while
+   you read is movement in the corner of the eye for information you didn't
+   ask for.
 
-   `html[data-scroll]` is written by components/Chrome.tsx, which already
-   tracks the direction for its own bar; this needs no listener of its own. */
+   Sized to match the floating bar opposite it exactly: that bar is a 2rem
+   button inside 0.25rem of padding, so both are 2.5rem tall and the two
+   corners read as one pair rather than two chips that happen to be near each
+   other. The icon carries its own padding for the same reason the left button
+   does — the tap target is the square, not the glyph. */
 @media (max-width: 639px) {
   .toc-bar {
     top: 0.75rem;
     right: 0.75rem;
     left: auto;
     bottom: auto;
-    max-width: calc(100vw - 11rem);
-    padding: 0.4375rem 0.5rem;
+    padding: 0.25rem;
   }
 
   .toc-bar-icon {
     display: block;
+    width: 2rem;
+    height: 2rem;
+    /* Leaves an 18px glyph inside the 32px square — the same proportions as
+       PanelIcon in the menu button. box-sizing is border-box site-wide. */
+    padding: 0.4375rem;
   }
 
   .toc-bar-label {
-    max-width: 0;
-    padding-left: 0;
-    opacity: 0;
-    transition: max-width 220ms ease, opacity 140ms ease, padding-left 220ms ease;
-  }
-
-  html[data-scroll="down"] .toc-bar-label {
-    max-width: 38vw;
-    padding-left: 0.375rem;
-    opacity: 1;
+    display: none;
   }
 
   /* The sheet follows the pill: it now hangs BELOW a chip at the top of the
      screen rather than rising from one at the bottom, so both the anchor and
      the direction of growth flip. */
   .toc-sheet {
-    top: 3.25rem;
+    top: 3.5rem;
     right: 0.75rem;
     left: auto;
     bottom: auto;
