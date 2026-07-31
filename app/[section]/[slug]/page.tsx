@@ -26,7 +26,7 @@ import Stars from "@/components/Stars";
 import T from "@/components/T";
 import Toc from "@/components/Toc";
 import EntryFooter from "@/components/EntryFooter";
-import Series, { SeriesBadge } from "@/components/Series";
+import Series from "@/components/Series";
 import CopyMarkdown from "@/components/CopyMarkdown";
 import ReadingProgress from "@/components/ReadingProgress";
 import ReadingPosition from "@/components/ReadingPosition";
@@ -155,7 +155,10 @@ export default async function EntryPage({ params }: Props) {
           </div>
         )}
 
-        <p className="mt-3 flex flex-wrap items-center gap-x-2 text-sm text-[var(--text-tertiary)]">
+        {/* A <div>, not a <p>: the series popover is a <nav>, which a browser
+            parsing the static HTML would kick out of a paragraph — and the
+            resulting DOM wouldn't match what React rendered. */}
+        <div className="mt-3 flex flex-wrap items-center gap-x-2 text-sm text-[var(--text-tertiary)]">
           {entry.date && (
             <time dateTime={entry.date}>
               <T en={displayDate(entry.date)} uk={displayDateUk(entry.date)} />
@@ -176,12 +179,13 @@ export default async function EntryPage({ params }: Props) {
               <T {...maturityOf(entry.meta).label} />
             </span>
           )}
-          {/* "Part 2 of 5", jumping to the full list below the article. It
-              belongs here rather than only at the foot: someone landing from
-              search is starting in the middle and should know it. */}
+          {/* "Part 2 of 5" — a badge that opens the list of parts. Someone
+              landing here from search is starting in the middle and should
+              know it, but the other parts are a detour, not the article, so
+              they live in a popover rather than a panel of their own. */}
           {series && (entry.date || stats) && <span aria-hidden>·</span>}
-          {series && <SeriesBadge series={series} />}
-        </p>
+          {series && <Series series={series} />}
+        </div>
 
       </header>
 
@@ -202,10 +206,6 @@ export default async function EntryPage({ params }: Props) {
           dangerouslySetInnerHTML={{ __html: en.html }}
         />
       )}
-
-      {/* The arc first, then the section's neighbours — one is where this
-          note sits in an argument, the other where it sits in a list. */}
-      {series && <Series series={series} />}
 
       <EntryFooter prev={prev} next={next} />
 
