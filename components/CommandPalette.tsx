@@ -75,14 +75,15 @@ export default function CommandPalette({
   /* The index is fetched on that same first open — nobody who never searches
      downloads it, and nobody who does waits twice. */
   const items = useSearchIndex(everOpen);
-  /* Recording lives here because the palette is the only thing that reads it
-     and is mounted on every page anyway (via components/Chrome.tsx). */
-  useEffect(() => remember(pathname), [pathname]);
   const { lang, toggle: toggleLang } = useLang();
   const inputRef = useRef<HTMLInputElement>(null);
   const flashTimer = useRef<number | undefined>(undefined);
   const router = useRouter();
   const pathname = usePathname();
+
+  /* Recorded here because the palette is the only thing that reads recents and
+     is mounted on every page anyway (via components/Chrome.tsx). */
+  useEffect(() => remember(pathname), [pathname]);
 
   useEffect(() => {
     if (open) {
