@@ -620,3 +620,15 @@ The conclusion was right and the reasoning was luck. What the rule was supposed 
 This is the second time this feature has been fixed by replacing a measurement of the page with a statement about the reader — #47 was the same shape (dismissing on `scrollY > 400` rather than on the reader actually scrolling). Worth remembering when the next condition gets written: **ask what the rule is for, then test that, not the thing that usually correlates with it.**
 
 **And the pill is still supposed to stay quiet on a phone that restores you exactly where you were.** That's not a bug to chase; it means the browser did the job first. To see it fire on iOS, arrive at the note fresh — from a link, the palette, or a new tab — rather than by reloading the page you were already on.
+
+## 50. One chip, two answers (2026-07-31)
+
+On a phone the floating bar at the top-left now shows the breadcrumb when you arrive and the **time remaining** once you start reading down; the corner pill is hidden below 640px. On anything wider nothing changes — the breadcrumb stays put and the pill keeps the bottom-right corner.
+
+The two labels answer the same question at different moments. "Posts · Kyrylo" matters when you land and stops mattering the second you start reading; "4 min left" is meaningless on arrival — it would just repeat the header's estimate — and becomes the only number you want halfway down. The bar already collapsed the breadcrumb on scroll-down (#—, the `compact` state), so the space was there and empty.
+
+**The number crosses components as an event.** `ReadingProgress` computes it from the same progress value the bar is drawing; `Chrome` renders it. They're in different parts of the tree — one belongs to the article, the other to the site chrome — and a context provider wrapping everything for a single integer would be the wrong shape. `TIME_LEFT_EVENT` follows `langchange`, which the codebase already uses for exactly this kind of announcement.
+
+- **Published only when the rounded minute changes**, not per frame; the easing runs at 60fps and React should hear from it about once a minute.
+- **`null` is a real value** meaning "nothing to report" — too early, finished, or not a timed article — and it's published on unmount too, so the chrome doesn't keep showing the last article's number after you navigate away.
+- **The swap is CSS, not conditional rendering.** `data-compact` on the bar animates `max-width` and opacity the same way the breadcrumb already collapses, so the two cross over rather than one popping in after the other disappears.
