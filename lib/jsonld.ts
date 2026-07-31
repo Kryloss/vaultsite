@@ -6,7 +6,7 @@
  * static, and it costs nothing at runtime. Types are chosen from the section a
  * note lives in and its `medium:`, so nothing new goes in the frontmatter.
  */
-import { siteName, siteUrl, socials } from "./site-config";
+import { authorName, siteName, siteUrl, socials } from "./site-config";
 import { resolveCoverUrl } from "./markdown";
 import { entryMedium } from "./shelf";
 import {
@@ -218,7 +218,7 @@ export function siteJsonLd(): object {
       {
         "@type": "Person",
         "@id": PERSON_ID,
-        name: "Kyrylo Leshchenko",
+        name: authorName,
         url: siteUrl,
         // sameAs is how a search engine ties the profiles together as one
         // person; mailto: isn't a profile, so it's filtered out.

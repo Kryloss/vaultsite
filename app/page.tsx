@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   getSections,
@@ -11,6 +12,11 @@ import T from "@/components/T";
 import SocialLinks from "@/components/SocialLinks";
 import { ui } from "@/lib/ui-strings";
 import { displayDateUk } from "@/lib/vault";
+import { pageMeta } from "@/lib/metadata";
+
+/** Title and description come from the layout's defaults; this adds the
+    canonical, which every page needs and the root most of all. */
+export const metadata: Metadata = pageMeta({ path: "/" });
 
 /**
  * Home page — renders vault/Home/main.md, then two generated blocks:

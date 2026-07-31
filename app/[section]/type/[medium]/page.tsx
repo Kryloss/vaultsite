@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSections, getSectionBySlug, getEntries } from "@/lib/vault";
 import { isShelfSection, shelfGroupBySlug, shelfMediumSlugs } from "@/lib/shelf";
+import { pageMeta } from "@/lib/metadata";
 import { getBookQuotes } from "@/lib/quotes";
 import ShelfTypeView from "@/components/lists/ShelfTypeView";
 import T from "@/components/T";
@@ -39,6 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${group.label.en} · ${section.title}`,
     description: section.description,
+    ...pageMeta({ path: `/${sectionSlug}/type/${medium}` }),
   };
 }
 

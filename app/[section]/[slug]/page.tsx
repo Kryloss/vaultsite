@@ -12,6 +12,7 @@ import {
   parseCategories,
 } from "@/lib/vault";
 import { renderWithHeadings } from "@/lib/markdown";
+import { pageMeta } from "@/lib/metadata";
 import { getSiblings } from "@/lib/siblings";
 import { getSeries } from "@/lib/series";
 import {
@@ -56,7 +57,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { section, slug } = await params;
   const entry = getEntry(section, slug);
   if (!entry) return {};
-  return { title: entry.title, description: entry.description };
+  return {
+    title: entry.title,
+    description: entry.description,
+    ...pageMeta({ path: `/${section}/${slug}`, publishedTime: entry.date }),
+  };
 }
 
 /** Entry page — an individual .md file, e.g. /posts/how-was-my-day. */

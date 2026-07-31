@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSections, getSectionBySlug, getEntries } from "@/lib/vault";
+import { pageMeta } from "@/lib/metadata";
 import {
   categoryFromSlug,
   categorySlug,
@@ -70,6 +71,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${group.label.en} · ${section.title}`,
     description: section.description,
+    ...pageMeta({ path: `/${sectionSlug}/type/${medium}/${category}` }),
   };
 }
 

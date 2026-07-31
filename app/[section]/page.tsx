@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getSections, getSectionBySlug, getEntries } from "@/lib/vault";
 import { renderMarkdown } from "@/lib/markdown";
+import { pageMeta } from "@/lib/metadata";
 import { getListComponent } from "@/lib/section-types";
 import { ui } from "@/lib/ui-strings";
 import T from "@/components/T";
@@ -22,7 +23,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { section: slug } = await params;
   const section = getSectionBySlug(slug);
   if (!section) return {};
-  return { title: section.title, description: section.description };
+  return {
+    title: section.title,
+    description: section.description,
+    // "home" is served at "/" — its canonical is the site root, not /home.
+    ...pageMeta({ path: slug === "home" ? "/" : `/${slug}` }),
+  };
 }
 
 /** Section page — vault/<Folder>/main.md plus its entry list. */

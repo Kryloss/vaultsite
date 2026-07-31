@@ -5,6 +5,12 @@
 export const siteName = "Kyrylo";
 
 /**
+ * Full name, for the machines: the schema.org Person and the `article:author`
+ * of every note. `siteName` is the short form the interface uses.
+ */
+export const authorName = "Kyrylo Leshchenko";
+
+/**
  * Breadcrumb label on the home page only.
  *
  * Everywhere else the site name is the tail of a path ("Posts · Kyrylo"), so
