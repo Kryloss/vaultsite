@@ -53,6 +53,22 @@ const MEDIA =
 const PILL_FROM = 0.06;
 const PILL_TO = 0.97;
 
+/**
+ * Name of the event carrying the remaining minutes to the rest of the page.
+ *
+ * On a phone the number is shown in the floating bar at the top-left rather
+ * than in its own pill (see components/Chrome.tsx), and that bar belongs to
+ * the site chrome while this number belongs to the article. A custom event is
+ * how the two talk — the same approach `langchange` already uses — instead of
+ * a context provider wrapping the whole tree for one integer.
+ */
+export const TIME_LEFT_EVENT = "timeleft";
+
+/** `null` means "nothing to report" — too early, finished, or not an article. */
+function publish(minutes: number | null) {
+  window.dispatchEvent(new CustomEvent(TIME_LEFT_EVENT, { detail: minutes }));
+}
+
 /** How fast the bar catches up to the scroll position: 0…1 per frame. */
 const EASE = 0.18;
 /** Below this, snap instead of easing — stops it creeping for ever. */
@@ -62,8 +78,11 @@ export default function ReadingProgress({ minutes }: { minutes?: number }) {
   const barRef = useRef<HTMLDivElement>(null);
   const pillRef = useRef<HTMLDivElement>(null);
   const numberRef = useRef<HTMLSpanElement>(null);
-  /** Last number written, so the text isn't rewritten sixty times a second. */
-  const lastShown = useRef(-1);
+  /**
+   * Last value published, so neither the DOM nor the rest of the page is
+   * touched sixty times a second. `null` means "nothing to report".
+   */
+  const lastShown = useRef<number | null>(null);
 
   useEffect(() => {
     const bar = barRef.current;
@@ -137,16 +156,20 @@ export default function ReadingProgress({ minutes }: { minutes?: number }) {
       /* Minutes left, from the same number the bar is drawing — the estimate
          and the progress can't disagree because there's only one of each.
          Rounded UP, so a part-minute reads as a minute rather than as nothing
-         left to read; the DOM is only touched when that number changes. */
-      const pill = pillRef.current;
-      if (!pill || !minutes) return;
+         left to read. */
+      if (!minutes) return;
       const visible = shown >= PILL_FROM && shown <= PILL_TO;
-      pill.hidden = !visible;
-      if (!visible) return;
-      const left = Math.max(1, Math.ceil(minutes * (1 - shown)));
+      const left = visible ? Math.max(1, Math.ceil(minutes * (1 - shown))) : null;
+
+      const pill = pillRef.current;
+      if (pill) pill.hidden = !visible;
+      // Nothing below this line runs on a frame where the minute is unchanged.
       if (left === lastShown.current) return;
       lastShown.current = left;
-      if (numberRef.current) numberRef.current.textContent = String(left);
+      if (left !== null && numberRef.current) {
+        numberRef.current.textContent = String(left);
+      }
+      publish(left);
     };
 
     const tick = () => {
@@ -199,6 +222,9 @@ export default function ReadingProgress({ minutes }: { minutes?: number }) {
       window.removeEventListener("scroll", update);
       window.removeEventListener("resize", remeasure);
       window.removeEventListener("langchange", remeasure);
+      // Leaving the article clears the number from the chrome, which outlives
+      // this component.
+      publish(null);
     };
   }, [minutes]);
 

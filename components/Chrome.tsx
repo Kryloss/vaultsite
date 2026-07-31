@@ -23,6 +23,7 @@ import {
   UkraineFlag,
 } from "@/components/icons";
 import CommandPalette from "@/components/CommandPalette";
+import { TIME_LEFT_EVENT } from "@/components/ReadingProgress";
 import { warmSearchIndex } from "@/components/useSearchIndex";
 import Shortcuts from "@/components/Shortcuts";
 import ResistanceDay from "@/components/ResistanceDay";
@@ -74,6 +75,15 @@ export default function Chrome({
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   /** Phones only: drop the breadcrumb while reading downward. */
   const [compact, setCompact] = useState(false);
+  /**
+   * Minutes left in the article, published by components/ReadingProgress.tsx.
+   *
+   * On a phone this bar shows the breadcrumb when you arrive and the time
+   * remaining once you start reading — the two answer the same question at
+   * different moments ("where am I" / "how much is left"), and there is only
+   * room for one. Null on any page that isn't a timed article.
+   */
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const { lang, toggle: toggleLang } = useLang();
   const pathname = usePathname();
 
@@ -113,6 +123,17 @@ export default function Chrome({
 
   // A new page starts at the top, so the breadcrumb should be showing.
   useEffect(() => setCompact(false), [pathname]);
+  // …and carries no reading estimate until the new article publishes one.
+  useEffect(() => setTimeLeft(null), [pathname]);
+
+  useEffect(() => {
+    const onTime = (e: Event) => {
+      const detail = (e as CustomEvent<number | null>).detail;
+      setTimeLeft(typeof detail === "number" ? detail : null);
+    };
+    window.addEventListener(TIME_LEFT_EVENT, onTime);
+    return () => window.removeEventListener(TIME_LEFT_EVENT, onTime);
+  }, []);
 
   /**
    * Focus follows the drawer, and comes back when it closes.
@@ -238,7 +259,13 @@ export default function Chrome({
       </a>
 
       {/* Floating top-left: panel icon + clickable location path */}
-      <div className="fixed left-3 top-3 z-30 flex items-center gap-1 rounded-full bg-[var(--bg)]/75 px-1.5 py-1 backdrop-blur-md">
+      {/* `data-compact` drives the swap between the breadcrumb and the time
+          remaining; both live here so the bar never changes width abruptly.
+          Below 640px only — see globals.css. */}
+      <div
+        className="chrome-bar fixed left-3 top-3 z-30 flex items-center gap-1 rounded-full bg-[var(--bg)]/75 px-1.5 py-1 backdrop-blur-md"
+        data-compact={compact && timeLeft !== null}
+      >
         <button
           ref={menuButtonRef}
           type="button"
@@ -250,6 +277,14 @@ export default function Chrome({
         >
           <PanelIcon className="h-[18px] w-[18px]" />
         </button>
+        {/* Reading downward on a phone: the breadcrumb collapses and this
+            takes its place, so the bar keeps saying something useful instead
+            of shrinking to a lone button. */}
+        {timeLeft !== null && (
+          <span className="bar-time">
+            {timeLeft} <T {...ui.minLeft} />
+          </span>
+        )}
         <span className={`crumbs${compact ? " is-collapsed" : ""}`}>
           {crumbs.map((crumb, i) => (
             <Fragment key={crumb.href}>
