@@ -1315,14 +1315,38 @@ body::after {
   transition: max-width 220ms ease, opacity 140ms ease, padding-right 220ms ease;
 }
 
-/* Phones only: scrolling down leaves just the menu button. Wider screens have
-   the room, and the breadcrumb there isn't covering anything. Animating
-   max-width rather than width because the content sizes itself. */
+/* The time remaining, shown in this bar instead of the breadcrumb while a
+   phone reader is scrolling down. Collapsed by default, and at every width
+   above the phone breakpoint where the corner pill does the job. */
+.bar-time {
+  max-width: 0;
+  overflow: hidden;
+  padding-right: 0;
+  opacity: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  transition: max-width 220ms ease, opacity 140ms ease, padding-right 220ms ease;
+}
+
+/* Phones only: scrolling down leaves just the menu button — and, in an
+   article, the time remaining in the breadcrumb's place. Wider screens have
+   the room, so the breadcrumb stays and the corner pill reports the time.
+   Animating max-width rather than width because the content sizes itself. */
 @media (max-width: 639px) {
   .crumbs.is-collapsed {
     max-width: 0;
     padding-right: 0;
     opacity: 0;
+  }
+
+  .chrome-bar[data-compact="true"] .bar-time {
+    max-width: 8rem;
+    padding-left: 0.25rem;
+    padding-right: 0.5rem;
+    opacity: 1;
   }
 }
 
@@ -1794,10 +1818,19 @@ body::after {
   animation: item-in 0.28s cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
 
-/* It stays in the window's corner at every width, unlike `.resume-reading`,
-   which moves in under the contents rail from 1280px (DECISIONS #39). Two
-   pills that can both be on screen shouldn't want the same spot — and the
-   far corner is empty at every size, since the rail sits inboard of it. */
+/* It stays in the window's corner at every width it appears at, unlike
+   `.resume-reading`, which moves in under the contents rail from 1280px
+   (DECISIONS #39). Two pills that can both be on screen shouldn't want the
+   same spot — and the far corner is empty, since the rail sits inboard of it. */
+
+/* On a phone the number lives in the floating bar at the top instead — one
+   chip showing the breadcrumb on arrival and the time while reading. A corner
+   pill as well would be the same fact twice, in the thumb's way. */
+@media (max-width: 639px) {
+  .time-left {
+    display: none;
+  }
+}
 
 @media print {
   .time-left {
