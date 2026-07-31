@@ -78,6 +78,7 @@ export default async function SectionPage({ params }: Props) {
           />
           <article
             className="prose mt-6 lang-uk"
+            lang="uk"
             dangerouslySetInnerHTML={{ __html: htmlUk }}
           />
         </>

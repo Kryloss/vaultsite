@@ -202,6 +202,7 @@ export default async function EntryPage({ params }: Props) {
           />
           <article
             className="prose mt-8 lang-uk"
+            lang="uk"
             dangerouslySetInnerHTML={{ __html: uk.html }}
           />
         </>

@@ -251,7 +251,9 @@ export default function Toc({
   );
 
   const list = (headings: Heading[], langClass: string) => (
-    <ul className={langClass}>
+    /* lang="uk" so a screen reader doesn't read Cyrillic headings with an
+       English voice — see the note in components/T.tsx. */
+    <ul className={langClass} lang={langClass === "lang-uk" ? "uk" : undefined}>
       {headings.map((h) => (
         <li key={h.id} data-level={h.level}>
           <a

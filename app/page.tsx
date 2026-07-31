@@ -64,6 +64,7 @@ export default async function HomePage() {
           />
           <article
             className="prose lang-uk"
+            lang="uk"
             dangerouslySetInnerHTML={{ __html: htmlUk }}
           />
         </>
