@@ -3,6 +3,8 @@ title: My Security+ journey
 title_uk: Мій шлях до Security+
 date: 2026-07-17
 category: Cybersecurity
+series: Road to Security+
+series_uk: Шлях до Security+
 description: What I'm studying, how I'm studying it, and what's working.
 description_uk: Що я вчу, як я це вчу і що справді працює.
 aliases:

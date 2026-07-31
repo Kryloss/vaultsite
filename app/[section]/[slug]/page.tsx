@@ -13,6 +13,7 @@ import {
 } from "@/lib/vault";
 import { renderWithHeadings } from "@/lib/markdown";
 import { getSiblings } from "@/lib/siblings";
+import { getSeries } from "@/lib/series";
 import {
   categoryLabel,
   categorySlug,
@@ -25,6 +26,7 @@ import Stars from "@/components/Stars";
 import T from "@/components/T";
 import Toc from "@/components/Toc";
 import EntryFooter from "@/components/EntryFooter";
+import Series, { SeriesBadge } from "@/components/Series";
 import CopyMarkdown from "@/components/CopyMarkdown";
 import ReadingProgress from "@/components/ReadingProgress";
 import ReadingPosition from "@/components/ReadingPosition";
@@ -78,6 +80,8 @@ export default async function EntryPage({ params }: Props) {
   const stats = section.type === "posts" ? readingStats(entry.content) : null;
   const categories = parseCategories(entry.meta);
   const { prev, next } = getSiblings(section.slug, entry.slug);
+  // Null unless `series:` names an arc with a second published part.
+  const series = getSeries(section.slug, entry.slug);
   const showToc = en.headings.length >= MIN_TOC_HEADINGS;
 
   // Category chips link back to the section, pre-filtered. Shelf entries get
@@ -172,6 +176,11 @@ export default async function EntryPage({ params }: Props) {
               <T {...maturityOf(entry.meta).label} />
             </span>
           )}
+          {/* "Part 2 of 5", jumping to the full list below the article. It
+              belongs here rather than only at the foot: someone landing from
+              search is starting in the middle and should know it. */}
+          {series && (entry.date || stats) && <span aria-hidden>·</span>}
+          {series && <SeriesBadge series={series} />}
         </p>
 
       </header>
@@ -193,6 +202,10 @@ export default async function EntryPage({ params }: Props) {
           dangerouslySetInnerHTML={{ __html: en.html }}
         />
       )}
+
+      {/* The arc first, then the section's neighbours — one is where this
+          note sits in an argument, the other where it sits in a list. */}
+      {series && <Series series={series} />}
 
       <EntryFooter prev={prev} next={next} />
 

@@ -130,6 +130,10 @@ export const ui = {
   maturityBudding: { en: "Budding", uk: "Розвивається" },
   maturityEvergreen: { en: "Evergreen", uk: "Вічнозелена" },
 
+  // series (multi-part notes) — the "Part 2 of 5" pair is built per note by
+  // seriesPartLabel() in lib/series.ts, since it interpolates numbers.
+  series: { en: "Series", uk: "Цикл" },
+
   // résumé (now page)
   resume: { en: "Résumé", uk: "Резюме" },
   resumeDownload: { en: "PDF", uk: "PDF" },
