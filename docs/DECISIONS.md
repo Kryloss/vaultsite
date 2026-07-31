@@ -632,3 +632,20 @@ The two labels answer the same question at different moments. "Posts · Kyrylo" 
 - **Published only when the rounded minute changes**, not per frame; the easing runs at 60fps and React should hear from it about once a minute.
 - **`null` is a real value** meaning "nothing to report" — too early, finished, or not a timed article — and it's published on unmount too, so the chrome doesn't keep showing the last article's number after you navigate away.
 - **The swap is CSS, not conditional rendering.** `data-compact` on the bar animates `max-width` and opacity the same way the breadcrumb already collapses, so the two cross over rather than one popping in after the other disappears.
+
+## 51. The phone's two corners (2026-07-31)
+
+The contents pill moves to the **top-right** on phones and furls up into three lines. It unfurls the current heading only while the reader is scrolling **down** — the same moment the breadcrumb opposite it gives way to the time remaining (#50). The two corners now change together:
+
+| | top-left | top-right |
+|---|---|---|
+| At rest / scrolling up | breadcrumb | ☰ |
+| Scrolling down | time remaining | ☰ current heading |
+
+Both corners answer "where am I" when you arrive and "how am I doing" once you're reading, and neither is ever wider than it needs to be. It also frees the bottom of the screen entirely, which is where the reading-position pill lives and where a thumb rests.
+
+**Nothing above 640px changes.** From 640 to 1279px the pill stays at the bottom-left with its label always showing; from 1280px the rail takes over and the pill doesn't exist. The icon is `display: none` outside the phone range, so the "label IS the control" design survives everywhere it was already working.
+
+**The direction comes from `html[data-scroll]`, and the swap is pure CSS.** `Chrome` already tracks scroll direction for its own bar; it now writes that to the document element, and `Toc` reads it without a listener, a prop, or a context — the component has no idea this is happening. One scroll handler drives both corners, which is also what keeps them in step: two independent listeners with their own thresholds would drift apart by a frame and read as sloppiness.
+
+**The sheet flips with the pill.** It used to rise from a chip at the bottom-left; it now hangs from one at the top-right, so both the anchor and the `transform-origin` invert. A panel that grows from the wrong corner reads as a different element arriving rather than the one you pressed opening.
