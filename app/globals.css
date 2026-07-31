@@ -1748,6 +1748,29 @@ body::after {
   background: var(--bg-hover);
 }
 
+/* ---------- Reading-position diagnostics (`?rp=debug`) ---------- */
+
+/* Only ever rendered behind that query param — see components/ReadingPosition.tsx.
+   Deliberately plain and deliberately in the way: it exists to be read off a
+   phone screen where there is no console to open. */
+.rp-debug {
+  position: fixed;
+  left: 0.5rem;
+  right: 0.5rem;
+  top: 3.5rem;
+  z-index: 60;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--bg);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.6875rem;
+  line-height: 1.6;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 /* ---------- Time remaining (components/ReadingProgress.tsx) ---------- */
 
 /* Bottom-right, mirroring the contents pill at bottom-left: that one says

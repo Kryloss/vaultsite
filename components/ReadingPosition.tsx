@@ -98,6 +98,17 @@ export default function ReadingPosition() {
   const [offer, setOffer] = useState<number | null>(null);
   /** Set once the reader has moved themselves, so the pill stops competing. */
   const moved = useRef(false);
+  /**
+   * `?rp=debug` prints why the offer was or wasn't made, on the page.
+   *
+   * This feature depends on four conditions and on data stored per ORIGIN, so
+   * "it works locally but not in production" can mean the code is broken or
+   * simply that nothing was ever saved on that domain — and the two look
+   * identical from the outside. On a phone there's no console to settle it
+   * with, so the panel exists to be read off the screen. Opt-in, so it costs
+   * a normal visit nothing.
+   */
+  const [debug, setDebug] = useState<string[] | null>(null);
 
   const hide = useCallback(() => setOffer(null), []);
 
@@ -140,19 +151,28 @@ export default function ReadingPosition() {
      */
     const decide = window.setTimeout(() => {
       lastY = window.scrollY;
-      if (
-        saved &&
-        !moved.current &&
-        // Still at the top: if the browser has put the reader back where they
-        // were — which is what every mobile browser does on reload and back —
-        // there is nothing to offer, and this correctly says nothing.
-        window.scrollY < 100 &&
-        !hasHash &&
-        saved.y > vh * MIN_DEPTH &&
-        // The note may have been rewritten shorter since the visit.
-        saved.y < document.documentElement.scrollHeight - vh
-      ) {
-        setOffer(saved.y);
+      const pageHeight = document.documentElement.scrollHeight;
+      const gates = {
+        "has saved position": !!saved,
+        "reader hasn't scrolled yet": !moved.current,
+        "arrived near the top": window.scrollY < 100,
+        "no #heading in the URL": !hasHash,
+        "saved deeper than 1.5 screens": !!saved && saved.y > vh * MIN_DEPTH,
+        "note still long enough": !!saved && saved.y < pageHeight - vh,
+      };
+
+      if (Object.values(gates).every(Boolean) && saved) setOffer(saved.y);
+
+      if (new URLSearchParams(window.location.search).get("rp") === "debug") {
+        setDebug([
+          `origin ${window.location.origin}`,
+          `path ${pathname}`,
+          `saved ${saved ? `y=${Math.round(saved.y)}` : "— nothing stored for this path"}`,
+          `keys ${Object.keys(read()).length}`,
+          `scrollY ${Math.round(window.scrollY)} · vh ${vh} · page ${pageHeight}`,
+          `needs y > ${Math.round(vh * MIN_DEPTH)}`,
+          ...Object.entries(gates).map(([k, v]) => `${v ? "PASS" : "FAIL"} ${k}`),
+        ]);
       }
     }, DECIDE_AFTER);
 
@@ -228,7 +248,17 @@ export default function ReadingPosition() {
     };
   }, [pathname]);
 
-  if (offer === null) return null;
+  /* Rendered before the early return below, so it shows whether or not the
+     offer was made — the interesting case is usually that it wasn't. */
+  const panel = debug ? (
+    <div className="rp-debug">
+      {debug.map((line) => (
+        <div key={line}>{line}</div>
+      ))}
+    </div>
+  ) : null;
+
+  if (offer === null) return panel;
 
   /**
    * One chip, built exactly like the mobile contents pill in Toc.tsx — same
@@ -242,6 +272,8 @@ export default function ReadingPosition() {
    * steam. Escape closes it for anyone who wants it gone without moving.
    */
   return (
+    <>
+      {panel}
     <button
       type="button"
       onClick={() => {
@@ -256,5 +288,6 @@ export default function ReadingPosition() {
         <T {...ui.resumeReading} />
       </span>
     </button>
+    </>
   );
 }
