@@ -5,13 +5,11 @@ import Chrome from "@/components/Chrome";
 import Lightbox from "@/components/Lightbox";
 import CodeCopy from "@/components/CodeCopy";
 import HeadingAnchors from "@/components/HeadingAnchors";
-import LinkPreview from "@/components/LinkPreview";
 import JsonLd from "@/components/JsonLd";
 import SelectionLink from "@/components/SelectionLink";
 import { Analytics } from "@vercel/analytics/next";
 import { siteJsonLd } from "@/lib/jsonld";
-import { getSections, getEntries, getSearchIndex } from "@/lib/vault";
-import { getLinkPreviews } from "@/lib/previews";
+import { getSections, getEntries } from "@/lib/vault";
 import { resistanceDay } from "@/lib/resistance";
 import { isShelfSection, shelfGroups } from "@/lib/shelf";
 import { siteName, siteUrl, siteDescription, socials } from "@/lib/site-config";
@@ -157,7 +155,6 @@ export default function RootLayout({
           items={items}
           socials={socials}
           siteName={siteName}
-          searchIndex={getSearchIndex()}
           resistanceDay={resistanceDay()}
         >
           {children}
@@ -166,7 +163,6 @@ export default function RootLayout({
         <JsonLd data={siteJsonLd()} />
         <CodeCopy />
         <HeadingAnchors />
-        <LinkPreview previews={getLinkPreviews()} />
         <SelectionLink />
         {/* Vercel Analytics: page views only, no cookies and no cross-site
             identifier, so there's nothing to consent to. It injects a script

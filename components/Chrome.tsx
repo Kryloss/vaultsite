@@ -16,13 +16,13 @@ import {
   UkraineFlag,
 } from "@/components/icons";
 import CommandPalette from "@/components/CommandPalette";
+import { warmSearchIndex } from "@/components/useSearchIndex";
 import Shortcuts from "@/components/Shortcuts";
 import ResistanceDay from "@/components/ResistanceDay";
 import T from "@/components/T";
 import { useLang } from "@/components/useLang";
 import { ui } from "@/lib/ui-strings";
 import { homeName, type SocialLink } from "@/lib/site-config";
-import type { SearchItem } from "@/lib/vault";
 
 export interface NavItem {
   slug: string;
@@ -51,14 +51,12 @@ export default function Chrome({
   items,
   socials,
   siteName,
-  searchIndex,
   resistanceDay,
   children,
 }: {
   items: NavItem[];
   socials: SocialLink[];
   siteName: string;
-  searchIndex: SearchItem[];
   /** Build-time day count for the sidebar line — see lib/resistance.ts */
   resistanceDay: number;
   children: ReactNode;
@@ -236,6 +234,9 @@ export default function Chrome({
                 setOpen(false);
                 setSearchOpen(true);
               }}
+              /* Start fetching the index as the pointer arrives, so the panel
+                 usually opens onto results rather than an empty list. */
+              onPointerEnter={warmSearchIndex}
               className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-tertiary)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
             >
               <SearchIcon className="h-[17px] w-[17px]" />
@@ -297,7 +298,6 @@ export default function Chrome({
       </aside>
 
       <CommandPalette
-        items={searchIndex}
         open={searchOpen}
         onClose={() => setSearchOpen(false)}
       />

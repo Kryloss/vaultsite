@@ -6,6 +6,7 @@ import T from "@/components/T";
 import { useLang } from "@/components/useLang";
 import { ui } from "@/lib/ui-strings";
 import { similarity } from "@/lib/fuzzy";
+import { useSearchIndex } from "@/components/useSearchIndex";
 import type { SearchItem } from "@/lib/vault";
 
 /**
@@ -13,8 +14,9 @@ import type { SearchItem } from "@/lib/vault";
  *
  * The path is only knowable in the browser — a statically-exported 404 is one
  * file serving every bad URL — so the matching runs client-side against the
- * same build-time index the Cmd+K palette uses. No extra payload: the index is
- * already in the page.
+ * same build-time index the Cmd+K palette uses, fetched from
+ * /search-index.json — the one page where it's worth requesting unprompted,
+ * since suggesting a correction IS the page's job.
  */
 
 /** Words too common to say anything about which note was meant. */
@@ -30,8 +32,9 @@ function terms(pathname: string): string[] {
     .filter((w) => w.length > 2 && !STOPWORDS.has(w));
 }
 
-export default function NotFoundSuggestions({ items }: { items: SearchItem[] }) {
+export default function NotFoundSuggestions() {
   const { lang } = useLang();
+  const items = useSearchIndex(true);
   const [matches, setMatches] = useState<SearchItem[]>([]);
 
   useEffect(() => {

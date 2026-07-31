@@ -13,6 +13,8 @@ import SocialLinks from "@/components/SocialLinks";
 import { ui } from "@/lib/ui-strings";
 import { displayDateUk } from "@/lib/vault";
 import { pageMeta } from "@/lib/metadata";
+import { previewsInHtml } from "@/lib/previews";
+import LinkPreview from "@/components/LinkPreview";
 
 /** Title and description come from the layout's defaults; this adds the
     canonical, which every page needs and the root most of all. */
@@ -56,6 +58,7 @@ export default async function HomePage() {
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-14 lg:py-24">
+      <LinkPreview previews={previewsInHtml(html, htmlUk)} />
       {htmlUk ? (
         <>
           <article

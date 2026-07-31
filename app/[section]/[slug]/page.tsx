@@ -13,6 +13,7 @@ import {
 } from "@/lib/vault";
 import { renderWithHeadings } from "@/lib/markdown";
 import { pageMeta } from "@/lib/metadata";
+import { previewsInHtml } from "@/lib/previews";
 import { getSiblings } from "@/lib/siblings";
 import { getSeries } from "@/lib/series";
 import {
@@ -28,6 +29,7 @@ import T from "@/components/T";
 import Toc from "@/components/Toc";
 import EntryFooter from "@/components/EntryFooter";
 import Series from "@/components/Series";
+import LinkPreview from "@/components/LinkPreview";
 import CopyMarkdown from "@/components/CopyMarkdown";
 import ReadingProgress from "@/components/ReadingProgress";
 import ReadingPosition from "@/components/ReadingPosition";
@@ -116,6 +118,9 @@ export default async function EntryPage({ params }: Props) {
       <JsonLd data={breadcrumbJsonLd(section, entry)} />
       <ReadingProgress />
       <ReadingPosition />
+      {/* Hover cards for the internal links in THIS note only — see
+          previewsInHtml() in lib/previews.ts. */}
+      <LinkPreview previews={previewsInHtml(en.html, uk?.html)} />
       <Link
         href={`/${section.slug}`}
         className="text-sm text-[var(--text-tertiary)] transition-colors hover:text-[var(--text)]"

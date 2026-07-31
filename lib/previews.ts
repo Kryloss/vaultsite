@@ -97,3 +97,35 @@ export function getLinkPreviews(): LinkPreview[] {
 
   return out;
 }
+
+/**
+ * Just the previews a given page can actually use.
+ *
+ * The whole index used to be passed to components/LinkPreview.tsx from the
+ * layout, which put every note's excerpt into every page — a note linking to
+ * two others was carrying sixty. Each page now scans its own rendered HTML
+ * and takes the handful of entries matching links that are really in it,
+ * which for a typical note is two or three.
+ *
+ * Reading the HTML rather than the markdown is deliberate: by this point
+ * `[[wiki links]]` have been resolved to real hrefs, so this sees exactly
+ * what the reader can hover.
+ */
+export function previewsInHtml(...html: (string | null | undefined)[]): LinkPreview[] {
+  const wanted = new Set<string>();
+  for (const doc of html) {
+    if (!doc) continue;
+    for (const [, href] of doc.matchAll(/href="(\/[^"#?]*)/g)) {
+      // Match the lookup key LinkPreview builds: no trailing slash, decoded.
+      const path = href.replace(/\/$/, "") || "/";
+      wanted.add(path);
+      try {
+        wanted.add(decodeURI(path));
+      } catch {
+        /* malformed escape — the raw path is already in the set */
+      }
+    }
+  }
+  if (wanted.size === 0) return [];
+  return getLinkPreviews().filter((p) => wanted.has(p.href));
+}

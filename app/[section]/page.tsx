@@ -3,10 +3,12 @@ import { notFound, redirect } from "next/navigation";
 import { getSections, getSectionBySlug, getEntries } from "@/lib/vault";
 import { renderMarkdown } from "@/lib/markdown";
 import { pageMeta } from "@/lib/metadata";
+import { previewsInHtml } from "@/lib/previews";
 import { getListComponent } from "@/lib/section-types";
 import { ui } from "@/lib/ui-strings";
 import T from "@/components/T";
 import JsonLd from "@/components/JsonLd";
+import LinkPreview from "@/components/LinkPreview";
 import { breadcrumbJsonLd } from "@/lib/jsonld";
 
 interface Props {
@@ -58,6 +60,10 @@ export default async function SectionPage({ params }: Props) {
   return (
     <div className="mx-auto max-w-2xl px-6 py-14 lg:py-24">
       <JsonLd data={breadcrumbJsonLd(section)} />
+      {/* Hover cards for the internal links in this section's own prose. The
+          entry list below links to notes too, but those rows already show a
+          title and a date — a card repeating them adds nothing. */}
+      <LinkPreview previews={previewsInHtml(html, htmlUk)} />
       <header>
         <h1 className="text-2xl font-semibold tracking-tight text-[var(--text)]">
           {section.icon && <span className="mr-2">{section.icon}</span>}

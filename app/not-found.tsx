@@ -1,7 +1,6 @@
 import Link from "next/link";
 import T from "@/components/T";
 import NotFoundSuggestions from "@/components/NotFoundSuggestions";
-import { getSearchIndex } from "@/lib/vault";
 import { ui } from "@/lib/ui-strings";
 
 export default function NotFound() {
@@ -14,9 +13,10 @@ export default function NotFound() {
         <T {...ui.notFoundBody} />
       </p>
 
-      {/* The index is built here; the matching happens in the browser, which
-          is the only place the attempted URL exists. */}
-      <NotFoundSuggestions items={getSearchIndex()} />
+      {/* Both the index and the matching land in the browser: a statically
+          exported 404 is one file serving every bad URL, so the attempted
+          path only exists there. */}
+      <NotFoundSuggestions />
 
       <Link
         href="/"

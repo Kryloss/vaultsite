@@ -3,16 +3,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { repoBranch, repoUrl } from "@/lib/site-config";
-import type { SearchItem } from "@/lib/vault";
 import T from "@/components/T";
 import { useLang } from "@/components/useLang";
+import { useSearchIndex } from "@/components/useSearchIndex";
 import { similarity, fold } from "@/lib/fuzzy";
 import { copyText } from "@/lib/clipboard";
 import { ui, type Str } from "@/lib/ui-strings";
 
 /**
  * Cmd/Ctrl+K palette over the static, build-time index of every page.
- * No backend — the index arrives as props from the server layout.
+ * No backend — the index is one static JSON file, fetched the first time the
+ * palette opens (see app/search-index.json/route.ts).
  * Opened by hotkey (handled in Chrome) or the search button.
  *
  * It finds pages AND runs commands. The actions live in the same list as the
@@ -50,11 +51,9 @@ interface Action {
   when?: () => boolean;
 }
 export default function CommandPalette({
-  items,
   open,
   onClose,
 }: {
-  items: SearchItem[];
   open: boolean;
   onClose: () => void;
 }) {
@@ -72,6 +71,9 @@ export default function CommandPalette({
   useEffect(() => {
     if (open) setEverOpen(true);
   }, [open]);
+  /* The index is fetched on that same first open — nobody who never searches
+     downloads it, and nobody who does waits twice. */
+  const items = useSearchIndex(everOpen);
   const { lang, toggle: toggleLang } = useLang();
   const inputRef = useRef<HTMLInputElement>(null);
   const flashTimer = useRef<number | undefined>(undefined);
