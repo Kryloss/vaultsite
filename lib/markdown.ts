@@ -33,7 +33,7 @@ import { appleMusicEmbedHtml, isAppleMusicUrl } from "./apple-music";
 import { youtubeEmbedHtml, youtubeId } from "./youtube";
 import { highlightToHast, parseCodeMeta, langLabel } from "./highlight";
 import { rehypeHeadings, type Heading } from "./toc";
-import { dimsFor } from "./blur";
+import { dimsFor, srcSetFor } from "./blur";
 
 /** Encode each path segment but keep "/" separators. */
 function encodePath(p: string): string {
@@ -857,14 +857,30 @@ function rehypeImageSize() {
       for (const child of node.children) {
         if (child.type === "element" && child.tagName === "img") {
           const p = child.properties ?? (child.properties = {});
+          const src = typeof p.src === "string" ? p.src : undefined;
           // An explicitly sized embed (`![[me.jpeg|93]]`) already said what it
           // wants — overriding it would resize the avatar.
-          if (p.width === undefined && p.height === undefined) {
-            const dims = dimsFor(typeof p.src === "string" ? p.src : undefined);
+          const sized = p.width !== undefined || p.height !== undefined;
+          if (!sized) {
+            const dims = dimsFor(src);
             if (dims) {
               p.width = dims.w;
               p.height = dims.h;
             }
+          }
+          // Candidate widths, plus the box they're painted in. A sized embed
+          // knows its box exactly; everything else fills the prose column,
+          // which is max-w-2xl (42rem = 672px) until the viewport is narrower
+          // than the column plus its 1.5rem gutters.
+          const srcSet = srcSetFor(src);
+          if (srcSet && !p.srcSet) {
+            p.srcSet = srcSet;
+            // p.width may be a string here: the sized embeds are built as raw
+            // HTML and come back through rehype-raw.
+            const box = sized ? Number(p.width) : NaN;
+            p.sizes = Number.isFinite(box)
+              ? `${box}px`
+              : "(max-width: 42rem) 100vw, 672px";
           }
           continue;
         }

@@ -22,6 +22,8 @@ export interface ImageMeta {
   /** Intrinsic pixel size. */
   w?: number;
   h?: number;
+  /** Ready-made srcset over the narrower WebP copies sync-assets wrote. */
+  srcset?: string;
 }
 
 let manifest: Record<string, ImageMeta> | null = null;
@@ -67,4 +69,15 @@ export function blurFor(url?: string): string | undefined {
 export function dimsFor(url?: string): { w: number; h: number } | undefined {
   const meta = imageMeta(url);
   return meta?.w && meta.h ? { w: meta.w, h: meta.h } : undefined;
+}
+
+/**
+ * Candidate widths for a vault asset, or undefined when there's only one file
+ * worth having (an image already narrower than the smallest variant, an SVG,
+ * a remote cover). Pair it with a `sizes` describing the box it's painted in
+ * — without one the browser assumes 100vw and picks the largest candidate,
+ * which is worse than not offering a choice at all.
+ */
+export function srcSetFor(url?: string): string | undefined {
+  return imageMeta(url)?.srcset;
 }

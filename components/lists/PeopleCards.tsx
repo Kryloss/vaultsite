@@ -11,6 +11,7 @@ export interface PersonRow {
   cover?: string;
   /** Base64 blur-up placeholder for `cover` — see lib/blur.ts. */
   coverBlur?: string;
+  coverSrcSet?: string;
   contain?: boolean;
   /** From `categories:` or `category:` frontmatter. */
   categories: string[];
@@ -75,6 +76,9 @@ export default function PeopleCards({
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={row.cover}
+                    srcSet={row.coverSrcSet}
+                    /* Two per row on a phone, three in the grid above it. */
+                    sizes="(max-width: 640px) 50vw, 220px"
                     alt={row.title}
                     className={
                       row.contain

@@ -37,6 +37,10 @@ export default function ShelfCard({
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={item.coverUrl}
+            srcSet={item.coverSrcSet}
+            /* Cover columns: roughly a third of a phone's width, and never
+               wider than the fixed card on a desktop row. */
+            sizes="(max-width: 640px) 33vw, 180px"
             alt={item.title}
             className={
               item.coverFit === "contain"

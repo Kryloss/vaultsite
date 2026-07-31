@@ -7,7 +7,7 @@
  */
 import { parseCategories, slugify, type Entry, type Section } from "./vault";
 import { resolveCoverUrl } from "./markdown";
-import { blurFor } from "./blur";
+import { blurFor, srcSetFor } from "./blur";
 import { youtubeId, youtubeThumbnail } from "./youtube";
 import { ui, type Str } from "./ui-strings";
 import { categoryLabel } from "./categories";
@@ -24,6 +24,8 @@ export interface ShelfItem {
   coverUrl?: string;
   /** Base64 blur-up placeholder for `coverUrl` — see lib/blur.ts. */
   coverBlur?: string;
+  /** Narrower WebP copies of the cover — see srcSetFor() in lib/blur.ts. */
+  coverSrcSet?: string;
   /** "contain" letterboxes wide art (logos) instead of cropping to fill. */
   coverFit?: "contain";
   /** 0–5, halves allowed. */
@@ -154,6 +156,7 @@ export function toShelfItem(entry: Entry): ShelfItem {
     coverUrl: cover ?? (videoId ? youtubeThumbnail(videoId) : undefined),
     // Only vault files have one; YouTube thumbnails are remote.
     coverBlur: blurFor(cover),
+    coverSrcSet: srcSetFor(cover),
     coverFit:
       entry.meta.coverFit === "contain" ? ("contain" as const) : undefined,
     rating:
