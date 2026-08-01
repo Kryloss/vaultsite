@@ -837,7 +837,9 @@ On a wide screen the site was a 39rem column with a contents rail on its right a
 
 **1280px, because that is where `.toc-rail` appears.** Arriving earlier would put weight on the left of the page with nothing to answer it on the right — the layout would read as lopsided rather than as a spread. Below 1280 nothing changes.
 
-**Built like `.toc-rail`, the contents list that stands in an article's right margin.** It was first built like the phone's contents *sheet* — card, blur, shadow — and that was the wrong reference. Those two things are not the same kind of object: a sheet is summoned, glanced at and dismissed, so it announces itself; a rail is present the entire time you read, so it must not. A permanent card in the margin competes with the article for the whole visit. No background, no blur, no shadow — a hairline, small type, right-aligned rows, and nothing else. **The two rails now bracket the page and both hairlines face the text.**
+**The same KIND of object as `.toc-rail`, and quieter than it.** It was first built like the phone's contents *sheet* — card, blur, shadow — and that was the wrong reference. A sheet is summoned, glanced at and dismissed, so it announces itself; a rail is present the entire time you read, so it must not. A permanent card in the margin competes with the article for the whole visit.
+
+The second pass copied the contents rail exactly — hairline, 13rem, rows right-aligned against the rule — and that was still too much. **The contents rail is about the thing you're reading; this isn't**, so it has less claim on attention, not an equal one. It also borrowed a width it didn't need: 13rem is sized for sentences, and this holds single words. Now 9rem, left-aligned, no rule at all — seven short words in the faintest grey, indented to sit under the bar above so it reads as hanging off the chrome. Findable when looked for, invisible when not.
 
 **Plain text, no icons, and search is the glyph alone.** The drawer keeps its icon column; at this size a row of emoji beside seven words is noise. Search was briefly a labelled field with a `⌘K` hint, which made it the loudest thing in a column whose whole purpose is to stay quiet — a drawn box in a panel that has no other boxes in it. The magnifier says the same thing, and the shortcut lives in the button's title and in the `?` cheat sheet.
 
@@ -845,4 +847,4 @@ On a wide screen the site was a 39rem column with a contents rail on its right a
 
 **The one thing that does have to wait for the browser is the key hint.** `⌘` or `Ctrl` depends on `navigator`, which the server doesn't have, so it renders as `⌘` and is corrected in an effect. A Windows visitor sees the Mac key for one frame; that is a better trade than a hydration mismatch, and the shortcut itself has always accepted either.
 
-**Active state is text-on-background inversion, not the accent** — the accent marks links and state, not navigation (#61).
+**Active state is weight and full text colour** — with no rule to mark, that carries it alone, and it adds no ink to the page when you aren't looking for it. Monochrome on purpose: the accent marks links and state, not navigation (#61).
