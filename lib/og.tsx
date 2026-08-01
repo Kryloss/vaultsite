@@ -111,7 +111,7 @@ export function ogImage(title: string, subtitle?: string, opts: OgOptions = {}) 
               style={{
                 width: 72,
                 height: 8,
-                background: "#3b82f6",
+                background: "#10b981",
                 borderRadius: 4,
               }}
             />

@@ -89,7 +89,7 @@ export default function NowList({ section }: ListProps) {
                 aria-hidden
                 className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-colors ${
                   goal.done
-                    ? "border-[var(--text)] bg-[var(--text)] text-[var(--bg)]"
+                    ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--bg)]"
                     : "border-[var(--border)] text-transparent"
                 }`}
               >

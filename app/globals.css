@@ -37,10 +37,21 @@
   --text-secondary: #3f3f46;
   --text-tertiary: #adadb8;
   --border: #ededf0;
-  /* Exactly one job, sitewide: the reading progress bar, which is the only
-     element on the site reporting STATE rather than decorating something.
-     Nothing else is allowed to use it. */
-  --accent: #2563eb;
+  /* The tip callout's green, which is the one hue on the site that already
+     meant "this is fine, carry on" rather than "look here".
+
+     It marks UI — filled state chips, the contents marker, the progress and
+     reading bars, focus rings, the selection wash — and only a handful of
+     ACTION texts: "Continue reading", "Back home". Body prose links are not
+     accent; a paragraph with three green words in it is a paragraph you read
+     three times.
+
+     Light and dark carry different values of the same hue for contrast, not
+     for taste. The callout's `#10b981` is a 3px border, which needs nothing
+     from a contrast ratio; as a link colour on white it lands near 2:1 and as
+     a chip fill it can't carry white text. `#047857` on white and `#10b981`
+     on near-black both clear 4.5:1 in every direction this token is used. */
+  --accent: #047857;
   --code-bg: #f4f4f5;
 
   /* The site's typeface. Source Serif 4 for everything except code — see the
@@ -113,7 +124,7 @@
     --text-secondary: #a4a4ae;
     --text-tertiary: #6f6f7a;
     --border: #26262b;
-    --accent: #3b82f6;
+    --accent: #10b981;
     --code-bg: #121215;
     /* Built from `--surface`, which is lighter than the page — so the pill
        reads as a pill instead of a hole. */
@@ -391,24 +402,26 @@ body::after {
    other. */
 .prose p { margin: 1rem 0; text-wrap: pretty; }
 
-/* Links are the accent's largest job. `--accent` used to have exactly one —
-   the reading bar — which meant the only colour a reader ever met was a
-   progress indicator, and prose links were distinguishable from body text by
-   an underline alone. The rule now is that the accent marks things you can
-   ACT on and things reporting STATE: links, focus, the progress bars, the
-   reading bar. Navigation and chips stay monochrome and keep their
-   text-on-background inversion — colouring those as well would turn the
-   chrome blue and leave the accent meaning nothing again. */
+/* Prose links are TEXT colour with a tinted underline, not accent.
+   Colouring them was tried and reverted: a link every other sentence turns a
+   paragraph into a page of green words, and the eye stops reading and starts
+   scanning. The underline already says "link" — it is the oldest and quietest
+   convention there is, and it costs the sentence nothing.
+
+   The accent goes to UI instead: filled state chips, the contents marker, the
+   progress and reading bars, focus rings, the selection wash. Standalone
+   ACTION links keep it — "Continue reading", "Back home" — because those are
+   a control that happens to be made of words rather than part of a sentence. */
 .prose a {
-  color: var(--accent);
+  color: var(--text);
   text-decoration: underline;
-  text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  text-decoration-color: var(--text-tertiary);
   text-underline-offset: 3px;
   transition: color var(--dur-fast) var(--ease), text-decoration-color var(--dur-fast) var(--ease);
 }
 
 .prose a:hover {
-  text-decoration-color: var(--accent);
+  text-decoration-color: var(--text);
 }
 
 .prose ul,
@@ -1503,7 +1516,8 @@ body::after {
   height: var(--h, 1.5rem);
   /* Sits over the rail's own border-left, like the link borders it replaces. */
   margin-left: -1px;
-  background: var(--text);
+  /* Where you are in the article is state, which is what the accent marks. */
+  background: var(--accent);
   opacity: 0;
   transform: translateY(var(--y, 0));
   transition:
