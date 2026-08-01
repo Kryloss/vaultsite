@@ -7,7 +7,6 @@ import {
   displayDate,
 } from "@/lib/vault";
 import { renderMarkdown } from "@/lib/markdown";
-import { resolveIcon } from "@/components/icons";
 import T from "@/components/T";
 import SocialLinks from "@/components/SocialLinks";
 import { ui } from "@/lib/ui-strings";
@@ -126,21 +125,17 @@ export default async function HomePage() {
           </h2>
           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {explore.map((section) => {
-              const Icon = resolveIcon(section.icon);
               return (
                 <Link
                   key={section.slug}
                   href={`/${section.slug}`}
                   className="group press press-soft rounded-xl border border-[var(--border)] p-4 hover:bg-[var(--bg-hover)]"
                 >
-                  <span className="flex items-center gap-2.5 font-medium text-[var(--text)]">
-                    {Icon ? (
-                      <Icon className="h-[18px] w-[18px] opacity-75" />
-                    ) : section.icon ? (
-                      <span className="text-base leading-none">
-                        {section.icon}
-                      </span>
-                    ) : null}
+                  {/* No icon. The section emoji belongs to the sidebar, where
+                      it's a target you aim at in a list you've learned; here
+                      it's decoration on a card that already says the name in
+                      words. */}
+                  <span className="block font-medium text-[var(--text)]">
                     <T en={section.title} uk={section.titleUk} />
                   </span>
                   {section.description && (

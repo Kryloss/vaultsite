@@ -67,7 +67,6 @@ export default async function SectionPage({ params }: Props) {
       <LinkPreview previews={previewsInHtml(html, htmlUk)} />
       <header>
         <h1 className="page-title text-2xl font-semibold tracking-tight text-[var(--text)]">
-          {section.icon && <span className="mr-2">{section.icon}</span>}
           <T en={section.title} uk={section.titleUk} />
         </h1>
         {section.description && (

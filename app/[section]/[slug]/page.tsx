@@ -178,9 +178,10 @@ export default async function EntryPage({ params }: Props) {
           )}
           {/* Maturity is a writing idea, so it rides with the writing stats.
               Unset notes fall back to Seedling — see lib/maturity.ts. */}
+          {/* Word only — the seedling/tree glyph was the last emoji left on a
+              reading page, and "Seedling" says it without one. */}
           {stats && (
             <span className="maturity">
-              <span aria-hidden>{maturityOf(entry.meta).icon}</span>
               <T {...maturityOf(entry.meta).label} />
             </span>
           )}

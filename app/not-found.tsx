@@ -21,7 +21,7 @@ export default function NotFound() {
 
       <Link
         href="/"
-        className="notfound-home press mt-8 inline-block text-sm text-[var(--accent)] hover:underline"
+        className="notfound-home press mt-8 inline-block text-sm"
       >
         <T {...ui.backHome} />
       </Link>

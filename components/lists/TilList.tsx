@@ -68,7 +68,7 @@ export default async function TilList({ section, entries }: ListProps) {
               />
               <Link
                 href={`/${section.slug}/${entry.slug}`}
-                className="mt-3 inline-block text-sm font-medium text-[var(--accent)] transition-opacity hover:opacity-75"
+                className="mt-3 inline-block text-sm font-medium text-[var(--text)] underline decoration-[var(--text-tertiary)] underline-offset-4 hover:decoration-[var(--text)]"
               >
                 <T {...ui.continueReading} />
               </Link>

@@ -39,7 +39,7 @@ export default function PostRows({
       scroll={false}
       className={`press rounded-full border px-3 py-1 text-sm ${
         active === value
-          ? "border-[var(--accent)] bg-[var(--accent)] font-medium text-[var(--bg)]"
+          ? "border-[var(--text)] bg-[var(--text)] font-medium text-[var(--bg)]"
           : "border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-tertiary)] hover:text-[var(--text)]"
       }`}
     >

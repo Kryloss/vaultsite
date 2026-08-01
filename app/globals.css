@@ -37,21 +37,6 @@
   --text-secondary: #3f3f46;
   --text-tertiary: #adadb8;
   --border: #ededf0;
-  /* The tip callout's green, which is the one hue on the site that already
-     meant "this is fine, carry on" rather than "look here".
-
-     It marks UI — filled state chips, the contents marker, the progress and
-     reading bars, focus rings, the selection wash — and only a handful of
-     ACTION texts: "Continue reading", "Back home". Body prose links are not
-     accent; a paragraph with three green words in it is a paragraph you read
-     three times.
-
-     Light and dark carry different values of the same hue for contrast, not
-     for taste. The callout's `#10b981` is a 3px border, which needs nothing
-     from a contrast ratio; as a link colour on white it lands near 2:1 and as
-     a chip fill it can't carry white text. `#047857` on white and `#10b981`
-     on near-black both clear 4.5:1 in every direction this token is used. */
-  --accent: #047857;
   --code-bg: #f4f4f5;
 
   /* The site's typeface. Source Serif 4 for everything except code — see the
@@ -124,7 +109,6 @@
     --text-secondary: #a4a4ae;
     --text-tertiary: #6f6f7a;
     --border: #26262b;
-    --accent: #10b981;
     --code-bg: #121215;
     /* Built from `--surface`, which is lighter than the page — so the pill
        reads as a pill instead of a hole. */
@@ -282,14 +266,14 @@ html[data-lang="uk"] .lang-uk {
    which matters more here, because selecting prose is how the copy-link pill
    is summoned (components/SelectionLink.tsx). */
 ::selection {
-  background: color-mix(in srgb, var(--accent) 28%, transparent);
+  background: color-mix(in srgb, var(--text) 28%, transparent);
   color: var(--text);
 }
 
 :focus-visible {
   /* A keyboard reader's position is state, and state is what the accent is
      for — it also separates the focus ring from every grey border near it. */
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--text);
   outline-offset: 2px;
   border-radius: var(--r-xs);
 }
@@ -466,7 +450,7 @@ body::after {
   height: 100%;
   border-radius: var(--r-xs);
   /* Same reasoning as the reading bar: this reports progress, not decoration. */
-  background: var(--accent);
+  background: var(--text);
   transition: width 0.6s var(--ease);
 }
 
@@ -1517,7 +1501,7 @@ body::after {
   /* Sits over the rail's own border-left, like the link borders it replaces. */
   margin-left: -1px;
   /* Where you are in the article is state, which is what the accent marks. */
-  background: var(--accent);
+  background: var(--text);
   opacity: 0;
   transform: translateY(var(--y, 0));
   transition:
@@ -2655,20 +2639,24 @@ svg.diagram tspan {
    The `.people-cover` hook is kept — it costs nothing and this is the class
    to reach for if the shapes are revisited. */
 
-/* --- The accent gets exactly one job ------------------------------------
-   `--accent` was reserved for "the odd functional case" and in practice
-   surfaced in two: the bar on the OG cards, and the link on the 404 page. So
-   the only place a reader ever met the site's accent colour was an error.
+/* --- No accent at all ----------------------------------------------------
+   There is no `--accent` token. It was blue, then reduced to a single bar,
+   then spread onto prose links, then made the tip callout's green — four
+   passes trying to find the right amount of one colour, which is the shape of
+   an answer that is zero. The site is monochrome, and everything the accent
+   was carrying (state chips, the contents marker, the progress and reading
+   bars, focus rings, the selection wash, "Continue reading") reads perfectly
+   well in `--text`, because on a page with no other colour, full text colour
+   IS the emphasis.
 
-   It belongs to the reading progress bar, which is the one element on the site
-   genuinely reporting STATE rather than decorating something. Everywhere else
-   goes back to text colour. */
+   Callouts keep their four hues. They're the exception that proves it: colour
+   there is carrying a meaning nothing else on the page carries. */
 .reading-progress-fill {
-  background: var(--accent);
+  background: var(--text);
 }
 
 .notfound-home {
-  color: var(--accent);
+  color: var(--text);
   text-decoration: underline;
   text-decoration-color: var(--text-tertiary);
   text-underline-offset: 4px;
