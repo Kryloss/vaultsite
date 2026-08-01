@@ -14,6 +14,7 @@ import {
   consumedAt,
   finishAt,
   progressAt,
+  chapterTicks,
 } from "./reading-progress.ts";
 
 /** Paragraph, then a 400px figure, then another paragraph. */
@@ -146,4 +147,28 @@ test("zero-height blocks are ignored", () => {
     { top: 0, height: 50 },
   ]);
   assert.equal(total, 50);
+});
+
+/* ---------- chapter ticks ---------- */
+
+test("ticks drop the ones crowding either end of the bar", () => {
+  assert.deepEqual(chapterTicks([0.01, 0.3, 0.6, 0.99]), [0.3, 0.6]);
+});
+
+test("ticks too close together collapse to the first", () => {
+  assert.deepEqual(chapterTicks([0.3, 0.31, 0.32, 0.7]), [0.3, 0.7]);
+});
+
+test("a single tick is no tick — one notch says what the heading says", () => {
+  assert.deepEqual(chapterTicks([0.5]), []);
+  // …and a list that survives the filters down to one is the same case.
+  assert.deepEqual(chapterTicks([0.01, 0.5, 0.995]), []);
+  assert.deepEqual(chapterTicks([]), []);
+});
+
+test("a note with no headings, and a bar that can't be measured", () => {
+  // finish = 0 makes progressAt return 0 for everything; every "heading" then
+  // sits at the origin and none of them should reach the bar.
+  assert.deepEqual(chapterTicks([0, 0, 0]), []);
+  assert.deepEqual(chapterTicks([NaN, 0.4, 0.8]), [0.4, 0.8]);
 });

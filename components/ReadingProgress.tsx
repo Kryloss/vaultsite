@@ -7,6 +7,7 @@ import { ui } from "@/lib/ui-strings";
 import { markRead, READ_AT } from "@/lib/read-notes";
 import {
   buildSegments,
+  chapterTicks,
   finishAt,
   progressAt,
   type Block,
@@ -90,18 +91,6 @@ function publish(minutes: number | null) {
 const EASE = 0.18;
 /** Below this, snap instead of easing — stops it creeping for ever. */
 const SETTLED = 0.0005;
-
-/**
- * Chapter ticks: how close to either end a heading can be and still earn one.
- *
- * The first `h2` of a note usually sits a paragraph in, which would put a
- * notch almost on top of the bar's origin, and a heading in the last breath of
- * an article marks a section nobody has to be told about. Both read as dirt on
- * the line rather than as structure.
- */
-const TICK_EDGE = 0.04;
-/** Closer than this to the previous tick and the two are one smudge. */
-const TICK_GAP = 0.03;
 
 export default function ReadingProgress({ minutes }: { minutes?: number }) {
   const pathname = usePathname();
@@ -195,23 +184,13 @@ export default function ReadingProgress({ minutes }: { minutes?: number }) {
       // and this runs on exactly those occasions.
       finish = finishAt(segments, document.documentElement.clientHeight);
 
-      /* Chapter ticks. A heading's position on the BAR is not its position on
-         the page — media is discounted, and the reference section past a
-         "Sources" heading isn't counted at all — so each one goes through the
-         same consumedAt() the bar itself is driven by. Anything else would put
-         the notches a little to the right of where the bar stops. */
-      const marks: number[] = [];
-      for (const top of headings) {
-        const p = progressAt(segments, top, finish);
-        if (p < TICK_EDGE || p > 1 - TICK_EDGE) continue;
-        if (marks.length && p - marks[marks.length - 1] < TICK_GAP) continue;
-        marks.push(p);
-      }
-      /* One notch says nothing — it divides the article into "before" and
-         "after" a single heading, which the heading itself already does. */
-      setTicks((prev) =>
-        marks.length < 2 ? (prev.length ? [] : prev) : same(prev, marks) ? prev : marks
+      /* Chapter ticks. Each heading is converted to bar progress FIRST, by the
+         same function that drives the bar, and the choosing is done in
+         lib/reading-progress.ts with the rest of the arithmetic. */
+      const marks = chapterTicks(
+        headings.map((top) => progressAt(segments, top, finish))
       );
+      setTicks((prev) => (same(prev, marks) ? prev : marks));
     };
 
     const paint = () => {
