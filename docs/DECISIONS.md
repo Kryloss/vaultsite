@@ -828,3 +828,21 @@ Eight changes, all of them problems the redesign itself created or exposed.
 **Selection is tinted rather than inverted.** A solid black slab hid the serif's shapes; a wash keeps the text readable while it's selected, which matters here because selecting prose is how the copy-link pill is summoned.
 
 **Two things removed rather than restyled.** The "← Section" link sat directly above a very large title while the floating breadcrumb already named the section and linked to it — deleting it lets the title be the first thing on the page, which is the entire point of making it big. And shelf and people cards carried a border *and* a surface fill, two ways of saying "this is an object"; the fill says it, so the hairline is gone.
+
+## 62. A standing pages rail, from 1280px (2026-08-01)
+
+On a wide screen the site was a 39rem column with a contents rail on its right and nothing at all on its left, and every route to another section went through a drawer you had to open first. `.side-rail` fills that margin: the sections as plain text, with the search field above them.
+
+**Always visible, not another thing to open.** The drawer already exists for that. A panel you have to summon in order to see a seven-item list is a worse version of a list.
+
+**1280px, because that is where `.toc-rail` appears.** Arriving earlier would put weight on the left of the page with nothing to answer it on the right — the layout would read as lopsided rather than as a spread. Below 1280 nothing changes.
+
+**Built like the phone's contents SHEET, not like the contents RAIL beside it.** Same floating surface, same blur, same radius. They look different on purpose: the contents rail is a margin note attached to the article, so it's a bare list against a hairline; this is a small panel hanging off the site chrome, so it's a card, like every other floating chip on the site.
+
+**Plain text, and exactly one icon.** The drawer keeps its icon column; at this size a row of emoji beside seven words is noise. The exception is the magnifier, which is what makes the search row read as a search field rather than another link — and the `⌘K` hint beside it is the entire reason the row exists. The palette is the fastest thing on the site and was invisible to anyone who didn't already know the shortcut.
+
+**No state, so a media query is the whole implementation.** The rail renders at every width and CSS hides it below 1280 — no resize listener, nothing to measure, and nothing that can disagree between the static HTML and the first client render.
+
+**The one thing that does have to wait for the browser is the key hint.** `⌘` or `Ctrl` depends on `navigator`, which the server doesn't have, so it renders as `⌘` and is corrected in an effect. A Windows visitor sees the Mac key for one frame; that is a better trade than a hydration mismatch, and the shortcut itself has always accepted either.
+
+**Active state is text-on-background inversion, not the accent** — the accent marks links and state, not navigation (#61).
