@@ -2618,6 +2618,55 @@ a.series-link:hover {
 .social-link[data-social="x"] { --brand: #0f1419; }
 /* mail: no rule — the `var(--text)` default above is the point. */
 
+/* Instagram and LinkedIn get the ACTUAL mark on hover rather than a tint of
+   the outline, because in both cases a single colour is a poor stand-in:
+   Instagram's logo is a gradient, and LinkedIn's is white letters on blue.
+   The other three are genuinely one colour, so a colour is the whole answer
+   for them. See components/icons.tsx for the markup each needs. */
+
+/* Two copies of the glyph, cross-faded. `url(#ig-grad)` can't be interpolated,
+   so swapping the stroke on a single copy would snap while its neighbours
+   fade — and one icon behaving differently from the row is more noticeable
+   than the colour it lands on. */
+.social-link .ig-plain,
+.social-link .ig-brand {
+  transition: opacity var(--dur) var(--ease);
+}
+
+.social-link .ig-brand {
+  opacity: 0;
+}
+
+.social-link[data-social="instagram"]:hover .ig-plain,
+.social-link[data-social="instagram"]:focus-visible .ig-plain {
+  opacity: 0;
+}
+
+.social-link[data-social="instagram"]:hover .ig-brand,
+.social-link[data-social="instagram"]:focus-visible .ig-brand {
+  opacity: 1;
+}
+
+/* The white plate behind LinkedIn's mark. The letters are cut OUT of the
+   path, so without this they'd show the page through them — brand-blue
+   letters on a blue square, which is not the logo. */
+.li-plate {
+  transition: fill var(--dur) var(--ease);
+}
+
+.social-link[data-social="linkedin"]:hover .li-plate,
+.social-link[data-social="linkedin"]:focus-visible .li-plate {
+  fill: #ffffff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .social-link .ig-plain,
+  .social-link .ig-brand,
+  .li-plate {
+    transition: none;
+  }
+}
+
 @media (prefers-color-scheme: dark) {
   .social-link[data-social="github"] { --brand: #f0f6fc; }
   .social-link[data-social="instagram"] { --brand: #f2618f; }

@@ -196,19 +196,60 @@ export function GitHubIcon({ className }: IconProps) {
   );
 }
 
+/**
+ * Instagram's real mark is a gradient, and a single hover colour can only
+ * approximate it. The glyph is drawn TWICE — once in `currentColor` and once
+ * stroked with the brand gradient — and `.social-link` cross-fades between
+ * them (globals.css). Two copies rather than swapping the `stroke` on one:
+ * `url(#…)` is not an interpolatable value, so a swap would snap while every
+ * other icon on the row fades.
+ *
+ * The gradient id is shared by every instance on the page. That's fine and
+ * deliberate: it's the same gradient, and SVG resolves `url(#id)` to the first
+ * definition it finds.
+ */
 export function InstagramIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
-      <rect x="3" y="3" width="18" height="18" rx="5" />
-      <circle cx="12" cy="12" r="4" />
-      <circle cx="17.2" cy="6.8" r="0.6" fill="currentColor" stroke="none" />
+      <defs>
+        {/* Corner to corner, the way the real logo runs. */}
+        <linearGradient id="ig-grad" x1="2" y1="22" x2="22" y2="2">
+          <stop offset="0%" stopColor="#FEDA75" />
+          <stop offset="25%" stopColor="#FA7E1E" />
+          <stop offset="50%" stopColor="#D62976" />
+          <stop offset="75%" stopColor="#962FBF" />
+          <stop offset="100%" stopColor="#4F5BD5" />
+        </linearGradient>
+      </defs>
+      <g className="ig-plain">
+        <rect x="3" y="3" width="18" height="18" rx="5" />
+        <circle cx="12" cy="12" r="4" />
+        <circle cx="17.2" cy="6.8" r="0.6" fill="currentColor" stroke="none" />
+      </g>
+      <g className="ig-brand" stroke="url(#ig-grad)">
+        <rect x="3" y="3" width="18" height="18" rx="5" />
+        <circle cx="12" cy="12" r="4" />
+        <circle cx="17.2" cy="6.8" r="0.6" fill="#D62976" stroke="none" />
+      </g>
     </svg>
   );
 }
 
+/**
+ * The LinkedIn mark is a single path: an outer rounded square with the "in"
+ * cut out of it, so the letters show whatever is behind the icon. In one
+ * colour that reads correctly — but the real logo is white letters on blue,
+ * and "whatever is behind" is the page.
+ *
+ * `.li-plate` is a white rectangle sitting under the path, transparent until
+ * the icon is hovered. Then the path takes the brand blue and the plate fills
+ * the cut-out letters, which is the actual mark rather than a tinted version
+ * of it. Inset half a unit so it can never peek past the rounded corners.
+ */
 export function LinkedInIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden>
+      <rect className="li-plate" x="0.5" y="0.5" width="23" height="23" rx="2" fill="none" />
       <path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05a3.74 3.74 0 0 1 3.37-1.85c3.6 0 4.27 2.37 4.27 5.46ZM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12ZM7.12 20.45H3.55V9h3.57ZM22.22 0H1.77C.79 0 0 .77 0 1.72v20.55C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.72C24 .77 23.2 0 22.22 0Z" />
     </svg>
   );
