@@ -7,7 +7,6 @@ import { ui } from "@/lib/ui-strings";
 import { markRead, READ_AT } from "@/lib/read-notes";
 import {
   buildSegments,
-  consumedAt,
   finishAt,
   progressAt,
   type Block,
@@ -67,6 +66,21 @@ const PILL_TO = 0.97;
  */
 export const TIME_LEFT_EVENT = "timeleft";
 
+/**
+ * Whether two tick lists are the same to within a pixel's worth of bar.
+ *
+ * The ResizeObserver below re-measures whenever an image settles, and handing
+ * React a fresh array of the same numbers each time would re-render the
+ * notches on every one of those. Compared at three decimals because the
+ * positions come out of floating-point arithmetic over live rects and will
+ * differ in the twelfth for no visible reason.
+ */
+function same(a: number[], b: number[]): boolean {
+  return (
+    a.length === b.length && a.every((v, i) => Math.abs(v - b[i]) < 0.001)
+  );
+}
+
 /** `null` means "nothing to report" — too early, finished, or not an article. */
 function publish(minutes: number | null) {
   window.dispatchEvent(new CustomEvent(TIME_LEFT_EVENT, { detail: minutes }));
@@ -121,6 +135,13 @@ export default function ReadingProgress({ minutes }: { minutes?: number }) {
     let target = 0;
     let frame = 0;
     let settled = true;
+    /**
+     * Whether this visit has already been recorded as read. A local rather
+     * than a check inside markRead(), because the bar sits past the threshold
+     * for the whole end of the article — without it, finishing a note would
+     * mean a localStorage read on every scroll frame from 92% to the bottom.
+     */
+    let marked = false;
 
     /**
      * Rebuild the list of blocks.
@@ -140,12 +161,17 @@ export default function ReadingProgress({ minutes }: { minutes?: number }) {
       if (!article) return;
 
       // Everything from a terminal heading onward is reference, not reading.
+      // The same pass collects where the other h2s sit, which is what the
+      // chapter ticks are drawn from — one walk, one set of rects.
       let stop = Infinity;
+      const headings: number[] = [];
       for (const h of article.querySelectorAll<HTMLElement>("h2[id]")) {
+        const top = h.getBoundingClientRect().top + window.scrollY;
         if (TERMINAL_HEADINGS.has(h.id.replace(/^uk-/, ""))) {
-          stop = h.getBoundingClientRect().top + window.scrollY;
+          stop = top;
           break;
         }
+        headings.push(top);
       }
 
       const blocks: Block[] = [];
@@ -168,6 +194,24 @@ export default function ReadingProgress({ minutes }: { minutes?: number }) {
       // Measured here, not per frame: it only changes when the layout does,
       // and this runs on exactly those occasions.
       finish = finishAt(segments, document.documentElement.clientHeight);
+
+      /* Chapter ticks. A heading's position on the BAR is not its position on
+         the page — media is discounted, and the reference section past a
+         "Sources" heading isn't counted at all — so each one goes through the
+         same consumedAt() the bar itself is driven by. Anything else would put
+         the notches a little to the right of where the bar stops. */
+      const marks: number[] = [];
+      for (const top of headings) {
+        const p = progressAt(segments, top, finish);
+        if (p < TICK_EDGE || p > 1 - TICK_EDGE) continue;
+        if (marks.length && p - marks[marks.length - 1] < TICK_GAP) continue;
+        marks.push(p);
+      }
+      /* One notch says nothing — it divides the article into "before" and
+         "after" a single heading, which the heading itself already does. */
+      setTicks((prev) =>
+        marks.length < 2 ? (prev.length ? [] : prev) : same(prev, marks) ? prev : marks
+      );
     };
 
     const paint = () => {
@@ -175,6 +219,15 @@ export default function ReadingProgress({ minutes }: { minutes?: number }) {
       // Hidden until there's something to report, so a short page or the very
       // top of a long one doesn't show a stub of a bar.
       bar.style.opacity = shown > 0.001 ? "1" : "0";
+
+      /* The bar is the only thing on the site that knows you finished, so it
+         is what says so — see lib/read-notes.ts. `finish > 0` excludes notes
+         shorter than the viewport, where the bar never moves and "read" would
+         be recorded for arriving. */
+      if (!marked && finish > 0 && shown >= READ_AT) {
+        marked = true;
+        markRead(pathname);
+      }
 
       /* Minutes left, from the same number the bar is drawing — the estimate
          and the progress can't disagree because there's only one of each.
@@ -249,12 +302,24 @@ export default function ReadingProgress({ minutes }: { minutes?: number }) {
       // this component.
       publish(null);
     };
-  }, [minutes]);
+  }, [minutes, pathname]);
 
   return (
     <>
       <div ref={barRef} className="reading-progress" aria-hidden>
         <span className="reading-progress-fill" />
+        {/* One hairline notch per h2, hanging under the bar: the percentage
+            says how far, these say how many sections are left. They light up
+            as the bar passes them — the arithmetic is in globals.css, since
+            both numbers involved are already CSS variables on this element
+            and comparing them there costs no JavaScript at all. */}
+        {ticks.map((t) => (
+          <span
+            key={t}
+            className="reading-tick"
+            style={{ "--t": String(t) } as React.CSSProperties}
+          />
+        ))}
         <span className="reading-progress-head" />
       </div>
       {/* Bottom-RIGHT, opposite the contents pill: one chip says where you

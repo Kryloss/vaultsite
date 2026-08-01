@@ -1652,6 +1652,30 @@ body::after {
   transform: scaleX(var(--p));
 }
 
+/* Chapter ticks — one per h2, positioned by the component (see the note there
+   for why a heading's place on the BAR isn't its place on the page).
+
+   They hang UNDER the hairline rather than sitting in it. A notch drawn on the
+   line has to be the background colour to show through the fill and the text
+   colour to show at all before the fill arrives, and there is no third option
+   that works at both ends; hanging below, one mark can simply brighten as it's
+   passed.
+
+   The brightening is done in CSS because both numbers are already here: --p is
+   the bar's progress, inherited from the parent, --t is this tick's position.
+   Subtracting them and multiplying hard turns "has the bar reached me" into an
+   opacity, with no per-frame JavaScript and nothing to keep in sync. */
+.reading-tick {
+  position: absolute;
+  top: 100%;
+  left: calc(var(--t) * 100%);
+  width: 1px;
+  height: 4px;
+  background: var(--text);
+  transform: translateX(-50%);
+  opacity: clamp(0.2, (var(--p) - var(--t)) * 60 + 0.2, 0.8);
+}
+
 /* A soft point of light at the leading edge. It sits OUTSIDE the scaled fill —
    inside it, the glow would be stretched into a smear at low progress.
 
