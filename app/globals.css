@@ -1718,13 +1718,14 @@ body::after {
 /* ---------- Pages rail (components/Chrome.tsx) ---------- */
 
 /* A standing panel under the breadcrumb bar, from 1280px up: the site's
-   sections as plain text, with the search field above them.
+   sections as plain text, with a search icon above them.
 
-   Built like the phone's contents sheet rather than like `.toc-rail` — same
-   floating surface, same blur, same corner radius — because it is the same
-   KIND of object: a small panel hanging off the chrome. The contents rail
-   opposite it is a margin note attached to the article, which is why that one
-   is a bare list against a hairline and this one is a card.
+   Built like `.toc-rail` — the contents list that stands in the right margin
+   of an article — and NOT like the phone's contents sheet. They're the same
+   kind of object: a quiet list living in a margin, present the whole time you
+   read, which is a different thing from a panel that opens. That means no
+   card, no blur, no shadow: a hairline, small type, and nothing else. The two
+   rails now bracket the article and their hairlines both face it.
 
    Hidden below 1280px and rendered at every width. It holds no state, so a
    media query is the entire implementation: no resize listener, nothing to
@@ -1736,21 +1737,18 @@ body::after {
   display: none;
   position: fixed;
   left: 0.75rem;
-  /* The bar above is 2.5rem tall at 0.75rem from the top; this clears it by
-     the same 0.25rem the bar keeps inside itself. */
+  /* Clears the breadcrumb bar above it: 0.75rem from the top plus its 2.5rem
+     height, plus the same 0.25rem of air the bar keeps inside itself. */
   top: 3.5rem;
   z-index: 30;
-  width: 13rem; /* the contents rail's width, so the two agree */
+  width: 13rem;
   max-height: calc(100vh - 4.5rem);
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 0.375rem;
-  border-radius: var(--r-lg);
-  background: var(--chrome-bg);
-  box-shadow:
-    inset 0 0 0 1px var(--chrome-ring),
-    0 6px 20px rgb(0 0 0 / 0.08);
-  backdrop-filter: blur(14px);
+  /* On the side facing the article, so the two rails frame it. */
+  border-right: 1px solid var(--border);
+  font-size: 0.8125rem;
+  line-height: 1.5;
 }
 
 @media (min-width: 1280px) {
@@ -1765,262 +1763,54 @@ body::after {
   }
 }
 
-/* The search row. The only thing in the panel with an icon, deliberately: a
-   magnifier is what makes a text field read as a search field, and the ⌘K
-   hint is the whole reason this row exists — the palette is the fastest thing
-   on the site and was invisible to anyone who didn't already know it. */
+/* Search is the icon alone. In a rail this quiet, "Search…" plus a key hint
+   was the loudest thing on the page — a text field drawn in a column that has
+   no other boxes in it. The glyph says the same thing; the shortcut is in the
+   title attribute and in the `?` cheat sheet for anyone who wants it. */
 .side-rail-search {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: flex-end;
   width: 100%;
-  padding: 0.4375rem 0.5rem;
-  border-radius: var(--r-sm);
+  padding: 0.25rem 0.75rem 0.25rem 0;
   color: var(--text-tertiary);
-  font-size: 0.875rem;
-  text-align: left;
 }
 
 .side-rail-search:hover {
-  background: var(--bg-hover);
-  color: var(--text-secondary);
+  color: var(--text);
 }
 
-.side-rail-search-label {
-  flex: 1;
-  min-width: 0;
-}
-
-.side-rail-kbd {
-  flex: none;
-  font-family: inherit;
-  font-size: 0.6875rem;
-  letter-spacing: 0.02em;
-  color: var(--text-tertiary);
-  opacity: 0.85;
-}
-
-/* Plain text, no icons. The drawer keeps its icon column — this is a glance
-   surface and a row of emoji beside seven words is noise at this size. */
 .side-rail ul {
-  margin: 0.25rem 0 0;
+  margin: 0.375rem 0 0;
   padding: 0;
   list-style: none;
 }
 
+/* Right-aligned against the hairline, mirroring the way the contents rail
+   sits against its own. Plain text, no icons — the drawer keeps its icon
+   column; at this size a row of glyphs beside seven words is noise. */
 .side-rail-link {
   display: block;
-  padding: 0.3125rem 0.5rem;
-  border-radius: var(--r-sm);
-  color: var(--text-secondary);
-  font-size: 0.9375rem;
+  padding: 0.25rem 0.75rem 0.25rem 0;
+  /* Overlaps the rail's border so the active row can replace it. */
+  margin-right: -1px;
+  border-right: 1px solid transparent;
+  color: var(--text-tertiary);
+  text-align: right;
   text-decoration: none;
 }
 
 .side-rail-link:hover {
-  background: var(--bg-hover);
-  color: var(--text);
-}
-
-/* Text-on-background inversion, like every other active state on the site —
-   the accent is for links and state, not for navigation (DECISIONS #61). */
-.side-rail-link.is-active {
-  background: var(--bg-hover);
-  color: var(--text);
-  font-weight: 600;
-}
-
-/* Three lines: the whole control on a phone. Hidden at wider widths, where
-   the label is the control, as it always was. */
-.toc-bar-icon {
-  display: none;
-  flex: none;
   color: var(--text-secondary);
 }
 
-/* Where you are in the document — and the tap target itself. */
-.toc-bar-label {
-  overflow: hidden;
-  font-size: 0.875rem;
-  font-weight: 500;
+/* The current section takes the hairline. Same idea as the contents rail's
+   marker, and monochrome for the same reason: the accent is for links and
+   state, not for navigation (DECISIONS #61). */
+.side-rail-link.is-active {
+  border-right-color: var(--text);
   color: var(--text);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Phones: the contents pill is the three-line icon in the top-right corner,
-   and nothing else — no label, at any scroll position. The heading it used to
-   unfurl is one tap away inside the sheet, and a chip that changes width while
-   you read is movement in the corner of the eye for information you didn't
-   ask for.
-
-   Sized to match the floating bar opposite it exactly: that bar is a 2rem
-   button inside 0.25rem of padding, so both are 2.5rem tall and the two
-   corners read as one pair rather than two chips that happen to be near each
-   other. The icon carries its own padding for the same reason the left button
-   does — the tap target is the square, not the glyph. */
-@media (max-width: 639px) {
-  .toc-bar {
-    top: 0.75rem;
-    right: 0.75rem;
-    left: auto;
-    bottom: auto;
-    padding: 0.25rem;
-  }
-
-  .toc-bar-icon {
-    display: block;
-    width: 2rem;
-    height: 2rem;
-    /* Leaves an 18px glyph inside the 32px square — the same proportions as
-       PanelIcon in the menu button. box-sizing is border-box site-wide. */
-    padding: 0.4375rem;
-  }
-
-  .toc-bar-label {
-    display: none;
-  }
-}
-
-/* Invisible on purpose — it exists only to catch a tap outside. Dimming the
-   page made opening the outline feel like a modal, which it isn't. */
-/* The sheet and its backdrop are always in the DOM and shown by `data-open`
-   — see the note in components/Toc.tsx. `visibility` is part of the
-   transition so the closed sheet is genuinely gone rather than merely
-   transparent, and it flips at the END of the fade rather than the start. */
-.toc-sheet-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  visibility: hidden;
-  transition: visibility 0s linear var(--dur);
-}
-
-.toc-sheet-backdrop[data-open="true"] {
-  visibility: visible;
-  transition-delay: 0s;
-}
-
-/* Sized to its content and anchored above the pill, so it reads as the pill
-   opening rather than a panel taking over the screen. Same translucent,
-   blurred material as the pill and the breadcrumb bar. */
-.toc-sheet {
-  position: fixed;
-  left: 0.75rem;
-  bottom: 3.5rem;
-  z-index: 45;
-  /* Grows out of the pill below it. */
-  transform-origin: 0 100%;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(6px) scale(0.97);
-  transition:
-    opacity var(--dur) var(--ease),
-    transform var(--dur) var(--ease),
-    visibility 0s linear var(--dur);
-  width: max-content;
-  max-width: min(18rem, calc(100vw - 1.5rem));
-  max-height: 45vh;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 0.375rem;
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  background: var(--chrome-bg);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 6px 20px rgb(0 0 0 / 0.08);
-  font-size: 0.875rem;
-  line-height: 1.45;
-}
-
-.toc-sheet[data-open="true"] {
-  opacity: 1;
-  visibility: visible;
-  transform: none;
-  transition-delay: 0s;
-}
-
-@media (prefers-color-scheme: dark) {
-  .toc-sheet {
-    box-shadow: 0 6px 20px rgb(0 0 0 / 0.4);
-  }
-}
-
-/* No vertical rule in the sheet — rows are full-width tap targets instead. */
-.toc-sheet ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.toc-sheet .toc-link {
-  margin-left: 0;
-  padding: 0.4375rem 0.5rem;
-  border-left: 0;
-  border-radius: var(--r-sm);
-}
-
-.toc-sheet .toc-link.is-active {
-  background: var(--bg-hover);
-}
-
-.toc-sheet li[data-level="3"] {
-  padding-left: 0.875rem;
-}
-
-.toc-sheet-top {
-  margin-bottom: 0.1875rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--border);
-  border-radius: 0;
-}
-
-/* Phones — AFTER the rules above, not before: these have the same specificity
-   as the base `.toc-sheet` block, and a media query adds none, so an override
-   written earlier in the file silently loses. That is exactly what happened
-   the first time and why the sheet kept opening at the bottom-left.
-
-   It hangs under the icon that opened it: the bar is 2.5rem tall at 0.75rem
-   from the top, so 3.5rem clears it by a quarter of a rem, and it shares the
-   right edge. Narrower, shorter and tighter than on a laptop — it's an index,
-   so it should cover a corner of the article rather than the article. */
-@media (max-width: 639px) {
-  .toc-sheet {
-    top: 3.5rem;
-    right: 0.75rem;
-    left: auto;
-    bottom: auto;
-    transform-origin: 100% 0;
-    transform: translateY(-6px) scale(0.97);
-    width: max-content;
-    max-width: min(13.5rem, calc(100vw - 1.5rem));
-    max-height: 55vh;
-    padding: 0.25rem;
-  }
-
-  .toc-sheet[data-open="true"] {
-    transform: none;
-  }
-
-  .toc-sheet .toc-link {
-    padding: 0.3125rem 0.5rem;
-    font-size: 0.8125rem;
-    line-height: 1.35;
-    /* One line per heading: the sheet's height should track how many sections
-       there are, not how wordy their titles are. */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .toc-sheet-top {
-    margin-bottom: 0.125rem;
-    padding-bottom: 0.375rem;
-  }
-
-  .toc-sheet li[data-level="3"] {
-    padding-left: 0.625rem;
-  }
+  font-weight: 600;
 }
 
 /* ---------- Spoilers (lib/markdown.ts) ---------- */
