@@ -278,24 +278,18 @@ export default function Chrome({
         >
           <PanelIcon className="h-[18px] w-[18px]" />
         </button>
-        {/* Reading downward on a phone: the breadcrumb collapses and this
-            takes its place, so the bar keeps saying something useful instead
-            of shrinking to a lone button.
+        {/* The breadcrumb and the time remaining occupy the SAME cell, one
+            above the other, and slide vertically past each other on a phone.
+            Stacked rather than side by side so the chip's width is the wider
+            of the two at all times and never changes during the swap — the
+            version that animated widths bulged and then settled, because two
+            things were resizing at once and their sum peaked in the middle.
 
-            ALWAYS rendered, even with nothing to say. Mounting it only once a
-            number existed meant it appeared mid-swap already at full width —
-            an element's first computed style is its final one, so there was
-            nothing for the transition to run from and the chip jumped. Empty,
-            it is a zero-width flex item that costs a comment to explain and
-            nothing to draw. */}
-        <span className="bar-time" aria-hidden={timeLeft === null}>
-          {timeLeft !== null && (
-            <>
-              {timeLeft} <T {...ui.minLeft} />
-            </>
-          )}
-        </span>
-        <span className={`crumbs${compact ? " is-collapsed" : ""}`}>
+            The time is always rendered, even with nothing to say: an element
+            mounted mid-swap has no previous style to animate from, which is
+            its own kind of jump. */}
+        <span className="bar-swap">
+          <span className={`crumbs${compact ? " is-collapsed" : ""}`}>
           {crumbs.map((crumb, i) => (
             <Fragment key={crumb.href}>
               {i > 0 && <span className="text-[var(--text-tertiary)]"> · </span>}
@@ -309,6 +303,14 @@ export default function Chrome({
               </Link>
             </Fragment>
           ))}
+          </span>
+          <span className="bar-time" aria-hidden={timeLeft === null}>
+            {timeLeft !== null && (
+              <>
+                {timeLeft} <T {...ui.minLeft} />
+              </>
+            )}
+          </span>
         </span>
       </div>
 
