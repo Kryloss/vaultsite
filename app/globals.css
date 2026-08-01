@@ -2278,8 +2278,18 @@ a.series-link:hover {
    and a shorthand resets every property it doesn't mention — including
    transform. Written above them, the press would be silently dropped from the
    controls that already had the most polish. See docs/DECISIONS.md #52. */
+/* Every property, not just transform. Almost everything that takes `.press`
+   also carries Tailwind's `transition-colors`, and this rule is unlayered
+   while the utilities are inside a layer — so an unlayered `transition:
+   transform` would win outright and silently delete the hover fade from the
+   nav, the chips and the cards. Naming the colour properties here keeps both.
+   The duration matches Tailwind's own default closely enough that nothing
+   which was tuned against it changes feel. */
 .press {
-  transition: transform 160ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition-property: transform, color, background-color, border-color,
+    opacity, box-shadow, filter;
+  transition-duration: 160ms;
+  transition-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 .press:active {

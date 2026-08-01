@@ -37,7 +37,7 @@ export default function PostRows({
           : `/${sectionSlug}`
       }
       scroll={false}
-      className={`rounded-full border px-3 py-1 text-sm transition-colors ${
+      className={`press rounded-full border px-3 py-1 text-sm ${
         active === value
           ? "border-[var(--text)] bg-[var(--text)] font-medium text-[var(--bg)]"
           : "border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-tertiary)] hover:text-[var(--text)]"
@@ -66,7 +66,7 @@ export default function PostRows({
               <li key={row.slug}>
                 <Link
                   href={`/${sectionSlug}/${row.slug}`}
-                  className="group -mx-3 flex items-baseline justify-between gap-4 rounded-lg px-3 py-2.5 transition-colors hover:bg-[var(--bg-hover)]"
+                  className="group press press-soft -mx-3 flex items-baseline justify-between gap-4 rounded-lg px-3 py-2.5 hover:bg-[var(--bg-hover)]"
                 >
                   <span className="min-w-0">
                     <span className="block truncate font-medium text-[var(--text)]">

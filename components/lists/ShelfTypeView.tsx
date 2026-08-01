@@ -60,7 +60,7 @@ export default function ShelfTypeView({
     <Link
       key={href}
       href={href}
-      className={`rounded-full border px-3 py-1 text-sm transition-colors ${extra} ${
+      className={`press rounded-full border px-3 py-1 text-sm ${extra} ${
         isActive
           ? "border-[var(--text)] bg-[var(--text)] font-medium text-[var(--bg)]"
           : "border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-tertiary)] hover:text-[var(--text)]"

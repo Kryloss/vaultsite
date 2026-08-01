@@ -48,7 +48,7 @@ export default function PeopleCards({
           : `/${sectionSlug}`
       }
       scroll={false}
-      className={`rounded-full border px-3 py-1 text-sm transition-colors ${
+      className={`press rounded-full border px-3 py-1 text-sm ${
         active === value
           ? "border-[var(--text)] bg-[var(--text)] font-medium text-[var(--bg)]"
           : "border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-tertiary)] hover:text-[var(--text)]"
@@ -83,10 +83,16 @@ export default function PeopleCards({
                     /* Two per row on a phone, three in the grid above it. */
                     sizes="(max-width: 640px) 50vw, 220px"
                     alt={row.title}
+                    /* `person-photo` (globals.css) holds the photographs at
+                       partial saturation and returns them to full colour on
+                       hover — the one place on a monochrome site where colour
+                       is allowed, and only when it's asked for. It also owns
+                       the transition, so the utility class here doesn't
+                       declare one and overwrite the filter half of it. */
                     className={
                       row.contain
-                        ? "h-full w-full object-contain p-6"
-                        : "h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        ? "person-photo h-full w-full object-contain p-6"
+                        : "person-photo h-full w-full object-cover group-hover:scale-105"
                     }
                     // Blur-up placeholder as the image's own background — see
                     // the matching note in ShelfCard.tsx and lib/blur.ts.

@@ -15,10 +15,30 @@ const socialIcons = {
   mail: MailIcon,
 };
 
-/** Row of social icon links, sourced from lib/site-config. */
-export default function SocialLinks({ className = "" }: { className?: string }) {
+/**
+ * Row of social icon links, sourced from lib/site-config.
+ *
+ * The sidebar kept a second copy of this markup at a smaller size, which is
+ * how the two rows came to have different hover behaviour. It now renders this
+ * with `iconClass` and `gap` set instead, so the icons behave the same
+ * wherever they appear and there is one place to change them.
+ *
+ * `data-social` is what globals.css keys each platform's colour off: the icons
+ * are drawn in `currentColor`, so the hover is a single custom property.
+ */
+export default function SocialLinks({
+  className = "",
+  /** Tailwind size classes for the glyph. */
+  iconClass = "h-[35px] w-[35px]",
+  /** Tailwind gap class for the row. */
+  gap = "gap-7",
+}: {
+  className?: string;
+  iconClass?: string;
+  gap?: string;
+}) {
   return (
-    <div className={`flex items-center gap-7 ${className}`}>
+    <div className={`flex items-center ${gap} ${className}`}>
       {socials.map((s) => {
         const Icon = socialIcons[s.icon];
         return (
@@ -29,9 +49,10 @@ export default function SocialLinks({ className = "" }: { className?: string }) 
             rel="noreferrer"
             aria-label={s.label}
             title={s.label}
-            className="text-[var(--text-tertiary)] transition-colors duration-150 hover:text-[var(--text)]"
+            data-social={s.icon}
+            className="social-link press"
           >
-            <Icon className="h-[35px] w-[35px]" />
+            <Icon className={`block ${iconClass}`} />
             <span className="sr-only">{s.label}</span>
           </a>
         );

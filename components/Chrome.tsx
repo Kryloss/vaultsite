@@ -410,26 +410,12 @@ export default function Chrome({
           })}
         </nav>
 
-        {/* Social links — plain icons, no background */}
+        {/* Social links — plain icons, no background. Rendered by the same
+            component as the home page's row (at a smaller size) rather than a
+            second copy of the markup: this one had drifted to its own hover
+            behaviour, which is exactly what duplicated chrome does. */}
         <div className="mt-auto px-6 pt-6">
-          <div className="flex items-center gap-4">
-            {socials.map((s) => {
-              const Icon = socialIcons[s.icon];
-              return (
-                <a
-                  key={s.label}
-                  href={s.href}
-                  target={s.href.startsWith("mailto:") ? undefined : "_blank"}
-                  rel="noreferrer"
-                  aria-label={s.label}
-                  title={s.label}
-                  className="text-[var(--text-tertiary)] transition-colors duration-150 hover:text-[var(--text)]"
-                >
-                  <Icon className="h-[21px] w-[21px]" />
-                </a>
-              );
-            })}
-          </div>
+          <SocialLinks iconClass="h-[21px] w-[21px]" gap="gap-4" />
           {/* Sized to fit the w-56 sidebar on one line — see lib/resistance.ts */}
           <p className="mt-4 whitespace-nowrap text-[11px] tracking-tight text-[var(--text-tertiary)]">
             <ResistanceDay initial={resistanceDay} />

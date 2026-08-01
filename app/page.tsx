@@ -95,7 +95,7 @@ export default async function HomePage() {
               <li key={entry.slug}>
                 <Link
                   href={`/posts/${entry.slug}`}
-                  className="-mx-3 flex items-baseline justify-between gap-4 rounded-lg px-3 py-2 transition-colors hover:bg-[var(--bg-hover)]"
+                  className="press press-soft -mx-3 flex items-baseline justify-between gap-4 rounded-lg px-3 py-2 hover:bg-[var(--bg-hover)]"
                 >
                   <span className="truncate font-medium text-[var(--text)]">
                     <T en={entry.title} uk={entry.titleUk} />
@@ -130,7 +130,7 @@ export default async function HomePage() {
                 <Link
                   key={section.slug}
                   href={`/${section.slug}`}
-                  className="group rounded-xl border border-[var(--border)] p-4 transition-colors hover:bg-[var(--bg-hover)]"
+                  className="group press press-soft rounded-xl border border-[var(--border)] p-4 hover:bg-[var(--bg-hover)]"
                 >
                   <span className="flex items-center gap-2.5 font-medium text-[var(--text)]">
                     {Icon ? (
