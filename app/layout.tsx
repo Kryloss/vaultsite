@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Lora, Source_Serif_4 } from "next/font/google";
+import { Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 import Chrome from "@/components/Chrome";
 import Lightbox from "@/components/Lightbox";
@@ -15,59 +15,39 @@ import { isShelfSection, shelfGroups } from "@/lib/shelf";
 import { siteName, siteUrl, siteDescription } from "@/lib/site-config";
 
 /**
- * Inter, self-hosted by next/font — the files are fetched at build time and
- * served from our own origin, so there's no Google request from the visitor,
- * no extra DNS, and no layout shift from a late-arriving webfont.
+ * Source Serif 4 — the site's one typeface, self-hosted by next/font so the
+ * files are served from our own origin: no Google request from the visitor,
+ * no extra DNS, no shift from a late webfont.
  *
- * The Cyrillic subset is not optional here: every note carries a Ukrainian
+ * It sets everything except code — prose, page titles, the sidebar, chips,
+ * dates, diagram labels. The site used to load three families and render in
+ * one: Inter had nothing left to set once the serif went on `body`, and Lora
+ * was carrying the quotes voice on the strength of being "a serif against
+ * Inter" — a distinction that stopped existing. Against another serif it
+ * doesn't read as a second voice, it reads as a font that failed to load.
+ * Source Serif's own italic does the job and costs no extra family.
+ *
+ * `axes: ["opsz"]` is the whole reason to bother with a variable serif here.
+ * Optical size is a real axis in this typeface: the letterforms are DRAWN
+ * differently for a 46px title (finer hairlines, tighter fit) than for 17px
+ * body text. next/font ships only the default axis unless the others are
+ * asked for by name, so without this line the titles are just body type
+ * scaled up.
+ *
+ * The Cyrillic subset is not optional: every note carries a Ukrainian
  * translation, and without it those pages fall back to a system font and read
- * as a different typeface. `latin-ext` covers the Ukrainian transliterations
- * and the odd European name.
- */
-const inter = Inter({
-  subsets: ["latin", "latin-ext", "cyrillic"],
-  display: "swap",
-  // NOT --font-sans: Tailwind v4 defines that as a theme token holding the
-  // system stack, and both land on the same element (<html> is :root), so
-  // which one won came down to stylesheet order. globals.css points
-  // Tailwind's token at this one instead — one name, one owner.
-  variable: "--font-inter",
-});
-
-/**
- * Lora, italic only — the quotes voice.
+ * as a different typeface. `latin-ext` covers the transliterations and the odd
+ * European name.
  *
- * A serif set against Inter is what makes a quoted passage read as someone
- * else's words rather than more of the page. Only the italic is loaded, since
- * that's the only cut used; Cyrillic is included for the same reason as above.
- */
-const lora = Lora({
-  subsets: ["latin", "latin-ext", "cyrillic"],
-  style: ["italic"],
-  display: "swap",
-  // NOT --font-serif, for the same reason Inter isn't --font-sans: Tailwind
-  // v4 owns that token too, both land on <html>, and the winner would come
-  // down to stylesheet order. globals.css points the token at this one.
-  variable: "--font-lora",
-});
-
-/**
- * Source Serif 4 — the site's typeface.
- *
- * Everything except code is set in this — prose, page titles, the sidebar, the
- * chips, the diagram labels. It began as the classic split (serif to read, sans
- * for the interface) and that was the wrong call for a site this size: when
- * half the page is chrome in a different family, the chrome reads as a product
- * someone else built and the writing reads as content pasted into it.
- *
- * NOT Newsreader, which was the first choice and is the better screen serif:
- * it has no Cyrillic subset, and every note on this site carries a Ukrainian
- * translation. A typeface that covers half the content isn't a candidate.
- * Source Serif has Cyrillic, is variable, and was drawn for text at reading
- * sizes.
+ * NOT named `--font-serif`: Tailwind v4 owns that token, next/font defines its
+ * variable on a class on <html>, and both land on the same element — the
+ * winner would come down to bundle order. globals.css points Tailwind's tokens
+ * at this one instead. One variable, one owner.
  */
 const sourceSerif = Source_Serif_4({
   subsets: ["latin", "latin-ext", "cyrillic"],
+  style: ["normal", "italic"],
+  axes: ["opsz"],
   display: "swap",
   variable: "--font-source-serif",
 });
@@ -123,7 +103,7 @@ export default function RootLayout({
     // runtime), so the server HTML intentionally differs — suppress the warning.
     <html
       lang="en"
-      className={`${inter.variable} ${lora.variable} ${sourceSerif.variable}`}
+      className={sourceSerif.variable}
       suppressHydrationWarning
     >
       <head>

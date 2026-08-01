@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
-/* Inter (loaded by next/font in app/layout.tsx as --font-inter) becomes the
-   sans everywhere, so `font-sans` utilities and the body rule below can't
-   disagree. The system stack stays as the fallback during the font swap. */
+/* One family, so Tailwind's font tokens and the `body` rule below can't
+   disagree about what the site is set in. `font-sans` has no separate owner
+   any more — Inter was deleted once the serif went on `body` and left it with
+   nothing to set — so it points at the same place. See app/layout.tsx. */
 @theme {
-  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, "Helvetica Neue", Arial, sans-serif;
-  /* Lora italic, used for quotations. Same one-name-one-owner rule as above. */
-  --font-serif: var(--font-lora), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-source-serif), Georgia, "Times New Roman", serif;
+  /* Quotations: the same family, italic. The italic IS the voice change. */
+  --font-serif: var(--font-source-serif), Georgia, "Times New Roman", serif;
 
   /* Tailwind's `transition-*` utilities have their own default curve and
      duration, so half the site's motion was speaking a different language
