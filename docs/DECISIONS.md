@@ -650,3 +650,23 @@ The contents pill moves to the **top-right** on a phone and is only ever the thr
 **The phone overrides have to sit AFTER the base rules in the file.** They were written before them the first time, and it looked like the media query simply wasn't matching: the sheet kept opening at the bottom-left, full desktop size. A media query adds no specificity, so `.toc-sheet` inside one and `.toc-sheet` outside one are exactly equal and the later declaration wins — which was the desktop one. Worth remembering in a hand-written stylesheet with no layers: **position is the tie-breaker, so an override belongs below what it overrides.**
 
 **Nothing above 640px changes.** From 640 to 1279px the pill stays bottom-left with its label; from 1280px the rail takes over and the pill doesn't exist. The icon is `display: none` outside the phone range, so the "the label IS the control" design survives everywhere it was already working.
+
+## 52. Override below, or not at all (2026-07-31)
+
+The phone rules for the contents sheet were written *above* the base `.toc-sheet` block, and it read as the media query not matching: the sheet kept opening at the bottom-left, at full laptop size. It was matching and losing. **A media query adds no specificity**, so `.toc-sheet` inside one and `.toc-sheet` outside one are exactly equal, and the tie goes to whichever comes later — the desktop rule.
+
+Moved below, where it can do its job. In a hand-written stylesheet with no `@layer`, position *is* the tie-breaker, so an override belongs under what it overrides. This had already caught the same file once; it is written here so the next one is cheaper to find.
+
+## 53. The chip swaps vertically, and the lightbox arrows come off the picture (2026-07-31)
+
+**The breadcrumb and the time now share one grid cell and pass each other vertically.**
+
+The version before this animated both widths — the breadcrumb shrinking to nothing while the time grew from nothing — and the chip visibly bulged before settling. That's arithmetic, not a bug: two boxes resizing in opposite directions inside a shrink-to-fit parent produce a sum that peaks somewhere in the middle. **Stacking them removes the question**: the cell is as wide as the wider label, at rest and mid-swap alike, so the background never moves.
+
+**Vertical, and that isn't only taste.** The swap is triggered *by scrolling*, and a label that travels the same way the page is travelling reads as part of that movement rather than as a separate animation that fired at you. The outgoing label leaves through the top, the incoming one arrives from the bottom, both clipped by a 1.25rem box.
+
+Both labels are always in the DOM — an element mounted mid-swap has no previous style to animate from, which was its own jump (#50) — and above 640px the time is `display: none` rather than merely hidden, or it would still be sizing the shared cell.
+
+**On phones the lightbox arrows moved into the counter: "‹ 1 / 2 ›".** A 2.75rem circle floating over a full-bleed image covers the thing you opened the lightbox to see, and sits where the artwork is rather than where a thumb is. Below 640px the arrows join the counter in one row under the picture; from 640px they float at the backdrop's edges exactly as before.
+
+The wrapper that makes this possible is `display: contents` on wide screens, so it collapses out of the box model entirely and the absolutely-positioned arrows keep resolving against the fixed overlay. One piece of markup, two layouts, and nothing conditional in the component.
