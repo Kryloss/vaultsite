@@ -633,6 +633,10 @@ The two labels answer the same question at different moments. "Posts · Kyrylo" 
 - **`null` is a real value** meaning "nothing to report" — too early, finished, or not a timed article — and it's published on unmount too, so the chrome doesn't keep showing the last article's number after you navigate away.
 - **The swap is CSS, not conditional rendering.** `data-compact` on the bar animates `max-width` and opacity the same way the breadcrumb already collapses, so the two cross over rather than one popping in after the other disappears.
 
+**And the label is always in the DOM, even with nothing to say.** Mounting it only once a number existed was the first version, and the chip visibly jumped: an element's first computed style *is* its final one, so it appeared mid-swap already at full width with nothing for the transition to run from. Empty it is a zero-width flex item, with a negative margin cancelling the flex gap so it leaves no notch.
+
+Two smaller things were making the same movement feel loose. The breadcrumb and the label had **different durations and different easing** (220ms `ease` against 220ms `ease`, but applied to different properties at different moments) — they now share one duration and one curve, because they are one movement and a 40ms difference between them reads as a stutter rather than a resize. And the label's expanded `max-width` was 8rem against a real content width of about 4.5rem, so the reveal finished a third of the way through the travel and then sat still; 7rem lands it near the end.
+
 ## 51. The phone's top corners (2026-07-31)
 
 The contents pill moves to the **top-right** on a phone and is only ever the three-line icon — no label, at any scroll position. The bottom of the screen is now empty, which is where the reading-position pill lives and where a thumb rests.
