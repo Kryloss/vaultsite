@@ -1720,12 +1720,13 @@ body::after {
 /* A standing panel under the breadcrumb bar, from 1280px up: the site's
    sections as plain text, with a search icon above them.
 
-   Built like `.toc-rail` — the contents list that stands in the right margin
-   of an article — and NOT like the phone's contents sheet. They're the same
-   kind of object: a quiet list living in a margin, present the whole time you
-   read, which is a different thing from a panel that opens. That means no
-   card, no blur, no shadow: a hairline, small type, and nothing else. The two
-   rails now bracket the article and their hairlines both face it.
+   The same KIND of object as `.toc-rail` — a quiet list living in a margin,
+   present the whole time you read rather than summoned and dismissed — but
+   quieter still, because unlike the contents rail it isn't about the thing
+   you're reading. No card, no blur, no shadow, and no rule either: seven
+   short words in the site's faintest grey, left-aligned in the width they
+   actually need. It should be findable when looked for and invisible when
+   not.
 
    Hidden below 1280px and rendered at every width. It holds no state, so a
    media query is the entire implementation: no resize listener, nothing to
@@ -1741,12 +1742,13 @@ body::after {
      height, plus the same 0.25rem of air the bar keeps inside itself. */
   top: 3.5rem;
   z-index: 30;
-  width: 13rem;
+  /* Sized to the longest section name, not to a column. The 13rem it began
+     at was borrowed from the contents rail, which needs the room because it
+     holds sentences; this holds single words. */
+  width: 9rem;
   max-height: calc(100vh - 4.5rem);
   overflow-y: auto;
   overscroll-behavior: contain;
-  /* On the side facing the article, so the two rails frame it. */
-  border-right: 1px solid var(--border);
   font-size: 0.8125rem;
   line-height: 1.5;
 }
@@ -1763,16 +1765,18 @@ body::after {
   }
 }
 
-/* Search is the icon alone. In a rail this quiet, "Search…" plus a key hint
-   was the loudest thing on the page — a text field drawn in a column that has
-   no other boxes in it. The glyph says the same thing; the shortcut is in the
-   title attribute and in the `?` cheat sheet for anyone who wants it. */
+/* Search is the icon alone. A labelled field with a key hint was the loudest
+   thing in a column whose whole job is to stay quiet — a drawn box in a panel
+   that has no other boxes in it. The glyph says the same thing; the shortcut
+   is in the title attribute and in the `?` cheat sheet.
+
+   The 0.5rem indent puts it under the menu button in the bar above rather
+   than at the window's edge, so the rail reads as hanging off the chrome. */
 .side-rail-search {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
   width: 100%;
-  padding: 0.25rem 0.75rem 0.25rem 0;
+  padding: 0.25rem 0 0.25rem 0.5rem;
   color: var(--text-tertiary);
 }
 
@@ -1786,17 +1790,13 @@ body::after {
   list-style: none;
 }
 
-/* Right-aligned against the hairline, mirroring the way the contents rail
-   sits against its own. Plain text, no icons — the drawer keeps its icon
-   column; at this size a row of glyphs beside seven words is noise. */
+/* Left-aligned, indented to sit under the bar above. Plain text, no icons —
+   the drawer keeps its icon column; at this size a row of glyphs beside seven
+   words is noise. */
 .side-rail-link {
   display: block;
-  padding: 0.25rem 0.75rem 0.25rem 0;
-  /* Overlaps the rail's border so the active row can replace it. */
-  margin-right: -1px;
-  border-right: 1px solid transparent;
+  padding: 0.25rem 0 0.25rem 0.5rem;
   color: var(--text-tertiary);
-  text-align: right;
   text-decoration: none;
 }
 
@@ -1804,11 +1804,11 @@ body::after {
   color: var(--text-secondary);
 }
 
-/* The current section takes the hairline. Same idea as the contents rail's
-   marker, and monochrome for the same reason: the accent is for links and
-   state, not for navigation (DECISIONS #61). */
+/* With no rule to mark, weight and full text colour do it alone — which is
+   enough at a glance and adds no ink to the page when you aren't looking.
+   Monochrome on purpose: the accent is for links and state, not navigation
+   (DECISIONS #61). */
 .side-rail-link.is-active {
-  border-right-color: var(--text);
   color: var(--text);
   font-weight: 600;
 }
