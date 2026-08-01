@@ -25,9 +25,6 @@ export const ui = {
     en: "Search pages and posts…",
     uk: "Пошук сторінок і дописів…",
   },
-  /* The palette's own placeholder is too long for the 13rem pages rail, and
-     the rail sits beside a key hint that already says what it does. */
-  searchShort: { en: "Search…", uk: "Пошук…" },
   searchHint: {
     en: "↑↓ navigate · ↵ open · esc close",
     uk: "↑↓ навігація · ↵ відкрити · esc закрити",

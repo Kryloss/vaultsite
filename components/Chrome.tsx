@@ -57,21 +57,6 @@ export default function Chrome({
 }) {
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  /**
-   * The modifier printed on the search rail's key hint.
-   *
-   * Starts at "⌘" and is corrected after mount rather than read during render:
-   * the server has no `navigator`, so deciding this while rendering would make
-   * the static HTML disagree with the first client render. A Windows visitor
-   * sees the Mac key for one frame, which is a better trade than a hydration
-   * mismatch — and the shortcut itself has always accepted either.
-   */
-  const [metaKey, setMetaKey] = useState("⌘");
-  useEffect(() => {
-    if (!/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)) {
-      setMetaKey("Ctrl ");
-    }
-  }, []);
   const drawerRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   /** Phones only: drop the breadcrumb while reading downward. */
@@ -427,47 +412,6 @@ export default function Chrome({
           </p>
         </div>
       </aside>
-
-      {/* The standing panel, from 1280px up — the width where the contents
-          rail appears on the right, so the two arrive together and the page
-          sits between them instead of floating in an empty left margin.
-
-          It is NOT a second copy of the drawer: pages and search only, in
-          plain text with no icons. The drawer still exists behind the same
-          button and still holds the social links and the day counter, which
-          belong to a place you go rather than a rail you glance at.
-
-          Rendered on every width and hidden by CSS below 1280px: it holds no
-          state, so a media query is the whole implementation, and there's no
-          resize listener or hydration mismatch to get wrong. */}
-      <nav className="side-rail" aria-label={lang === "uk" ? "Сторінки" : "Pages"}>
-        {/* The icon alone. A labelled field with a key hint was the loudest
-            thing in a column whose whole job is to be quiet — the shortcut
-            lives in the title attribute and the `?` cheat sheet instead. */}
-        <button
-          type="button"
-          onClick={() => setSearchOpen(true)}
-          onPointerEnter={warmSearchIndex}
-          aria-label={`${ui.searchShort[lang]} (${metaKey}K)`}
-          title={`${ui.searchShort[lang]} (${metaKey}K)`}
-          className="side-rail-search press"
-        >
-          <SearchIcon className="h-[15px] w-[15px] shrink-0" />
-        </button>
-
-        <ul>
-          {nav.map((item) => (
-            <li key={item.slug}>
-              <Link
-                href={item.href}
-                className={`side-rail-link press${isActive(item.href) ? " is-active" : ""}`}
-              >
-                <T en={item.title} uk={item.titleUk} />
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
 
       <CommandPalette
         open={searchOpen}
