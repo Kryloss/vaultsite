@@ -78,9 +78,7 @@ export default function ShelfGrid({ section, entries }: ListProps) {
               <li
                 key={item.slug}
                 className={`shrink-0 snap-start ${
-                  item.isVideo
-                    ? "w-[calc(var(--shelf-card-h)*16/9)]"
-                    : "w-[calc(var(--shelf-card-h)*2/3)]"
+                  item.isVideo ? "shelf-card-wide" : "shelf-card-tall"
                 }`}
               >
                 <ShelfCard

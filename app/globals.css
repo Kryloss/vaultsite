@@ -409,6 +409,19 @@ body::after {
   }
 }
 
+/* The two card widths, as real classes rather than Tailwind arbitrary values:
+   `w-[calc(var(--shelf-card-h)*16/9)]` is scanned but never emitted, because
+   `/` is Tailwind's modifier separator and it splits the class name before the
+   bracket is ever read. It fails silently — the markup looks right and the
+   rule simply doesn't exist. */
+.shelf-card-tall {
+  width: calc(var(--shelf-card-h) * 2 / 3);
+}
+
+.shelf-card-wide {
+  width: calc(var(--shelf-card-h) * 16 / 9);
+}
+
 .shelf-row::-webkit-scrollbar {
   display: none;
 }
