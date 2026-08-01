@@ -672,3 +672,53 @@ Both labels are always in the DOM — an element mounted mid-swap has no previou
 **On phones the lightbox arrows moved into the counter: "‹ 1 / 2 ›".** A 2.75rem circle floating over a full-bleed image covers the thing you opened the lightbox to see, and sits where the artwork is rather than where a thumb is. Below 640px the arrows join the counter in one row under the picture; from 640px they float at the backdrop's edges exactly as before.
 
 The wrapper that makes this possible is `display: contents` on wide screens, so it collapses out of the box model entirely and the absolutely-positioned arrows keep resolving against the fixed overlay. One piece of markup, two layouts, and nothing conditional in the component.
+
+## 54. One height for every shelf card (2026-07-31)
+
+Cards were sized by **width** — `w-[150px]` for covers, `w-[280px]` for videos — and since a 2:3 cover and a 16:9 thumbnail turn width into height differently, the shelf came out as a 225px row above a 158px row above another 225px row. Each row was internally tidy, which is why it survived this long; it's the *page* that was ragged, and a section built entirely out of rows only reads as a shelf if the shelves line up.
+
+**Height is now the constant** (`--shelf-card-h`, set on `.shelf-row`) and the widths are derived from it and the artwork's own aspect ratio. Height is the right one to fix because it's the dimension the eye measures while scrolling; width is what varies between media anyway, and letting it vary means nothing has to be cropped or letterboxed to fit. A video card is simply a wide card.
+
+**Rows only.** On a medium page the cards sit in a grid where the column width leads and every card in the grid is the same shape already.
+
+**One variable, and a step down below 480px.** A 16:9 card 225px tall is 400px wide, which is wider than a phone. The row scrolls, so nothing breaks, but a card you can never see all of is a poor introduction to a row — so the whole shelf steps down to 190px together, which keeps it level.
+
+**The widths are real classes, not Tailwind arbitrary values.** `w-[calc(var(--shelf-card-h)*16/9)]` scans fine and is never emitted: `/` is Tailwind's modifier separator and splits the class name before the bracket is read. Nothing warns. The markup looks correct, the rule doesn't exist, and the cards fall back to their content width — which is roughly what a broken layout looks like from the outside but not from the source. **If an arbitrary value needs a slash, write the rule by hand.**
+
+## 55. A dip, so a tap has an answer (2026-07-31)
+
+Every control on the site changed background on hover and did nothing at all on click. Hover is a statement about the pointer, not about the press, and on a phone it doesn't exist — so between tapping a post and the next page painting, the longest wait the interface asks for, the site showed nothing.
+
+`.press` scales a control to 97% while it's held. Instant on the way down, eased on the way back up, which is what a physical button does and what makes the release read as the button pushing back rather than as a second animation.
+
+**Opt-in, not `a:active`.** A scaled inline link inside a paragraph nudges the words around it and reads as a rendering fault. And several controls already own their transform — the lightbox arrows are centred with `translateY(-50%)`, the selection pill with `translateX(-50%)` — where a blanket `scale()` would *replace* the positioning and throw them off screen. Those two get composed rules.
+
+**`--press-scale`, because the same percentage isn't the same movement.** 3% of a 32px chip is one pixel; 3% of a 320px card is ten. Cards take `.press-soft` and travel a third as far.
+
+**The rule names the colour properties too.** Almost everything taking `.press` also carried Tailwind's `transition-colors`. `.press` is unlayered and the utilities are inside a layer, so an unlayered `transition: transform` wins outright and silently deletes the hover fade from the nav, the chips and the cards. Listing colour, background, border and the rest keeps both.
+
+**And the block sits at the very end of `globals.css`,** because half the components it names declare their own `transition:` shorthand hundreds of lines above — and a shorthand resets every property it doesn't mention, transform included. Written higher up, the press would have been dropped from precisely the controls with the most polish. Third time this file has taught the same lesson (#51, #52).
+
+## 56. The two places colour is allowed (2026-07-31)
+
+The site is monochrome by rule. Two exceptions, both of which only exist under the pointer, so the page at a glance is unchanged.
+
+**People photographs sit at `grayscale(0.6)` and come back to full colour on hover.** Not all the way to grey: a portrait at `grayscale(1)` next to monochrome type reads as an archive photograph, which says something about the person that isn't ours to say. At 0.6 the skin tones survive, the picture stops competing with a page that has no other colour in it, and the hover has somewhere to go. A small contrast lift compensates for the flattening that pulling saturation always causes.
+
+**Social icons take their platform's own colour on hover.** These five marks are already colours in everyone's memory, so this isn't decoration — it's recognition, and it's the one hover on the site that tells you something the grey version didn't. GitHub and X are brand-black, which is invisible on a near-black page, so both take a near-white in dark mode; that's the same mark at the lightness the medium allows, not an invented brand colour. Instagram's real logo is a gradient and the icon is a single `currentColor` stroke, so it takes the pink the gradient is centred on. Mail has no brand and borrows Gmail's red, which is where the link goes for most people who click it.
+
+**On touch, the photographs are simply shown.** `@media (hover: none)` drops the filter entirely — without it the effect there isn't "grey until you ask", it's just grey.
+
+**The sidebar's icon row is now `<SocialLinks />`.** It had been a second copy of the same markup at a smaller size, which is how the two rows came to have different hover behaviour in the first place; `socials` no longer needs threading through `Chrome` from the layout.
+
+## 57. Shelf previews show the cover (2026-07-31)
+
+A shared link to a book note used to render the same dark text card as everything else. But a shelf note is *about* a thing that already has a picture, and the picture is what someone recognises in a feed before they've read a word of the title.
+
+`ogImage()` now takes an optional cover and splits the card: text left, artwork right, bled to the full height so it reads as a jacket rather than a thumbnail pasted onto a slide. The frame follows the medium — 2:3 for covers, 16:9 for videos — so nothing is cropped or letterboxed. The author gets a line, but only when there's art beside it; on the plain card it would sit where the section name already is.
+
+**The image is inlined as a data URL, not linked.** These are generated *during* the build, when there is no server running to serve the site's own `/vault-assets/` files — a relative path renders as nothing, silently. Remote YouTube thumbnails are passed through, since Satori fetches those itself.
+
+**Every failure path is a shrug.** Unknown format (Satori decodes no WebP or AVIF), missing file, unreadable — `ogCover()` returns undefined and the note falls back to the text card. A preview image that throws would fail the build of the page it belongs to, which is a steep price for a picture.
+
+**Shelf only.** A post has no cover, and the photograph on a People note is a person's face, which is not a thing to paste into a link preview.
