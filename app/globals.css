@@ -1046,6 +1046,38 @@ body::after {
   font-variant-numeric: tabular-nums;
 }
 
+/* The row that holds "‹ 1 / 2 ›". It's `display: contents` on wide screens,
+   so the arrows keep resolving against the fixed overlay and float at its
+   edges exactly as before — the wrapper exists purely for the phone layout
+   below and leaves no trace above it. */
+.lightbox-nav {
+  display: contents;
+}
+
+/* Phones: the arrows come off the picture and sit either side of the counter.
+   A 2.75rem circle over a full-bleed image on a small screen covers the thing
+   you opened the lightbox to look at, and lands where the artwork is rather
+   than where a thumb is. */
+@media (max-width: 639px) {
+  .lightbox-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .lightbox-arrow {
+    position: static;
+    transform: none;
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .lightbox-arrow svg {
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
 /* ---------- Selection → link pill (components/SelectionLink.tsx) ----------
    Floats above a text selection in .prose and copies a #:~:text= deep link.
    Inverted (text-on-bg) like the active nav chips — it's a momentary control,
@@ -1304,6 +1336,32 @@ body::after {
 
 /* ---------- Breadcrumb bar (components/Chrome.tsx) ---------- */
 
+/* The breadcrumb and the time share one cell and pass each other vertically.
+   Stacking is what keeps the chip's width fixed: the box is as wide as the
+   wider of the two, at rest and mid-swap alike. The previous version animated
+   both widths and the sum peaked in the middle, so the chip bulged and then
+   settled — the "expands for a moment and then adjusts" everyone could see.
+
+   Vertical rather than horizontal for a second reason: the swap is triggered
+   BY scrolling, and a label that slides the same way the page is moving reads
+   as part of that movement instead of as a separate little animation. */
+.bar-swap {
+  display: grid;
+  align-items: center;
+  /* Clips whichever label is on its way out. Tall enough for 14px text with
+     room for descenders; the children set their own line-height to match. */
+  height: 1.25rem;
+  overflow: hidden;
+}
+
+.bar-swap > * {
+  grid-area: 1 / 1;
+  line-height: 1.25rem;
+  transition:
+    transform 260ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    opacity 160ms ease;
+}
+
 .crumbs {
   max-width: 70vw;
   overflow: hidden;
@@ -1312,60 +1370,44 @@ body::after {
   font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
-  /* Matches .bar-time exactly — see the note there. */
-  transition:
-    max-width 240ms cubic-bezier(0.22, 0.61, 0.36, 1),
-    padding-right 240ms cubic-bezier(0.22, 0.61, 0.36, 1),
-    opacity 150ms ease;
 }
 
-/* The time remaining, shown in this bar instead of the breadcrumb while a
-   phone reader is scrolling down. Collapsed by default, and at every width
-   above the phone breakpoint where the corner pill does the job. */
+/* The time remaining, shown in this chip instead of the breadcrumb while a
+   phone reader is scrolling down. */
 .bar-time {
-  max-width: 0;
-  overflow: hidden;
-  padding-right: 0;
-  /* Cancels the flex gap while collapsed, so an empty or furled label doesn't
-     leave a permanent 4px notch beside the button. */
-  margin-left: -0.25rem;
-  opacity: 0;
+  padding-right: 0.5rem;
   font-size: 0.875rem;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
   white-space: nowrap;
-  /* Same duration and same curve as .crumbs opposite it — the two are one
-     movement, and a difference of even 40ms between them reads as the chip
-     stuttering rather than resizing. Opacity is deliberately shorter and
-     unshifted: text that fades for the whole width change looks like it is
-     being dragged. */
-  transition:
-    max-width 240ms cubic-bezier(0.22, 0.61, 0.36, 1),
-    margin-left 240ms cubic-bezier(0.22, 0.61, 0.36, 1),
-    padding-right 240ms cubic-bezier(0.22, 0.61, 0.36, 1),
-    opacity 150ms ease;
+  /* Waiting below the lip until the reader starts down the page. */
+  transform: translateY(100%);
+  opacity: 0;
 }
 
-/* Phones only: scrolling down leaves just the menu button — and, in an
-   article, the time remaining in the breadcrumb's place. Wider screens have
-   the room, so the breadcrumb stays and the corner pill reports the time.
-   Animating max-width rather than width because the content sizes itself. */
+/* Above the phone breakpoint the breadcrumb never gives way, so the time is
+   out of the layout entirely — left in, it would still be sizing the shared
+   cell. Placed AFTER the rule it modifies, per the note in DECISIONS #52. */
+@media (min-width: 640px) {
+  .bar-time {
+    display: none;
+  }
+}
+
+/* Phones only: scrolling down slides the breadcrumb up out of the chip and
+   the time remaining up into it. Wider screens have the room, so the
+   breadcrumb stays put and the corner pill reports the time. */
 @media (max-width: 639px) {
+  /* Up and out of the top of the box… */
   .crumbs.is-collapsed {
-    max-width: 0;
-    padding-right: 0;
+    transform: translateY(-100%);
     opacity: 0;
   }
 
-  /* 7rem is a shade over the widest this ever gets ("12 хв лишилось"), so the
-     reveal finishes near the end of the travel rather than a third of the way
-     in — a label that arrives early and then waits is the other half of what
-     made the swap feel loose. */
+  /* …as the time comes up from the bottom to replace it. */
   .chrome-bar[data-compact="true"] .bar-time {
-    max-width: 7rem;
-    margin-left: 0;
-    padding-right: 0.5rem;
+    transform: none;
     opacity: 1;
   }
 }

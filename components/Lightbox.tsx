@@ -243,7 +243,6 @@ export default function Lightbox() {
       onClick={close}
       className="fixed inset-0 z-[70] flex cursor-zoom-out flex-col items-center justify-center gap-3 bg-black/65 p-6 backdrop-blur-sm"
     >
-      {many && arrow(-1, ui.previousImage)}
       {shown.kind === "img" ? (
         /* eslint-disable-next-line @next/next/no-img-element */
         <img
@@ -267,12 +266,20 @@ export default function Lightbox() {
       ) : (
         label && <p className="text-sm text-white/70">{label}</p>
       )}
+      {/* One row holding both arrows and the counter: "‹ 1 / 2 ›".
+          On a phone the arrows sit inside it, beside the number, where a
+          thumb already is and where they can't cover the picture. From 640px
+          they go back to floating at the left and right edges of the
+          backdrop — see globals.css; the markup is the same either way. */}
       {many && (
-        <p className="lightbox-count">
-          {index + 1} / {items.length}
-        </p>
+        <div className="lightbox-nav">
+          {arrow(-1, ui.previousImage)}
+          <p className="lightbox-count">
+            {index + 1} / {items.length}
+          </p>
+          {arrow(1, ui.nextImage)}
+        </div>
       )}
-      {many && arrow(1, ui.nextImage)}
     </div>
   );
 }
