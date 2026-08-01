@@ -11,6 +11,7 @@ import type { NavItem } from "@/components/Chrome";
  * Keyboard navigation, for readers who'd rather not reach for the mouse.
  *
  *   [ / ]   previous / next entry in this section
+ *   j / k           down / up the list on this page
  *   g then h        home
  *   g then 1…9      the nth section, in sidebar order
  *   l               switch language
@@ -46,6 +47,50 @@ function isTyping(el: EventTarget | null): boolean {
   );
 }
 
+/**
+ * Whether a modal is up — the drawer, the palette, this sheet.
+ *
+ * Read from the DOM rather than from state, exactly like the prev/next links
+ * below: this component doesn't own the drawer or the palette and would have
+ * to be handed their state to know, which is a second source of truth for
+ * something the page already says out loud. Every dialog on the site is
+ * `inert` when closed (Chrome, CommandPalette, and the sheet below all do
+ * this), so "a dialog that isn't inert" is the whole test.
+ */
+function modalOpen(): boolean {
+  return !!document.querySelector('[role="dialog"][aria-modal="true"]:not([inert])');
+}
+
+/**
+ * The rows of whatever list is on this page, in reading order.
+ *
+ * `.stagger` is the hook, and it isn't a new one: every list on the site
+ * already carries it so its children can arrive one at a time (DECISIONS #38),
+ * which makes it the existing answer to "which elements here are a list".
+ * Posts put one on each year, so a page can have several — querySelectorAll
+ * returns them in document order, and flattening keeps the rows in the order
+ * they're read.
+ *
+ * `offsetParent` skips the hidden language: both are in the HTML, and without
+ * this a reader in Ukrainian would be walking the English list.
+ */
+function listRows(): HTMLAnchorElement[] {
+  const rows: HTMLAnchorElement[] = [];
+  for (const list of document.querySelectorAll<HTMLElement>(".stagger")) {
+    if (list.offsetParent === null) continue;
+    for (const child of list.children) {
+      // The row is usually a wrapper (<li>, <article>) around one link, but the
+      // shelf makes the card itself the link.
+      const link =
+        child instanceof HTMLAnchorElement
+          ? child
+          : child.querySelector<HTMLAnchorElement>("a[href]");
+      if (link) rows.push(link);
+    }
+  }
+  return rows;
+}
+
 export default function Shortcuts({
   items,
   onSearch,
@@ -73,6 +118,52 @@ export default function Shortcuts({
     () => items.filter((i) => i.slug !== "home").slice(0, 9),
     [items]
   );
+
+  /**
+   * Move the highlight down (`+1`) or up (`-1`) the page's list.
+   *
+   * The highlight IS focus — the row is focused rather than tracked in state
+   * and painted to look focused. That's one line instead of a selected-index
+   * and a scroll-into-view of our own, and it means Enter already opens the
+   * row, Tab carries on from where you are, and a screen reader is told what
+   * you're pointing at. The class only exists because a programmatic focus
+   * isn't reliably `:focus-visible` across browsers, and a highlight you can't
+   * see is no highlight.
+   */
+  const moveList = useCallback((delta: 1 | -1) => {
+    const rows = listRows();
+    if (rows.length === 0) return false;
+
+    const here = rows.indexOf(document.activeElement as HTMLAnchorElement);
+    // Starting fresh: `j` takes the first row, `k` the last, so both keys
+    // enter the list from the end they travel away from.
+    const next =
+      here === -1
+        ? delta === 1
+          ? 0
+          : rows.length - 1
+        : Math.min(rows.length - 1, Math.max(0, here + delta));
+
+    const row = rows[next];
+    for (const other of rows) other.classList.remove("list-focus");
+    row.classList.add("list-focus");
+    row.addEventListener("blur", () => row.classList.remove("list-focus"), {
+      once: true,
+    });
+    // preventScroll, then scroll deliberately: the browser's own focus scroll
+    // jumps the row to the edge of the window, where `nearest` moves as little
+    // as possible and leaves a row that's already visible where it is.
+    row.focus({ preventScroll: true });
+    row.scrollIntoView({
+      block: "nearest",
+      // Browsers don't apply the reduced-motion preference to programmatic
+      // smooth scrolling — it has to be asked for and honoured here.
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+    });
+    return true;
+  }, []);
 
   /** Follow the entry footer's prev/next link, if this page has one. */
   const sibling = useCallback(
@@ -136,6 +227,15 @@ export default function Shortcuts({
           e.preventDefault();
           sibling("next");
           return;
+        case "j":
+        case "k":
+          // Only when a list is actually being walked. On a note there's
+          // nothing to move through, and swallowing the key there would break
+          // Vim-style scrolling for anyone whose browser extension provides
+          // it — moveList reports whether it found a list at all.
+          if (modalOpen()) return;
+          if (moveList(e.key === "j" ? 1 : -1)) e.preventDefault();
+          return;
         case "l":
           e.preventDefault();
           toggleLang();
@@ -157,11 +257,13 @@ export default function Shortcuts({
       window.removeEventListener("keydown", onKey);
       window.clearTimeout(timer);
     };
-  }, [router, sibling, onSearch, toggleLang, sections]);
+  }, [router, sibling, moveList, onSearch, toggleLang, sections]);
 
   const rows: { keys: string[]; label: { en: string; uk: string } }[] = [
     { keys: ["["], label: ui.previousEntry },
     { keys: ["]"], label: ui.nextEntry },
+    { keys: ["j"], label: ui.shortcutListDown },
+    { keys: ["k"], label: ui.shortcutListUp },
     { keys: ["g", "h"], label: ui.shortcutHome },
     ...sections.map((s, i) => ({
       keys: ["g", String(i + 1)],

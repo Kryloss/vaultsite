@@ -103,6 +103,8 @@ export const ui = {
   shortcutSheet: { en: "Keyboard shortcuts", uk: "Клавіатурні скорочення" },
   shortcutHome: { en: "Home", uk: "Головна" },
   shortcutSearch: { en: "Search", uk: "Пошук" },
+  shortcutListDown: { en: "Down the list", uk: "Вниз списком" },
+  shortcutListUp: { en: "Up the list", uk: "Вгору списком" },
 
   // command palette actions (components/CommandPalette.tsx)
   actionToggleLang: { en: "Switch language", uk: "Змінити мову" },

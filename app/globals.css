@@ -2738,3 +2738,17 @@ svg.diagram tspan {
    A heading two lines below the paragraph it interrupts belongs to that
    paragraph. Pushing the space above it well past the space below makes the
    sections separate on their own. */
+
+/* --- Walking a list from the keyboard (components/Shortcuts.tsx) ----------
+   `j`/`k` move focus down and up the rows of whatever list is on the page.
+   The highlight is real focus, so Enter opens the row and a screen reader is
+   told where it is; this class exists only because a programmatic .focus() is
+   not reliably `:focus-visible` in every browser, and an invisible highlight
+   would make the keys feel broken.
+
+   Last in the file on purpose (see the note on ordering above): rows carry
+   their own hover and press styles, and this has to win over them. */
+.list-focus {
+  outline: 2px solid var(--text);
+  outline-offset: 3px;
+}
