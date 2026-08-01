@@ -667,6 +667,8 @@ The version before this animated both widths — the breadcrumb shrinking to not
 
 Both labels are always in the DOM — an element mounted mid-swap has no previous style to animate from, which was its own jump (#50) — and above 640px the time is `display: none` rather than merely hidden, or it would still be sizing the shared cell.
 
+**And the breadcrumb only moves when there is something to replace it.** For a moment the collapse was driven by scroll direction alone, which meant a section list or the home page animated its breadcrumb away on every scroll and left an empty chip — motion that spends the reader's attention and returns nothing. The swap now needs a number as well as a direction, so pages without a reading estimate simply keep their breadcrumb and never animate at all.
+
 **On phones the lightbox arrows moved into the counter: "‹ 1 / 2 ›".** A 2.75rem circle floating over a full-bleed image covers the thing you opened the lightbox to see, and sits where the artwork is rather than where a thumb is. Below 640px the arrows join the counter in one row under the picture; from 640px they float at the backdrop's edges exactly as before.
 
 The wrapper that makes this possible is `display: contents` on wide screens, so it collapses out of the box model entirely and the absolutely-positioned arrows keep resolving against the fixed overlay. One piece of markup, two layouts, and nothing conditional in the component.
