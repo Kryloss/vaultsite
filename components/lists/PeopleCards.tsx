@@ -70,7 +70,10 @@ export default function PeopleCards({
       <ul className="stagger mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3">
         {filtered.map((row) => (
           <li key={row.slug}>
-            <Link href={`/${sectionSlug}/${row.slug}`} className="group block">
+            <Link
+              href={`/${sectionSlug}/${row.slug}`}
+              className="group press press-soft block"
+            >
               <div className="aspect-square overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-hover)]">
                 {row.cover ? (
                   // eslint-disable-next-line @next/next/no-img-element

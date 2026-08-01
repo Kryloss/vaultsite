@@ -381,6 +381,32 @@ body::after {
   cursor: grab;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+
+  /* ONE height for every medium, and the card widths derived from it.
+     Book covers are 2:3 and video thumbnails are 16:9, so sizing them by
+     width — which is what the fixed `w-[150px]` / `w-[280px]` did — gave the
+     shelf rows of 225px and rows of 158px stacked down one page. Each row is
+     internally tidy either way; it's the page that was ragged, and a section
+     built out of rows only reads as a shelf if the shelves line up.
+
+     Height is the constant because it's the dimension the eye actually
+     measures down a scrolling page. Width follows from the artwork's own
+     aspect ratio, so nothing is cropped or letterboxed to fit — a video card
+     is simply a wide card. See docs/DECISIONS.md #54.
+
+     Only the rows. On a medium page the cards sit in a grid where the column
+     width leads and every card is the same shape anyway. */
+  --shelf-card-h: 225px;
+}
+
+/* A 16:9 card at 225px tall is 400px wide, which is wider than a phone. The
+   row scrolls, so it isn't broken — but a card you can never see the whole of
+   is a poor first impression of a row. Below 480px everything steps down
+   together, which keeps the shelves level. */
+@media (max-width: 479px) {
+  .shelf-row {
+    --shelf-card-h: 190px;
+  }
 }
 
 .shelf-row::-webkit-scrollbar {
@@ -2224,5 +2250,204 @@ a.series-link:hover {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* ---------- Pressed state ---------- */
+
+/* One answer to "did that register?", shared by every control on the site: it
+   dips while the pointer or finger is down and springs back on release.
+
+   Hover already says "this is a target" — but hover doesn't exist on a phone,
+   where the gap between a tap and the next page painting is the longest wait
+   this interface asks for and currently shows nothing at all. The dip is the
+   only thing in that window.
+
+   Opt-in through `.press` rather than a blanket `a:active`. A scaled inline
+   link inside a paragraph nudges the words around it and reads as a rendering
+   fault, and several controls here already own their transform — the lightbox
+   arrows are centred with one, the selection pill is — where a blanket
+   `scale()` would replace the positioning and throw them off-screen. Those get
+   composed rules below.
+
+   `--press-scale` exists because the same percentage is not the same movement:
+   3% of a 32px chip is one pixel, 3% of a 320px card is ten. Big surfaces take
+   `.press-soft` and travel a third as far.
+
+   THIS BLOCK LIVES AT THE END OF THE FILE ON PURPOSE. Half of the classes
+   named below declare their own `transition:` shorthand hundreds of lines up,
+   and a shorthand resets every property it doesn't mention — including
+   transform. Written above them, the press would be silently dropped from the
+   controls that already had the most polish. See docs/DECISIONS.md #52. */
+.press {
+  transition: transform 160ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.press:active {
+  transform: scale(var(--press-scale, 0.97));
+  /* Instant down, eased back up — which is what a physical button does, and
+     what makes the release read as the button pushing back rather than as a
+     second animation of its own. */
+  transition-duration: 0ms;
+}
+
+/* Cards, cover art, anything measured in hundreds of pixels. */
+.press-soft {
+  --press-scale: 0.99;
+}
+
+/* Components that are already styled by name join in here rather than gaining
+   a class in their markup — one rule instead of an edit in a dozen files. The
+   transition is re-declared because their own shorthands don't list transform;
+   the properties each of them actually animates are carried along so nothing
+   they already do is lost. */
+.copy-md,
+.prose .code-copy,
+.series-badge,
+.toc-bar,
+.toc-top,
+.sibling,
+.resume-reading,
+.spoiler-cover,
+.lightbox-arrow,
+.selection-pill {
+  transition-property: transform, color, background-color, border-color,
+    opacity, box-shadow;
+  transition-duration: 160ms;
+  transition-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.copy-md:active,
+.prose .code-copy:active,
+.series-badge:active,
+.toc-bar:active,
+.toc-top:active,
+.spoiler-cover:active,
+.resume-reading:active {
+  transform: scale(0.97);
+  transition-duration: 0ms;
+}
+
+.sibling:active {
+  transform: scale(0.99);
+  transition-duration: 0ms;
+}
+
+/* Composed by hand: `scale()` alone would drop the centring these two are
+   positioned with. */
+.lightbox-arrow:active {
+  transform: translateY(-50%) scale(0.94);
+  transition-duration: 0ms;
+}
+
+.selection-pill:active {
+  transform: translateX(-50%) scale(0.96);
+  transition-duration: 0ms;
+}
+
+/* A dip is motion, and someone who asked for less of it meant this too. The
+   blanket reduced-motion rule near the top only collapses DURATIONS, which
+   would leave the press snapping in and out instantly rather than removing
+   it — so each transform is turned off explicitly, and the two composed ones
+   are handed back the positioning they were built on. */
+@media (prefers-reduced-motion: reduce) {
+  .press:active,
+  .copy-md:active,
+  .prose .code-copy:active,
+  .series-badge:active,
+  .toc-bar:active,
+  .toc-top:active,
+  .spoiler-cover:active,
+  .resume-reading:active,
+  .sibling:active {
+    transform: none;
+  }
+  .lightbox-arrow:active {
+    transform: translateY(-50%);
+  }
+  .selection-pill:active {
+    transform: translateX(-50%);
+  }
+}
+
+/* ---------- People photos ---------- */
+
+/* Partly desaturated at rest, full colour under the pointer.
+
+   Not all the way to grey: a portrait at `grayscale(1)` next to monochrome
+   type reads as an archive photograph, which says something about the person
+   that isn't ours to say. At ~0.6 the skin tones survive, the picture sits
+   quietly in a page that has no other colour in it, and there is somewhere for
+   the hover to go. The slight contrast lift compensates for the flattening
+   that pulling saturation out always causes.
+
+   The transform transition comes from the utility class on the element (the
+   cover also scales on hover); this adds the filter to it rather than
+   replacing it, which is why it's `transition-property` and not a shorthand. */
+.person-photo {
+  filter: grayscale(0.6) contrast(1.04);
+  transition-property: filter, transform;
+  transition-duration: 400ms;
+  transition-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.group:hover .person-photo,
+.group:focus-visible .person-photo {
+  filter: grayscale(0) contrast(1);
+}
+
+/* A touch screen has no hover, so the effect there is not "grey until you
+   ask" — it's just grey. Show the photographs. */
+@media (hover: none) {
+  .person-photo {
+    filter: none;
+  }
+}
+
+@media print {
+  .person-photo {
+    filter: none;
+  }
+}
+
+/* ---------- Social icons ---------- */
+
+/* Grey in the page, the platform's own colour under the pointer.
+
+   The site is monochrome by rule, and this is the one place the rule should
+   bend: these five marks are already colours in everyone's memory, so the
+   hover isn't decoration — it's recognition, and it arrives only when asked
+   for. Nothing is coloured at rest, so the page at a glance is unchanged.
+
+   GitHub and X are brand-black, which is invisible on a near-black page, so
+   both take a near-white in dark mode. That isn't a licence to invent brand
+   colours — it's the same mark at the lightness the medium allows.
+
+   Instagram's is a gradient in the real logo; the icon is a single-path
+   stroke drawn in `currentColor`, so it takes the pink the gradient is
+   centred on. Mail has no brand at all and borrows Gmail's red, which is
+   where the link goes for most people who click it. */
+.social-link {
+  --brand: var(--text);
+  color: var(--text-tertiary);
+  transition: color 180ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.social-link:hover,
+.social-link:focus-visible {
+  color: var(--brand);
+}
+
+.social-link[data-social="github"] { --brand: #24292f; }
+.social-link[data-social="instagram"] { --brand: #e1306c; }
+.social-link[data-social="linkedin"] { --brand: #0a66c2; }
+.social-link[data-social="x"] { --brand: #0f1419; }
+.social-link[data-social="mail"] { --brand: #ea4335; }
+
+@media (prefers-color-scheme: dark) {
+  .social-link[data-social="github"] { --brand: #f0f6fc; }
+  .social-link[data-social="instagram"] { --brand: #f2618f; }
+  .social-link[data-social="linkedin"] { --brand: #4aa3f0; }
+  .social-link[data-social="x"] { --brand: #e7e9ea; }
+  .social-link[data-social="mail"] { --brand: #f2786b; }
 }
 

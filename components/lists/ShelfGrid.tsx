@@ -69,15 +69,18 @@ export default function ShelfGrid({ section, entries }: ListProps) {
             )}
           </h2>
 
-          {/* Horizontal scroller. Cards are fixed-width flex children; videos
-              get a wider box because they're 16:9 rather than 2:3. ShelfRow
-              adds the edge fade that says the row continues off-screen. */}
+          {/* Horizontal scroller. Every row is the same height — the card
+              WIDTHS are computed from `--shelf-card-h` (globals.css) and the
+              medium's aspect ratio, so a 16:9 video card is wide rather than
+              short and the shelves down the page line up. */}
           <ShelfRow className="shelf-row stagger mt-3 flex snap-x snap-proximity gap-5 overflow-x-auto pb-1">
             {group.items.map((item) => (
               <li
                 key={item.slug}
                 className={`shrink-0 snap-start ${
-                  item.isVideo ? "w-[280px]" : "w-[150px]"
+                  item.isVideo
+                    ? "w-[calc(var(--shelf-card-h)*16/9)]"
+                    : "w-[calc(var(--shelf-card-h)*2/3)]"
                 }`}
               >
                 <ShelfCard

@@ -26,7 +26,7 @@ export default function ShelfCard({
   return (
     <Link
       href={`/${sectionSlug}/${item.slug}`}
-      className={`group block ${className}`}
+      className={`group press press-soft block ${className}`}
     >
       <div
         className={`relative overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--bg-hover)] shadow-sm transition-shadow duration-300 group-hover:shadow-md ${
