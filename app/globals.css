@@ -836,6 +836,37 @@ body::after {
   color: var(--text-secondary);
 }
 
+/* Terminal blocks (```bash, ```console, ```powershell …) — the header becomes
+   a window's title bar instead of a filename tab. Most of what's pasted into
+   these notes is a session rather than a file, and the two shouldn't look the
+   same. See isShell() in lib/markdown.ts.
+
+   The dots are grey, not red/amber/green: the shape already says "terminal",
+   and traffic lights would be the only colour on an otherwise monochrome
+   page. The bar itself takes `--surface`, which is the site's one step of
+   elevation and reads correctly in both themes without a second token. */
+.prose figure.code-block[data-terminal] figcaption.code-head {
+  background: var(--surface);
+  padding-left: 0.875rem;
+}
+
+.prose .code-dots {
+  display: inline-flex;
+  flex: none;
+  gap: 0.3125rem;
+  /* Optical, not geometric: the dots read as sitting low against a line of
+     text otherwise. */
+  transform: translateY(-0.5px);
+}
+
+.prose .code-dots span {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--r-full);
+  background: currentColor;
+  opacity: 0.35;
+}
+
 .prose .code-lang {
   margin-left: auto;
   font-size: 0.75rem;

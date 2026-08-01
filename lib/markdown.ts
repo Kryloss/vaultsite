@@ -725,6 +725,37 @@ function rehypeCodeMeta() {
  * Async on purpose — Shiki loads its grammars lazily; unified awaits the
  * returned promise.
  */
+/**
+ * Fences that are a terminal rather than a file.
+ *
+ * The distinction is worth drawing because most of what gets pasted into these
+ * notes is a session — an nmap run, a systemctl status, a failed login — and a
+ * session is a window you were sitting at, not a file you wrote. Rendering the
+ * two identically made every post read as source code.
+ *
+ * Written as the aliases people actually type, not the grammar names Shiki
+ * resolves them to: the fence says ```bash, and this runs before Shiki has
+ * been anywhere near it.
+ */
+const SHELL_LANGS = new Set([
+  "bash",
+  "sh",
+  "shell",
+  "shellscript",
+  "shellsession",
+  "console",
+  "zsh",
+  "fish",
+  "powershell",
+  "ps1",
+  "cmd",
+  "bat",
+]);
+
+function isShell(lang: string | undefined): boolean {
+  return !!lang && SHELL_LANGS.has(lang.toLowerCase());
+}
+
 function rehypeCodeBlocks() {
   return async (tree: any) => {
     // Collect first, transform after: highlighting is async and we must not
@@ -784,10 +815,31 @@ function rehypeCodeBlocks() {
 
         const { title } = parseCodeMeta(job.meta);
         const label = langLabel(job.lang);
+        const terminal = isShell(job.lang);
         const children: any[] = [];
 
-        if (title || label) {
+        /* A shell block gets a header whether or not it was given a title:
+           the three dots ARE the header, and a terminal without its title bar
+           is just a grey box. Everything else keeps the old rule — no title,
+           no language, no bar. */
+        if (title || label || terminal) {
           const bits: any[] = [];
+          if (terminal) {
+            // Three dots, and deliberately not red/amber/green: the site is
+            // monochrome, and the shape is what says "terminal" — the traffic
+            // lights would be the only colour on the page.
+            bits.push({
+              type: "element",
+              tagName: "span",
+              properties: { className: ["code-dots"] },
+              children: [0, 1, 2].map(() => ({
+                type: "element",
+                tagName: "span",
+                properties: {},
+                children: [],
+              })),
+            });
+          }
           if (title) {
             bits.push({
               type: "element",
@@ -819,6 +871,7 @@ function rehypeCodeBlocks() {
           properties: {
             className: ["code-block"],
             ...(label ? { "data-lang": label } : {}),
+            ...(terminal ? { "data-terminal": "" } : {}),
           },
           children,
         };
