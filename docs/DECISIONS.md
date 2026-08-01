@@ -874,3 +874,17 @@ So #61's principle survives ("what you can act on, and what reports state") and 
 **Light and dark carry different values of it, for contrast rather than taste.** `#10b981` works as a 3px callout border, which asks nothing of a contrast ratio. As a link colour on white it lands near 2:1, and as a chip fill it can't carry white text. `#047857` on white and `#10b981` on near-black both clear 4.5:1 in every direction the token is used — as text, as a fill behind `--bg`, and as a focus ring.
 
 **The OG card's rule changed with it**, since that colour is baked into the image at build time and would otherwise be the last blue left on the site.
+
+## 64. No accent, and no emoji outside the sidebar (2026-08-01)
+
+**The accent token is deleted.** Its history: blue for "the odd functional case", cut to the reading bar alone (#59), spread onto prose links and UI (#61), changed to the tip callout's green and pulled back off prose (#63). Four passes hunting for the right amount of one colour — which is the shape of an answer that is zero.
+
+Everything it was carrying now uses `--text`: the filled state chips, the contents marker, the `[progress::]` and reading bars, focus rings, the selection wash, "Continue reading", "Back home". None of it lost anything, and that is the point — **on a page with no other colour, full text colour IS the emphasis.** A monochrome design doesn't need an accent; it needs a range, and it has one (#59).
+
+Two things kept their colour deliberately. **Callouts** keep four hues, because there the colour carries a meaning nothing else on the page carries — note, tip, warning, danger are four different things, not four decorations. And the **hover-only exceptions** stay: people photographs return to full colour, social icons take their platform's (#56). Both are colour that arrives when asked for and is absent otherwise.
+
+The OG card's rule went white with everything else — that colour is baked into an image at build time and would have been the last of it anywhere on the site.
+
+**Emoji are sidebar-only.** They were also on the home page's Explore cards, in each section page's title, and as the seedling/tree glyph in a note's metadata. In the sidebar an icon is doing work: it's a target you aim at in a list you've learned the shape of, and it survives being read at a glance. On a page it's decoration next to a heading that already says the word — and next to a serif at 46px, a colour emoji is the one thing on the screen not drawn by the typeface.
+
+`resolveIcon()` is unchanged and the `icon:` frontmatter still means what it did. The nav items still carry it. It just isn't rendered outside the drawer.

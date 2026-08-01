@@ -51,13 +51,13 @@ Next.js only serves static files from `public/`. Instead of a runtime file-servi
 
 **Light/dark** is `prefers-color-scheme` only — there is no manual toggle. It works by re-declaring the colour tokens in a media query.
 
-**The design** — serif typeface throughout, large fluid page titles, a wide tonal range, `--accent` (the tip callout's green) on UI and state — filled chips, the ToC marker, progress bars, focus rings — never on prose links, dark mode with `--surface` sitting above `--bg` — lives in one block at the foot of `globals.css`, kept together because the rules explain each other. It shipped briefly as one of two switchable themes so it could be judged against the design it replaced; that switch is gone (DECISIONS #59).
+**The design** — serif typeface throughout, large fluid page titles, a wide tonal range, no accent colour at all — state chips, the ToC marker, progress bars and focus rings are `--text` (DECISIONS #64), dark mode with `--surface` sitting above `--bg` — lives in one block at the foot of `globals.css`, kept together because the rules explain each other. It shipped briefly as one of two switchable themes so it could be judged against the design it replaced; that switch is gone (DECISIONS #59).
 
 Everything is built from tokens at the top of `globals.css`:
 
 | Group | Tokens | Notes |
 |---|---|---|
-| Colour | `--bg`, `--bg-sidebar`, `--bg-hover`, `--surface`, `--text`, `--text-secondary`, `--text-tertiary`, `--border`, `--accent`, `--code-bg` | `--surface` is the FILL of a card or cover box; `--bg-hover` is the response to a pointer. |
+| Colour | `--bg`, `--bg-sidebar`, `--bg-hover`, `--surface`, `--text`, `--text-secondary`, `--text-tertiary`, `--border`, `--code-bg` | `--surface` is the FILL of a card or cover box; `--bg-hover` is the response to a pointer. |
 | Floating chrome | `--chrome-bg`, `--chrome-ring` | The breadcrumb bar, contents pill, time-left chip and reading-position offer. Built from `--surface` in dark mode so a pill isn't the same colour as the page it hovers over (DECISIONS #60). |
 | Radius | `--r-xs` … `--r-xl`, `--r-full` | 4/6/8/12/16px + pill, deliberately equal to Tailwind's scale so utilities and hand-written rules can't drift. |
 | Motion | `--ease`, `--dur-fast`, `--dur`, `--dur-slow` | 120/200/320ms. Tailwind's `--default-transition-*` point at these, so `transition-colors` moves like the hand-written rules. |
