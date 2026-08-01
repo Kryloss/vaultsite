@@ -12,7 +12,7 @@ import { siteJsonLd } from "@/lib/jsonld";
 import { getSections, getEntries } from "@/lib/vault";
 import { resistanceDay } from "@/lib/resistance";
 import { isShelfSection, shelfGroups } from "@/lib/shelf";
-import { siteName, siteUrl, siteDescription, socials } from "@/lib/site-config";
+import { siteName, siteUrl, siteDescription } from "@/lib/site-config";
 
 /**
  * Inter, self-hosted by next/font — the files are fetched at build time and
@@ -151,9 +151,10 @@ export default function RootLayout({
         />
       </head>
       <body>
+        {/* `socials` used to be threaded through here; the sidebar's icon row
+            is now <SocialLinks />, which reads lib/site-config itself. */}
         <Chrome
           items={items}
-          socials={socials}
           siteName={siteName}
           resistanceDay={resistanceDay()}
         >

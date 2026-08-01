@@ -14,15 +14,11 @@ import {
   PanelIcon,
   SearchIcon,
   resolveIcon,
-  GitHubIcon,
-  InstagramIcon,
-  LinkedInIcon,
-  XIcon,
-  MailIcon,
   CanadaFlag,
   UkraineFlag,
 } from "@/components/icons";
 import CommandPalette from "@/components/CommandPalette";
+import SocialLinks from "@/components/SocialLinks";
 import { TIME_LEFT_EVENT } from "@/components/ReadingProgress";
 import { warmSearchIndex } from "@/components/useSearchIndex";
 import Shortcuts from "@/components/Shortcuts";
@@ -30,7 +26,7 @@ import ResistanceDay from "@/components/ResistanceDay";
 import T from "@/components/T";
 import { useLang } from "@/components/useLang";
 import { ui } from "@/lib/ui-strings";
-import { homeName, type SocialLink } from "@/lib/site-config";
+import { homeName } from "@/lib/site-config";
 
 export interface NavItem {
   slug: string;
@@ -41,14 +37,6 @@ export interface NavItem {
   mediums?: { slug: string; title: string; titleUk?: string }[];
 }
 
-const socialIcons = {
-  github: GitHubIcon,
-  instagram: InstagramIcon,
-  linkedin: LinkedInIcon,
-  x: XIcon,
-  mail: MailIcon,
-};
-
 /**
  * Site chrome, brianlovin-style: a floating panel icon plus a clickable
  * breadcrumb naming the current page's ancestors — a post under Posts reads
@@ -57,13 +45,11 @@ const socialIcons = {
  */
 export default function Chrome({
   items,
-  socials,
   siteName,
   resistanceDay,
   children,
 }: {
   items: NavItem[];
-  socials: SocialLink[];
   siteName: string;
   /** Build-time day count for the sidebar line — see lib/resistance.ts */
   resistanceDay: number;
@@ -285,7 +271,7 @@ export default function Chrome({
           aria-expanded={open}
           aria-controls="site-menu"
           onClick={() => setOpen((v) => !v)}
-          className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
+          className="press flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
         >
           <PanelIcon className="h-[18px] w-[18px]" />
         </button>
@@ -361,7 +347,7 @@ export default function Chrome({
                 lang === "en" ? "Switch to Ukrainian" : "Перемкнути на англійську"
               }
               title={lang === "en" ? "English — switch to Ukrainian" : "Українська — перемкнути на англійську"}
-              className="flex h-8 w-8 items-center justify-center rounded-md text-base leading-none transition-colors hover:bg-[var(--bg-hover)]"
+              className="press flex h-8 w-8 items-center justify-center rounded-md text-base leading-none hover:bg-[var(--bg-hover)]"
             >
               {/* Shows the CURRENT language's flag */}
               {lang === "en" ? "🇨🇦" : "🇺🇦"}
@@ -377,7 +363,7 @@ export default function Chrome({
               /* Start fetching the index as the pointer arrives, so the panel
                  usually opens onto results rather than an empty list. */
               onPointerEnter={warmSearchIndex}
-              className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-tertiary)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
+              className="press flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-tertiary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
             >
               <SearchIcon className="h-[17px] w-[17px]" />
             </button>
@@ -391,7 +377,7 @@ export default function Chrome({
               <Link
                 key={item.slug}
                 href={item.href}
-                className={`flex items-center gap-3.5 rounded-lg px-3 py-2 text-lg transition-colors duration-150 ${
+                className={`press flex items-center gap-3.5 rounded-lg px-3 py-2 text-lg ${
                   isActive(item.href)
                     ? "bg-[var(--bg-hover)] font-medium text-[var(--text)]"
                     : "text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
