@@ -50,7 +50,7 @@ Next.js only serves static files from `public/`. Instead of a runtime file-servi
 
 **Light/dark** is `prefers-color-scheme` only — there is no manual toggle. It works by re-declaring the colour tokens in a media query.
 
-**The design** — serif typeface throughout, large fluid page titles, a wide tonal range, `--accent` reserved for the reading progress bar, dark mode with `--surface` sitting above `--bg` — lives in one block at the foot of `globals.css`, kept together because the rules explain each other. It shipped briefly as one of two switchable themes so it could be judged against the design it replaced; that switch is gone (DECISIONS #59).
+**The design** — serif typeface throughout, large fluid page titles, a wide tonal range, `--accent` on what you can act on and what reports state — links, focus, progress bars, dark mode with `--surface` sitting above `--bg` — lives in one block at the foot of `globals.css`, kept together because the rules explain each other. It shipped briefly as one of two switchable themes so it could be judged against the design it replaced; that switch is gone (DECISIONS #59).
 
 Everything is built from tokens at the top of `globals.css`:
 
@@ -65,7 +65,7 @@ Everything is built from tokens at the top of `globals.css`:
 Two behaviours are worth knowing before editing the stylesheet:
 
 - **`.press`** dips any control to 97% while it's held (`.press-soft` → 99% for cards). Opt-in, because scaling an inline prose link reads as a rendering fault. The block sits at the very END of `globals.css` — several components declare their own `transition:` shorthand hundreds of lines earlier, and a shorthand resets transform. Overrides belong below what they override (DECISIONS #52, #55).
-- Typefaces: **Source Serif 4** (`--font-prose`) sets everything except code; Lora italic is the quotes voice; Inter is still loaded and owns Tailwind's `--font-sans`, but nothing currently renders in it. All are self-hosted by `next/font` with the **cyrillic** subset — non-negotiable, since every note carries a Ukrainian translation.
+- Typeface: **Source Serif 4** and nothing else. It sets everything except code; its own italic is the quotes voice. Self-hosted by `next/font` with the **cyrillic** subset (non-negotiable — every note carries a Ukrainian translation) and with `axes: ["opsz"]`, without which the optical-size axis isn't in the file and `font-optical-sizing` has nothing to act on (DECISIONS #61).
 
 ## Repo layout note
 

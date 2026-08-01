@@ -808,3 +808,23 @@ Making `--bg` darker (#0a0a0a → #08080a) didn't create this, it just removed t
 **And the breadcrumb bar's fill was a Tailwind utility on the element** (`bg-[var(--bg)]/75`), which is why it was the last piece of chrome still painted in the page colour after the others were fixed — it wasn't in the stylesheet to find. It's `.chrome-bar` in `globals.css` now, sharing the token with the pill opposite it. Two chips that are the same object at two corners should not be styled in two different files.
 
 **Two dark-mode values came back up as well.** `--border` (#1d1d21 → #26262b) and `--text-tertiary` (#5e5e68 → #6f6f7a). Widening the tonal range is right on white, where pushing the quietest grey lighter costs nothing; in dark mode the same move pushes it *toward the background*, and on a phone in daylight it disappears. **The rule isn't "more range", it's "more distance from the background" — and which direction that is depends on the mode.**
+
+## 61. Consequences of the serif (2026-08-01)
+
+Eight changes, all of them problems the redesign itself created or exposed.
+
+**Three typefaces, one voice.** Inter was still loaded and rendered nowhere — the serif on `body` had left it nothing to set. Lora was carrying quotations on the strength of being *a serif against Inter*, a distinction that stopped existing the moment the site became a serif; against Source Serif it doesn't read as a second voice, it reads as a font that failed to load. Both deleted. Source Serif's own italic is the quotes voice now — same family, different cut, which is the older and better way to do it. Three webfont families to one.
+
+**The optical size axis was being paid for and not used.** Source Serif 4 draws its letterforms differently at 8pt than at 60pt — finer hairlines and a tighter fit as the size goes up. `next/font` ships only a typeface's default axis unless the others are named, so `axes: ["opsz"]` was needed before `font-optical-sizing: auto` could mean anything. Verified in the built files: `wght 200–900` and `opsz 8–60`. Without it a 46px title is body type scaled up, which is exactly what a display size shouldn't be.
+
+**`.prose h1` was sized for a title that no longer exists.** 20px, chosen when the entry title was 24px and the two sat close. Against a 46px `.page-title` a markdown `#` read as a mistake rather than a level. Now 28px, with h2 and h3 stepped up behind it — the old 20/18/16 over a 17px body was not a scale, it was four sizes of nearly the same thing.
+
+**`text-wrap: balance` stopped being polish.** A word alone on the last line is a blemish at 18px and a real flaw at 46px. `balance` on headings, `pretty` on body copy — `pretty` only forbids the orphan rather than re-flowing the paragraph, which is why they get different values.
+
+**The measure was set for the old typeface.** 42rem was chosen for 16px Inter; at 17px Source Serif it's roughly 78 characters a line and a serif wants 60–70. Now 39rem. **A typeface change is a measure change** — the token that should have moved with it and didn't.
+
+**The accent got its job back, and then some.** #59 cut `--accent` down to the reading progress bar alone, on the argument that one use is better than three scattered ones. That was half right: the principle was good and the scope was too tight — it left prose links distinguishable from body text by an underline alone, and made a progress indicator the only colour a reader ever met. The rule now is **the accent marks what you can act on and what reports state**: links, focus rings, the `[progress::]` bars, the reading bar. Navigation and chips stay monochrome with their text-on-background inversion, because colouring those too would turn the chrome blue and leave the accent meaning nothing again. Callouts keep their four hues.
+
+**Selection is tinted rather than inverted.** A solid black slab hid the serif's shapes; a wash keeps the text readable while it's selected, which matters here because selecting prose is how the copy-link pill is summoned.
+
+**Two things removed rather than restyled.** The "← Section" link sat directly above a very large title while the floating breadcrumb already named the section and linked to it — deleting it lets the title be the first thing on the page, which is the entire point of making it big. And shelf and people cards carried a border *and* a surface fill, two ways of saying "this is an object"; the fill says it, so the hairline is gone.
