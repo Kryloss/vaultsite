@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
+import { markRead, READ_AT } from "@/lib/read-notes";
 import {
   buildSegments,
+  consumedAt,
   finishAt,
   progressAt,
   type Block,
@@ -74,7 +77,20 @@ const EASE = 0.18;
 /** Below this, snap instead of easing — stops it creeping for ever. */
 const SETTLED = 0.0005;
 
+/**
+ * Chapter ticks: how close to either end a heading can be and still earn one.
+ *
+ * The first `h2` of a note usually sits a paragraph in, which would put a
+ * notch almost on top of the bar's origin, and a heading in the last breath of
+ * an article marks a section nobody has to be told about. Both read as dirt on
+ * the line rather than as structure.
+ */
+const TICK_EDGE = 0.04;
+/** Closer than this to the previous tick and the two are one smudge. */
+const TICK_GAP = 0.03;
+
 export default function ReadingProgress({ minutes }: { minutes?: number }) {
+  const pathname = usePathname();
   const barRef = useRef<HTMLDivElement>(null);
   const pillRef = useRef<HTMLDivElement>(null);
   const numberRef = useRef<HTMLSpanElement>(null);
@@ -83,6 +99,13 @@ export default function ReadingProgress({ minutes }: { minutes?: number }) {
    * touched sixty times a second. `null` means "nothing to report".
    */
   const lastShown = useRef<number | null>(null);
+  /**
+   * Where each `h2` falls on the bar, 0…1. State rather than an imperative
+   * DOM write because the list only changes when the layout does — the effect
+   * below doesn't depend on it, so re-rendering these spans can't restart the
+   * measurement that produced them.
+   */
+  const [ticks, setTicks] = useState<number[]>([]);
 
   useEffect(() => {
     const bar = barRef.current;
