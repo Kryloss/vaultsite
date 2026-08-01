@@ -829,7 +829,7 @@ Eight changes, all of them problems the redesign itself created or exposed.
 
 **Two things removed rather than restyled.** The "← Section" link sat directly above a very large title while the floating breadcrumb already named the section and linked to it — deleting it lets the title be the first thing on the page, which is the entire point of making it big. And shelf and people cards carried a border *and* a surface fill, two ways of saying "this is an object"; the fill says it, so the hairline is gone.
 
-## 62. A standing pages rail, from 1280px (2026-08-01)
+## 62. A standing pages rail, from 1280px — BUILT AND REMOVED (2026-08-01)
 
 On a wide screen the site was a 39rem column with a contents rail on its right and nothing at all on its left, and every route to another section went through a drawer you had to open first. `.side-rail` fills that margin: the sections as plain text, with the search field above them.
 
@@ -848,3 +848,13 @@ The second pass copied the contents rail exactly — hairline, 13rem, rows right
 **The one thing that does have to wait for the browser is the key hint.** `⌘` or `Ctrl` depends on `navigator`, which the server doesn't have, so it renders as `⌘` and is corrected in an effect. A Windows visitor sees the Mac key for one frame; that is a better trade than a hydration mismatch, and the shortcut itself has always accepted either.
 
 **Active state is weight and full text colour** — with no rule to mark, that carries it alone, and it adds no ink to the page when you aren't looking for it. Monochrome on purpose: the accent marks links and state, not navigation (#61).
+
+### Outcome: deleted the same day
+
+Three passes — a floating card, then a copy of the contents rail, then a bare 9rem list with no rule — each one quieter than the last, and the honest read at the end was that the thing itself was the problem, not its styling.
+
+**The premise was wrong.** The rail existed because a wide screen has empty margins, which is a statement about the window, not about the reader. Nothing was being asked for: this site has seven sections, the drawer is one keystroke or one click away, `g 1…9` jumps to any of them, and Cmd+K searches everything. A permanent list of seven words was answering a question nobody had, and every attempt to make it less intrusive was really an attempt to make it less present — which is what "delete it" means.
+
+**Empty space is not a defect to be filled.** A wide margin around a 39rem column is what makes the column readable. The successive rounds of quieting were the design arguing itself toward zero, and it should have been read that way sooner.
+
+`.side-rail`, its markup in `Chrome.tsx`, the `metaKey` platform detection and the `searchShort` string are all gone. The entry is kept because the reasoning about *sheet versus rail* (a summoned panel announces itself, a permanent one must not) is worth having, and because the next idea that starts with "there's space over there" should meet this one first.

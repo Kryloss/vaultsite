@@ -34,7 +34,7 @@ Sections may hold subfolders (`vault/Shelf/Books/`, `vault/Shelf/Books/covers/`,
 | `lib/metadata.ts` | Canonical URL + Open Graph per page (`pageMeta()`) |
 | `lib/series.ts` | Multi-part notes: the `series:` index and reading order |
 | `lib/section-types.tsx` | Registry: section `type` → list component. Extend page styles here |
-| `components/Chrome.tsx` | Site chrome: sticky header ("Section · Kyrylo" breadcrumb), the standing pages rail from 1280px (`.side-rail` — plain-text sections + search, no icons), slide-in drawer sidebar (a modal dialog: focus trapped while open, restored on close, `inert` when closed), skip-to-content link, social links, page transition wrapper |
+| `components/Chrome.tsx` | Site chrome: sticky header ("Section · Kyrylo" breadcrumb), slide-in drawer sidebar (a modal dialog: focus trapped while open, restored on close, `inert` when closed), skip-to-content link, social links, page transition wrapper |
 | `components/icons.tsx` | Inline SVG icon set; `resolveIcon()` maps vault frontmatter emoji/names → SVGs, unknown emoji render as text |
 | `lib/site-config.ts` | Site name + social links (owner edits URLs here) |
 | `components/lists/` | List-style components, one per section type |
