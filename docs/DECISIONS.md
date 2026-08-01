@@ -858,3 +858,19 @@ Three passes — a floating card, then a copy of the contents rail, then a bare 
 **Empty space is not a defect to be filled.** A wide margin around a 39rem column is what makes the column readable. The successive rounds of quieting were the design arguing itself toward zero, and it should have been read that way sooner.
 
 `.side-rail`, its markup in `Chrome.tsx`, the `metaKey` platform detection and the `searchShort` string are all gone. The entry is kept because the reasoning about *sheet versus rail* (a summoned panel announces itself, a permanent one must not) is worth having, and because the next idea that starts with "there's space over there" should meet this one first.
+
+## 63. The accent is green, and it marks UI rather than sentences (2026-08-01)
+
+Two corrections to #61, which had just widened `--accent` from one job to several and put it on prose links.
+
+**Prose links are text colour again.** Colouring them was the obvious move and the wrong one: a link every other sentence turns a paragraph into a page of coloured words, and the eye stops reading and starts scanning. The underline already says "link" — the oldest and quietest convention there is, and it costs the sentence nothing. **A control made of words inside a sentence is still part of the sentence.**
+
+**The accent goes to UI instead:** the filled state chips, the contents marker, the `[progress::]` and reading bars, focus rings, the selection wash, the done checkbox on the Now page. Those are all things that report state, and none of them is prose. Standalone ACTION links keep it — "Continue reading", "Back home" — because those are controls that happen to be made of words rather than words that happen to link.
+
+So #61's principle survives ("what you can act on, and what reports state") and its scope was wrong twice in opposite directions: #59 cut it to a single bar, #61 spread it into body copy. The line is prose.
+
+**The hue is the tip callout's green.** It's the one colour already on the site that meant *this is fine, carry on* rather than *look here*, which is what a state marker should say. It also stops the accent being the fifth unrelated colour on a page that already had four in its callouts.
+
+**Light and dark carry different values of it, for contrast rather than taste.** `#10b981` works as a 3px callout border, which asks nothing of a contrast ratio. As a link colour on white it lands near 2:1, and as a chip fill it can't carry white text. `#047857` on white and `#10b981` on near-black both clear 4.5:1 in every direction the token is used — as text, as a fill behind `--bg`, and as a focus ring.
+
+**The OG card's rule changed with it**, since that colour is baked into the image at build time and would otherwise be the last blue left on the site.

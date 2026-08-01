@@ -51,7 +51,7 @@ Next.js only serves static files from `public/`. Instead of a runtime file-servi
 
 **Light/dark** is `prefers-color-scheme` only — there is no manual toggle. It works by re-declaring the colour tokens in a media query.
 
-**The design** — serif typeface throughout, large fluid page titles, a wide tonal range, `--accent` on what you can act on and what reports state — links, focus, progress bars, dark mode with `--surface` sitting above `--bg` — lives in one block at the foot of `globals.css`, kept together because the rules explain each other. It shipped briefly as one of two switchable themes so it could be judged against the design it replaced; that switch is gone (DECISIONS #59).
+**The design** — serif typeface throughout, large fluid page titles, a wide tonal range, `--accent` (the tip callout's green) on UI and state — filled chips, the ToC marker, progress bars, focus rings — never on prose links, dark mode with `--surface` sitting above `--bg` — lives in one block at the foot of `globals.css`, kept together because the rules explain each other. It shipped briefly as one of two switchable themes so it could be judged against the design it replaced; that switch is gone (DECISIONS #59).
 
 Everything is built from tokens at the top of `globals.css`:
 
