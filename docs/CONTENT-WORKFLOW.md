@@ -357,6 +357,12 @@ Rules for the SVG:
   secondary text grey, thin arrows with a marker head. Rounded rectangles.
 - Keep it simple and readable — a handful of labelled nodes, not a blueprint.
 - Add `role="img"` and an `aria-label` describing the diagram.
+- **Don't fuss over `font-family`.** A self-theming SVG is inlined into the
+  page, and `globals.css` sets the typeface on `svg.diagram text` so labels
+  match whatever the site is using. Any `font-family` written into the file is
+  a presentation attribute and loses to that rule — harmless, but it isn't
+  what's rendering. DO set sensible `font-size` values (~13–14px for labels),
+  since those aren't overridden.
 
 This renders on the site immediately (no Obsidian export step) and adapts to the
 reader's theme. Report the file path and where you embedded it.

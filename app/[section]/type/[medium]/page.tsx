@@ -7,6 +7,7 @@ import { pageMeta } from "@/lib/metadata";
 import { getBookQuotes } from "@/lib/quotes";
 import ShelfTypeView from "@/components/lists/ShelfTypeView";
 import T from "@/components/T";
+import Page from "@/components/Page";
 
 interface Props {
   params: Promise<{ section: string; medium: string }>;
@@ -54,10 +55,10 @@ export default async function ShelfMediumPage({ params }: Props) {
   if (!group) notFound();
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-14 lg:py-24">
+    <Page>
       <Link
         href={`/${section.slug}`}
-        className="text-sm text-[var(--text-tertiary)] transition-colors hover:text-[var(--text)]"
+        className="press inline-block text-sm text-[var(--text-tertiary)] hover:text-[var(--text)]"
       >
         ← <T en={section.title} uk={section.titleUk} />
       </Link>
@@ -69,6 +70,6 @@ export default async function ShelfMediumPage({ params }: Props) {
         group={group}
         quotes={group.medium === "book" ? getBookQuotes(entries) : undefined}
       />
-    </div>
+    </Page>
   );
 }

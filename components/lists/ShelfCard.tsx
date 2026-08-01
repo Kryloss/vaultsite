@@ -29,7 +29,11 @@ export default function ShelfCard({
       className={`group press press-soft block ${className}`}
     >
       <div
-        className={`relative overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--bg-hover)] shadow-sm transition-shadow duration-300 group-hover:shadow-md ${
+        /* Video cards keep the thumbnail's native 16:9 — nothing is cropped.
+           They're made smaller instead, by being sized from their own
+           (shorter) height rather than the shared one; see `--shelf-video-h`
+           in globals.css. */
+        className={`relative overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--surface)] shadow-sm transition-shadow duration-300 group-hover:shadow-md ${
           item.isVideo ? "aspect-video" : "aspect-[2/3]"
         }`}
       >

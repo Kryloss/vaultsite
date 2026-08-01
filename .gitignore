@@ -30,3 +30,6 @@ __pycache__/
 .image-manifest.json
 # former name of the same file — keep ignored so stale copies stay invisible
 .blur-manifest.json
+
+# Claude Code / Cowork local settings — machine-specific, not the repo's business
+.claude/

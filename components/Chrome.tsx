@@ -261,7 +261,11 @@ export default function Chrome({
           remaining; both live here so the bar never changes width abruptly.
           Below 640px only — see globals.css. */}
       <div
-        className="chrome-bar fixed left-3 top-3 z-30 flex items-center gap-1 rounded-full bg-[var(--bg)]/75 px-1.5 py-1 backdrop-blur-md"
+        /* Fill and hairline come from `.chrome-bar` in globals.css, where they
+           share the `--chrome-bg` token with the contents pill in the opposite
+           corner — they're the same object twice and can't be allowed to
+           drift. */
+        className="chrome-bar fixed left-3 top-3 z-30 flex items-center gap-1 rounded-full px-1.5 py-1 backdrop-blur-md"
         data-compact={swap}
       >
         <button

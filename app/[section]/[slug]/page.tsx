@@ -36,6 +36,7 @@ import ReadingPosition from "@/components/ReadingPosition";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbJsonLd, entryJsonLd } from "@/lib/jsonld";
 import { maturityOf } from "@/lib/maturity";
+import Page from "@/components/Page";
 
 /** Below this many h2/h3 an outline is noise, not navigation. */
 const MIN_TOC_HEADINGS = 3;
@@ -105,8 +106,7 @@ export default async function EntryPage({ params }: Props) {
        can find them — the Cmd+K "open on GitHub" action reads these rather
        than having every entry's file path threaded through the layout. Same
        read-the-page approach as the prev/next shortcuts. */
-    <div
-      className="mx-auto max-w-2xl px-6 py-14 lg:py-24"
+    <Page
       data-vault-source={`vault/${entry.sectionDir}/${entry.fileName}.md`}
       data-vault-source-uk={
         entry.contentUk
@@ -124,13 +124,13 @@ export default async function EntryPage({ params }: Props) {
       <LinkPreview previews={previewsInHtml(en.html, uk?.html)} />
       <Link
         href={`/${section.slug}`}
-        className="text-sm text-[var(--text-tertiary)] transition-colors hover:text-[var(--text)]"
+        className="press inline-block text-sm text-[var(--text-tertiary)] hover:text-[var(--text)]"
       >
         ← <T en={section.title} uk={section.titleUk} />
       </Link>
 
       <header className="mt-6">
-        <h1 className="text-2xl font-semibold tracking-tight text-[var(--text)]">
+        <h1 className="page-title text-2xl font-semibold tracking-tight text-[var(--text)]">
           <T en={entry.title} uk={entry.titleUk} />
           {typeof entry.meta.rating === "number" && (
             <Stars
@@ -153,12 +153,12 @@ export default async function EntryPage({ params }: Props) {
             render as plain chips. Names are raw strings, identical in both
             languages (same as the posts' category chips). */}
         {categories.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="entry-tags mt-3 flex flex-wrap gap-2">
             {categories.map((c) => (
               <Link
                 key={c}
                 href={categoryHref(c)}
-                className="rounded-full border border-[var(--border)] px-3 py-1 text-sm text-[var(--text-secondary)] transition-colors hover:border-[var(--text-tertiary)] hover:text-[var(--text)]"
+                className="press rounded-full border border-[var(--border)] px-3 py-1 text-sm text-[var(--text-secondary)] hover:border-[var(--text-tertiary)] hover:text-[var(--text)]"
               >
                 <T {...categoryLabel(c)} />
               </Link>
@@ -169,7 +169,7 @@ export default async function EntryPage({ params }: Props) {
         {/* A <div>, not a <p>: the series popover is a <nav>, which a browser
             parsing the static HTML would kick out of a paragraph — and the
             resulting DOM wouldn't match what React rendered. */}
-        <div className="mt-3 flex flex-wrap items-center gap-x-2 text-sm text-[var(--text-tertiary)]">
+        <div className="entry-meta mt-3 flex flex-wrap items-center gap-x-2 text-sm text-[var(--text-tertiary)]">
           {entry.date && (
             <time dateTime={entry.date}>
               <T en={displayDate(entry.date)} uk={displayDateUk(entry.date)} />
@@ -229,6 +229,6 @@ export default async function EntryPage({ params }: Props) {
           uk={uk?.headings}
         />
       )}
-    </div>
+    </Page>
   );
 }

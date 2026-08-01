@@ -50,7 +50,7 @@ export default function ShelfGrid({ section, entries }: ListProps) {
             ) : (
               <Link
                 href={`/${section.slug}/type/${group.slug}`}
-                className="group inline-flex items-center gap-0.5"
+                className="group press inline-flex items-center gap-0.5"
               >
                 <T {...group.label} />
                 <svg

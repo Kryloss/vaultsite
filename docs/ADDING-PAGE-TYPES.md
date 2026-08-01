@@ -17,7 +17,10 @@ export default function ProjectGrid({ section, entries }: ListProps) {
         <li key={e.slug}>
           <Link
             href={`/${section.slug}/${e.slug}`}
-            className="block rounded-xl border border-[var(--border)] p-4 transition-colors hover:bg-[var(--bg-hover)]"
+            /* `press press-soft` gives the card the site's pressed state — see
+               Guidelines. No `transition-colors`: `.press` already declares the
+               transition, including the colour properties. */
+            className="press press-soft block rounded-xl border border-[var(--border)] p-4 hover:bg-[var(--bg-hover)]"
           >
             <span className="font-medium text-[var(--text)]">{e.title}</span>
             {e.description && (
@@ -64,6 +67,11 @@ Add frontmatter keys to the entry notes (e.g. `url:`, `tech:`) and read them whe
 
 ## Guidelines
 
-- Reuse the CSS variables (`--text`, `--border`, `--bg-hover`, `--accent`) so new types match both themes automatically.
-- Keep list components server-compatible (no hooks) unless interactivity is truly needed.
+- **A list component never sets its own page container.** The route already wraps everything in `components/Page.tsx`, which owns the measure, gutters and vertical rhythm. Start at `mt-8` and let the shell handle the edges.
+- **Use the tokens, don't type literals.** Colour (`--text`, `--text-secondary`, `--border`, `--surface`, `--bg-hover`), radius (`--r-sm` … `--r-full`, or the equivalent Tailwind `rounded-*` classes), motion (`--ease`, `--dur-fast`, `--dur`, `--dur-slow`). This is what makes a new type follow light and dark without you doing anything. See `docs/ARCHITECTURE.md` → Design system.
+- **`--surface` for a card's fill, `--bg-hover` for its hover.** They're the same grey today and are separate tokens precisely so they can stop being.
+- **Give every clickable thing `press`** (or `press press-soft` for anything card-sized). It's the site's one piece of tap feedback and the only response a phone gets before the next page paints. Don't add `transition-colors` alongside it — `.press` declares the transition itself, colours included.
+- **Don't hard-code a typeface.** The family is set on `body` and everything inherits it; a `font-*` utility would opt your component out of the site's voice.
+- Keep list components server-compatible (no hooks) unless interactivity is truly needed. If a type needs the URL (filter chips, say), split it: a presentational half plus a thin client wrapper, like `PostRows` / `PostListClient`.
+- Check it in **both languages, light and dark**, and under `prefers-reduced-motion`, before calling it done.
 - Document any new frontmatter keys in README.md and CLAUDE.md.

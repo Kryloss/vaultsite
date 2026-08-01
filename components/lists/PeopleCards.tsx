@@ -74,7 +74,7 @@ export default function PeopleCards({
               href={`/${sectionSlug}/${row.slug}`}
               className="group press press-soft block"
             >
-              <div className="aspect-square overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-hover)]">
+              <div className="people-cover aspect-square overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)]">
                 {row.cover ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img

@@ -8,32 +8,129 @@
     Roboto, "Helvetica Neue", Arial, sans-serif;
   /* Lora italic, used for quotations. Same one-name-one-owner rule as above. */
   --font-serif: var(--font-lora), Georgia, "Times New Roman", serif;
+
+  /* Tailwind's `transition-*` utilities have their own default curve and
+     duration, so half the site's motion was speaking a different language
+     from the half written by hand in this file. Pointing them at the same
+     tokens finishes the job — `transition-colors` on a nav link now moves
+     exactly like the `.toc-marker` does. Defined in `:root` below; a var
+     reference is fine here, both end up in the same place. */
+  --default-transition-timing-function: var(--ease);
+  --default-transition-duration: var(--dur);
 }
 
 /* Design tokens — light by default, dark follows system preference. */
 :root {
   --bg: #ffffff;
   --bg-sidebar: #fbfbfa;
-  --bg-hover: #f4f4f5;
-  --text: #18181b;
-  --text-secondary: #52525b;
-  --text-tertiary: #a1a1aa;
-  --border: #e6e6e9;
+  --bg-hover: #f2f2f4;
+  /* The FILL of a card, a cover box, a small badge — as opposed to
+     `--bg-hover`, which is the response to a pointer. One token used to do
+     both jobs, which meant they could never be tuned apart: lifting cards off
+     the page in dark mode would have lifted every hover state with them. */
+  --surface: #f6f6f7;
+  /* A wide tonal range is the whole design. Monochrome has nothing but the
+     distance between its darkest and lightest marks — headings go properly
+     black, tertiary text properly light, and the borders retreat far enough
+     to stop competing with the text. */
+  --text: #09090b;
+  --text-secondary: #3f3f46;
+  --text-tertiary: #adadb8;
+  --border: #ededf0;
+  /* Exactly one job, sitewide: the reading progress bar, which is the only
+     element on the site reporting STATE rather than decorating something.
+     Nothing else is allowed to use it. */
   --accent: #2563eb;
   --code-bg: #f4f4f5;
+
+  /* The site's typeface. Source Serif 4 for everything except code — see the
+     `body` rule below and docs/DECISIONS.md #59. */
+  --font-prose: var(--font-source-serif), Georgia, "Times New Roman", serif;
+
+  /* ---- Radius ----
+     Four steps, matching Tailwind's own scale so the utility classes and the
+     hand-written rules in this file can't disagree. There were TEN distinct
+     values before this: 0.1875rem, 0.375rem, 4px, 0.5rem, 0.625rem, 0.75rem,
+     1rem, 999px and 9999px, plus five Tailwind classes. Nothing chose those —
+     they accumulated one component at a time, and the drift is invisible
+     individually and quite visible in aggregate. */
+  --r-xs: 0.25rem; /* 4px — bars, markers, tiny marks */
+  --r-sm: 0.375rem; /* 6px — buttons, icon squares      (= rounded-md) */
+  --r-md: 0.5rem; /* 8px — list rows                  (= rounded-lg) */
+  --r-lg: 0.75rem; /* 12px — cards, panels, callouts   (= rounded-xl) */
+  --r-xl: 1rem; /* 16px — large surfaces            (= rounded-2xl) */
+  --r-full: 999px; /* pills */
+
+  /* ---- Motion ----
+     The site had a signature curve and used it 15 times, against 39 uses of
+     the browser default `ease`, across eleven different durations (60, 90,
+     120, 150, 160, 180, 200, 260, 320, 400, 600ms). So it had a motion
+     language on paper and spoke it about a third of the time. Three steps and
+     one curve; if something needs a fourth, that's a decision worth making
+     here rather than a number typed at the call site. */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur-fast: 120ms; /* colour and other in-place changes */
+  --dur: 200ms; /* the default: most things that move */
+  --dur-slow: 320ms; /* panels, drawers, anything that travels far */
+
+  /* ---- Floating chrome ----
+     The breadcrumb bar, the contents pill, the time-remaining chip and the
+     reading-position offer: small translucent things that hover OVER the
+     page rather than sitting in it.
+
+     They used to be `--bg` at 75% with a blur and no border — that is, the
+     page's own colour painted on top of the page. In light mode the blur
+     smudging the content behind it was enough to read as a chip. In dark
+     mode it was invisible: a near-black pill on a near-black page, which is
+     exactly what a phone shows and a desktop in light mode never does.
+
+     Now they take a surface that sits ABOVE the page, plus a hairline. The
+     hairline is an INSET SHADOW, not a border: `.toc-bar` and the breadcrumb
+     bar are deliberately built to the same 2.5rem height (DECISIONS #51) and
+     a real border would add two pixels to whichever ones got it. */
+  --chrome-bg: color-mix(in srgb, var(--bg) 78%, transparent);
+  --chrome-ring: color-mix(in srgb, var(--text) 9%, transparent);
+
+  /* ---- Page shell ---- (components/Page.tsx) */
+  --measure: 42rem; /* the text column, unchanged from max-w-2xl */
+  --gutter: 1.5rem;
+  --page-y: 4.5rem;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #0a0a0a;
     --bg-sidebar: #0e0e0f;
-    --bg-hover: #1a1a1d;
-    --text: #fafafa;
-    --text-secondary: #a1a1aa;
-    --text-tertiary: #6b6b74;
-    --border: #222226;
+    --bg-hover: #1e1e23;
+    /* ABOVE the background, not beside it. A dark interface isn't a light one
+       with the numbers flipped: surfaces have to sit on top of the page, and
+       borders have to be dimmer RELATIVE to text than they are on white. */
+    --surface: #141417;
+    --text: #f5f5f6;
+    --text-secondary: #a4a4ae;
+    --text-tertiary: #6f6f7a;
+    --border: #26262b;
     --accent: #3b82f6;
-    --code-bg: #17171a;
+    --code-bg: #121215;
+    /* Built from `--surface`, which is lighter than the page — so the pill
+       reads as a pill instead of a hole. */
+    --chrome-bg: color-mix(in srgb, var(--surface) 88%, transparent);
+    --chrome-ring: color-mix(in srgb, #ffffff 10%, transparent);
+  }
+}
+
+/* The page shell. Was `mx-auto max-w-2xl px-6 py-14 lg:py-24` written out in
+   seven route files — see components/Page.tsx for why that had to stop. */
+.page {
+  margin-inline: auto;
+  max-width: var(--measure);
+  padding-inline: var(--gutter);
+  padding-block: var(--page-y);
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --page-y: 7rem;
   }
 }
 
@@ -73,7 +170,7 @@ html[data-lang="uk"] .lang-uk {
 }
 
 .page-in {
-  animation: page-in 0.35s ease both;
+  animation: page-in var(--dur-slow) var(--ease) both;
 }
 
 /* ---------- View transitions (components/Lightbox.tsx) ---------- */
@@ -95,8 +192,8 @@ html[data-lang="uk"] .lang-uk {
 }
 
 ::view-transition-group(lightbox-figure) {
-  animation-duration: 320ms;
-  animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+  animation-duration: var(--dur-slow);
+  animation-timing-function: var(--ease);
   z-index: 2;
 }
 
@@ -119,7 +216,7 @@ html[data-lang="uk"] .lang-uk {
 }
 
 .stagger > * {
-  animation: item-in 0.32s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation: item-in var(--dur-slow) var(--ease) both;
   animation-delay: 360ms;
 }
 
@@ -174,20 +271,21 @@ html[data-lang="uk"] .lang-uk {
 :focus-visible {
   outline: 2px solid var(--text-secondary);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: var(--r-xs);
 }
 
 body {
   background: var(--bg);
   color: var(--text);
-  /* Resolves to Inter + the system fallbacks via the @theme block up top. */
-  font-family: var(--font-sans);
-  /* Inter sets looser default tracking than the system font it replaced
-     (-apple-system / SF Pro), which reads as gappy at body sizes. Inter's own
-     guidance is to tighten it; -0.011em is the usual starting point for ~16px
-     and this sits a step past it. Dial toward 0 for airier text; much below
-     -0.025em starts to cramp the Cyrillic. */
-  letter-spacing: -0.02em;
+  /* The site's typeface — see the Visual design block at the foot of this
+     file for why it's a serif, and for the one exception (code).
+
+     Tracking stays at `normal`. The site ran at -0.02em when it was set in
+     Inter, which sets loose default spacing at body sizes and wants
+     tightening; a serif does not, and the same value cramps it — the Cyrillic
+     especially. */
+  font-family: var(--font-prose);
+  letter-spacing: normal;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -236,8 +334,10 @@ body::after {
 
 /* ---------- Prose (rendered markdown) ---------- */
 .prose {
-  font-size: 1rem;
-  line-height: 1.75;
+  /* A serif at 16px reads smaller than a sans at 16px — the x-height is lower
+     — so the body steps up and the leading comes in slightly to match. */
+  font-size: 1.0625rem;
+  line-height: 1.7;
   color: var(--text-secondary);
 }
 
@@ -250,15 +350,18 @@ body::after {
 .prose h4 {
   color: var(--text);
   font-weight: 600;
-  /* Tracking wants to go more negative as size goes up — headings need more
-     than the body correction to look like the same typeface. */
-  letter-spacing: -0.03em;
+  /* Tracking wants to go more negative as size goes up, but far less for a
+     serif than the -0.03em this carried when the site was set in Inter. */
+  letter-spacing: -0.01em;
   scroll-margin-top: 5rem;
 }
 
 .prose h1 { font-size: 1.25rem; margin: 0 0 1.25rem; }
-.prose h2 { font-size: 1.125rem; margin: 2.25rem 0 0.75rem; }
-.prose h3 { font-size: 1rem; margin: 1.75rem 0 0.5rem; }
+/* The space ABOVE an h2 is well past the space below it: a heading two lines
+   under the paragraph it interrupts reads as part of that paragraph. This is
+   what separates the sections, rather than a rule or a divider. */
+.prose h2 { font-size: 1.125rem; margin: 3.25rem 0 0.75rem; }
+.prose h3 { font-size: 1rem; margin: 2.25rem 0 0.5rem; }
 .prose h4 { font-size: 0.9375rem; margin: 1.5rem 0 0.5rem; }
 
 .prose p { margin: 1rem 0; }
@@ -268,7 +371,7 @@ body::after {
   text-decoration: underline;
   text-decoration-color: var(--text-tertiary);
   text-underline-offset: 3px;
-  transition: color 120ms ease, text-decoration-color 120ms ease;
+  transition: color var(--dur-fast) var(--ease), text-decoration-color var(--dur-fast) var(--ease);
 }
 
 .prose a:hover {
@@ -287,12 +390,12 @@ body::after {
 .prose li::marker { color: var(--text-tertiary); }
 
 .prose img {
-  border-radius: 0.75rem;
+  border-radius: var(--r-lg);
   border: 1px solid var(--border);
   margin: 1.5rem 0;
   max-width: 100%;
   height: auto;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s var(--ease);
 }
 
 .prose img:hover {
@@ -305,7 +408,7 @@ body::after {
   width: 140px;
   height: 7px;
   margin: 0 6px 0 10px;
-  border-radius: 4px;
+  border-radius: var(--r-xs);
   border: 1px solid var(--border);
   background: var(--bg-hover);
   overflow: hidden;
@@ -315,9 +418,9 @@ body::after {
 .progress-fill {
   display: block;
   height: 100%;
-  border-radius: 4px;
+  border-radius: var(--r-xs);
   background: var(--text);
-  transition: width 0.6s ease;
+  transition: width 0.6s var(--ease);
 }
 
 .progress-label {
@@ -333,7 +436,7 @@ body::after {
   margin: 1.5rem 0;
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: 1rem;
+  border-radius: var(--r-xl);
   background: var(--bg-hover);
 }
 
@@ -395,17 +498,37 @@ body::after {
      is simply a wide card. See docs/DECISIONS.md #54.
 
      Only the rows. On a medium page the cards sit in a grid where the column
-     width leads and every card is the same shape anyway. */
-  --shelf-card-h: 225px;
+     width leads and every card is the same shape anyway.
+
+     190px is deliberately BETWEEN the two heights the rows used to have (225
+     for covers, 158 for videos), so covers come down a little and videos come
+     up a little rather than one of them being dragged the whole way to the
+     other. Matching the covers' old 225 would have made a video card 400px
+     wide — wider than a phone, and a cover row's worth of screen for one
+     thumbnail. Matching the videos' 158 would have cut the covers to 105px,
+     which is too small to read a spine at. */
+  --shelf-card-h: 190px;
+
+  /* Videos are the exception, and they get their own height rather than a
+     crop. A 16:9 card at the full 190px is 338px wide next to a 127px cover,
+     so the video row reads as the page's main event whatever is in it — but
+     the fix is to make the card smaller, not to cut the sides off a thumbnail
+     that was composed at 16:9. At two thirds of the shared height it lands at
+     roughly 226 × 127, which is about the presence of a cover turned on its
+     side.
+
+     Still derived from `--shelf-card-h`, so the whole shelf scales from one
+     number and the two sizes can't drift apart. */
+  --shelf-video-h: calc(var(--shelf-card-h) * 0.67);
 }
 
-/* A 16:9 card at 225px tall is 400px wide, which is wider than a phone. The
-   row scrolls, so it isn't broken — but a card you can never see the whole of
-   is a poor first impression of a row. Below 480px everything steps down
-   together, which keeps the shelves level. */
+/* One more step down on a narrow phone: a 16:9 card at 190px is 338px wide,
+   which is most of a small screen. The row scrolls, so nothing breaks — but a
+   card you can never see all of is a poor introduction to a row. Everything
+   steps together, which is the whole point of the variable. */
 @media (max-width: 479px) {
   .shelf-row {
-    --shelf-card-h: 190px;
+    --shelf-card-h: 170px;
   }
 }
 
@@ -418,8 +541,10 @@ body::after {
   width: calc(var(--shelf-card-h) * 2 / 3);
 }
 
+/* 16:9 off the video's own shorter height — ~226px, against ~127px for a
+   cover. Uncropped, and no longer the widest thing on the page. */
 .shelf-card-wide {
-  width: calc(var(--shelf-card-h) * 16 / 9);
+  width: calc(var(--shelf-video-h) * 16 / 9);
 }
 
 .shelf-row::-webkit-scrollbar {
@@ -448,7 +573,7 @@ body::after {
   margin: 1.5rem 0;
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: 1rem;
+  border-radius: var(--r-xl);
   background: var(--bg-hover);
 }
 
@@ -521,7 +646,7 @@ body::after {
   display: block;
   margin: 1.25rem 0;
   border: 1px dashed var(--border);
-  border-radius: 0.75rem;
+  border-radius: var(--r-lg);
   padding: 0.75rem 1rem;
   font-size: 0.875rem;
   color: var(--text-tertiary);
@@ -547,7 +672,7 @@ body::after {
 .callout {
   border: 1px solid var(--border);
   border-left: 3px solid var(--callout-color, var(--text-tertiary));
-  border-radius: 0.75rem;
+  border-radius: var(--r-lg);
   padding: 0.875rem 1.125rem;
   margin: 1.25rem 0;
 }
@@ -591,7 +716,7 @@ body::after {
 
 /* Avatar images — small sized Obsidian embeds like ![[me.jpeg|93]] (≤128px) */
 .prose img.avatar {
-  border-radius: 9999px;
+  border-radius: var(--r-full);
   object-fit: cover;
   margin: 0 0 1.25rem;
 }
@@ -617,7 +742,7 @@ body::after {
 .prose code {
   background: var(--code-bg);
   border: 1px solid var(--border);
-  border-radius: 0.375rem;
+  border-radius: var(--r-sm);
   padding: 0.125rem 0.375rem;
   font-size: 0.875em;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -627,7 +752,7 @@ body::after {
 .prose pre {
   background: var(--code-bg);
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: var(--r-lg);
   padding: 1rem 1.25rem;
   margin: 1.5rem 0;
   overflow-x: auto;
@@ -649,7 +774,7 @@ body::after {
   position: relative;
   background: var(--code-bg);
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: var(--r-lg);
   overflow: hidden;
 }
 
@@ -713,12 +838,12 @@ body::after {
   height: 2rem;
   padding: 0;
   border: 1px solid transparent;
-  border-radius: 0.5rem;
+  border-radius: var(--r-md);
   background: var(--code-bg);
   color: var(--text-tertiary);
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition: opacity var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
 }
 
 .prose figure.code-block:hover .code-copy,
@@ -778,7 +903,7 @@ body::after {
   margin: 1.5rem 0;
   font-size: 0.9375rem;
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: var(--r-lg);
   overflow: hidden;
 }
 
@@ -946,8 +1071,8 @@ body::after {
   opacity: 0;
   visibility: hidden;
   transition:
-    opacity 160ms ease,
-    visibility 0s linear 160ms;
+    opacity var(--dur) var(--ease),
+    visibility 0s linear var(--dur);
 }
 
 .overlay[data-open="true"] {
@@ -960,7 +1085,7 @@ body::after {
    what makes it read as arriving rather than just appearing. */
 .overlay-panel {
   transform: translateY(-8px) scale(0.98);
-  transition: transform 200ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition: transform var(--dur) var(--ease);
 }
 
 .overlay[data-open="true"] .overlay-panel {
@@ -989,12 +1114,13 @@ body::after {
   gap: 0.4375rem;
   max-width: calc(100vw - 1.5rem);
   padding: 0.4375rem 0.875rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--bg) 75%, transparent);
+  border-radius: var(--r-full);
+  background: var(--chrome-bg);
+  box-shadow: inset 0 0 0 1px var(--chrome-ring);
   backdrop-filter: blur(12px);
   cursor: pointer;
-  transition: background-color 120ms ease;
-  animation: item-in 0.32s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  transition: background-color var(--dur-fast) var(--ease);
+  animation: item-in var(--dur-slow) var(--ease) both;
   animation-delay: 600ms;
 }
 
@@ -1034,7 +1160,7 @@ body::after {
   min-width: 1.5rem;
   padding: 0.125rem 0.375rem;
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--r-xs);
   background: var(--bg-hover);
   color: var(--text-secondary);
   font-family: var(--font-mono, ui-monospace, monospace);
@@ -1055,11 +1181,11 @@ body::after {
   justify-content: center;
   width: 2.75rem;
   height: 2.75rem;
-  border-radius: 9999px;
+  border-radius: var(--r-full);
   background: rgb(255 255 255 / 0.1);
   color: #fff;
   cursor: pointer;
-  transition: background 120ms ease;
+  transition: background var(--dur-fast) var(--ease);
 }
 
 .lightbox-arrow:hover {
@@ -1130,7 +1256,7 @@ body::after {
   /* `left` is the selection's centre — shift the box back over it. */
   transform: translateX(-50%);
   padding: 0.375rem 0.625rem;
-  border-radius: 9999px;
+  border-radius: var(--r-full);
   background: var(--text);
   color: var(--bg);
   font-size: 0.75rem;
@@ -1138,7 +1264,7 @@ body::after {
   white-space: nowrap;
   cursor: pointer;
   box-shadow: 0 4px 14px rgb(0 0 0 / 0.18);
-  animation: preview-in 120ms ease both;
+  animation: preview-in var(--dur-fast) var(--ease) both;
 }
 
 .selection-pill:hover {
@@ -1173,11 +1299,11 @@ body::after {
   max-width: calc(100vw - 24px);
   padding: 0.875rem;
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: var(--r-lg);
   background: var(--bg);
   box-shadow: 0 8px 30px rgb(0 0 0 / 0.12);
   pointer-events: none;
-  animation: preview-in 0.14s ease both;
+  animation: preview-in 0.14s var(--ease) both;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -1190,7 +1316,7 @@ body::after {
   flex: none;
   width: 44px;
   height: 66px;
-  border-radius: 0.375rem;
+  border-radius: var(--r-sm);
   object-fit: cover;
   background: var(--bg-hover);
 }
@@ -1245,7 +1371,7 @@ body::after {
   color: var(--text-tertiary);
   text-decoration: none;
   opacity: 0;
-  transition: opacity 120ms ease, color 120ms ease;
+  transition: opacity var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
   /* Keeps the "#" out of copied text when a heading is selected. */
   user-select: none;
 }
@@ -1311,7 +1437,7 @@ body::after {
   border-left: 1px solid transparent;
   color: var(--text-tertiary);
   text-decoration: none;
-  transition: color 120ms ease, border-color 120ms ease;
+  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
 }
 
 .toc-link:hover {
@@ -1347,14 +1473,14 @@ body::after {
   opacity: 0;
   transform: translateY(var(--y, 0));
   transition:
-    transform 260ms cubic-bezier(0.22, 0.61, 0.36, 1),
-    height 260ms cubic-bezier(0.22, 0.61, 0.36, 1),
-    opacity 160ms ease;
+    transform var(--dur-slow) var(--ease),
+    height var(--dur-slow) var(--ease),
+    opacity var(--dur) var(--ease);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .toc-marker {
-    transition: opacity 160ms ease;
+    transition: opacity var(--dur) var(--ease);
   }
 }
 
@@ -1384,6 +1510,16 @@ body::after {
    Vertical rather than horizontal for a second reason: the swap is triggered
    BY scrolling, and a label that slides the same way the page is moving reads
    as part of that movement instead of as a separate little animation. */
+/* The breadcrumb bar, top-left. Its fill used to be a Tailwind utility
+   (`bg-[var(--bg)]/75`) written on the element, which is why it was the last
+   piece of floating chrome still painted in the page's own colour — invisible
+   on a dark screen. It now shares the token with the contents pill opposite
+   it, and the two are once again the same object at two corners. */
+.chrome-bar {
+  background: var(--chrome-bg);
+  box-shadow: inset 0 0 0 1px var(--chrome-ring);
+}
+
 .bar-swap {
   display: grid;
   align-items: center;
@@ -1397,8 +1533,8 @@ body::after {
   grid-area: 1 / 1;
   line-height: 1.25rem;
   transition:
-    transform 260ms cubic-bezier(0.22, 0.61, 0.36, 1),
-    opacity 160ms ease;
+    transform var(--dur-slow) var(--ease),
+    opacity var(--dur) var(--ease);
 }
 
 .crumbs {
@@ -1473,7 +1609,7 @@ body::after {
   /* Fades in once there's progress to report — see paint() in the component.
      Slower out than in: appearing should be quiet, vanishing shouldn't blink. */
   opacity: 0;
-  transition: opacity 260ms ease;
+  transition: opacity var(--dur-slow) var(--ease);
 }
 
 .reading-progress-fill {
@@ -1497,7 +1633,7 @@ body::after {
   left: calc(var(--p) * 100%);
   width: 2px;
   height: 2px;
-  border-radius: 9999px;
+  border-radius: var(--r-full);
   background: var(--text);
   box-shadow: 0 0 6px 2px var(--text);
   opacity: calc(var(--p) * 0.85);
@@ -1527,10 +1663,11 @@ body::after {
   align-items: center;
   max-width: calc(100vw - 1.5rem);
   padding: 0.4375rem 0.875rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--bg) 75%, transparent);
+  border-radius: var(--r-full);
+  background: var(--chrome-bg);
+  box-shadow: inset 0 0 0 1px var(--chrome-ring);
   backdrop-filter: blur(12px);
-  transition: background-color 120ms ease;
+  transition: background-color var(--dur-fast) var(--ease);
 }
 
 .toc-bar:hover {
@@ -1607,7 +1744,7 @@ body::after {
   inset: 0;
   z-index: 40;
   visibility: hidden;
-  transition: visibility 0s linear 200ms;
+  transition: visibility 0s linear var(--dur);
 }
 
 .toc-sheet-backdrop[data-open="true"] {
@@ -1629,9 +1766,9 @@ body::after {
   visibility: hidden;
   transform: translateY(6px) scale(0.97);
   transition:
-    opacity 180ms ease,
-    transform 200ms cubic-bezier(0.22, 0.61, 0.36, 1),
-    visibility 0s linear 200ms;
+    opacity var(--dur) var(--ease),
+    transform var(--dur) var(--ease),
+    visibility 0s linear var(--dur);
   width: max-content;
   max-width: min(18rem, calc(100vw - 1.5rem));
   max-height: 45vh;
@@ -1639,8 +1776,8 @@ body::after {
   overscroll-behavior: contain;
   padding: 0.375rem;
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  border-radius: var(--r-lg);
+  background: var(--chrome-bg);
   backdrop-filter: blur(14px);
   box-shadow: 0 6px 20px rgb(0 0 0 / 0.08);
   font-size: 0.875rem;
@@ -1671,7 +1808,7 @@ body::after {
   margin-left: 0;
   padding: 0.4375rem 0.5rem;
   border-left: 0;
-  border-radius: 0.375rem;
+  border-radius: var(--r-sm);
 }
 
 .toc-sheet .toc-link.is-active {
@@ -1755,11 +1892,11 @@ body::after {
 }
 
 .spoiler-inline label > span {
-  border-radius: 0.1875rem;
+  border-radius: var(--r-xs);
   background: var(--bg-hover);
   color: transparent;
   text-shadow: 0 0 0.5rem var(--text-secondary);
-  transition: color 160ms ease, text-shadow 160ms ease, background-color 160ms ease;
+  transition: color var(--dur) var(--ease), text-shadow var(--dur) var(--ease), background-color var(--dur) var(--ease);
   /* Stops the hidden text being swept up by a selection or a copy. */
   user-select: none;
 }
@@ -1793,7 +1930,7 @@ body::after {
   display: block;
   filter: blur(6px);
   user-select: none;
-  transition: filter 200ms ease;
+  transition: filter var(--dur) var(--ease);
 }
 
 .spoiler-body > :first-child {
@@ -1807,7 +1944,7 @@ body::after {
 .spoiler-cover {
   position: absolute;
   inset: -0.25rem;
-  border-radius: 0.375rem;
+  border-radius: var(--r-sm);
   cursor: pointer;
 }
 
@@ -1909,9 +2046,9 @@ body::after {
   gap: 1rem;
   margin: 0 -0.625rem;
   padding: 0.4375rem 0.625rem;
-  border-radius: 0.5rem;
+  border-radius: var(--r-md);
   text-decoration: none;
-  transition: background-color 120ms ease;
+  transition: background-color var(--dur-fast) var(--ease);
 }
 
 .backlink-ish:hover {
@@ -1928,7 +2065,7 @@ body::after {
   top: 0.5rem;
   left: 0.5rem;
   padding: 0.1875rem 0.5rem;
-  border-radius: 999px;
+  border-radius: var(--r-full);
   background: rgb(0 0 0 / 0.62);
   backdrop-filter: blur(6px);
   color: #fff;
@@ -1953,9 +2090,9 @@ body::after {
   margin-left: 0.375rem;
   vertical-align: middle;
   translate: 0 -2px;
-  border-radius: 0.375rem;
+  border-radius: var(--r-sm);
   color: var(--text-tertiary);
-  transition: color 120ms ease, background-color 120ms ease;
+  transition: color var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease);
 }
 
 .copy-md:hover {
@@ -1976,7 +2113,7 @@ body::after {
   z-index: 60;
   padding: 0.625rem 0.75rem;
   border: 1px solid var(--border);
-  border-radius: 0.5rem;
+  border-radius: var(--r-md);
   background: var(--bg);
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 0.6875rem;
@@ -1999,14 +2136,15 @@ body::after {
   bottom: 0.75rem;
   z-index: 25;
   padding: 0.4375rem 0.875rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--bg) 75%, transparent);
+  border-radius: var(--r-full);
+  background: var(--chrome-bg);
+  box-shadow: inset 0 0 0 1px var(--chrome-ring);
   backdrop-filter: blur(12px);
   font-size: 0.8125rem;
   font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
   pointer-events: none;
-  animation: item-in 0.28s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation: item-in 0.28s var(--ease) both;
 }
 
 /* It stays in the window's corner at every width it appears at, unlike
@@ -2041,7 +2179,7 @@ body::after {
   z-index: 60;
   padding: 0.4375rem 0.875rem;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--r-full);
   background: var(--bg);
   font-size: 0.875rem;
   font-weight: 500;
@@ -2049,7 +2187,7 @@ body::after {
   text-decoration: none;
   /* Out of the layout and out of sight until focused. */
   transform: translateY(-200%);
-  transition: transform 160ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition: transform var(--dur) var(--ease);
 }
 
 .skip-link:focus-visible {
@@ -2077,7 +2215,7 @@ body::after {
   font: inherit;
   color: inherit;
   cursor: pointer;
-  transition: color 120ms ease, border-color 120ms ease;
+  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
 }
 
 .series-badge:hover,
@@ -2094,7 +2232,7 @@ body::after {
   inset: 0;
   z-index: 40;
   visibility: hidden;
-  transition: visibility 0s linear 200ms;
+  transition: visibility 0s linear var(--dur);
 }
 
 .series-backdrop[data-open="true"] {
@@ -2117,9 +2255,9 @@ body::after {
   visibility: hidden;
   transform: translateY(-6px) scale(0.97);
   transition:
-    opacity 180ms ease,
-    transform 200ms cubic-bezier(0.22, 0.61, 0.36, 1),
-    visibility 0s linear 200ms;
+    opacity var(--dur) var(--ease),
+    transform var(--dur) var(--ease),
+    visibility 0s linear var(--dur);
   width: max-content;
   /* Narrow on purpose — rows are a number and a title, and a long title
      ellipses rather than widening the panel. */
@@ -2129,8 +2267,8 @@ body::after {
   overscroll-behavior: contain;
   padding: 0.375rem;
   border: 1px solid var(--border);
-  border-radius: 0.625rem;
-  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  border-radius: var(--r-lg);
+  background: var(--chrome-bg);
   backdrop-filter: blur(12px);
   box-shadow: 0 6px 20px rgb(0 0 0 / 0.08);
   text-align: left;
@@ -2174,11 +2312,11 @@ body::after {
   /* Full-width rows, like the contents sheet's — the whole line is the tap
      target, not just the words in it. */
   padding: 0.3125rem 0.4375rem;
-  border-radius: 0.375rem;
+  border-radius: var(--r-sm);
   font-size: 0.8125rem;
   color: var(--text-secondary);
   text-decoration: none;
-  transition: color 120ms ease, background-color 120ms ease;
+  transition: color var(--dur-fast) var(--ease), background-color var(--dur-fast) var(--ease);
 }
 
 a.series-link:hover {
@@ -2238,7 +2376,7 @@ a.series-link:hover {
   font-size: 0.875rem;
   color: var(--text-secondary);
   text-decoration: none;
-  transition: color 120ms ease;
+  transition: color var(--dur-fast) var(--ease);
 }
 
 .sibling:hover {
@@ -2250,7 +2388,7 @@ a.series-link:hover {
   font-size: 1.25rem;
   line-height: 1;
   color: var(--text-tertiary);
-  transition: color 120ms ease;
+  transition: color var(--dur-fast) var(--ease);
 }
 
 .sibling:hover .sibling-arrow {
@@ -2301,8 +2439,8 @@ a.series-link:hover {
 .press {
   transition-property: transform, color, background-color, border-color,
     opacity, box-shadow, filter;
-  transition-duration: 160ms;
-  transition-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition-duration: var(--dur);
+  transition-timing-function: var(--ease);
 }
 
 .press:active {
@@ -2326,31 +2464,37 @@ a.series-link:hover {
 .copy-md,
 .prose .code-copy,
 .series-badge,
+.series-link,
 .toc-bar,
-.toc-top,
+.toc-link,
 .sibling,
+.backlink-ish,
+.quote-source a,
 .resume-reading,
 .spoiler-cover,
 .lightbox-arrow,
 .selection-pill {
   transition-property: transform, color, background-color, border-color,
     opacity, box-shadow;
-  transition-duration: 160ms;
-  transition-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition-duration: var(--dur);
+  transition-timing-function: var(--ease);
 }
 
 .copy-md:active,
 .prose .code-copy:active,
 .series-badge:active,
+.series-link:active,
 .toc-bar:active,
-.toc-top:active,
+.toc-link:active,
+.quote-source a:active,
 .spoiler-cover:active,
 .resume-reading:active {
   transform: scale(0.97);
   transition-duration: 0ms;
 }
 
-.sibling:active {
+.sibling:active,
+.backlink-ish:active {
   transform: scale(0.99);
   transition-duration: 0ms;
 }
@@ -2377,11 +2521,14 @@ a.series-link:hover {
   .copy-md:active,
   .prose .code-copy:active,
   .series-badge:active,
+  .series-link:active,
   .toc-bar:active,
-  .toc-top:active,
+  .toc-link:active,
+  .quote-source a:active,
   .spoiler-cover:active,
   .resume-reading:active,
-  .sibling:active {
+  .sibling:active,
+  .backlink-ish:active {
     transform: none;
   }
   .lightbox-arrow:active {
@@ -2407,10 +2554,10 @@ a.series-link:hover {
    cover also scales on hover); this adds the filter to it rather than
    replacing it, which is why it's `transition-property` and not a shorthand. */
 .person-photo {
-  filter: grayscale(0.6) contrast(1.04);
+  filter: grayscale(0.3) contrast(1.04);
   transition-property: filter, transform;
-  transition-duration: 400ms;
-  transition-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition-duration: var(--dur-slow);
+  transition-timing-function: var(--ease);
 }
 
 .group:hover .person-photo,
@@ -2447,12 +2594,17 @@ a.series-link:hover {
 
    Instagram's is a gradient in the real logo; the icon is a single-path
    stroke drawn in `currentColor`, so it takes the pink the gradient is
-   centred on. Mail has no brand at all and borrows Gmail's red, which is
-   where the link goes for most people who click it. */
+   centred on.
+
+   Mail is the exception with no exception: it stays `var(--text)`, because it
+   isn't a platform. The other four are marks someone recognises — a red
+   envelope would be inventing a brand for a `mailto:` link and claiming it
+   for Gmail, which is only where SOME of this goes. It still lifts from grey
+   to full text colour on hover, so it behaves like its neighbours. */
 .social-link {
   --brand: var(--text);
   color: var(--text-tertiary);
-  transition: color 180ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition: color var(--dur) var(--ease);
 }
 
 .social-link:hover,
@@ -2464,13 +2616,162 @@ a.series-link:hover {
 .social-link[data-social="instagram"] { --brand: #e1306c; }
 .social-link[data-social="linkedin"] { --brand: #0a66c2; }
 .social-link[data-social="x"] { --brand: #0f1419; }
-.social-link[data-social="mail"] { --brand: #ea4335; }
+/* mail: no rule — the `var(--text)` default above is the point. */
 
 @media (prefers-color-scheme: dark) {
   .social-link[data-social="github"] { --brand: #f0f6fc; }
   .social-link[data-social="instagram"] { --brand: #f2618f; }
   .social-link[data-social="linkedin"] { --brand: #4aa3f0; }
   .social-link[data-social="x"] { --brand: #e7e9ea; }
-  .social-link[data-social="mail"] { --brand: #f2786b; }
 }
 
+
+/* ============================================================================
+   VISUAL DESIGN — the layer that makes the site look like itself.
+
+   These rules shipped as "theme one", one of two complete designs switchable
+   from the palette while the choice was being made (docs/DECISIONS.md #59).
+   Theme one won; theme two, `lib/theme.ts`, the palette action and the theme
+   half of the inline script in app/layout.tsx are gone. What's left is just
+   the design, and this block is kept together because the rules explain each
+   other — the serif is why the tracking is reset, the big title is why the
+   metadata is demoted.
+
+   The colour tokens that go with it live in `:root` at the top of this file.
+   ========================================================================== */
+
+/* --- One voice, everywhere except code -----------------------------------
+   Source Serif 4 is the site's typeface, not just the article's:
+   sidebar, section headings, list rows, chips, dates, buttons and the labels
+   inside diagrams. Only code stays monospace.
+
+   This started as the classic split — serif to read, sans for the interface —
+   and the split was the wrong call for a site this size. A personal site is
+   not an application with articles in it; when half the page is chrome set in
+   a different family, the chrome reads as a product someone else built and
+   the writing reads as content pasted into it. One voice, and the page is one
+   thing.
+
+   Set on `body` so it simply inherits. `<code>` and `<pre>` carry their own
+   font-family from Tailwind's preflight, which beats an inherited value, but
+   it's restated below so the intent isn't an accident of load order.
+
+   The tracking has to go back to normal. `body` runs at -0.02em because Inter
+   sets loose default spacing at body sizes; a serif doesn't, and the same
+   value cramps it — especially the Cyrillic. */
+/* Code is the exception, and the only one. */
+code,
+pre,
+kbd,
+.shortcut-key,
+.code-file,
+.code-lang {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* Diagram labels. The generated SVGs carry `font-family="ui-sans-serif, …"`
+   as a PRESENTATION ATTRIBUTE, which loses to any CSS rule that targets the
+   element directly — so the diagrams can be brought into the site's voice
+   from here without editing a single file in the vault, which is content and
+   the owner's.
+
+   Only reaches self-theming SVGs, which are inlined into the page
+   (`inlineSelfThemingSvg`, lib/markdown.ts). A two-file Excalidraw export is
+   an <img> and can't be restyled from outside; that's a property of the
+   embed, not something to work around. */
+svg.diagram text,
+svg.diagram tspan {
+  font-family: var(--font-prose);
+}
+
+/* --- One big thing per page ---------------------------------------------
+   Every page opened at the same visual volume: a 20px heading over 16px body
+   over small chips. Nothing was ever the moment. The title is now two to three
+   times the size of what surrounds it, and it scales with the window rather
+   than sitting at one size from a phone to a 27-inch display.
+
+   It beats the Tailwind classes on the element because this rule is unlayered
+   and the utilities are inside a layer — no `!important`, and theme two keeps
+   the classes untouched. */
+.page-title {
+  font-family: var(--font-prose);
+  font-size: clamp(2rem, 1.3rem + 2.6vw, 2.875rem);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.021em;
+}
+
+/* --- Metadata that stops competing --------------------------------------
+   Date, reading time, word count, maturity and the series badge could appear
+   under one heading at sizes and colours close enough to the title to argue
+   with it. One size, one grey, one line — including the pieces that style
+   themselves. */
+.entry-meta {
+  margin-top: 0.875rem;
+  font-size: 0.8125rem;
+  color: var(--text-tertiary);
+}
+
+.entry-meta .maturity,
+.entry-meta .series-badge {
+  font-size: 0.8125rem;
+  color: inherit;
+}
+
+/* The `categories:` chips were bordered pills at body size, which made three
+   tags as loud as the title above them. They read as tags now — no border, no
+   box, just the word. */
+.entry-tags {
+  gap: 0.875rem;
+}
+
+.entry-tags a {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  font-size: 0.8125rem;
+  color: var(--text-tertiary);
+}
+
+.entry-tags a::before {
+  content: "#";
+  opacity: 0.55;
+}
+
+.entry-tags a:hover {
+  color: var(--text);
+}
+
+/* --- Image shapes — REVERTED ---------------------------------------------
+   Faces briefly took the covers' 2:3 portrait frame, on the theory that one
+   silhouette for everything with artwork behind it would read as a system.
+   In practice a person is not a book jacket: a square crops to the face,
+   where a tall frame either includes a lot of room the photo wasn't composed
+   for or crops it to a passport photo. Squares stay.
+
+   The `.people-cover` hook is kept — it costs nothing and this is the class
+   to reach for if the shapes are revisited. */
+
+/* --- The accent gets exactly one job ------------------------------------
+   `--accent` was reserved for "the odd functional case" and in practice
+   surfaced in two: the bar on the OG cards, and the link on the 404 page. So
+   the only place a reader ever met the site's accent colour was an error.
+
+   It belongs to the reading progress bar, which is the one element on the site
+   genuinely reporting STATE rather than decorating something. Everywhere else
+   goes back to text colour. */
+.reading-progress-fill {
+  background: var(--accent);
+}
+
+.notfound-home {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--text-tertiary);
+  text-underline-offset: 4px;
+}
+
+/* --- Grouping, continued ------------------------------------------------
+   A heading two lines below the paragraph it interrupts belongs to that
+   paragraph. Pushing the space above it well past the space below makes the
+   sections separate on their own. */

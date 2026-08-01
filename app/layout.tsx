@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Lora } from "next/font/google";
+import { Inter, Lora, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 import Chrome from "@/components/Chrome";
 import Lightbox from "@/components/Lightbox";
@@ -49,6 +49,27 @@ const lora = Lora({
   // v4 owns that token too, both land on <html>, and the winner would come
   // down to stylesheet order. globals.css points the token at this one.
   variable: "--font-lora",
+});
+
+/**
+ * Source Serif 4 — the site's typeface.
+ *
+ * Everything except code is set in this — prose, page titles, the sidebar, the
+ * chips, the diagram labels. It began as the classic split (serif to read, sans
+ * for the interface) and that was the wrong call for a site this size: when
+ * half the page is chrome in a different family, the chrome reads as a product
+ * someone else built and the writing reads as content pasted into it.
+ *
+ * NOT Newsreader, which was the first choice and is the better screen serif:
+ * it has no Cyrillic subset, and every note on this site carries a Ukrainian
+ * translation. A typeface that covers half the content isn't a candidate.
+ * Source Serif has Cyrillic, is variable, and was drawn for text at reading
+ * sizes.
+ */
+const sourceSerif = Source_Serif_4({
+  subsets: ["latin", "latin-ext", "cyrillic"],
+  display: "swap",
+  variable: "--font-source-serif",
 });
 
 export const metadata: Metadata = {
@@ -102,7 +123,7 @@ export default function RootLayout({
     // runtime), so the server HTML intentionally differs — suppress the warning.
     <html
       lang="en"
-      className={`${inter.variable} ${lora.variable}`}
+      className={`${inter.variable} ${lora.variable} ${sourceSerif.variable}`}
       suppressHydrationWarning
     >
       <head>

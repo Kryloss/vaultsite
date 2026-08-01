@@ -55,6 +55,18 @@ A working example lives at `vault/Projects/attachments/publishing-pipeline.svg` 
 the "This website" project). This is the format the AI workflow generates — see
 `docs/CONTENT-WORKFLOW.md`.
 
+**Self-theming SVGs are inlined into the page**, not loaded through an `<img>`
+(`inlineSelfThemingSvg` in `lib/markdown.ts`) — through an `<img>` the browser
+caches the rasterised result and freezes its `prefers-color-scheme` at first
+decode, so a diagram gets stuck in the wrong theme. Two useful consequences:
+
+- **Labels take the site's typeface.** `globals.css` styles `svg.diagram text`,
+  which beats the `font-family` presentation attribute the file carries, so
+  diagrams follow the site instead of drifting from it.
+- **A two-file Excalidraw export can't do either.** It's a real `<img>`, so it
+  keeps whatever font it was exported with and needs both light and dark files
+  for the theme swap. That's a property of the embed, not a bug.
+
 ### Manual dark variants (any image)
 
 Beyond Excalidraw, any embed gets a theme swap for free: if `chart.png` has a

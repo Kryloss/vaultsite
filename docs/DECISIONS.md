@@ -681,9 +681,19 @@ Cards were sized by **width** — `w-[150px]` for covers, `w-[280px]` for videos
 
 **Rows only.** On a medium page the cards sit in a grid where the column width leads and every card in the grid is the same shape already.
 
-**One variable, and a step down below 480px.** A 16:9 card 225px tall is 400px wide, which is wider than a phone. The row scrolls, so nothing breaks, but a card you can never see all of is a poor introduction to a row — so the whole shelf steps down to 190px together, which keeps it level.
+**Videos are the exception, and they get their own height rather than a crop.** A 16:9 card at the full shared height is 338px wide next to a 127px cover, so the video row read as the page's main event whatever happened to be in it. This was briefly solved by cropping thumbnails to 4:3, and that was the wrong lever: a YouTube thumbnail is composed at 16:9, and taking a fifth off each side to make a layout behave is the layout helping itself to the picture.
 
-**The widths are real classes, not Tailwind arbitrary values.** `w-[calc(var(--shelf-card-h)*16/9)]` scans fine and is never emitted: `/` is Tailwind's modifier separator and splits the class name before the bracket is read. Nothing warns. The markup looks correct, the rule doesn't exist, and the cards fall back to their content width — which is roughly what a broken layout looks like from the outside but not from the source. **If an arbitrary value needs a slash, write the rule by hand.**
+`--shelf-video-h` is two thirds of `--shelf-card-h`, which lands a video card at roughly 226 × 127 — about the presence of a cover turned on its side, uncropped. It's still *derived* from the shared height, so the shelf scales from one number and the two sizes can't drift apart.
+
+**Which means the video row is shorter than the cover rows, and that's accepted.** The original problem was rows whose heights had no relationship to each other; two thirds is a relationship. Every row is still internally uniform, because a row is one medium.
+
+**The height is between the two it replaced, not equal to either.** Covers used to make a 225px row and videos a 158px one. Taking 225 would have made a video card 400px wide — wider than a phone, and a cover row's worth of screen for one thumbnail. Taking 158 would have cut the covers to 105px, too small to read a spine at. 190 brings the covers down a little and the videos up a little, which is the version where nothing is dragged the whole way to the other. Below 480px everything steps to 170 together, which is the point of putting it in a variable.
+
+**The widths are hand-written classes, not Tailwind arbitrary values** — but not for the reason first written here. An earlier version of this note claimed `w-[calc(var(--shelf-card-h)*16/9)]` is silently never emitted because `/` is Tailwind's modifier separator. That is false; it compiles, and so does `aspect-[4/3]`. The claim came from grepping the built CSS and finding nothing.
+
+**What actually happened is worth more than the wrong lesson.** Tailwind escapes every bracket, paren and slash in the class name it writes, so the rule is on disk as `.w-\[calc\(var\(--shelf-card-h\)\*16\/9\)\]` — a plain grep for the source spelling matches nothing whether or not the rule exists, and "nothing" reads exactly like "never emitted". **Grep for the escaped form, or read the element's computed width in the browser.** A tool that cannot find something is not evidence that it isn't there.
+
+The classes stayed anyway, on their own merits: the width is arithmetic on `--shelf-card-h`, the variable is declared in `globals.css`, and a rule that only makes sense beside its variable belongs beside it. `.shelf-card-tall` / `.shelf-card-wide` also name what they are, which a `calc()` inside a ternary does not.
 
 ## 55. A dip, so a tap has an answer (2026-07-31)
 
@@ -703,9 +713,11 @@ Every control on the site changed background on hover and did nothing at all on 
 
 The site is monochrome by rule. Two exceptions, both of which only exist under the pointer, so the page at a glance is unchanged.
 
-**People photographs sit at `grayscale(0.6)` and come back to full colour on hover.** Not all the way to grey: a portrait at `grayscale(1)` next to monochrome type reads as an archive photograph, which says something about the person that isn't ours to say. At 0.6 the skin tones survive, the picture stops competing with a page that has no other colour in it, and the hover has somewhere to go. A small contrast lift compensates for the flattening that pulling saturation always causes.
+**People photographs sit at `grayscale(0.3)` and come back to full colour on hover.** Not all the way to grey: a portrait at `grayscale(1)` next to monochrome type reads as an archive photograph, which says something about the person that isn't ours to say. At 0.3 the skin tones survive, the picture stops competing with a page that has no other colour in it, and the hover still has somewhere to go. A small contrast lift compensates for the flattening that pulling saturation always causes.
 
-**Social icons take their platform's own colour on hover.** These five marks are already colours in everyone's memory, so this isn't decoration — it's recognition, and it's the one hover on the site that tells you something the grey version didn't. GitHub and X are brand-black, which is invisible on a near-black page, so both take a near-white in dark mode; that's the same mark at the lightness the medium allows, not an invented brand colour. Instagram's real logo is a gradient and the icon is a single `currentColor` stroke, so it takes the pink the gradient is centred on. Mail has no brand and borrows Gmail's red, which is where the link goes for most people who click it.
+**Social icons take their platform's own colour on hover.** These five marks are already colours in everyone's memory, so this isn't decoration — it's recognition, and it's the one hover on the site that tells you something the grey version didn't. GitHub and X are brand-black, which is invisible on a near-black page, so both take a near-white in dark mode; that's the same mark at the lightness the medium allows, not an invented brand colour. Instagram's real logo is a gradient and the icon is a single `currentColor` stroke, so it takes the pink the gradient is centred on.
+
+**Mail is the exception with no exception.** It stays `var(--text)`, because it isn't a platform — a red envelope would be inventing a brand for a `mailto:` link and quietly assigning it to Gmail, which is only where some of it goes. It still lifts from grey to full text colour on hover, so it behaves like its four neighbours without pretending to be one.
 
 **On touch, the photographs are simply shown.** `@media (hover: none)` drops the filter entirely — without it the effect there isn't "grey until you ask", it's just grey.
 
@@ -722,3 +734,70 @@ A shared link to a book note used to render the same dark text card as everythin
 **Every failure path is a shrug.** Unknown format (Satori decodes no WebP or AVIF), missing file, unreadable — `ogCover()` returns undefined and the note falls back to the text card. A preview image that throws would fail the build of the page it belongs to, which is a steep price for a picture.
 
 **Shelf only.** A post has no cover, and the photograph on a People note is a person's face, which is not a thing to paste into a link preview.
+
+## 58. The global layer: one shell, and tokens instead of accumulation (2026-07-31)
+
+Everything up to here was component-level. Looking at the site as a system turned up three things that weren't decisions at all — they were sediment.
+
+**The page shell was written out seven times.** `mx-auto max-w-2xl px-6 py-14 lg:py-24`, copied into every route file, with two of the seven already quietly disagreeing (`py-20`, `py-24`). Nothing was wrong with any single copy. The problem is that "how wide is this site" and "how much air does a page open with" were not questions anyone could answer in one place — changing either meant a find-and-replace across `app/` that you could get partly right. `components/Page.tsx` now owns it, backed by `--measure`, `--gutter` and `--page-y`. Extra props pass through, which is how the entry page keeps hanging its `data-vault-source` attributes there.
+
+**Ten corner radii.** `0.1875rem`, `0.375rem`, `4px`, `0.5rem`, `0.625rem`, `0.75rem`, `1rem`, `999px`, `9999px`, plus five Tailwind classes. Nobody chose that set; it arrived one component at a time. Four tokens now, deliberately equal to Tailwind's own scale so the utility classes and the hand-written rules in `globals.css` can't drift apart again. This is invisible on any one element and quite visible across a page — it is most of why a screen can feel unresolved without anything being identifiably wrong.
+
+**A motion language spoken a third of the time.** The signature curve appeared 15 times against 39 uses of the browser default `ease`, across eleven durations: 60, 90, 120, 150, 160, 180, 200, 260, 320, 400 and 600ms. Now one `--ease` and three steps — `--dur-fast` for colour changes, `--dur` for most movement, `--dur-slow` for things that travel. Tailwind's `--default-transition-timing-function` and `--default-transition-duration` point at the same tokens, so the utility half of the site moves like the hand-written half rather than merely near it.
+
+**And `--bg-hover` was doing two jobs.** It was the response to a pointer *and* the fill of a card, a cover box and a badge — which meant the two could never be tuned apart: any attempt to lift cards off the page in dark mode would have lifted every hover state with them. `--surface` splits the name. The values are identical today on purpose; the point is that they no longer have to be.
+
+**None of this changes a design decision, and that's the test it had to pass.** Radii moved by a pixel or two where they were consolidated and a few durations changed by tens of milliseconds, but nothing was re-styled. What changed is that the site's design is now editable from one place, which it wasn't — and the things that come next (a type scale, a persistent rail on wide screens) are decisions rather than sweeps because of it.
+
+## 59. Two themes, temporarily, so the design can be judged rather than remembered (2026-07-31)
+
+Eight notes on the site's visual design are all implemented at once, as **theme one**, with the design that existed before them kept whole as **theme two**. `Cmd+K → "Switch design theme"` flips between them. There is no control in the interface, deliberately: this is a tool for the owner during a decision, not a preference for readers.
+
+**Theme one is the ABSENCE of the attribute**, not `data-theme="one"`. Only `"two"` is ever written to `<html>`, and the new design is scoped `:root:not([data-theme="two"])`. So the default arrives with no script involved — a first visit, a visitor with JavaScript off, and the static HTML before the inline restore all get theme one, and there is no flash to prevent. The mechanism is otherwise the language toggle exactly: one localStorage key, restored pre-paint in `app/layout.tsx`.
+
+**What theme one changes, and why each one is on the list:**
+
+1. **A wider tonal range.** Three text greys all living in the middle, with borders a shade off the lightest. Monochrome design has nothing *but* the distance between its darkest and lightest marks, and that distance was compressed. Headings go properly black, tertiary text properly light, borders retreat.
+2. **One big thing per page.** Every page opened at the same volume — a 20px heading over 16px body over small chips — so nothing was ever the moment. `.page-title` is now `clamp(2rem, 1.3rem + 2.6vw, 2.875rem)`, two to three times what surrounds it, and it scales with the window instead of sitting at one size from a phone to a 27-inch display.
+3. **Image shapes — tried and reverted.** Faces briefly took the covers' 2:3 portrait frame, on the theory that one silhouette for everything with artwork would read as a system. A person is not a book jacket: a square crops to the face, where a tall frame either includes a lot of room the photo wasn't composed for or turns it into a passport photo. Squares stay, and the five silhouettes stay five. The `.people-cover` hook is kept for whenever this is looked at again.
+4. **The accent gets exactly one job.** `--accent` was reserved for "the odd functional case" and surfaced in two: the OG card bar and the 404 link. A reader's only exposure to the site's accent colour was an error page. It now belongs to the reading progress bar — the one element genuinely reporting *state* rather than decorating something — and nothing else.
+5. **Dark mode stops being light mode inverted.** Borders are dimmer relative to text than they are on white, and `--surface` sits *above* `--bg` rather than beside it. That's what splitting the token off `--bg-hover` in #58 was for; this is the first use of it.
+6. **One voice, everywhere except code.** Source Serif 4 is the site's typeface in theme one, not just the article's: sidebar, section headings, list rows, chips, dates, buttons, and the labels inside diagrams.
+
+   This began as the classic split — serif to read, sans for the interface — and the split was wrong for a site this size. A personal site is not an application with articles in it, and when half the page is chrome in a different family, the chrome reads as a product someone else built and the writing reads as content pasted into it. Set on `body` so everything simply inherits; `<code>`/`<pre>` keep their own family from Tailwind's preflight, restated explicitly so it isn't an accident of load order.
+
+   **Diagrams come along without touching the vault.** The generated SVGs carry `font-family="ui-sans-serif, …"` as a *presentation attribute*, which loses to any CSS rule targeting the element — so `svg.diagram text` restyles them from `globals.css`. Vault files are content and the owner's; a stylesheet reaching into them would have been the wrong fix. Only self-theming SVGs are covered, since those are inlined into the page; a two-file Excalidraw export is an `<img>` and can't be restyled from outside.
+
+   The `body` tracking of -0.02em is reset to normal: it exists because Inter sets loose default spacing at body sizes, and the same value cramps a serif — the Cyrillic especially.
+7. **Metadata that stops competing.** Date, reading time, word count, maturity and the series badge sat under the title at sizes close enough to argue with it. One size, one grey, one line. The `categories:` chips were bordered pills at body size — three of them were as loud as the heading — and are now `#tags`.
+8. **Spacing that groups.** A heading two lines below the paragraph it interrupts belongs to that paragraph. The space above `h2` is now well past the space below it, and pages open with more air, so sections separate without a single divider.
+
+**Newsreader was chosen and then rejected: it has no Cyrillic subset.** It is the better screen serif, and every note on this site carries a Ukrainian translation — a typeface that covers half the content isn't a candidate, it's a bug with good kerning. Source Serif 4 has Cyrillic *and* Cyrillic-Extended, is variable, and was drawn for text at reading sizes. **Worth remembering as a rule: on this site, script coverage is a hard filter, applied before anything is judged on looks.**
+
+**This is scaffolding and should not survive the decision.** Whichever design wins should be the only one in `globals.css`. Delete the loser, `lib/theme.ts`, the palette action, the `actionToggleTheme` string and the theme half of the inline script.
+
+### Outcome (same day)
+
+**Theme one won and the switch is gone.** `lib/theme.ts`, the palette action, its `ui` string, the `[data-theme]` half of the inline script and every `:root:not([data-theme="two"])` selector have been deleted; the tokens are folded into `:root` and the rules into the ordinary stylesheet, under a "Visual design" banner at the foot of `globals.css`. The eight points above are now just how the site looks, and this entry stands as the reasoning behind each of them.
+
+**With one change carried back from theme two: the dark background.** Theme one had taken `--bg` down to `#08080a`, and the grey it replaced (`#0a0a0a`, with `#0e0e0f` behind the sidebar) is better — near-black is not the same as black, and the extra darkness bought nothing except a harder edge against `--surface`. Everything else in dark mode keeps theme one's values, including the surface that finally sits *above* the background rather than beside it.
+
+**Inter is now loaded and unused.** It's still in `app/layout.tsx` and still owns Tailwind's `--font-sans`, but with the serif set on `body` and code carrying its own monospace stack, nothing on the site renders in it. Dropping it would save a download; keeping it costs a font file and leaves the door open. Left in deliberately, and noted here so it isn't discovered as a mystery.
+
+## 60. The floating chrome was the page's own colour (2026-07-31)
+
+Reported from a phone: after the design pass the site read as *completely black*, with the breadcrumb bar and the contents pill barely visible. On a desktop nothing had changed.
+
+The desktop/phone split was the tell, and it isn't about screen size — it's about **which mode each device was in**. The regression was entirely in dark mode, and the phone was the only device looking at it.
+
+**The bars were built out of the page they float over.** `.chrome-bar`, `.toc-bar`, `.time-left` and `.resume-reading` were all `color-mix(in srgb, var(--bg) 75%, transparent)` with a blur and **no border** — the page's own colour, painted at 75% on top of the page. In light mode that works by accident: the backdrop blur smears the text behind the pill and the smear is what your eye reads as an edge. In dark mode there is nothing to smear into anything, so a near-black pill sits on a near-black page and the only thing marking it is its content.
+
+Making `--bg` darker (#0a0a0a → #08080a) didn't create this, it just removed the last of the margin. **A surface defined as a fraction of the thing behind it can't be seen against the thing behind it** — the transparency was doing all the work and there was no fallback when it stopped being enough.
+
+**They now take a surface that sits above the page.** `--chrome-bg` is built from `--bg` in light mode (unchanged) and from `--surface` in dark, which is lighter than the background — the token split off in #58 for exactly this, used properly for the first time. Plus a hairline.
+
+**The hairline is an inset shadow, not a border.** `.toc-bar` and the breadcrumb bar are deliberately built to the same 2.5rem height (#51); a real border adds two pixels to whichever of them got it, and the two chips in opposite corners would stop agreeing. `box-shadow: inset 0 0 0 1px` costs no layout at all.
+
+**And the breadcrumb bar's fill was a Tailwind utility on the element** (`bg-[var(--bg)]/75`), which is why it was the last piece of chrome still painted in the page colour after the others were fixed — it wasn't in the stylesheet to find. It's `.chrome-bar` in `globals.css` now, sharing the token with the pill opposite it. Two chips that are the same object at two corners should not be styled in two different files.
+
+**Two dark-mode values came back up as well.** `--border` (#1d1d21 → #26262b) and `--text-tertiary` (#5e5e68 → #6f6f7a). Widening the tonal range is right on white, where pushing the quietest grey lighter costs nothing; in dark mode the same move pushes it *toward the background*, and on a phone in daylight it disappears. **The rule isn't "more range", it's "more distance from the background" — and which direction that is depends on the mode.**

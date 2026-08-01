@@ -15,6 +15,7 @@ import { displayDateUk } from "@/lib/vault";
 import { pageMeta } from "@/lib/metadata";
 import { previewsInHtml } from "@/lib/previews";
 import LinkPreview from "@/components/LinkPreview";
+import Page from "@/components/Page";
 
 /** Title and description come from the layout's defaults; this adds the
     canonical, which every page needs and the root most of all. */
@@ -30,11 +31,11 @@ export default async function HomePage() {
 
   if (!home) {
     return (
-      <div className="mx-auto max-w-2xl px-6 py-20">
+      <Page>
         <p className="text-[var(--text-secondary)]">
           Create <code>vault/Home/main.md</code> to populate this page.
         </p>
-      </div>
+      </Page>
     );
   }
 
@@ -57,7 +58,7 @@ export default async function HomePage() {
   );
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-14 lg:py-24">
+    <Page>
       <LinkPreview previews={previewsInHtml(html, htmlUk)} />
       {htmlUk ? (
         <>
@@ -85,7 +86,7 @@ export default async function HomePage() {
             </h2>
             <Link
               href="/posts"
-              className="text-sm text-[var(--text-tertiary)] transition-colors hover:text-[var(--text)]"
+              className="press text-sm text-[var(--text-tertiary)] hover:text-[var(--text)]"
             >
               <T {...ui.allPosts} />
             </Link>
@@ -153,6 +154,6 @@ export default async function HomePage() {
           </div>
         </section>
       )}
-    </div>
+    </Page>
   );
 }

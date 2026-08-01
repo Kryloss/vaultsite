@@ -14,6 +14,7 @@ import {
 import { getBookQuotes } from "@/lib/quotes";
 import ShelfTypeView from "@/components/lists/ShelfTypeView";
 import T from "@/components/T";
+import Page from "@/components/Page";
 
 /** URL segment for the synthetic Quotes category — see lib/quotes.ts. */
 const QUOTES_SLUG = "quotes";
@@ -92,10 +93,10 @@ export default async function ShelfCategoryPage({ params }: Props) {
   if (!name && !showQuotes) notFound();
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-14 lg:py-24">
+    <Page>
       <Link
         href={`/${section.slug}`}
-        className="text-sm text-[var(--text-tertiary)] transition-colors hover:text-[var(--text)]"
+        className="press inline-block text-sm text-[var(--text-tertiary)] hover:text-[var(--text)]"
       >
         ← <T en={section.title} uk={section.titleUk} />
       </Link>
@@ -107,6 +108,6 @@ export default async function ShelfCategoryPage({ params }: Props) {
         quotes={quotes}
         showQuotes={showQuotes}
       />
-    </div>
+    </Page>
   );
 }

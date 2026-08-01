@@ -2,10 +2,11 @@ import Link from "next/link";
 import T from "@/components/T";
 import NotFoundSuggestions from "@/components/NotFoundSuggestions";
 import { ui } from "@/lib/ui-strings";
+import Page from "@/components/Page";
 
 export default function NotFound() {
   return (
-    <div className="mx-auto max-w-2xl px-6 py-24">
+    <Page>
       <h1 className="text-2xl font-semibold tracking-tight text-[var(--text)]">
         404
       </h1>
@@ -20,10 +21,10 @@ export default function NotFound() {
 
       <Link
         href="/"
-        className="mt-8 inline-block text-sm text-[var(--accent)] hover:underline"
+        className="notfound-home press mt-8 inline-block text-sm text-[var(--accent)] hover:underline"
       >
         <T {...ui.backHome} />
       </Link>
-    </div>
+    </Page>
   );
 }

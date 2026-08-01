@@ -10,6 +10,7 @@ import T from "@/components/T";
 import JsonLd from "@/components/JsonLd";
 import LinkPreview from "@/components/LinkPreview";
 import { breadcrumbJsonLd } from "@/lib/jsonld";
+import Page from "@/components/Page";
 
 interface Props {
   params: Promise<{ section: string }>;
@@ -58,14 +59,14 @@ export default async function SectionPage({ params }: Props) {
   const List = getListComponent(section.type);
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-14 lg:py-24">
+    <Page>
       <JsonLd data={breadcrumbJsonLd(section)} />
       {/* Hover cards for the internal links in this section's own prose. The
           entry list below links to notes too, but those rows already show a
           title and a date — a card repeating them adds nothing. */}
       <LinkPreview previews={previewsInHtml(html, htmlUk)} />
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-[var(--text)]">
+        <h1 className="page-title text-2xl font-semibold tracking-tight text-[var(--text)]">
           {section.icon && <span className="mr-2">{section.icon}</span>}
           <T en={section.title} uk={section.titleUk} />
         </h1>
@@ -96,6 +97,6 @@ export default async function SectionPage({ params }: Props) {
       ) : null}
 
       <List section={section} entries={entries} />
-    </div>
+    </Page>
   );
 }

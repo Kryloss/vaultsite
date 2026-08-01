@@ -354,7 +354,10 @@ export default function CommandPalette({
               lang === "en" ? "Switch to Ukrainian" : "Перемкнути на англійську"
             }
             title={lang === "en" ? "English" : "Українська"}
-            className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-base leading-none transition-colors hover:bg-[var(--bg-hover)]"
+            /* `press` and `-translate-y-1/2` coexist: Tailwind v4 centres with
+               the `translate` property, not `transform`, so the scale has the
+               transform to itself. */
+            className="press absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-base leading-none hover:bg-[var(--bg-hover)]"
           >
             {lang === "en" ? "🇨🇦" : "🇺🇦"}
           </button>
@@ -401,7 +404,7 @@ export default function CommandPalette({
                 type="button"
                 onClick={() => runRow(row)}
                 onMouseEnter={() => setSelected(i)}
-                className={`flex w-full items-baseline justify-between gap-3 px-4 py-2.5 text-left text-[15px] transition-colors ${
+                className={`press flex w-full items-baseline justify-between gap-3 px-4 py-2.5 text-left text-[15px] ${
                   i === selected
                     ? "bg-[var(--bg-hover)] text-[var(--text)]"
                     : "text-[var(--text-secondary)]"

@@ -39,7 +39,7 @@ export default function MusicList({ section, entries }: ListProps) {
           {playlists.map((url) => (
             <div
               key={url}
-              className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-hover)] shadow-sm transition-shadow duration-300 hover:shadow-md"
+              className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm transition-shadow duration-300 hover:shadow-md"
             >
               {/* credentialless: fresh ephemeral storage each load (Chromium)
                   so stale Apple state can't stall the player — see DECISIONS #10 */}
@@ -58,7 +58,7 @@ export default function MusicList({ section, entries }: ListProps) {
                   href={url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[var(--text-tertiary)] transition-colors hover:text-[var(--text-secondary)]"
+                  className="press text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
                 >
                   <T {...ui.openInAppleMusic} /> ↗
                 </a>
@@ -98,7 +98,7 @@ export default function MusicList({ section, entries }: ListProps) {
               <li key={entry.slug}>
                 <Link
                   href={`/${section.slug}/${entry.slug}`}
-                  className="group -mx-3 flex items-baseline justify-between gap-4 rounded-lg px-3 py-2.5 transition-colors hover:bg-[var(--bg-hover)]"
+                  className="group press press-soft -mx-3 flex items-baseline justify-between gap-4 rounded-lg px-3 py-2.5 hover:bg-[var(--bg-hover)]"
                 >
                   <span className="min-w-0">
                     <span className="block truncate font-medium text-[var(--text)]">

@@ -126,7 +126,7 @@ export default function NowList({ section }: ListProps) {
             <li key={i}>
               {href ? (
                 isInternal(href) ? (
-                  <Link href={href} className={`${cardClass} hover:bg-[var(--bg-hover)]`}>
+                  <Link href={href} className={`${cardClass} press press-soft hover:bg-[var(--bg-hover)]`}>
                     {inner}
                   </Link>
                 ) : (
@@ -134,7 +134,7 @@ export default function NowList({ section }: ListProps) {
                     href={href}
                     target="_blank"
                     rel="noreferrer"
-                    className={`${cardClass} hover:bg-[var(--bg-hover)]`}
+                    className={`${cardClass} press press-soft hover:bg-[var(--bg-hover)]`}
                   >
                     {inner}
                   </a>

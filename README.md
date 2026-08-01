@@ -27,13 +27,15 @@ Entry frontmatter: `title`, `date` (YYYY-MM-DD), `description`, `draft`.
 
 **Diagrams:** embed Excalidraw drawings with `![[Name.excalidraw]]` (turn on the plugin's Auto-export SVG; light+dark exports become theme-aware). AI-made diagrams are self-theming `.svg` files embedded like images. See [docs/EXCALIDRAW.md](./docs/EXCALIDRAW.md).
 
-**Section types:** `posts` (year-grouped rows; entries can set `category:` for filter chips) · `music` (Apple Music playlist embeds via `playlists:` frontmatter + notes below) · `people` (square cover-image grid; entries set `cover: photo.jpg`) · `shelf` (vertical 2:3 covers with Books/Movies/Shows filter; entries set `cover:`, `author:`, `medium: book|movie|show`) · `projects` (full entries rendered inline, TIL-style) · `now` (status cards from an `items:` list in main.md — a nownownow-style page). Any Apple Music link pasted alone on a line in any note also becomes an embedded player.
+**Section types:** `posts` (year-grouped rows; entries can set `category:` for filter chips) · `music` (Apple Music playlist embeds via `playlists:` frontmatter + notes below) · `people` (square cover-image grid; entries set `cover: photo.jpg`) · `shelf` (Netflix-style: one horizontally-scrolling row per medium, each opening its own page; entries set `cover:`, `author:`, `medium: book|movie|show|video`, optional `rating:` and `status: reading`) · `projects` (full entries rendered inline, TIL-style) · `now` (a nownownow-style page: a goals checklist and a résumé, both written as markdown in `main.md`'s body). Any Apple Music or YouTube link pasted alone on a line in any note also becomes an embedded player.
 
 ## Local development
 
 ```bash
 npm install
 npm run dev   # http://localhost:3000
+npm run build # must pass — it statically generates every page
+npm test      # unit tests for lib/ (Node's own runner, no framework)
 ```
 
 ## Key files
@@ -42,6 +44,8 @@ npm run dev   # http://localhost:3000
 - `lib/vault.ts` — folder→page engine
 - `lib/markdown.ts` — markdown + Obsidian syntax → HTML
 - `lib/section-types.tsx` — registry of page styles (extend here)
+- `app/globals.css` — design tokens (colour, radius, motion, page shell) + all hand-written styles
+- `components/Page.tsx` — the page shell every route wraps in
 - `app/` — routes and layout
 - `scripts/sync-assets.mjs` — copies vault images to `public/` before build
 

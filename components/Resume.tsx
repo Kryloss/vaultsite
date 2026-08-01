@@ -55,7 +55,7 @@ export default function Resume({ section }: { section: Section }) {
           <a
             href={fileUrl}
             download
-            className="group inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
+            className="group press inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
           >
             <DownloadIcon className="h-3.5 w-3.5 transition-transform group-hover:translate-y-px" />
             <T {...ui.resumeDownload} />
@@ -118,7 +118,7 @@ export default function Resume({ section }: { section: Section }) {
         <Block id="contact" label={<T {...ui.resumeContact} />}>
           <a
             href={`mailto:${data.contact.email}`}
-            className="inline-flex items-center gap-2 text-sm text-[var(--text-secondary)] underline decoration-[var(--text-tertiary)] underline-offset-4 transition-colors hover:text-[var(--text)]"
+            className="press inline-flex items-center gap-2 text-sm text-[var(--text-secondary)] underline decoration-[var(--text-tertiary)] underline-offset-4 hover:text-[var(--text)]"
           >
             <MailIcon className="h-4 w-4" />
             {data.contact.email}
@@ -209,7 +209,7 @@ function Timeline({ rows, badge = false }: { rows: ResumeRow[]; badge?: boolean 
                   title
                 )}
                 {badge && row.current && (
-                  <span className="ml-2 align-[2px] rounded-full bg-[var(--bg-hover)] px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[var(--text-secondary)]">
+                  <span className="ml-2 align-[2px] rounded-full bg-[var(--surface)] px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[var(--text-secondary)]">
                     <T {...ui.resumeCurrent} />
                   </span>
                 )}

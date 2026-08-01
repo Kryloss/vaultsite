@@ -55,7 +55,7 @@ export default async function TilList({ section, entries }: ListProps) {
           <h2 className="mt-1 text-lg font-semibold tracking-tight">
             <Link
               href={`/${section.slug}/${entry.slug}`}
-              className="text-[var(--text)] transition-colors hover:text-[var(--text)]"
+              className="press text-[var(--text)]"
             >
               <T en={entry.title} uk={entry.titleUk} />
             </Link>
