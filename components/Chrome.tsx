@@ -449,7 +449,7 @@ export default function Chrome({
         >
           <SearchIcon className="h-[15px] w-[15px] shrink-0" />
           <span className="side-rail-search-label">
-            <T {...ui.searchPlaceholder} />
+            <T {...ui.searchShort} />
           </span>
           {/* The one ornament in the panel, and it earns its place: the
               palette is the fastest thing on the site and was previously

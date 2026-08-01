@@ -25,6 +25,9 @@ export const ui = {
     en: "Search pages and posts…",
     uk: "Пошук сторінок і дописів…",
   },
+  /* The palette's own placeholder is too long for the 13rem pages rail, and
+     the rail sits beside a key hint that already says what it does. */
+  searchShort: { en: "Search…", uk: "Пошук…" },
   searchHint: {
     en: "↑↓ navigate · ↵ open · esc close",
     uk: "↑↓ навігація · ↵ відкрити · esc закрити",
@@ -112,7 +115,6 @@ export const ui = {
   actionGithub: { en: "Open this note on GitHub", uk: "Відкрити нотатку на GitHub" },
   searchThisPage: { en: "Searching this page", uk: "Пошук на цій сторінці" },
   actionsGroup: { en: "Actions", uk: "Дії" },
-  searchPlaceholder: { en: "Search…", uk: "Пошук…" },
   recentGroup: { en: "Recent", uk: "Нещодавні" },
   pagesGroup: { en: "Pages", uk: "Сторінки" },
   actionDone: { en: "Done", uk: "Готово" },
