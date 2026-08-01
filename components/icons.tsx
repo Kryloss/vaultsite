@@ -212,8 +212,19 @@ export function InstagramIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
       <defs>
-        {/* Corner to corner, the way the real logo runs. */}
-        <linearGradient id="ig-grad" x1="2" y1="22" x2="22" y2="2">
+        {/* Bottom-left to top-right, the way the real logo runs.
+            `userSpaceOnUse` is load-bearing: without it the coordinates are
+            read as FRACTIONS of the bounding box, so 2 and 22 mean 200% and
+            2200%, the visible glyph lands inside a sliver of the ramp, and
+            the whole thing renders as one flat pink. */}
+        <linearGradient
+          id="ig-grad"
+          gradientUnits="userSpaceOnUse"
+          x1="3"
+          y1="21"
+          x2="21"
+          y2="3"
+        >
           <stop offset="0%" stopColor="#FEDA75" />
           <stop offset="25%" stopColor="#FA7E1E" />
           <stop offset="50%" stopColor="#D62976" />

@@ -2613,7 +2613,10 @@ a.series-link:hover {
 }
 
 .social-link[data-social="github"] { --brand: #24292f; }
-.social-link[data-social="instagram"] { --brand: #e1306c; }
+/* Instagram's `--brand` deliberately holds still: the gradient copy of the
+   glyph is what arrives on hover, and letting the grey copy drift pink
+   underneath it just makes the cross-fade muddy in the middle. */
+.social-link[data-social="instagram"] { --brand: var(--text-tertiary); }
 .social-link[data-social="linkedin"] { --brand: #0a66c2; }
 .social-link[data-social="x"] { --brand: #0f1419; }
 /* mail: no rule — the `var(--text)` default above is the point. */
