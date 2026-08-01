@@ -99,8 +99,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0a0a0a;
-    --bg-sidebar: #0e0e0f;
+    --bg: #08080a;
+    --bg-sidebar: #0c0c0e;
     --bg-hover: #1e1e23;
     /* ABOVE the background, not beside it. A dark interface isn't a light one
        with the numbers flipped: surfaces have to sit on top of the page, and
