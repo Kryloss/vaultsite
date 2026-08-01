@@ -265,7 +265,7 @@ export default function Chrome({
           Below 640px only — see globals.css. */}
       <div
         className="chrome-bar fixed left-3 top-3 z-30 flex items-center gap-1 rounded-full bg-[var(--bg)]/75 px-1.5 py-1 backdrop-blur-md"
-        data-compact={compact && timeLeft !== null}
+        data-compact={compact}
       >
         <button
           ref={menuButtonRef}
@@ -280,12 +280,21 @@ export default function Chrome({
         </button>
         {/* Reading downward on a phone: the breadcrumb collapses and this
             takes its place, so the bar keeps saying something useful instead
-            of shrinking to a lone button. */}
-        {timeLeft !== null && (
-          <span className="bar-time">
-            {timeLeft} <T {...ui.minLeft} />
-          </span>
-        )}
+            of shrinking to a lone button.
+
+            ALWAYS rendered, even with nothing to say. Mounting it only once a
+            number existed meant it appeared mid-swap already at full width —
+            an element's first computed style is its final one, so there was
+            nothing for the transition to run from and the chip jumped. Empty,
+            it is a zero-width flex item that costs a comment to explain and
+            nothing to draw. */}
+        <span className="bar-time" aria-hidden={timeLeft === null}>
+          {timeLeft !== null && (
+            <>
+              {timeLeft} <T {...ui.minLeft} />
+            </>
+          )}
+        </span>
         <span className={`crumbs${compact ? " is-collapsed" : ""}`}>
           {crumbs.map((crumb, i) => (
             <Fragment key={crumb.href}>
