@@ -206,6 +206,17 @@ export default function Chrome({
 
   const openSearch = useCallback(() => setSearchOpen(true), []);
 
+  /**
+   * Whether the chip should swap its label at all.
+   *
+   * The breadcrumb only gives way when there is something to give way TO. On a
+   * section list, the home page, or any note without a reading estimate there
+   * is no time remaining, so collapsing would animate the breadcrumb out and
+   * leave an empty chip — motion that costs the reader attention and returns
+   * nothing. Those pages simply keep their breadcrumb.
+   */
+  const swap = compact && timeLeft !== null;
+
   const nav = items.map((item) => ({
     ...item,
     href: item.slug === "home" ? "/" : `/${item.slug}`,
@@ -265,7 +276,7 @@ export default function Chrome({
           Below 640px only — see globals.css. */}
       <div
         className="chrome-bar fixed left-3 top-3 z-30 flex items-center gap-1 rounded-full bg-[var(--bg)]/75 px-1.5 py-1 backdrop-blur-md"
-        data-compact={compact}
+        data-compact={swap}
       >
         <button
           ref={menuButtonRef}
@@ -289,7 +300,7 @@ export default function Chrome({
             mounted mid-swap has no previous style to animate from, which is
             its own kind of jump. */}
         <span className="bar-swap">
-          <span className={`crumbs${compact ? " is-collapsed" : ""}`}>
+          <span className={`crumbs${swap ? " is-collapsed" : ""}`}>
           {crumbs.map((crumb, i) => (
             <Fragment key={crumb.href}>
               {i > 0 && <span className="text-[var(--text-tertiary)]"> · </span>}
