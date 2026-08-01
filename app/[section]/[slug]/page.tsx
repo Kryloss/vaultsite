@@ -122,14 +122,8 @@ export default async function EntryPage({ params }: Props) {
       {/* Hover cards for the internal links in THIS note only — see
           previewsInHtml() in lib/previews.ts. */}
       <LinkPreview previews={previewsInHtml(en.html, uk?.html)} />
-      <Link
-        href={`/${section.slug}`}
-        className="press inline-block text-sm text-[var(--text-tertiary)] hover:text-[var(--text)]"
-      >
-        ← <T en={section.title} uk={section.titleUk} />
-      </Link>
 
-      <header className="mt-6">
+      <header>
         <h1 className="page-title text-2xl font-semibold tracking-tight text-[var(--text)]">
           <T en={entry.title} uk={entry.titleUk} />
           {typeof entry.meta.rating === "number" && (

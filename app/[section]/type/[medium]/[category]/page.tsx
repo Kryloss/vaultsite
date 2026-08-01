@@ -94,12 +94,6 @@ export default async function ShelfCategoryPage({ params }: Props) {
 
   return (
     <Page>
-      <Link
-        href={`/${section.slug}`}
-        className="press inline-block text-sm text-[var(--text-tertiary)] hover:text-[var(--text)]"
-      >
-        ← <T en={section.title} uk={section.titleUk} />
-      </Link>
 
       <ShelfTypeView
         sectionSlug={section.slug}

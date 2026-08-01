@@ -72,7 +72,7 @@ export default function ShelfTypeView({
 
   return (
     <div>
-      <header className="mt-6">
+      <header>
         <h1 className="page-title text-2xl font-semibold tracking-tight text-[var(--text)]">
           <T {...group.label} />
           {/* Inherits the heading's size, weight and tracking — only the

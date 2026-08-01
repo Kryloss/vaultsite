@@ -33,7 +33,7 @@ export default function ShelfCard({
            They're made smaller instead, by being sized from their own
            (shorter) height rather than the shared one; see `--shelf-video-h`
            in globals.css. */
-        className={`relative overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--surface)] shadow-sm transition-shadow duration-300 group-hover:shadow-md ${
+        className={`relative overflow-hidden rounded-lg bg-[var(--surface)] shadow-sm transition-shadow duration-300 group-hover:shadow-md ${
           item.isVideo ? "aspect-video" : "aspect-[2/3]"
         }`}
       >

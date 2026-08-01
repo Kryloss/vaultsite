@@ -56,12 +56,6 @@ export default async function ShelfMediumPage({ params }: Props) {
 
   return (
     <Page>
-      <Link
-        href={`/${section.slug}`}
-        className="press inline-block text-sm text-[var(--text-tertiary)] hover:text-[var(--text)]"
-      >
-        ← <T en={section.title} uk={section.titleUk} />
-      </Link>
 
       {/* Passed so the Quotes chip shows here too — the page it leads to is
           /books/quotes, handled by the [category] route. */}

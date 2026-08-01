@@ -92,7 +92,10 @@
   --chrome-ring: color-mix(in srgb, var(--text) 9%, transparent);
 
   /* ---- Page shell ---- (components/Page.tsx) */
-  --measure: 42rem; /* the text column, unchanged from max-w-2xl */
+  /* The text column. 42rem was chosen for 16px Inter; at 17px Source Serif
+     that is about 78 characters a line, and a serif wants 60–70. This is the
+     token the typeface change should have moved and didn't. */
+  --measure: 39rem;
   --gutter: 1.5rem;
   --page-y: 4.5rem;
 }
@@ -263,13 +266,19 @@ html[data-lang="uk"] .lang-uk {
   }
 }
 
+/* Tinted rather than inverted. Full inversion was a hard black slab that hid
+   the serif's shapes; a wash keeps the text readable while it's selected —
+   which matters more here, because selecting prose is how the copy-link pill
+   is summoned (components/SelectionLink.tsx). */
 ::selection {
-  background: var(--text);
-  color: var(--bg);
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+  color: var(--text);
 }
 
 :focus-visible {
-  outline: 2px solid var(--text-secondary);
+  /* A keyboard reader's position is state, and state is what the accent is
+     for — it also separates the focus ring from every grey border near it. */
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: var(--r-xs);
 }
@@ -286,6 +295,12 @@ body {
      especially. */
   font-family: var(--font-prose);
   letter-spacing: normal;
+  /* Source Serif carries a real optical-size axis (requested in layout.tsx),
+     so the letterforms are cut differently at 46px than at 17px rather than
+     merely scaled. `auto` is the initial value, but it's stated because the
+     axis only exists here deliberately and a future font swap should have to
+     notice this line. */
+  font-optical-sizing: auto;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -353,29 +368,47 @@ body::after {
   /* Tracking wants to go more negative as size goes up, but far less for a
      serif than the -0.03em this carried when the site was set in Inter. */
   letter-spacing: -0.01em;
+  /* One word alone on the last line is a small blemish at 18px and a large
+     one at 28px. `balance` evens the lines instead. */
+  text-wrap: balance;
   scroll-margin-top: 5rem;
 }
 
-.prose h1 { font-size: 1.25rem; margin: 0 0 1.25rem; }
+/* Sized to sit UNDER `.page-title`, not beside the old 24px one. At 20px
+   against a 46px title a markdown `#` read as a mistake rather than a level.
+   The rest of the scale steps down from it so h1 > h2 > h3 is legible at a
+   glance — they used to be 20/18/16, which on a 17px body is no scale at all. */
+.prose h1 { font-size: 1.75rem; margin: 0 0 1.25rem; }
 /* The space ABOVE an h2 is well past the space below it: a heading two lines
    under the paragraph it interrupts reads as part of that paragraph. This is
    what separates the sections, rather than a rule or a divider. */
-.prose h2 { font-size: 1.125rem; margin: 3.25rem 0 0.75rem; }
-.prose h3 { font-size: 1rem; margin: 2.25rem 0 0.5rem; }
+.prose h2 { font-size: 1.3125rem; margin: 3.25rem 0 0.75rem; }
+.prose h3 { font-size: 1.125rem; margin: 2.25rem 0 0.5rem; }
 .prose h4 { font-size: 0.9375rem; margin: 1.5rem 0 0.5rem; }
 
-.prose p { margin: 1rem 0; }
+/* `pretty` only forbids the orphan; it doesn't re-flow the whole paragraph
+   the way `balance` would, which is why body copy gets one and headings the
+   other. */
+.prose p { margin: 1rem 0; text-wrap: pretty; }
 
+/* Links are the accent's largest job. `--accent` used to have exactly one —
+   the reading bar — which meant the only colour a reader ever met was a
+   progress indicator, and prose links were distinguishable from body text by
+   an underline alone. The rule now is that the accent marks things you can
+   ACT on and things reporting STATE: links, focus, the progress bars, the
+   reading bar. Navigation and chips stay monochrome and keep their
+   text-on-background inversion — colouring those as well would turn the
+   chrome blue and leave the accent meaning nothing again. */
 .prose a {
-  color: var(--text);
+  color: var(--accent);
   text-decoration: underline;
-  text-decoration-color: var(--text-tertiary);
+  text-decoration-color: color-mix(in srgb, var(--accent) 40%, transparent);
   text-underline-offset: 3px;
   transition: color var(--dur-fast) var(--ease), text-decoration-color var(--dur-fast) var(--ease);
 }
 
 .prose a:hover {
-  text-decoration-color: var(--text);
+  text-decoration-color: var(--accent);
 }
 
 .prose ul,
@@ -419,7 +452,8 @@ body::after {
   display: block;
   height: 100%;
   border-radius: var(--r-xs);
-  background: var(--text);
+  /* Same reasoning as the reading bar: this reports progress, not decoration. */
+  background: var(--accent);
   transition: width 0.6s var(--ease);
 }
 
@@ -1976,14 +2010,11 @@ body::after {
 /* ---------- Quotes collection (components/lists/QuotesView.tsx) ---------- */
 
 /* The Quotes chip isn't a category — it opens a different kind of page. It's
-   set apart by voice rather than ornament: the same italic serif the quotes
+   set apart by voice rather than ornament: the same italic the quotes
    themselves are set in, so the chip previews where it leads. */
 .chip-quotes {
-  font-family: var(--font-serif);
   font-style: italic;
-  /* Serifs read small next to Inter at the same size. */
   font-size: 0.9375rem;
-  letter-spacing: 0;
 }
 
 .quote-source {
@@ -2014,18 +2045,17 @@ body::after {
 }
 
 /* The passage is the content here, so it gets prose size — bigger than the
-   book it came from, which is only a label. Set in an italic serif against
-   the site's sans, so a quotation reads as someone else's words. */
+   book it came from, which is only a label. The ITALIC is what marks it as
+   someone else's words; it used to be a second family (Lora) set against the
+   site's sans, and once the site became a serif that distinction stopped
+   existing. Same family, different cut. */
 .pull-quote {
   margin: 0;
   padding: 0.125rem 0 0.125rem 1rem;
   border-left: 2px solid var(--border);
-  font-family: var(--font-serif);
   font-style: italic;
   font-size: 1.125rem;
   line-height: 1.6;
-  /* Inter's tracking correction doesn't apply to a serif. */
-  letter-spacing: 0;
   color: var(--text-secondary);
 }
 
@@ -2817,7 +2847,7 @@ svg.diagram tspan {
 }
 
 .notfound-home {
-  color: var(--text);
+  color: var(--accent);
   text-decoration: underline;
   text-decoration-color: var(--text-tertiary);
   text-underline-offset: 4px;
