@@ -43,7 +43,7 @@ Next.js only serves static files from `public/`. Instead of a runtime file-servi
 
 - `app/layout.tsx` (server) reads sections → passes nav items to `components/Chrome.tsx` (client), which owns all site chrome.
 - The sidebar is a slide-in **drawer**, closed by default at every width, opened from the floating pill at the top-left that also carries the breadcrumb. It's a modal dialog: focus trapped while open, restored on close, `inert` when closed.
-- **From 1280px a standing pages rail** (`.side-rail`) sits under that pill — the sections as plain text plus the search field, no icons. It appears at the same width as the contents rail on the right, so the article sits between two panels rather than in an empty left margin. It holds no state and is hidden by a media query below 1280px. The drawer still opens from the same button and still owns the social links and the day counter (DECISIONS #62).
+- **From 1280px a standing pages rail** (`.side-rail`) sits under that pill — the sections as plain text plus a search icon. Styled like the contents rail opposite it — a hairline and small type, no card — so the two bracket the article. It appears at the same width as the contents rail on the right, so the article sits between two panels rather than in an empty left margin. It holds no state and is hidden by a media query below 1280px. The drawer still opens from the same button and still owns the social links and the day counter (DECISIONS #62).
 - Every route wraps its content in `components/Page.tsx` rather than repeating a container — see Design system below.
 - Section entry lists are pluggable via `lib/section-types.tsx` (see ADDING-PAGE-TYPES.md).
 

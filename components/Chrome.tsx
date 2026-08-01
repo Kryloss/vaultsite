@@ -441,20 +441,18 @@ export default function Chrome({
           state, so a media query is the whole implementation, and there's no
           resize listener or hydration mismatch to get wrong. */}
       <nav className="side-rail" aria-label={lang === "uk" ? "Сторінки" : "Pages"}>
+        {/* The icon alone. A labelled field with a key hint was the loudest
+            thing in a column whose whole job is to be quiet — the shortcut
+            lives in the title attribute and the `?` cheat sheet instead. */}
         <button
           type="button"
           onClick={() => setSearchOpen(true)}
           onPointerEnter={warmSearchIndex}
+          aria-label={`${ui.searchShort[lang]} (${metaKey}K)`}
+          title={`${ui.searchShort[lang]} (${metaKey}K)`}
           className="side-rail-search press"
         >
           <SearchIcon className="h-[15px] w-[15px] shrink-0" />
-          <span className="side-rail-search-label">
-            <T {...ui.searchShort} />
-          </span>
-          {/* The one ornament in the panel, and it earns its place: the
-              palette is the fastest thing on the site and was previously
-              invisible unless you already knew the shortcut. */}
-          <kbd className="side-rail-kbd">{metaKey}K</kbd>
         </button>
 
         <ul>
