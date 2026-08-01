@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import T from "@/components/T";
+import { CheckIcon } from "@/components/icons";
 import { useLang } from "@/components/useLang";
+import { readNotes, READ_EVENT } from "@/lib/read-notes";
 /* Type-only: lib/series.ts reaches the filesystem, and a type import is
    erased before the client bundle is built. Everything this needs at runtime
    arrives already computed on the `series` prop. */
@@ -30,10 +32,21 @@ const EDGE = 12;
  *
  * Rows are a number and a title. No dates: this is a place to go, not a thing
  * to read, and the numbering already carries the order.
+ *
+ * **How much of the arc you've read** is layered on top of that, from
+ * lib/read-notes.ts — a tick against the parts you finished, a count in the
+ * panel, and a line filling under the badge itself so the answer is visible
+ * without opening anything. All of it is client-only and starts at zero: the
+ * server has no idea who is reading, so the first render must match the one
+ * the build produced or React will complain, and the marks appear a frame
+ * later. That also means the badge never changes SIZE — an underline that
+ * grows can't reflow the metadata row the way "· 3 read" would.
  */
 export default function Series({ series }: { series: Series }) {
   const { lang } = useLang();
   const [open, setOpen] = useState(false);
+  /** Paths finished, per this browser. Empty until after hydration. */
+  const [read, setRead] = useState<ReadonlySet<string>>(() => new Set());
   /** See the note in Toc.tsx: the list waits for the first open, then stays. */
   const [everOpen, setEverOpen] = useState(false);
   const sheetRef = useRef<HTMLElement>(null);
@@ -41,6 +54,22 @@ export default function Series({ series }: { series: Series }) {
   useEffect(() => {
     if (open) setEverOpen(true);
   }, [open]);
+
+  /**
+   * Read the store once, then again whenever a note is marked read.
+   *
+   * The event matters for the part you're on: finish it and the badge fills
+   * in underneath you, without a navigation and without polling. Everything
+   * else about this component already exists on the page by then.
+   */
+  useEffect(() => {
+    const sync = () => setRead(new Set(Object.keys(readNotes())));
+    sync();
+    window.addEventListener(READ_EVENT, sync);
+    return () => window.removeEventListener(READ_EVENT, sync);
+  }, []);
+
+  const readCount = series.parts.filter((p) => read.has(p.href)).length;
 
   useEffect(() => {
     if (!open) return;
@@ -88,6 +117,14 @@ export default function Series({ series }: { series: Series }) {
         aria-expanded={open}
         aria-controls="series-parts"
         className="series-badge"
+        /* The fraction of the arc read, drawn as a line under the badge in
+           globals.css. Not text: a number here would change the badge's width
+           after hydration, and this row is metadata, not a dashboard. */
+        style={
+          {
+            "--read": String(readCount / series.total),
+          } as React.CSSProperties
+        }
       >
         <T {...series.partLabel} />
       </button>
@@ -113,10 +150,23 @@ export default function Series({ series }: { series: Series }) {
                 Road to Security+" says the word twice over, once needlessly. */}
             <p className="series-name">
               <T en={series.name} uk={series.nameUk} />
+              {/* Built here rather than in lib/series.ts: this is a client
+                  component and that module reaches the filesystem, so the
+                  count — which only exists in the browser — can't come from
+                  there. Interpolating numbers rules out a `ui` key too. */}
+              {readCount > 0 && (
+                <span className="series-read-count">
+                  <T
+                    en={`${readCount} of ${series.total} read`}
+                    uk={`${readCount} з ${series.total} прочитано`}
+                  />
+                </span>
+              )}
             </p>
 
             <ol className="series-list">
               {series.parts.map((part) => {
+                const done = read.has(part.href);
                 const label = (
                   <>
                     <span className="series-number" aria-hidden>
@@ -125,6 +175,9 @@ export default function Series({ series }: { series: Series }) {
                     <span className="series-part-title">
                       <T en={part.title} uk={part.titleUk} />
                     </span>
+                    {/* The number stays — the tick is added beside it, not in
+                        place of it, so the reading order never goes missing. */}
+                    {done && <CheckIcon className="series-tick" />}
                   </>
                 );
 
