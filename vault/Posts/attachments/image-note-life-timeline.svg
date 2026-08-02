@@ -1,12 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 930" role="img" aria-label="Life timeline from Kramatorsk through Romania and Canada to TMU">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 1120" role="img" aria-label="Life timeline from Kramatorsk through Romania and Canada to TMU">
   <style>
     .line { fill: none; stroke: #a3a3a3; stroke-width: 1.6; }
     .line-strong { fill: none; stroke: #33373d; stroke-width: 2; }
     .node { fill: none; stroke: #33373d; stroke-width: 1.5; }
-    .title { fill: #25282d; font-size: 24px; font-weight: 650; }
-    .label { fill: #33373d; font-size: 16px; font-weight: 600; }
-    .small { fill: #6b7280; font-size: 13px; }
-    .date { fill: #33373d; font-size: 13px; font-weight: 650; letter-spacing: .04em; }
+    .title { fill: #25282d; font-size: 26px; font-weight: 650; }
+    .label { fill: #33373d; font-size: 19px; font-weight: 600; }
+    .small { fill: #6b7280; font-size: 15px; }
+    .date { fill: #33373d; font-size: 14px; font-weight: 650; letter-spacing: .04em; }
     .dot { fill: #33373d; }
     .arrow { fill: #a3a3a3; }
     @media (prefers-color-scheme: dark) {
@@ -23,58 +23,59 @@
     </marker>
   </defs>
 
-  <text class="title" x="380" y="42" text-anchor="middle">My path so far</text>
-  <text class="small" x="380" y="66" text-anchor="middle">places, schools, and turning points</text>
+  <text class="title" x="260" y="38" text-anchor="middle">My path so far</text>
+  <text class="small" x="260" y="62" text-anchor="middle">places, schools, and turning points</text>
+  <line class="line-strong" x1="55" y1="108" x2="55" y2="1062" />
 
-  <line class="line-strong" x1="92" y1="118" x2="92" y2="852" />
+  <circle class="dot" cx="55" cy="122" r="6" />
+  <text class="date" x="88" y="118">2007–2022</text>
+  <text class="label" x="88" y="145">Kramatorsk</text>
+  <text class="small" x="88" y="168">home and early education</text>
 
-  <circle class="dot" cx="92" cy="130" r="6" />
-  <text class="date" x="122" y="126">2007–2022</text>
-  <text class="label" x="122" y="151">Kramatorsk</text>
-  <text class="small" x="122" y="174">home and early education</text>
+  <rect class="node" x="88" y="198" width="344" height="58" rx="16" />
+  <text class="label" x="260" y="224" text-anchor="middle">Kindergarten</text>
+  <text class="small" x="260" y="246" text-anchor="middle">first classroom</text>
+  <line class="line" x1="260" y1="258" x2="260" y2="282" marker-end="url(#life-arrow)" />
 
-  <rect class="node" x="122" y="205" width="166" height="62" rx="16" />
-  <text class="label" x="205" y="235" text-anchor="middle">Kindergarten</text>
-  <text class="small" x="205" y="254" text-anchor="middle">first classroom</text>
-  <line class="line" x1="290" y1="236" x2="325" y2="236" marker-end="url(#life-arrow)" />
-  <rect class="node" x="331" y="205" width="150" height="62" rx="16" />
-  <text class="label" x="406" y="235" text-anchor="middle">Preschool</text>
-  <text class="small" x="406" y="254" text-anchor="middle">preparation</text>
-  <line class="line" x1="483" y1="236" x2="518" y2="236" marker-end="url(#life-arrow)" />
-  <rect class="node" x="524" y="205" width="154" height="62" rx="16" />
-  <text class="label" x="601" y="235" text-anchor="middle">School</text>
-  <text class="small" x="601" y="254" text-anchor="middle">grades 1–8</text>
+  <rect class="node" x="88" y="288" width="344" height="58" rx="16" />
+  <text class="label" x="260" y="314" text-anchor="middle">Preschool</text>
+  <text class="small" x="260" y="336" text-anchor="middle">preparation for school</text>
+  <line class="line" x1="260" y1="348" x2="260" y2="372" marker-end="url(#life-arrow)" />
 
-  <circle class="dot" cx="92" cy="336" r="6" />
-  <text class="date" x="122" y="332">24 FEB 2022</text>
-  <text class="label" x="122" y="357">The full-scale war begins</text>
-  <path class="line" d="M122 376 C210 394 298 358 386 376 S562 394 650 376" />
+  <rect class="node" x="88" y="378" width="344" height="58" rx="16" />
+  <text class="label" x="260" y="404" text-anchor="middle">School</text>
+  <text class="small" x="260" y="426" text-anchor="middle">grades 1–8</text>
 
-  <circle class="dot" cx="92" cy="448" r="6" />
-  <text class="date" x="122" y="444">17 MAR 2022</text>
-  <text class="label" x="122" y="469">Romania</text>
-  <text class="small" x="122" y="491">a temporary home for four months</text>
-  <path class="line" d="M324 462 H408" marker-end="url(#life-arrow)" />
-  <text class="date" x="438" y="444">8 JUN 2022</text>
-  <text class="label" x="438" y="469">Canada</text>
-  <text class="small" x="438" y="491">a new beginning</text>
+  <circle class="dot" cx="55" cy="484" r="6" />
+  <text class="date" x="88" y="480">24 FEB 2022</text>
+  <text class="label" x="88" y="507">The full-scale war begins</text>
+  <path class="line" d="M88 530 C170 548 252 512 334 530 S416 548 452 530" />
 
-  <rect class="node" x="122" y="535" width="190" height="60" rx="16" />
-  <text class="label" x="217" y="570" text-anchor="middle">Nobleton</text>
-  <line class="line" x1="315" y1="565" x2="405" y2="565" marker-end="url(#life-arrow)" />
-  <rect class="node" x="412" y="535" width="190" height="60" rx="16" />
-  <text class="label" x="507" y="570" text-anchor="middle">Newmarket</text>
+  <circle class="dot" cx="55" cy="604" r="6" />
+  <text class="date" x="88" y="600">17 MAR 2022</text>
+  <text class="label" x="88" y="627">Romania</text>
+  <text class="small" x="88" y="650">a temporary home for four months</text>
+  <line class="line" x1="260" y1="666" x2="260" y2="694" marker-end="url(#life-arrow)" />
 
-  <circle class="dot" cx="92" cy="666" r="6" />
-  <text class="date" x="122" y="662">2022–2026</text>
-  <text class="label" x="122" y="687">Sacred Heart CHS</text>
-  <text class="small" x="122" y="709">high school</text>
+  <text class="date" x="88" y="716">8 JUN 2022</text>
+  <text class="label" x="88" y="743">Canada</text>
+  <text class="small" x="88" y="766">a new beginning</text>
 
-  <line class="line" x1="362" y1="742" x2="362" y2="820" marker-end="url(#life-arrow)" />
+  <rect class="node" x="88" y="800" width="150" height="56" rx="16" />
+  <text class="label" x="163" y="835" text-anchor="middle">Nobleton</text>
+  <line class="line" x1="240" y1="828" x2="278" y2="828" marker-end="url(#life-arrow)" />
+  <rect class="node" x="284" y="800" width="148" height="56" rx="16" />
+  <text class="label" x="358" y="835" text-anchor="middle">Newmarket</text>
 
-  <circle class="dot" cx="92" cy="824" r="6" />
-  <text class="date" x="122" y="820">NOW</text>
-  <rect class="node" x="122" y="840" width="480" height="68" rx="18" />
-  <text class="label" x="362" y="870" text-anchor="middle">Toronto Metropolitan University</text>
-  <text class="small" x="362" y="891" text-anchor="middle">Cyber Science</text>
+  <circle class="dot" cx="55" cy="906" r="6" />
+  <text class="date" x="88" y="902">2022–2026</text>
+  <text class="label" x="88" y="929">Sacred Heart CHS</text>
+  <text class="small" x="88" y="952">high school</text>
+  <line class="line" x1="260" y1="962" x2="260" y2="990" marker-end="url(#life-arrow)" />
+
+  <circle class="dot" cx="55" cy="1016" r="6" />
+  <text class="date" x="88" y="1012">NOW</text>
+  <rect class="node" x="88" y="1028" width="344" height="76" rx="18" />
+  <text class="label" x="260" y="1059" text-anchor="middle">Toronto Metropolitan University</text>
+  <text class="small" x="260" y="1084" text-anchor="middle">Cyber Science</text>
 </svg>

@@ -13,10 +13,10 @@
             "state": {
               "type": "image",
               "state": {
-                "file": "Posts/attachments/rendering-pipeline.svg"
+                "file": "Posts/attachments/image-note-life-timeline.uk.svg"
               },
               "icon": "lucide-image",
-              "title": "rendering-pipeline"
+              "title": "image-note-life-timeline.uk"
             }
           }
         ]
@@ -199,11 +199,12 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
+    "Posts/attachments/image-note-life-timeline.svg",
+    "Posts/attachments/image-note-life-timeline.uk.svg",
+    "Posts/attachments/image-note-life-timeline.jpeg",
+    "Posts/attachments/rendering-pipeline.svg",
     "Posts/Examples/Image note QA.uk.md",
     "Posts/Examples/Image note QA.md",
-    "Posts/attachments/image-note-life-timeline.uk.svg",
-    "Posts/attachments/image-note-life-timeline.svg",
-    "Posts/attachments/image-note-life-timeline.jpeg",
     "Music/main.md",
     "Posts/First certification.md",
     "Posts/First certification.uk.md",
@@ -233,7 +234,6 @@
     "Home/me.jpeg",
     "Shelf/Books/Footprints on the Road.uk.md",
     "Shelf/Books/The Order of Time.md",
-    "Shelf/Books/Illustrated History of Ukraine's Independence.md",
     "People/mykhailo-fedorov.png",
     "Now/Kyrylo Leshchenko Resume.pdf",
     "Posts/Examples",
