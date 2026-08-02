@@ -361,8 +361,9 @@ Rules for the SVG:
   page, and `globals.css` sets the typeface on `svg.diagram text` so labels
   match whatever the site is using. Any `font-family` written into the file is
   a presentation attribute and loses to that rule — harmless, but it isn't
-  what's rendering. DO set sensible `font-size` values (~13–14px for labels),
-  since those aren't overridden.
+  what's rendering. DO size labels so they render at roughly 13–14 CSS pixels
+  at the narrowest supported viewport. SVG user units are scaled with the
+  `viewBox`, so `font-size="14"` does not necessarily render as 14px on a phone.
 
 This renders on the site immediately (no Obsidian export step) and adapts to the
 reader's theme. Report the file path and where you embedded it.
@@ -391,37 +392,66 @@ the photograph available as the primary-source view.
 
 ### Intake contract
 
-1. **Transcribe before redesigning.** List the readable nodes, arrows, dates,
-   corrections, and hierarchy. Correct obvious spelling (for example,
-   “kindergarden” → “kindergarten”), but do not invent missing facts or silently
-   resolve unclear handwriting. Report every uncertainty.
-2. **Preserve meaning, not notebook geometry.** Choose the clearest diagram
+1. **Make a transcription map before redesigning.** Record these six groups
+   explicitly in the working report: exact readable text; dates/numbers; nodes;
+   arrows/relationships; corrections or crossed-out content; and uncertain
+   handwriting. The map is a review step, not another vault file. Resolve a
+   genuine uncertainty with Kyrylo before drawing, or carry it into the diagram
+   with a visible `?`/uncertain treatment and report it at handoff.
+2. **Every displayed claim needs a source.** Correct obvious spelling (for
+   example, “kindergarden” → “kindergarten”) and normalize date formatting, but
+   do not add explanatory microcopy, inferred emotions, or connective claims.
+   Structural phase labels may summarize only facts already present in the map.
+   List every correction in the handoff report so it can be checked against the
+   photograph.
+3. **Preserve meaning, not notebook geometry.** Choose the clearest diagram
    structure for the information. Keep the author's chronology, relationships,
    emphasis, and wording; remove crossed-out text and accidental page clutter.
    Pick the form from the meaning: chronology → timeline, causes/steps → flow,
    hierarchy → tree, alternatives → comparison, connected ideas → concept map.
    Do not turn every page into the same left-to-right chain.
-3. **Make the graph bilingual.** Produce `<name>.svg` and `<name>.uk.svg` with
+4. **Keep it structured and personal.** Use the site's restrained nodes,
+   typography, and hierarchy, then preserve one or two meaningful visual cues
+   from the source — for example its winding route, a rupture, circled choices,
+   or a distinctive emphasis mark. Do not trace the notebook mechanically and
+   do not force every source into the same panel template.
+5. **Make the graph bilingual.** Produce `<name>.svg` and `<name>.uk.svg` with
    identical geometry and professionally translated labels. Proper nouns follow
    the Translation rules above.
-4. **Keep the original safely.** Copy it into the target section's
+6. **Keep the original safely.** Copy it into the target section's
    `attachments/`, strip EXIF/GPS/device metadata, bake in orientation, and
    resize to about 1600px on the long edge. Never publish the untouched phone
    original when it contains location metadata.
-5. **Transparent and native-looking.** Use the self-theming SVG rules above:
+7. **Transparent and native-looking.** Use the self-theming SVG rules above:
    no canvas/background rectangle, monochrome page colors, the site's typeface,
    simple rounded nodes, and reduced visual noise.
-6. **Rebuild the information architecture.** Group related facts into named
+8. **Rebuild the information architecture.** Group related facts into named
    phases, give dates/labels a consistent hierarchy, use arrows only for real
-   relationships, and move explanation into short secondary labels. The point
-   is to make the note easier to scan, not to trace the handwriting neatly.
-7. **Match the source canvas.** Give the SVG a `viewBox` with approximately the
+   relationships, and use secondary labels only when their text appears in the
+   transcription map. The point is to make the note easier to scan, not to trace
+   the handwriting neatly or editorialize it.
+9. **Match the source canvas.** Give the SVG a `viewBox` within 2% of the
    same aspect ratio as the sanitized photo. The site reserves one shared frame
    from the photo's build-time dimensions, so both views remain centered and the
    article never jumps when the reader switches them.
-8. **Run a legibility pass.** Check both languages at the actual prose width and
+10. **Run a legibility pass.** Check both languages at the actual prose width and
    at a phone width, in light and dark mode. Split or shorten labels that clip;
-   never shrink all text to rescue one long translation.
+   never shrink all text to rescue one long translation. At 360px, primary
+   labels should remain comparable to the surrounding body text and secondary
+   text must remain comfortably readable without opening the lightbox.
+
+### Build-time validation
+
+Run `npm run validate:image-notes` after adding or changing an Image note. It is
+also part of `predev` and `prebuild`, so an invalid pair cannot silently deploy.
+The validator checks asset existence, a bilingual caption/pair, matching
+geometry, source-photo aspect ratio and privacy metadata, accessible self-
+theming SVGs, live dark-mode styles, transparent canvases, unsafe/external SVG
+content, and complete bilingual light/dark Excalidraw exports.
+
+The validator cannot decide whether a label is faithful to handwriting. The
+transcription map, correction list, and visual review remain required even when
+the command passes.
 
 ### Embed syntax
 
@@ -464,6 +494,9 @@ it when hand adjustment is useful.
   `.uk.svg` sibling and bilingual caption handle the visible translation.
 - If Kyrylo has not named the destination page, prepare and report the assets
   but do not attach them to an arbitrary note.
+- In the final report, include the transcription map, spelling/date corrections,
+  uncertainties and their resolution, plus the validator and visual-check
+  results. Do not commit the map as a sidecar file.
 
 ## Sources section
 

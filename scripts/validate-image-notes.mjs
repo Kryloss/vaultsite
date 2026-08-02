@@ -64,7 +64,7 @@ function rootSvg(markup) {
 }
 
 function attribute(tag, name) {
-  const match = tag?.match(new RegExp(`\\b${name}\\s*=\\s*(["'])(.*?)\\1`, "i"));
+  const match = tag?.match(new RegExp(`(?:^|\\s)${name}\\s*=\\s*(["'])(.*?)\\1`, "i"));
   return match?.[2]?.trim();
 }
 
@@ -230,7 +230,7 @@ export async function validateImageNotes({ vaultDir, sharpImpl } = {}) {
     const source = fs.readFileSync(noteFile, "utf8");
     for (const match of source.matchAll(IMAGE_NOTE_RE)) {
       const [, target, caption, originalName] = match;
-      const key = `${target.trim().toLowerCase()}\0${originalName.trim().toLowerCase()}`;
+      const key = `${path.dirname(noteFile).toLowerCase()}\0${target.trim().toLowerCase()}\0${originalName.trim().toLowerCase()}`;
       if (seen.has(key)) continue;
       seen.add(key);
       count++;
@@ -256,10 +256,18 @@ export async function validateImageNotes({ vaultDir, sharpImpl } = {}) {
         const ukrainian = resolveAsset(noteFile, ukrainianName, index);
         if (!english) errors.push(`${location}: diagram not found: ${target.trim()}`);
         if (!ukrainian) errors.push(`${location}: Ukrainian diagram not found: ${ukrainianName}`);
+        const languageSvgs = [];
         for (const file of [english, ukrainian].filter(Boolean)) {
           const facts = svgFacts(file);
           validateSvg(facts, { selfTheming: true }, errors, root);
+          languageSvgs.push(facts);
           svgFiles.push(facts);
+        }
+        if (
+          languageSvgs.length === 2 &&
+          languageSvgs[0].ariaLabel === languageSvgs[1].ariaLabel
+        ) {
+          errors.push(`${location}: English and Ukrainian SVGs require localized aria-label values`);
         }
       } else {
         const base = path.basename(target.trim()).replace(/\.md$/i, "").replace(/\.excalidraw$/i, "");

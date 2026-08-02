@@ -12,8 +12,13 @@ const DARK_STYLE = `
     @media (prefers-color-scheme: dark) { .label { fill: #e6e8eb; } }
   </style>`;
 
-function svg({ viewBox = "0 0 300 400", accessible = true, unsafe = "" } = {}) {
-  const access = accessible ? ` role="img" aria-label="A source-faithful diagram"` : "";
+function svg({
+  viewBox = "0 0 300 400",
+  accessible = true,
+  ariaLabel = "A source-faithful diagram",
+  unsafe = "",
+} = {}) {
+  const access = accessible ? ` role="img" aria-label="${ariaLabel}"` : "";
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}"${access}>
     ${DARK_STYLE}
     ${unsafe}
@@ -54,7 +59,7 @@ async function validFixture() {
   f.note(`![[timeline.svg|Life timeline :: Життєвий шлях]]
 <!-- image-note: timeline-original.jpeg -->`);
   f.write("timeline.svg", svg());
-  f.write("timeline.uk.svg", svg());
+  f.write("timeline.uk.svg", svg({ ariaLabel: "Точна до джерела схема" }));
   await photo(path.join(f.assets, "timeline-original.jpeg"));
   return f;
 }

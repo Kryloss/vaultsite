@@ -117,6 +117,9 @@ drawings and keep Auto-export SVG enabled. Do not hand-write scene JSON.
 The original photo is a public asset once attached, so remove EXIF/GPS/device
 metadata and resize it before it enters the vault. Full transcription, naming,
 translation, and privacy rules live in `docs/CONTENT-WORKFLOW.md → Image notes`.
+Run `npm run validate:image-notes` after attaching the pair; development and
+production builds run the same validation automatically. For an Excalidraw
+Image note, both English and Ukrainian drawings need light and dark SVG exports.
 
 ### Which diagram tool belongs here?
 

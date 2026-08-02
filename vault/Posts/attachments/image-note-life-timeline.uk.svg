@@ -1,26 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1067" role="img" aria-label="Структурований життєвий шлях із Краматорська через Румунію та Канаду до TMU">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 960" role="img" aria-label="Точна до джерела часова шкала від Краматорська через Румунію та Канаду до TMU">
   <style>
-    .panel { fill: #f5f5f4; stroke: #d6d6d3; stroke-width: 1.5; }
-    .node { fill: #fff; stroke: #3f4248; stroke-width: 1.6; }
-    .line { fill: none; stroke: #9a9da3; stroke-width: 2; }
-    .line-strong { fill: none; stroke: #35383e; stroke-width: 2.4; }
-    .title { fill: #25282d; font-size: 34px; font-weight: 650; }
-    .phase { fill: #25282d; font-size: 27px; font-weight: 650; }
-    .label { fill: #35383e; font-size: 25px; font-weight: 600; }
-    .tight { font-size: 22px; }
-    .small { fill: #6b7079; font-size: 19px; }
-    .date { fill: #555a63; font-size: 18px; font-weight: 650; letter-spacing: .04em; }
-    .event { fill: #35383e; font-size: 24px; font-weight: 600; }
-    .dot { fill: #35383e; }
-    .arrow { fill: #9a9da3; }
+    .guide { fill: none; stroke: #d6d6d3; stroke-width: 2; }
+    .route { fill: none; stroke: #8e9299; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .route-strong { fill: none; stroke: #34383e; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
+    .node { fill: #fff; stroke: #3f4349; stroke-width: 2.2; }
+    .node-soft { fill: #f5f5f3; stroke: #9a9da3; stroke-width: 2; }
+    .phase { fill: #25292f; font-size: 34px; font-weight: 700; }
+    .date { fill: #626770; font-size: 30px; font-weight: 650; letter-spacing: .025em; }
+    .label { fill: #34383e; font-size: 34px; font-weight: 650; }
+    .label-tight { fill: #34383e; font-size: 30px; font-weight: 650; }
+    .small { fill: #626770; font-size: 30px; }
+    .event { fill: #25292f; font-size: 34px; font-weight: 700; }
+    .dot { fill: #34383e; }
+    .arrow { fill: #8e9299; }
     @media (prefers-color-scheme: dark) {
-      .panel { fill: #222326; stroke: #41444a; }
-      .node { fill: #18191b; stroke: #c8ccd2; }
-      .line { stroke: #656a72; }
-      .line-strong { stroke: #d7d9dd; }
-      .title, .phase, .label, .event, .dot { fill: #e7e9ec; }
-      .small, .date { fill: #a3a8b1; }
-      .arrow { fill: #656a72; }
+      .guide { stroke: #3f4248; }
+      .route { stroke: #717680; }
+      .route-strong { stroke: #e2e4e7; }
+      .node { fill: #18191b; stroke: #c7cbd1; }
+      .node-soft { fill: #222326; stroke: #717680; }
+      .phase, .label, .label-tight, .event, .dot { fill: #e7e9ec; }
+      .date, .small { fill: #aeb3bc; }
+      .arrow { fill: #717680; }
     }
   </style>
   <defs>
@@ -29,64 +30,55 @@
     </marker>
   </defs>
 
-  <text class="title" x="400" y="48" text-anchor="middle">Мій шлях дотепер</text>
-  <text class="small" x="400" y="77" text-anchor="middle">місця, навчання та поворотні моменти</text>
+  <text class="phase" x="40" y="48">КРАМАТОРСЬК</text>
+  <text class="date" x="680" y="48" text-anchor="end">2007–2022</text>
+  <line class="guide" x1="40" y1="67" x2="680" y2="67" />
 
-  <rect class="panel" x="35" y="105" width="730" height="260" rx="24" />
-  <text class="date" x="70" y="145">2007–2022</text>
-  <text class="phase" x="70" y="181">Краматорськ</text>
-  <text class="small" x="70" y="208">дім і початок навчання</text>
+  <rect class="node" x="40" y="98" width="190" height="88" rx="42" />
+  <text class="label-tight" x="135" y="136" text-anchor="middle">Дитячий</text>
+  <text class="small" x="135" y="169" text-anchor="middle">садок</text>
+  <line class="route" x1="234" y1="142" x2="266" y2="142" marker-end="url(#life-arrow)" />
+  <rect class="node" x="275" y="98" width="170" height="88" rx="42" />
+  <text class="label-tight" x="360" y="136" text-anchor="middle">Дошкільна</text>
+  <text class="small" x="360" y="169" text-anchor="middle">підготовка</text>
+  <line class="route" x1="449" y1="142" x2="481" y2="142" marker-end="url(#life-arrow)" />
+  <rect class="node" x="490" y="88" width="190" height="108" rx="52" />
+  <text class="label" x="585" y="139" text-anchor="middle">Школа</text>
+  <text class="small" x="585" y="172" text-anchor="middle">1–8 класи</text>
 
-  <rect class="node" x="70" y="250" width="180" height="75" rx="18" />
-  <text class="label" x="160" y="281" text-anchor="middle">Дитсадок</text>
-  <text class="small" x="160" y="307" text-anchor="middle">перші заняття</text>
-  <line class="line" x1="254" y1="288" x2="300" y2="288" marker-end="url(#life-arrow)" />
-  <rect class="node" x="310" y="250" width="180" height="75" rx="18" />
-  <text class="label" x="400" y="281" text-anchor="middle">Підготовка</text>
-  <text class="small" x="400" y="307" text-anchor="middle">до школи</text>
-  <line class="line" x1="494" y1="288" x2="540" y2="288" marker-end="url(#life-arrow)" />
-  <rect class="node" x="550" y="250" width="180" height="75" rx="18" />
-  <text class="label" x="640" y="281" text-anchor="middle">Школа</text>
-  <text class="small" x="640" y="307" text-anchor="middle">1–8 класи</text>
+  <path class="route" d="M585 199 C585 226 638 230 650 260" marker-end="url(#life-arrow)" />
+  <path class="route-strong" d="M40 276 C95 258 143 291 201 274 S307 257 365 276 S474 294 532 275 S625 257 680 276" />
+  <circle class="dot" cx="365" cy="276" r="8" />
+  <text class="date" x="350" y="237" text-anchor="end">24 ЛЮТ 2022</text>
+  <text class="event" x="382" y="238">Почалася війна</text>
 
-  <circle class="dot" cx="70" cy="405" r="7" />
-  <line class="line-strong" x1="70" y1="365" x2="70" y2="446" />
-  <text class="date" x="105" y="397">24 ЛЮТ 2022</text>
-  <text class="event" x="105" y="431">Початок повномасштабної війни</text>
-  <path class="line" d="M525 412 C565 395 605 430 645 412 S705 395 730 412" />
+  <text class="phase" x="40" y="355">2022</text>
+  <line class="guide" x1="40" y1="374" x2="680" y2="374" />
 
-  <rect class="panel" x="35" y="465" width="730" height="300" rx="24" />
-  <text class="date" x="70" y="505">2022 · ВІД’ЇЗД ІЗ ДОМУ</text>
+  <rect class="node-soft" x="40" y="405" width="280" height="125" rx="48" />
+  <text class="date" x="180" y="443" text-anchor="middle">17 БЕР</text>
+  <text class="label" x="180" y="482" text-anchor="middle">Румунія</text>
+  <text class="small" x="180" y="515" text-anchor="middle">чотири місяці</text>
+  <line class="route" x1="325" y1="468" x2="391" y2="468" marker-end="url(#life-arrow)" />
+  <rect class="node" x="400" y="405" width="280" height="125" rx="48" />
+  <text class="date" x="540" y="449" text-anchor="middle">8 ЧЕР</text>
+  <text class="label" x="540" y="493" text-anchor="middle">Канада</text>
 
-  <rect class="node" x="70" y="530" width="255" height="120" rx="18" />
-  <text class="date" x="95" y="569">17 БЕР</text>
-  <text class="label" x="95" y="601">Румунія</text>
-  <text class="small" x="95" y="625">тимчасовий дім</text>
-  <text class="small" x="95" y="646">чотири місяці</text>
-  <line class="line" x1="330" y1="585" x2="385" y2="585" marker-end="url(#life-arrow)" />
-  <rect class="node" x="395" y="535" width="335" height="100" rx="18" />
-  <text class="date" x="420" y="569">8 ЧЕР</text>
-  <text class="label" x="420" y="601">Канада</text>
-  <text class="small" x="420" y="625">новий початок</text>
+  <path class="route" d="M540 534 C540 566 328 545 222 587" marker-end="url(#life-arrow)" />
+  <rect class="node" x="85" y="590" width="230" height="82" rx="40" />
+  <text class="label" x="200" y="641" text-anchor="middle">Ноблтон</text>
+  <line class="route" x1="319" y1="631" x2="391" y2="631" marker-end="url(#life-arrow)" />
+  <rect class="node" x="400" y="590" width="250" height="82" rx="40" />
+  <text class="label" x="525" y="641" text-anchor="middle">Ньюмаркет</text>
 
-  <text class="small" x="70" y="685">новий дім</text>
-  <rect class="node" x="180" y="655" width="190" height="70" rx="18" />
-  <text class="label" x="275" y="699" text-anchor="middle">Ноблтон</text>
-  <line class="line" x1="375" y1="690" x2="425" y2="690" marker-end="url(#life-arrow)" />
-  <rect class="node" x="435" y="655" width="215" height="70" rx="18" />
-  <text class="label" x="542" y="699" text-anchor="middle">Ньюмаркет</text>
+  <text class="phase" x="40" y="731">2022–2026</text>
+  <text class="date" x="680" y="731" text-anchor="end">ЗАРАЗ</text>
+  <line class="guide" x1="40" y1="750" x2="680" y2="750" />
 
-  <rect class="panel" x="35" y="795" width="730" height="225" rx="24" />
-  <text class="date" x="70" y="835">НАВЧАННЯ В КАНАДІ</text>
-
-  <rect class="node" x="70" y="855" width="285" height="135" rx="18" />
-  <text class="date" x="95" y="899">2022–2026</text>
-  <text class="label" x="95" y="938">Sacred Heart CHS</text>
-  <text class="small" x="95" y="968">старша школа</text>
-  <line class="line" x1="360" y1="923" x2="410" y2="923" marker-end="url(#life-arrow)" />
-  <rect class="node" x="420" y="855" width="310" height="135" rx="18" />
-  <text class="date" x="445" y="899">ЗАРАЗ</text>
-  <text class="label tight" x="445" y="934">Торонтський столичний</text>
-  <text class="label tight" x="445" y="961">університет</text>
-  <text class="small" x="445" y="984">Кібернаука</text>
+  <rect class="node-soft" x="40" y="783" width="300" height="135" rx="48" />
+  <text class="label-tight" x="190" y="841" text-anchor="middle">Sacred Heart CHS</text>
+  <line class="route" x1="345" y1="850" x2="391" y2="850" marker-end="url(#life-arrow)" />
+  <rect class="node" x="400" y="783" width="280" height="135" rx="48" />
+  <text class="label" x="540" y="833" text-anchor="middle">TMU</text>
+  <text class="small" x="540" y="873" text-anchor="middle">Cyber Science</text>
 </svg>

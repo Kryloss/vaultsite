@@ -1055,3 +1055,32 @@ as the permanent, inspectable demonstration of every supported content feature.
 Its `draft: true` flag is removed and the first Image note lives there. `Post
 Sample` and `Draft example` remain scaffolding/draft material; publishing this
 one reference does not change the default rule that examples are hidden.
+
+## 71. Image-note reconstruction is source-faithful and build-validated (2026-08-02)
+
+**Decision:** every photographed-note diagram starts with a transcription map,
+and every claim drawn in the final SVG must be supported by it. Layout may be
+reorganized and obvious spelling/date formatting corrected, but explanatory
+microcopy is not invented to make a sparse source feel polished. Unclear text is
+confirmed with the owner or remains visibly uncertain. The map and correction
+list are review material reported at handoff, not another persistent content
+format beside the note.
+
+The design remains interpretive in structure, not in facts. A chronology can
+become a proper timeline and a hierarchy a tree, while one or two meaningful
+source cues — a winding route, rupture, circle, or emphasis mark — keep the
+result connected to the page it came from. This avoids both literal tracing and
+a generic panel template while preserving decision #69's cleaned-view/source-
+evidence relationship.
+
+**The build validates what software can know.** `validate-image-notes.mjs` runs
+before development and production asset sync. It checks referenced assets,
+bilingual geometry and captions, photo aspect/size/privacy metadata, accessible
+self-theming SVGs, dark-mode support, transparent canvases, unsafe/external SVG
+content, and complete Excalidraw language/theme exports. Semantic fidelity and
+phone legibility still require the transcription and visual review; pretending a
+validator can read handwriting would make the automated guarantee dishonest.
+
+The Markdown interface, native Diagram/Original switch, lightbox, and static
+renderer do not change. Validation is an authoring/build concern and introduces
+no runtime state, content database, or new dependency.
