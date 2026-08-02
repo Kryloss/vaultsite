@@ -1096,9 +1096,10 @@ cannot move nodes or redirect arrows. Every node uses one fill token, text has
 explicit padding, and arrows terminate only at the elements connected in the
 source scene.
 
-The life-journey reference uses four ordered groups separated by one explicit
-24 February 2022 rupture. Rounded nodes and a continuous directional path keep
-the source page's circled-node and journey cues, while the phase containers,
-consistent hierarchy, and bound connectors repair its accidental notebook
-spacing. `npm run export:image-notes` rebuilds this pair from the editable
-scenes; the validator requires both sources as well as both static exports.
+The life-journey reference uses three ordered phases separated by one explicit
+24 February 2022 rupture. Compact rounded nodes and a continuous directional
+path keep the source page's circled-node and journey cues, while restrained
+phase containers, primary/secondary type, and bound connectors repair its
+accidental notebook spacing. `npm run export:image-notes` rebuilds this pair
+from the editable scenes; the validator requires both sources as well as both
+static exports.

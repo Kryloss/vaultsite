@@ -10,42 +10,36 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const VIEWBOX = { width: 750, height: 1000 };
-const STAGES = [
-  {
-    box: [40, 35, 670, 195],
-    labelY: 66,
+const STAGE_COUNTS = [3, 2, 2, 2];
+const GEOMETRY = {
+  kramatorsk: {
+    box: [55, 35, 640, 190],
     nodes: [
-      [55, 96, 205, 92],
-      [300, 96, 175, 92],
-      [515, 96, 180, 92],
+      [75, 100, 190, 76],
+      [300, 100, 190, 76],
+      [525, 100, 145, 76],
     ],
   },
-  {
-    box: [40, 400, 670, 170],
-    labelY: 432,
+  rupture: [200, 270, 350, 88],
+  relocation: {
+    box: [55, 405, 640, 185],
     nodes: [
-      [85, 461, 300, 76],
-      [455, 461, 210, 76],
+      [90, 472, 260, 78],
+      [430, 472, 230, 78],
     ],
   },
-  {
-    box: [105, 610, 540, 145],
-    labelY: 641,
-    nodes: [
-      [150, 666, 160, 62],
-      [420, 666, 180, 62],
+  canada: {
+    box: [55, 650, 640, 305],
+    places: [
+      [90, 715, 180, 70],
+      [480, 715, 170, 70],
+    ],
+    education: [
+      [80, 850, 285, 78],
+      [445, 850, 210, 78],
     ],
   },
-  {
-    box: [40, 795, 670, 170],
-    labelY: 827,
-    nodes: [
-      [80, 856, 300, 76],
-      [450, 856, 220, 76],
-    ],
-  },
-];
-const RUPTURE = [160, 270, 430, 90];
+};
 
 function escapeXml(value) {
   return value
@@ -99,7 +93,7 @@ function extractJourney(file) {
   );
   const rupture = ruptureRect && textByContainer.get(ruptureRect.id);
 
-  if (stages.length !== STAGES.length || stages.some((stage, index) => stage.nodes.length !== STAGES[index].nodes.length)) {
+  if (stages.length !== STAGE_COUNTS.length || stages.some((stage, index) => stage.nodes.length !== STAGE_COUNTS[index])) {
     throw new Error(`${file}: expected four stages with 3, 2, 2, and 2 nodes`);
   }
   if (!rupture) throw new Error(`${file}: expected one standalone rupture node`);
@@ -130,16 +124,68 @@ function wrapText(text, width, fontSize) {
   return [lines[0], lines.slice(1).join(" ")];
 }
 
-function centeredText(text, box, className, fontSize) {
-  const [x, y, width, height] = box;
-  const longestWord = Math.max(...text.split(/\s+/).map((word) => word.length));
-  const fittedSize = Math.min(fontSize, Math.max(24, (width - 28) / (longestWord * 0.54)));
-  const lines = wrapText(text, width - 28, fittedSize);
-  const lineHeight = fittedSize * 1.16;
-  const firstY = y + height / 2 - ((lines.length - 1) * lineHeight) / 2;
-  return `<text class="${className}" style="font-size:${fittedSize.toFixed(1)}px" x="${x + width / 2}" y="${firstY.toFixed(1)}">${lines
-    .map((line, index) => `<tspan x="${x + width / 2}" dy="${index ? lineHeight.toFixed(1) : 0}">${escapeXml(line)}</tspan>`)
+function splitParts(text) {
+  return text.split(/\s+·\s+/).map((part) => part.trim());
+}
+
+function model(scene, language) {
+  const [kramatorskIndex, kramatorsk, kramatorskYears] = splitParts(scene.stages[0].label);
+  const [relocationIndex, relocation, relocationYear] = splitParts(scene.stages[1].label);
+  const [warDate, war] = splitParts(scene.rupture);
+  const [romaniaDate, romania, romaniaDuration] = splitParts(scene.stages[1].nodes[0]);
+  const [canadaDate, canada] = splitParts(scene.stages[1].nodes[1]);
+  const schoolMatch = scene.stages[0].nodes[2].match(/^(.*?)\s*\((.*?)\)$/);
+  const [sacredYears, sacred] = splitParts(scene.stages[3].nodes[0]);
+  const [now, tmu, program] = splitParts(scene.stages[3].nodes[1]);
+
+  return {
+    kramatorsk: {
+      title: `${kramatorskIndex} · ${kramatorsk}`,
+      meta: kramatorskYears,
+      nodes: [
+        { primary: scene.stages[0].nodes[0] },
+        { primary: scene.stages[0].nodes[1] },
+        { primary: schoolMatch?.[1] ?? scene.stages[0].nodes[2], secondary: schoolMatch?.[2] },
+      ],
+    },
+    rupture: { primary: war, secondary: warDate },
+    relocation: {
+      title: `${relocationIndex} · ${relocation}`,
+      meta: relocationYear,
+      nodes: [
+        { primary: romania, secondary: `${romaniaDate} · ${romaniaDuration}` },
+        { primary: canada, secondary: canadaDate },
+      ],
+    },
+    canada: {
+      title: language === "uk" ? "3 · КАНАДА" : "3 · CANADA",
+      places: scene.stages[2].nodes.map((primary) => ({ primary })),
+      education: [
+        { primary: sacred, secondary: sacredYears },
+        { primary: tmu, secondary: `${now} · ${program}` },
+      ],
+    },
+  };
+}
+
+function multilineText(lines, x, centerY, className, lineHeight = 21) {
+  const firstY = centerY - ((lines.length - 1) * lineHeight) / 2;
+  return `<text class="${className}" x="${x}" y="${firstY.toFixed(1)}">${lines
+    .map((line, index) => `<tspan x="${x}" dy="${index ? lineHeight : 0}">${escapeXml(line)}</tspan>`)
     .join("")}</text>`;
+}
+
+function nodeText(node, box, className = "primary") {
+  const [x, y, width, height] = box;
+  const centerX = x + width / 2;
+  const centerY = y + height / 2;
+  const primaryLines = wrapText(node.primary, width - 32, 20);
+  if (!node.secondary) return multilineText(primaryLines, centerX, centerY, className);
+
+  const primaryCenter = centerY - (primaryLines.length > 1 ? 12 : 10);
+  const secondaryY = centerY + (primaryLines.length > 1 ? 23 : 16);
+  return `${multilineText(primaryLines, centerX, primaryCenter, className)}
+    <text class="secondary" x="${centerX}" y="${secondaryY}">${escapeXml(node.secondary)}</text>`;
 }
 
 function arrow(x1, y1, x2, y2, markerId) {
@@ -148,66 +194,92 @@ function arrow(x1, y1, x2, y2, markerId) {
 
 function render(scene, { language, ariaLabel }) {
   const markerId = `image-note-arrow-${language}`;
+  const content = model(scene, language);
   const shapes = [];
   const labels = [];
   const paths = [];
 
-  scene.stages.forEach((stage, stageIndex) => {
-    const geometry = STAGES[stageIndex];
+  const addStage = (stage, geometry, nodes) => {
     const [x, y, width, height] = geometry.box;
-    shapes.push(`<rect class="stage" x="${x}" y="${y}" width="${width}" height="${height}" rx="22"/>`);
-    labels.push(
-      `<text class="stage-label" x="${x + width / 2}" y="${geometry.labelY}">${escapeXml(stage.label)}</text>`
-    );
-    stage.nodes.forEach((node, nodeIndex) => {
-      const nodeBox = geometry.nodes[nodeIndex];
-      const [nodeX, nodeY, nodeWidth, nodeHeight] = nodeBox;
-      shapes.push(
-        `<rect class="node" x="${nodeX}" y="${nodeY}" width="${nodeWidth}" height="${nodeHeight}" rx="${Math.min(30, nodeHeight / 2)}"/>`
-      );
-      labels.push(centeredText(node, nodeBox, "node-label", 29));
-      if (nodeIndex) {
-        const previous = geometry.nodes[nodeIndex - 1];
-        paths.push(
-          arrow(previous[0] + previous[2] + 8, previous[1] + previous[3] / 2, nodeX - 10, nodeY + nodeHeight / 2, markerId)
-        );
+    shapes.push(`<rect class="stage" x="${x}" y="${y}" width="${width}" height="${height}" rx="16"/>`);
+    labels.push(`<text class="stage-title" x="${x + 22}" y="${y + 30}">${escapeXml(stage.title)}</text>`);
+    if (stage.meta) {
+      labels.push(`<text class="stage-meta" x="${x + width - 22}" y="${y + 30}">${escapeXml(stage.meta)}</text>`);
+    }
+    nodes.forEach((node, index) => {
+      const box = geometry.nodes[index];
+      const [nodeX, nodeY, nodeWidth, nodeHeight] = box;
+      shapes.push(`<rect class="node" x="${nodeX}" y="${nodeY}" width="${nodeWidth}" height="${nodeHeight}" rx="13"/>`);
+      labels.push(nodeText(node, box));
+      if (index) {
+        const previous = geometry.nodes[index - 1];
+        paths.push(arrow(previous[0] + previous[2] + 8, previous[1] + previous[3] / 2, nodeX - 10, nodeY + nodeHeight / 2, markerId));
       }
     });
-  });
+  };
 
-  const [ruptureX, ruptureY, ruptureWidth, ruptureHeight] = RUPTURE;
-  shapes.push(
-    `<rect class="node rupture" x="${ruptureX}" y="${ruptureY}" width="${ruptureWidth}" height="${ruptureHeight}" rx="${ruptureHeight / 2}"/>`
-  );
-  labels.push(centeredText(scene.rupture, RUPTURE, "rupture-label", 31));
+  addStage(content.kramatorsk, GEOMETRY.kramatorsk, content.kramatorsk.nodes);
 
-  paths.push(arrow(375, 238, 375, 262, markerId));
-  paths.push(arrow(375, 368, 375, 392, markerId));
-  paths.push(arrow(375, 578, 375, 602, markerId));
-  paths.push(arrow(375, 763, 375, 787, markerId));
+  const [ruptureX, ruptureY, ruptureWidth, ruptureHeight] = GEOMETRY.rupture;
+  shapes.push(`<rect class="node rupture" x="${ruptureX}" y="${ruptureY}" width="${ruptureWidth}" height="${ruptureHeight}" rx="18"/>`);
+  labels.push(nodeText(content.rupture, GEOMETRY.rupture, "rupture-primary"));
+
+  addStage(content.relocation, GEOMETRY.relocation, content.relocation.nodes);
+
+  const [canadaX, canadaY, canadaWidth, canadaHeight] = GEOMETRY.canada.box;
+  shapes.push(`<rect class="stage" x="${canadaX}" y="${canadaY}" width="${canadaWidth}" height="${canadaHeight}" rx="16"/>`);
+  labels.push(`<text class="stage-title" x="${canadaX + 22}" y="${canadaY + 30}">${escapeXml(content.canada.title)}</text>`);
+  for (const [nodes, boxes] of [
+    [content.canada.places, GEOMETRY.canada.places],
+    [content.canada.education, GEOMETRY.canada.education],
+  ]) {
+    nodes.forEach((node, index) => {
+      const [x, y, width, height] = boxes[index];
+      shapes.push(`<rect class="node" x="${x}" y="${y}" width="${width}" height="${height}" rx="13"/>`);
+      labels.push(nodeText(node, boxes[index]));
+      if (index) {
+        const previous = boxes[index - 1];
+        paths.push(arrow(previous[0] + previous[2] + 8, previous[1] + previous[3] / 2, x - 10, y + height / 2, markerId));
+      }
+    });
+  }
+
+  paths.push(arrow(375, 233, 375, 262, markerId));
+  paths.push(arrow(375, 366, 375, 397, markerId));
+  paths.push(arrow(375, 598, 375, 642, markerId));
+  paths.push(`<path class="path" d="M 565 793 L 565 817 L 222.5 817 L 222.5 842" marker-end="url(#${markerId})"/>`);
 
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${VIEWBOX.width} ${VIEWBOX.height}" role="img" aria-label="${escapeXml(ariaLabel)}">
   <style>
-    .stage { fill: none; stroke: #77777d; stroke-width: 1.6; stroke-dasharray: 7 8; }
-    .node { fill: #f3f3f2; stroke: #29292c; stroke-width: 1.8; }
-    .rupture { stroke-width: 3; }
-    .path { fill: none; stroke: #29292c; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .stage { fill: none; stroke: #77777d; stroke-width: 1.2; stroke-dasharray: 6 7; }
+    .node { fill: #f3f3f2; stroke: #29292c; stroke-width: 1.35; }
+    .rupture { stroke-width: 2; }
+    .path { fill: none; stroke: #55555b; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
     .arrowhead { fill: #29292c; stroke: none; }
-    .stage-label, .node-label, .rupture-label {
+    .stage-title, .stage-meta, .primary, .secondary, .rupture-primary {
       fill: #202023;
       font-family: var(--font-prose, var(--font-source-serif, Georgia, "Times New Roman", serif));
-      text-anchor: middle;
       dominant-baseline: middle;
     }
-    .stage-label { font-size: 22px; font-weight: 700; letter-spacing: 1.1px; }
-    .node-label { font-size: 29px; font-weight: 600; }
-    .rupture-label { font-size: 31px; font-weight: 700; }
+    .stage-title { font-size: 15px; font-weight: 600; letter-spacing: .65px; text-anchor: start; }
+    .stage-meta { fill: #65656c; font-size: 14px; font-weight: 400; text-anchor: end; }
+    .primary, .secondary, .rupture-primary { text-anchor: middle; }
+    .primary { font-size: 20px; font-weight: 500; }
+    .secondary { fill: #65656c; font-size: 14px; font-weight: 400; }
+    .rupture-primary { font-size: 22px; font-weight: 600; }
+    @media (max-width: 420px) {
+      .stage-title { font-size: 17px; }
+      .stage-meta, .secondary { font-size: 16px; }
+      .primary { font-size: 23px; }
+      .rupture-primary { font-size: 24px; }
+    }
     @media (prefers-color-scheme: dark) {
       .stage { stroke: #88888f; }
       .node { fill: #19191c; stroke: #e7e7e9; }
-      .path { stroke: #e7e7e9; }
+      .path { stroke: #a0a0a8; }
       .arrowhead { fill: #e7e7e9; }
-      .stage-label, .node-label, .rupture-label { fill: #f2f2f3; }
+      .stage-title, .primary, .rupture-primary { fill: #f2f2f3; }
+      .stage-meta, .secondary { fill: #a6a6ae; }
     }
   </style>
   <defs>
