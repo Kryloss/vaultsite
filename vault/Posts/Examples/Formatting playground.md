@@ -76,7 +76,7 @@ Full guide: see the Excalidraw docs in the repo. Ask the AI for a diagram and it
 
 A photographed notebook page can become a cleaner, bilingual diagram without
 throwing the source away. The reconstruction below groups the handwritten
-timeline into three readable phases and shares one fixed frame with the photo,
+timeline into four readable phases and shares one fixed frame with the photo,
 so switching views never moves the rest of the page.
 
 ![[image-note-life-timeline.svg|A handwritten life timeline, reconstructed as a structured diagram :: Рукописний життєвий шлях, відтворений як структурована схема]]

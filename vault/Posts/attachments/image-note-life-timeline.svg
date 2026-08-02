@@ -4,25 +4,27 @@
     .node { fill: #f3f3f2; stroke: #29292c; stroke-width: 1.8; }
     .rupture { stroke-width: 3; }
     .path { fill: none; stroke: #29292c; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .arrowhead { fill: #29292c; stroke: none; }
     .stage-label, .node-label, .rupture-label {
       fill: #202023;
-      font-family: ui-serif, Georgia, Cambria, "Times New Roman", serif;
+      font-family: var(--font-prose, var(--font-source-serif, Georgia, "Times New Roman", serif));
       text-anchor: middle;
       dominant-baseline: middle;
     }
-    .stage-label { font-size: 20px; font-weight: 700; letter-spacing: 1.1px; }
-    .node-label { font-size: 25px; font-weight: 600; }
-    .rupture-label { font-size: 27px; font-weight: 700; }
+    .stage-label { font-size: 22px; font-weight: 700; letter-spacing: 1.1px; }
+    .node-label { font-size: 29px; font-weight: 600; }
+    .rupture-label { font-size: 31px; font-weight: 700; }
     @media (prefers-color-scheme: dark) {
       .stage { stroke: #88888f; }
       .node { fill: #19191c; stroke: #e7e7e9; }
       .path { stroke: #e7e7e9; }
+      .arrowhead { fill: #e7e7e9; }
       .stage-label, .node-label, .rupture-label { fill: #f2f2f3; }
     }
   </style>
   <defs>
     <marker id="image-note-arrow-en" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path class="path" d="M 1 1 L 9 5 L 1 9"/>
+      <path class="arrowhead" d="M 1 1 L 9 5 L 1 9 Z"/>
     </marker>
   </defs>
   <g aria-hidden="true">
@@ -50,18 +52,18 @@
     <path class="path" d="M 375 578 L 375 602" marker-end="url(#image-note-arrow-en)"/>
     <path class="path" d="M 375 763 L 375 787" marker-end="url(#image-note-arrow-en)"/>
     <text class="stage-label" x="375" y="66">1 · KRAMATORSK · 2007–2022</text>
-    <text class="node-label" x="157.5" y="142.0"><tspan x="157.5" dy="0">Kindergarten</tspan></text>
-    <text class="node-label" x="387.5" y="142.0"><tspan x="387.5" dy="0">Preschool</tspan></text>
-    <text class="node-label" x="605" y="127.5"><tspan x="605" dy="0">School</tspan><tspan x="605" dy="29.0">(grades 1–8)</tspan></text>
+    <text class="node-label" style="font-size:27.3px" x="157.5" y="142.0"><tspan x="157.5" dy="0">Kindergarten</tspan></text>
+    <text class="node-label" style="font-size:29.0px" x="387.5" y="142.0"><tspan x="387.5" dy="0">Preschool</tspan></text>
+    <text class="node-label" style="font-size:29.0px" x="605" y="125.2"><tspan x="605" dy="0">School</tspan><tspan x="605" dy="33.6">(grades 1–8)</tspan></text>
     <text class="stage-label" x="375" y="432">2 · RELOCATION · 2022</text>
-    <text class="node-label" x="235" y="484.5"><tspan x="235" dy="0">17 MAR · Romania ·</tspan><tspan x="235" dy="29.0">four months</tspan></text>
-    <text class="node-label" x="560" y="484.5"><tspan x="560" dy="0">8 JUN ·</tspan><tspan x="560" dy="29.0">Canada</tspan></text>
+    <text class="node-label" style="font-size:29.0px" x="235" y="482.2"><tspan x="235" dy="0">17 MAR · Romania</tspan><tspan x="235" dy="33.6">· four months</tspan></text>
+    <text class="node-label" style="font-size:29.0px" x="560" y="482.2"><tspan x="560" dy="0">8 JUN ·</tspan><tspan x="560" dy="33.6">Canada</tspan></text>
     <text class="stage-label" x="375" y="641">3 · PLACES IN CANADA</text>
-    <text class="node-label" x="230" y="697.0"><tspan x="230" dy="0">Nobleton</tspan></text>
-    <text class="node-label" x="510" y="697.0"><tspan x="510" dy="0">Newmarket</tspan></text>
+    <text class="node-label" style="font-size:29.0px" x="230" y="697.0"><tspan x="230" dy="0">Nobleton</tspan></text>
+    <text class="node-label" style="font-size:29.0px" x="510" y="697.0"><tspan x="510" dy="0">Newmarket</tspan></text>
     <text class="stage-label" x="375" y="827">4 · EDUCATION IN CANADA</text>
-    <text class="node-label" x="230" y="879.5"><tspan x="230" dy="0">2022–2026 · Sacred</tspan><tspan x="230" dy="29.0">Heart CHS</tspan></text>
-    <text class="node-label" x="560" y="879.5"><tspan x="560" dy="0">NOW · TMU ·</tspan><tspan x="560" dy="29.0">Cyber Science</tspan></text>
-    <text class="rupture-label" x="375" y="315.0"><tspan x="375" dy="0">24 FEB 2022 · War started</tspan></text>
+    <text class="node-label" style="font-size:29.0px" x="230" y="877.2"><tspan x="230" dy="0">2022–2026 ·</tspan><tspan x="230" dy="33.6">Sacred Heart CHS</tspan></text>
+    <text class="node-label" style="font-size:29.0px" x="560" y="877.2"><tspan x="560" dy="0">NOW · TMU ·</tspan><tspan x="560" dy="33.6">Cyber Science</tspan></text>
+    <text class="rupture-label" style="font-size:31.0px" x="375" y="297.0"><tspan x="375" dy="0">24 FEB 2022 · War</tspan><tspan x="375" dy="36.0">started</tspan></text>
   </g>
 </svg>

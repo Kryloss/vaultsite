@@ -132,10 +132,12 @@ function wrapText(text, width, fontSize) {
 
 function centeredText(text, box, className, fontSize) {
   const [x, y, width, height] = box;
-  const lines = wrapText(text, width - 28, fontSize);
-  const lineHeight = fontSize * 1.16;
+  const longestWord = Math.max(...text.split(/\s+/).map((word) => word.length));
+  const fittedSize = Math.min(fontSize, Math.max(24, (width - 28) / (longestWord * 0.54)));
+  const lines = wrapText(text, width - 28, fittedSize);
+  const lineHeight = fittedSize * 1.16;
   const firstY = y + height / 2 - ((lines.length - 1) * lineHeight) / 2;
-  return `<text class="${className}" x="${x + width / 2}" y="${firstY.toFixed(1)}">${lines
+  return `<text class="${className}" style="font-size:${fittedSize.toFixed(1)}px" x="${x + width / 2}" y="${firstY.toFixed(1)}">${lines
     .map((line, index) => `<tspan x="${x + width / 2}" dy="${index ? lineHeight.toFixed(1) : 0}">${escapeXml(line)}</tspan>`)
     .join("")}</text>`;
 }
@@ -163,7 +165,7 @@ function render(scene, { language, ariaLabel }) {
       shapes.push(
         `<rect class="node" x="${nodeX}" y="${nodeY}" width="${nodeWidth}" height="${nodeHeight}" rx="${Math.min(30, nodeHeight / 2)}"/>`
       );
-      labels.push(centeredText(node, nodeBox, "node-label", 25));
+      labels.push(centeredText(node, nodeBox, "node-label", 29));
       if (nodeIndex) {
         const previous = geometry.nodes[nodeIndex - 1];
         paths.push(
@@ -177,7 +179,7 @@ function render(scene, { language, ariaLabel }) {
   shapes.push(
     `<rect class="node rupture" x="${ruptureX}" y="${ruptureY}" width="${ruptureWidth}" height="${ruptureHeight}" rx="${ruptureHeight / 2}"/>`
   );
-  labels.push(centeredText(scene.rupture, RUPTURE, "rupture-label", 27));
+  labels.push(centeredText(scene.rupture, RUPTURE, "rupture-label", 31));
 
   paths.push(arrow(375, 238, 375, 262, markerId));
   paths.push(arrow(375, 368, 375, 392, markerId));
@@ -190,25 +192,27 @@ function render(scene, { language, ariaLabel }) {
     .node { fill: #f3f3f2; stroke: #29292c; stroke-width: 1.8; }
     .rupture { stroke-width: 3; }
     .path { fill: none; stroke: #29292c; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .arrowhead { fill: #29292c; stroke: none; }
     .stage-label, .node-label, .rupture-label {
       fill: #202023;
-      font-family: ui-serif, Georgia, Cambria, "Times New Roman", serif;
+      font-family: var(--font-prose, var(--font-source-serif, Georgia, "Times New Roman", serif));
       text-anchor: middle;
       dominant-baseline: middle;
     }
-    .stage-label { font-size: 20px; font-weight: 700; letter-spacing: 1.1px; }
-    .node-label { font-size: 25px; font-weight: 600; }
-    .rupture-label { font-size: 27px; font-weight: 700; }
+    .stage-label { font-size: 22px; font-weight: 700; letter-spacing: 1.1px; }
+    .node-label { font-size: 29px; font-weight: 600; }
+    .rupture-label { font-size: 31px; font-weight: 700; }
     @media (prefers-color-scheme: dark) {
       .stage { stroke: #88888f; }
       .node { fill: #19191c; stroke: #e7e7e9; }
       .path { stroke: #e7e7e9; }
+      .arrowhead { fill: #e7e7e9; }
       .stage-label, .node-label, .rupture-label { fill: #f2f2f3; }
     }
   </style>
   <defs>
     <marker id="${markerId}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path class="path" d="M 1 1 L 9 5 L 1 9"/>
+      <path class="arrowhead" d="M 1 1 L 9 5 L 1 9 Z"/>
     </marker>
   </defs>
   <g aria-hidden="true">

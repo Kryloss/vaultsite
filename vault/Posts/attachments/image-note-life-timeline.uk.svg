@@ -4,25 +4,27 @@
     .node { fill: #f3f3f2; stroke: #29292c; stroke-width: 1.8; }
     .rupture { stroke-width: 3; }
     .path { fill: none; stroke: #29292c; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .arrowhead { fill: #29292c; stroke: none; }
     .stage-label, .node-label, .rupture-label {
       fill: #202023;
-      font-family: ui-serif, Georgia, Cambria, "Times New Roman", serif;
+      font-family: var(--font-prose, var(--font-source-serif, Georgia, "Times New Roman", serif));
       text-anchor: middle;
       dominant-baseline: middle;
     }
-    .stage-label { font-size: 20px; font-weight: 700; letter-spacing: 1.1px; }
-    .node-label { font-size: 25px; font-weight: 600; }
-    .rupture-label { font-size: 27px; font-weight: 700; }
+    .stage-label { font-size: 22px; font-weight: 700; letter-spacing: 1.1px; }
+    .node-label { font-size: 29px; font-weight: 600; }
+    .rupture-label { font-size: 31px; font-weight: 700; }
     @media (prefers-color-scheme: dark) {
       .stage { stroke: #88888f; }
       .node { fill: #19191c; stroke: #e7e7e9; }
       .path { stroke: #e7e7e9; }
+      .arrowhead { fill: #e7e7e9; }
       .stage-label, .node-label, .rupture-label { fill: #f2f2f3; }
     }
   </style>
   <defs>
     <marker id="image-note-arrow-uk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path class="path" d="M 1 1 L 9 5 L 1 9"/>
+      <path class="arrowhead" d="M 1 1 L 9 5 L 1 9 Z"/>
     </marker>
   </defs>
   <g aria-hidden="true">
@@ -50,18 +52,18 @@
     <path class="path" d="M 375 578 L 375 602" marker-end="url(#image-note-arrow-uk)"/>
     <path class="path" d="M 375 763 L 375 787" marker-end="url(#image-note-arrow-uk)"/>
     <text class="stage-label" x="375" y="66">1 · КРАМАТОРСЬК · 2007–2022</text>
-    <text class="node-label" x="157.5" y="142.0"><tspan x="157.5" dy="0">Дитячий садок</tspan></text>
-    <text class="node-label" x="387.5" y="127.5"><tspan x="387.5" dy="0">Дошкільна</tspan><tspan x="387.5" dy="29.0">підготовка</tspan></text>
-    <text class="node-label" x="605" y="127.5"><tspan x="605" dy="0">Школа (1–8</tspan><tspan x="605" dy="29.0">класи)</tspan></text>
+    <text class="node-label" style="font-size:29.0px" x="157.5" y="125.2"><tspan x="157.5" dy="0">Дитячий</tspan><tspan x="157.5" dy="33.6">садок</tspan></text>
+    <text class="node-label" style="font-size:27.2px" x="387.5" y="126.2"><tspan x="387.5" dy="0">Дошкільна</tspan><tspan x="387.5" dy="31.6">підготовка</tspan></text>
+    <text class="node-label" style="font-size:29.0px" x="605" y="125.2"><tspan x="605" dy="0">Школа</tspan><tspan x="605" dy="33.6">(1–8 класи)</tspan></text>
     <text class="stage-label" x="375" y="432">2 · ПЕРЕЇЗД · 2022</text>
-    <text class="node-label" x="235" y="484.5"><tspan x="235" dy="0">17 БЕР · Румунія ·</tspan><tspan x="235" dy="29.0">чотири місяці</tspan></text>
-    <text class="node-label" x="560" y="484.5"><tspan x="560" dy="0">8 ЧЕР ·</tspan><tspan x="560" dy="29.0">Канада</tspan></text>
+    <text class="node-label" style="font-size:29.0px" x="235" y="482.2"><tspan x="235" dy="0">17 БЕР · Румунія</tspan><tspan x="235" dy="33.6">· чотири місяці</tspan></text>
+    <text class="node-label" style="font-size:29.0px" x="560" y="482.2"><tspan x="560" dy="0">8 ЧЕР ·</tspan><tspan x="560" dy="33.6">Канада</tspan></text>
     <text class="stage-label" x="375" y="641">3 · МІСЦЯ В КАНАДІ</text>
-    <text class="node-label" x="230" y="697.0"><tspan x="230" dy="0">Ноблтон</tspan></text>
-    <text class="node-label" x="510" y="697.0"><tspan x="510" dy="0">Ньюмаркет</tspan></text>
+    <text class="node-label" style="font-size:29.0px" x="230" y="697.0"><tspan x="230" dy="0">Ноблтон</tspan></text>
+    <text class="node-label" style="font-size:29.0px" x="510" y="697.0"><tspan x="510" dy="0">Ньюмаркет</tspan></text>
     <text class="stage-label" x="375" y="827">4 · ОСВІТА В КАНАДІ</text>
-    <text class="node-label" x="230" y="879.5"><tspan x="230" dy="0">2022–2026 · Sacred</tspan><tspan x="230" dy="29.0">Heart CHS</tspan></text>
-    <text class="node-label" x="560" y="879.5"><tspan x="560" dy="0">ЗАРАЗ · TMU ·</tspan><tspan x="560" dy="29.0">Cyber Science</tspan></text>
-    <text class="rupture-label" x="375" y="299.3"><tspan x="375" dy="0">24 ЛЮТ 2022 · Почалася</tspan><tspan x="375" dy="31.3">війна</tspan></text>
+    <text class="node-label" style="font-size:29.0px" x="230" y="877.2"><tspan x="230" dy="0">2022–2026 ·</tspan><tspan x="230" dy="33.6">Sacred Heart CHS</tspan></text>
+    <text class="node-label" style="font-size:29.0px" x="560" y="877.2"><tspan x="560" dy="0">ЗАРАЗ · TMU</tspan><tspan x="560" dy="33.6">· Cyber Science</tspan></text>
+    <text class="rupture-label" style="font-size:31.0px" x="375" y="297.0"><tspan x="375" dy="0">24 ЛЮТ 2022 · Почалася</tspan><tspan x="375" dy="36.0">війна</tspan></text>
   </g>
 </svg>

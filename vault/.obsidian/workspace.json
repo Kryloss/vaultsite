@@ -13,10 +13,10 @@
             "state": {
               "type": "image",
               "state": {
-                "file": "Posts/attachments/image-note-life-timeline.svg"
+                "file": "Posts/attachments/image-note-life-timeline.uk.svg"
               },
               "icon": "lucide-image",
-              "title": "image-note-life-timeline"
+              "title": "image-note-life-timeline.uk"
             }
           }
         ]
@@ -199,12 +199,12 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
+    "Posts/attachments/image-note-life-timeline.excalidraw",
     "Posts/attachments/image-note-life-timeline.uk.svg",
+    "Posts/attachments/image-note-life-timeline.uk.excalidraw",
+    "Posts/attachments/image-note-life-timeline.svg",
     "Posts/attachments/rendering-pipeline.svg",
     "Posts/attachments/image-note-life-timeline.jpeg",
-    "Posts/attachments/image-note-life-timeline.svg",
-    "Posts/attachments/image-note-life-timeline.excalidraw",
-    "Posts/attachments/image-note-life-timeline.uk.excalidraw",
     "Posts/attachments/secplus-plan.uk.svg",
     "Posts/attachments/war-newspaper.pdf",
     "Posts/attachments/war-newspaper-01.webp",
