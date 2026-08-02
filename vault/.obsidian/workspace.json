@@ -13,10 +13,10 @@
             "state": {
               "type": "image",
               "state": {
-                "file": "Posts/attachments/image-note-family-tree.svg"
+                "file": "Posts/attachments/image-note-family-tree.uk.svg"
               },
               "icon": "lucide-image",
-              "title": "image-note-family-tree"
+              "title": "image-note-family-tree.uk"
             }
           }
         ]
@@ -199,9 +199,10 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
+    "Posts/attachments/image-note-family-tree.svg",
+    "Posts/attachments/image-note-family-tree.uk.excalidraw",
     "Posts/attachments/image-note-family-tree.excalidraw",
     "Posts/attachments/image-note-family-tree.jpeg",
-    "Posts/attachments/image-note-family-tree.svg",
     "Posts/attachments/image-note-life-timeline.jpeg",
     "Posts/attachments/image-note-life-timeline.svg",
     "Posts/attachments/image-note-life-timeline.excalidraw",
@@ -210,7 +211,6 @@
     "Posts/attachments/image-note-family-tree.uk.svg",
     "Posts/attachments/image-note-life-timeline.uk.excalidraw",
     "Posts/attachments/image-note-life-timeline.uk.svg",
-    "Posts/attachments/image-note-family-tree.uk.excalidraw",
     "Posts/attachments/rendering-pipeline.uk.svg",
     "Posts/attachments/war-newspaper.pdf",
     "Posts/attachments/war-newspaper-01.webp",

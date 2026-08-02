@@ -100,13 +100,16 @@ function center(box) {
 function card(person, key, className = "person") {
   const [x, y, width, height] = BOXES[key];
   const cx = x + width / 2;
-  const nameY = y + (person.note ? 29 : 34);
-  const roleY = nameY + 24;
-  const noteY = roleY + 21;
+  const roleLines = person.role.length > 13 && person.role.includes(" ") ? person.role.split(/\s+/) : [person.role];
+  const nameY = y + (person.note ? 29 : roleLines.length > 1 ? 29 : 34);
+  const roleY = nameY + (roleLines.length > 1 ? 21 : 24);
+  const noteY = roleY + (roleLines.length > 1 ? 34 : 21);
   return `<g class="card ${className}">
       <rect x="${x}" y="${y}" width="${width}" height="${height}" rx="14"/>
       <text class="name" x="${cx}" y="${nameY}">${escapeXml(person.name)}</text>
-      <text class="role" x="${cx}" y="${roleY}">${escapeXml(person.role)}</text>${
+      <text class="role" x="${cx}" y="${roleY}">${roleLines
+        .map((line, index) => `<tspan x="${cx}" dy="${index ? 18 : 0}">${escapeXml(line)}</tspan>`)
+        .join("")}</text>${
         person.note ? `\n      <text class="note" x="${cx}" y="${noteY}">${escapeXml(person.note)}</text>` : ""
       }
     </g>`;
@@ -164,18 +167,18 @@ function render(people, { language, ariaLabel }) {
     .name, .role, .note { text-anchor: middle; }
     .name { font-size: 20px; font-weight: 600; }
     .role { fill: #606067; font-size: 14px; font-weight: 400; }
-    .cousin .role { font-size: 11.5px; }
+    .cousin .role { font-size: 13.5px; }
     .note { fill: #77777e; font-size: 11.5px; font-style: italic; font-weight: 400; }
     .current .name { fill: #ffffff; }
     .current .role { fill: #d4d4d8; }
     @media (max-width: 420px) {
-      .title { font-size: 27px; }
-      .branch-title { font-size: 16px; }
-      .generation { font-size: 15px; }
-      .name { font-size: 22px; }
-      .role { font-size: 16px; }
-      .cousin .role { font-size: 13px; }
-      .note { font-size: 13px; }
+      .title { font-size: 30px; }
+      .branch-title { font-size: 19px; }
+      .generation { font-size: 19px; }
+      .name { font-size: 25px; }
+      .role { font-size: 20px; }
+      .cousin .role { font-size: 18px; }
+      .note { font-size: 17px; }
     }
     @media (prefers-color-scheme: dark) {
       .branch { stroke: #85858d; }
