@@ -398,6 +398,9 @@ the photograph available as the primary-source view.
 2. **Preserve meaning, not notebook geometry.** Choose the clearest diagram
    structure for the information. Keep the author's chronology, relationships,
    emphasis, and wording; remove crossed-out text and accidental page clutter.
+   Pick the form from the meaning: chronology → timeline, causes/steps → flow,
+   hierarchy → tree, alternatives → comparison, connected ideas → concept map.
+   Do not turn every page into the same left-to-right chain.
 3. **Make the graph bilingual.** Produce `<name>.svg` and `<name>.uk.svg` with
    identical geometry and professionally translated labels. Proper nouns follow
    the Translation rules above.
@@ -408,6 +411,17 @@ the photograph available as the primary-source view.
 5. **Transparent and native-looking.** Use the self-theming SVG rules above:
    no canvas/background rectangle, monochrome page colors, the site's typeface,
    simple rounded nodes, and reduced visual noise.
+6. **Rebuild the information architecture.** Group related facts into named
+   phases, give dates/labels a consistent hierarchy, use arrows only for real
+   relationships, and move explanation into short secondary labels. The point
+   is to make the note easier to scan, not to trace the handwriting neatly.
+7. **Match the source canvas.** Give the SVG a `viewBox` with approximately the
+   same aspect ratio as the sanitized photo. The site reserves one shared frame
+   from the photo's build-time dimensions, so both views remain centered and the
+   article never jumps when the reader switches them.
+8. **Run a legibility pass.** Check both languages at the actual prose width and
+   at a phone width, in light and dark mode. Split or shorten labels that clip;
+   never shrink all text to rescue one long translation.
 
 ### Embed syntax
 
@@ -421,7 +435,9 @@ Put the source-photo directive **immediately after** the normal diagram embed:
 Obsidian displays the diagram and hides the HTML comment. The site upgrades the
 pair into one figure with a `Diagram / Original` (`Схема / Оригінал`) switch;
 the diagram is the default. Both views still open in the existing lightbox.
-The switch is native HTML and works without JavaScript.
+The switch is native HTML and works without JavaScript. Both views occupy the
+same dimensioned stage; switching changes only what is painted inside it, not
+the height of the article.
 
 The first embed may also be an exported drawing:
 
@@ -433,8 +449,10 @@ The first embed may also be an exported drawing:
 For an editable Obsidian drawing, use the Excalidraw plugin's **Convert SVG to
 Excalidraw** workflow, save English and `.uk` drawings, and keep Auto-export SVG
 enabled. Conversion has some SVG limitations, so visually check both exports.
-The AI must not manufacture Excalidraw scene JSON; its reliable headless output
-is the bilingual SVG pair, which Obsidian can display directly and convert.
+Codex should create the bilingual, semantic SVG pair directly and verify it in
+the site. It must not manufacture Excalidraw scene JSON. Excalidraw remains the
+optional manual-editing layer: Obsidian can display the SVG directly or convert
+it when hand adjustment is useful.
 
 ### Where files go
 

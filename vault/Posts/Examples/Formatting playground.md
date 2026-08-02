@@ -6,9 +6,6 @@ category: Meta
 description: Every tool this site supports, demonstrated in one post.
 description_uk: Усі інструменти, які підтримує сайт, показані в одному дописі.
 maturity: evergreen
-# A reference sheet for writing notes, not a post — visible in `npm run dev`,
-# absent from the published site. Remove this line to publish it.
-draft: true
 ---
 
 A living demo of everything you can use in a note. Steal from it freely, or delete it once you know the toolbox.
@@ -74,6 +71,20 @@ Two kinds, both fully static. Draw in Excalidraw and embed `![[Name.excalidraw]]
 ![[rendering-pipeline.svg|From an Obsidian note to a static page — every syntax on this page passes through here :: Від нотатки Obsidian до статичної сторінки — увесь синтаксис на цій сторінці проходить сюди]]
 
 Full guide: see the Excalidraw docs in the repo. Ask the AI for a diagram and it drops one in.
+
+## Image notes
+
+A photographed notebook page can become a cleaner, bilingual diagram without
+throwing the source away. The reconstruction below groups the handwritten
+timeline into three readable phases and shares one fixed frame with the photo,
+so switching views never moves the rest of the page.
+
+![[image-note-life-timeline.svg|A handwritten life timeline, reconstructed as a structured diagram :: Рукописний життєвий шлях, відтворений як структурована схема]]
+<!-- image-note: image-note-life-timeline.jpeg -->
+
+Use **Diagram** for the organized version and **Original** to check it against
+the handwriting. The source photo is resized and stripped of location/device
+metadata before publication.
 
 ## Drafts
 

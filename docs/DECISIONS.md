@@ -1031,3 +1031,27 @@ orientation-normalized, resized to roughly 1600px on its long edge, and stripped
 of EXIF/GPS/device metadata before entering `vault/`. The file is evidence for
 the reader, not a reason to publish where and on what device the note was
 photographed.
+
+**Both views own one canvas.** The photo's width and height already exist in the
+build-time image manifest. `imageNoteHtml()` writes that ratio onto the shared
+stage, and the diagram and original are centered in the same grid cell. The
+inactive view changes, but the figure's geometry does not, so a switch can never
+move the controls, caption, or paragraph below it. Diagram authors also match the
+SVG `viewBox` to the source ratio when practical, which uses that reserved space
+rather than letterboxing it.
+
+**Codex is the reconstruction tool; Excalidraw is an optional editor.** Mermaid,
+D2, and Graphviz can lay out already-structured graphs, but interpreting a photo
+and designing an information hierarchy is the difficult part here. Codex writes
+the final bilingual SVG against the site's actual constraints and visually tests
+it. Excalidraw remains available when the owner wants to adjust the result by
+hand, not as a mandatory intermediate format or a website dependency.
+
+## 70. Formatting Playground is a published reference (2026-08-02)
+
+Decision #43 correctly removed accidental scaffolding from the public site at
+the time. The owner has now explicitly chosen to publish Formatting Playground
+as the permanent, inspectable demonstration of every supported content feature.
+Its `draft: true` flag is removed and the first Image note lives there. `Post
+Sample` and `Draft example` remain scaffolding/draft material; publishing this
+one reference does not change the default rule that examples are hidden.

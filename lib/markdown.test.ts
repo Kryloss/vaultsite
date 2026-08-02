@@ -21,6 +21,8 @@ test("image note pairs a bilingual diagram with its source photo", async () => {
     html,
     /src="\/vault-assets\/Posts\/attachments\/image-note-life-timeline\.jpeg"/
   );
+  assert.match(html, /--image-note-aspect: 1600 \/ 2133/);
+  assert.match(html, /width="1600" height="2133"/);
   assert.match(html, /My path so far/);
   assert.match(html, /Мій шлях дотепер/);
   assert.doesNotMatch(html, /<!--\s*image-note:/);

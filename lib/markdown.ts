@@ -467,6 +467,13 @@ function imageNoteHtml(
   const originalId = `${id}-original`;
   const groupName = `${id}-view`;
   const originalAlt = `${ui.imageNoteOriginalAlt.en} / ${ui.imageNoteOriginalAlt.uk}`;
+  const originalDims = dimsFor(originalSrc);
+  const stageStyle = originalDims
+    ? ` style="--image-note-aspect: ${originalDims.w} / ${originalDims.h}"`
+    : "";
+  const originalSize = originalDims
+    ? ` width="${originalDims.w}" height="${originalDims.h}"`
+    : "";
 
   return (
     `<figure class="image-note">` +
@@ -477,14 +484,14 @@ function imageNoteHtml(
     )}</legend>` +
     `<input class="image-note-radio image-note-radio-diagram" type="radio" id="${diagramId}" name="${groupName}" checked />` +
     `<input class="image-note-radio image-note-radio-original" type="radio" id="${originalId}" name="${groupName}" />` +
-    `<div class="image-note-stage">` +
+    `<div class="image-note-stage"${stageStyle}>` +
     `<div class="image-note-diagram">${diagramMedia(
       diagram.en,
       diagram.uk,
       alt,
       "image-note-drawing"
     )}</div>` +
-    `<div class="image-note-original"><img src="${originalSrc}" alt="${escapeHtml(
+    `<div class="image-note-original"><img src="${originalSrc}"${originalSize} alt="${escapeHtml(
       originalAlt
     )}" loading="lazy" /></div>` +
     `</div>` +

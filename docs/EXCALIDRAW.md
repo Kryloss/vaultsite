@@ -118,6 +118,24 @@ The original photo is a public asset once attached, so remove EXIF/GPS/device
 metadata and resize it before it enters the vault. Full transcription, naming,
 translation, and privacy rules live in `docs/CONTENT-WORKFLOW.md → Image notes`.
 
+### Which diagram tool belongs here?
+
+- **Codex-authored semantic SVG is the default.** Codex can inspect the source
+  photo, reconstruct its information hierarchy, write both language variants,
+  match the site's exact visual system, and verify the result in the real page.
+  The checked-in SVG is portable and the website needs no diagram runtime.
+- **Excalidraw is the optional hand-editing surface.** Use it when freehand
+  adjustment inside Obsidian matters. Its export remains the website asset; the
+  Excalidraw React/canvas application never ships to readers.
+- **Mermaid, D2, and Graphviz are good for regular generated graphs**, especially
+  when the source is already structured text. For photographed personal notes,
+  their automatic layout and extra build dependency buy less than direct SVG:
+  the hard work is interpreting and grouping the information, not routing edges.
+
+This is a division of responsibilities, not a conversion requirement: most
+Image notes should stay as SVG forever. Convert one to Excalidraw only when
+Kyrylo actually wants to edit it by hand.
+
 ## How it resolves (for maintainers)
 
 - `lib/vault.ts → getAssetIndex()` maps every non-md file's basename to its
@@ -125,7 +143,9 @@ translation, and privacy rules live in `docs/CONTENT-WORKFLOW.md → Image notes
 - `lib/markdown.ts` turns `![[x.excalidraw]]` into a themed `<figure>`, trying
   `x.light.svg`/`x.dark.svg` → `x.svg` → `x.png`.
 - An SVG/Excalidraw embed immediately followed by `<!-- image-note: file -->`
-  becomes a radio-backed `.image-note` figure. The diagram stays first and the
-  source photo is resolved through the same vault-wide asset index.
+  becomes a radio-backed `.image-note` figure. The source photo's image-manifest
+  dimensions set one shared aspect-ratio stage, so diagram/original switching
+  cannot reflow the page. The diagram stays first and the source photo is
+  resolved through the same vault-wide asset index.
 - `.excalidraw.md` source files are excluded from becoming pages; `.excalidraw`
   JSON sources aren't shipped (only the exported image is).

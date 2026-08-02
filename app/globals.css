@@ -759,6 +759,7 @@ body::after {
 }
 
 .image-note-shell {
+  position: relative;
   min-width: 0;
   margin: 0;
   border: 0;
@@ -776,10 +777,30 @@ body::after {
   white-space: nowrap;
 }
 
-.image-note-stage,
+.image-note-radio {
+  bottom: 0;
+  left: 50%;
+}
+
+.image-note-stage {
+  display: grid;
+  width: 100%;
+  max-height: 75vh;
+  aspect-ratio: var(--image-note-aspect, 3 / 4);
+}
+
 .image-note-diagram,
 .image-note-original {
+  grid-area: 1 / 1;
+  min-width: 0;
+  min-height: 0;
   width: 100%;
+  height: 100%;
+  place-items: center;
+}
+
+.image-note-diagram {
+  display: grid;
 }
 
 .image-note-original {
@@ -791,26 +812,47 @@ body::after {
 }
 
 .image-note-radio-original:checked ~ .image-note-stage .image-note-original {
-  display: block;
+  display: grid;
+}
+
+.image-note-diagram > .lang-en {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+}
+
+.image-note-diagram > .lang-uk {
+  width: 100%;
+  height: 100%;
+  place-items: center;
+}
+
+html[data-lang="uk"] .image-note-diagram > .lang-en {
+  display: none;
+}
+
+html[data-lang="uk"] .image-note-diagram > .lang-uk {
+  display: grid;
 }
 
 .image-note-diagram img,
 .image-note-diagram svg.diagram {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
   margin: 0 auto;
   border: 0;
   border-radius: 0;
   background: transparent;
+  object-fit: contain;
 }
 
 .image-note-original img {
   display: block;
-  width: auto;
+  width: 100%;
   max-width: 100%;
-  max-height: 75vh;
-  height: auto;
+  height: 100%;
   margin: 0 auto;
   object-fit: contain;
 }
