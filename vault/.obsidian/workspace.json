@@ -11,12 +11,14 @@
             "id": "9cd2acf5af766b33",
             "type": "leaf",
             "state": {
-              "type": "image",
+              "type": "markdown",
               "state": {
-                "file": "Posts/attachments/image-note-life-timeline.uk.svg"
+                "file": "Posts/Examples/Formatting playground.uk.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "lucide-image",
-              "title": "image-note-life-timeline.uk"
+              "icon": "lucide-file",
+              "title": "Formatting playground.uk"
             }
           }
         ]
@@ -199,7 +201,14 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
+    "Posts/Examples/Draft example.uk.md",
+    "Posts/First certification.uk.md",
+    "Posts/I made propaganda for my Religion class.uk.md",
+    "Posts/main.md",
+    "Posts/Security+ journey.md",
+    "Posts/attachments/war-newspaper.pdf",
     "Posts/attachments/image-note-life-timeline.svg",
+    "Music/Clancy.uk.md",
     "Posts/attachments/image-note-life-timeline.uk.svg",
     "Posts/attachments/image-note-life-timeline.jpeg",
     "Posts/attachments/rendering-pipeline.svg",
@@ -207,14 +216,12 @@
     "Posts/Examples/Image note QA.md",
     "Music/main.md",
     "Posts/First certification.md",
-    "Posts/First certification.uk.md",
     "Posts/attachments/secplus-plan.svg",
     "Posts/attachments/secplus-domains.svg",
     "Posts/attachments/rendering-pipeline.uk.svg",
     "Shelf/Books/Sapiens.uk.md",
     "Posts/attachments/war-newspaper-01.webp",
     "Posts/Examples/Formatting playground.uk.md",
-    "Posts/Examples/Draft example.uk.md",
     "Posts/Examples/Post Sample.uk.md",
     "Shelf/Shows/Mr Robot.uk.md",
     "Shelf/Movies/Inception.uk.md",
@@ -222,26 +229,21 @@
     "Posts/Security+ journey.uk.md",
     "People/Mykhailo Fedorov.uk.md",
     "Music/main.uk.md",
-    "Music/Clancy.uk.md",
     "Posts/attachments/secplus-plan.uk.svg",
     "Shelf/Books/The Witcher - The Last Wish.md",
     "Shelf/Books/Jonathan Livingston Seagull.uk 1.md",
     "Shelf/Books/New Version.uk.md",
-    "Posts/main.md",
     "Shelf/Books/Jonathan Livingston Seagull.md",
     "Shelf/Books/Jonathan Livingston Seagull.uk.md",
     "Now/main.md",
     "Home/me.jpeg",
     "Shelf/Books/Footprints on the Road.uk.md",
-    "Shelf/Books/The Order of Time.md",
-    "People/mykhailo-fedorov.png",
     "Now/Kyrylo Leshchenko Resume.pdf",
     "Posts/Examples",
     "Shelf/Shows/covers",
     "Shelf/Movies/covers",
     "Shelf/Books/covers",
     "Projects/attachments",
-    "Posts/attachments/war-newspaper.pdf",
     "Posts/attachments",
     "Shelf/Shows",
     "Shelf/Movies"
