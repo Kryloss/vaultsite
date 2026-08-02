@@ -68,9 +68,14 @@ export default async function TilList({ section, entries }: ListProps) {
               />
               <Link
                 href={`/${section.slug}/${entry.slug}`}
-                className="mt-3 inline-block text-sm font-medium text-[var(--text)] underline decoration-[var(--text-tertiary)] underline-offset-4 hover:decoration-[var(--text)]"
+                className="action-link mt-3 inline-block text-sm font-medium text-[var(--text)] underline decoration-[var(--text-tertiary)] underline-offset-4 hover:decoration-[var(--text)]"
               >
                 <T {...ui.continueReading} />
+                {/* Its own element so it can lead on hover and be thrown on
+                    press — see `.arrow-glyph` in globals.css. */}
+                <span className="arrow-glyph" aria-hidden>
+                  →
+                </span>
               </Link>
             </>
           ) : (

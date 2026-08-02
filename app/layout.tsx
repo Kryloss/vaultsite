@@ -7,12 +7,12 @@ import CodeCopy from "@/components/CodeCopy";
 import HeadingAnchors from "@/components/HeadingAnchors";
 import JsonLd from "@/components/JsonLd";
 import SelectionLink from "@/components/SelectionLink";
+import ArrowThrow from "@/components/ArrowThrow";
 import { Analytics } from "@vercel/analytics/next";
 import { siteJsonLd } from "@/lib/jsonld";
-import { getSections, getEntries } from "@/lib/vault";
+import { getSections } from "@/lib/vault";
 import { resistanceDay } from "@/lib/resistance";
-import { isShelfSection, shelfGroups } from "@/lib/shelf";
-import { siteName, siteUrl, siteDescription } from "@/lib/site-config";
+import { siteName, siteNameUk, siteUrl, siteDescription } from "@/lib/site-config";
 
 /**
  * Source Serif 4 — the site's one typeface, self-hosted by next/font so the
@@ -78,25 +78,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   // Navigation (and breadcrumb titles) generated from the vault at build time.
-  const items = getSections().map((section) => {
-    const entries = getEntries(section);
-    return {
-      slug: section.slug,
-      title: section.title,
-      titleUk: section.titleUk,
-      icon: section.icon,
-      // Lets the breadcrumb name /<section>/type/<medium> pages.
-      mediums: isShelfSection(section)
-        ? shelfGroups(entries)
-            .filter((g) => g.medium !== "unsorted")
-            .map((g) => ({
-              slug: g.slug,
-              title: g.label.en,
-              titleUk: g.label.uk,
-            }))
-        : undefined,
-    };
-  });
+  const items = getSections().map((section) => ({
+    slug: section.slug,
+    title: section.title,
+    titleUk: section.titleUk,
+    icon: section.icon,
+  }));
 
   return (
     // data-lang is set pre-paint by the inline script below (and toggled at
@@ -157,6 +144,7 @@ export default function RootLayout({
         <Chrome
           items={items}
           siteName={siteName}
+          siteNameUk={siteNameUk}
           resistanceDay={resistanceDay()}
         >
           {children}
@@ -166,6 +154,8 @@ export default function RootLayout({
         <CodeCopy />
         <HeadingAnchors />
         <SelectionLink />
+        {/* Keeps a thrown arrow thrown — see the note in the component. */}
+        <ArrowThrow />
         {/* Vercel Analytics: page views only, no cookies and no cross-site
             identifier, so there's nothing to consent to. It injects a script
             tag on Vercel and is a no-op in local dev. */}

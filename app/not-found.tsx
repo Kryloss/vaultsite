@@ -21,8 +21,13 @@ export default function NotFound() {
 
       <Link
         href="/"
-        className="notfound-home press mt-8 inline-block text-sm"
+        className="notfound-home action-link press mt-8 inline-block text-sm"
       >
+        {/* Leading, so it points back the way you came — `.is-back` flips the
+            spacing and the direction it's thrown in. */}
+        <span className="arrow-glyph is-back" aria-hidden>
+          ←
+        </span>
         <T {...ui.backHome} />
       </Link>
     </Page>

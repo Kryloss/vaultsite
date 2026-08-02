@@ -5,7 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import T from "@/components/T";
 import { CheckIcon } from "@/components/icons";
 import { useLang } from "@/components/useLang";
-import { readNotes, READ_EVENT } from "@/lib/read-notes";
+import { markRead, readNotes, unmarkRead, READ_EVENT } from "@/lib/read-notes";
+import { ui } from "@/lib/ui-strings";
 /* Type-only: lib/series.ts reaches the filesystem, and a type import is
    erased before the client bundle is built. Everything this needs at runtime
    arrives already computed on the `series` prop. */
@@ -70,6 +71,21 @@ export default function Series({ series }: { series: Series }) {
   }, []);
 
   const readCount = series.parts.filter((p) => read.has(p.href)).length;
+
+  /**
+   * Tick a part by hand.
+   *
+   * The automatic signal is a good guess and only a guess — someone who
+   * skimmed to the bottom for one line has "finished" by the bar's reckoning
+   * and knows they haven't, and a part read on another device was never seen
+   * by this browser at all. The store is the reader's, so they get to write to
+   * it. No local state: the write fires `noteread`, the listener above re-reads
+   * the store, and there is still exactly one source of truth.
+   */
+  const toggle = (href: string) => {
+    if (read.has(href)) unmarkRead(href);
+    else markRead(href);
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -175,14 +191,11 @@ export default function Series({ series }: { series: Series }) {
                     <span className="series-part-title">
                       <T en={part.title} uk={part.titleUk} />
                     </span>
-                    {/* The number stays — the tick is added beside it, not in
-                        place of it, so the reading order never goes missing. */}
-                    {done && <CheckIcon className="series-tick" />}
                   </>
                 );
 
                 return (
-                  <li key={part.href}>
+                  <li key={part.href} className="series-row">
                     {part.current ? (
                       /* The note you're on stays in the list, unlinked — take
                          it out and the numbers lie about where you are. */
@@ -201,6 +214,24 @@ export default function Series({ series }: { series: Series }) {
                         {label}
                       </Link>
                     )}
+
+                    {/* Outside the link, deliberately: a checkbox inside an
+                        anchor is a control you can't reach without following
+                        the link. Its own button, its own tab stop, and the
+                        panel stays open when you press it. */}
+                    <button
+                      type="button"
+                      role="checkbox"
+                      aria-checked={done}
+                      aria-label={
+                        done ? ui.markUnread[lang] : ui.markRead[lang]
+                      }
+                      title={done ? ui.markUnread[lang] : ui.markRead[lang]}
+                      className="series-check"
+                      onClick={() => toggle(part.href)}
+                    >
+                      <CheckIcon className="series-tick" />
+                    </button>
                   </li>
                 );
               })}

@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
 import { markRead, READ_AT } from "@/lib/read-notes";
 import {
   buildSegments,
-  chapterTicks,
   finishAt,
   progressAt,
   type Block,
@@ -67,21 +66,6 @@ const PILL_TO = 0.97;
  */
 export const TIME_LEFT_EVENT = "timeleft";
 
-/**
- * Whether two tick lists are the same to within a pixel's worth of bar.
- *
- * The ResizeObserver below re-measures whenever an image settles, and handing
- * React a fresh array of the same numbers each time would re-render the
- * notches on every one of those. Compared at three decimals because the
- * positions come out of floating-point arithmetic over live rects and will
- * differ in the twelfth for no visible reason.
- */
-function same(a: number[], b: number[]): boolean {
-  return (
-    a.length === b.length && a.every((v, i) => Math.abs(v - b[i]) < 0.001)
-  );
-}
-
 /** `null` means "nothing to report" — too early, finished, or not an article. */
 function publish(minutes: number | null) {
   window.dispatchEvent(new CustomEvent(TIME_LEFT_EVENT, { detail: minutes }));
@@ -102,13 +86,6 @@ export default function ReadingProgress({ minutes }: { minutes?: number }) {
    * touched sixty times a second. `null` means "nothing to report".
    */
   const lastShown = useRef<number | null>(null);
-  /**
-   * Where each `h2` falls on the bar, 0…1. State rather than an imperative
-   * DOM write because the list only changes when the layout does — the effect
-   * below doesn't depend on it, so re-rendering these spans can't restart the
-   * measurement that produced them.
-   */
-  const [ticks, setTicks] = useState<number[]>([]);
 
   useEffect(() => {
     const bar = barRef.current;
@@ -150,17 +127,12 @@ export default function ReadingProgress({ minutes }: { minutes?: number }) {
       if (!article) return;
 
       // Everything from a terminal heading onward is reference, not reading.
-      // The same pass collects where the other h2s sit, which is what the
-      // chapter ticks are drawn from — one walk, one set of rects.
       let stop = Infinity;
-      const headings: number[] = [];
       for (const h of article.querySelectorAll<HTMLElement>("h2[id]")) {
-        const top = h.getBoundingClientRect().top + window.scrollY;
         if (TERMINAL_HEADINGS.has(h.id.replace(/^uk-/, ""))) {
-          stop = top;
+          stop = h.getBoundingClientRect().top + window.scrollY;
           break;
         }
-        headings.push(top);
       }
 
       const blocks: Block[] = [];
@@ -183,14 +155,6 @@ export default function ReadingProgress({ minutes }: { minutes?: number }) {
       // Measured here, not per frame: it only changes when the layout does,
       // and this runs on exactly those occasions.
       finish = finishAt(segments, document.documentElement.clientHeight);
-
-      /* Chapter ticks. Each heading is converted to bar progress FIRST, by the
-         same function that drives the bar, and the choosing is done in
-         lib/reading-progress.ts with the rest of the arithmetic. */
-      const marks = chapterTicks(
-        headings.map((top) => progressAt(segments, top, finish))
-      );
-      setTicks((prev) => (same(prev, marks) ? prev : marks));
     };
 
     const paint = () => {
@@ -199,10 +163,10 @@ export default function ReadingProgress({ minutes }: { minutes?: number }) {
       // top of a long one doesn't show a stub of a bar.
       bar.style.opacity = shown > 0.001 ? "1" : "0";
 
-      /* The bar is the only thing on the site that knows you finished, so it
-         is what says so — see lib/read-notes.ts. `finish > 0` excludes notes
-         shorter than the viewport, where the bar never moves and "read" would
-         be recorded for arriving. */
+      /* The bar is the only thing on the site that knows you finished a note
+         you had to scroll through, so it is what says so — see
+         lib/read-notes.ts. `finish > 0` is that case; the one-screen case is
+         markIfShort() below, which has no scrolling to go on. */
       if (!marked && finish > 0 && shown >= READ_AT) {
         marked = true;
         markRead(pathname);
@@ -252,12 +216,35 @@ export default function ReadingProgress({ minutes }: { minutes?: number }) {
       if (!frame) frame = requestAnimationFrame(tick);
     };
 
+    /**
+     * A note that fits on one screen is read by being opened.
+     *
+     * It never moves the bar — `finishAt()` returns 0 for anything shorter
+     * than the viewport, because a bar for a note you can see all of would be
+     * a lie in either direction — so there is no progress for the threshold to
+     * catch, and short notes were never recorded at all. There is also nothing
+     * left to measure: the whole note is in front of the reader on arrival.
+     * Opening it is the only event there is, so opening it is the signal.
+     *
+     * Re-checked after every measurement rather than once on mount, because
+     * whether the note fits isn't known until it has been measured and can
+     * change afterwards — images settling and the language switch both move
+     * the article's height.
+     */
+    const markIfShort = () => {
+      if (marked || finish > 0) return;
+      marked = true;
+      markRead(pathname);
+    };
+
     const remeasure = () => {
       measure();
+      markIfShort();
       update();
     };
 
     measure();
+    markIfShort();
     // First paint lands where the reader actually is, with no glide from zero
     // — they may have arrived on a #heading link partway down.
     shown = target = progressAt(segments, window.scrollY, finish);
@@ -287,18 +274,6 @@ export default function ReadingProgress({ minutes }: { minutes?: number }) {
     <>
       <div ref={barRef} className="reading-progress" aria-hidden>
         <span className="reading-progress-fill" />
-        {/* One hairline notch per h2, hanging under the bar: the percentage
-            says how far, these say how many sections are left. They light up
-            as the bar passes them — the arithmetic is in globals.css, since
-            both numbers involved are already CSS variables on this element
-            and comparing them there costs no JavaScript at all. */}
-        {ticks.map((t) => (
-          <span
-            key={t}
-            className="reading-tick"
-            style={{ "--t": String(t) } as React.CSSProperties}
-          />
-        ))}
         <span className="reading-progress-head" />
       </div>
       {/* Bottom-RIGHT, opposite the contents pill: one chip says where you

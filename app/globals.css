@@ -408,6 +408,84 @@ body::after {
   text-decoration-color: var(--text);
 }
 
+/* ---------- The underline sweeps ----------
+   A link in a sentence rests on a grey rule and takes a black one from the
+   left when you point at it, instead of the whole line changing colour at
+   once. On a page with no accent, the underline IS the link's only voice, and
+   this gives it a way to answer that costs the sentence nothing.
+
+   Two gradients rather than `text-decoration`, because a decoration can only
+   change colour — there is no way to grow one from one end. The cost is
+   `text-decoration-skip-ink`, which a background can't do, so this is scoped
+   to links inside actual prose (paragraphs, list items, quotes, table cells)
+   and the line is placed at the very bottom of the text box, clear of the
+   descenders it would otherwise cut through. Everything else on the page —
+   heading anchors, footnote references, embed fallbacks, a link wrapping an
+   image — keeps the plain decoration above.
+
+   `background-position` in `em` rather than pixels so the rule holds its
+   distance from the text at every size the prose uses. That one number is
+   also the only thing to touch if the rule ever sits too low or too close:
+   100% is the bottom of the text box (below the descenders), and subtracting
+   walks it back up toward the baseline. */
+.prose p > a,
+.prose li > a,
+.prose blockquote a,
+.prose td > a {
+  text-decoration: none;
+  background-image:
+    linear-gradient(var(--text), var(--text)),
+    linear-gradient(var(--text-tertiary), var(--text-tertiary));
+  background-repeat: no-repeat;
+  background-position: 0 calc(100% - 0.08em), 0 calc(100% - 0.08em);
+  background-size: 0 1px, 100% 1px;
+  transition:
+    background-size var(--dur) var(--ease),
+    color var(--dur-fast) var(--ease);
+}
+
+.prose p > a:hover,
+.prose li > a:hover,
+.prose blockquote a:hover,
+.prose td > a:hover {
+  background-size: 100% 1px, 100% 1px;
+}
+
+/* Links in prose that aren't sentences: a superscript reference, the fallback
+   under an embed that failed to load, an image wrapped in a link. None of them
+   is a phrase you read past, and a rule growing under a raised number is a
+   rendering fault. */
+.prose sup > a,
+.prose p > a.apple-music-fallback,
+.prose p > a:has(img),
+.prose li > a:has(img) {
+  background-image: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prose p > a,
+  .prose li > a,
+  .prose blockquote a,
+  .prose td > a {
+    /* No sweep, but the link still has to answer: the grey rule goes black,
+       which is what it did before any of this. */
+    background-size: 100% 1px, 100% 1px;
+    background-image:
+      linear-gradient(var(--text-tertiary), var(--text-tertiary)),
+      linear-gradient(var(--text-tertiary), var(--text-tertiary));
+    transition: none;
+  }
+
+  .prose p > a:hover,
+  .prose li > a:hover,
+  .prose blockquote a:hover,
+  .prose td > a:hover {
+    background-image:
+      linear-gradient(var(--text), var(--text)),
+      linear-gradient(var(--text), var(--text));
+  }
+}
+
 .prose ul,
 .prose ol {
   margin: 1rem 0;
@@ -828,6 +906,11 @@ body::after {
   border-bottom: 1px solid var(--border);
   text-align: left;
   font-size: 0.8125rem;
+  /* Stated rather than inherited from .prose, so the bar's height is a number
+     this file knows: 0.5rem + 1.375rem + 0.5rem = 2.375rem. The copy button
+     is centred against it below, and an inherited line-height would make that
+     arithmetic depend on a rule several hundred lines away. */
+  line-height: 1.375rem;
   color: var(--text-tertiary);
 }
 
@@ -908,6 +991,14 @@ body::after {
   transition: opacity var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
 }
 
+/* Centred in the header bar when there is one — (2.375rem − 2rem) ÷ 2. The
+   button was pinned at 0.5rem from the top, which is right against bare code
+   and a third of a rem too low against a title bar. Shell blocks always have
+   one now, so it showed on every terminal in every note. */
+.prose figure.code-block:has(figcaption.code-head) .code-copy {
+  top: 0.1875rem;
+}
+
 .prose figure.code-block:hover .code-copy,
 .prose .code-copy:focus-visible {
   opacity: 1;
@@ -942,6 +1033,38 @@ body::after {
 
 .prose .code-copy.is-copied svg + svg {
   display: block;
+}
+
+/* ---------- The tick draws itself ----------
+   `stroke-dasharray` set to a little over the path's own length (≈22.7 units
+   for M4 12 l5 5 L20 6) makes the whole stroke one dash; sliding the offset
+   from that length to zero walks the dash along the path, which looks like a
+   pen drawing it. Both check paths are written from the short arm upward so
+   the stroke runs the way a hand would — see components/icons.tsx.
+
+   An animation rather than a transition here, because the icon goes from
+   `display: none` to visible: a transition has no previous computed value to
+   move from on the frame an element first renders, so it would simply appear.
+   The series checkbox, which is always in the DOM, uses a transition instead
+   and gets the reverse for free. */
+@keyframes tick-draw {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.prose .code-copy.is-copied svg + svg path {
+  stroke-dasharray: 24;
+  animation: tick-draw var(--dur) var(--ease) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prose .code-copy.is-copied svg + svg path {
+    animation: none;
+  }
 }
 
 /* Accessible name only — the .lang-en/.lang-uk pair means exactly one
@@ -1231,6 +1354,42 @@ body::after {
   text-align: center;
 }
 
+/* ---------- Command palette: the selected row (components/CommandPalette.tsx)
+   One wash that slides, rather than a background switching off one row and on
+   at another — the same object as the contents rail's `.toc-marker`, and for
+   the same reason: moving between two states says they're the same thing seen
+   at two moments, where two separate paints say nothing at all.
+
+   The list is the offset parent AND the scroller, so the marker is measured
+   against it and scrolls with the rows. It sits first in the list and every
+   row is `position: relative`, which puts the text above it without needing a
+   z-index on either. */
+.palette-list {
+  position: relative;
+}
+
+.palette-marker {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: var(--h, 2.75rem);
+  background: var(--bg-hover);
+  opacity: 0;
+  transform: translateY(var(--y, 0));
+  transition:
+    transform var(--dur) var(--ease),
+    height var(--dur) var(--ease),
+    opacity var(--dur-fast) var(--ease);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .palette-marker {
+    transition: opacity var(--dur-fast) var(--ease);
+  }
+}
+
 /* ---------- Lightbox gallery controls (components/Lightbox.tsx) ----------
    Only rendered when a page holds more than one figure. Sit on the backdrop,
    not on the image, so they don't cover artwork on a narrow viewport. */
@@ -1265,6 +1424,41 @@ body::after {
 .lightbox-arrow svg {
   width: 1.25rem;
   height: 1.25rem;
+  transition: transform var(--dur) var(--ease);
+}
+
+/* A shorter throw than the entry footer's, and no fade: these arrows step
+   through a gallery you stay in, so the glyph has to come back. An arrow that
+   flew off the screen would promise a page change that isn't happening. */
+.lightbox-arrow.is-prev:hover svg {
+  transform: translateX(-2px);
+}
+
+.lightbox-arrow.is-next:hover svg {
+  transform: translateX(2px);
+}
+
+.lightbox-arrow.is-prev:active svg {
+  transform: translateX(-7px);
+  transition-duration: var(--dur-fast);
+}
+
+.lightbox-arrow.is-next:active svg {
+  transform: translateX(7px);
+  transition-duration: var(--dur-fast);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lightbox-arrow svg {
+    transition: none;
+  }
+
+  .lightbox-arrow.is-prev:hover svg,
+  .lightbox-arrow.is-next:hover svg,
+  .lightbox-arrow.is-prev:active svg,
+  .lightbox-arrow.is-next:active svg {
+    transform: none;
+  }
 }
 
 .lightbox-count {
@@ -1681,30 +1875,6 @@ body::after {
   background: var(--text);
   transform-origin: 0 50%;
   transform: scaleX(var(--p));
-}
-
-/* Chapter ticks — one per h2, positioned by the component (see the note there
-   for why a heading's place on the BAR isn't its place on the page).
-
-   They hang UNDER the hairline rather than sitting in it. A notch drawn on the
-   line has to be the background colour to show through the fill and the text
-   colour to show at all before the fill arrives, and there is no third option
-   that works at both ends; hanging below, one mark can simply brighten as it's
-   passed.
-
-   The brightening is done in CSS because both numbers are already here: --p is
-   the bar's progress, inherited from the parent, --t is this tick's position.
-   Subtracting them and multiplying hard turns "has the bar reached me" into an
-   opacity, with no per-frame JavaScript and nothing to keep in sync. */
-.reading-tick {
-  position: absolute;
-  top: 100%;
-  left: calc(var(--t) * 100%);
-  width: 1px;
-  height: 4px;
-  background: var(--text);
-  transform: translateX(-50%);
-  opacity: clamp(0.2, (var(--p) - var(--t)) * 60 + 0.2, 0.8);
 }
 
 /* A soft point of light at the leading edge. It sits OUTSIDE the scaled fill —
@@ -2254,20 +2424,76 @@ a.series-link:hover {
   color: var(--text-tertiary);
 }
 
-/* Finished. Pushed to the far edge of the row by `margin-left: auto` so the
-   ticks line up in a column of their own, whatever length the titles are. */
-.series-tick {
-  flex: none;
-  margin-left: auto;
-  width: 0.75rem;
-  height: 0.75rem;
-  color: var(--text-tertiary);
-  align-self: center;
+/* A row is the link plus its checkbox. The link takes the width; the box is
+   a fixed column at the end, so the ticks line up whatever the titles do. */
+.series-row {
+  display: flex;
+  align-items: center;
 }
 
-.series-current .series-tick,
-a.series-link:hover .series-tick {
+.series-row .series-link {
+  flex: 1;
+  min-width: 0;
+}
+
+/* The tick is a CHECKBOX, not a read-out. The bar's guess at whether you
+   finished a note is a good default and no more than that — someone who
+   skimmed to the end for one line knows better, and a part read on another
+   device was never seen by this browser at all. So it can be pressed.
+
+   Empty box when unread rather than nothing at all: a control you can only
+   find by hovering the row it's in isn't a control. */
+.series-check {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-left: 0.25rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--r-xs);
+  background: none;
   color: var(--text);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    background-color var(--dur-fast) var(--ease);
+}
+
+.series-check:hover {
+  border-color: var(--text-tertiary);
+  background: var(--bg-hover);
+}
+
+.series-tick {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+/* Drawn on rather than switched on — same dasharray trick as the copy
+   button's tick above, but a transition instead of an animation: this icon is
+   always in the DOM, so it has a value to move from, and unticking a part
+   un-draws it without a second rule. */
+.series-tick path {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  transition: stroke-dashoffset var(--dur) var(--ease);
+}
+
+.series-check[aria-checked="true"] {
+  border-color: var(--text);
+}
+
+.series-check[aria-checked="true"] .series-tick path {
+  stroke-dashoffset: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .series-tick path {
+    transition: none;
+  }
 }
 
 .series-part-title {
@@ -2321,16 +2547,126 @@ a.series-link:hover .series-tick {
   color: var(--text);
 }
 
+/* ---------- Arrows that go where they point ----------
+   An arrow is the one glyph on the page that means a DIRECTION, and it was
+   the only thing here that never moved in it. On hover it leads by a couple
+   of pixels; on press it keeps going and fades, so the last thing you see
+   before the next page paints is the arrow leaving in the direction you sent
+   it. The gap between a tap and a new page is the longest wait this interface
+   asks for (the same reasoning as `.press`), and this fills it with something
+   that means something.
+
+   Distances are small on purpose. Two pixels on hover is under the threshold
+   where it reads as an animation and over the one where it reads as nothing —
+   the arrow just seems eager. */
 .sibling-arrow {
   flex: none;
   font-size: 1.25rem;
   line-height: 1;
   color: var(--text-tertiary);
-  transition: color var(--dur-fast) var(--ease);
+  transition:
+    color var(--dur-fast) var(--ease),
+    transform var(--dur) var(--ease),
+    opacity var(--dur) var(--ease);
 }
 
 .sibling:hover .sibling-arrow {
   color: var(--text);
+}
+
+.sibling-prev:hover .sibling-arrow {
+  transform: translateX(-3px);
+}
+
+.sibling-next:hover .sibling-arrow {
+  transform: translateX(3px);
+}
+
+/* Thrown — and it STAYS thrown. `.is-thrown` is added at the click by
+   components/ArrowThrow.tsx and never removed: `:active` ends the instant the
+   finger lifts, which is a fraction of a second before the next page paints,
+   so on its own the arrow raced back to where it started and the gesture read
+   as cancelled rather than sent. The class outlives the press; the navigation
+   unmounts the link.
+
+   `.is-thrown` is also what `[` and `]` add (components/Shortcuts.tsx), so
+   the keyboard and the pointer reach the same state by different routes.
+
+   `--dur-slow` on purpose. The throw is the one piece of motion here anyone
+   is meant to WATCH — everything else is a response you feel rather than
+   see — and at 120ms it was a jump rather than a departure. */
+.sibling-prev:active .sibling-arrow,
+.sibling-prev.is-thrown .sibling-arrow {
+  transform: translateX(-16px);
+  opacity: 0;
+  transition-duration: var(--dur-slow);
+}
+
+.sibling-next:active .sibling-arrow,
+.sibling-next.is-thrown .sibling-arrow {
+  transform: translateX(16px);
+  opacity: 0;
+  transition-duration: var(--dur-slow);
+}
+
+/* The same behaviour for a standalone action link's arrow — "Continue
+   reading →", "All posts →", "← Back home" — where the arrow is a sibling
+   span rather than part of the translated string (see lib/ui-strings.ts).
+   `.is-back` is the leading kind: it sits before the words and is thrown the
+   other way, because it points back the way you came. */
+.arrow-glyph {
+  display: inline-block;
+  margin-left: 0.3em;
+  transition:
+    transform var(--dur) var(--ease),
+    opacity var(--dur) var(--ease);
+}
+
+.arrow-glyph.is-back {
+  margin-left: 0;
+  margin-right: 0.3em;
+}
+
+.action-link:hover .arrow-glyph {
+  transform: translateX(3px);
+}
+
+.action-link:hover .arrow-glyph.is-back {
+  transform: translateX(-3px);
+}
+
+.action-link:active .arrow-glyph,
+.action-link.is-thrown .arrow-glyph {
+  transform: translateX(16px);
+  opacity: 0;
+  transition-duration: var(--dur-slow);
+}
+
+.action-link:active .arrow-glyph.is-back,
+.action-link.is-thrown .arrow-glyph.is-back {
+  transform: translateX(-16px);
+  opacity: 0;
+  transition-duration: var(--dur-slow);
+}
+
+/* Someone who asked for less motion asked for this too. */
+@media (prefers-reduced-motion: reduce) {
+  .sibling-arrow,
+  .arrow-glyph {
+    transition: color var(--dur-fast) var(--ease);
+  }
+
+  .sibling:hover .sibling-arrow,
+  .sibling-prev:active .sibling-arrow,
+  .sibling-next:active .sibling-arrow,
+  .sibling-prev.is-thrown .sibling-arrow,
+  .sibling-next.is-thrown .sibling-arrow,
+  .action-link:hover .arrow-glyph,
+  .action-link:active .arrow-glyph,
+  .action-link.is-thrown .arrow-glyph {
+    transform: none;
+    opacity: 1;
+  }
 }
 
 /* Always named. On a narrow screen the two titles just share the width and
@@ -2710,7 +3046,9 @@ svg.diagram tspan {
 
 /* The `categories:` chips were bordered pills at body size, which made three
    tags as loud as the title above them. They read as tags now — no border, no
-   box, just the word. */
+   box, just the word — and they sit at the END of the metadata line rather
+   than on a row of their own above it (#66): two rows of metadata under a
+   title is one more than the title deserves. */
 .entry-tags {
   gap: 0.875rem;
 }
@@ -2777,9 +3115,16 @@ svg.diagram tspan {
    not reliably `:focus-visible` in every browser, and an invisible highlight
    would make the keys feel broken.
 
+   It paints the same wash the pointer does rather than a ring. A row under
+   the pointer and a row under the keyboard are the same state — "this is the
+   one you'd open" — and giving them two different appearances would say
+   otherwise. The ring is suppressed for the same reason: with the wash there,
+   it's a second answer to a question already answered.
+
    Last in the file on purpose (see the note on ordering above): rows carry
    their own hover and press styles, and this has to win over them. */
-.list-focus {
-  outline: 2px solid var(--text);
-  outline-offset: 3px;
+.list-focus,
+.list-focus:focus-visible {
+  background-color: var(--bg-hover);
+  outline: none;
 }

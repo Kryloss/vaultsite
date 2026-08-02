@@ -3,6 +3,13 @@
  * to touch. Icon names must exist in components/icons.tsx.
  */
 export const siteName = "Kyrylo";
+/**
+ * Ukrainian form of `siteName`, for the one place it's shown bilingually: the
+ * breadcrumb ("Кирило · Музика"). Everywhere else `siteName` feeds machine
+ * fields — RSS, OG images, JSON-LD, the sidebar wordmark — which stay in
+ * Latin regardless of the reader's language, so it isn't touched there.
+ */
+export const siteNameUk = "Кирило";
 
 /**
  * Full name, for the machines: the schema.org Person and the `article:author`

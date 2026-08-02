@@ -18,7 +18,10 @@ import { copyText } from "@/lib/clipboard";
  */
 const COPY_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>`;
 
-const DONE_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>`;
+/* Path drawn from the short arm upward — see the note on CheckIcon in
+   components/icons.tsx. globals.css strokes it on with a dasharray when the
+   button flips to `.is-copied`, and a dasharray follows the path's direction. */
+const DONE_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>`;
 
 export default function CodeCopy() {
   const pathname = usePathname();

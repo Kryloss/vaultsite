@@ -33,8 +33,6 @@ export interface NavItem {
   title: string;
   titleUk?: string;
   icon?: string;
-  /** Shelf-type sections only: medium pages at /<slug>/type/<medium>. */
-  mediums?: { slug: string; title: string; titleUk?: string }[];
 }
 
 /**
@@ -46,11 +44,14 @@ export interface NavItem {
 export default function Chrome({
   items,
   siteName,
+  siteNameUk,
   resistanceDay,
   children,
 }: {
   items: NavItem[];
   siteName: string;
+  /** Ukrainian form of `siteName`, for the breadcrumb only — see lib/site-config.ts. */
+  siteNameUk: string;
   /** Build-time day count for the sidebar line — see lib/resistance.ts */
   resistanceDay: number;
   children: ReactNode;
@@ -215,36 +216,30 @@ export default function Chrome({
   // already the <h1> directly below, so naming it here said the same thing
   // twice — the deepest crumb is the current page's parent.
   //
-  // Two shapes live under a section: /<section>/<entry> and the shelf's medium
-  // pages, /<section>/type/<medium> (see lib/shelf.ts).
+  // The section is the only ancestor there is, at any depth. A shelf medium
+  // (/shelf/type/books) and its categories (/shelf/type/books/fantasy) are one
+  // page with a different chip pressed — same heading, same chips, same grid —
+  // so naming the medium said "Books" beside an <h1> reading "Books", and said
+  // it on some of those URLs and not others. Both now read "Shelf · Kyrylo",
+  // and the trail no longer changes shape while the page doesn't.
   const segments = pathname.split("/").filter(Boolean);
-  const [sectionSlug, second, third] = segments;
+  const [sectionSlug] = segments;
   const section = sectionSlug ? nav.find((i) => i.slug === sectionSlug) : undefined;
-  const medium =
-    second === "type" && third
-      ? section?.mediums?.find((m) => m.slug === third)
-      : undefined;
 
-  const crumbs: { en: string; uk?: string; href: string }[] = [];
-  // Only a category page (/…/type/<medium>/<category>) sits inside a medium.
-  // On the medium page itself the medium is the current page, so it's dropped.
-  if (medium && section && segments.length > 3)
-    crumbs.push({
-      en: medium.title,
-      uk: medium.titleUk,
-      href: `/${section.slug}/type/${medium.slug}`,
-    });
-  // Likewise: skipped on the section's own page, which sits at the root.
+  // Site name first, section after — "Kyrylo · Music" reads the way the
+  // trail is walked (home, then in), rather than most-specific-first. Home
+  // has no parent, so the name stands alone there rather than leaving the bar
+  // empty — and switches to the surname, since it's naming the page rather
+  // than leading a path. See lib/site-config.ts.
+  const isHome = segments.length === 0;
+  const crumbs: { en: string; uk?: string; href: string }[] = [
+    isHome
+      ? { ...homeName, href: "/" }
+      : { en: siteName, uk: siteNameUk, href: "/" },
+  ];
+  // Skipped on the section's own page, which sits at the root.
   if (section && section.slug !== "home" && segments.length > 1)
     crumbs.push({ en: section.title, uk: section.titleUk, href: `/${section.slug}` });
-  // Home has no parent, so the site name stands alone there rather than
-  // leaving the bar empty — and switches to the surname, since it's naming
-  // the page rather than trailing a path. See lib/site-config.ts.
-  crumbs.push(
-    segments.length === 0
-      ? { ...homeName, href: "/" }
-      : { en: siteName, href: "/" }
-  );
 
   return (
     <>
@@ -297,7 +292,15 @@ export default function Chrome({
               <Link
                 href={crumb.href}
                 className={`transition-colors hover:text-[var(--text)] ${
-                  i === 0 ? "text-[var(--text)]" : "text-[var(--text-secondary)]"
+                  /* The full-colour crumb is whichever one is CLOSEST to the
+                     current page — last now that the site name leads. On
+                     home there's only one crumb and it isn't naming
+                     anywhere closer than the page you're already on, so it
+                     stays the quiet grey rather than borrowing the emphasis
+                     that elsewhere marks "this is where you are". */
+                  i === crumbs.length - 1 && !isHome
+                    ? "text-[var(--text)]"
+                    : "text-[var(--text-secondary)]"
                 }`}
               >
                 <T en={crumb.en} uk={crumb.uk} />
@@ -341,7 +344,7 @@ export default function Chrome({
       >
         <div className="flex items-center justify-between px-6 pb-5">
           <Link href="/" className="text-base font-semibold text-[var(--text)]">
-            {siteName}
+            <T en={siteName} uk={siteNameUk} />
           </Link>
           <div className="flex items-center gap-1">
             <button

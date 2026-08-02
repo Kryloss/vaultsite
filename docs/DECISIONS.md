@@ -625,7 +625,7 @@ This is the second time this feature has been fixed by replacing a measurement o
 
 On a phone the floating bar at the top-left now shows the breadcrumb when you arrive and the **time remaining** once you start reading down; the corner pill is hidden below 640px. On anything wider nothing changes — the breadcrumb stays put and the pill keeps the bottom-right corner.
 
-The two labels answer the same question at different moments. "Posts · Kyrylo" matters when you land and stops mattering the second you start reading; "4 min left" is meaningless on arrival — it would just repeat the header's estimate — and becomes the only number you want halfway down. The bar already collapsed the breadcrumb on scroll-down (#—, the `compact` state), so the space was there and empty.
+The two labels answer the same question at different moments. "Kyrylo · Posts" matters when you land and stops mattering the second you start reading; "4 min left" is meaningless on arrival — it would just repeat the header's estimate — and becomes the only number you want halfway down. The bar already collapsed the breadcrumb on scroll-down (#—, the `compact` state), so the space was there and empty.
 
 **The number crosses components as an event.** `ReadingProgress` computes it from the same progress value the bar is drawing; `Chrome` renders it. They're in different parts of the tree — one belongs to the article, the other to the site chrome — and a context provider wrapping everything for a single integer would be the wrong shape. `TIME_LEFT_EVENT` follows `langchange`, which the codebase already uses for exactly this kind of announcement.
 
@@ -888,3 +888,110 @@ The OG card's rule went white with everything else — that colour is baked into
 **Emoji are sidebar-only.** They were also on the home page's Explore cards, in each section page's title, and as the seedling/tree glyph in a note's metadata. In the sidebar an icon is doing work: it's a target you aim at in a list you've learned the shape of, and it survives being read at a glance. On a page it's decoration next to a heading that already says the word — and next to a serif at 46px, a colour emoji is the one thing on the screen not drawn by the typeface.
 
 `resolveIcon()` is unchanged and the `icon:` frontmatter still means what it did. The nav items still carry it. It just isn't rendered outside the drawer.
+
+## 65. A series that knows what you've read, `j`/`k`, a terminal, and one idea that didn't survive the day (2026-08-01)
+
+### The reading bar shows structure — BUILT AND REMOVED (same day)
+
+One hairline notch per `h2`, hanging under the bar and brightening as the bar passed it. The reasoning was sound — a percentage answers *how far*, and nobody asks that on its own; they ask *how much more of this*, and "three sections left" is the better answer.
+
+It looked like dirt on the line. A 2px hairline is not a surface you can put marks on: at that size a notch is either invisible or a speck, and there is no third size. **The bar is a line, and a line can carry a position but not a structure** — that job already belongs to the contents rail, which has room to name the sections rather than count them.
+
+Deleted: `chapterTicks()` and its tests, the `.reading-tick` rule, the heading pass in `measure()`. Kept here because the *positioning* insight is worth not re-deriving: a heading's place on the BAR is not its place on the page, since media is discounted (#36) and anything past a "Sources" heading isn't counted, so anything ever drawn against the bar has to be converted through `progressAt()` first.
+
+### The bar is what knows you finished
+
+`lib/read-notes.ts` is a second, much smaller store: path → when you finished it. Deliberately NOT the same question as `ReadingPosition` (#47–#49), which remembers *where you stopped* — that store holds a scroll offset and nothing about the page's length, so `y = 4300` is a finished short note and an abandoned long one at the same time. The reading bar already computes the answer properly, so the bar is what writes it, at 92%.
+
+**A note shorter than the viewport is read by being opened.** `finishAt()` returns 0 for one — a bar for a note you can see all of would be a lie in either direction — so there is no progress to cross a threshold, and short notes were silently never recorded. There is also nothing left to measure: the whole note is in front of the reader on arrival. A dwell timer was tried first and is the wrong shape of answer — it invents a threshold ("eight seconds") for a page that has no second event to wait for. Opening it is the only event there is, so opening it is the signal.
+
+**And the tick is a checkbox.** Everything above is a good guess and no more than that: someone who skimmed to the bottom for one line has "finished" by the bar's reckoning and knows they haven't, and a part read on another device was never seen by this browser at all. So it can be pressed, either way. The measurement is the DEFAULT, not the verdict — which is the same principle as `ReadingPosition` never scrolling on its own (#47): the feature may offer a conclusion, it may not impose one.
+
+The badge reads the store: a solid line grows along its dotted underline as you finish parts, and the panel counts them. **The badge never changes size** — "· 3 read" in the metadata row would reflow the date and reading time beside it every time the number went up, so the progress is drawn, not spelled. All of it starts at zero and fills in after hydration, because the server has no idea who is reading; a `noteread` event means the badge fills in under you as you finish the part you're on, without a navigation.
+
+### `j` / `k` walk the list, and the highlight is real focus
+
+The rows are found through `.stagger` — not a new hook, but the class every list on the site already carries so its children can arrive one at a time (#38), which makes it the existing answer to "which elements here are a list". Hidden-language lists are skipped by `offsetParent`, the same test the reading bar uses.
+
+**The highlight is focus itself**, not a selected index painted to look like focus. That gets Enter, Tab continuing from where you are, and a screen reader being told what you're pointing at, all for free. The `.list-focus` class exists only because a programmatic `.focus()` isn't reliably `:focus-visible` across browsers.
+
+**It paints the hover wash, not a ring.** A row under the pointer and a row under the keyboard are the same state — *this is the one you'd open* — and giving them two appearances says they aren't. The focus ring is suppressed on those rows for the same reason: with the wash there, the ring is a second answer to a question already answered.
+
+Two things it deliberately doesn't do: it never fires while a modal is up (read from the DOM as "a dialog that isn't `inert`" — this component doesn't own the drawer or the palette and shouldn't be handed their state), and it doesn't swallow the key on a page with no list, where someone's Vim-style scrolling extension has a better claim to it.
+
+### A shell fence is a window, not a file
+
+Most of what gets pasted into these notes is a session — an nmap run, a `systemctl status`, a failed login — and a session is a window you were sitting at, not a file you wrote. ```bash and friends now get a title bar with three dots instead of a filename tab, and get one whether or not a title was given: the dots ARE the header, and a terminal without its title bar is just a grey box.
+
+**The dots are grey.** Red/amber/green would be the only colour on an otherwise monochrome page, and the shape already says "terminal" without them — this is the same line #64 drew around the callouts, from the other side.
+
+### Three more, while in there
+
+**The section is the only ancestor there is.** `/shelf/type/books` read "Shelf · Kyrylo" and `/shelf/type/books/fantasy` read "Books · Shelf · Kyrylo", so pressing a category chip changed the shape of the trail — which reads as having navigated somewhere when you haven't. Both now read "Shelf · Kyrylo".
+
+The first attempt went the other way, adding "Books" to the medium page so the two matched. That fixed the inconsistency and broke the rule: a medium page's `<h1>` IS "Books", so the crumb was saying the page's own name back to it — the exact thing the breadcrumb was changed to stop doing. When two pages disagree, the one to change is the one breaking the rule. `NavItem.mediums` existed only to feed that crumb and is gone with it, along with the `shelfGroups()` pass the layout ran on every build to fill it.
+
+**The copy button is centred against the code header**, not pinned 0.5rem from the top of the figure. That offset was right against bare code and a third of a rem low against a title bar — invisible until shell blocks started always having one. The header's line-height is now stated rather than inherited, so the height it's centred against is a number this file knows rather than one that depends on a `.prose` rule several hundred lines away.
+
+**The selection pill says "Selection".** It appears attached to the text you just highlighted; "Copy link to selection" spent three words restating what is already on screen.
+
+## 66. Motion that answers, in four places (2026-08-01)
+
+The site had entrances (#38, #44) and a pressed state (#55) — motion for *arriving* and for *being touched*. What it had none of was motion that answers what a control MEANS. Four additions, each attached to a specific meaning rather than to a specific element.
+
+### An arrow goes where it points
+
+The one glyph on the page that means a direction, and the only thing here that never moved in one. It leads by 3px on hover and, on press, keeps going and fades — so the last thing you see before the next page paints is the arrow leaving the way you sent it. This fills the same window `.press` was built for: the gap between a tap and a new page is the longest wait this interface asks for.
+
+**It has to outlive the press, and CSS can't do that.** `:active` ends the instant the finger lifts — a fraction of a second BEFORE the next page paints — so the first version raced the arrow back to its resting position and then changed the page. The gesture read as cancelled rather than sent. There is no state after `:active` to hold and an animation with `forwards` is dropped along with the selector that started it, so `components/ArrowThrow.tsx` adds one class at the click and never takes it off: the navigation unmounts the link, and the arrow's last frame is the one on screen while the new page arrives. A 1.5s timer is the only cleanup, for a click that doesn't navigate.
+
+**And it needed to be slower.** At `--dur-fast` the throw was a jump. It runs at `--dur-slow` now — this is the one piece of motion on the site anyone is meant to WATCH, where everything else is a response you feel rather than see.
+
+**The keyboard gets it too.** `[` and `]` navigate through those exact links, so `Shortcuts` adds the same class before pushing the route. A shortcut that skipped the animation would make the mouse and the keyboard feel like different sites.
+
+**The lightbox arrows throw shorter and don't fade.** They step through a gallery you stay in; an arrow that flew off the screen would promise a page change that isn't coming. Same gesture, different sentence.
+
+`ui.continueReading`, `ui.allPosts` and `ui.backHome` all lost their arrows, which are now `.arrow-glyph` spans. An arrow baked into a translated string can't move, and is one more thing a translator can drop. `.is-back` is the leading kind ("← Back home"): before the words, thrown the other way, because it points back where you came from.
+
+### A tick that draws itself
+
+`stroke-dasharray` set just over the path's length makes the whole stroke one dash; walking the offset to zero draws it. Both check paths were rewritten to start at the short arm (`M4 12l5 5L20 6`) — a dasharray follows the path's own direction, and a tick that draws backwards reads as an error being undone.
+
+The copy button uses an **animation** and the series checkbox a **transition**, and the difference is not stylistic: the copy icon goes from `display: none` to visible, and a transition has no previous computed value to move from on the frame an element first renders. The checkbox is always in the DOM, so a transition gets un-ticking for free.
+
+### The underline sweeps
+
+A link in a sentence rests on a grey rule and takes a black one from the left. On a page with no accent (#64) the underline is the link's only voice, so it needed a way to answer beyond changing colour all at once.
+
+**Two gradients, not `text-decoration`** — a decoration can only change colour; there is no way to grow one from one end. The cost is `text-decoration-skip-ink`, which a background can't do, so this is scoped to links in actual prose (`p`, `li`, `blockquote`, `td`) and the rule sits at the bottom of the text box, clear of the descenders it would otherwise cut. Heading anchors, footnote references, embed fallbacks and image links keep the plain decoration. Under `prefers-reduced-motion` both layers are drawn full-width and the colour swap comes back — the link still answers, it just doesn't sweep.
+
+### The palette highlight slides
+
+One wash moving between rows instead of one switching off and another on — the same object as the contents rail's marker (#38) and the same argument: **moving between two states says they are the same thing at two moments; two separate paints say nothing at all.**
+
+Measured from the live DOM rather than computed, because rows differ in height and group labels ("Recent", "Actions") appear between them depending on the query. Any arithmetic for "where is row 4" would be a second, quietly wrong copy of the list's own layout.
+
+**No entrance stagger on the results.** It was in the original sketch and it's wrong: the list re-renders on every keystroke, so a staggered entrance would replay under the reader's fingers while they type. An entrance animation belongs to something that arrives once.
+
+### One metadata line, joined rather than punctuated
+
+The entry header had two rows under the title: date · reading time · words · maturity · series, and then the `categories:` chips on a line of their own. Two rows of metadata under a title is one more than the title deserves, and the tags are the same kind of thing as everything beside them — something the note knows about itself. They moved to the end of the one line.
+
+The separators were also wrong, and wrong in a way that shows why. They were written as `{a && b && <span>·</span>}` between each pair, which means every pair that can ever be adjacent has to be named — and one wasn't, so the maturity ran straight into the word count as "37 wordsSeedling". The pieces are now collected into an array and joined, which cannot have that bug: a list doesn't care what's on either side of a gap.
+
+The tags take ONE middot in front of the whole set rather than one apiece — the hashes already separate them from each other.
+
+One more of the same kind: the middot between the reading time and the word count was typed inside their shared span, surrounded by ordinary spaces, while every other separator on the line is spaced by the row's `gap`. It looked like a separator and wasn't one, so those two sat visibly closer together than anything else. They're two entries in the list now.
+
+
+## 67. The breadcrumb reads outside-in (2026-08-01)
+
+The order was most-specific-first: "Music · Kyrylo", "Posts · Kyrylo". It read backwards — a trail is walked from the root inward, and the site name is the root. It now reads "Kyrylo · Music", "Kyrylo · Posts", and the crumb given full colour (`--text` rather than `--text-secondary`) moved from the first position to the last, since that's still the one closest to the page you're on.
+
+## 68. "Кирило" in the breadcrumb, and home stays grey (2026-08-01)
+
+Two follow-ons to #67 (the breadcrumb reading outside-in).
+
+**The site name had no Ukrainian form.** `siteName` ("Kyrylo") feeds machine fields — RSS, OG images, JSON-LD — that stay in Latin regardless of the reader's language, so the constant itself wasn't touched. A sibling `siteNameUk` ("Кирило") was added and threaded through `Chrome` as its own prop, the same way `siteName` already was — used by the breadcrumb crumb AND the sidebar wordmark, the two places the name is read as prose rather than as data.
+
+**Home stayed white when the emphasis rule flipped.** #67 moved the full-colour crumb to whichever one is closest to the current page — last, now that the site name leads. On every other page that's correct: the section is where you are. On home there's only one crumb, and it isn't naming anywhere closer than the page already showing — it's the surname standing in for a page that has no ancestor to point past. Giving it the "you are here" colour was borrowing emphasis it hadn't earned. It's `isHome` now, and excluded from the last-crumb rule explicitly rather than by falling out of the general case.

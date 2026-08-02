@@ -85,9 +85,12 @@ export default async function HomePage() {
             </h2>
             <Link
               href="/posts"
-              className="press text-sm text-[var(--text-tertiary)] hover:text-[var(--text)]"
+              className="action-link press text-sm text-[var(--text-tertiary)] hover:text-[var(--text)]"
             >
               <T {...ui.allPosts} />
+              <span className="arrow-glyph" aria-hidden>
+                →
+              </span>
             </Link>
           </div>
           <ul className="mt-2 flex flex-col">

@@ -33,7 +33,9 @@ export const ui = {
 
   // home
   recentPosts: { en: "Recent posts", uk: "Останні дописи" },
-  allPosts: { en: "All posts →", uk: "Усі дописи →" },
+  /* Arrows are rendered as their own `.arrow-glyph` span, never baked
+     into the string — see continueReading below. */
+  allPosts: { en: "All posts", uk: "Усі дописи" },
   explore: { en: "Explore", uk: "Розділи" },
 
   // filters
@@ -52,7 +54,11 @@ export const ui = {
     uk: "Нотатки про почуте",
   },
   openInAppleMusic: { en: "Open in Apple Music", uk: "Відкрити в Apple Music" },
-  continueReading: { en: "Continue reading →", uk: "Читати далі →" },
+  /* No arrow in the string: it's rendered as its own element so it can move
+     on hover and be thrown on press (see `.arrow-glyph` in globals.css). An
+     arrow baked into a translated string is also one more thing a translator
+     can drop. */
+  continueReading: { en: "Continue reading", uk: "Читати далі" },
   emptyState: {
     en: "Nothing here yet. Add a .md file next to this section’s main.md in your vault and it will show up automatically.",
     uk: "Тут поки що порожньо. Додайте файл .md поряд із main.md цього розділу у вашому сховищі — і він з’явиться автоматично.",
@@ -85,10 +91,12 @@ export const ui = {
   copiedCode: { en: "Copied", uk: "Скопійовано" },
   copyMarkdown: { en: "Copy as Markdown", uk: "Копіювати як Markdown" },
 
-  // selection → text-fragment link (components/SelectionLink.tsx)
+  /* selection → text-fragment link (components/SelectionLink.tsx). One word:
+     the pill appears attached to the text you just highlighted, where "Copy
+     link to selection" spends three words restating what you can see. */
   copyLinkToSelection: {
-    en: "Copy link to selection",
-    uk: "Скопіювати посилання на вибране",
+    en: "Selection",
+    uk: "Вибране",
   },
   linkCopied: { en: "Link copied", uk: "Посилання скопійовано" },
 
@@ -139,9 +147,12 @@ export const ui = {
   maturityBudding: { en: "Budding", uk: "Розвивається" },
   maturityEvergreen: { en: "Evergreen", uk: "Вічнозелена" },
 
-  /* Series (multi-part notes) has no fixed strings: the popover shows the
-     series' own name, and "Part 2 of 5" interpolates numbers, so it's built
-     per note by seriesPartLabel() in lib/series.ts. */
+  /* Series (multi-part notes): the popover shows the series' own name, and
+     "Part 2 of 5" interpolates numbers, so it's built per note by
+     seriesPartLabel() in lib/series.ts. These two are fixed, so they live
+     here — they label the checkbox that ticks a part read by hand. */
+  markRead: { en: "Mark as read", uk: "Позначити прочитаним" },
+  markUnread: { en: "Mark as unread", uk: "Позначити непрочитаним" },
 
   // résumé (now page)
   resume: { en: "Résumé", uk: "Резюме" },
@@ -159,6 +170,6 @@ export const ui = {
     en: "This page doesn’t exist (or the note behind it was unpublished).",
     uk: "Цієї сторінки не існує (або нотатку за нею знято з публікації).",
   },
-  backHome: { en: "← Back home", uk: "← На головну" },
+  backHome: { en: "Back home", uk: "На головну" },
   didYouMean: { en: "Did you mean…", uk: "Можливо, ви шукали…" },
 } satisfies Record<string, Str>;

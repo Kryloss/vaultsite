@@ -165,12 +165,25 @@ export default function Shortcuts({
     return true;
   }, []);
 
-  /** Follow the entry footer's prev/next link, if this page has one. */
+  /**
+   * Follow the entry footer's prev/next link, if this page has one.
+   *
+   * `.is-thrown` gives the keyboard the animation the pointer gets for free
+   * from `:active` — the arrow flies off in the direction you sent it (see
+   * globals.css). Without it, `]` and clicking "next" would do the same thing
+   * and feel like different sites. The navigation unmounts the link, which is
+   * the real cleanup — the timer only matters for a press that doesn't
+   * navigate, and is long enough not to snap the arrow back mid-flight (same
+   * reasoning as components/ArrowThrow.tsx).
+   */
   const sibling = useCallback(
     (which: "prev" | "next") => {
       const a = document.querySelector<HTMLAnchorElement>(`a.sibling-${which}`);
       const href = a?.getAttribute("href");
-      if (href) router.push(href);
+      if (!href) return;
+      a?.classList.add("is-thrown");
+      window.setTimeout(() => a?.classList.remove("is-thrown"), 1500);
+      router.push(href);
     },
     [router]
   );

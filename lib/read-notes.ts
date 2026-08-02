@@ -68,6 +68,29 @@ export function markRead(path: string): void {
   if (notes[path]) return;
 
   notes[path] = Date.now();
+  save(notes);
+  window.dispatchEvent(new CustomEvent(READ_EVENT, { detail: path }));
+}
+
+/**
+ * Take a note back off the list.
+ *
+ * The automatic signal is a guess — a good one, but a reader who skimmed to
+ * the bottom looking for one line has "finished" the note by the bar's
+ * reckoning and knows perfectly well that they haven't. The tick in the series
+ * panel is a checkbox for exactly that reason: the measurement is a default,
+ * not a verdict.
+ */
+export function unmarkRead(path: string): void {
+  const notes = readNotes();
+  if (!notes[path]) return;
+
+  delete notes[path];
+  save(notes);
+  window.dispatchEvent(new CustomEvent(READ_EVENT, { detail: path }));
+}
+
+function save(notes: ReadNotes): void {
   try {
     const fresh = Date.now() - MAX_AGE_MS;
     const kept = Object.entries(notes)
@@ -78,5 +101,4 @@ export function markRead(path: string): void {
   } catch {
     /* storage full or blocked — the feature simply doesn't remember */
   }
-  window.dispatchEvent(new CustomEvent(READ_EVENT, { detail: path }));
 }

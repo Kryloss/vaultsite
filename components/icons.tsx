@@ -384,7 +384,11 @@ export function CheckIcon(p: IconProps) {
       aria-hidden
       {...p}
     >
-      <path d="M20 6 9 17l-5-5" />
+      {/* Drawn from the short arm upward, not from the long arm down: the
+          path's direction is what a stroke-dasharray animation follows, and a
+          tick that draws itself backwards reads as an error being undone.
+          Identical shape either way. */}
+      <path d="M4 12l5 5L20 6" />
     </svg>
   );
 }

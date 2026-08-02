@@ -77,6 +77,7 @@ export default function CommandPalette({
   const items = useSearchIndex(everOpen);
   const { lang, toggle: toggleLang } = useLang();
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLUListElement>(null);
   const flashTimer = useRef<number | undefined>(undefined);
   const router = useRouter();
   const pathname = usePathname();
@@ -293,6 +294,37 @@ export default function CommandPalette({
 
   useEffect(() => setSelected(0), [rows.length, query]);
 
+  /**
+   * Park the sliding wash on the selected row.
+   *
+   * Measured from the live DOM rather than computed, exactly like the contents
+   * rail's marker (components/Toc.tsx): rows are not all the same height and
+   * group labels ("Recent", "Actions") appear between them depending on the
+   * query, so the arithmetic for "where is row 4" would be a second, quietly
+   * wrong copy of the list's own layout.
+   *
+   * `offsetTop` is relative to the list, which is the marker's offset parent
+   * and the thing that scrolls — so the marker travels with the rows without
+   * anything having to read a scroll position.
+   */
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const marker = list.querySelector<HTMLElement>(".palette-marker");
+    if (!marker) return;
+
+    const row = list.querySelector<HTMLElement>("button.is-selected");
+    // Nothing selected (an empty result set): fade out where it is rather than
+    // sliding up to sit on the "no results" line.
+    if (!row) {
+      marker.style.opacity = "0";
+      return;
+    }
+    marker.style.setProperty("--y", `${row.offsetTop}px`);
+    marker.style.setProperty("--h", `${row.offsetHeight}px`);
+    marker.style.opacity = "1";
+  }, [selected, rows, open, lang]);
+
   const runRow = async (row: (typeof rows)[number]) => {
     if (row.kind === "page") return go(row.item.href);
     await row.action.run();
@@ -362,7 +394,13 @@ export default function CommandPalette({
             {lang === "en" ? "🇨🇦" : "🇺🇦"}
           </button>
         </div>
-        <ul className="max-h-72 overflow-y-auto py-1.5">
+        <ul ref={listRef} className="palette-list max-h-72 overflow-y-auto py-1.5">
+          {/* One wash that slides between rows, rather than one switching off
+              and another switching on — the same object the contents rail uses
+              (.toc-marker). Positioned from the live DOM by the effect above,
+              because the rows are different heights and carry group labels
+              nothing here can predict. */}
+          <li className="palette-marker" aria-hidden />
           {rows.length === 0 && (
             <li className="px-4 py-6 text-center text-sm text-[var(--text-tertiary)]">
               <T {...ui.noResultsFor} /> &ldquo;{query}&rdquo;
@@ -404,9 +442,11 @@ export default function CommandPalette({
                 type="button"
                 onClick={() => runRow(row)}
                 onMouseEnter={() => setSelected(i)}
-                className={`press flex w-full items-baseline justify-between gap-3 px-4 py-2.5 text-left text-[15px] ${
+                /* No background here: the wash is the one sliding marker at
+                   the top of the list. Only the text colour changes per row. */
+                className={`press palette-row relative flex w-full items-baseline justify-between gap-3 px-4 py-2.5 text-left text-[15px] ${
                   i === selected
-                    ? "bg-[var(--bg-hover)] text-[var(--text)]"
+                    ? "is-selected text-[var(--text)]"
                     : "text-[var(--text-secondary)]"
                 }`}
               >

@@ -134,41 +134,6 @@ export function finishAt(segments: Segment[], viewportHeight: number): number {
 }
 
 /**
- * Chapter ticks: how close to either end a heading can be and still earn one.
- *
- * The first `h2` of a note usually sits a paragraph in, which would put a
- * notch almost on top of the bar's origin, and a heading in the last breath of
- * an article marks a section nobody needs warning about. Both read as dirt on
- * the line rather than as structure.
- */
-export const TICK_EDGE = 0.04;
-/** Closer than this to the previous tick and the two are one smudge. */
-export const TICK_GAP = 0.03;
-
-/**
- * Which of an article's headings get a notch on the bar.
- *
- * Takes positions ALREADY converted to bar progress (0…1) by `progressAt`,
- * not document offsets: a heading's place on the bar is not its place on the
- * page, because media is discounted and anything past a "Sources" heading
- * isn't counted at all. Converting first is what keeps the notches where the
- * bar actually stops.
- *
- * Returns nothing at all for a single tick: one notch divides the article into
- * "before" and "after" one heading, which that heading already does.
- */
-export function chapterTicks(positions: number[]): number[] {
-  const ticks: number[] = [];
-  for (const p of positions) {
-    if (!Number.isFinite(p)) continue;
-    if (p < TICK_EDGE || p > 1 - TICK_EDGE) continue;
-    if (ticks.length && p - ticks[ticks.length - 1] < TICK_GAP) continue;
-    ticks.push(p);
-  }
-  return ticks.length < 2 ? [] : ticks;
-}
-
-/**
  * 0…1. `line` is the TOP of the viewport in document space — i.e. `scrollY` —
  * and `finish` comes from `finishAt()`.
  */

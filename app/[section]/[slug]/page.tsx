@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Fragment, type ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -101,6 +102,93 @@ export default async function EntryPage({ params }: Props) {
       ? `/${section.slug}/type/${mediumSlug(medium)}/${categorySlug(category)}`
       : `/${section.slug}?category=${encodeURIComponent(category)}`;
 
+  /* Everything the header knows about the note, on ONE line, with a middot
+     between each part.
+
+     The pieces are collected into an array and joined rather than written out
+     with `{a && b && <span>·</span>}` between them: that version had to name
+     every pair that could be adjacent, and it was already wrong — the maturity
+     ran straight into the word count with no separator, because nothing had
+     been written for that particular pair. Joining a list can't have that bug.
+
+     The `categories:` chips used to be a row of their own above this one. Two
+     rows of metadata under a title is one more than the title deserves, and
+     these are the same kind of thing as everything else here: something the
+     note knows about itself (#66). */
+  const meta: ReactNode[] = [];
+
+  if (entry.date) {
+    meta.push(
+      <time dateTime={entry.date}>
+        <T en={displayDate(entry.date)} uk={displayDateUk(entry.date)} />
+      </time>
+    );
+  }
+
+  if (stats) {
+    /* Two entries, not one span with a middot typed inside it. That middot was
+       surrounded by ordinary spaces while every other separator on the line is
+       spaced by the row's `gap`, so the reading time and the word count sat
+       visibly closer together than anything else. Anything that looks like a
+       separator has to BE one. */
+    meta.push(
+      <span>
+        {stats.minutes} <T {...ui.minRead} />
+      </span>
+    );
+    meta.push(
+      <span>
+        {stats.words.toLocaleString()} <T {...ui.words} />
+      </span>
+    );
+    /* Maturity is a writing idea, so it rides with the writing stats. Unset
+       notes fall back to Seedling — see lib/maturity.ts. Word only: the
+       seedling/tree glyph was the last emoji left on a reading page, and
+       "Seedling" says it without one. */
+    meta.push(
+      <span className="maturity">
+        <T {...maturityOf(entry.meta).label} />
+      </span>
+    );
+  }
+
+  /* "Part 2 of 5" — a badge that opens the list of parts. Someone landing here
+     from search is starting in the middle and should know it, but the other
+     parts are a detour, not the article, so they live in a popover rather than
+     a panel of their own. */
+  if (series) meta.push(<Series series={series} />);
+
+  /* Last, and as ONE group: the hashes already separate the tags from each
+     other, so the set takes a single middot in front of it rather than one
+     apiece. On a shelf entry each opens its medium page with that category
+     pre-selected; elsewhere there's no such page, so they're plain chips.
+     Names are raw strings, identical in both languages. */
+  if (categories.length > 0) {
+    meta.push(
+      <span className="entry-tags inline-flex flex-wrap items-baseline">
+        {categories.map((c) => (
+          <Link key={c} href={categoryHref(c)} className="press">
+            <T {...categoryLabel(c)} />
+          </Link>
+        ))}
+      </span>
+    );
+  }
+
+  /* A <div>, not a <p>: the series popover is a <nav>, which a browser parsing
+     the static HTML would kick out of a paragraph — and the resulting DOM
+     wouldn't match what React rendered. */
+  const metaLine = meta.length > 0 && (
+    <div className="entry-meta mt-3 flex flex-wrap items-center gap-x-2 text-sm text-[var(--text-tertiary)]">
+      {meta.map((part, i) => (
+        <Fragment key={i}>
+          {i > 0 && <span aria-hidden>·</span>}
+          {part}
+        </Fragment>
+      ))}
+    </div>
+  );
+
   return (
     /* The note's own vault paths ride on the page so page-agnostic components
        can find them — the Cmd+K "open on GitHub" action reads these rather
@@ -141,57 +229,8 @@ export default async function EntryPage({ params }: Props) {
           {/* Raw vault source, in whichever language is showing. */}
           <CopyMarkdown en={entry.content} uk={entry.contentUk} />
         </h1>
-        {/* `categories:` frontmatter, styled like the filter chips they lead
-            to. On a shelf entry each one opens its medium page with that
-            category pre-selected; elsewhere there's no such page, so they
-            render as plain chips. Names are raw strings, identical in both
-            languages (same as the posts' category chips). */}
-        {categories.length > 0 && (
-          <div className="entry-tags mt-3 flex flex-wrap gap-2">
-            {categories.map((c) => (
-              <Link
-                key={c}
-                href={categoryHref(c)}
-                className="press rounded-full border border-[var(--border)] px-3 py-1 text-sm text-[var(--text-secondary)] hover:border-[var(--text-tertiary)] hover:text-[var(--text)]"
-              >
-                <T {...categoryLabel(c)} />
-              </Link>
-            ))}
-          </div>
-        )}
-
-        {/* A <div>, not a <p>: the series popover is a <nav>, which a browser
-            parsing the static HTML would kick out of a paragraph — and the
-            resulting DOM wouldn't match what React rendered. */}
-        <div className="entry-meta mt-3 flex flex-wrap items-center gap-x-2 text-sm text-[var(--text-tertiary)]">
-          {entry.date && (
-            <time dateTime={entry.date}>
-              <T en={displayDate(entry.date)} uk={displayDateUk(entry.date)} />
-            </time>
-          )}
-          {entry.date && stats && <span aria-hidden>·</span>}
-          {stats && (
-            <span>
-              {stats.minutes} <T {...ui.minRead} /> ·{" "}
-              {stats.words.toLocaleString()} <T {...ui.words} />
-            </span>
-          )}
-          {/* Maturity is a writing idea, so it rides with the writing stats.
-              Unset notes fall back to Seedling — see lib/maturity.ts. */}
-          {/* Word only — the seedling/tree glyph was the last emoji left on a
-              reading page, and "Seedling" says it without one. */}
-          {stats && (
-            <span className="maturity">
-              <T {...maturityOf(entry.meta).label} />
-            </span>
-          )}
-          {/* "Part 2 of 5" — a badge that opens the list of parts. Someone
-              landing here from search is starting in the middle and should
-              know it, but the other parts are a detour, not the article, so
-              they live in a popover rather than a panel of their own. */}
-          {series && (entry.date || stats) && <span aria-hidden>·</span>}
-          {series && <Series series={series} />}
-        </div>
+        {/* Date · reading stats · maturity · series · #tags — built above. */}
+        {metaLine}
 
       </header>
 
