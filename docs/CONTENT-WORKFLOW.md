@@ -415,9 +415,11 @@ the photograph available as the primary-source view.
    from the source — for example its winding route, a rupture, circled choices,
    or a distinctive emphasis mark. Do not trace the notebook mechanically and
    do not force every source into the same panel template.
-5. **Make the graph bilingual.** Produce `<name>.svg` and `<name>.uk.svg` with
-   identical geometry and professionally translated labels. Proper nouns follow
-   the Translation rules above.
+5. **Make the graph bilingual in Excalidraw.** Create editable
+   `<name>.excalidraw` and `<name>.uk.excalidraw` scenes through Excalidraw's UI,
+   then produce `<name>.svg` and `<name>.uk.svg` static exports with identical
+   geometry and professionally translated labels. Proper nouns follow the
+   Translation rules above. Never manufacture scene JSON by hand.
 6. **Keep the original safely.** Copy it into the target section's
    `attachments/`, strip EXIF/GPS/device metadata, bake in orientation, and
    resize to about 1600px on the long edge. Never publish the untouched phone
@@ -444,10 +446,11 @@ the photograph available as the primary-source view.
 
 Run `npm run validate:image-notes` after adding or changing an Image note. It is
 also part of `predev` and `prebuild`, so an invalid pair cannot silently deploy.
-The validator checks asset existence, a bilingual caption/pair, matching
-geometry, source-photo aspect ratio and privacy metadata, accessible self-
-theming SVGs, live dark-mode styles, transparent canvases, unsafe/external SVG
-content, and complete bilingual light/dark Excalidraw exports.
+The validator checks asset existence, bilingual editable Excalidraw sources, a
+bilingual caption/export pair, matching geometry, source-photo aspect ratio and
+privacy metadata, accessible self-theming SVGs, live dark-mode styles,
+transparent canvases, unsafe/external SVG content, and complete bilingual
+light/dark exports when the note embeds an Excalidraw drawing directly.
 
 The validator cannot decide whether a label is faithful to handwriting. The
 transcription map, correction list, and visual review remain required even when
@@ -476,20 +479,23 @@ The first embed may also be an exported drawing:
 <!-- image-note: my-timeline-original.jpeg -->
 ```
 
-For an editable Obsidian drawing, use the Excalidraw plugin's **Convert SVG to
-Excalidraw** workflow, save English and `.uk` drawings, and keep Auto-export SVG
-enabled. Conversion has some SVG limitations, so visually check both exports.
-Codex should create the bilingual, semantic SVG pair directly and verify it in
-the site. It must not manufacture Excalidraw scene JSON. Excalidraw remains the
-optional manual-editing layer: Obsidian can display the SVG directly or convert
-it when hand adjustment is useful.
+Create the reconstruction in Excalidraw after the transcription map is agreed.
+Its Mermaid importer is useful for an already-understood flow, but automatic
+layout is only a starting point: normalize spacing, fills, padding, arrow
+bindings, and hierarchy in the editor before saving the English and `.uk`
+scenes. The website still embeds the static SVG pair, so it remains fast and
+fully static. The current journey reference is regenerated from its two
+Excalidraw scenes by `npm run export:image-notes`; a different semantic shape
+should get its own exporter/layout instead of being forced into that journey
+template. Never hand-author Excalidraw scene JSON.
 
 ### Where files go
 
-- Put the diagram pair and source photo beside the page's other loose media in
-  that section's `attachments/` folder.
+- Put the two Excalidraw sources, diagram pair, and source photo beside the
+  page's other loose media in that section's `attachments/` folder.
 - Use lowercase slugged names: `<note-slug>-<topic>.svg`,
-  `<note-slug>-<topic>.uk.svg`, and `<note-slug>-<topic>-original.jpeg`.
+  `<note-slug>-<topic>.uk.svg`, matching `.excalidraw` / `.uk.excalidraw`
+  sources, and `<note-slug>-<topic>-original.jpeg`.
 - Embed the pair in both language bodies with the exact same two lines. The
   `.uk.svg` sibling and bilingual caption handle the visible translation.
 - If Kyrylo has not named the destination page, prepare and report the assets

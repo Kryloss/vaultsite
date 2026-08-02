@@ -109,10 +109,10 @@ On the site, this becomes one transparent figure with a single-click
 embed and the directive remains hidden. An exported `.excalidraw` embed works
 in the first line too.
 
-The AI workflow deliberately produces transparent, self-theming English and
-Ukrainian SVGs first. The Obsidian Excalidraw plugin can convert an SVG into an
-editable drawing (with some limitations); save the result as English and `.uk`
-drawings and keep Auto-export SVG enabled. Do not hand-write scene JSON.
+The reconstruction workflow creates English and Ukrainian scenes in Excalidraw
+first, then checks in transparent, self-theming SVG exports for the website.
+Both `.excalidraw` sources stay beside the SVGs so the diagram remains editable;
+the scene JSON is produced by Excalidraw itself, never hand-written.
 
 The original photo is a public asset once attached, so remove EXIF/GPS/device
 metadata and resize it before it enters the vault. Full transcription, naming,
@@ -123,21 +123,23 @@ Image note, both English and Ukrainian drawings need light and dark SVG exports.
 
 ### Which diagram tool belongs here?
 
-- **Codex-authored semantic SVG is the default.** Codex can inspect the source
-  photo, reconstruct its information hierarchy, write both language variants,
-  match the site's exact visual system, and verify the result in the real page.
-  The checked-in SVG is portable and the website needs no diagram runtime.
-- **Excalidraw is the optional hand-editing surface.** Use it when freehand
-  adjustment inside Obsidian matters. Its export remains the website asset; the
-  Excalidraw React/canvas application never ships to readers.
+- **Excalidraw is the required creation surface for photographed notes.** Codex
+  first interprets the photo and records its transcription map, then constructs
+  both language scenes in Excalidraw. The editor makes node bounds, bindings,
+  and future manual adjustment inspectable instead of hiding them in generated
+  SVG markup.
+- **The static SVG pair remains the website asset.** A deterministic exporter
+  may normalize the two scenes onto identical geometry and the site's live
+  light/dark tokens. Excalidraw's React/canvas application never ships to
+  readers.
 - **Mermaid, D2, and Graphviz are good for regular generated graphs**, especially
   when the source is already structured text. For photographed personal notes,
   their automatic layout and extra build dependency buy less than direct SVG:
   the hard work is interpreting and grouping the information, not routing edges.
 
-This is a division of responsibilities, not a conversion requirement: most
-Image notes should stay as SVG forever. Convert one to Excalidraw only when
-Kyrylo actually wants to edit it by hand.
+This is a division of responsibilities: Excalidraw owns the editable diagram;
+the bilingual SVG pair owns predictable web rendering. Changing the semantic
+layout still starts in Excalidraw and both exports are regenerated afterward.
 
 ## How it resolves (for maintainers)
 

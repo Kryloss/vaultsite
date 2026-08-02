@@ -1019,12 +1019,9 @@ cross-outs, spatial emphasis, and any transcription uncertainty. Both remain
 ordinary lightbox items, but CSS uses `display: none` for the inactive view so
 the gallery only collects what the reader can currently see.
 
-**AI produces SVG first, Excalidraw remains the editing path.** Headless agents
-create the same transparent, self-theming English/`.uk.svg` pair as every other
-AI diagram. They do not manufacture Excalidraw scene JSON. When an editable
-drawing is wanted, Obsidian Excalidraw's supported SVG conversion creates it and
-Auto-export supplies the static SVG the site already knows how to serve. This
-keeps decision #10: no Excalidraw React runtime or canvas in the website.
+**Creation workflow revised by decision #72.** Image notes now begin as genuine
+bilingual Excalidraw scenes and end as static SVGs. Decision #10 still holds: no
+Excalidraw React runtime or canvas enters the website.
 
 **Phone originals are sanitized before publication.** The source image is
 orientation-normalized, resized to roughly 1600px on its long edge, and stripped
@@ -1040,12 +1037,9 @@ move the controls, caption, or paragraph below it. Diagram authors also match th
 SVG `viewBox` to the source ratio when practical, which uses that reserved space
 rather than letterboxing it.
 
-**Codex is the reconstruction tool; Excalidraw is an optional editor.** Mermaid,
-D2, and Graphviz can lay out already-structured graphs, but interpreting a photo
-and designing an information hierarchy is the difficult part here. Codex writes
-the final bilingual SVG against the site's actual constraints and visually tests
-it. Excalidraw remains available when the owner wants to adjust the result by
-hand, not as a mandatory intermediate format or a website dependency.
+**Creation workflow revised by decision #72.** Codex still performs the source
+interpretation, but Excalidraw is now the required editable construction layer
+for photographed notes rather than an optional editor.
 
 ## 70. Formatting Playground is a published reference (2026-08-02)
 
@@ -1084,3 +1078,27 @@ validator can read handwriting would make the automated guarantee dishonest.
 The Markdown interface, native Diagram/Original switch, lightbox, and static
 renderer do not change. Validation is an authoring/build concern and introduces
 no runtime state, content database, or new dependency.
+
+## 72. Photographed-note diagrams are authored in Excalidraw (2026-08-02)
+
+**Decision:** every Image note keeps genuine English and Ukrainian Excalidraw
+scenes beside its static SVG exports. The transcription map still decides the
+facts and the semantic layout; Excalidraw is where node bounds, connections,
+spacing, and future edits are made inspectable. Agents may use Excalidraw's own
+Mermaid importer after interpreting a flow, but they do not synthesize scene
+JSON or accept the import's first automatic layout without review.
+
+The checked-in website asset remains SVG. This preserves the existing Markdown
+embed, static renderer, live site typography, transparent canvas, and theme
+behavior without shipping Excalidraw React/canvas code. A deterministic export
+may map the two language scenes onto one shared geometry so translation length
+cannot move nodes or redirect arrows. Every node uses one fill token, text has
+explicit padding, and arrows terminate only at the elements connected in the
+source scene.
+
+The life-journey reference uses four ordered groups separated by one explicit
+24 February 2022 rupture. Rounded nodes and a continuous directional path keep
+the source page's circled-node and journey cues, while the phase containers,
+consistent hierarchy, and bound connectors repair its accidental notebook
+spacing. `npm run export:image-notes` rebuilds this pair from the editable
+scenes; the validator requires both sources as well as both static exports.

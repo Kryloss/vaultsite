@@ -199,18 +199,19 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
-    "Posts/attachments/image-note-life-timeline.jpeg",
-    "Posts/attachments/image-note-life-timeline.svg",
     "Posts/attachments/image-note-life-timeline.uk.svg",
     "Posts/attachments/rendering-pipeline.svg",
+    "Posts/attachments/image-note-life-timeline.jpeg",
+    "Posts/attachments/image-note-life-timeline.svg",
+    "Posts/attachments/image-note-life-timeline.excalidraw",
+    "Posts/attachments/image-note-life-timeline.uk.excalidraw",
+    "Posts/attachments/secplus-plan.uk.svg",
+    "Posts/attachments/war-newspaper.pdf",
+    "Posts/attachments/war-newspaper-01.webp",
     "Posts/attachments/rendering-pipeline.uk.svg",
     "Posts/attachments/secplus-domains.svg",
-    "Posts/attachments/war-newspaper-01.webp",
-    "Posts/attachments/war-newspaper.pdf",
     "Posts/attachments/war-newspaper-09.webp",
     "Posts/attachments/war-newspaper-03.webp",
-    "Posts/attachments/war-newspaper-05.webp",
-    "Posts/attachments/secplus-plan.uk.svg",
     "Posts/Examples/Formatting playground.uk.md",
     "Posts/Examples/Draft example.uk.md",
     "Posts/First certification.uk.md",
@@ -242,8 +243,6 @@
     "Shelf/Movies/covers",
     "Shelf/Books/covers",
     "Projects/attachments",
-    "Posts/attachments",
-    "Shelf/Shows",
-    "Shelf/Movies"
+    "Posts/attachments"
   ]
 }

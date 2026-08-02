@@ -1,84 +1,67 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 960" role="img" aria-label="Точна до джерела часова шкала від Краматорська через Румунію та Канаду до TMU">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 1000" role="img" aria-label="Життєвий шлях із Краматорська через переїзд під час війни до навчання в Канаді">
   <style>
-    .guide { fill: none; stroke: #d6d6d3; stroke-width: 2; }
-    .route { fill: none; stroke: #8e9299; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
-    .route-strong { fill: none; stroke: #34383e; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
-    .node { fill: #fff; stroke: #3f4349; stroke-width: 2.2; }
-    .node-soft { fill: #f5f5f3; stroke: #9a9da3; stroke-width: 2; }
-    .phase { fill: #25292f; font-size: 34px; font-weight: 700; }
-    .date { fill: #626770; font-size: 30px; font-weight: 650; letter-spacing: .025em; }
-    .label { fill: #34383e; font-size: 34px; font-weight: 650; }
-    .label-tight { fill: #34383e; font-size: 30px; font-weight: 650; }
-    .small { fill: #626770; font-size: 30px; }
-    .event { fill: #25292f; font-size: 34px; font-weight: 700; }
-    .dot { fill: #34383e; }
-    .arrow { fill: #8e9299; }
+    .stage { fill: none; stroke: #77777d; stroke-width: 1.6; stroke-dasharray: 7 8; }
+    .node { fill: #f3f3f2; stroke: #29292c; stroke-width: 1.8; }
+    .rupture { stroke-width: 3; }
+    .path { fill: none; stroke: #29292c; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .stage-label, .node-label, .rupture-label {
+      fill: #202023;
+      font-family: ui-serif, Georgia, Cambria, "Times New Roman", serif;
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+    .stage-label { font-size: 20px; font-weight: 700; letter-spacing: 1.1px; }
+    .node-label { font-size: 25px; font-weight: 600; }
+    .rupture-label { font-size: 27px; font-weight: 700; }
     @media (prefers-color-scheme: dark) {
-      .guide { stroke: #3f4248; }
-      .route { stroke: #717680; }
-      .route-strong { stroke: #e2e4e7; }
-      .node { fill: #18191b; stroke: #c7cbd1; }
-      .node-soft { fill: #222326; stroke: #717680; }
-      .phase, .label, .label-tight, .event, .dot { fill: #e7e9ec; }
-      .date, .small { fill: #aeb3bc; }
-      .arrow { fill: #717680; }
+      .stage { stroke: #88888f; }
+      .node { fill: #19191c; stroke: #e7e7e9; }
+      .path { stroke: #e7e7e9; }
+      .stage-label, .node-label, .rupture-label { fill: #f2f2f3; }
     }
   </style>
   <defs>
-    <marker id="life-arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-      <path class="arrow" d="M0 0 L9 5 L0 10 Z" />
+    <marker id="image-note-arrow-uk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path class="path" d="M 1 1 L 9 5 L 1 9"/>
     </marker>
   </defs>
-
-  <text class="phase" x="40" y="48">КРАМАТОРСЬК</text>
-  <text class="date" x="680" y="48" text-anchor="end">2007–2022</text>
-  <line class="guide" x1="40" y1="67" x2="680" y2="67" />
-
-  <rect class="node" x="40" y="98" width="190" height="88" rx="42" />
-  <text class="label-tight" x="135" y="136" text-anchor="middle">Дитячий</text>
-  <text class="small" x="135" y="169" text-anchor="middle">садок</text>
-  <line class="route" x1="234" y1="142" x2="266" y2="142" marker-end="url(#life-arrow)" />
-  <rect class="node" x="275" y="98" width="170" height="88" rx="42" />
-  <text class="label-tight" x="360" y="136" text-anchor="middle">Дошкільна</text>
-  <text class="small" x="360" y="169" text-anchor="middle">підготовка</text>
-  <line class="route" x1="449" y1="142" x2="481" y2="142" marker-end="url(#life-arrow)" />
-  <rect class="node" x="490" y="88" width="190" height="108" rx="52" />
-  <text class="label" x="585" y="139" text-anchor="middle">Школа</text>
-  <text class="small" x="585" y="172" text-anchor="middle">1–8 класи</text>
-
-  <path class="route" d="M585 199 C585 226 638 230 650 260" marker-end="url(#life-arrow)" />
-  <path class="route-strong" d="M40 276 C95 258 143 291 201 274 S307 257 365 276 S474 294 532 275 S625 257 680 276" />
-  <circle class="dot" cx="365" cy="276" r="8" />
-  <text class="date" x="350" y="237" text-anchor="end">24 ЛЮТ 2022</text>
-  <text class="event" x="382" y="238">Почалася війна</text>
-
-  <text class="phase" x="40" y="355">2022</text>
-  <line class="guide" x1="40" y1="374" x2="680" y2="374" />
-
-  <rect class="node-soft" x="40" y="405" width="280" height="125" rx="48" />
-  <text class="date" x="180" y="443" text-anchor="middle">17 БЕР</text>
-  <text class="label" x="180" y="482" text-anchor="middle">Румунія</text>
-  <text class="small" x="180" y="515" text-anchor="middle">чотири місяці</text>
-  <line class="route" x1="325" y1="468" x2="391" y2="468" marker-end="url(#life-arrow)" />
-  <rect class="node" x="400" y="405" width="280" height="125" rx="48" />
-  <text class="date" x="540" y="449" text-anchor="middle">8 ЧЕР</text>
-  <text class="label" x="540" y="493" text-anchor="middle">Канада</text>
-
-  <path class="route" d="M540 534 C540 566 328 545 222 587" marker-end="url(#life-arrow)" />
-  <rect class="node" x="85" y="590" width="230" height="82" rx="40" />
-  <text class="label" x="200" y="641" text-anchor="middle">Ноблтон</text>
-  <line class="route" x1="319" y1="631" x2="391" y2="631" marker-end="url(#life-arrow)" />
-  <rect class="node" x="400" y="590" width="250" height="82" rx="40" />
-  <text class="label" x="525" y="641" text-anchor="middle">Ньюмаркет</text>
-
-  <text class="phase" x="40" y="731">2022–2026</text>
-  <text class="date" x="680" y="731" text-anchor="end">ЗАРАЗ</text>
-  <line class="guide" x1="40" y1="750" x2="680" y2="750" />
-
-  <rect class="node-soft" x="40" y="783" width="300" height="135" rx="48" />
-  <text class="label-tight" x="190" y="841" text-anchor="middle">Sacred Heart CHS</text>
-  <line class="route" x1="345" y1="850" x2="391" y2="850" marker-end="url(#life-arrow)" />
-  <rect class="node" x="400" y="783" width="280" height="135" rx="48" />
-  <text class="label" x="540" y="833" text-anchor="middle">TMU</text>
-  <text class="small" x="540" y="873" text-anchor="middle">Cyber Science</text>
+  <g aria-hidden="true">
+    <rect class="stage" x="40" y="35" width="670" height="195" rx="22"/>
+    <rect class="node" x="55" y="96" width="205" height="92" rx="30"/>
+    <rect class="node" x="300" y="96" width="175" height="92" rx="30"/>
+    <rect class="node" x="515" y="96" width="180" height="92" rx="30"/>
+    <rect class="stage" x="40" y="400" width="670" height="170" rx="22"/>
+    <rect class="node" x="85" y="461" width="300" height="76" rx="30"/>
+    <rect class="node" x="455" y="461" width="210" height="76" rx="30"/>
+    <rect class="stage" x="105" y="610" width="540" height="145" rx="22"/>
+    <rect class="node" x="150" y="666" width="160" height="62" rx="30"/>
+    <rect class="node" x="420" y="666" width="180" height="62" rx="30"/>
+    <rect class="stage" x="40" y="795" width="670" height="170" rx="22"/>
+    <rect class="node" x="80" y="856" width="300" height="76" rx="30"/>
+    <rect class="node" x="450" y="856" width="220" height="76" rx="30"/>
+    <rect class="node rupture" x="160" y="270" width="430" height="90" rx="45"/>
+    <path class="path" d="M 268 142 L 290 142" marker-end="url(#image-note-arrow-uk)"/>
+    <path class="path" d="M 483 142 L 505 142" marker-end="url(#image-note-arrow-uk)"/>
+    <path class="path" d="M 393 499 L 445 499" marker-end="url(#image-note-arrow-uk)"/>
+    <path class="path" d="M 318 697 L 410 697" marker-end="url(#image-note-arrow-uk)"/>
+    <path class="path" d="M 388 894 L 440 894" marker-end="url(#image-note-arrow-uk)"/>
+    <path class="path" d="M 375 238 L 375 262" marker-end="url(#image-note-arrow-uk)"/>
+    <path class="path" d="M 375 368 L 375 392" marker-end="url(#image-note-arrow-uk)"/>
+    <path class="path" d="M 375 578 L 375 602" marker-end="url(#image-note-arrow-uk)"/>
+    <path class="path" d="M 375 763 L 375 787" marker-end="url(#image-note-arrow-uk)"/>
+    <text class="stage-label" x="375" y="66">1 · КРАМАТОРСЬК · 2007–2022</text>
+    <text class="node-label" x="157.5" y="142.0"><tspan x="157.5" dy="0">Дитячий садок</tspan></text>
+    <text class="node-label" x="387.5" y="127.5"><tspan x="387.5" dy="0">Дошкільна</tspan><tspan x="387.5" dy="29.0">підготовка</tspan></text>
+    <text class="node-label" x="605" y="127.5"><tspan x="605" dy="0">Школа (1–8</tspan><tspan x="605" dy="29.0">класи)</tspan></text>
+    <text class="stage-label" x="375" y="432">2 · ПЕРЕЇЗД · 2022</text>
+    <text class="node-label" x="235" y="484.5"><tspan x="235" dy="0">17 БЕР · Румунія ·</tspan><tspan x="235" dy="29.0">чотири місяці</tspan></text>
+    <text class="node-label" x="560" y="484.5"><tspan x="560" dy="0">8 ЧЕР ·</tspan><tspan x="560" dy="29.0">Канада</tspan></text>
+    <text class="stage-label" x="375" y="641">3 · МІСЦЯ В КАНАДІ</text>
+    <text class="node-label" x="230" y="697.0"><tspan x="230" dy="0">Ноблтон</tspan></text>
+    <text class="node-label" x="510" y="697.0"><tspan x="510" dy="0">Ньюмаркет</tspan></text>
+    <text class="stage-label" x="375" y="827">4 · ОСВІТА В КАНАДІ</text>
+    <text class="node-label" x="230" y="879.5"><tspan x="230" dy="0">2022–2026 · Sacred</tspan><tspan x="230" dy="29.0">Heart CHS</tspan></text>
+    <text class="node-label" x="560" y="879.5"><tspan x="560" dy="0">ЗАРАЗ · TMU ·</tspan><tspan x="560" dy="29.0">Cyber Science</tspan></text>
+    <text class="rupture-label" x="375" y="299.3"><tspan x="375" dy="0">24 ЛЮТ 2022 · Почалася</tspan><tspan x="375" dy="31.3">війна</tspan></text>
+  </g>
 </svg>

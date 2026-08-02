@@ -46,6 +46,16 @@ function fixture() {
   };
 }
 
+function excalidraw() {
+  return JSON.stringify({
+    type: "excalidraw",
+    version: 2,
+    elements: [{ id: "node", type: "rectangle", isDeleted: false }],
+    appState: {},
+    files: {},
+  });
+}
+
 async function photo(file, { exif = false, width = 300, height = 400 } = {}) {
   let image = sharp({
     create: { width, height, channels: 3, background: { r: 235, g: 232, b: 220 } },
@@ -60,6 +70,8 @@ async function validFixture() {
 <!-- image-note: timeline-original.jpeg -->`);
   f.write("timeline.svg", svg());
   f.write("timeline.uk.svg", svg({ ariaLabel: "Точна до джерела схема" }));
+  f.write("timeline.excalidraw", excalidraw());
+  f.write("timeline.uk.excalidraw", excalidraw());
   await photo(path.join(f.assets, "timeline-original.jpeg"));
   return f;
 }
@@ -81,6 +93,15 @@ test("reports missing translations and original assets", async (t) => {
   const { errors } = await validateImageNotes({ vaultDir: f.dir });
   assert.ok(errors.some((error) => error.includes("original photo not found")));
   assert.ok(errors.some((error) => error.includes("Ukrainian diagram not found")));
+  assert.ok(errors.some((error) => error.includes("editable Excalidraw source not found")));
+});
+
+test("requires bilingual editable Excalidraw sources for static SVG exports", async (t) => {
+  const f = await validFixture();
+  t.after(() => fs.rmSync(f.dir, { recursive: true, force: true }));
+  fs.rmSync(path.join(f.assets, "timeline.uk.excalidraw"));
+  const { errors } = await validateImageNotes({ vaultDir: f.dir });
+  assert.ok(errors.some((error) => error.includes("Ukrainian Excalidraw source not found")));
 });
 
 test("rejects mismatched language and photo geometry", async (t) => {
