@@ -1092,9 +1092,11 @@ The checked-in website asset remains SVG. This preserves the existing Markdown
 embed, static renderer, live site typography, transparent canvas, and theme
 behavior without shipping Excalidraw React/canvas code. A deterministic export
 may map the two language scenes onto one shared geometry so translation length
-cannot move nodes or redirect arrows. Every node uses one fill token, text has
-explicit padding, and arrows terminate only at the elements connected in the
-source scene.
+cannot move nodes or redirect arrows. Ordinary steps share one neutral fill;
+semantic exceptions reuse the rendering-pipeline grammar: a rupture/event gets
+the high-contrast input/output outline treatment, while the current destination
+gets the inverted solid treatment. Text has explicit padding, and arrows
+terminate only at the elements connected in the source scene.
 
 The life-journey reference uses three ordered phases separated by one explicit
 24 February 2022 rupture. Compact rounded nodes and a continuous directional

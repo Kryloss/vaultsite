@@ -2,33 +2,44 @@
   <style>
     .stage { fill: none; stroke: #77777d; stroke-width: 1.2; stroke-dasharray: 6 7; }
     .node { fill: #f3f3f2; stroke: #29292c; stroke-width: 1.35; }
-    .rupture { stroke-width: 2; }
+    .rupture { fill: #33373d; stroke: #33373d; stroke-width: 1.5; }
+    .destination { fill: #33373d; stroke: #33373d; stroke-width: 1.5; }
     .path { fill: none; stroke: #55555b; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
     .arrowhead { fill: #29292c; stroke: none; }
-    .stage-title, .stage-meta, .primary, .secondary, .rupture-primary {
+    .stage-title, .stage-meta, .primary, .secondary, .event-primary, .event-secondary, .destination-primary, .destination-secondary {
       fill: #202023;
       font-family: var(--font-prose, var(--font-source-serif, Georgia, "Times New Roman", serif));
       dominant-baseline: middle;
     }
     .stage-title { font-size: 15px; font-weight: 600; letter-spacing: .65px; text-anchor: start; }
     .stage-meta { fill: #65656c; font-size: 14px; font-weight: 400; text-anchor: end; }
-    .primary, .secondary, .rupture-primary { text-anchor: middle; }
+    .primary, .secondary, .event-primary, .event-secondary, .destination-primary, .destination-secondary { text-anchor: middle; }
     .primary { font-size: 20px; font-weight: 500; }
     .secondary { fill: #65656c; font-size: 14px; font-weight: 400; }
-    .rupture-primary { font-size: 22px; font-weight: 600; }
+    .event-primary { fill: #ffffff; font-size: 22px; font-weight: 600; }
+    .event-secondary { fill: #d4d4d8; font-size: 14px; font-weight: 400; }
+    .destination-primary { fill: #ffffff; font-size: 20px; font-weight: 600; }
+    .destination-secondary { fill: #d4d4d8; font-size: 14px; font-weight: 400; }
     @media (max-width: 420px) {
       .stage-title { font-size: 17px; }
       .stage-meta, .secondary { font-size: 16px; }
       .primary { font-size: 23px; }
-      .rupture-primary { font-size: 24px; }
+      .event-primary { font-size: 24px; }
+      .event-secondary, .destination-secondary { font-size: 16px; }
+      .destination-primary { font-size: 23px; }
     }
     @media (prefers-color-scheme: dark) {
       .stage { stroke: #88888f; }
       .node { fill: #19191c; stroke: #e7e7e9; }
+      .rupture { fill: none; stroke: #c8ccd2; }
+      .destination { fill: #e6e8eb; stroke: #e6e8eb; }
       .path { stroke: #a0a0a8; }
       .arrowhead { fill: #e7e7e9; }
-      .stage-title, .primary, .rupture-primary { fill: #f2f2f3; }
+      .stage-title, .primary, .event-primary { fill: #f2f2f3; }
       .stage-meta, .secondary { fill: #a6a6ae; }
+      .event-secondary { fill: #9aa0aa; }
+      .destination-primary { fill: #0a0a0a; }
+      .destination-secondary { fill: #4b4b52; }
     }
   </style>
   <defs>
@@ -49,7 +60,7 @@
     <rect class="node" x="90" y="715" width="180" height="70" rx="13"/>
     <rect class="node" x="480" y="715" width="170" height="70" rx="13"/>
     <rect class="node" x="80" y="850" width="285" height="78" rx="13"/>
-    <rect class="node" x="445" y="850" width="210" height="78" rx="13"/>
+    <rect class="node destination" x="445" y="850" width="210" height="78" rx="13"/>
     <path class="path" d="M 273 138 L 290 138" marker-end="url(#image-note-arrow-uk)"/>
     <path class="path" d="M 498 138 L 515 138" marker-end="url(#image-note-arrow-uk)"/>
     <path class="path" d="M 358 511 L 420 511" marker-end="url(#image-note-arrow-uk)"/>
@@ -65,8 +76,8 @@
     <text class="primary" x="395" y="127.5"><tspan x="395" dy="0">Дошкільна</tspan><tspan x="395" dy="21">підготовка</tspan></text>
     <text class="primary" x="597.5" y="128.0"><tspan x="597.5" dy="0">Школа</tspan></text>
     <text class="secondary" x="597.5" y="154">1–8 класи</text>
-    <text class="rupture-primary" x="375" y="304.0"><tspan x="375" dy="0">Почалася війна</tspan></text>
-    <text class="secondary" x="375" y="330">24 ЛЮТ 2022</text>
+    <text class="event-primary" x="375" y="304.0"><tspan x="375" dy="0">Почалася війна</tspan></text>
+    <text class="event-secondary" x="375" y="330">24 ЛЮТ 2022</text>
     <text class="stage-title" x="77" y="435">2 · ПЕРЕЇЗД</text>
     <text class="stage-meta" x="673" y="435">2022</text>
     <text class="primary" x="220" y="501.0"><tspan x="220" dy="0">Румунія</tspan></text>
@@ -78,7 +89,7 @@
     <text class="primary" x="565" y="750.0"><tspan x="565" dy="0">Ньюмаркет</tspan></text>
     <text class="primary" x="222.5" y="879.0"><tspan x="222.5" dy="0">Sacred Heart CHS</tspan></text>
     <text class="secondary" x="222.5" y="905">2022–2026</text>
-    <text class="primary" x="550" y="879.0"><tspan x="550" dy="0">TMU</tspan></text>
-    <text class="secondary" x="550" y="905">ЗАРАЗ · Cyber Science</text>
+    <text class="destination-primary" x="550" y="879.0"><tspan x="550" dy="0">TMU</tspan></text>
+    <text class="destination-secondary" x="550" y="905">ЗАРАЗ · Cyber Science</text>
   </g>
 </svg>

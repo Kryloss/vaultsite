@@ -175,17 +175,17 @@ function multilineText(lines, x, centerY, className, lineHeight = 21) {
     .join("")}</text>`;
 }
 
-function nodeText(node, box, className = "primary") {
+function nodeText(node, box, { primaryClass = "primary", secondaryClass = "secondary" } = {}) {
   const [x, y, width, height] = box;
   const centerX = x + width / 2;
   const centerY = y + height / 2;
   const primaryLines = wrapText(node.primary, width - 32, 20);
-  if (!node.secondary) return multilineText(primaryLines, centerX, centerY, className);
+  if (!node.secondary) return multilineText(primaryLines, centerX, centerY, primaryClass);
 
   const primaryCenter = centerY - (primaryLines.length > 1 ? 12 : 10);
   const secondaryY = centerY + (primaryLines.length > 1 ? 23 : 16);
-  return `${multilineText(primaryLines, centerX, primaryCenter, className)}
-    <text class="secondary" x="${centerX}" y="${secondaryY}">${escapeXml(node.secondary)}</text>`;
+  return `${multilineText(primaryLines, centerX, primaryCenter, primaryClass)}
+    <text class="${secondaryClass}" x="${centerX}" y="${secondaryY}">${escapeXml(node.secondary)}</text>`;
 }
 
 function arrow(x1, y1, x2, y2, markerId) {
@@ -222,7 +222,12 @@ function render(scene, { language, ariaLabel }) {
 
   const [ruptureX, ruptureY, ruptureWidth, ruptureHeight] = GEOMETRY.rupture;
   shapes.push(`<rect class="node rupture" x="${ruptureX}" y="${ruptureY}" width="${ruptureWidth}" height="${ruptureHeight}" rx="18"/>`);
-  labels.push(nodeText(content.rupture, GEOMETRY.rupture, "rupture-primary"));
+  labels.push(
+    nodeText(content.rupture, GEOMETRY.rupture, {
+      primaryClass: "event-primary",
+      secondaryClass: "event-secondary",
+    })
+  );
 
   addStage(content.relocation, GEOMETRY.relocation, content.relocation.nodes);
 
@@ -235,8 +240,17 @@ function render(scene, { language, ariaLabel }) {
   ]) {
     nodes.forEach((node, index) => {
       const [x, y, width, height] = boxes[index];
-      shapes.push(`<rect class="node" x="${x}" y="${y}" width="${width}" height="${height}" rx="13"/>`);
-      labels.push(nodeText(node, boxes[index]));
+      const isDestination = boxes === GEOMETRY.canada.education && index === 1;
+      shapes.push(`<rect class="node${isDestination ? " destination" : ""}" x="${x}" y="${y}" width="${width}" height="${height}" rx="13"/>`);
+      labels.push(
+        nodeText(
+          node,
+          boxes[index],
+          isDestination
+            ? { primaryClass: "destination-primary", secondaryClass: "destination-secondary" }
+            : undefined
+        )
+      );
       if (index) {
         const previous = boxes[index - 1];
         paths.push(arrow(previous[0] + previous[2] + 8, previous[1] + previous[3] / 2, x - 10, y + height / 2, markerId));
@@ -253,33 +267,44 @@ function render(scene, { language, ariaLabel }) {
   <style>
     .stage { fill: none; stroke: #77777d; stroke-width: 1.2; stroke-dasharray: 6 7; }
     .node { fill: #f3f3f2; stroke: #29292c; stroke-width: 1.35; }
-    .rupture { stroke-width: 2; }
+    .rupture { fill: #33373d; stroke: #33373d; stroke-width: 1.5; }
+    .destination { fill: #33373d; stroke: #33373d; stroke-width: 1.5; }
     .path { fill: none; stroke: #55555b; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
     .arrowhead { fill: #29292c; stroke: none; }
-    .stage-title, .stage-meta, .primary, .secondary, .rupture-primary {
+    .stage-title, .stage-meta, .primary, .secondary, .event-primary, .event-secondary, .destination-primary, .destination-secondary {
       fill: #202023;
       font-family: var(--font-prose, var(--font-source-serif, Georgia, "Times New Roman", serif));
       dominant-baseline: middle;
     }
     .stage-title { font-size: 15px; font-weight: 600; letter-spacing: .65px; text-anchor: start; }
     .stage-meta { fill: #65656c; font-size: 14px; font-weight: 400; text-anchor: end; }
-    .primary, .secondary, .rupture-primary { text-anchor: middle; }
+    .primary, .secondary, .event-primary, .event-secondary, .destination-primary, .destination-secondary { text-anchor: middle; }
     .primary { font-size: 20px; font-weight: 500; }
     .secondary { fill: #65656c; font-size: 14px; font-weight: 400; }
-    .rupture-primary { font-size: 22px; font-weight: 600; }
+    .event-primary { fill: #ffffff; font-size: 22px; font-weight: 600; }
+    .event-secondary { fill: #d4d4d8; font-size: 14px; font-weight: 400; }
+    .destination-primary { fill: #ffffff; font-size: 20px; font-weight: 600; }
+    .destination-secondary { fill: #d4d4d8; font-size: 14px; font-weight: 400; }
     @media (max-width: 420px) {
       .stage-title { font-size: 17px; }
       .stage-meta, .secondary { font-size: 16px; }
       .primary { font-size: 23px; }
-      .rupture-primary { font-size: 24px; }
+      .event-primary { font-size: 24px; }
+      .event-secondary, .destination-secondary { font-size: 16px; }
+      .destination-primary { font-size: 23px; }
     }
     @media (prefers-color-scheme: dark) {
       .stage { stroke: #88888f; }
       .node { fill: #19191c; stroke: #e7e7e9; }
+      .rupture { fill: none; stroke: #c8ccd2; }
+      .destination { fill: #e6e8eb; stroke: #e6e8eb; }
       .path { stroke: #a0a0a8; }
       .arrowhead { fill: #e7e7e9; }
-      .stage-title, .primary, .rupture-primary { fill: #f2f2f3; }
+      .stage-title, .primary, .event-primary { fill: #f2f2f3; }
       .stage-meta, .secondary { fill: #a6a6ae; }
+      .event-secondary { fill: #9aa0aa; }
+      .destination-primary { fill: #0a0a0a; }
+      .destination-secondary { fill: #4b4b52; }
     }
   </style>
   <defs>

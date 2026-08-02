@@ -13,10 +13,10 @@
             "state": {
               "type": "image",
               "state": {
-                "file": "Posts/attachments/image-note-life-timeline.svg"
+                "file": "Posts/attachments/image-note-life-timeline.uk.svg"
               },
               "icon": "lucide-image",
-              "title": "image-note-life-timeline"
+              "title": "image-note-life-timeline.uk"
             }
           }
         ]
@@ -199,9 +199,9 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
-    "Posts/attachments/image-note-life-timeline.uk.svg",
-    "Posts/attachments/image-note-life-timeline.svg",
     "Posts/attachments/image-note-life-timeline.excalidraw",
+    "Posts/attachments/image-note-life-timeline.svg",
+    "Posts/attachments/image-note-life-timeline.uk.svg",
     "Posts/attachments/image-note-life-timeline.jpeg",
     "Posts/attachments/rendering-pipeline.uk.svg",
     "Posts/attachments/rendering-pipeline.svg",
