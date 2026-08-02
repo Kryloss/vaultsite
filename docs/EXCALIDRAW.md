@@ -93,11 +93,39 @@ If no `.uk` sibling exists, the English diagram shows in both languages (fine
 for language-neutral pictures). Working examples: `vault/Projects/attachments/publishing-pipeline.svg`
 (+`.uk.svg`) and `vault/Posts/rendering-pipeline.svg` (+`.uk.svg`).
 
+## Image notes (diagram + original notebook photo)
+
+An Image note pairs a reconstructed bilingual diagram with the photographed
+handwritten page it came from. Keep the normal Obsidian embed and place one
+hidden directive directly below it:
+
+```md
+![[life-timeline.svg|My path so far :: Мій шлях дотепер]]
+<!-- image-note: life-timeline-original.jpeg -->
+```
+
+On the site, this becomes one transparent figure with a single-click
+`Diagram / Original` switch. In Obsidian, the SVG remains a normal visible
+embed and the directive remains hidden. An exported `.excalidraw` embed works
+in the first line too.
+
+The AI workflow deliberately produces transparent, self-theming English and
+Ukrainian SVGs first. The Obsidian Excalidraw plugin can convert an SVG into an
+editable drawing (with some limitations); save the result as English and `.uk`
+drawings and keep Auto-export SVG enabled. Do not hand-write scene JSON.
+
+The original photo is a public asset once attached, so remove EXIF/GPS/device
+metadata and resize it before it enters the vault. Full transcription, naming,
+translation, and privacy rules live in `docs/CONTENT-WORKFLOW.md → Image notes`.
+
 ## How it resolves (for maintainers)
 
 - `lib/vault.ts → getAssetIndex()` maps every non-md file's basename to its
   `/vault-assets/…` URL, vault-wide (so name-based embeds work across folders).
 - `lib/markdown.ts` turns `![[x.excalidraw]]` into a themed `<figure>`, trying
   `x.light.svg`/`x.dark.svg` → `x.svg` → `x.png`.
+- An SVG/Excalidraw embed immediately followed by `<!-- image-note: file -->`
+  becomes a radio-backed `.image-note` figure. The diagram stays first and the
+  source photo is resolved through the same vault-wide asset index.
 - `.excalidraw.md` source files are excluded from becoming pages; `.excalidraw`
   JSON sources aren't shipped (only the exported image is).

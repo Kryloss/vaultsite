@@ -995,3 +995,39 @@ Two follow-ons to #67 (the breadcrumb reading outside-in).
 **The site name had no Ukrainian form.** `siteName` ("Kyrylo") feeds machine fields — RSS, OG images, JSON-LD — that stay in Latin regardless of the reader's language, so the constant itself wasn't touched. A sibling `siteNameUk` ("Кирило") was added and threaded through `Chrome` as its own prop, the same way `siteName` already was — used by the breadcrumb crumb AND the sidebar wordmark, the two places the name is read as prose rather than as data.
 
 **Home stayed white when the emphasis rule flipped.** #67 moved the full-colour crumb to whichever one is closest to the current page — last, now that the site name leads. On every other page that's correct: the section is where you are. On home there's only one crumb, and it isn't naming anywhere closer than the page already showing — it's the surname standing in for a page that has no ancestor to point past. Giving it the "you are here" colour was borrowing emphasis it hadn't earned. It's `isHome` now, and excluded from the last-crumb rule explicitly rather than by falling out of the general case.
+
+## 69. Image notes keep the reconstruction and the evidence (2026-08-02)
+
+**Decision:** a diagram embed followed immediately by
+`<!-- image-note: original.jpeg -->` renders as one figure whose default view is
+the cleaned-up bilingual diagram and whose second view is the photographed
+handwritten source. The switch is a pair of native radios styled as one
+segmented control, not a client component.
+
+The syntax is deliberately asymmetric. Obsidian already knows how to display
+the first line (`![[x.svg]]` or `![[x.excalidraw]]`) and hides the HTML comment,
+so the vault remains pleasant to read without teaching Obsidian a custom block.
+On the site, preprocessing sees both lines before either ordinary embed rule can
+consume them and emits `.image-note`. The diagram/original state is local to the
+figure, survives with JavaScript disabled, works by keyboard, and adds no state
+store or hydration. Unique radio names include the language body's existing id
+prefix, because both English and Ukrainian articles are present in the same DOM.
+
+**The reconstruction is a view, not a replacement.** A cleaned graph is easier
+to read, translate, theme, and fit to the page; the photo preserves handwriting,
+cross-outs, spatial emphasis, and any transcription uncertainty. Both remain
+ordinary lightbox items, but CSS uses `display: none` for the inactive view so
+the gallery only collects what the reader can currently see.
+
+**AI produces SVG first, Excalidraw remains the editing path.** Headless agents
+create the same transparent, self-theming English/`.uk.svg` pair as every other
+AI diagram. They do not manufacture Excalidraw scene JSON. When an editable
+drawing is wanted, Obsidian Excalidraw's supported SVG conversion creates it and
+Auto-export supplies the static SVG the site already knows how to serve. This
+keeps decision #10: no Excalidraw React runtime or canvas in the website.
+
+**Phone originals are sanitized before publication.** The source image is
+orientation-normalized, resized to roughly 1600px on its long edge, and stripped
+of EXIF/GPS/device metadata before entering `vault/`. The file is evidence for
+the reader, not a reason to publish where and on what device the note was
+photographed.

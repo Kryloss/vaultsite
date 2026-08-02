@@ -383,6 +383,70 @@ the SVG in the Excalidraw plugin, or draw his own and embed `![[Name.excalidraw]
 (needs Auto-export SVG on; see EXCALIDRAW.md). Don't hand-author Excalidraw
 scene JSON — it won't render on the site without the plugin's export.
 
+## Image notes — photographed notes → clean diagrams
+
+An **Image note** starts with a photograph of Kyrylo's handwritten page. Rebuild
+its meaning as a clean graph, timeline, flow, map, or comparison while keeping
+the photograph available as the primary-source view.
+
+### Intake contract
+
+1. **Transcribe before redesigning.** List the readable nodes, arrows, dates,
+   corrections, and hierarchy. Correct obvious spelling (for example,
+   “kindergarden” → “kindergarten”), but do not invent missing facts or silently
+   resolve unclear handwriting. Report every uncertainty.
+2. **Preserve meaning, not notebook geometry.** Choose the clearest diagram
+   structure for the information. Keep the author's chronology, relationships,
+   emphasis, and wording; remove crossed-out text and accidental page clutter.
+3. **Make the graph bilingual.** Produce `<name>.svg` and `<name>.uk.svg` with
+   identical geometry and professionally translated labels. Proper nouns follow
+   the Translation rules above.
+4. **Keep the original safely.** Copy it into the target section's
+   `attachments/`, strip EXIF/GPS/device metadata, bake in orientation, and
+   resize to about 1600px on the long edge. Never publish the untouched phone
+   original when it contains location metadata.
+5. **Transparent and native-looking.** Use the self-theming SVG rules above:
+   no canvas/background rectangle, monochrome page colors, the site's typeface,
+   simple rounded nodes, and reduced visual noise.
+
+### Embed syntax
+
+Put the source-photo directive **immediately after** the normal diagram embed:
+
+```md
+![[my-timeline.svg|My path so far :: Мій шлях дотепер]]
+<!-- image-note: my-timeline-original.jpeg -->
+```
+
+Obsidian displays the diagram and hides the HTML comment. The site upgrades the
+pair into one figure with a `Diagram / Original` (`Схема / Оригінал`) switch;
+the diagram is the default. Both views still open in the existing lightbox.
+The switch is native HTML and works without JavaScript.
+
+The first embed may also be an exported drawing:
+
+```md
+![[my-timeline.excalidraw|My path so far :: Мій шлях дотепер]]
+<!-- image-note: my-timeline-original.jpeg -->
+```
+
+For an editable Obsidian drawing, use the Excalidraw plugin's **Convert SVG to
+Excalidraw** workflow, save English and `.uk` drawings, and keep Auto-export SVG
+enabled. Conversion has some SVG limitations, so visually check both exports.
+The AI must not manufacture Excalidraw scene JSON; its reliable headless output
+is the bilingual SVG pair, which Obsidian can display directly and convert.
+
+### Where files go
+
+- Put the diagram pair and source photo beside the page's other loose media in
+  that section's `attachments/` folder.
+- Use lowercase slugged names: `<note-slug>-<topic>.svg`,
+  `<note-slug>-<topic>.uk.svg`, and `<note-slug>-<topic>-original.jpeg`.
+- Embed the pair in both language bodies with the exact same two lines. The
+  `.uk.svg` sibling and bilingual caption handle the visible translation.
+- If Kyrylo has not named the destination page, prepare and report the assets
+  but do not attach them to an arbitrary note.
+
 ## Sources section
 
 Notes making factual claims (People, current-events posts) end with:

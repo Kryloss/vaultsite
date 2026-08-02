@@ -176,6 +176,9 @@ Important conventions:
   changing any of them.
 - Self-theming SVG diagrams are deliberately inlined; do not replace them with
   ordinary `<img>` output. Excalidraw JSON is not shipped.
+- Image notes pair a bilingual SVG/Excalidraw embed with an original photo via
+  `<!-- image-note: file -->`; preserve the static, diagram-first radio switch
+  and strip EXIF/GPS metadata from source photos before they enter the vault.
 - Content images get intrinsic dimensions, blur data, responsive WebP variants,
   `srcset`, and `sizes` at build time. Preserve that pipeline.
 - The drawer and other dialogs stay mounted so close animations work; closed

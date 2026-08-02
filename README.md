@@ -25,7 +25,7 @@ No database, no CMS. Git is the single source of truth. Publish latency ≈ 1 mi
 `main.md` frontmatter: `title`, `icon` (emoji), `order` (sidebar position), `description`, `type` (list style, default `posts`).
 Entry frontmatter: `title`, `date` (YYYY-MM-DD), `description`, `draft`.
 
-**Diagrams:** embed Excalidraw drawings with `![[Name.excalidraw]]` (turn on the plugin's Auto-export SVG; light+dark exports become theme-aware). AI-made diagrams are self-theming `.svg` files embedded like images. See [docs/EXCALIDRAW.md](./docs/EXCALIDRAW.md).
+**Diagrams:** embed Excalidraw drawings with `![[Name.excalidraw]]` (turn on the plugin's Auto-export SVG; light+dark exports become theme-aware). AI-made diagrams are self-theming `.svg` files embedded like images. A photographed handwritten note can become an **Image note**: a clean bilingual diagram with a one-click switch back to the original photo. See [docs/EXCALIDRAW.md](./docs/EXCALIDRAW.md).
 
 **Section types:** `posts` (year-grouped rows; entries can set `category:` for filter chips) · `music` (Apple Music playlist embeds via `playlists:` frontmatter + notes below) · `people` (square cover-image grid; entries set `cover: photo.jpg`) · `shelf` (Netflix-style: one horizontally-scrolling row per medium, each opening its own page; entries set `cover:`, `author:`, `medium: book|movie|show|video`, optional `rating:` and `status: reading`) · `projects` (full entries rendered inline, TIL-style) · `now` (a nownownow-style page: a goals checklist and a résumé, both written as markdown in `main.md`'s body). Any Apple Music or YouTube link pasted alone on a line in any note also becomes an embedded player.
 

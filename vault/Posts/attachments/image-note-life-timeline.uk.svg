@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 930" role="img" aria-label="Життєвий шлях із Краматорська через Румунію та Канаду до TMU">
+  <style>
+    .line { fill: none; stroke: #a3a3a3; stroke-width: 1.6; }
+    .line-strong { fill: none; stroke: #33373d; stroke-width: 2; }
+    .node { fill: none; stroke: #33373d; stroke-width: 1.5; }
+    .title { fill: #25282d; font-size: 24px; font-weight: 650; }
+    .label { fill: #33373d; font-size: 16px; font-weight: 600; }
+    .small { fill: #6b7280; font-size: 13px; }
+    .date { fill: #33373d; font-size: 13px; font-weight: 650; letter-spacing: .04em; }
+    .dot { fill: #33373d; }
+    .arrow { fill: #a3a3a3; }
+    @media (prefers-color-scheme: dark) {
+      .line { stroke: #64676d; }
+      .line-strong, .node { stroke: #c8ccd2; }
+      .title, .label, .date, .dot { fill: #e6e8eb; }
+      .small { fill: #9aa0aa; }
+      .arrow { fill: #64676d; }
+    }
+  </style>
+  <defs>
+    <marker id="life-arrow" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+      <path class="arrow" d="M0 0 L8 4 L0 8 Z" />
+    </marker>
+  </defs>
+
+  <text class="title" x="380" y="42" text-anchor="middle">Мій шлях дотепер</text>
+  <text class="small" x="380" y="66" text-anchor="middle">місця, навчання та поворотні моменти</text>
+
+  <line class="line-strong" x1="92" y1="118" x2="92" y2="852" />
+
+  <circle class="dot" cx="92" cy="130" r="6" />
+  <text class="date" x="122" y="126">2007–2022</text>
+  <text class="label" x="122" y="151">Краматорськ</text>
+  <text class="small" x="122" y="174">дім і початок навчання</text>
+
+  <rect class="node" x="122" y="205" width="166" height="62" rx="16" />
+  <text class="label" x="205" y="235" text-anchor="middle">Дитсадок</text>
+  <text class="small" x="205" y="254" text-anchor="middle">перші заняття</text>
+  <line class="line" x1="290" y1="236" x2="325" y2="236" marker-end="url(#life-arrow)" />
+  <rect class="node" x="331" y="205" width="150" height="62" rx="16" />
+  <text class="label" x="406" y="235" text-anchor="middle">Підготовка</text>
+  <text class="small" x="406" y="254" text-anchor="middle">до школи</text>
+  <line class="line" x1="483" y1="236" x2="518" y2="236" marker-end="url(#life-arrow)" />
+  <rect class="node" x="524" y="205" width="154" height="62" rx="16" />
+  <text class="label" x="601" y="235" text-anchor="middle">Школа</text>
+  <text class="small" x="601" y="254" text-anchor="middle">1–8 класи</text>
+
+  <circle class="dot" cx="92" cy="336" r="6" />
+  <text class="date" x="122" y="332">24 ЛЮТ 2022</text>
+  <text class="label" x="122" y="357">Початок повномасштабної війни</text>
+  <path class="line" d="M122 376 C210 394 298 358 386 376 S562 394 650 376" />
+
+  <circle class="dot" cx="92" cy="448" r="6" />
+  <text class="date" x="122" y="444">17 БЕР 2022</text>
+  <text class="label" x="122" y="469">Румунія</text>
+  <text class="small" x="122" y="491">тимчасовий дім на чотири місяці</text>
+  <path class="line" d="M324 462 H408" marker-end="url(#life-arrow)" />
+  <text class="date" x="438" y="444">8 ЧЕР 2022</text>
+  <text class="label" x="438" y="469">Канада</text>
+  <text class="small" x="438" y="491">новий початок</text>
+
+  <rect class="node" x="122" y="535" width="190" height="60" rx="16" />
+  <text class="label" x="217" y="570" text-anchor="middle">Ноблтон</text>
+  <line class="line" x1="315" y1="565" x2="405" y2="565" marker-end="url(#life-arrow)" />
+  <rect class="node" x="412" y="535" width="190" height="60" rx="16" />
+  <text class="label" x="507" y="570" text-anchor="middle">Ньюмаркет</text>
+
+  <circle class="dot" cx="92" cy="666" r="6" />
+  <text class="date" x="122" y="662">2022–2026</text>
+  <text class="label" x="122" y="687">Sacred Heart CHS</text>
+  <text class="small" x="122" y="709">старша школа</text>
+
+  <line class="line" x1="362" y1="742" x2="362" y2="820" marker-end="url(#life-arrow)" />
+
+  <circle class="dot" cx="92" cy="824" r="6" />
+  <text class="date" x="122" y="820">ЗАРАЗ</text>
+  <rect class="node" x="122" y="840" width="480" height="68" rx="18" />
+  <text class="label" x="362" y="870" text-anchor="middle">Торонтський столичний університет</text>
+  <text class="small" x="362" y="891" text-anchor="middle">Cyber Science</text>
+</svg>
