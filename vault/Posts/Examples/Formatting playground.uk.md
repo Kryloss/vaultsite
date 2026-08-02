@@ -72,6 +72,13 @@ https://music.apple.com/us/album/clancy/1733370881
 ![[image-note-life-timeline.svg|A handwritten life timeline, reconstructed as a structured diagram :: Рукописний життєвий шлях, відтворений як структурована схема]]
 <!-- image-note: image-note-life-timeline.jpeg -->
 
+Так само можна впорядкувати й родинні зв’язки. У цьому відтворенні обидві гілки
+родини залишаються явними, імена відокремлені від ролей, а замість стрілок
+використані звичайні лінії, адже родинне дерево — не послідовність.
+
+![[image-note-family-tree.svg|A handwritten family tree, reconstructed as a structured relationship map :: Рукописне родинне дерево, відтворене як структурована схема зв’язків]]
+<!-- image-note: image-note-family-tree.jpeg -->
+
 Обери **Схема** для впорядкованої версії або **Оригінал**, щоб звірити її з
 почерком. Перед публікацією вихідне фото зменшується, а метадані про місце й
 пристрій видаляються.

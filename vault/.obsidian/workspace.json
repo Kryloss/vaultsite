@@ -13,10 +13,10 @@
             "state": {
               "type": "image",
               "state": {
-                "file": "Posts/attachments/image-note-life-timeline.uk.svg"
+                "file": "Posts/attachments/image-note-family-tree.svg"
               },
               "icon": "lucide-image",
-              "title": "image-note-life-timeline.uk"
+              "title": "image-note-family-tree"
             }
           }
         ]
@@ -199,19 +199,21 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
-    "Posts/attachments/image-note-life-timeline.excalidraw",
-    "Posts/attachments/image-note-life-timeline.svg",
-    "Posts/attachments/image-note-life-timeline.uk.svg",
+    "Posts/attachments/image-note-family-tree.excalidraw",
+    "Posts/attachments/image-note-family-tree.jpeg",
+    "Posts/attachments/image-note-family-tree.svg",
     "Posts/attachments/image-note-life-timeline.jpeg",
-    "Posts/attachments/rendering-pipeline.uk.svg",
+    "Posts/attachments/image-note-life-timeline.svg",
+    "Posts/attachments/image-note-life-timeline.excalidraw",
     "Posts/attachments/rendering-pipeline.svg",
-    "Posts/attachments/image-note-life-timeline.uk.excalidraw",
     "Posts/attachments/secplus-plan.uk.svg",
+    "Posts/attachments/image-note-family-tree.uk.svg",
+    "Posts/attachments/image-note-life-timeline.uk.excalidraw",
+    "Posts/attachments/image-note-life-timeline.uk.svg",
+    "Posts/attachments/image-note-family-tree.uk.excalidraw",
+    "Posts/attachments/rendering-pipeline.uk.svg",
     "Posts/attachments/war-newspaper.pdf",
     "Posts/attachments/war-newspaper-01.webp",
-    "Posts/attachments/secplus-domains.svg",
-    "Posts/attachments/war-newspaper-09.webp",
-    "Posts/attachments/war-newspaper-03.webp",
     "Posts/Examples/Formatting playground.uk.md",
     "Posts/Examples/Draft example.uk.md",
     "Posts/First certification.uk.md",
@@ -241,8 +243,6 @@
     "Posts/Examples",
     "Shelf/Shows/covers",
     "Shelf/Movies/covers",
-    "Shelf/Books/covers",
-    "Projects/attachments",
-    "Posts/attachments"
+    "Shelf/Books/covers"
   ]
 }

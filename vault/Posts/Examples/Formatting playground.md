@@ -82,6 +82,13 @@ so switching views never moves the rest of the page.
 ![[image-note-life-timeline.svg|A handwritten life timeline, reconstructed as a structured diagram :: Рукописний життєвий шлях, відтворений як структурована схема]]
 <!-- image-note: image-note-life-timeline.jpeg -->
 
+The same workflow can clarify relationships. This reconstruction keeps both
+family branches explicit, separates names from roles, and uses plain connectors
+instead of arrows because a family tree is not a sequence.
+
+![[image-note-family-tree.svg|A handwritten family tree, reconstructed as a structured relationship map :: Рукописне родинне дерево, відтворене як структурована схема зв’язків]]
+<!-- image-note: image-note-family-tree.jpeg -->
+
 Use **Diagram** for the organized version and **Original** to check it against
 the handwriting. The source photo is resized and stripped of location/device
 metadata before publication.
