@@ -11,14 +11,12 @@
             "id": "9cd2acf5af766b33",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "image",
               "state": {
-                "file": "Music/main.md",
-                "mode": "source",
-                "source": false
+                "file": "Posts/attachments/rendering-pipeline.svg"
               },
-              "icon": "lucide-file",
-              "title": "main"
+              "icon": "lucide-image",
+              "title": "rendering-pipeline"
             }
           }
         ]
@@ -201,6 +199,7 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
+    "Music/main.md",
     "Posts/First certification.md",
     "Posts/First certification.uk.md",
     "Posts/attachments/secplus-plan.svg",
@@ -232,7 +231,6 @@
     "Shelf/Books/Illustrated History of Ukraine's Independence.md",
     "Shelf/Books/Illustrated History of Ukraine's Independence.uk.md",
     "Shelf/Books/New Version.md",
-    "People/Mykhailo Fedorov.md",
     "People/mykhailo-fedorov.png",
     "Now/Kyrylo Leshchenko Resume.pdf",
     "Posts/Examples",
