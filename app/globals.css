@@ -751,6 +751,125 @@ body::after {
   margin: 0 auto;
 }
 
+/* Image notes pair a cleaned-up diagram with the photographed notebook page
+   it came from. The diagram is the default; two native radios make the switch
+   keyboard-accessible and keep it working without client JavaScript. */
+.prose figure.image-note {
+  margin: 1.75rem 0;
+}
+
+.image-note-shell {
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.image-note-legend,
+.image-note-radio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.image-note-stage,
+.image-note-diagram,
+.image-note-original {
+  width: 100%;
+}
+
+.image-note-original {
+  display: none;
+}
+
+.image-note-radio-original:checked ~ .image-note-stage .image-note-diagram {
+  display: none;
+}
+
+.image-note-radio-original:checked ~ .image-note-stage .image-note-original {
+  display: block;
+}
+
+.image-note-diagram img,
+.image-note-diagram svg.diagram {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.image-note-original img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  max-height: 75vh;
+  height: auto;
+  margin: 0 auto;
+  object-fit: contain;
+}
+
+.image-note-controls {
+  display: flex;
+  width: fit-content;
+  margin: 0.875rem auto 0;
+  border: 1px solid var(--chrome-ring);
+  border-radius: var(--r-full);
+  padding: 0.1875rem;
+  background: var(--chrome-bg);
+}
+
+.image-note-label {
+  cursor: pointer;
+  border-radius: var(--r-full);
+  padding: 0.3rem 0.75rem;
+  color: var(--text-tertiary);
+  font-size: 0.8125rem;
+  line-height: 1.25;
+  user-select: none;
+}
+
+.image-note-radio-diagram:checked
+  ~ .image-note-controls
+  .image-note-label-diagram,
+.image-note-radio-original:checked
+  ~ .image-note-controls
+  .image-note-label-original {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.image-note-radio-diagram:focus-visible
+  ~ .image-note-controls
+  .image-note-label-diagram,
+.image-note-radio-original:focus-visible
+  ~ .image-note-controls
+  .image-note-label-original {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .image-note-label:hover {
+    color: var(--text);
+  }
+
+  .image-note-radio-diagram:checked
+    ~ .image-note-controls
+    .image-note-label-diagram:hover,
+  .image-note-radio-original:checked
+    ~ .image-note-controls
+    .image-note-label-original:hover {
+    color: var(--bg);
+  }
+}
+
 .excalidraw-missing {
   display: block;
   margin: 1.25rem 0;

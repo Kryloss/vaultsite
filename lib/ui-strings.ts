@@ -131,6 +131,15 @@ export const ui = {
   nextImage: { en: "Next image", uk: "Наступне зображення" },
   closeImage: { en: "Close", uk: "Закрити" },
 
+  // image notes (diagram reconstructed from a photographed handwritten note)
+  imageNoteView: { en: "Image note view", uk: "Вигляд фотонататки" },
+  imageNoteDiagram: { en: "Diagram", uk: "Схема" },
+  imageNoteOriginal: { en: "Original", uk: "Оригінал" },
+  imageNoteOriginalAlt: {
+    en: "Original handwritten note",
+    uk: "Оригінальна рукописна нотатка",
+  },
+
   // shelf status
   currentlyReading: { en: "Reading", uk: "Читаю" },
   currentlyWatching: { en: "Watching", uk: "Дивлюся" },

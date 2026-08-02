@@ -34,6 +34,7 @@ import { youtubeEmbedHtml, youtubeId } from "./youtube";
 import { highlightToHast, parseCodeMeta, langLabel } from "./highlight";
 import { rehypeHeadings, type Heading } from "./toc";
 import { dimsFor, srcSetFor } from "./blur";
+import { ui } from "./ui-strings";
 
 /** Encode each path segment but keep "/" separators. */
 function encodePath(p: string): string {
@@ -134,6 +135,41 @@ function captionParts(alt?: string): { en: string; uk?: string } {
   return { en, uk: uk || undefined };
 }
 
+/** Shared bilingual caption markup for diagrams and image notes. */
+function diagramCaption(alt?: string): string {
+  const { en, uk } = captionParts(alt);
+  if (!en) return "";
+  return uk
+    ? `<figcaption><span class="lang-en">${escapeHtml(
+        en
+      )}</span><span class="lang-uk">${escapeHtml(uk)}</span></figcaption>`
+    : `<figcaption>${escapeHtml(en)}</figcaption>`;
+}
+
+/** Theme/language-aware diagram media without its outer figure or caption. */
+function diagramMedia(
+  en: { light: string; dark?: string },
+  uk: { light: string; dark?: string } | undefined,
+  alt?: string,
+  extraClass = ""
+): string {
+  const { en: capEn, uk: capUk } = captionParts(alt);
+  if (uk) {
+    return `<span class="lang-en">${themedImg(
+      en.light,
+      en.dark,
+      capEn,
+      extraClass
+    )}</span><span class="lang-uk">${themedImg(
+      uk.light,
+      uk.dark,
+      capUk ?? capEn,
+      extraClass
+    )}</span>`;
+  }
+  return themedImg(en.light, en.dark, capEn, extraClass);
+}
+
 /**
  * A diagram figure with theme (light/dark) AND language (en/uk) swaps.
  * Each side is a {light, dark?} image set; `uk` omitted → single-language.
@@ -144,27 +180,10 @@ function diagramFigure(
   alt: string | undefined,
   figClass: string
 ): string {
-  const { en: capEn, uk: capUk } = captionParts(alt);
-  const cap = capEn
-    ? capUk
-      ? `<figcaption><span class="lang-en">${escapeHtml(
-          capEn
-        )}</span><span class="lang-uk">${escapeHtml(capUk)}</span></figcaption>`
-      : `<figcaption>${escapeHtml(capEn)}</figcaption>`
-    : "";
   const cls = figClass ? ` class="${figClass}"` : "";
-  if (uk) {
-    return `<figure${cls}><span class="lang-en">${themedImg(
-      en.light,
-      en.dark,
-      capEn
-    )}</span><span class="lang-uk">${themedImg(
-      uk.light,
-      uk.dark,
-      capUk ?? capEn
-    )}</span>${cap}</figure>`;
-  }
-  return `<figure${cls}>${themedImg(en.light, en.dark, capEn)}${cap}</figure>`;
+  return `<figure${cls}>${diagramMedia(en, uk, alt)}${diagramCaption(
+    alt
+  )}</figure>`;
 }
 
 /**
@@ -376,6 +395,115 @@ function excalidrawHtml(target: string, alt?: string): string {
   )}” isn’t exported yet — turn on Auto-export SVG in the Excalidraw plugin (see docs/EXCALIDRAW.md).</span>`;
 }
 
+/** Resolve an ordinary SVG diagram with its optional theme/language siblings. */
+function resolveSvgDiagram(
+  sectionDir: string,
+  file: string
+): {
+  en: { light: string; dark?: string };
+  uk?: { light: string; dark?: string };
+} {
+  const ukName = langVariantName(file);
+  return {
+    en: {
+      light: resolveImageUrl(sectionDir, file),
+      dark: darkVariantUrl(file),
+    },
+    uk:
+      ukName && assetExists(sectionDir, ukName)
+        ? {
+            light: resolveImageUrl(sectionDir, ukName),
+            dark: darkVariantUrl(ukName),
+          }
+        : undefined,
+  };
+}
+
+/** A bilingual string pair rendered through the site's existing language CSS. */
+function bilingual(en: string, uk: string): string {
+  return `<span class="lang-en">${escapeHtml(
+    en
+  )}</span><span class="lang-uk">${escapeHtml(uk)}</span>`;
+}
+
+/**
+ * Diagram-first figure paired with the source notebook photo.
+ *
+ * The two radios are intentionally plain HTML: the switch remains fully static,
+ * keyboard-accessible, and usable with JavaScript disabled. The diagram stays
+ * the default; CSS swaps the original in only when the reader asks for it.
+ */
+function imageNoteHtml(
+  target: string,
+  original: string,
+  alt: string | undefined,
+  sectionDir: string,
+  id: string
+): string {
+  let diagram:
+    | {
+        en: { light: string; dark?: string };
+        uk?: { light: string; dark?: string };
+      }
+    | undefined;
+
+  if (/\.excalidraw(?:\.md)?$/i.test(target.trim())) {
+    const resolved = resolveExcalidraw(target);
+    const en = excalSideToImg(resolved.en);
+    if (en) {
+      diagram = {
+        en,
+        uk: resolved.uk ? excalSideToImg(resolved.uk) : undefined,
+      };
+    }
+  } else if (/\.svg$/i.test(target.trim())) {
+    diagram = resolveSvgDiagram(sectionDir, target);
+  }
+
+  if (!diagram) return excalidrawHtml(target, alt);
+
+  const originalSrc = resolveImageUrl(sectionDir, original);
+  const diagramId = `${id}-diagram`;
+  const originalId = `${id}-original`;
+  const groupName = `${id}-view`;
+  const originalAlt = `${ui.imageNoteOriginalAlt.en} / ${ui.imageNoteOriginalAlt.uk}`;
+
+  return (
+    `<figure class="image-note">` +
+    `<fieldset class="image-note-shell">` +
+    `<legend class="image-note-legend">${bilingual(
+      ui.imageNoteView.en,
+      ui.imageNoteView.uk
+    )}</legend>` +
+    `<input class="image-note-radio image-note-radio-diagram" type="radio" id="${diagramId}" name="${groupName}" checked />` +
+    `<input class="image-note-radio image-note-radio-original" type="radio" id="${originalId}" name="${groupName}" />` +
+    `<div class="image-note-stage">` +
+    `<div class="image-note-diagram">${diagramMedia(
+      diagram.en,
+      diagram.uk,
+      alt,
+      "image-note-drawing"
+    )}</div>` +
+    `<div class="image-note-original"><img src="${originalSrc}" alt="${escapeHtml(
+      originalAlt
+    )}" loading="lazy" /></div>` +
+    `</div>` +
+    `<div class="image-note-controls">` +
+    `<label class="image-note-label image-note-label-diagram press" for="${diagramId}">${bilingual(
+      ui.imageNoteDiagram.en,
+      ui.imageNoteDiagram.uk
+    )}</label>` +
+    `<label class="image-note-label image-note-label-original press" for="${originalId}">${bilingual(
+      ui.imageNoteOriginal.en,
+      ui.imageNoteOriginal.uk
+    )}</label>` +
+    `</div>` +
+    `</fieldset>` +
+    `${diagramCaption(alt)}` +
+    `</figure>`
+  );
+}
+
 /**
  * Obsidian callouts → styled divs. The body is emitted as markdown between
  * raw HTML tags (separated by blank lines) so the pipeline still parses it.
@@ -503,7 +631,27 @@ export function preprocessObsidian(
   // 1. Callouts first (they restructure blockquote syntax).
   md = transformCallouts(md, idPrefix);
 
-  // 2a. Excalidraw drawings: ![[Drawing.excalidraw]] / ![[Drawing.excalidraw.md]]
+  // 2. Image notes: a normal SVG/Excalidraw embed followed by a hidden source
+  //    photo directive. Obsidian shows the drawing and ignores the comment;
+  //    the site upgrades the pair into a diagram/original switch.
+  let imageNoteN = 0;
+  md = md.replace(
+    /!\[\[([^\]|]+?\.(?:svg|excalidraw(?:\.md)?))(?:\|([^\]]*))?\]\][ \t]*\r?\n[ \t]*<!--\s*image-note:\s*([^\n>]+?)\s*-->/gi,
+    (_m, target: string, alt: string | undefined, original: string) => {
+      const id = `${idPrefix ?? ""}image-note-${++imageNoteN}-${slugify(
+        target.replace(/\.(?:svg|excalidraw(?:\.md)?)$/i, "")
+      )}`;
+      return `\n${imageNoteHtml(
+        target.trim(),
+        original.trim(),
+        alt,
+        sectionDir,
+        id
+      )}\n`;
+    }
+  );
+
+  // 2a. Remaining Excalidraw drawings: ![[Drawing.excalidraw]] / ![[Drawing.excalidraw.md]]
   //     → the exported SVG (theme-aware if light + dark were exported).
   md = md.replace(
     /!\[\[([^\]|]+?\.excalidraw(?:\.md)?)(?:\|([^\]]*))?\]\]/gi,
