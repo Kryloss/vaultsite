@@ -13,10 +13,10 @@
             "state": {
               "type": "image",
               "state": {
-                "file": "Posts/attachments/rendering-pipeline.svg"
+                "file": "Posts/attachments/image-note-life-timeline.svg"
               },
               "icon": "lucide-image",
-              "title": "rendering-pipeline"
+              "title": "image-note-life-timeline"
             }
           }
         ]
@@ -197,29 +197,32 @@
       "obsidian-excalidraw-plugin:New drawing": false
     }
   },
-  "active": "4e6d28c414c0125d",
+  "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
+    "Posts/attachments/image-note-life-timeline.jpeg",
+    "Posts/attachments/image-note-life-timeline.svg",
+    "Posts/attachments/image-note-life-timeline.uk.svg",
+    "Posts/attachments/rendering-pipeline.svg",
     "Posts/attachments/rendering-pipeline.uk.svg",
     "Posts/attachments/secplus-domains.svg",
-    "Posts/attachments/image-note-life-timeline.uk.svg",
+    "Posts/attachments/war-newspaper-01.webp",
     "Posts/attachments/war-newspaper.pdf",
+    "Posts/attachments/war-newspaper-09.webp",
+    "Posts/attachments/war-newspaper-03.webp",
+    "Posts/attachments/war-newspaper-05.webp",
+    "Posts/attachments/secplus-plan.uk.svg",
     "Posts/Examples/Formatting playground.uk.md",
     "Posts/Examples/Draft example.uk.md",
     "Posts/First certification.uk.md",
     "Posts/I made propaganda for my Religion class.uk.md",
     "Posts/main.md",
     "Posts/Security+ journey.md",
-    "Posts/attachments/image-note-life-timeline.svg",
     "Music/Clancy.uk.md",
-    "Posts/attachments/image-note-life-timeline.jpeg",
-    "Posts/attachments/rendering-pipeline.svg",
     "Posts/Examples/Image note QA.uk.md",
     "Posts/Examples/Image note QA.md",
     "Music/main.md",
     "Posts/First certification.md",
-    "Posts/attachments/secplus-plan.svg",
     "Shelf/Books/Sapiens.uk.md",
-    "Posts/attachments/war-newspaper-01.webp",
     "Posts/Examples/Post Sample.uk.md",
     "Shelf/Shows/Mr Robot.uk.md",
     "Shelf/Movies/Inception.uk.md",
@@ -227,14 +230,12 @@
     "Posts/Security+ journey.uk.md",
     "People/Mykhailo Fedorov.uk.md",
     "Music/main.uk.md",
-    "Posts/attachments/secplus-plan.uk.svg",
     "Shelf/Books/The Witcher - The Last Wish.md",
     "Shelf/Books/Jonathan Livingston Seagull.uk 1.md",
     "Shelf/Books/New Version.uk.md",
     "Shelf/Books/Jonathan Livingston Seagull.md",
     "Shelf/Books/Jonathan Livingston Seagull.uk.md",
     "Now/main.md",
-    "Home/me.jpeg",
     "Now/Kyrylo Leshchenko Resume.pdf",
     "Posts/Examples",
     "Shelf/Shows/covers",
