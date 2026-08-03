@@ -1019,9 +1019,9 @@ cross-outs, spatial emphasis, and any transcription uncertainty. Both remain
 ordinary lightbox items, but CSS uses `display: none` for the inactive view so
 the gallery only collects what the reader can currently see.
 
-**Creation workflow revised by decision #72.** Image notes now begin as genuine
-bilingual Excalidraw scenes and end as static SVGs. Decision #10 still holds: no
-Excalidraw React runtime or canvas enters the website.
+**Creation workflow is clarified by decision #72.** Image notes use the normal
+hand-authored, self-theming SVG workflow after a photo-extraction/transcription
+step. Excalidraw remains optional rather than entering the default pipeline.
 
 **Phone originals are sanitized before publication.** The source image is
 orientation-normalized, resized to roughly 1600px on its long edge, and stripped
@@ -1037,18 +1037,16 @@ move the controls, caption, or paragraph below it. Diagram authors also match th
 SVG `viewBox` to the source ratio when practical, which uses that reserved space
 rather than letterboxing it.
 
-**Creation workflow revised by decision #72.** Codex still performs the source
-interpretation, but Excalidraw is now the required editable construction layer
-for photographed notes rather than an optional editor.
-
 ## 70. Formatting Playground is a published reference (2026-08-02)
 
 Decision #43 correctly removed accidental scaffolding from the public site at
 the time. The owner has now explicitly chosen to publish Formatting Playground
 as the permanent, inspectable demonstration of every supported content feature.
-Its `draft: true` flag is removed and the first Image note lives there. `Post
-Sample` and `Draft example` remain scaffolding/draft material; publishing this
-one reference does not change the default rule that examples are hidden.
+Its `draft: true` flag is removed. The two Image-note demonstrations that first
+lived there were later removed at the owner's request; the renderer and
+authoring contract remain supported. `Post Sample` and `Draft example` remain
+scaffolding/draft material; publishing this one reference does not change the
+default rule that examples are hidden.
 
 ## 71. Image-note reconstruction is source-faithful and build-validated (2026-08-02)
 
@@ -1071,37 +1069,37 @@ evidence relationship.
 before development and production asset sync. It checks referenced assets,
 bilingual geometry and captions, photo aspect/size/privacy metadata, accessible
 self-theming SVGs, dark-mode support, transparent canvases, unsafe/external SVG
-content, and complete Excalidraw language/theme exports. Semantic fidelity and
-phone legibility still require the transcription and visual review; pretending a
-validator can read handwriting would make the automated guarantee dishonest.
+content, and complete language/theme exports for directly embedded Excalidraw
+drawings. Semantic fidelity and phone legibility still require the transcription
+and visual review; pretending a validator can read handwriting would make the
+automated guarantee dishonest.
 
 The Markdown interface, native Diagram/Original switch, lightbox, and static
 renderer do not change. Validation is an authoring/build concern and introduces
 no runtime state, content database, or new dependency.
 
-## 72. Photographed-note diagrams are authored in Excalidraw (2026-08-02)
+## 72. Photographed notes extend the semantic-SVG workflow (2026-08-02)
 
-**Decision:** every Image note keeps genuine English and Ukrainian Excalidraw
-scenes beside its static SVG exports. The transcription map still decides the
-facts and the semantic layout; Excalidraw is where node bounds, connections,
-spacing, and future edits are made inspectable. Agents may use Excalidraw's own
-Mermaid importer after interpreting a flow, but they do not synthesize scene
-JSON or accept the import's first automatic layout without review.
+**Decision:** an Image note adds photo extraction before the existing diagram
+recipe; it does not introduce a second drawing pipeline. Codex first records a
+transcription map of exact text, dates, nodes, relationships, corrections,
+cross-outs, and uncertainty. It then hand-authors `<name>.svg` and
+`<name>.uk.svg` directly, using identical coordinates and the same internal
+dark-mode, transparent-canvas, accessible-label pattern as
+`rendering-pipeline.svg`.
 
-The checked-in website asset remains SVG. This preserves the existing Markdown
-embed, static renderer, live site typography, transparent canvas, and theme
-behavior without shipping Excalidraw React/canvas code. A deterministic export
-may map the two language scenes onto one shared geometry so translation length
-cannot move nodes or redirect arrows. Ordinary steps share one neutral fill;
-semantic exceptions reuse the rendering-pipeline grammar: a rupture/event gets
-the high-contrast input/output outline treatment, while the current destination
-gets the inverted solid treatment. Text has explicit padding, and arrows
-terminate only at the elements connected in the source scene.
+An earlier iteration of this decision required bilingual Excalidraw scenes for
+every photographed note. That requirement added an intermediate artifact
+without improving the reader-facing static SVG or the source-fidelity review,
+so it was reversed. Excalidraw remains supported when the owner explicitly
+wants a visually editable drawing, and a directly embedded Excalidraw Image
+note still needs the plugin's complete bilingual static exports. It is not a
+prerequisite for a semantic SVG Image note, and the validator no longer expects
+`.excalidraw` siblings beside `.svg` files.
 
-The life-journey reference uses three ordered phases separated by one explicit
-24 February 2022 rupture. Compact rounded nodes and a continuous directional
-path keep the source page's circled-node and journey cues, while restrained
-phase containers, primary/secondary type, and bound connectors repair its
-accidental notebook spacing. `npm run export:image-notes` rebuilds this pair
-from the editable scenes; the validator requires both sources as well as both
-static exports.
+The visual rules remain unchanged: translations share geometry; ordinary nodes
+share a neutral treatment; a true semantic event or endpoint may receive a
+different card treatment; text keeps explicit padding; and arrows appear only
+for relationships that are genuinely directional. The source photo remains the
+evidence, the transcription map owns factual fidelity, and the SVG pair owns
+the cleaned reader-facing diagram.

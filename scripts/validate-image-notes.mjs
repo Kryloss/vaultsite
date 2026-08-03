@@ -160,22 +160,6 @@ function validateSvg(facts, options, errors, vaultDir) {
   }
 }
 
-function validateExcalidrawSource(file, errors, vaultDir) {
-  const name = label(file, vaultDir);
-  try {
-    const scene = JSON.parse(fs.readFileSync(file, "utf8"));
-    if (scene.type !== "excalidraw" || !Array.isArray(scene.elements)) {
-      errors.push(`${name}: file is not a valid Excalidraw scene`);
-      return;
-    }
-    if (!scene.elements.some((element) => !element.isDeleted)) {
-      errors.push(`${name}: Excalidraw scene has no active elements`);
-    }
-  } catch {
-    errors.push(`${name}: file is not valid Excalidraw JSON`);
-  }
-}
-
 function compareGeometry(svgFiles, photo, errors, vaultDir) {
   if (!svgFiles.length) return;
   const first = svgFiles[0];
@@ -270,19 +254,8 @@ export async function validateImageNotes({ vaultDir, sharpImpl } = {}) {
         const english = resolveAsset(noteFile, target, index);
         const ukrainianName = target.trim().replace(/\.svg$/i, ".uk.svg");
         const ukrainian = resolveAsset(noteFile, ukrainianName, index);
-        const sourceName = target.trim().replace(/\.svg$/i, ".excalidraw");
-        const ukrainianSourceName = target.trim().replace(/\.svg$/i, ".uk.excalidraw");
-        const source = resolveAsset(noteFile, sourceName, index);
-        const ukrainianSource = resolveAsset(noteFile, ukrainianSourceName, index);
         if (!english) errors.push(`${location}: diagram not found: ${target.trim()}`);
         if (!ukrainian) errors.push(`${location}: Ukrainian diagram not found: ${ukrainianName}`);
-        if (!source) errors.push(`${location}: editable Excalidraw source not found: ${sourceName}`);
-        if (!ukrainianSource) {
-          errors.push(`${location}: Ukrainian Excalidraw source not found: ${ukrainianSourceName}`);
-        }
-        for (const file of [source, ukrainianSource].filter(Boolean)) {
-          validateExcalidrawSource(file, errors, root);
-        }
         const languageSvgs = [];
         for (const file of [english, ukrainian].filter(Boolean)) {
           const facts = svgFacts(file);

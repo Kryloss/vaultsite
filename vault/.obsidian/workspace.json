@@ -13,10 +13,10 @@
             "state": {
               "type": "image",
               "state": {
-                "file": "Posts/attachments/image-note-family-tree.uk.svg"
+                "file": "Posts/attachments/image-note-family-tree.jpeg"
               },
               "icon": "lucide-image",
-              "title": "image-note-family-tree.uk"
+              "title": "image-note-family-tree"
             }
           }
         ]
@@ -199,21 +199,22 @@
   },
   "active": "9cd2acf5af766b33",
   "lastOpenFiles": [
+    "Posts/attachments/image-note-life-timeline.jpeg",
+    "Posts/attachments/secplus-domains.uk.svg",
+    "Posts/attachments/rendering-pipeline.svg",
+    "Posts/attachments/image-note-family-tree.jpeg",
+    "Posts/attachments/secplus-plan.svg",
     "Posts/attachments/image-note-family-tree.svg",
+    "Posts/attachments/image-note-life-timeline.uk.excalidraw",
+    "Posts/attachments/image-note-family-tree.uk.svg",
     "Posts/attachments/image-note-family-tree.uk.excalidraw",
     "Posts/attachments/image-note-family-tree.excalidraw",
-    "Posts/attachments/image-note-family-tree.jpeg",
-    "Posts/attachments/image-note-life-timeline.jpeg",
     "Posts/attachments/image-note-life-timeline.svg",
     "Posts/attachments/image-note-life-timeline.excalidraw",
-    "Posts/attachments/rendering-pipeline.svg",
     "Posts/attachments/secplus-plan.uk.svg",
-    "Posts/attachments/image-note-family-tree.uk.svg",
-    "Posts/attachments/image-note-life-timeline.uk.excalidraw",
     "Posts/attachments/image-note-life-timeline.uk.svg",
     "Posts/attachments/rendering-pipeline.uk.svg",
     "Posts/attachments/war-newspaper.pdf",
-    "Posts/attachments/war-newspaper-01.webp",
     "Posts/Examples/Formatting playground.uk.md",
     "Posts/Examples/Draft example.uk.md",
     "Posts/First certification.uk.md",

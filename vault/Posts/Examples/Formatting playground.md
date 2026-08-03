@@ -72,27 +72,6 @@ Two kinds, both fully static. Draw in Excalidraw and embed `![[Name.excalidraw]]
 
 Full guide: see the Excalidraw docs in the repo. Ask the AI for a diagram and it drops one in.
 
-## Image notes
-
-A photographed notebook page can become a cleaner, bilingual diagram without
-throwing the source away. The reconstruction below groups the handwritten
-timeline into three readable phases and shares one fixed frame with the photo,
-so switching views never moves the rest of the page.
-
-![[image-note-life-timeline.svg|A handwritten life timeline, reconstructed as a structured diagram :: Рукописний життєвий шлях, відтворений як структурована схема]]
-<!-- image-note: image-note-life-timeline.jpeg -->
-
-The same workflow can clarify relationships. This reconstruction keeps both
-family branches explicit, separates names from roles, and uses plain connectors
-instead of arrows because a family tree is not a sequence.
-
-![[image-note-family-tree.svg|A handwritten family tree, reconstructed as a structured relationship map :: Рукописне родинне дерево, відтворене як структурована схема зв’язків]]
-<!-- image-note: image-note-family-tree.jpeg -->
-
-Use **Diagram** for the organized version and **Original** to check it against
-the handwriting. The source photo is resized and stripped of location/device
-metadata before publication.
-
 ## Drafts
 
 Add `draft: true` to any note's frontmatter and it shows up locally with an amber badge but never gets published. There's one in this folder right now — you can only see it in `npm run dev`.

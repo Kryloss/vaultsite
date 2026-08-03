@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "export:image-notes": "node scripts/export-image-note-excalidraw.mjs && node scripts/export-family-tree-excalidraw.mjs",
     "validate:image-notes": "node scripts/validate-image-notes.mjs",
     "predev": "npm run validate:image-notes && node scripts/sync-assets.mjs",
     "dev": "next dev",

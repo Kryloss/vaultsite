@@ -349,6 +349,10 @@ embed it like an image:
 
 Rules for the SVG:
 
+- Write the SVG markup directly: simple `<rect>`, `<path>`/`<line>`, and
+  `<text>` elements. Use a marker for real directional arrows and a monospace
+  secondary label for literal syntax when useful. Do not route the default
+  workflow through a drawing tool or an Excalidraw export.
 - Transparent background; no outer `<rect>` fill.
 - Include an internal `<style>` with a `@media (prefers-color-scheme: dark)`
   block that recolors strokes/text for dark mode — so ONE file works on both
@@ -415,11 +419,12 @@ the photograph available as the primary-source view.
    from the source — for example its winding route, a rupture, circled choices,
    or a distinctive emphasis mark. Do not trace the notebook mechanically and
    do not force every source into the same panel template.
-5. **Make the graph bilingual in Excalidraw.** Create editable
-   `<name>.excalidraw` and `<name>.uk.excalidraw` scenes through Excalidraw's UI,
-   then produce `<name>.svg` and `<name>.uk.svg` static exports with identical
-   geometry and professionally translated labels. Proper nouns follow the
-   Translation rules above. Never manufacture scene JSON by hand.
+5. **Apply the normal diagram recipe.** After extracting the photo, write
+   `<name>.svg` directly and make a `<name>.uk.svg` twin with identical geometry
+   and professionally translated labels. Use the same hand-authored SVG rules,
+   dark-mode style block, accessible label, and reference files from Diagrams
+   above. Proper nouns follow the Translation rules. Excalidraw is not an
+   intermediate or required source file.
 6. **Keep the original safely.** Copy it into the target section's
    `attachments/`, strip EXIF/GPS/device metadata, bake in orientation, and
    resize to about 1600px on the long edge. Never publish the untouched phone
@@ -446,9 +451,9 @@ the photograph available as the primary-source view.
 
 Run `npm run validate:image-notes` after adding or changing an Image note. It is
 also part of `predev` and `prebuild`, so an invalid pair cannot silently deploy.
-The validator checks asset existence, bilingual editable Excalidraw sources, a
-bilingual caption/export pair, matching geometry, source-photo aspect ratio and
-privacy metadata, accessible self-theming SVGs, live dark-mode styles,
+The validator checks asset existence, a bilingual caption/export pair,
+matching geometry, source-photo aspect ratio and privacy metadata, accessible
+self-theming SVGs, live dark-mode styles,
 transparent canvases, unsafe/external SVG content, and complete bilingual
 light/dark exports when the note embeds an Excalidraw drawing directly.
 
@@ -479,23 +484,17 @@ The first embed may also be an exported drawing:
 <!-- image-note: my-timeline-original.jpeg -->
 ```
 
-Create the reconstruction in Excalidraw after the transcription map is agreed.
-Its Mermaid importer is useful for an already-understood flow, but automatic
-layout is only a starting point: normalize spacing, fills, padding, arrow
-bindings, and hierarchy in the editor before saving the English and `.uk`
-scenes. The website still embeds the static SVG pair, so it remains fast and
-fully static. The current journey reference is regenerated from its two
-Excalidraw scenes by `npm run export:image-notes`; a different semantic shape
-should get its own exporter/layout instead of being forced into that journey
-template. Never hand-author Excalidraw scene JSON.
+Use this form only when Kyrylo explicitly wants an editable Excalidraw drawing.
+Create and export it through the plugin; never hand-author Excalidraw scene
+JSON. The default photo-note workflow remains the direct semantic SVG pair.
 
 ### Where files go
 
-- Put the two Excalidraw sources, diagram pair, and source photo beside the
-  page's other loose media in that section's `attachments/` folder.
+- Put the diagram pair and sanitized source photo beside the page's other loose
+  media in that section's `attachments/` folder.
 - Use lowercase slugged names: `<note-slug>-<topic>.svg`,
-  `<note-slug>-<topic>.uk.svg`, matching `.excalidraw` / `.uk.excalidraw`
-  sources, and `<note-slug>-<topic>-original.jpeg`.
+  `<note-slug>-<topic>.uk.svg`, and
+  `<note-slug>-<topic>-original.jpeg`.
 - Embed the pair in both language bodies with the exact same two lines. The
   `.uk.svg` sibling and bilingual caption handle the visible translation.
 - If Kyrylo has not named the destination page, prepare and report the assets

@@ -91,7 +91,7 @@ sibling and the site shows the right one automatically:
 
 If no `.uk` sibling exists, the English diagram shows in both languages (fine
 for language-neutral pictures). Working examples: `vault/Projects/attachments/publishing-pipeline.svg`
-(+`.uk.svg`) and `vault/Posts/rendering-pipeline.svg` (+`.uk.svg`).
+(+`.uk.svg`) and `vault/Posts/attachments/rendering-pipeline.svg` (+`.uk.svg`).
 
 ## Image notes (diagram + original notebook photo)
 
@@ -109,10 +109,10 @@ On the site, this becomes one transparent figure with a single-click
 embed and the directive remains hidden. An exported `.excalidraw` embed works
 in the first line too.
 
-The reconstruction workflow creates English and Ukrainian scenes in Excalidraw
-first, then checks in transparent, self-theming SVG exports for the website.
-Both `.excalidraw` sources stay beside the SVGs so the diagram remains editable;
-the scene JSON is produced by Excalidraw itself, never hand-written.
+The default reconstruction workflow adds one intake step to the normal semantic
+SVG recipe: extract the photo into a transcription map, then hand-author the
+English and Ukrainian self-theming SVGs with identical geometry. There is no
+required drawing-tool or Excalidraw-export step.
 
 The original photo is a public asset once attached, so remove EXIF/GPS/device
 metadata and resize it before it enters the vault. Full transcription, naming,
@@ -123,23 +123,21 @@ Image note, both English and Ukrainian drawings need light and dark SVG exports.
 
 ### Which diagram tool belongs here?
 
-- **Excalidraw is the required creation surface for photographed notes.** Codex
-  first interprets the photo and records its transcription map, then constructs
-  both language scenes in Excalidraw. The editor makes node bounds, bindings,
-  and future manual adjustment inspectable instead of hiding them in generated
-  SVG markup.
-- **The static SVG pair remains the website asset.** A deterministic exporter
-  may normalize the two scenes onto identical geometry and the site's live
-  light/dark tokens. Excalidraw's React/canvas application never ships to
-  readers.
+- **A semantic SVG is the default.** Codex extracts the source facts and
+  relationships, then writes the bilingual SVG pair directly using the same
+  pattern as `rendering-pipeline.svg`. This keeps geometry, theme rules,
+  typography, and accessibility explicit in the website asset.
+- **Excalidraw is an optional manual-editing bridge.** Use it when Kyrylo asks
+  for a drawing he wants to edit visually. In that case Excalidraw owns its
+  exported assets, and scene JSON is never synthesized by hand.
 - **Mermaid, D2, and Graphviz are good for regular generated graphs**, especially
   when the source is already structured text. For photographed personal notes,
   their automatic layout and extra build dependency buy less than direct SVG:
   the hard work is interpreting and grouping the information, not routing edges.
 
-This is a division of responsibilities: Excalidraw owns the editable diagram;
-the bilingual SVG pair owns predictable web rendering. Changing the semantic
-layout still starts in Excalidraw and both exports are regenerated afterward.
+For the default Image note, the source photo owns the evidence, the
+transcription map owns factual fidelity, and the bilingual SVG pair owns the
+clean reader-facing reconstruction.
 
 ## How it resolves (for maintainers)
 
