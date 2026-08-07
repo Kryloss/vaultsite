@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 545 240" role="img" aria-label="Потік даних Dispatch: застосунок пише через WorkspaceStore у локальний SwiftData, який синхронізується з Supabase; агент дістається Supabase через OAuth-портал з обмеженим дозволом.">
+  <style>
+    .box { fill: none; stroke: #33373d; stroke-width: 1.5; }
+    .lbl { fill: #33373d; font-size: 14px; font-weight: 600; }
+    .sub { fill: #6b7280; font-size: 10.5px; }
+    .arw { stroke: #9aa0aa; stroke-width: 1.5; fill: none; }
+    .ah  { fill: #9aa0aa; }
+    @media (prefers-color-scheme: dark) {
+      .box { stroke: #c8ccd2; }
+      .lbl { fill: #e6e8eb; }
+      .sub { fill: #9aa0aa; }
+      .arw { stroke: #6b7280; }
+      .ah  { fill: #6b7280; }
+    }
+  </style>
+  <defs>
+    <marker id="ahead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path class="ah" d="M0 0 L6 3 L0 6 Z" />
+    </marker>
+    <marker id="ahead-rev" markerWidth="8" markerHeight="8" refX="0" refY="3" orient="auto">
+      <path class="ah" d="M6 0 L0 3 L6 6 Z" />
+    </marker>
+  </defs>
+
+  <!-- верхня смуга: мої власні записи -->
+  <rect class="box" x="10"  y="20" width="158" height="62" rx="12" />
+  <rect class="box" x="195" y="20" width="158" height="62" rx="12" />
+  <rect class="box" x="380" y="20" width="155" height="62" rx="12" />
+
+  <text class="lbl" x="89"    y="47" text-anchor="middle">Застосунок</text>
+  <text class="sub" x="89"    y="65" text-anchor="middle">Mac / iPhone, спільний UI</text>
+  <text class="lbl" x="274"   y="47" text-anchor="middle">WorkspaceStore</text>
+  <text class="sub" x="274"   y="65" text-anchor="middle">єдиний шлях запису</text>
+  <text class="lbl" x="457.5" y="47" text-anchor="middle">SwiftData</text>
+  <text class="sub" x="457.5" y="65" text-anchor="middle">локально, працює офлайн</text>
+
+  <line class="arw" x1="170" y1="51" x2="191" y2="51" marker-end="url(#ahead)" />
+  <line class="arw" x1="355" y1="51" x2="376" y2="51" marker-end="url(#ahead)" />
+
+  <!-- нижня смуга: агенти і хмара -->
+  <rect class="box" x="10"  y="158" width="158" height="62" rx="12" />
+  <rect class="box" x="195" y="158" width="158" height="62" rx="12" />
+  <rect class="box" x="380" y="158" width="155" height="62" rx="12" />
+
+  <text class="lbl" x="89"    y="185" text-anchor="middle">Агент (MCP)</text>
+  <text class="sub" x="89"    y="203" text-anchor="middle">обмежений доступ, лог</text>
+  <text class="lbl" x="274"   y="185" text-anchor="middle">OAuth-портал</text>
+  <text class="sub" x="274"   y="203" text-anchor="middle">Vercel</text>
+  <text class="lbl" x="457.5" y="185" text-anchor="middle">Supabase</text>
+  <text class="sub" x="457.5" y="203" text-anchor="middle">RLS на кожному рядку</text>
+
+  <line class="arw" x1="170" y1="189" x2="191" y2="189" marker-end="url(#ahead)" />
+  <line class="arw" x1="355" y1="189" x2="376" y2="189" marker-end="url(#ahead)" />
+
+  <!-- локальне сховище і хмара, в обидва боки -->
+  <line class="arw" x1="457.5" y1="88" x2="457.5" y2="152" marker-end="url(#ahead)" marker-start="url(#ahead-rev)" />
+  <text class="sub" x="466" y="124">синхр.</text>
+</svg>
