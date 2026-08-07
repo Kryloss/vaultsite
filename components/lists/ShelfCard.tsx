@@ -88,11 +88,11 @@ export default function ShelfCard({
           </span>
         )}
       </div>
-      <span className="mt-2.5 block font-medium leading-snug text-[var(--text)]">
+      <span className="mt-2.5 block truncate font-medium leading-snug text-[var(--text)]">
         <T en={item.title} uk={item.titleUk} />
       </span>
       {item.author && (
-        <span className="mt-0.5 block text-sm leading-snug text-[var(--text-secondary)]">
+        <span className="mt-0.5 block truncate text-sm leading-snug text-[var(--text-secondary)]">
           {item.author}
         </span>
       )}

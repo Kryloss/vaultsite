@@ -114,11 +114,11 @@ export default function PeopleCards({
                   </div>
                 )}
               </div>
-              <span className="mt-2.5 block font-medium leading-snug text-[var(--text)]">
+              <span className="mt-2.5 block truncate font-medium leading-snug text-[var(--text)]">
                 <T en={row.title} uk={row.titleUk} />
               </span>
               {row.description && (
-                <span className="mt-0.5 line-clamp-2 block text-sm leading-snug text-[var(--text-secondary)]">
+                <span className="mt-0.5 block truncate text-sm leading-snug text-[var(--text-secondary)]">
                   {row.description}
                 </span>
               )}

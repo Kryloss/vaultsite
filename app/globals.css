@@ -2079,6 +2079,7 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   z-index: 30;
   display: flex;
   align-items: center;
+  gap: 0.5rem;
   max-width: calc(100vw - 1.5rem);
   padding: 0.4375rem 0.875rem;
   border-radius: var(--r-full);
@@ -2092,10 +2093,159 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   background: color-mix(in srgb, var(--bg-hover) 88%, transparent);
 }
 
+/* Sized to match the breadcrumb icon opposite it (Chrome.tsx's `h-[18px]
+   w-[18px]`) — an SVG with no width/height falls back to the browser's
+   300×150 replaced-element default, which is what an unset `<MenuIcon>`
+   here rendered at before. `flex-shrink: 0` keeps it from being squeezed
+   by the label next to it. */
+.toc-bar-icon {
+  flex-shrink: 0;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+/* Belt and suspenders alongside the JS character cap in components/Toc.tsx
+   — the cut string can still overflow on a narrow phone in the rare
+   language/font combination where it doesn't, so this keeps the pill a
+   single line regardless. */
+.toc-bar-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* The rail owns wide screens; the pill owns everything below it. */
 @media (min-width: 1280px) {
   .toc-bar {
     display: none;
+  }
+}
+
+/* Invisible on purpose — it exists only to catch a click outside, same as
+   the series popover's (see .series-backdrop). Dimming the page would make
+   an outline read as a modal, which it isn't. */
+.toc-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  visibility: hidden;
+  transition: visibility 0s linear var(--dur);
+}
+
+.toc-sheet-backdrop[data-open="true"] {
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+/* Grows upward out of the pill — the same translucent blurred material and
+   timing as .series-sheet, but rising rather than falling: the pill sits at
+   the very bottom of the screen (640–1279px; below that it moves to the
+   top-right, see the phone override at the end of this file — DECISIONS
+   #51), so there's no room below it to grow into. This is the size for
+   that range; the phone override below narrows and shortens it. */
+.toc-sheet {
+  position: fixed;
+  left: 0.75rem;
+  bottom: 3.625rem; /* pill: 0.75rem offset + ~2.375rem tall + 0.5rem gap */
+  z-index: 45;
+  transform-origin: 0 100%;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px) scale(0.97);
+  transition:
+    opacity var(--dur) var(--ease),
+    transform var(--dur) var(--ease),
+    visibility 0s linear var(--dur);
+  width: min(18rem, calc(100vw - 1.5rem));
+  max-height: 70vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--chrome-bg);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.08);
+  font-size: 0.875rem;
+}
+
+.toc-sheet[data-open="true"] {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition-delay: 0s;
+}
+
+@media (prefers-color-scheme: dark) {
+  .toc-sheet {
+    box-shadow: 0 6px 20px rgb(0 0 0 / 0.4);
+  }
+}
+
+/* The note's title, as the sheet's own first row — separated from the
+   headings below it with a rule, since the sheet has no rail marker to do
+   that job by itself. */
+.toc-sheet-top {
+  display: block;
+  margin-bottom: 0.25rem;
+  padding-bottom: 0.375rem;
+  border-bottom: 1px solid var(--border);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toc-sheet,
+  .toc-sheet-backdrop {
+    transition-duration: 0.01ms;
+  }
+}
+
+/* The phone's top corners (DECISIONS #51). Written LAST and after every
+   base `.toc-bar`/`.toc-sheet` rule above on purpose: a media query adds no
+   specificity, so the override and the base declaration are exactly equal
+   and whichever comes later in the file wins (DECISIONS #52) — written
+   above the base rules the first time, it looked like the query simply
+   wasn't matching. */
+@media (max-width: 639px) {
+  /* Icon-only now, and moved to match the breadcrumb bar opposite it —
+     sized the same way, a 2.5rem square around an 18px glyph. The bottom
+     of the screen is left empty for the reading-position pill and a
+     thumb. */
+  .toc-bar {
+    left: auto;
+    right: 0.75rem;
+    top: 0.75rem;
+    bottom: auto;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+  }
+
+  .toc-bar-label {
+    display: none;
+  }
+
+  /* Hangs directly under the icon now that the icon lives at the top —
+     anchor and transform-origin both invert with it, or the panel would
+     read as arriving from the wrong corner. Narrower, shorter and tighter
+     than the 640–1279px version above: it's an index, so it should cover a
+     corner of the article rather than the article. */
+  .toc-sheet {
+    left: auto;
+    right: 0.75rem;
+    top: 3.625rem; /* icon: 0.75rem offset + 2.5rem tall + 0.5rem gap */
+    bottom: auto;
+    transform-origin: 100% 0;
+    transform: translateY(-6px) scale(0.97);
+    width: 13.5rem;
+    max-height: 55vh;
+  }
+
+  /* One line per heading — an index that wraps stops reading as an index. */
+  .toc-sheet .toc-link {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
 
@@ -2337,6 +2487,49 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
 /* No room in the margin on small screens, and no hover on touch either. */
 @media (max-width: 639px), (hover: none) {
   .copy-md {
+    display: none;
+  }
+
+  /* With the button gone, the title itself is the tap target — see
+     CopyMarkdownTitle. `--x`/`--y` are written by that component from a
+     measured Range, positioning this against the end of the title's FIRST
+     line — never the block's corner (which for anything short of the full
+     measure floated well past the title's actual last word) and never
+     wherever the text happens to end on a later, tightly-leaded line
+     (which had no headroom to lift into without spilling onto the line
+     above). `translate` centers the icon on that point and lifts it
+     clear above — hovering over the last character rather than sitting on
+     its ink, which an on-glyph placement let the checkmark blend into
+     (both are `var(--text)`, so any overlap read as one smudged stroke
+     rather than two shapes).
+
+     Always mounted, opacity-only, so tapping never touches layout. A
+     plain stroked checkmark, not a filled badge: the same icon the
+     desktop button swaps to, so a phone confirmation doesn't call more
+     attention to itself than the mouse one it stands in for. */
+  .copy-md-title-icon {
+    position: absolute;
+    left: var(--x, 0);
+    top: var(--y, 0);
+    transform: translate(-50%, calc(-35% - 2px));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    color: var(--text);
+    opacity: 0;
+    transition: opacity var(--dur-fast) var(--ease);
+  }
+
+  .copy-md-title-icon[data-copied] {
+    opacity: 1;
+  }
+}
+
+/* No reserved slot needed once there's room for the real button. */
+@media (min-width: 640px) and (hover: hover) {
+  .copy-md-title-icon {
     display: none;
   }
 }

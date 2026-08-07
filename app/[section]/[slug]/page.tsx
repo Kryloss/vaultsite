@@ -31,7 +31,7 @@ import Toc from "@/components/Toc";
 import EntryFooter from "@/components/EntryFooter";
 import Series from "@/components/Series";
 import LinkPreview from "@/components/LinkPreview";
-import CopyMarkdown from "@/components/CopyMarkdown";
+import CopyMarkdown, { CopyMarkdownTitle } from "@/components/CopyMarkdown";
 import ReadingProgress from "@/components/ReadingProgress";
 import ReadingPosition from "@/components/ReadingPosition";
 import JsonLd from "@/components/JsonLd";
@@ -217,7 +217,9 @@ export default async function EntryPage({ params }: Props) {
               left of the title and stays hidden until the heading is
               hovered/focused — same reveal-on-hover treatment as the ToC pill. */}
           <CopyMarkdown en={entry.content} uk={entry.contentUk} />
-          <T en={entry.title} uk={entry.titleUk} />
+          <CopyMarkdownTitle en={entry.content} uk={entry.contentUk}>
+            <T en={entry.title} uk={entry.titleUk} />
+          </CopyMarkdownTitle>
           {typeof entry.meta.rating === "number" && (
             <Stars
               rating={entry.meta.rating}

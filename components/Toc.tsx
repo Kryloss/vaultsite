@@ -24,6 +24,24 @@ import type { Heading } from "@/lib/toc";
  * Jumping to a heading pins the highlight to it (see `held` below).
  */
 
+/**
+ * Longest label the phone pill shows before truncating. `.toc-bar` has no
+ * fixed width to speak of — just a `max-width` cap — so an untruncated
+ * heading or title wrapped inside it across two or three lines instead of
+ * eliding; this cuts the string itself rather than leaning on CSS
+ * `text-overflow`, so the pill stays the one-line chip it was built as
+ * regardless of font metrics. Same word-boundary convention as the excerpt
+ * cut in `lib/previews.ts` — cutting mid-word reads as broken, not trimmed.
+ */
+const LABEL_CHARS = 32;
+
+function truncateLabel(text: string): string {
+  if (text.length <= LABEL_CHARS) return text;
+  const cut = text.slice(0, LABEL_CHARS);
+  const lastSpace = cut.lastIndexOf(" ");
+  return `${(lastSpace > 12 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`;
+}
+
 /** Keys that mean "the reader is moving the page themselves". */
 const SCROLL_KEYS = new Set([
   "ArrowUp",
@@ -309,10 +327,12 @@ export default function Toc({
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-label={lang === "uk" ? "Зміст сторінки" : "Table of contents"}
+        /* Full text on hover/long-press — the label itself is cut short. */
+        title={hereLabel}
         className="toc-bar"
       >
         <MenuIcon className="toc-bar-icon" />
-        <span className="toc-bar-label">{hereLabel}</span>
+        <span className="toc-bar-label">{truncateLabel(hereLabel)}</span>
       </button>
 
       {/* Always rendered, shown by `data-open`, rather than mounted on demand:
