@@ -1103,3 +1103,13 @@ different card treatment; text keeps explicit padding; and arrows appear only
 for relationships that are genuinely directional. The source photo remains the
 evidence, the transcription map owns factual fidelity, and the SVG pair owns
 the cleaned reader-facing diagram.
+
+## 73. Two agent files, one reference (2026-08-06)
+
+**Decision:** Claude Code and Codex each keep their own auto-loaded entry file — `CLAUDE.md` and `AGENTS.md` — but only `CLAUDE.md` owns feature detail. `AGENTS.md` stays a thin map that defers to it, `docs/` stays shared and authoritative for both, and any change to a convention, command, or invariant must update both files in the same change.
+
+**Why:** Each tool only auto-loads its own filename, so a single file can't serve both without one agent starting cold. Two hand-maintained copies of the same prose drift, and this pair already had: `AGENTS.md` went untouched through three later `CLAUDE.md` edits, leaving the two describing different `npm test` wiring (`lib/*.test.ts` via `test-resolve.mjs` vs. the actual `lib/*.test.ts scripts/*.test.mjs` via `test-hooks.mjs`), and `AGENTS.md` never learned about `npm run validate:image-notes` gating dev and build. Splitting by role rather than duplicating shrinks the surface that can drift to the map itself; a symlink was rejected because the two files genuinely want different lengths and framing.
+
+**Also recorded there:** one agent at a time in this working tree. Obsidian Git auto-commits everything unstaged (`autoCommitOnlyStaged: false`) every 10 minutes and pushes, and Vercel deploys it — so two agents editing concurrently publish each other's half-finished work on a timer. Separate `git worktree`s if genuinely parallel work is wanted.
+
+**Revisit when:** a third agent joins (then the shared rules probably want their own file both entry points include), or either tool learns to read a shared filename.

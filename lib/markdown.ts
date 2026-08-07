@@ -242,8 +242,27 @@ function excalSideToImg(
   return { light: primary, dark: s.light ? s.dark : undefined };
 }
 
-/** Largest SVG we're willing to paste into the HTML (keeps pages lean). */
-const MAX_INLINE_SVG = 64 * 1024;
+/**
+ * Largest SVG we're willing to paste into the HTML (keeps pages lean).
+ *
+ * Exported because going over it is a SILENT downgrade: the diagram falls back
+ * to `<img>`, which freezes `prefers-color-scheme` at first decode — the exact
+ * bug inlining exists to fix. `scripts/validate-image-notes.mjs` keeps its own
+ * copy so it can check a diagram without importing this whole pipeline, and a
+ * test pins the two together.
+ */
+export const MAX_INLINE_SVG = 64 * 1024;
+
+/**
+ * How wide a full-column content image is actually painted: the prose measure
+ * (`max-w-2xl` = 42rem = 672px) until the viewport is narrower than it.
+ *
+ * Shared so `rehypeImageSize` and the image note can't disagree — the image
+ * note stamps intrinsic `width`/`height` to reserve its stage, which reads to
+ * `rehypeImageSize` like a deliberately sized embed and would otherwise get it
+ * a `sizes` equal to the photo's full pixel width.
+ */
+const PROSE_IMAGE_SIZES = "(max-width: 42rem) 100vw, 672px";
 
 /** "/vault-assets/Posts/x.svg" → the file's real path inside the vault. */
 function vaultPathFromUrl(url: string): string | undefined {
@@ -474,6 +493,16 @@ function imageNoteHtml(
   const originalSize = originalDims
     ? ` width="${originalDims.w}" height="${originalDims.h}"`
     : "";
+  // Claim the responsive variants here rather than leaving it to
+  // rehypeImageSize: the width/height above are the photo's INTRINSIC size (they
+  // reserve the stage), not the box it's painted in, and that step reads any
+  // width as the painted box. It would hand the browser `sizes="1218px"` for an
+  // image the prose column never paints wider than 672px, so switching to the
+  // original always fetched the largest source.
+  const originalSrcSet = srcSetFor(originalSrc);
+  const originalResponsive = originalSrcSet
+    ? ` srcset="${originalSrcSet}" sizes="${PROSE_IMAGE_SIZES}"`
+    : "";
 
   return (
     `<figure class="image-note">` +
@@ -491,7 +520,7 @@ function imageNoteHtml(
       alt,
       "image-note-drawing"
     )}</div>` +
-    `<div class="image-note-original"><img src="${originalSrc}"${originalSize} alt="${escapeHtml(
+    `<div class="image-note-original"><img src="${originalSrc}"${originalSize}${originalResponsive} alt="${escapeHtml(
       originalAlt
     )}" loading="lazy" /></div>` +
     `</div>` +
@@ -1086,9 +1115,7 @@ function rehypeImageSize() {
             // p.width may be a string here: the sized embeds are built as raw
             // HTML and come back through rehype-raw.
             const box = sized ? Number(p.width) : NaN;
-            p.sizes = Number.isFinite(box)
-              ? `${box}px`
-              : "(max-width: 42rem) 100vw, 672px";
+            p.sizes = Number.isFinite(box) ? `${box}px` : PROSE_IMAGE_SIZES;
           }
           continue;
         }

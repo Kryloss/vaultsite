@@ -2,10 +2,30 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { renderMarkdown } from "./markdown";
 
-test("image note pairs a bilingual diagram with its source photo", async () => {
+/*
+ * The image-note tests below render against REAL vault assets, because
+ * `renderMarkdown` resolves embeds through the vault-wide asset index and reads
+ * dimensions from the build's image manifest — there is no tmpdir to point it at.
+ *
+ * The pair used here is deliberately mismatched: `rendering-pipeline.svg` is
+ * 760x540 and `me.jpeg` is square, so it is NOT a shape the validator would
+ * accept (`compareGeometry` allows 2%). No pair in the vault would be — every
+ * diagram is landscape, every photo is square or portrait — and inventing one
+ * would mean adding a file to the owner's vault, which publishes.
+ *
+ * That split is the point, and it is load-bearing rather than a compromise:
+ *   - what a VALID image note is  → scripts/validate-image-notes.test.mjs,
+ *     which builds matched fixtures in a tmpdir and owns every geometry,
+ *     privacy, safety and bilingual rule.
+ *   - what the renderer EMITS for one → here.
+ * The renderer deliberately does not check geometry, so a mismatched pair is a
+ * legitimate input to it. Do not "fix" this by relaxing the validator.
+ */
+
+test("renderer pairs a bilingual diagram with its source photo", async () => {
   const html = await renderMarkdown(
-    `![[image-note-life-timeline.svg|My path so far :: Мій шлях дотепер]]
-<!-- image-note: image-note-life-timeline.jpeg -->`,
+    `![[rendering-pipeline.svg|Rendering pipeline :: Конвеєр рендерингу]]
+<!-- image-note: me.jpeg -->`,
     "Posts/attachments",
     "posts",
     { idPrefix: "en-" }
@@ -14,30 +34,48 @@ test("image note pairs a bilingual diagram with its source photo", async () => {
   assert.match(html, /<figure class="image-note">/);
   assert.match(html, /class="image-note-radio image-note-radio-diagram"/);
   assert.match(html, /class="image-note-radio image-note-radio-original"/);
-  assert.match(html, /name="en-image-note-1-image-note-life-timeline-view"/);
-  assert.match(html, /<svg id="d-image-note-life-timeline" class="diagram"/);
-  assert.match(html, /<svg id="d-image-note-life-timeline-uk" class="diagram"/);
-  assert.match(
-    html,
-    /src="\/vault-assets\/Posts\/attachments\/image-note-life-timeline\.jpeg"/
-  );
-  assert.match(html, /--image-note-aspect: 1600 \/ 2133/);
-  assert.match(html, /width="1600" height="2133"/);
-  assert.match(html, /My path so far/);
-  assert.match(html, /Мій шлях дотепер/);
+  assert.match(html, /name="en-image-note-1-rendering-pipeline-view"/);
+  assert.match(html, /<svg id="d-rendering-pipeline" class="diagram"/);
+  assert.match(html, /<svg id="d-rendering-pipeline-uk" class="diagram"/);
+  assert.match(html, /src="\/vault-assets\/Home\/me\.jpeg"/);
+  // The stage is reserved from the PHOTO's dimensions, never the diagram's, so
+  // that flipping the switch cannot reflow the article. The 760x540 diagram
+  // above proves the diagram's own viewBox gets no say here.
+  assert.match(html, /--image-note-aspect: 1218 \/ 1218/);
+  assert.match(html, /width="1218" height="1218"/);
+  assert.doesNotMatch(html, /--image-note-aspect: 760 \/ 540/);
+  assert.match(html, /Rendering pipeline/);
+  assert.match(html, /Конвеєр рендерингу/);
   assert.doesNotMatch(html, /<!--\s*image-note:/);
   assert.equal(html.match(/<figure\b/g)?.length, 1);
   assert.equal(html.match(/<\/figure>/g)?.length, 1);
 });
 
+test("the source photo is served at the size it is actually painted", async () => {
+  const html = await renderMarkdown(
+    `![[rendering-pipeline.svg|Rendering pipeline :: Конвеєр рендерингу]]
+<!-- image-note: me.jpeg -->`,
+    "Posts/attachments",
+    "posts",
+    { idPrefix: "en-" }
+  );
+
+  // The intrinsic width/height reserve the stage; they are NOT the painted box.
+  // Reading them as one handed the browser sizes="1218px" and it fetched the
+  // largest source every time the reader switched to the original.
+  assert.match(html, /srcset="[^"]*me-672w\.webp 672w/);
+  assert.match(html, /sizes="\(max-width: 42rem\) 100vw, 672px"/);
+  assert.doesNotMatch(html, /sizes="1218px"/);
+});
+
 test("image note controls are namespaced per rendered language body", async () => {
-  const source = `![[image-note-life-timeline.svg]]
-<!-- image-note: image-note-life-timeline.jpeg -->`;
+  const source = `![[rendering-pipeline.svg]]
+<!-- image-note: me.jpeg -->`;
   const [en, uk] = await Promise.all([
     renderMarkdown(source, "Posts/attachments", "posts", { idPrefix: "en-" }),
     renderMarkdown(source, "Posts/attachments", "posts", { idPrefix: "uk-" }),
   ]);
 
-  assert.match(en, /id="en-image-note-1-image-note-life-timeline-diagram"/);
-  assert.match(uk, /id="uk-image-note-1-image-note-life-timeline-diagram"/);
+  assert.match(en, /id="en-image-note-1-rendering-pipeline-diagram"/);
+  assert.match(uk, /id="uk-image-note-1-rendering-pipeline-diagram"/);
 });

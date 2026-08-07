@@ -15,6 +15,18 @@ const IMAGE_NOTE_RE =
 const MAX_ORIGINAL_EDGE = 2400;
 const ASPECT_TOLERANCE = 0.02;
 
+/**
+ * Mirror of `MAX_INLINE_SVG` in `lib/markdown.ts`, kept here so this check
+ * doesn't have to import the whole Markdown pipeline. `validate-image-notes.test.mjs`
+ * pins the two together, so they cannot drift apart silently.
+ *
+ * Going over it is the failure this catches: an oversized self-theming SVG is
+ * quietly left as an `<img>`, and an `<img>` freezes `prefers-color-scheme` at
+ * first decode — so the diagram sticks in whichever theme it was first painted
+ * in. Nothing else in the build says a word about it.
+ */
+export const MAX_INLINE_SVG = 64 * 1024;
+
 function walk(dir, accept, out = []) {
   if (!fs.existsSync(dir)) return out;
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -109,6 +121,9 @@ function svgFacts(file) {
     markup,
     root,
     viewBox,
+    // Bytes on disk, because that is what lib/markdown.ts measures before it
+    // decides whether to inline.
+    bytes: fs.statSync(file).size,
     role: attribute(root, "role"),
     ariaLabel: attribute(root, "aria-label"),
     hasDarkMode: /@media\s*\(\s*prefers-color-scheme\s*:\s*dark\s*\)/i.test(markup),
@@ -156,6 +171,11 @@ function validateSvg(facts, options, errors, vaultDir) {
     }
     if (!facts.hasDarkMode) {
       errors.push(`${name}: self-theming SVG requires a prefers-color-scheme: dark style`);
+    }
+    if (facts.bytes > MAX_INLINE_SVG) {
+      errors.push(
+        `${name}: ${(facts.bytes / 1024).toFixed(1)}KB exceeds the ${MAX_INLINE_SVG / 1024}KB inline limit, so it would render as an <img> and freeze in one theme`
+      );
     }
   }
 }

@@ -11,8 +11,12 @@ next-env.d.ts
 public/vault-assets/
 
 # obsidian workspace state (machine-specific)
-.obsidian/workspace.json
-.obsidian/workspace-mobile.json
+# `**/` matters: a pattern with a slash in the MIDDLE is anchored to this file's
+# directory, so the un-prefixed form only ever matched the vault at the repo
+# root and silently tracked vault/.obsidian/workspace.json — which rewrites
+# itself as panes are opened, so it churned in nearly every auto-commit.
+**/.obsidian/workspace.json
+**/.obsidian/workspace-mobile.json
 .trash/
 
 # env & platform

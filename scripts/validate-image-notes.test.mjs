@@ -4,7 +4,8 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import sharp from "sharp";
-import { validateImageNotes } from "./validate-image-notes.mjs";
+import { validateImageNotes, MAX_INLINE_SVG } from "./validate-image-notes.mjs";
+import { MAX_INLINE_SVG as PIPELINE_MAX_INLINE_SVG } from "@/lib/markdown";
 
 const DARK_STYLE = `
   <style>
@@ -70,6 +71,26 @@ test("accepts a complete, sanitized bilingual SVG image note", async (t) => {
   const result = await validateImageNotes({ vaultDir: f.dir });
   assert.equal(result.count, 1);
   assert.deepEqual(result.errors, []);
+});
+
+test("the inline limit matches the one the Markdown pipeline enforces", () => {
+  // Two copies of the number exist so the validator doesn't have to import the
+  // whole pipeline. This is what stops them drifting apart.
+  assert.equal(MAX_INLINE_SVG, PIPELINE_MAX_INLINE_SVG);
+});
+
+test("rejects a self-theming SVG too large to be inlined", async (t) => {
+  const f = await validFixture();
+  t.after(() => fs.rmSync(f.dir, { recursive: true, force: true }));
+  // Padded past the ceiling with a comment, so it stays a valid, safe SVG and
+  // the only thing wrong with it is its size.
+  const padding = `<!-- ${"x".repeat(MAX_INLINE_SVG)} -->`;
+  f.write("timeline.svg", svg().replace("</svg>", `${padding}</svg>`));
+
+  const result = await validateImageNotes({ vaultDir: f.dir });
+  assert.equal(result.errors.length, 1);
+  assert.match(result.errors[0], /exceeds the 64KB inline limit/);
+  assert.match(result.errors[0], /freeze in one theme/);
 });
 
 test("reports missing translations and original assets", async (t) => {

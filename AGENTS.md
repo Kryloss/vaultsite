@@ -22,6 +22,29 @@ for a different project. Search it before modifying an existing feature, but use
 this smaller file as the always-loaded map. Code and the targeted decision record
 remain the source of truth if prose has drifted.
 
+## Two agents work on this repo
+
+Claude Code and Codex are both used here, on the same checkout. Each auto-loads
+its own file: Codex reads this one, Claude Code reads `CLAUDE.md`, and `docs/` is
+shared and authoritative for both.
+
+- **`CLAUDE.md` owns feature detail; this file owns the map.** Do not restate
+  feature detail here — point at `CLAUDE.md` instead. Duplicated prose is what
+  drifts.
+- **Change a convention, command, or invariant → update BOTH agent files in the
+  same change**, plus `docs/DECISIONS.md` when the choice is non-obvious. The two
+  files have already drifted apart once (each described a different `npm test`
+  wiring), which is exactly the failure this rule prevents.
+- **One agent at a time in this working tree.** Obsidian Git auto-commits
+  *everything* (`autoCommitOnlyStaged: false`) every 10 minutes and pushes, and
+  Vercel deploys the result — so a half-finished edit publishes itself on a
+  timer. Finish and verify a change, or work in a separate `git worktree`. Do not
+  run Codex and Claude against this checkout at the same time.
+- **Check `git status --short` before editing.** Uncommitted changes you do not
+  recognise may be the other agent's or the owner's in-flight work: leave them
+  alone and ask. Never `git restore`, `git checkout --`, or `git stash` a file you
+  did not change yourself.
+
 ## What this project is
 
 Kyrylo's personal portfolio, published directly from an Obsidian vault. The
@@ -179,8 +202,14 @@ Important conventions:
 - Image notes pair a bilingual SVG/Excalidraw embed with an original photo via
   `<!-- image-note: file -->`; preserve the static, diagram-first radio switch
   and its shared dimensioned stage, and strip EXIF/GPS metadata from source
-  photos before they enter the vault. Codex-authored semantic SVG is the default;
-  Excalidraw is an optional manual-editing bridge.
+  photos before they enter the vault. Reconstruction is source-faithful: extract
+  a transcription map first, then hand-author identical-geometry EN/UK SVGs;
+  unsupported explanatory copy is forbidden. Agent-authored semantic SVG is the
+  default; Excalidraw is an optional manual-editing bridge, never hand-authored
+  scene JSON. A self-theming diagram must also stay under the 64KB inline
+  ceiling (`MAX_INLINE_SVG`): past it the SVG degrades to an `<img>` and freezes
+  in one theme. `scripts/validate-image-notes.mjs` enforces all of this at build
+  time — see `CLAUDE.md` and `docs/DECISIONS.md` #69, #71, #72.
 - Content images get intrinsic dimensions, blur data, responsive WebP variants,
   `srcset`, and `sizes` at build time. Preserve that pipeline.
 - The drawer and other dialogs stay mounted so close animations work; closed
@@ -198,11 +227,16 @@ npm test
 npm run build
 ```
 
-- `npm test` uses Node's test runner over `lib/*.test.ts` through
-  `scripts/test-hooks.mjs`.
-- `npm run build` first syncs vault assets, then statically generates every
-  route. It is required because it catches broken content, imports, and static
-  params that unit tests cannot.
+- `npm test` uses Node's test runner over `lib/*.test.ts` **and
+  `scripts/*.test.mjs`**, through `--import ./scripts/test-hooks.mjs` (which
+  registers `scripts/test-resolve.mjs` for the `@/` alias and extensionless
+  imports).
+- `npm run build` first validates image notes and syncs vault assets, then
+  statically generates every route. It is required because it catches broken
+  content, imports, and static params that unit tests cannot.
+- `npm run validate:image-notes` gates both `predev` and `prebuild`, so a broken
+  image note fails `dev` and `build` before Next.js starts. Run it directly when
+  iterating on an image note.
 - For UI changes, also inspect the affected view in both languages, both system
   color schemes, relevant viewport sizes, keyboard/touch states, and reduced
   motion. If the available environment cannot perform a visual check, say so.
