@@ -213,6 +213,10 @@ export default async function EntryPage({ params }: Props) {
 
       <header>
         <h1 className="page-title text-2xl font-semibold tracking-tight text-[var(--text)]">
+          {/* Raw vault source, in whichever language is showing. Sits to the
+              left of the title and stays hidden until the heading is
+              hovered/focused — same reveal-on-hover treatment as the ToC pill. */}
+          <CopyMarkdown en={entry.content} uk={entry.contentUk} />
           <T en={entry.title} uk={entry.titleUk} />
           {typeof entry.meta.rating === "number" && (
             <Stars
@@ -226,8 +230,6 @@ export default async function EntryPage({ params }: Props) {
               <T {...ui.draft} />
             </span>
           )}
-          {/* Raw vault source, in whichever language is showing. */}
-          <CopyMarkdown en={entry.content} uk={entry.contentUk} />
         </h1>
         {/* Date · reading stats · maturity · series · #tags — built above. */}
         {metaLine}
