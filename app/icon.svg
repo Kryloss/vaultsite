@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Favicon. Next.js picks this up from the `app/icon.svg` file convention and
+  emits the <link rel="icon"> itself — nothing to wire up in layout.tsx.
+
+  The source mark was drawn in a 768x640 box with the artwork sitting
+  off-centre inside it. A favicon is rendered into a square, so the viewBox
+  here is re-cut as a square centred on the ink itself (bounds x 40..688,
+  y 16..608) with even breathing room on all four sides. Same paths,
+  untouched; only the window onto them changed.
+
+  Transparent background on purpose: SVG favicons are composited against the
+  browser's own tab chrome, which is light or dark depending on the reader's
+  theme, and teal holds contrast against both.
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="-20 -72 768 768"
+     role="img"
+     aria-labelledby="title desc">
+  <title id="title">Kryloss double-chevron logo mark</title>
+  <desc id="desc">Two geometric teal chevrons forming a stylized K and L mark.</desc>
+  <g fill="#10B981">
+    <path d="M40 320 360 16h192L224 320l296 288H360Z"/>
+    <path d="M336 320 512 176h176L520 320l168 160H512Z"/>
+  </g>
+</svg>
