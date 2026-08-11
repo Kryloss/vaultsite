@@ -111,6 +111,7 @@ export const ui = {
   shortcutSheet: { en: "Keyboard shortcuts", uk: "Клавіатурні скорочення" },
   shortcutHome: { en: "Home", uk: "Головна" },
   shortcutSearch: { en: "Search", uk: "Пошук" },
+  shortcutMenu: { en: "Menu", uk: "Меню" },
   shortcutListDown: { en: "Down the list", uk: "Вниз списком" },
   shortcutListUp: { en: "Up the list", uk: "Вгору списком" },
 

@@ -214,6 +214,17 @@ Important conventions:
   `srcset`, and `sizes` at build time. Preserve that pipeline.
 - The drawer and other dialogs stay mounted so close animations work; closed
   content uses `inert`, and expensive contents may be gated until first open.
+  The drawer opens two KINDS of way — deliberately, by the panel icon or the
+  `m` key (modal: backdrop, focus trapped), or by the pointer reaching the
+  left edge (a peek: no backdrop, focus untouched, closes when the pointer
+  leaves). Keep the two distinguishable; `CLAUDE.md` and `docs/DECISIONS.md`
+  #74, #75 have the detail.
+- Scroll maths (the reading bar, the contents scroll-spy) lives in `lib/` as
+  pure functions with `npm test` coverage, not inline in the component — see
+  `lib/reading-progress.ts`, `lib/toc-spy.ts`, `docs/DECISIONS.md` #76.
+- Keyboard shortcuts match through `shortcutKey()` (`lib/shortcut-key.ts`),
+  never `e.key` directly: the site is bilingual and `e.key` is Cyrillic under a
+  Ukrainian layout. `docs/DECISIONS.md` #77.
 - Motion must answer interaction and disappear under reduced motion/print.
   Preserve the established `.press`, arrow-throw, stagger, and marker patterns.
 

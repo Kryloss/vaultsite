@@ -8,6 +8,7 @@ import {
   useEffect,
   useRef,
   useState,
+  type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
 import {
@@ -26,6 +27,7 @@ import ResistanceDay from "@/components/ResistanceDay";
 import T from "@/components/T";
 import { useLang } from "@/components/useLang";
 import { ui } from "@/lib/ui-strings";
+import { shortcutKey } from "@/lib/shortcut-key";
 import { homeName } from "@/lib/site-config";
 
 export interface NavItem {
@@ -56,7 +58,23 @@ export default function Chrome({
   resistanceDay: number;
   children: ReactNode;
 }) {
-  const [open, setOpen] = useState(false);
+  /**
+   * WHAT KIND of open, not just whether it's open.
+   *
+   * A deliberate open — the panel icon, or the `m` key — is a decision: the
+   * panel is modal, takes the keyboard, dims the page, and stays until it's
+   * dismissed. Brushing the left edge is a glance: the panel slides in under
+   * the pointer and leaves again when the pointer does, without a backdrop
+   * and without moving focus — a peek that stole the keyboard would punish
+   * you for aiming badly. One state answers both questions, so the two can
+   * never disagree about whether it's open.
+   *
+   * Named for the kind rather than the input, because more than one input
+   * arrives at each: a click and a keypress both mean "modal".
+   */
+  const [openBy, setOpenBy] = useState<"modal" | "peek" | null>(null);
+  const open = openBy !== null;
+  const modal = openBy === "modal";
   const [searchOpen, setSearchOpen] = useState(false);
   const drawerRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -73,6 +91,66 @@ export default function Chrome({
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const { lang, toggle: toggleLang } = useLang();
   const pathname = usePathname();
+
+  /**
+   * The hover peek: open on entering the left edge, close on leaving the
+   * panel — but only after a grace period. Clipping the corner on the way
+   * somewhere else, or crossing the hairline border for a frame, shouldn't
+   * slam the panel shut and reopen it; the delay makes the edge forgiving
+   * without making it slow to answer, since opening is immediate.
+   */
+  const closeTimer = useRef(0);
+  const cancelClose = useCallback(() => {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = 0;
+    }
+  }, []);
+
+  const peek = useCallback(
+    (e: ReactPointerEvent) => {
+      // The media query already keeps this strip off touch screens; a hybrid
+      // device can still deliver a touch here, and a tap near the edge is a
+      // scroll, not a request for the menu.
+      if (e.pointerType === "touch") return;
+      // Never slide the page's own navigation in under an open dialog.
+      if (searchOpen) return;
+      cancelClose();
+      setOpenBy((v) => v ?? "peek");
+    },
+    [cancelClose, searchOpen]
+  );
+
+  const unpeek = useCallback(() => {
+    cancelClose();
+    closeTimer.current = window.setTimeout(() => {
+      closeTimer.current = 0;
+      setOpenBy((v) => {
+        if (v !== "peek") return v;
+        // The pointer left, but the keyboard is still inside: someone tabbed
+        // into the panel while it was open. Closing would leave focus on a
+        // link nobody can see.
+        if (drawerRef.current?.contains(document.activeElement)) return v;
+        return null;
+      });
+    }, 180);
+  }, [cancelClose]);
+
+  useEffect(() => cancelClose, [cancelClose]);
+
+  /**
+   * Open the panel deliberately, or close it — the panel icon and the `m` key
+   * are the same gesture arriving two ways, so they share one function rather
+   * than each writing the state.
+   *
+   * A peek is PROMOTED, never closed: whichever input did this, the panel is
+   * already open (the pointer is resting on the icon, or the edge), and
+   * closing would read as the click or the key having done nothing.
+   */
+  const toggleMenu = useCallback(() => {
+    cancelClose();
+    setOpenBy((v) => (v === "modal" ? null : "modal"));
+  }, [cancelClose]);
 
   /**
    * Collapse the bar to just its button when the reader scrolls down, restore
@@ -136,9 +214,15 @@ export default function Chrome({
    * Focus is only restored if it's still inside the drawer at the time:
    * closing by clicking a link navigates, and yanking focus back to the menu
    * button would undo the browser's own reset.
+   *
+   * Only for the MODAL panel — the icon or the `m` key. A peek is a glance
+   * with the pointer,
+   * and pulling the keyboard into it would mean drifting past the edge of the
+   * window moved focus. The peeked panel is still tabbable — it's on screen —
+   * it just isn't entered for you.
    */
   useEffect(() => {
-    if (!open) return;
+    if (!modal) return;
     const drawer = drawerRef.current;
     if (!drawer) return;
 
@@ -175,14 +259,16 @@ export default function Chrome({
         (previous ?? menuButtonRef.current)?.focus();
       }
     };
-  }, [open]);
+  }, [modal]);
 
   // Close the drawer on navigation; Escape closes it; Cmd/Ctrl+K opens search.
-  useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => setOpenBy(null), [pathname]);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      if (e.key === "Escape") setOpenBy(null);
+      // Read through shortcutKey for the same reason every other shortcut is:
+      // ⌘K under a Cyrillic layout arrives as `л` (see lib/shortcut-key.ts).
+      if ((e.metaKey || e.ctrlKey) && shortcutKey(e) === "k") {
         e.preventDefault();
         setSearchOpen((v) => !v);
       }
@@ -269,8 +355,16 @@ export default function Chrome({
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
           aria-controls="site-menu"
-          onClick={() => setOpen((v) => !v)}
-          className="press flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
+          /* The key is advertised here the way ⌘K is on the search button —
+             the tooltip is where someone finds out the shortcut exists. */
+          title={lang === "uk" ? "Меню (m)" : "Menu (m)"}
+          onClick={toggleMenu}
+          /* No hover wash here, unlike the buttons inside the drawer: this one
+             sits ON the translucent chip, and a filled square inside a
+             translucent pill is two stacked surfaces where the reader should
+             see one. The glyph coming up to full `--text` is the whole hover
+             state, and `.press` still answers the click. */
+          className="press flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-secondary)] hover:text-[var(--text)]"
         >
           <PanelIcon className="h-[18px] w-[18px]" />
         </button>
@@ -318,12 +412,19 @@ export default function Chrome({
         </span>
       </div>
 
-      {/* Backdrop */}
+      {/* The left edge, live to the pointer. A strip this narrow is under the
+          scrollbar's width on the other side and over nothing you'd click, so
+          it costs the page nothing until you aim at it. Pointer devices only
+          — see `.edge-zone` in globals.css. */}
+      <div aria-hidden className="edge-zone fixed inset-y-0 left-0 z-20 w-4" onPointerEnter={peek} />
+
+      {/* Backdrop — the clicked panel only. Dimming the page every time the
+          pointer crosses the edge would make a glance feel like a decision. */}
       <div
         aria-hidden
-        onClick={() => setOpen(false)}
+        onClick={() => setOpenBy(null)}
         className={`fixed inset-0 z-40 bg-black/25 transition-opacity duration-300 ${
-          open ? "opacity-100" : "pointer-events-none opacity-0"
+          modal ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       />
 
@@ -335,9 +436,14 @@ export default function Chrome({
            dialog, whatever it looks like. `inert` keeps the closed one out of
            the tab order and the accessibility tree entirely. */
         role="dialog"
-        aria-modal="true"
+        /* A peek doesn't take the keyboard or cover the page, so it isn't
+           modal and shouldn't tell a screen reader the rest of the site has
+           gone away. */
+        aria-modal={modal}
         aria-label={lang === "uk" ? "Меню сайту" : "Site menu"}
         inert={!open}
+        onPointerEnter={cancelClose}
+        onPointerLeave={unpeek}
         className={`fixed inset-y-0 left-0 z-50 flex w-56 flex-col border-r border-[var(--border)] bg-[var(--bg)] py-5 transition-transform duration-300 ease-out ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
@@ -364,7 +470,7 @@ export default function Chrome({
               aria-label="Search (⌘K)"
               title="Search (⌘K)"
               onClick={() => {
-                setOpen(false);
+                setOpenBy(null);
                 setSearchOpen(true);
               }}
               /* Start fetching the index as the pointer arrives, so the panel
@@ -424,7 +530,7 @@ export default function Chrome({
       {/* Mounted here rather than in the layout because it needs the same nav
           list the sidebar shows — `g 1…9` follows that order. `openSearch` is
           memoized so its key listener isn't torn down on every render. */}
-      <Shortcuts items={items} onSearch={openSearch} />
+      <Shortcuts items={items} onSearch={openSearch} onMenu={toggleMenu} />
 
       {/* Content — re-animates on each navigation via the pathname key */}
       <main id="main" key={pathname} className="page-in min-w-0">

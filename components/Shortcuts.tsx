@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import T from "@/components/T";
 import { useLang } from "@/components/useLang";
 import { ui } from "@/lib/ui-strings";
+import { shortcutKey } from "@/lib/shortcut-key";
 import type { NavItem } from "@/components/Chrome";
 
 /**
@@ -15,6 +16,7 @@ import type { NavItem } from "@/components/Chrome";
  *   g then h        home
  *   g then 1…9      the nth section, in sidebar order
  *   l               switch language
+ *   m               open / close the menu
  *   /               open search
  *   ?               this list
  *
@@ -94,9 +96,12 @@ function listRows(): HTMLAnchorElement[] {
 export default function Shortcuts({
   items,
   onSearch,
+  onMenu,
 }: {
   items: NavItem[];
   onSearch: () => void;
+  /** Toggle the sidebar as a modal panel — see toggleMenu in Chrome.tsx. */
+  onMenu: () => void;
 }) {
   const router = useRouter();
   const { lang, toggle: toggleLang } = useLang();
@@ -209,16 +214,22 @@ export default function Shortcuts({
         setSheet(false);
         return;
       }
+
+      /* Which shortcut this is, on whatever layout the reader has — NOT
+         `e.key`, which is Cyrillic on a Ukrainian keyboard and matched none of
+         these. See lib/shortcut-key.ts. */
+      const key = shortcutKey(e);
+
       // Any other key while the sheet is up should close it and still act.
       if (chord) {
         endChord();
-        if (e.key === "h") {
+        if (key === "h") {
           e.preventDefault();
           setSheet(false);
           router.push("/");
           return;
         }
-        const n = Number(e.key);
+        const n = Number(key);
         if (n >= 1 && n <= sections.length) {
           e.preventDefault();
           setSheet(false);
@@ -227,7 +238,7 @@ export default function Shortcuts({
         return;
       }
 
-      switch (e.key) {
+      switch (key) {
         case "g":
           chord = true;
           timer = window.setTimeout(endChord, CHORD_MS);
@@ -247,11 +258,18 @@ export default function Shortcuts({
           // Vim-style scrolling for anyone whose browser extension provides
           // it — moveList reports whether it found a list at all.
           if (modalOpen()) return;
-          if (moveList(e.key === "j" ? 1 : -1)) e.preventDefault();
+          if (moveList(key === "j" ? 1 : -1)) e.preventDefault();
           return;
         case "l":
           e.preventDefault();
           toggleLang();
+          return;
+        case "m":
+          // The sheet is in the way of the panel it would open behind, and
+          // both are dismissed the same way everywhere else on the site.
+          e.preventDefault();
+          setSheet(false);
+          onMenu();
           return;
         case "/":
           e.preventDefault();
@@ -270,7 +288,7 @@ export default function Shortcuts({
       window.removeEventListener("keydown", onKey);
       window.clearTimeout(timer);
     };
-  }, [router, sibling, moveList, onSearch, toggleLang, sections]);
+  }, [router, sibling, moveList, onSearch, onMenu, toggleLang, sections]);
 
   const rows: { keys: string[]; label: { en: string; uk: string } }[] = [
     { keys: ["["], label: ui.previousEntry },
@@ -283,6 +301,9 @@ export default function Shortcuts({
       label: { en: s.title, uk: s.titleUk ?? s.title },
     })),
     { keys: ["l"], label: ui.actionToggleLang },
+    // Beside search rather than up with the navigation keys: these two open
+    // panels, the ones above go somewhere.
+    { keys: ["m"], label: ui.shortcutMenu },
     { keys: ["/"], label: ui.shortcutSearch },
     { keys: ["?"], label: ui.shortcutSheet },
   ];

@@ -1846,8 +1846,19 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   padding-left: 0.75rem;
 }
 
+/* One line per row, ellipsised — an index that wraps stops reading as an
+   index. The rail is a fixed 13rem and heading text is arbitrary length, so
+   without this a couple of long titles turn a scannable column of section
+   names into a paragraph, and the eye has to read the outline instead of
+   glancing at it. The full text is in each row's tooltip.
+
+   Applies to the sheet as well as the rail: it was the phone sheet's rule
+   first (DECISIONS #51), and the reason was never about the width. */
 .toc-link {
   display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   padding: 0.25rem 0 0.25rem 0.75rem;
   /* Overlaps the ul's border so the active marker replaces it. */
   margin-left: -1px;
@@ -1875,9 +1886,10 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
 }
 
 /* The marker itself. Positioned by components/Toc.tsx via --y (the active
-   row's offsetTop) and --h (its height, so it matches a row that wrapped to
-   two lines). Starts hidden and is revealed once placed, or it would slide
-   down from the top of the rail on every page load. */
+   row's offsetTop) and --h (its measured height — every row is one line now,
+   but the marker still reads the live element rather than assuming it).
+   Starts hidden and is revealed once placed, or it would slide down from the
+   top of the rail on every page load. */
 .toc-marker {
   position: absolute;
   left: 0;
@@ -1906,13 +1918,9 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
    Only a step heavier than a heading link — enough to read as the parent,
    not enough to pull the eye off the section you're actually in.
 
-   One line, ellipsised. The rail is a fixed 13rem and titles are arbitrary
-   length, so wrapping is the difference between a tidy row and three lines of
-   heading before the outline even starts. Full text is in the tooltip. */
+   Its one-line truncation used to live here, back when it was the only row
+   that had it; it's on `.toc-link` now, where every row shares it. */
 .toc-top {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   font-weight: 500;
   color: var(--text-secondary);
 }
@@ -2239,13 +2247,6 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
     transform: translateY(-6px) scale(0.97);
     width: 13.5rem;
     max-height: 55vh;
-  }
-
-  /* One line per heading — an index that wraps stops reading as an index. */
-  .toc-sheet .toc-link {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 }
 
@@ -3501,4 +3502,24 @@ svg.diagram tspan {
 .list-focus:focus-visible {
   background-color: var(--bg-hover);
   outline: none;
+}
+
+/* --- The left edge opens the menu (components/Chrome.tsx) -----------------
+   A strip along the left edge that slides the sidebar in when the pointer
+   reaches it, and lets it go when the pointer leaves the panel. The panel
+   icon still opens it by click; this is the same panel arrived at a faster
+   way, which is why there's one open state and not two.
+
+   Pointer devices only. On a touch screen there is no hovering — the strip
+   would either do nothing or, worse, swallow the edge swipe the browser uses
+   to go back. `display: none` rather than a JS check so it isn't in the page
+   at all on a phone. */
+.edge-zone {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .edge-zone {
+    display: block;
+  }
 }

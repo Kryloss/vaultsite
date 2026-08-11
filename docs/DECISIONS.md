@@ -645,7 +645,9 @@ The contents pill moves to the **top-right** on a phone and is only ever the thr
 
 **It briefly unfurled the current heading while scrolling down, and that was removed.** The idea was symmetry with the left bar, which swaps breadcrumb for time remaining (#50). In practice it meant a chip changing width in the corner of the eye, reporting something the reader hadn't asked for, while they were reading. The heading is one tap away inside the sheet. `html[data-scroll]` was added to drive it and has been removed with it — nothing reads it now.
 
-**The sheet hangs directly under the icon.** It used to rise from a chip at the bottom-left, so both the anchor and the `transform-origin` inverted; a panel that grows from the wrong corner reads as a different element arriving rather than the one you pressed. On a phone it's also narrower (13.5rem), shorter (55vh) and tighter than on a laptop, with one line per heading — it's an index, so it should cover a corner of the article rather than the article.
+**The sheet hangs directly under the icon.** It used to rise from a chip at the bottom-left, so both the anchor and the `transform-origin` inverted; a panel that grows from the wrong corner reads as a different element arriving rather than the one you pressed. On a phone it's also narrower (13.5rem), shorter (55vh) and tighter than on a laptop — it's an index, so it should cover a corner of the article rather than the article.
+
+**Later (2026-08-10): one line per row is no longer a phone rule.** It was written here as a phone override, but the reason — an index that wraps stops reading as an index — was never about the width. It moved onto `.toc-link`, so the rail and both sizes of sheet truncate the same way and the full text is in every row's tooltip. `.toc-top` dropped its own copy of the same three declarations.
 
 **The phone overrides have to sit AFTER the base rules in the file.** They were written before them the first time, and it looked like the media query simply wasn't matching: the sheet kept opening at the bottom-left, full desktop size. A media query adds no specificity, so `.toc-sheet` inside one and `.toc-sheet` outside one are exactly equal and the later declaration wins — which was the desktop one. Worth remembering in a hand-written stylesheet with no layers: **position is the tie-breaker, so an override belongs below what it overrides.**
 
@@ -1113,3 +1115,65 @@ the cleaned reader-facing diagram.
 **Also recorded there:** one agent at a time in this working tree. Obsidian Git auto-commits everything unstaged (`autoCommitOnlyStaged: false`) every 10 minutes and pushes, and Vercel deploys it — so two agents editing concurrently publish each other's half-finished work on a timer. Separate `git worktree`s if genuinely parallel work is wanted.
 
 **Revisit when:** a third agent joins (then the shared rules probably want their own file both entry points include), or either tool learns to read a shared filename.
+
+## 74. The left edge opens the sidebar (2026-08-10)
+
+**Decision:** A 16px strip down the left edge of the window opens the drawer when the pointer reaches it, and the drawer closes again ~180ms after the pointer leaves it. The panel icon still opens it by click. One state (`openBy: "modal" | "peek" | null` in `components/Chrome.tsx`) records WHAT KIND of open it is: a deliberate one is a decision — modal, backdrop, focus trapped, stays until dismissed; the edge is a glance — no backdrop, no `aria-modal`, focus untouched, gone when the pointer is. Named for the kind rather than the input, because more than one input arrives at each (the icon and the `m` key both mean "modal" — see #75).
+
+**Why:** The drawer holds the site's whole navigation and is closed at every width, so reaching it costs a click every time. The left edge is a target you can't miss (Fitts' law: infinitely tall, and the window edge stops the pointer for you), which is exactly why it must not be expensive to hit by accident. Hence the asymmetry: opening is instant, closing is delayed so clipping the corner on the way elsewhere doesn't slam it shut, and a peek deliberately does NOT take the keyboard — drifting past the edge of the window is not a request to move focus, and a stolen caret is far more disruptive than a panel that slid in.
+
+Two smaller calls fall out of it. Clicking the panel icon while peeking promotes the peek to a modal panel rather than closing it: the pointer is on the button, the panel is already open under it, and "close" would read as the click having done nothing. And the strip is `display: none` outside `(hover: hover) and (pointer: fine)` — on a touch screen there is no hovering, and a live element on the left edge would swallow the browser's own back-swipe.
+
+**Revisit when:** the drawer ever becomes a permanent rail at wide widths, which removes the problem this solves.
+
+## 75. `m` opens the menu, and the keyboard opens it modally (2026-08-10)
+
+**Decision:** `m` toggles the sidebar, listed in the `?` sheet beside `/` and advertised in the panel icon's tooltip the way ⌘K is on the search button. It shares `toggleMenu()` with the icon, so a keypress opens the panel MODALLY — backdrop, focus inside — not as a peek.
+
+**Why:** #74 made the sidebar cheaper to reach with a pointer than with a keyboard, on a site that otherwise has a key for every kind of movement (`[`/`]`, `j`/`k`, `g h`, `g 1…9`, `l`, `/`). That asymmetry was created by the edge zone, so it belongs to the same change. The kind of open follows from the input's own logic rather than a rule: someone reaching for `m` is already on the keyboard and wants to arrow through the sections, which is exactly what the focus trap is for, whereas the peek exists precisely to keep the keyboard out of it.
+
+`m` for menu over `\` (the editor convention for panels): on several European layouts `\` needs AltGr, and the handler drops anything with `altKey` set. A plain letter also matches every other shortcut on the site.
+
+**Known gap, deliberately not fixed here — fixed in #77 the same day:** shortcuts read `e.key`, so under a Cyrillic layout `m` produces `ь` and did nothing, as did `j`, `k`, `l`, `g` and `h`. It was always one change to all of them or none, not a special case bolted onto the newest key.
+
+## 76. The contents' reading line comes down to meet the end of the page (2026-08-10)
+
+**Decision:** The table of contents highlights the last heading above a reading line 140px from the top of the window — but over the page's final screenful that line descends to the foot of the window, at exactly the rate the page runs out of scroll. Maths in `lib/toc-spy.ts`, covered by `npm test`; `components/Toc.tsx` measures the headings and asks it which one is active.
+
+**Why:** A fixed line has a dead zone one viewport tall at the bottom of every page. The last screenful can't be scrolled up to the line, so any heading inside it never lights up — you are visibly at the end of the article and the rail is still pointing at the middle of it. It's worst exactly where the rail lives: 1280px and up, where the window is tall, the dead zone is 900px or more, and short closing sections ("Sources", a two-line conclusion) all fall inside it.
+
+The alternative fixes were both worse. Highlighting the last heading whenever `scrollY` hits the bottom is a special case with a discontinuity in it — the rail jumps two rows at the last pixel of scroll. Shrinking the dead zone by moving the line down to the middle of the window makes every OTHER heading light up late, trading a bug at the end of the page for a mismatch through all of it. Sweeping the line keeps one rule ("the last heading above the line") and adjusts the only quantity that has actually changed: how much page is left. Because it descends at the rate the scroll is running out, it doesn't read as motion — the closing sections take their turn one after another, as if the page were still scrolling under a line that never moved.
+
+A page too short to scroll keeps the resting line: with no "further down" to bring the line to, sweeping it would highlight the LAST heading of a page you just arrived at the top of.
+
+**Also:** the click-hold (`held`) is still needed and its reasoning is now the opposite of what it was. It used to exist because a heading near the end couldn't reach the line; it now exists because several of them are above the line at once, so the spy would answer with a later heading than the one you clicked.
+
+**Revisit when:** the rail ever gains its own scroll-into-view of the active row, which is where a moving line and a moving rail could fight.
+
+## 77. Shortcuts read the character, then the key (2026-08-10)
+
+**Decision:** Every keyboard shortcut goes through `shortcutKey()` in `lib/shortcut-key.ts`, which prefers `e.key` and falls back to the Latin label of `e.code`. `⌘K` in `components/Chrome.tsx` reads through it too. Pure and unit-tested, with the layouts themselves as the test cases.
+
+**Why:** `e.key` alone is the character the layout produced, so under a Ukrainian layout the physical `l` types `д` and matched nothing — every letter shortcut on the site was dead for a reader typing in Cyrillic, which on a site where every note is translated is the reader most likely to be doing it. `e.code` alone is the physical key, which fixes that and breaks punctuation in the other direction: `/` is Shift+7 on a German layout and `?` is Shift+, on a French one, neither of them the key `e.code` calls `Slash`. Preferring the character and falling back to the key gets both, and needs no table of layouts.
+
+The residual case is a layout that maps some other character onto one of our physical keys — a German keyboard's `-` sits on `Slash`, so it opens search. Outside a text field that key did nothing before, so the cost is a stray panel, against letter shortcuts that didn't work at all.
+
+**Tested rather than tried:** a layout bug is invisible in the browser you're testing in, because you're testing in one layout. The test file names the layouts (`{ key: "д", code: "KeyL" }`) so the next person doesn't have to install a keyboard to see what's being claimed.
+
+**Not changed:** handlers that only look for `Escape`, `Enter` and arrows — those key names don't move with the layout. Only `Shortcuts.tsx` and the `⌘K` listener needed it.
+
+**Revisit when:** a shortcut is ever added on a character that isn't a letter, digit, bracket or slash — `SHORTCUT_CHARS` and the `e.code` map both need it, and the sheet is drawn for a US layout either way.
+
+## 78. `rel="me"` on the social links (2026-08-10)
+
+**Decision:** Every icon in `components/SocialLinks.tsx` carries `rel="me noreferrer"`, email included. `lib/site-config.ts` documents what that makes the `socials` list: the owner's own accounts, and only those.
+
+**Why:** The site already stated its identity for machines — `sameAs` in the JSON-LD — but only in the form search engines read. `rel="me"` is the same claim in the form the rest of the independent web reads: it's what Mastodon checks before marking a domain verified on a profile, and what `rel-me` sign-in uses. One attribute, one list, no new surface.
+
+The two claims differ in exactly one place, and correctly: `sameAs` filters out the `mailto:` because an address isn't a profile, while `rel="me"` keeps it, an address you control being precisely the identity it exists to claim.
+
+**The invariant this creates:** a link in `socials` is an assertion of identity, not a bookmark. Adding a friend's profile, a project's account, or an org you belong to would inherit `rel="me"` and claim to BE them. Links like that belong in a note. Both files say so where someone would be editing.
+
+**Only half of it lives here:** verification is bidirectional. The profile has to link back to the site for the pair to prove anything — this side is now done and stays done, the other side is a field in each profile.
+
+**Revisit when:** a Mastodon or other fediverse account is added, which is where the attribute stops being latent and starts showing a green check.

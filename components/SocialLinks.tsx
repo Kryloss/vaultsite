@@ -25,6 +25,20 @@ const socialIcons = {
  *
  * `data-social` is what globals.css keys each platform's colour off: the icons
  * are drawn in `currentColor`, so the hover is a single custom property.
+ *
+ * **`rel="me"` is an identity claim, not decoration.** It says "that account
+ * is the same person as this site", and when the profile links back the pair
+ * proves it — which is exactly what Mastodon checks before showing a domain
+ * as verified, and what `rel-me` sign-in reads. It's the IndieWeb half of a
+ * statement the site already makes in machine-readable form: `sameAs` in
+ * lib/jsonld.ts tells search engines the same thing, from the same list. The
+ * one difference is the email — `sameAs` drops it because a mailto isn't a
+ * profile, while `rel="me"` keeps it, since an address you control is
+ * precisely the kind of identity it exists to claim.
+ *
+ * So every href in `socials` must be the OWNER's own account. A link to
+ * someone else's profile added to that list would inherit this attribute and
+ * quietly claim to be them.
  */
 export default function SocialLinks({
   className = "",
@@ -46,7 +60,7 @@ export default function SocialLinks({
             key={s.label}
             href={s.href}
             target={s.href.startsWith("mailto:") ? undefined : "_blank"}
-            rel="noreferrer"
+            rel="me noreferrer"
             aria-label={s.label}
             title={s.label}
             data-social={s.icon}

@@ -42,8 +42,8 @@ Next.js only serves static files from `public/`. Instead of a runtime file-servi
 ## UI structure
 
 - `app/layout.tsx` (server) reads sections → passes nav items to `components/Chrome.tsx` (client), which owns all site chrome.
-- The sidebar is a slide-in **drawer**, closed by default at every width, opened from the floating pill at the top-left that also carries the breadcrumb. It's a modal dialog: focus trapped while open, restored on close, `inert` when closed.
-- **There is no permanent nav rail at any width**, and one was built and deleted rather than kept — see DECISIONS #62 before proposing another. The only standing rail is `.toc-rail`, the article's own contents list, from 1280px.
+- The sidebar is a slide-in **drawer**, closed by default at every width, opened from the floating pill at the top-left that also carries the breadcrumb, or by putting the pointer on the left edge of the window (`.edge-zone`, pointer devices only). Which one opened it is what `openBy` records: a CLICKED drawer is a modal dialog — backdrop, focus trapped while open, restored on close; a HOVERED one is a peek — no backdrop, not `aria-modal`, focus untouched, closing shortly after the pointer leaves it. `inert` when closed either way. See `docs/DECISIONS.md` #74.
+- **There is no permanent nav rail at any width**, and one was built and deleted rather than kept — see DECISIONS #62 before proposing another. The only standing rail is `.toc-rail`, the article's own contents list, from 1280px. Its highlight follows a reading line that descends to the foot of the window over the page's last screenful, so the closing sections can reach it — `lib/toc-spy.ts`, DECISIONS #76.
 - Every route wraps its content in `components/Page.tsx` rather than repeating a container — see Design system below.
 - Section entry lists are pluggable via `lib/section-types.tsx` (see ADDING-PAGE-TYPES.md).
 

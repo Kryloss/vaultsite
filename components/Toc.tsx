@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import T from "@/components/T";
 import { useLang } from "@/components/useLang";
 import { MenuIcon } from "@/components/icons";
+import { activeHeading } from "@/lib/toc-spy";
 import type { Heading } from "@/lib/toc";
 
 /**
@@ -20,6 +21,10 @@ import type { Heading } from "@/lib/toc";
  * the active one. The scroll-spy walks the merged list and skips anything whose
  * language is currently hidden — a display:none heading has no offsetParent, so
  * the check costs nothing and keeps one observer serving both languages.
+ *
+ * Which row is active is decided by `lib/toc-spy.ts`: the last heading above a
+ * reading line that rests below the chrome and descends to the foot of the
+ * window over the page's final screenful, so the closing sections can reach it.
  *
  * Jumping to a heading pins the highlight to it (see `held` below).
  */
@@ -73,11 +78,12 @@ export default function Toc({
   /**
    * The heading the reader jumped to, held until they scroll again.
    *
-   * Without this the spy overrules the click: it highlights whatever sits at
-   * the top of the viewport, and a short section — or any heading near the end
-   * of the page, which can't scroll far enough to reach the top — leaves the
-   * clicked item unhighlighted. Smooth scrolling makes it worse, since the spy
-   * runs through every heading on the way down.
+   * Without this the spy overrules the click: it highlights whatever the
+   * reading line has last passed, and a click that lands the page at its
+   * bottom — anything in the final screenful — puts several headings above
+   * that line at once, so the LAST of them wins rather than the one you asked
+   * for. Smooth scrolling makes it worse, since the spy runs through every
+   * heading on the way down.
    *
    * `""` is a real value meaning "pinned to the top of the page"; only `null`
    * means nothing is held.
@@ -93,15 +99,24 @@ export default function Toc({
     const measure = () => {
       frame = 0;
       if (held.current !== null) return;
-      let current = "";
+      const visible: string[] = [];
+      const tops: number[] = [];
       for (const id of list) {
         const el = document.getElementById(id);
         // offsetParent is null for the hidden language's headings.
         if (!el || el.offsetParent === null) continue;
-        // Last heading that has crossed the top of the reading area wins.
-        if (el.getBoundingClientRect().top <= 140) current = id;
+        visible.push(id);
+        tops.push(el.getBoundingClientRect().top);
       }
-      setActive(current);
+      // The last heading above the reading line wins, and the line descends to
+      // the foot of the window over the final screenful — otherwise the last
+      // sections of a page can never reach it. See lib/toc-spy.ts.
+      const i = activeHeading(tops, {
+        scrollY: window.scrollY,
+        innerHeight: window.innerHeight,
+        scrollHeight: document.documentElement.scrollHeight,
+      });
+      setActive(i === -1 ? "" : visible[i]);
     };
 
     const onScroll = () => {
@@ -261,7 +276,7 @@ export default function Toc({
     <a
       href="#"
       onClick={jumpTop}
-      /* Truncated to one line — the tooltip carries the rest. */
+      /* Every row is truncated to one line — the tooltip carries the rest. */
       title={localTitle}
       className={`toc-link toc-top${extra}${active === "" ? " is-active" : ""}`}
     >
@@ -278,6 +293,9 @@ export default function Toc({
           <a
             href={`#${h.id}`}
             onClick={jump(h.id)}
+            /* Rows are one line and ellipsised — the tooltip is where a long
+               heading's full text still lives, same as the title row. */
+            title={h.text}
             className={h.id === active ? "toc-link is-active" : "toc-link"}
           >
             {h.text}

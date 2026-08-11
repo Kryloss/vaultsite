@@ -47,7 +47,14 @@ export interface SocialLink {
   icon: "github" | "instagram" | "linkedin" | "x" | "mail";
 }
 
-// ⚠️ Placeholder handles — replace with your real profile URLs.
+/**
+ * The owner's own accounts — and ONLY those.
+ *
+ * This list is rendered with `rel="me"` (components/SocialLinks.tsx) and
+ * emitted as `sameAs` in the site's JSON-LD (lib/jsonld.ts), both of which
+ * claim the account is the same person as this site. A link to somebody
+ * else's profile belongs in a note, not here.
+ */
 export const socials: SocialLink[] = [
   { label: "GitHub", href: "https://github.com/kryloss", icon: "github" },
   { label: "Instagram", href: "https://instagram.com/kyryloles", icon: "instagram" },
