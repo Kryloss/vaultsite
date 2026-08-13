@@ -222,7 +222,14 @@ Important conventions:
 - Scroll maths (the reading bar, the contents scroll-spy) lives in `lib/` as
   pure functions with `npm test` coverage, not inline in the component — see
   `lib/reading-progress.ts`, `lib/toc-spy.ts`, `lib/intro.ts`,
-  `docs/DECISIONS.md` #76.
+  `lib/constellation.ts`, `docs/DECISIONS.md` #76.
+- The sidebar note strip (`components/Constellation.tsx`) buckets notes BY
+  WEEK, deliberately: a day grid was built first and misrepresented a vault
+  whose shelf notes were typed up in batches. Its bar width, gap and `WEEKS`
+  must stay consistent with the 176px of inner width in the `w-56` drawer.
+  It is rendered by `app/layout.tsx` and handed to `Chrome` as an element,
+  never imported by `Chrome` itself — that would pull `lib/vault.ts` and `fs`
+  into the client bundle. `today` stays a prop. See `docs/DECISIONS.md` #80.
 - The first-visit intro hides the whole page behind `data-intro` on `<html>`.
   Never hide intro content in the HTML itself, and never remove one of its
   exits: any click/key/scroll/touch, the driver's own completion, and the 8s
