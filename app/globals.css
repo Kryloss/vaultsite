@@ -3533,10 +3533,14 @@ svg.diagram tspan {
    lib/constellation.ts and the strip overflows the panel — they are one
    decision written in two files, and this is the note saying so. */
 .constellation {
-  /* The per-bar summary is positioned against the whole section so it always
-     lands on the label's line, however tall the open week's list is. */
+  /* The per-bar summary is positioned against the whole section, so it lands
+     in the same place under the bars however tall the open week's list is. */
   position: relative;
-  margin-bottom: 1.25rem;
+  /* The reserved line under the strip that summary appears in. Reserved, not
+     conjured on hover: a line that appears would push the social icons down
+     every time the pointer crossed a bar. */
+  padding-bottom: 0.875rem;
+  margin-bottom: 1rem;
   /* Read by the card mode at the foot of this block to clear the strip. The
      strip's own `height` reads it too, so the two can't disagree. */
   --strip-h: 30px;
@@ -3576,26 +3580,34 @@ svg.diagram tspan {
   opacity: 0;
 }
 
-/* --- A week's summary, in the label's line --------------------------------
-   Takes the line over on hover instead of appearing beside it, so the strip
-   never has two rows of text above it. Opaque rather than layered with
-   `:has()`, which keeps it correct in a browser that doesn't have it: the
-   background simply covers the count underneath. */
+/* --- A week's summary, UNDER the strip -------------------------------------
+   "16.07 · 14n", in the reserved line below the bars — near the thing it
+   describes, and out of the way of the range and total above.
+
+   Abbreviated because it has a 176px column and two things to say. The panel
+   spells both out in full once a week is actually opened, and the button's
+   `sr-only` name carries the long form, so nothing is heard as "sixteen dot
+   zero seven, fourteen en".
+
+   The line's height is reserved by the section's `padding-bottom`, so raising
+   one moves nothing. */
 .constellation-tip {
   position: absolute;
-  top: 0;
+  bottom: 0;
   left: 0;
   right: 0;
   overflow: hidden;
-  /* One line, ellipsised, like the contents rail — a wrapping label would
-     shove the strip around. */
+  /* One line, ellipsised — a wrapping label would shove the drawer around. */
   white-space: nowrap;
   text-overflow: ellipsis;
   text-align: left;
-  font-size: 11px;
-  line-height: 1.2;
-  color: var(--text-secondary);
-  background: var(--bg);
+  font-size: 10px;
+  line-height: 1.1;
+  /* Steady under the pointer: without this the label jitters as the digits
+     change from one week to the next. */
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+  color: var(--text-tertiary);
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--dur-fast) var(--ease);
@@ -3618,14 +3630,6 @@ svg.diagram tspan {
    some of its room. */
 .constellation-open {
   display: none;
-  /* THE SECTION LIST OUTRANKS THIS. In flow, whatever height an open week
-     takes comes out of the `nav` above, and the nav is what the drawer is
-     for — getting to Posts or Shelf is the job; last July is a footnote.
-     Ten rems is about five rows, comfortably less than the section list's own
-     height, and a busier week scrolls inside it rather than growing. */
-  max-height: min(28vh, 10rem);
-  overflow-y: auto;
-  overscroll-behavior: contain;
   margin-bottom: 0.5rem;
 }
 
@@ -3647,6 +3651,19 @@ svg.diagram tspan {
   margin: 0 -0.75rem;
   padding: 0;
   list-style: none;
+  /* THE SCROLL LIVES ON THE LIST, not on the block around it, so the date
+     above stays put while the notes move under it. Scrolling the container
+     took the heading away with the first row, which is the one line telling
+     you which week you're looking at.
+
+     THE SECTION LIST OUTRANKS THIS. Whatever height an open week takes comes
+     out of the `nav` above, and the nav is what the drawer is FOR — getting
+     to Posts or Shelf is the job; last July is a footnote. Ten rems is about
+     five rows, comfortably less than the section list's own height, and a
+     busier week scrolls inside it rather than growing. */
+  max-height: min(28vh, 10rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 /* The section rows, one size down. Same geometry, same wash, same press —
@@ -3730,7 +3747,6 @@ svg.diagram tspan {
     bottom: calc(var(--strip-h) + 0.5rem);
     z-index: 45;
     margin-bottom: 0;
-    max-height: min(40vh, 15rem);
     padding: 0.375rem;
     border: 1px solid var(--border);
     border-radius: var(--r-lg);
@@ -3740,9 +3756,12 @@ svg.diagram tspan {
   }
 
   /* The rows are inside a card now, so they stop reaching for the nav's
-     column and sit in the card's own padding. */
+     column and sit in the card's own padding. A floating card takes no room
+     from the navigation, so it can afford to be taller than the in-flow
+     version — but the date above still doesn't move. */
   .constellation-open[data-open="true"] .constellation-notes {
     margin: 0;
+    max-height: min(40vh, 13rem);
   }
 
   .constellation-open[data-open="true"] .constellation-open-head {

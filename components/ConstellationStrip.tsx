@@ -18,6 +18,8 @@ export interface StripWeek {
   start: string;
   /** Bar height, 0–1, against the busiest week. */
   fill: number;
+  /** "16.07" — the hover label, where there's no room for a month's name. */
+  short: string;
   dateEn: string;
   dateUk: string;
   notes: { href: string; title: string; titleUk?: string }[];
@@ -177,8 +179,7 @@ export default function ConstellationStrip({
             return <div key={w.start} className="constellation-week" aria-hidden />;
           }
 
-          const count = w.notes.length;
-          const summary = (date: string, word: string) => `${date} · ${count} ${word}`;
+          const count = noteCount(w.notes.length);
 
           return (
             <button
@@ -196,16 +197,22 @@ export default function ConstellationStrip({
               {/* The button's accessible name. Separate from the summary
                   below, which is hidden until hover — and a hidden element
                   is no name at all. */}
+              {/* The button's accessible name gets the full sentence — the
+                  abbreviations below are a glance, not something to hear read
+                  out as "sixteen dot zero seven, fourteen en". */}
               <span className="sr-only">
                 <T
-                  en={summary(w.dateEn, count === 1 ? "note" : "notes")}
-                  uk={summary(w.dateUk, "нот.")}
+                  en={`${w.dateEn} · ${count.en}`}
+                  uk={`${w.dateUk} · ${count.uk}`}
                 />
               </span>
+              {/* "16.07 · 14n", under the strip. Short because it sits in a
+                  176px column and has to say two things; the panel spells both
+                  out in full once a week is actually opened. */}
               <span className="constellation-tip" aria-hidden>
                 <T
-                  en={summary(w.dateEn, count === 1 ? "note" : "notes")}
-                  uk={summary(w.dateUk, "нот.")}
+                  en={`${w.short} · ${w.notes.length}n`}
+                  uk={`${w.short} · ${w.notes.length}н`}
                 />
               </span>
             </button>

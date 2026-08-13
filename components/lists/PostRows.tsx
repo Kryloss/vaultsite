@@ -2,6 +2,7 @@ import Link from "next/link";
 import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
 import { categoryLabel } from "@/lib/categories";
+import { shortDate } from "@/lib/dates";
 import type { PostRow } from "@/components/lists/PostListClient";
 
 /**
@@ -125,9 +126,3 @@ function groupByYear(rows: PostRow[]): { label: string; items: PostRow[] }[] {
   return years;
 }
 
-/** "2026-07-16" → "16.07" */
-function shortDate(iso: string): string {
-  const [, m, d] = iso.split("-");
-  if (!m || !d) return iso;
-  return `${d}.${m}`;
-}

@@ -94,6 +94,8 @@ simple, documented, low-maintenance solutions over clever abstractions.
 | `lib/markdown.ts` | Obsidian preprocessing and Markdown-to-HTML pipeline |
 | `lib/section-types.tsx` | Section `type` → list component registry |
 | `lib/ui-strings.ts` | Fixed English/Ukrainian UI strings |
+| `lib/plural.ts` | Counted nouns — any string with a number in it |
+| `lib/dates.ts` | Date formatting with no `fs` behind it, safe for client code |
 | `lib/metadata.ts`, `lib/jsonld.ts` | Canonicals, Open Graph, and structured data |
 | `scripts/sync-assets.mjs` | Build-time vault asset mirror and image manifest |
 | `docs/ARCHITECTURE.md` | Stable system and design-system overview |
@@ -113,7 +115,10 @@ Routes:
 - Reuse current patterns before introducing a new helper, abstraction, package,
   client component, or state store.
 - Preserve server rendering. Add `"use client"` only when browser state or an
-  event handler requires it; keep the client boundary thin.
+  event handler requires it; keep the client boundary thin. Note that a server
+  component RENDERED BY a client one still ships to the browser and so cannot
+  import `lib/vault.ts` — `components/lists/PostRows.tsx` is the example, and
+  `lib/dates.ts` exists because of it.
 - All routes use `<Page>`. Never duplicate its container utilities.
 - Use existing CSS tokens instead of literal colors, radii, motion durations,
   page widths, or gutters.
@@ -127,7 +132,10 @@ Routes:
 - Use Source Serif 4 for everything except code. It is self-hosted with the
   Cyrillic subset and the `opsz` axis.
 - Use `components/T.tsx` plus `lib/ui-strings.ts` for fixed bilingual UI. Do not
-  hard-code a new English-only interface string.
+  hard-code a new English-only interface string. Any string containing a COUNT
+  goes through `lib/plural.ts` instead — English has two forms and Ukrainian
+  three, and interpolating a bare number ships a phrase with no noun in it,
+  which an English reader will never notice.
 - Keep the design monochrome. State emphasis uses `--text`; there is no
   `--accent` token. Existing semantic callout colors and documented hover-only
   brand/photo exceptions may remain.

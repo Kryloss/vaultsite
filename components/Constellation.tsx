@@ -1,5 +1,6 @@
 import ConstellationStrip, { type StripWeek } from "@/components/ConstellationStrip";
 import { displayDate, displayDateUk } from "@/lib/vault";
+import { shortDate } from "@/lib/dates";
 import {
   WEEKS,
   buildConstellation,
@@ -43,6 +44,7 @@ export default function Constellation({
   const weeks: StripWeek[] = grid.weeks.map((week) => ({
     start: week.start,
     fill: week.fill,
+    short: shortDate(week.start),
     dateEn: displayDate(week.start),
     dateUk: displayDateUk(week.start),
     // Slimmed to what the panel renders. The full entry — body, frontmatter,

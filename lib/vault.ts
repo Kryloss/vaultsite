@@ -539,6 +539,10 @@ function plainText(md: string): string {
     .slice(0, 1500);
 }
 
+/* `shortDate` ("16.07") lives in lib/dates.ts, not here: it's wanted by
+   components that reach the browser, and this module's `fs` imports can't
+   follow them. See the note at the top of that file. */
+
 /** "2026-07-16" → "July 16, 2026" (UTC-safe, no timezone drift). */
 export function displayDate(iso: string, locale = "en-US"): string {
   const [y, m, d] = iso.split("-").map(Number);
