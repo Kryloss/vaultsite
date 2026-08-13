@@ -109,6 +109,39 @@ export default function RootLayout({
               "try{var q=new URLSearchParams(location.search).get('lang');var l=q||localStorage.getItem('lang');if(l==='uk')document.documentElement.dataset.lang='uk';}catch(e){}",
           }}
         />
+        {/* First-visit intro gate — see components/Intro.tsx.
+            Home opens by typing the greeting on an otherwise empty page, and
+            everything else has to be hidden BEFORE the first paint or the
+            reader sees the finished page for a frame and then watches it be
+            taken away. Only an inline script in <head> is early enough; React
+            hydrates long after the server HTML has painted.
+
+            In the layout rather than in app/page.tsx because position in the
+            document is the whole point — hence the pathname check, which is
+            what keeps a home-only feature from touching any other page.
+
+            The failsafe is not optional. This attribute hides the site, so it
+            must expire on its own: if the driver never arrives — a chunk that
+            404s, a JS error, a browser that hydration never reaches — the page
+            still appears, a beat late, rather than staying blank for good.
+
+            The two listeners are the same argument at human speed. Between the
+            first paint and hydration the driver's own skip doesn't exist yet,
+            so without these a reader who taps a page that looks empty gets
+            nothing back for it. Dropping the attribute here also settles what
+            the driver does next: it finds no attribute, finds the flag written
+            below, and leaves the visible page alone.
+
+            The flag is written HERE, not in the driver, so that "armed" and
+            "seen" are one decision made at one moment. Its own try/catch:
+            storage being unwritable shouldn't cancel the intro. */}
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(location.pathname==='/'&&!localStorage.getItem('intro-seen')&&!matchMedia('(prefers-reduced-motion: reduce)').matches){var r=document.documentElement;try{localStorage.setItem('intro-seen','1')}catch(e){}r.dataset.intro='type';var o=function(){r.removeAttribute('data-intro')};setTimeout(o,8000);addEventListener('pointerdown',o,{once:true,passive:true});addEventListener('keydown',o,{once:true,passive:true})}}catch(e){}",
+          }}
+        />
         {/* Speculation rules: once the pointer rests on an internal link, fetch
             that document in the background so a hard navigation — a new tab, a
             middle click, the first click after landing — has nothing left to

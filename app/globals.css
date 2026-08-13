@@ -3523,3 +3523,223 @@ svg.diagram tspan {
     display: block;
   }
 }
+
+/* --- First-visit intro: home types itself in (components/Intro.tsx) --------
+   Everything here hangs off ONE attribute, `data-intro` on <html>, set by the
+   gate script in app/layout.tsx and cleared by the driver. That's deliberate:
+   the page is hidden by CSS that only matches while an attribute is present,
+   so every way the JavaScript can fail — never loading, throwing, the gate's
+   own 8s failsafe firing — ends with the attribute gone and the whole page
+   visible. Nothing is hidden in the HTML itself.
+
+   Last in the file because it has to beat the components it covers, which
+   carry their own opacity and transitions hundreds of lines above.
+
+   Stages, in order: `type` → `photo` → `body` → attribute removed. */
+
+/* NAMED, not `body > *:not(main)`.
+   The blanket version also caught the things that are in the DOM precisely
+   BECAUSE they're invisible — the drawer's `bg-black/25` backdrop, the closed
+   search and shortcut dialogs — and the reveal animation then faded them all
+   to opacity 1, dropping a quarter-black sheet over the page for a moment on
+   the way out. Anything that manages its own visibility must be left to it;
+   this list is the chrome that is actually on screen. */
+html[data-intro] .skip-link,
+html[data-intro] .chrome-bar,
+html[data-intro] .edge-zone {
+  opacity: 0;
+  /* Invisible controls that still take clicks are worse than visible ones —
+     and the edge zone would otherwise peek the sidebar open mid-sentence. */
+  pointer-events: none;
+}
+
+/* The page's own furniture below the prose: social links, recent posts, the
+   Explore grid. */
+html[data-intro] .page > *:not(.prose) {
+  opacity: 0;
+}
+
+/* Inside the article, only the heading is on stage. The photo is hidden but
+   still occupies its box, so the heading is already where it will end up and
+   the reveal moves nothing. */
+html[data-intro] .prose > *:not(h1) {
+  opacity: 0;
+}
+
+html[data-intro] .prose > .avatar {
+  transform: scale(0.94);
+  transition:
+    opacity var(--dur-slow) var(--ease),
+    transform var(--dur-slow) var(--ease);
+}
+
+/* Cued by the name landing, not by a timer — see the component. */
+html[data-intro="photo"] .prose > .avatar,
+html[data-intro="body"] .prose > .avatar {
+  opacity: 1;
+  transform: none;
+}
+
+/* --- The characters -------------------------------------------------------
+   The heading is hidden until the driver has split it into characters and
+   added `.tw`. Without that step the server's finished sentence is painted as
+   soon as the HTML arrives and then yanked away when hydration finally runs —
+   the page opened by showing you the answer and taking it back. The gate can
+   hide the heading before the first paint; only the driver can know when
+   there are characters to hide instead. */
+html[data-intro] .prose > h1 {
+  visibility: hidden;
+}
+
+html[data-intro] .prose > h1.tw {
+  visibility: visible;
+}
+
+/* `visibility`, not `display`, so the untyped remainder still takes up its
+   space: the line wraps once, at the start, into the shape it will finish in.
+   With `display: none` the sentence would rewrap under the reader as it grew,
+   which is the one thing a typewriter shouldn't do to a page. */
+html[data-intro] .tw-c {
+  position: relative;
+  visibility: hidden;
+}
+
+html[data-intro] .tw-c.is-on {
+  visibility: visible;
+}
+
+/* The caret rides on the NEXT character, so it sits in the gap the next
+   keystroke will fill. Absolutely positioned and sized in `em`, which keeps it
+   proportional to a title that's fluid. `visibility` is inherited, so the
+   character it rides on is made visible and its glyph hidden with a
+   transparent colour — otherwise the caret, being a pseudo-element of a
+   hidden box, would be hidden too.
+
+   Typing stages only. Once the page is arriving there is nothing left to type,
+   and a caret still blinking after the full stop reads as a stuck cursor. */
+html[data-intro="type"] .tw-c.is-next,
+html[data-intro="photo"] .tw-c.is-next {
+  visibility: visible;
+  color: transparent;
+}
+
+html[data-intro="type"] .tw-c.is-next::before,
+html[data-intro="photo"] .tw-c.is-next::before {
+  content: "";
+  position: absolute;
+  top: 0.1em;
+  bottom: 0.06em;
+  left: -0.06em;
+  width: 0.055em;
+  background: var(--text);
+  animation: intro-caret 1.05s steps(1, end) infinite;
+}
+
+@keyframes intro-caret {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  50%,
+  95% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* However the reveal was reached, the sentence finishes with the page. On a
+   skip that means the characters nobody waited for, and they fade rather than
+   snap — the same 160ms as everything else arriving with them. */
+html[data-intro="body"] .tw-c {
+  visibility: visible;
+}
+
+html[data-intro="body"] .tw-c:not(.is-on) {
+  animation: intro-chrome 160ms var(--ease) both;
+}
+
+/* --- The page arriving ----------------------------------------------------
+   Lines wipe in from the left, one after the next: the same gesture as the
+   typing, run at a speed you read rather than watch. `--intro-i` is set per
+   element by the driver in reading order.
+
+   `clip-path` is safe to leave in the end state because the whole block stops
+   applying the moment the attribute is dropped, which the driver does as soon
+   as the last line lands. */
+html[data-intro="body"] .prose > *:not(h1):not(.avatar),
+html[data-intro="body"] .page > *:not(.prose) {
+  animation: intro-line 320ms var(--ease) calc(var(--intro-i, 0) * 55ms) both;
+}
+
+@keyframes intro-line {
+  from {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* The chrome doesn't wipe. It isn't a line of text — it's the room the page is
+   in, and it should just be there again. */
+html[data-intro="body"] .skip-link,
+html[data-intro="body"] .chrome-bar,
+html[data-intro="body"] .edge-zone {
+  animation: intro-chrome var(--dur-slow) var(--ease) 220ms both;
+  pointer-events: auto;
+}
+
+@keyframes intro-chrome {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Skipped: the reader has asked for the page, so it arrives as one thing.
+   Still a fade rather than a cut — snapping from a near-empty page to a full
+   one is the same jolt the intro exists to avoid. */
+html[data-intro][data-intro-fast] .prose > *:not(h1):not(.avatar),
+html[data-intro][data-intro-fast] .page > *:not(.prose),
+html[data-intro][data-intro-fast] .skip-link,
+html[data-intro][data-intro-fast] .chrome-bar,
+html[data-intro][data-intro-fast] .edge-zone {
+  animation-name: intro-chrome;
+  animation-duration: 160ms;
+  animation-delay: 0ms;
+}
+
+html[data-intro][data-intro-fast] .prose > .avatar {
+  transition-duration: 160ms;
+}
+
+/* Belt and braces. The gate already refuses to set the attribute for a reader
+   who asked for less motion, and print has no first visit — but a stuck
+   attribute must never be the reason a page is blank. */
+@media (prefers-reduced-motion: reduce), print {
+  html[data-intro] .skip-link,
+  html[data-intro] .chrome-bar,
+  html[data-intro] .edge-zone,
+  html[data-intro] .page > *:not(.prose),
+  html[data-intro] .prose > *,
+  html[data-intro] .prose > h1,
+  html[data-intro] .tw-c {
+    visibility: visible;
+    opacity: 1;
+    color: inherit;
+    transform: none;
+    animation: none;
+    clip-path: none;
+    pointer-events: auto;
+  }
+
+  html[data-intro] .tw-c.is-next::before {
+    display: none;
+  }
+}

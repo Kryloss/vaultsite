@@ -15,6 +15,7 @@ import { pageMeta } from "@/lib/metadata";
 import { previewsInHtml } from "@/lib/previews";
 import LinkPreview from "@/components/LinkPreview";
 import Page from "@/components/Page";
+import Intro from "@/components/Intro";
 
 /** Title and description come from the layout's defaults; this adds the
     canonical, which every page needs and the root most of all. */
@@ -59,6 +60,9 @@ export default async function HomePage() {
   return (
     <Page>
       <LinkPreview previews={previewsInHtml(html, htmlUk)} />
+      {/* Renders nothing. Types the heading below on a reader's first ever
+          visit; the pre-paint half of it lives in app/layout.tsx. */}
+      <Intro />
       {htmlUk ? (
         <>
           <article

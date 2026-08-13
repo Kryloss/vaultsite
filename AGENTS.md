@@ -221,7 +221,23 @@ Important conventions:
   #74, #75 have the detail.
 - Scroll maths (the reading bar, the contents scroll-spy) lives in `lib/` as
   pure functions with `npm test` coverage, not inline in the component — see
-  `lib/reading-progress.ts`, `lib/toc-spy.ts`, `docs/DECISIONS.md` #76.
+  `lib/reading-progress.ts`, `lib/toc-spy.ts`, `lib/intro.ts`,
+  `docs/DECISIONS.md` #76.
+- The first-visit intro hides the whole page behind `data-intro` on `<html>`.
+  Never hide intro content in the HTML itself, and never remove one of its
+  exits: any click/key/scroll/touch, the driver's own completion, and the 8s
+  failsafe plus early pointer/key listeners in the gate script in
+  `app/layout.tsx`. The gate must stay an inline `<head>` script (only that
+  runs before the first paint) and must keep its pathname check. `INTRO_KEY` is
+  duplicated between `components/Intro.tsx` and that script because the script
+  runs before modules load — change both or every visitor becomes new again.
+  Three details are load-bearing and were each a visible flash before review:
+  the heading stays hidden until the driver adds `.tw`; the chrome is hidden
+  and revealed BY NAME, never as `body > *:not(main)` (that also caught the
+  drawer backdrop and the closed dialogs and faded a dark sheet over the page);
+  and the character spans are never reassembled, because that reflows the
+  title. Anything that manages its own visibility must be left to manage it.
+  See `CLAUDE.md` and `docs/DECISIONS.md` #79.
 - Keyboard shortcuts match through `shortcutKey()` (`lib/shortcut-key.ts`),
   never `e.key` directly: the site is bilingual and `e.key` is Cyrillic under a
   Ukrainian layout. `docs/DECISIONS.md` #77.
