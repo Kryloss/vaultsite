@@ -1210,7 +1210,7 @@ The two claims differ in exactly one place, and correctly: `sameAs` filters out 
 
 ## 80. The sidebar note strip counts weeks, not days (2026-08-13)
 
-**Decision:** The drawer's footer carries six months of writing as one bar per week — `components/Constellation.tsx`, bucketing in `lib/constellation.ts`, covered by `npm test`. Bar height is that week's note count against the busiest week in the window. Hovering names the week's first note; clicking opens it.
+**Decision:** The drawer's footer carries six months of writing as one bar per week — `components/Constellation.tsx` (server) → `components/ConstellationStrip.tsx` (client), bucketing in `lib/constellation.ts`, covered by `npm test`. Bar height is that week's note count against the busiest week in the window. Hovering a bar names the week and its count; clicking opens that week's notes as a list above the strip.
 
 **Why it exists:** twenty-five notes spread across five folders read as a list. In time they read as a habit, which is the true thing about them and the thing the folder tree cannot show. It costs nothing to keep current — every note already carries `date:`, so the strip is built at build time and a new note grows a bar on its own.
 
@@ -1220,9 +1220,19 @@ The two claims differ in exactly one place, and correctly: `sameAs` filters out 
 
 **Height carries the count, so tone doesn't.** Every bar is the same weight. Encoding the same number twice would be the only place on the site that shouts, and a green heat ramp here would be the one piece of colour on a monochrome page (#64).
 
-**No client JavaScript.** Weeks with notes are real links, so they are keyboard-reachable and work without JS; the label is a `:hover` rule on a real element rather than the `title` attribute, because a native tooltip holds one language and every string here ships in two. It's positioned against the whole strip, not the bar that raised it — a 6px anchor in a 176px panel puts every label off the edge. Empty weeks are `aria-hidden` divs: "nothing that week" is not worth reading out twenty times.
+**The count is hidden until you look at it.** A permanent "25 notes · 6 months" is a statistic the drawer has to justify every time it opens — and this drawer opens on a pointer brushing the edge of the window. It fades in on `:hover`, and on `:focus-within` so it isn't pointer-only. The line always occupies its height, so nothing moves when it appears, and a week's own summary takes the same line over on hover rather than adding a second one. That summary is opaque rather than layered with `:has()`, which keeps it right in a browser that hasn't got it: the background simply covers the count underneath.
 
-**Rendered by the layout, not by `Chrome.tsx`.** The strip reads the vault and `Chrome` is a client component, so importing it would drag `lib/vault.ts` and its `fs` calls into the browser bundle. It's passed in as an already-rendered element.
+**A week opens a list; it doesn't guess.** The first version made each bar a link to the week's first note with the rest counted — `+13` — which picked a destination on the reader's behalf and hid thirteen. Clicking now opens the week directly above the strip so you choose where to land. ONE list refilled per week, not twenty-five in the HTML for the one that might be opened — no note titles are in the page until something is clicked. `inert` and `display: none` when closed, Escape to dismiss, and clicking the same bar closes it.
+
+**And it's the sidebar's own rows, not a card.** It was a floating popover first, borrowed wholesale from the series panel (#42) — absolutely positioned, bordered, blurred, shadowed. For a handful of links inside a navigation drawer that reads as a different piece of software parked over the sidebar. They're now the same rows as the section list a few inches above, pulled out of the footer's `px-6` by `-0.75rem` so they land in the same column as it, with the same radius, wash and `.press`. One size down is the only deliberate difference: a section is one word and a note title is a sentence, and `text-lg` would ellipsise most of them away.
+
+In the drawer's flow rather than absolutely positioned, which follows from being rows and not a card: the drawer is a column with a scrolling `nav` above, so an open week simply takes some of its room instead of covering it. That also removed the backdrop — a fixed overlay to catch outside clicks would have swallowed the first click on every nav link underneath it.
+
+**This costs the no-JS version, deliberately.** The bars were real links and worked without JavaScript; they're buttons now. A popover of choices is a control, not a destination, and there is no honest static form of "show me the thirteen other notes" in a 176px column. Keyboard access is kept properly instead: real buttons, `aria-expanded`, `aria-controls`, Escape, and an `sr-only` name on every bar. Empty weeks stay `aria-hidden` divs — "nothing that week" is not worth reading out twenty times.
+
+**Split server/client, like PostList → PostListClient.** `Constellation.tsx` reads the vault, buckets, and formats both languages' dates; `ConstellationStrip.tsx` draws and holds the open state. That's what keeps `lib/vault.ts` out of the browser bundle, and it slims what crosses over to href, title and Ukrainian title — not whole entries with bodies and frontmatter.
+
+**Rendered by the layout, not by `Chrome.tsx`.** `Chrome` is a client component, so importing the server half would drag `lib/vault.ts` and its `fs` calls into the browser anyway. It's passed in as an already-rendered element.
 
 **`today` is a parameter, not a clock read.** The last column depends on it, and a component that reads the clock can't be asserted. It's the build date, which is right for a static site: "now" is whenever it last deployed.
 

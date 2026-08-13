@@ -82,89 +82,84 @@ export default function ConstellationStrip({
         />
       </h2>
 
-      <div className="constellation-body">
-        <span
-          className="constellation-backdrop"
-          data-open={!!open}
-          aria-hidden
-          onClick={() => setOpen(null)}
-        />
+      {/* In the drawer's flow, directly above the strip — not a floating card.
+          These are the same rows as the section list higher up, because they
+          are the same kind of thing: places in this site to go next. A panel
+          with its own border, blur and shadow made a handful of links look
+          like a different piece of software parked over the sidebar. */}
+      <div
+        id="constellation-week"
+        className="constellation-open"
+        data-open={!!open}
+        inert={!open}
+        aria-label={lang === "uk" ? "Нотатки цього тижня" : "Notes from this week"}
+        role="group"
+      >
+        {week && (
+          <>
+            <p className="constellation-open-head">
+              <T
+                en={`${week.dateEn} · ${week.notes.length} ${week.notes.length === 1 ? "note" : "notes"}`}
+                uk={`${week.dateUk} · ${week.notes.length}`}
+              />
+            </p>
+            <ul className="constellation-notes">
+              {week.notes.map((note) => (
+                <li key={note.href}>
+                  <Link
+                    href={note.href}
+                    className="press constellation-note"
+                    onClick={() => setOpen(null)}
+                  >
+                    <T en={note.title} uk={note.titleUk ?? note.title} />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
 
-        <div
-          id="constellation-week"
-          className="constellation-panel"
-          data-open={!!open}
-          inert={!open}
-          aria-label={lang === "uk" ? "Нотатки цього тижня" : "Notes from this week"}
-          role="group"
-        >
-          {week && (
-            <>
-              <p className="constellation-panel-head">
+      <div className="constellation-strip">
+        {weeks.map((w) => {
+          if (w.notes.length === 0) {
+            return <div key={w.start} className="constellation-week" aria-hidden />;
+          }
+
+          const count = w.notes.length;
+          const summary = (date: string, word: string) => `${date} · ${count} ${word}`;
+
+          return (
+            <button
+              key={w.start}
+              type="button"
+              className="constellation-week is-on"
+              data-active={w.start === open}
+              aria-expanded={w.start === open}
+              aria-controls="constellation-week"
+              onClick={() => setOpen((cur) => (cur === w.start ? null : w.start))}
+              // Height is data — there's no sensible number of buckets to
+              // round a week's note count into, so it rides a property.
+              style={{ "--fill": w.fill } as CSSProperties}
+            >
+              {/* The button's accessible name. Separate from the summary
+                  below, which is hidden until hover — and a hidden element
+                  is no name at all. */}
+              <span className="sr-only">
                 <T
-                  en={`${week.dateEn} · ${week.notes.length} ${week.notes.length === 1 ? "note" : "notes"}`}
-                  uk={`${week.dateUk} · ${week.notes.length}`}
+                  en={summary(w.dateEn, count === 1 ? "note" : "notes")}
+                  uk={summary(w.dateUk, "нот.")}
                 />
-              </p>
-              <ul className="constellation-notes">
-                {week.notes.map((note) => (
-                  <li key={note.href}>
-                    <Link
-                      href={note.href}
-                      className="constellation-note"
-                      onClick={() => setOpen(null)}
-                    >
-                      <T en={note.title} uk={note.titleUk ?? note.title} />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
-        </div>
-
-        <div className="constellation-strip">
-          {weeks.map((w) => {
-            if (w.notes.length === 0) {
-              return <div key={w.start} className="constellation-week" aria-hidden />;
-            }
-
-            const count = w.notes.length;
-            const summary = (date: string, word: string) =>
-              `${date} · ${count} ${word}`;
-
-            return (
-              <button
-                key={w.start}
-                type="button"
-                className="constellation-week is-on"
-                data-active={w.start === open}
-                aria-expanded={w.start === open}
-                aria-controls="constellation-week"
-                onClick={() => setOpen((cur) => (cur === w.start ? null : w.start))}
-                // Height is data — there's no sensible number of buckets to
-                // round a week's note count into, so it rides a property.
-                style={{ "--fill": w.fill } as CSSProperties}
-              >
-                {/* The button's accessible name. Separate from the summary
-                    below, which is hidden until hover — and a hidden element
-                    is no name at all. */}
-                <span className="sr-only">
-                  <T
-                    en={summary(w.dateEn, count === 1 ? "note" : "notes")}
-                    uk={summary(w.dateUk, "нот.")}
-                  />
-                </span>
-                <span className="constellation-tip" aria-hidden>
-                  <T
-                    en={summary(w.dateEn, count === 1 ? "note" : "notes")}
-                    uk={summary(w.dateUk, "нот.")}
-                  />
-                </span>
-              </button>
-            );
-          })}
-        </div>
+              </span>
+              <span className="constellation-tip" aria-hidden>
+                <T
+                  en={summary(w.dateEn, count === 1 ? "note" : "notes")}
+                  uk={summary(w.dateUk, "нот.")}
+                />
+              </span>
+            </button>
+          );
+        })}
       </div>
     </section>
   );

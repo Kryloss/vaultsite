@@ -223,13 +223,18 @@ Important conventions:
   pure functions with `npm test` coverage, not inline in the component — see
   `lib/reading-progress.ts`, `lib/toc-spy.ts`, `lib/intro.ts`,
   `lib/constellation.ts`, `docs/DECISIONS.md` #76.
-- The sidebar note strip (`components/Constellation.tsx`) buckets notes BY
-  WEEK, deliberately: a day grid was built first and misrepresented a vault
-  whose shelf notes were typed up in batches. Its bar width, gap and `WEEKS`
-  must stay consistent with the 176px of inner width in the `w-56` drawer.
-  It is rendered by `app/layout.tsx` and handed to `Chrome` as an element,
-  never imported by `Chrome` itself — that would pull `lib/vault.ts` and `fs`
-  into the client bundle. `today` stays a prop. See `docs/DECISIONS.md` #80.
+- The sidebar note strip buckets notes BY WEEK, deliberately: a day grid was
+  built first and misrepresented a vault whose shelf notes were typed up in
+  batches. Its bar width, gap and `WEEKS` must stay consistent with the 176px
+  of inner width in the `w-56` drawer. It is split server/client
+  (`components/Constellation.tsx` → `components/ConstellationStrip.tsx`) so
+  `lib/vault.ts` stays out of the browser bundle, and is rendered by
+  `app/layout.tsx` and handed to `Chrome` as an element, never imported by
+  `Chrome` itself. `today` stays a prop. The count line is hidden until hover
+  or focus, and a bar opens that week's notes in the drawer's flow, styled as
+  the same rows as the section list — not as a floating card, and with no
+  backdrop, which would swallow the first click on the nav beneath it. See
+  `docs/DECISIONS.md` #80.
 - The first-visit intro hides the whole page behind `data-intro` on `<html>`.
   Never hide intro content in the HTML itself, and never remove one of its
   exits: any click/key/scroll/touch, the driver's own completion, and the 8s

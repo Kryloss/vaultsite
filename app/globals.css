@@ -3533,11 +3533,14 @@ svg.diagram tspan {
    lib/constellation.ts and the strip overflows the panel — they are one
    decision written in two files, and this is the note saying so. */
 .constellation {
+  /* The per-bar summary is positioned against the whole section so it always
+     lands on the label's line, however tall the open week's list is. */
+  position: relative;
   margin-bottom: 1.25rem;
 }
 
 /* --- The line above the strip ---------------------------------------------
-   Hidden until you look at it. A permanent "27 notes / 6 months" is a
+   Hidden until you look at it. A permanent "25 notes / 6 months" is a
    statistic the drawer has to justify every time it opens — and this drawer
    opens on a pointer brushing the edge of the window. Fading it in on hover
    makes it an answer rather than an announcement.
@@ -3563,10 +3566,97 @@ svg.diagram tspan {
   opacity: 1;
 }
 
-.constellation-body {
-  position: relative;
+/* --- A week's summary, in the label's line --------------------------------
+   Takes the line over on hover instead of appearing beside it, so the strip
+   never has two rows of text above it. Opaque rather than layered with
+   `:has()`, which keeps it correct in a browser that doesn't have it: the
+   background simply covers the count underneath. */
+.constellation-tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  /* One line, ellipsised, like the contents rail — a wrapping label would
+     shove the strip around. */
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: left;
+  font-size: 11px;
+  line-height: 1.2;
+  color: var(--text-secondary);
+  background: var(--bg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-fast) var(--ease);
 }
 
+.constellation-week.is-on:hover .constellation-tip,
+.constellation-week.is-on:focus-visible .constellation-tip {
+  opacity: 1;
+}
+
+/* --- The open week --------------------------------------------------------
+   IN THE DRAWER'S FLOW, directly above the strip — not a floating card. These
+   are the same rows as the section list higher up, because they are the same
+   kind of thing: places in this site to go next. Given their own border, blur
+   and shadow they read as a different piece of software parked over the
+   sidebar, which is a lot of furniture for a handful of links.
+
+   In flow rather than absolute, so the list can't cover the navigation: the
+   drawer is a column, `nav` above it scrolls, and opening a week simply takes
+   some of its room. */
+.constellation-open {
+  display: none;
+  /* Fourteen notes in one week would otherwise fill the drawer. */
+  max-height: 40vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin-bottom: 0.5rem;
+}
+
+.constellation-open[data-open="true"] {
+  display: block;
+}
+
+/* Which week is open. A quiet line in the same key as the count above it — the
+   bar you pressed already said this, so it only has to confirm it. */
+.constellation-open-head {
+  margin: 0 0 0.25rem;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.constellation-notes {
+  /* Pulled out of the footer's `px-6` so the rows line up with the section
+     list's `px-3` container, and land in the same column as the nav above. */
+  margin: 0 -0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+/* The section rows, one size down. Same geometry, same wash, same press —
+   the size is the one deliberate difference: a section is one word and a note
+   title is a sentence, and `text-lg` here would ellipsise most of them away. */
+.constellation-note {
+  display: block;
+  overflow: hidden;
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--r-md);
+  font-size: 0.875rem;
+  line-height: 1.35;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--text-secondary);
+}
+
+.constellation-note:hover,
+.constellation-note:focus-visible {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+/* --- The strip ------------------------------------------------------------ */
 .constellation-strip {
   display: flex;
   align-items: flex-end;
@@ -3602,138 +3692,11 @@ svg.diagram tspan {
   outline: none;
 }
 
-/* --- A week's summary, in the label's line --------------------------------
-   Takes the line over on hover instead of appearing beside it, so the strip
-   never has two rows of text above it. Opaque rather than layered with
-   `:has()`, which keeps it correct in a browser that doesn't have it: the
-   background simply covers the count underneath. */
-.constellation-tip {
-  position: absolute;
-  bottom: calc(100% + 0.4rem);
-  left: 0;
-  right: 0;
-  overflow: hidden;
-  /* One line, ellipsised, like the contents rail — a wrapping label would
-     shove the strip around. */
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  text-align: left;
-  font-size: 11px;
-  line-height: 1.2;
-  color: var(--text-secondary);
-  background: var(--bg);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--dur-fast) var(--ease);
-}
-
-.constellation-week.is-on:hover .constellation-tip,
-.constellation-week.is-on:focus-visible .constellation-tip {
-  opacity: 1;
-}
-
-/* --- The week's notes -----------------------------------------------------
-   Opens ABOVE the strip, which sits at the foot of the drawer. Same material
-   and the same open/close mechanics as the series popover: always mounted,
-   `data-open` so it animates shut as well as open, `inert` when closed.
-
-   Absolutely positioned rather than in flow: growing a list in the drawer's
-   footer would push the navigation up every time a week was opened. */
-.constellation-panel {
-  position: absolute;
-  bottom: calc(100% + 0.5rem);
-  left: 0;
-  z-index: 45;
-  width: 100%;
-  transform-origin: 0 100%;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(6px) scale(0.97);
-  transition:
-    opacity var(--dur) var(--ease),
-    transform var(--dur) var(--ease),
-    visibility 0s linear var(--dur);
-  max-height: 40vh;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 0.375rem;
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  background: var(--chrome-bg);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 6px 20px rgb(0 0 0 / 0.08);
-}
-
-.constellation-panel[data-open="true"] {
-  opacity: 1;
-  visibility: visible;
-  transform: none;
-  transition-delay: 0s;
-}
-
-@media (prefers-color-scheme: dark) {
-  .constellation-panel {
-    box-shadow: 0 6px 20px rgb(0 0 0 / 0.4);
-  }
-}
-
-/* The week being shown. A heading, not a label — the bar you pressed already
-   said which week this is, so it only has to confirm it. */
-.constellation-panel-head {
-  margin: 0.125rem 0 0.3125rem;
-  padding: 0 0.4375rem;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: var(--text-tertiary);
-}
-
-.constellation-notes {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.constellation-note {
-  display: block;
-  overflow: hidden;
-  padding: 0.25rem 0.4375rem;
-  border-radius: var(--r-sm);
-  font-size: 0.8125rem;
-  line-height: 1.3;
-  /* One line each: fourteen wrapped titles would fill the drawer. */
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  color: var(--text-secondary);
-}
-
-.constellation-note:hover,
-.constellation-note:focus-visible {
-  background: var(--bg-hover);
-  color: var(--text);
-}
-
-/* Catches a click anywhere else. Invisible, and only there while open. */
-.constellation-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 44;
-  display: none;
-}
-
-.constellation-backdrop[data-open="true"] {
-  display: block;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .constellation-label,
   .constellation-tip,
-  .constellation-week.is-on,
-  .constellation-panel {
+  .constellation-week.is-on {
     transition: none;
-  }
-
-  .constellation-panel {
-    transform: none;
   }
 }
 
