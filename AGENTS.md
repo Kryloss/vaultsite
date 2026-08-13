@@ -231,9 +231,14 @@ Important conventions:
   `lib/vault.ts` stays out of the browser bundle, and is rendered by
   `app/layout.tsx` and handed to `Chrome` as an element, never imported by
   `Chrome` itself. `today` stays a prop. The count line is hidden until hover
-  or focus, and a bar opens that week's notes in the drawer's flow, styled as
-  the same rows as the section list — not as a floating card, and with no
-  backdrop, which would swallow the first click on the nav beneath it. See
+  or focus and silent while a week is open, and a bar opens that week's notes
+  in the drawer's flow, styled as the same rows as the section list — with no
+  backdrop element, which would swallow the first click on the nav beneath it;
+  outside clicks are a `pointerdown` listener, and the drawer closing collapses
+  the week via an `IntersectionObserver` on the strip, not a prop from Chrome.
+  Under `max-height: 700px` it floats as a card instead, so a long week can't
+  squeeze the section list off a short window. Keep the section list ranked
+  above it: the week list stays capped well under the nav's own height. See
   `docs/DECISIONS.md` #80.
 - The first-visit intro hides the whole page behind `data-intro` on `<html>`.
   Never hide intro content in the HTML itself, and never remove one of its

@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import T from "@/components/T";
 import { useLang } from "@/components/useLang";
+import { noteCount } from "@/lib/plural";
 
 /**
  * A week's column, already formatted. Everything the strip needs at runtime
@@ -54,6 +55,7 @@ export default function ConstellationStrip({
 }) {
   const [open, setOpen] = useState<string | null>(null);
   const { lang } = useLang();
+  const root = useRef<HTMLElement>(null);
 
   const week = weeks.find((w) => w.start === open) ?? null;
 
@@ -66,19 +68,68 @@ export default function ConstellationStrip({
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
+  /**
+   * Anything outside the strip closes it — the empty half of the sidebar, the
+   * page behind it, a section link on the way to somewhere else.
+   *
+   * A listener rather than the usual backdrop element. A fixed overlay would
+   * sit on top of the navigation directly above this and eat the first click
+   * on every link in it; this only listens, so a click that closes the week
+   * still does whatever else it was for.
+   */
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: PointerEvent) => {
+      if (!root.current?.contains(e.target as Node)) setOpen(null);
+    };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, [open]);
+
+  /**
+   * The drawer sliding shut collapses the week too, so it isn't still sitting
+   * there the next time the sidebar opens — an open week is a thing you were
+   * looking at, not a setting.
+   *
+   * Watched rather than told. The drawer stays mounted and merely translates
+   * off-screen, so this asks the only question that actually matters — "am I
+   * on screen?" — instead of subscribing to Chrome's open state. That keeps
+   * the two components uncoupled (the strip is handed to Chrome as an opaque
+   * element, so there's no prop to thread through anyway) and it holds for
+   * every way the panel can go away: the pointer leaving during a peek, the
+   * backdrop, Escape, a navigation.
+   */
+  useEffect(() => {
+    const el = root.current;
+    if (!open || !el) return;
+    const io = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) setOpen(null);
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [open]);
+
   // The drawer closes when the pointer leaves it, and a panel left open would
   // be waiting the next time it opened.
   useEffect(() => () => setOpen(null), []);
 
   return (
-    <section className="constellation" aria-labelledby="constellation-label">
-      {/* The reserved line above the strip. It holds the running total, and a
-          week's own summary takes it over on hover — one line, not two, so
-          nothing in the drawer moves when either appears. */}
+    <section
+      ref={root}
+      className="constellation"
+      data-open={!!open}
+      aria-labelledby="constellation-label"
+    >
+      {/* The reserved line above the strip. It holds the range and the running
+          total, and a week's own summary takes it over on hover — one line,
+          not two, so nothing in the drawer moves when either appears.
+          It goes quiet entirely once a week is open, because the list below
+          then names that week on the very next line and the two would be
+          answering different questions an inch apart. */}
       <h2 id="constellation-label" className="constellation-label">
         <T
-          en={`${total} notes · 6 months`}
-          uk={`${total} нотаток · 6 місяців`}
+          en={`6 months · ${noteCount(total).en}`}
+          uk={`6 місяців · ${noteCount(total).uk}`}
         />
       </h2>
 
@@ -99,8 +150,8 @@ export default function ConstellationStrip({
           <>
             <p className="constellation-open-head">
               <T
-                en={`${week.dateEn} · ${week.notes.length} ${week.notes.length === 1 ? "note" : "notes"}`}
-                uk={`${week.dateUk} · ${week.notes.length}`}
+                en={`${week.dateEn} · ${noteCount(week.notes.length).en}`}
+                uk={`${week.dateUk} · ${noteCount(week.notes.length).uk}`}
               />
             </p>
             <ul className="constellation-notes">
