@@ -13,6 +13,20 @@ import { noteCount } from "@/lib/plural";
  * never imports `lib/vault.ts` and its `fs` calls stay out of the bundle.
  * Same split as PostList → PostListClient.
  */
+/**
+ * The strip's geometry, in px, and the same numbers `globals.css` draws with:
+ * a 6px bar and a 1px gap across 25 columns is 174px, which is what fits the
+ * drawer's 176px of inner width. They're here as well because the label has to
+ * be told which column it sits under, and that can only be arithmetic on the
+ * index. Change them in one place and the other is wrong — both say so.
+ */
+const BAR = 6;
+const GAP = 1;
+const STRIP_W = 25 * (BAR + GAP) - GAP;
+/** Roughly how wide "20.07 · 14n" runs. Only used to decide which way a label
+ *  hangs, so a generous guess is the safe one. */
+const LABEL_W = 62;
+
 export interface StripWeek {
   /** Monday, `YYYY-MM-DD`. The React key and the open-state token. */
   start: string;
@@ -174,12 +188,20 @@ export default function ConstellationStrip({
       </div>
 
       <div className="constellation-strip">
-        {weeks.map((w) => {
+        {weeks.map((w, i) => {
           if (w.notes.length === 0) {
             return <div key={w.start} className="constellation-week" aria-hidden />;
           }
 
           const count = noteCount(w.notes.length);
+          // Where this column starts along the strip. Every bar is 6px with a
+          // 1px gap, so it's arithmetic rather than a measurement — the label
+          // below hangs off this to sit under its own week.
+          const x = i * (BAR + GAP);
+          // Near the right-hand end there isn't room for a label to grow
+          // rightwards, so it hangs the other way instead. Only the index
+          // knows how much room is left, which is why this isn't pure CSS.
+          const late = x > STRIP_W - LABEL_W;
 
           return (
             <button
@@ -190,9 +212,10 @@ export default function ConstellationStrip({
               aria-expanded={w.start === open}
               aria-controls="constellation-week"
               onClick={() => setOpen((cur) => (cur === w.start ? null : w.start))}
-              // Height is data — there's no sensible number of buckets to
-              // round a week's note count into, so it rides a property.
-              style={{ "--fill": w.fill } as CSSProperties}
+              // Height and position are both data: there's no sensible number
+              // of buckets to round a week's note count into, and the label
+              // needs to know which column it belongs under.
+              style={{ "--fill": w.fill, "--x": `${x}px` } as CSSProperties}
             >
               {/* The button's accessible name. Separate from the summary
                   below, which is hidden until hover — and a hidden element
@@ -209,7 +232,11 @@ export default function ConstellationStrip({
               {/* "16.07 · 14n", under the strip. Short because it sits in a
                   176px column and has to say two things; the panel spells both
                   out in full once a week is actually opened. */}
-              <span className="constellation-tip" aria-hidden>
+              <span
+                className="constellation-tip"
+                data-align={late ? "end" : "start"}
+                aria-hidden
+              >
                 <T
                   en={`${w.short} · ${w.notes.length}n`}
                   uk={`${w.short} · ${w.notes.length}н`}

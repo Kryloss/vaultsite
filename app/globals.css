@@ -3533,14 +3533,13 @@ svg.diagram tspan {
    lib/constellation.ts and the strip overflows the panel — they are one
    decision written in two files, and this is the note saying so. */
 .constellation {
-  /* The per-bar summary is positioned against the whole section, so it lands
-     in the same place under the bars however tall the open week's list is. */
+  /* The per-bar summary positions against this, so `--x` on a bar is measured
+     from the same origin as the strip's own left edge. */
   position: relative;
-  /* The reserved line under the strip that summary appears in. Reserved, not
-     conjured on hover: a line that appears would push the social icons down
-     every time the pointer crossed a bar. */
-  padding-bottom: 0.875rem;
-  margin-bottom: 1rem;
+  /* The summary hangs into this gap rather than reserving a line of its own.
+     Padding here would push the strip up off its baseline every time — the
+     bars belong at the foot of the drawer, not floating above a blank row. */
+  margin-bottom: 1.25rem;
   /* Read by the card mode at the foot of this block to clear the strip. The
      strip's own `height` reads it too, so the two can't disagree. */
   --strip-h: 30px;
@@ -3589,17 +3588,20 @@ svg.diagram tspan {
    `sr-only` name carries the long form, so nothing is heard as "sixteen dot
    zero seven, fourteen en".
 
-   The line's height is reserved by the section's `padding-bottom`, so raising
-   one moves nothing. */
+   UNDER ITS OWN BAR, not under the strip. `--x` is the bar's offset along the
+   strip, which is exact rather than measured: every column is 6px wide with a
+   1px gap, so the nth one starts at n × 7px.
+
+   It hangs BELOW the strip in the section's bottom margin, so showing it
+   doesn't move the bars or the icons under them.
+
+   Alignment flips near the right-hand end — see `data-align`. */
 .constellation-tip {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  overflow: hidden;
-  /* One line, ellipsised — a wrapping label would shove the drawer around. */
+  bottom: -0.95rem;
+  left: var(--x);
+  width: max-content;
   white-space: nowrap;
-  text-overflow: ellipsis;
   text-align: left;
   font-size: 10px;
   line-height: 1.1;
@@ -3611,6 +3613,16 @@ svg.diagram tspan {
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--dur-fast) var(--ease);
+}
+
+/* A label under one of the last few bars would run off the end of the drawer,
+   so those hang the other way: right edge against the bar's right edge, text
+   growing left. The component decides which, from the column's index — the
+   only thing that knows how much room is left. */
+.constellation-tip[data-align="end"] {
+  left: auto;
+  right: calc(100% - var(--x) - 6px);
+  text-align: right;
 }
 
 .constellation-week.is-on:hover .constellation-tip,
