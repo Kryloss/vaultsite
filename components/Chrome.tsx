@@ -48,6 +48,7 @@ export default function Chrome({
   siteName,
   siteNameUk,
   resistanceDay,
+  constellation,
   children,
 }: {
   items: NavItem[];
@@ -56,6 +57,15 @@ export default function Chrome({
   siteNameUk: string;
   /** Build-time day count for the sidebar line — see lib/resistance.ts */
   resistanceDay: number;
+  /**
+   * The note grid for the drawer's footer, rendered as an ELEMENT by the
+   * layout rather than built from props here.
+   *
+   * It reads the vault, and this is a client component: importing it would
+   * drag `lib/vault.ts` and its `fs` calls into the browser bundle. Handed in
+   * already-rendered, it stays server-side and this file stays a shell.
+   */
+  constellation?: ReactNode;
   children: ReactNode;
 }) {
   /**
@@ -514,6 +524,7 @@ export default function Chrome({
             second copy of the markup: this one had drifted to its own hover
             behaviour, which is exactly what duplicated chrome does. */}
         <div className="mt-auto px-6 pt-6">
+          {constellation}
           <SocialLinks iconClass="h-[21px] w-[21px]" gap="gap-4" />
           {/* Sized to fit the w-56 sidebar on one line — see lib/resistance.ts */}
           <p className="mt-4 whitespace-nowrap text-[11px] tracking-tight text-[var(--text-tertiary)]">

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 import Chrome from "@/components/Chrome";
+import Constellation from "@/components/Constellation";
 import Lightbox from "@/components/Lightbox";
 import CodeCopy from "@/components/CodeCopy";
 import HeadingAnchors from "@/components/HeadingAnchors";
@@ -10,7 +11,7 @@ import SelectionLink from "@/components/SelectionLink";
 import ArrowThrow from "@/components/ArrowThrow";
 import { Analytics } from "@vercel/analytics/next";
 import { siteJsonLd } from "@/lib/jsonld";
-import { getSections } from "@/lib/vault";
+import { getSections, getEntries } from "@/lib/vault";
 import { resistanceDay } from "@/lib/resistance";
 import { siteName, siteNameUk, siteUrl, siteDescription } from "@/lib/site-config";
 
@@ -78,12 +79,38 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   // Navigation (and breadcrumb titles) generated from the vault at build time.
-  const items = getSections().map((section) => ({
+  const sections = getSections();
+  const items = sections.map((section) => ({
     slug: section.slug,
     title: section.title,
     titleUk: section.titleUk,
     icon: section.icon,
   }));
+
+  /**
+   * Every dated note in the vault, for the sidebar constellation. Flattened
+   * here rather than in the component because reading the vault is this
+   * layer's job — `components/Constellation.tsx` takes data and draws it, and
+   * stays a pure function of its props that a test can call.
+   *
+   * `today` is passed down for the same reason: the grid's last column depends
+   * on it, and a component that reads the clock itself can't be asserted. It's
+   * a build-time date, which is exactly right — the site is static, so "now"
+   * is whenever it was last deployed.
+   */
+  const notes = sections
+    .filter((section) => section.slug !== "home")
+    .flatMap((section) =>
+      getEntries(section)
+        .filter((entry) => entry.date)
+        .map((entry) => ({
+          date: entry.date as string,
+          title: entry.title,
+          titleUk: entry.titleUk,
+          href: `/${section.slug}/${entry.slug}`,
+        }))
+    );
+  const today = new Date().toISOString().slice(0, 10);
 
   return (
     // data-lang is set pre-paint by the inline script below (and toggled at
@@ -179,6 +206,7 @@ export default function RootLayout({
           siteName={siteName}
           siteNameUk={siteNameUk}
           resistanceDay={resistanceDay()}
+          constellation={<Constellation notes={notes} today={today} />}
         >
           {children}
         </Chrome>

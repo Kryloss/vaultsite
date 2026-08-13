@@ -3524,6 +3524,97 @@ svg.diagram tspan {
   }
 }
 
+/* --- Note constellation in the drawer (components/Constellation.tsx) -------
+   Six months of writing as a bar per week, in the sidebar footer.
+
+   THE ARITHMETIC IS THE DESIGN. The drawer is `w-56` (224px) with `px-6`
+   gutters, leaving 176px. Twenty-five bars at 6px with 1px gaps comes to
+   25 x 7 - 1 = 174px, two to spare. Change the bar, the gap, or `WEEKS` in
+   lib/constellation.ts and the strip overflows the panel — they are one
+   decision written in two files, and this is the note saying so. */
+.constellation {
+  margin-bottom: 1.25rem;
+}
+
+.constellation-label {
+  margin-bottom: 0.4rem;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: var(--text-tertiary);
+  /* Reserved, so raising a week's label doesn't shift the strip. */
+  min-height: 1.2em;
+}
+
+.constellation-strip {
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+  height: 30px;
+  /* The label is positioned against the whole strip, not the bar that raised
+     it: a 6px anchor in a 176px panel would put every label off the edge.
+     One place, always the same place. */
+  position: relative;
+}
+
+.constellation-week {
+  width: 6px;
+  border-radius: 1px;
+  /* A week with nothing in it: a stub on the baseline. Present, and barely —
+     the empty strip should read as ruled paper, not as data. */
+  height: 2px;
+  background: color-mix(in srgb, var(--text) 9%, transparent);
+}
+
+/* Height carries the count, so tone doesn't have to. One weight for every bar
+   keeps the strip monochrome and stops it double-encoding the same number. */
+.constellation-week.is-on {
+  display: block;
+  height: calc(2px + var(--fill, 0) * 28px);
+  background: color-mix(in srgb, var(--text) 42%, transparent);
+  transition:
+    background-color var(--dur-fast) var(--ease),
+    opacity var(--dur-fast) var(--ease);
+}
+
+.constellation-week.is-on:hover,
+.constellation-week.is-on:focus-visible {
+  background: var(--text);
+  outline: none;
+}
+
+/* --- The label ------------------------------------------------------------
+   A `:hover` rule rather than a listener, and a real element rather than the
+   `title` attribute: a native tooltip holds one language, and every string on
+   this site ships in two. */
+.constellation-tip {
+  position: absolute;
+  bottom: calc(100% + 5px);
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  /* One line, ellipsised, like the contents rail. Note titles are longer than
+     176px and a wrapping label would shove the strip around. */
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 11px;
+  line-height: 1.2;
+  color: var(--text-secondary);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.constellation-week.is-on:hover .constellation-tip,
+.constellation-week.is-on:focus-visible .constellation-tip {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .constellation-week.is-on {
+    transition: none;
+  }
+}
+
 /* --- First-visit intro: home types itself in (components/Intro.tsx) --------
    Everything here hangs off ONE attribute, `data-intro` on <html>, set by the
    gate script in app/layout.tsx and cleared by the driver. That's deliberate:

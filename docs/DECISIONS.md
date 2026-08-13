@@ -1207,3 +1207,23 @@ The two claims differ in exactly one place, and correctly: `sameAs` filters out 
 **Revisit when:** the home greeting stops containing the first name or gains inline markup (a link, a bold word — the driver stands down rather than flattening it); or `INTRO_KEY` changes. That key is written in two places, `components/Intro.tsx` and the gate script, because the gate runs before any module can be imported. Changing one and not the other makes every visitor new again.
 
 **Also worth knowing:** Chrome renders `.skip-link`, `.chrome-bar` and `.edge-zone` as the only always-visible things beside `<main>`. New always-visible chrome has to be added to the intro's hide/reveal lists by hand — deliberately, since the alternative is the blanket selector that caused the dark blink. Getting it wrong leaves a stray control floating over an otherwise empty page, which is visible; the old failure forced hidden overlays open, which was not.
+
+## 80. The sidebar note strip counts weeks, not days (2026-08-13)
+
+**Decision:** The drawer's footer carries six months of writing as one bar per week — `components/Constellation.tsx`, bucketing in `lib/constellation.ts`, covered by `npm test`. Bar height is that week's note count against the busiest week in the window. Hovering names the week's first note; clicking opens it.
+
+**Why it exists:** twenty-five notes spread across five folders read as a list. In time they read as a habit, which is the true thing about them and the thing the folder tree cannot show. It costs nothing to keep current — every note already carries `date:`, so the strip is built at build time and a new note grows a bar on its own.
+
+**Why by week, and this is the whole decision.** It was built as a day grid first — GitHub's shape, one square per day — and looked wrong the moment it was pointed at the real vault: 25 notes on 5 distinct days, one of which held 14 because a batch of shelf notes was typed up in a single sitting. 170 empty squares around five specks reads as "abandoned". The data was fine; the resolution was a lie about it, because the day a shelf note is TYPED is not the day the book was read, and a day grid takes that clerical detail and makes it the whole picture. A week is coarse enough to absorb when things get written up and fine enough to show when work happened. The day-level grain is a real loss, and a vault this young has none to lose.
+
+**Six months, because that is what fits.** The drawer is `w-56` with `px-6` gutters — 176px. Twenty-five bars at 6px with 1px gaps is 174px. The bar width, the gap and `WEEKS` are one decision written in two files, which is why both say so. A full-history version wants a page of its own, not this strip.
+
+**Height carries the count, so tone doesn't.** Every bar is the same weight. Encoding the same number twice would be the only place on the site that shouts, and a green heat ramp here would be the one piece of colour on a monochrome page (#64).
+
+**No client JavaScript.** Weeks with notes are real links, so they are keyboard-reachable and work without JS; the label is a `:hover` rule on a real element rather than the `title` attribute, because a native tooltip holds one language and every string here ships in two. It's positioned against the whole strip, not the bar that raised it — a 6px anchor in a 176px panel puts every label off the edge. Empty weeks are `aria-hidden` divs: "nothing that week" is not worth reading out twenty times.
+
+**Rendered by the layout, not by `Chrome.tsx`.** The strip reads the vault and `Chrome` is a client component, so importing it would drag `lib/vault.ts` and its `fs` calls into the browser bundle. It's passed in as an already-rendered element.
+
+**`today` is a parameter, not a clock read.** The last column depends on it, and a component that reads the clock can't be asserted. It's the build date, which is right for a static site: "now" is whenever it last deployed.
+
+**Revisit when:** the vault has a year or two of steady dates, at which point a day grid becomes worth having and probably wants a page rather than the drawer. Also if the shelf notes are ever re-dated to when things were actually read or watched — that alone would change what the honest resolution is.
