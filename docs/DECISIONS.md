@@ -1328,7 +1328,7 @@ Brushing the left edge of the window slides the sidebar out (#—, the `peek` st
 
 **The marker advances once per SESSION, not once per page load.** Stamping it on arrival is the obvious implementation and it destroys the feature: the first page you open clears every badge, so you only ever see them on whichever list you happened to land on. A gap of more than `SESSION_GAP_MS` (30 minutes) starts a new visit; anything shorter is the same visit, so the badges survive a reload and a browse around. The answer is also memoized for the life of the page, so a soft navigation doesn't clear the row you were looking at.
 
-**Comparison is by DAY, not by timestamp.** An entry's `date` is day-granular, so testing it against a millisecond clock is a coin flip across a timezone offset — a note dated today is "before" a visit made this morning in one timezone and "after" it in another. Both sides become a local `YYYY-MM-DD` and compare as plain strings, which ISO dates do correctly.
+**A note dated D is read as having arrived at the END of day D**, and that is compared against the previous visit's timestamp. Comparing two local `YYYY-MM-DD` strings was the first version and is the tidier-looking one; see the outcome below for why it had to go. End-of-day is the generous reading of a day-granular date, and generosity is the right direction here: showing a badge one visit too long is a far better failure than never showing it.
 
 **Nothing older than 30 days is ever badged, however long you have been away.** Strictly, everything published since your last visit IS new to you — but come back after a year and every row says New, and a list where everything is new is a list where nothing is. The cap is the admission that this is a nudge, not an inbox.
 
@@ -1339,3 +1339,17 @@ Brushing the left edge of the window slides the sidebar out (#—, the `peek` st
 **It renders client-side only**, like every other reader-state signal here (`components/Series.tsx` and its read counts). `PostRows` is rendered on both sides — it is the Suspense fallback for `PostListClient` — so the badge had to be its own client component rather than a hook, or the whole list would have become client-only and the static HTML that crawlers and JS-off visitors get would have shipped empty.
 
 **Revisit when:** posting rate changes. The 30-day cap assumes a note every week or two; at a note a day it is too generous, and at one a quarter it hides things that really are unseen.
+
+### Outcome (same day): the day-string comparison never fired for regular readers
+
+The first version compared the note's `date` against the local `YYYY-MM-DD` of the previous visit, strictly. That is wrong in one specific and important case, and it was found the way these things usually are — by publishing a note and not seeing the badge.
+
+A reader is here at 09:00. A note goes up at 14:00, dated today. They come back at 20:00: the line reads `2026-08-20`, the note reads `2026-08-20`, `>` is false, no badge. Tomorrow the line advances past it for good. **The note never badges for that reader at all** — and "that reader" is whoever visits most often, which is precisely backwards for a feature whose entire purpose is rewarding a return.
+
+The fix is to stop rounding both sides to a day. The stored marker keeps the previous visit's TIMESTAMP (`prevAt`), and a note dated D is read as arriving at the end of D. The evening visit above now sees `23:59 > 09:00` and badges.
+
+The cost is real and bounded: a note dated on the day of your previous visit stays badged one visit longer than it strictly should — seen Tuesday evening, still badged Wednesday, gone Thursday. That is the trade taken deliberately.
+
+The original worry that motivated day-strings — a day-granular date compared against a millisecond clock flipping across a timezone offset — was real but was solved at the wrong end. Rounding the VISIT down to a day threw away the information that mattered; rounding the NOTE up to the end of its own day keeps a stable meaning in any timezone.
+
+`parse()` still reads the day-string shape that briefly shipped, converting that day to its end, so a browser that loaded the first version carries on rather than losing a cycle. It can be deleted once no browser can plausibly still hold it.

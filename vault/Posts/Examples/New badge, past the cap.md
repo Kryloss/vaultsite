@@ -8,7 +8,7 @@ description_uk: Старіше за 30 днів, тож значка не буд
 draft: true
 ---
 
-This note is dated **2026-06-10**. Set the marker to January (the snippet in [[New badge example]]) and it is unquestionably new to you — you have not been here since — and it still gets no chip.
+This note is dated **2026-06-10**. Put your last visit far enough back (the snippet in [[New badge example]]) and it is unquestionably new to you — you have not been here since — and it still gets no chip.
 
 That is `MAX_AGE_MS` doing its job. Strictly, everything published since your last visit is new to you; but come back after a year and every row would say New, and a list where everything is new is a list where nothing is. The chip is a nudge, not an inbox.
 
