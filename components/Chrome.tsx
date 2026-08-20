@@ -29,6 +29,25 @@ import { useLang } from "@/components/useLang";
 import { ui } from "@/lib/ui-strings";
 import { shortcutKey } from "@/lib/shortcut-key";
 
+/**
+ * How long the pointer has to stay in the left edge strip before the panel
+ * answers, in milliseconds.
+ *
+ * Opening was instant, and instant is wrong for a target you can hit without
+ * meaning to. The strip runs the full height of the window at x < 16px, so
+ * every throw of the pointer at the browser's back button, every overshoot on
+ * the way to a link near the left margin, and every pass across the screen
+ * that happens to end short slid a sidebar out over the page.
+ *
+ * Small enough that a deliberate move to the edge still feels like the panel
+ * was already there — the pointer has not finished settling at 90ms, and the
+ * 300ms slide starts from under it either way. Long enough that a pointer
+ * merely PASSING through the strip is gone before the timer fires. It buys
+ * intent, not deliberation: this is not a hover-intent heuristic measuring
+ * velocity, just the shortest dwell that distinguishes arriving from crossing.
+ */
+const PEEK_DELAY = 90;
+
 export interface NavItem {
   slug: string;
   title: string;
@@ -102,17 +121,41 @@ export default function Chrome({
   const pathname = usePathname();
 
   /**
-   * The hover peek: open on entering the left edge, close on leaving the
-   * panel — but only after a grace period. Clipping the corner on the way
-   * somewhere else, or crossing the hairline border for a frame, shouldn't
-   * slam the panel shut and reopen it; the delay makes the edge forgiving
-   * without making it slow to answer, since opening is immediate.
+   * The hover peek, and the two delays that make an invisible edge target
+   * usable — one before it opens, one before it closes.
+   *
+   * OPENING waits `PEEK_DELAY` (see above), so the strip answers a pointer
+   * that arrives rather than one that passes through.
+   *
+   * CLOSING waits longer. Clipping the corner on the way somewhere else, or
+   * crossing the hairline border for a frame, shouldn't slam the panel shut
+   * and reopen it. The asymmetry is deliberate and it's the usual one for
+   * hover-revealed surfaces: opening by accident costs the reader the page
+   * they were looking at, closing by accident costs them the thing they were
+   * reaching for, and the second is the more annoying of the two — so the
+   * cheap mistake gets the short fuse.
    */
   const closeTimer = useRef(0);
   const cancelClose = useCallback(() => {
     if (closeTimer.current) {
       clearTimeout(closeTimer.current);
       closeTimer.current = 0;
+    }
+  }, []);
+
+  /**
+   * The pending open, cancelled when the pointer leaves the strip before the
+   * delay is up — which is the whole point of having a delay.
+   *
+   * Also fires harmlessly once per successful peek: the panel slides out over
+   * the strip it came from, so the edge zone gets a `pointerleave` the moment
+   * it opens. By then the timer has already run and the ref is 0.
+   */
+  const openTimer = useRef(0);
+  const cancelOpen = useCallback(() => {
+    if (openTimer.current) {
+      clearTimeout(openTimer.current);
+      openTimer.current = 0;
     }
   }, []);
 
@@ -125,7 +168,13 @@ export default function Chrome({
       // Never slide the page's own navigation in under an open dialog.
       if (searchOpen) return;
       cancelClose();
-      setOpenBy((v) => v ?? "peek");
+      // Re-entering the strip while a peek is already pending restarts
+      // nothing — the dwell that's been accumulating is the one that counts.
+      if (openTimer.current) return;
+      openTimer.current = window.setTimeout(() => {
+        openTimer.current = 0;
+        setOpenBy((v) => v ?? "peek");
+      }, PEEK_DELAY);
     },
     [cancelClose, searchOpen]
   );
@@ -145,7 +194,13 @@ export default function Chrome({
     }, 180);
   }, [cancelClose]);
 
-  useEffect(() => cancelClose, [cancelClose]);
+  useEffect(
+    () => () => {
+      cancelClose();
+      cancelOpen();
+    },
+    [cancelClose, cancelOpen]
+  );
 
   /**
    * Open the panel deliberately, or close it — the panel icon and the `m` key
@@ -158,8 +213,12 @@ export default function Chrome({
    */
   const toggleMenu = useCallback(() => {
     cancelClose();
+    // The button overlaps the strip, so reaching for it arms a peek on the
+    // way. Left pending, it would fire 90ms after a click that CLOSED the
+    // panel and open it again as a peek.
+    cancelOpen();
     setOpenBy((v) => (v === "modal" ? null : "modal"));
-  }, [cancelClose]);
+  }, [cancelClose, cancelOpen]);
 
   /**
    * Collapse the bar to just its button when the reader scrolls down, restore
@@ -274,7 +333,12 @@ export default function Chrome({
   useEffect(() => setOpenBy(null), [pathname]);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpenBy(null);
+      // `cancelOpen` too: dismissing with the pointer still resting in the
+      // edge strip must not let a peek armed a moment ago undo the Escape.
+      if (e.key === "Escape") {
+        cancelOpen();
+        setOpenBy(null);
+      }
       // Read through shortcutKey for the same reason every other shortcut is:
       // ⌘K under a Cyrillic layout arrives as `л` (see lib/shortcut-key.ts).
       if ((e.metaKey || e.ctrlKey) && shortcutKey(e) === "k") {
@@ -284,7 +348,7 @@ export default function Chrome({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [cancelOpen]);
 
   const openSearch = useCallback(() => setSearchOpen(true), []);
 
@@ -360,12 +424,17 @@ export default function Chrome({
            drift. */
         /* No `backdrop-blur-*` here: `.chrome-bar` layers its own, so the
            blur can fall off toward the rim instead of stopping dead at it. */
-        /* Home has no crumb, so the chip is one 32px button: even padding all
-           round makes it an actual circle rather than a pill 4px wider than it
-           is tall, which at this size reads as a mistake. */
-        className={`chrome-bar fixed left-3 top-3 z-30 flex items-center rounded-full py-1 ${
-          crumbs.length > 0 ? "gap-1 px-1.5" : "px-1"
-        }`}
+        /* PADDING IS CONSTANT, on home and everywhere else. The chip is the
+           only piece of chrome that survives a navigation intact, and the
+           button inside it is the only thing in the chip that's on every page.
+           Tightening the padding on home to square the pill up moved that
+           button 2px sideways the moment you arrived — a control shifting
+           under the pointer while the page behind it is still settling, which
+           is the one kind of motion a fixed element must not make. Home's chip
+           is a 44×40 pill rather than a circle, and the button doesn't move.
+           (Squaring it the other way — growing the height to 44 — is worse
+           still: this bar and `.toc-bar` are built to the same 2.5rem, #51.) */
+        className="chrome-bar fixed left-3 top-3 z-30 flex items-center gap-1 rounded-full px-1.5 py-1"
         data-compact={swap}
       >
         <button
@@ -438,7 +507,12 @@ export default function Chrome({
           scrollbar's width on the other side and over nothing you'd click, so
           it costs the page nothing until you aim at it. Pointer devices only
           — see `.edge-zone` in globals.css. */}
-      <div aria-hidden className="edge-zone fixed inset-y-0 left-0 z-20 w-4" onPointerEnter={peek} />
+      <div
+        aria-hidden
+        className="edge-zone fixed inset-y-0 left-0 z-20 w-4"
+        onPointerEnter={peek}
+        onPointerLeave={cancelOpen}
+      />
 
       {/* Backdrop — the clicked panel only. Dimming the page every time the
           pointer crosses the edge would make a glance feel like a decision. */}

@@ -1292,12 +1292,30 @@ That's the doubled edge, and the way it was reported is what identified it: it s
 
 ## 82. Home's breadcrumb is gone, not shortened (2026-08-20)
 
-The bar at the top-left named home with the surname — "Leshchenko", "Лещенко" (#68). It's removed: on home the chip is the panel button alone, a round 40px chip, and `homeName` is gone from `lib/site-config.ts` with it.
+The bar at the top-left named home with the surname — "Leshchenko", "Лещенко" (#68). It's removed: on home the chip is the panel button alone, and `homeName` is gone from `lib/site-config.ts` with it.
 
 **A crumb is a trail, and home's trail is empty.** Every other page's crumb answers "where does this sit" and links somewhere you aren't. Home's linked to `/` — the page already showing — so it was a word that could not be used, occupying width in the corner the eye lands on first, on the one page whose job is to be uncluttered. #68 had already noticed half of this, when it stopped giving that crumb the "you are here" colour because it hadn't earned the emphasis; this is the rest of the same observation.
 
-**The label cell isn't rendered at all on home, rather than emptied.** `.bar-swap` is a grid cell sized by its contents, so an empty one still carries `padding-right` and the pill would keep a few pixels of dead space on its right. `crumbs.length > 0` gates the whole span, and the same test picks the chip's padding — `px-1` when there's nothing but the button, so it's a circle rather than a pill 4px wider than it is tall.
+**The label cell isn't rendered at all on home, rather than emptied.** `.bar-swap` is a grid cell sized by its contents, so an empty one still carries `padding-right` and the pill would keep a few pixels of dead space on its right. `crumbs.length > 0` gates the whole span.
+
+**And the chip's padding is NOT conditional, which was the first attempt and was wrong.** With one 32px button and no label, `px-1.5` leaves a 44×40 pill rather than a circle, so the padding was tightened to `px-1` on home to square it up. That moves the button 2px to the left the instant you arrive. The chip is the only piece of chrome that survives a navigation intact and the button is the only thing in it that's on every page — reported immediately as the bar "moving for a bit" when switching to home, because a fixed control shifting under the pointer while the page behind it is still settling is exactly the motion a fixed control must not make. The padding is constant now and home's chip is a pill. Squaring it the other way is worse: growing the height to 44 breaks the 2.5rem this bar shares with `.toc-bar` (#51), and moves the button vertically instead.
+
+Note what does still change: the pill's right edge, which goes from the width of "Kyrylo · Posts" to the width of the button in one frame. That's a content change and it's meant to be instant — animating it would be a chip resizing itself in the corner of the eye on every navigation, which is #52's mistake in a new place. Nothing that persists across the navigation moves; only the part that's leaving.
 
 **Nothing was lost with it.** The name is the `<h1>` two lines below in the vault's own words ("Hey, I'm Kyrylo Leshchenko."), the sidebar wordmark still carries it, and `authorName` — not `homeName` — is what feeds JSON-LD and RSS. The breadcrumb's structured-data twin never emitted home anyway (#40).
 
 **Revisit when:** a page other than home ends up with zero crumbs. The padding rule keys off `crumbs.length`, not off `isHome`, so it would follow correctly — but the round chip currently reads as "this is home" and that meaning would stop being true.
+
+## 83. The edge peek waits 90ms before it opens (2026-08-20)
+
+Brushing the left edge of the window slides the sidebar out (#—, the `peek` state). It used to open on the first `pointerenter`, with no delay at all; it now waits `PEEK_DELAY` = 90ms of dwell, and cancels if the pointer leaves the strip first.
+
+**Instant is wrong for a target you can hit without meaning to.** The strip is 16px wide and the full height of the window, and it is invisible — so it collects every throw of the pointer at the browser's back button, every overshoot on the way to a link near the left margin, and every pass across the screen that happens to end short. Each one slid a panel out over the page the reader was looking at. The strip has no affordance to say "don't come here", so the correction has to be in time rather than in space; widening or narrowing it trades one of those failures for the other.
+
+**90ms buys intent, not deliberation.** A pointer thrown at the edge is still settling at 90ms and the 300ms slide starts from under it either way, so a move made on purpose still feels like the panel was already there. A pointer merely crossing the strip is gone before the timer fires. It is deliberately not a hover-intent heuristic measuring velocity or angle — the shortest dwell that separates arriving from crossing is the whole of what's needed, and a heuristic would have a wrong answer to be wrong with.
+
+**The open and close delays are asymmetric on purpose** — 90ms in, 180ms out. Opening by accident costs the reader the page they were reading; closing by accident costs them the thing they were reaching for. The second is the more annoying of the two, so the cheap mistake gets the short fuse. (Re-entering the strip while an open is already pending does NOT restart the clock: the dwell that has been accumulating is the one that counts.)
+
+**Three places had to drop a pending open**, and each was a real reversal rather than tidiness: the panel button overlaps the strip, so reaching for it arms a peek on the way, and a click that CLOSED the panel would be undone 90ms later; Escape pressed with the pointer still resting in the strip would be undone the same way; and unmount left a timer holding a `setState`.
+
+**Revisit when:** the strip's width changes. The delay and the width are one setting between them — a wider strip is easier to enter by accident and would want longer, a narrower one is hard enough to hit that the dwell stops earning its keep.
