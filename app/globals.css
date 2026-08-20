@@ -1710,8 +1710,15 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
 .link-preview {
   position: fixed;
   z-index: 60; /* under the lightbox (70) */
-  width: 320px;
-  max-width: calc(100vw - 24px);
+  /* Shrink-to-fit, not a fixed 320px slab. A section whose whole description
+     is "What I'm focused on right now." was getting the same rectangle as a
+     three-line book note, and the difference was empty card. `fit-content`
+     measures the longest line the card actually holds — the floated cover
+     included — so a short preview is a small one, and anything with a real
+     excerpt still hits the 20rem ceiling. DECISIONS #85. */
+  width: fit-content;
+  min-width: 13rem;
+  max-width: min(20rem, calc(100vw - 24px));
   padding: 0.75rem;
   /* Contains the floated cover, so a card whose text runs shorter than its
      image still closes underneath it. */
@@ -1728,6 +1735,16 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   .link-preview {
     box-shadow: 0 8px 30px rgb(0 0 0 / 0.5);
   }
+}
+
+/* A card carrying artwork takes the full ceiling. Shrink-to-fit can't be
+   trusted here: the cover is FLOATED, so it's out of flow and contributes
+   nothing to the card's max-content width — the card would measure its text
+   alone and then squeeze the cover into what was left, wrapping a title that
+   had been fitting on one line. `data-cover` is set by the component, which
+   is the one place that already knows. */
+.link-preview[data-cover] {
+  width: min(20rem, calc(100vw - 24px));
 }
 
 /* The cover FLOATS rather than sitting in its own flex column: the excerpt

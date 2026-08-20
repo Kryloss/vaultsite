@@ -1384,4 +1384,8 @@ The first version rendered in the posts list only, and shelf and people were lef
 
 **The cover is served from the responsive copies.** It paints at ~80px and was loading the original — a 1000 × 1000 PNG for the portrait. `srcSetFor()` was already there; the card just passes it a `sizes` of `80px`.
 
+**A card with no artwork shrinks to its text.** 320px was a fixed slab, so hovering a link to Now — whose entire description is "What I'm focused on right now." — produced the same rectangle as a three-paragraph book note, and the difference was empty card. `width: fit-content` with a `13rem` floor and the 20rem ceiling makes that one 208px wide and 86px tall; anything with a real excerpt still measures past the ceiling and looks exactly as it did.
+
+**Cards that DO carry artwork keep the full ceiling, via `data-cover`.** Shrink-to-fit and floats don't mix: the cover is out of flow, so it contributes nothing to the card's max-content width — the card measures its text alone, then squeezes the cover into what's left and wraps a title that had been fitting. The component sets the attribute because it is the one place that already knows whether there's a cover; `:has()` would have worked too, but a card that silently reflows on browsers without it is a worse failure than an explicit flag.
+
 **Revisit when:** a section type wants a cover with a wildly different shape again — the 80 × 84 box is sized for the covers this vault has, and it is one `min()` to move.

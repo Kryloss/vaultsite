@@ -154,6 +154,9 @@ export default function LinkPreview({ previews }: { previews: Preview[] }) {
   return (
     <div
       className="link-preview"
+      // Tells the CSS to stop shrink-wrapping — see globals.css for why a
+      // floated cover can't be measured by `fit-content`.
+      data-cover={p.cover ? "" : undefined}
       role="tooltip"
       aria-hidden="true"
       style={{
