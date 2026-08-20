@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Stars from "@/components/Stars";
 import T from "@/components/T";
+import NewBadge from "@/components/NewBadge";
 import type { ShelfItem } from "@/lib/shelf";
 
 /**
@@ -87,6 +88,9 @@ export default function ShelfCard({
             <T {...item.statusLabel} />
           </span>
         )}
+        {/* Opposite corner from the status badge, and client-only — see
+            components/NewBadge.tsx. */}
+        <NewBadge date={item.date} variant="cover" />
       </div>
       <span className="mt-2.5 block truncate font-medium leading-snug text-[var(--text)]">
         <T en={item.title} uk={item.titleUk} />

@@ -8,6 +8,7 @@ import {
 } from "@/lib/apple-music";
 import { displayDate, displayDateUk } from "@/lib/vault";
 import T from "@/components/T";
+import NewBadge from "@/components/NewBadge";
 import { ui } from "@/lib/ui-strings";
 
 /**
@@ -103,6 +104,8 @@ export default function MusicList({ section, entries }: ListProps) {
                   <span className="min-w-0">
                     <span className="block truncate font-medium text-[var(--text)]">
                       <T en={entry.title} uk={entry.titleUk} />
+                      {/* Client-only — see components/NewBadge.tsx. */}
+                      <NewBadge date={entry.date} />
                     </span>
                     {entry.description && (
                       <span className="mt-0.5 block truncate text-sm text-[var(--text-secondary)]">

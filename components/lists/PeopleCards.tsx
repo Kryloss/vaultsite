@@ -1,5 +1,6 @@
 import Link from "next/link";
 import T from "@/components/T";
+import NewBadge from "@/components/NewBadge";
 import { ui } from "@/lib/ui-strings";
 import { categoryLabel } from "@/lib/categories";
 
@@ -15,6 +16,8 @@ export interface PersonRow {
   contain?: boolean;
   /** From `categories:` or `category:` frontmatter. */
   categories: string[];
+  /** `date:` frontmatter — read by components/NewBadge.tsx. */
+  date?: string;
 }
 
 /**
@@ -74,7 +77,7 @@ export default function PeopleCards({
               href={`/${sectionSlug}/${row.slug}`}
               className="group press press-soft block"
             >
-              <div className="people-cover aspect-square overflow-hidden rounded-2xl bg-[var(--surface)]">
+              <div className="people-cover relative aspect-square overflow-hidden rounded-2xl bg-[var(--surface)]">
                 {row.cover ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -113,6 +116,8 @@ export default function PeopleCards({
                     {initials(row.title)}
                   </div>
                 )}
+                {/* Client-only — see components/NewBadge.tsx. */}
+                <NewBadge date={row.date} variant="cover" />
               </div>
               <span className="mt-2.5 block truncate font-medium leading-snug text-[var(--text)]">
                 <T en={row.title} uk={row.titleUk} />

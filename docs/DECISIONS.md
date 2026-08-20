@@ -1353,3 +1353,17 @@ The cost is real and bounded: a note dated on the day of your previous visit sta
 The original worry that motivated day-strings — a day-granular date compared against a millisecond clock flipping across a timezone offset — was real but was solved at the wrong end. Rounding the VISIT down to a day threw away the information that mattered; rounding the NOTE up to the end of its own day keeps a stable meaning in any timezone.
 
 `parse()` still reads the day-string shape that briefly shipped, converting that day to its end, so a browser that loaded the first version carries on rather than losing a cycle. It can be deleted once no browser can plausibly still hold it.
+
+### Outcome: every section but `now` carries it, in one of two shapes
+
+The first version rendered in the posts list only, and shelf and people were left out with the note that a card is artwork rather than a row of text. That turned out to be the whole design problem, not a reason to skip them.
+
+**A row of text takes the chip; a card takes a mark on its cover.** `NewBadge` has two variants. `chip` follows a title — posts, projects (the TIL feed), music, and home's recent list — and is the monochrome outline described above. `cover` is for shelf and people, where there is no room after a title and no predictable colour underneath: it becomes a pill on the artwork in exactly the material the shelf's "Reading" badge already uses (`.shelf-status`), because that badge had already solved this problem — a dark scrim and a blur, the one place on a monochrome page where white-on-black is right, since the thing behind it is a photograph.
+
+**The two cover marks take opposite corners.** `.shelf-status` is top-left, `.cover-new` top-right, and they share one rule block so they cannot drift apart. A book you are part-way through that also arrived since your last visit carries both, and neither has to know about the other.
+
+**`now` is deliberately excluded.** It is a status page about the present, not a list of arrivals — everything on it is current by definition, so a New mark there says nothing. `NowList` mounts no badge.
+
+**The date had to be carried onto two view models.** `ShelfItem` (`lib/shelf.ts`) and `PersonRow` (`components/lists/PeopleCards.tsx`) are slimmed-down projections of an entry, and neither kept `date` — nothing had needed it. Both now carry it, which is the only change outside the components themselves.
+
+**Revisit when:** a new section type is added. The rule is not "every list gets a badge" — it is that a list of ARRIVALS gets one, and a page about the present does not.

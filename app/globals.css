@@ -2521,11 +2521,17 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
 
 /* Sits on the artwork, so it needs its own backdrop to stay legible over
    whatever the cover happens to be — hence the blur and the dark scrim
-   rather than the usual theme variables. */
-.shelf-status {
+   rather than the usual theme variables.
+
+   `.cover-new` is the same material for the "New" mark on a shelf or people
+   card (components/NewBadge.tsx, variant="cover"): a card has no room after
+   its title and no predictable colour under the mark, so the chip used in
+   text rows can't work here. It takes the OPPOSITE corner, so a card that is
+   both new and in progress carries both without them colliding. */
+.shelf-status,
+.cover-new {
   position: absolute;
   top: 0.5rem;
-  left: 0.5rem;
   padding: 0.1875rem 0.5rem;
   border-radius: var(--r-full);
   background: rgb(0 0 0 / 0.62);
@@ -2536,6 +2542,14 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   letter-spacing: 0;
   line-height: 1.3;
   white-space: nowrap;
+}
+
+.shelf-status {
+  left: 0.5rem;
+}
+
+.cover-new {
+  right: 0.5rem;
 }
 
 /* ---------- Copy as Markdown (components/CopyMarkdown.tsx) ---------- */

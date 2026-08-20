@@ -208,8 +208,12 @@ Important conventions:
 - Reader-state signals are CLIENT-ONLY and must start hidden: the site is
   static, so anything derived from localStorage renders after hydration or it
   mismatches. `components/NewBadge.tsx` is a component rather than a hook for
-  this reason — `components/lists/PostRows.tsx` also renders on the server as
-  a Suspense fallback, and a hook there would empty the static HTML.
+  this reason — `components/lists/PostRows.tsx` and `PeopleCards.tsx` also
+  render on the server as Suspense fallbacks, and a hook there would empty the
+  static HTML. It renders in every section list except `now`, in one of two
+  shapes: a chip after a title in text rows, or a mark on the cover of a shelf
+  or people card. A new section type that lists ARRIVALS should mount it; a
+  page about the present should not.
 - Self-theming SVG diagrams are deliberately inlined; do not replace them with
   ordinary `<img>` output. Excalidraw JSON is not shipped.
 - Image notes pair a bilingual SVG/Excalidraw embed with an original photo via

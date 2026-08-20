@@ -6,26 +6,40 @@ import { ui } from "@/lib/ui-strings";
 import { isNew, newSince } from "@/lib/new-notes";
 
 /**
- * "New" beside a list row's title — a note dated after the day you were last
- * here (`lib/new-notes.ts`).
+ * "New" on an entry that arrived after your last visit (`lib/new-notes.ts`).
  *
- * Client-only and starts hidden, like every other reader-state badge on the
+ * Client-only and starts hidden, like every other reader-state signal on the
  * site (`components/Series.tsx` and its read counts): the server has no idea
  * who is reading, so rendering this during SSR would mismatch on hydration.
  * It fills in a frame after mount instead.
  *
- * A component rather than a class on the row, because it has to sit inside
- * `PostRows` — which renders on BOTH sides (it is the Suspense fallback for
- * `PostListClient`). A hook there would make the whole list client-only and
- * empty the static HTML that crawlers and JS-off visitors get.
+ * A component rather than a hook, because it has to sit inside components that
+ * render on BOTH sides — `PostRows` and `PeopleCards` are the Suspense
+ * fallbacks for their own client halves. A hook there would make the whole
+ * list client-only and empty the static HTML that crawlers and JS-off visitors
+ * get.
  *
- * Monochrome, unlike the amber Draft badge next to it: Draft is a warning that
- * only ever appears in `npm run dev`, and the page itself has no accent colour
- * (`docs/DECISIONS.md` #64). Same outline as an inactive filter chip, which is
- * this design's quiet chip — and unlike a filled one it stays legible when the
- * row takes its `--bg-hover` wash.
+ * Two shapes, because the site lists things two ways:
+ *
+ * - `chip` (default) follows a title in a row of text — posts, projects,
+ *   music. Monochrome, unlike the amber Draft chip it sits beside: Draft only
+ *   appears in `npm run dev`, and the published page has no accent colour
+ *   (`docs/DECISIONS.md` #64). It takes the outline of an inactive filter
+ *   chip, which is this design's quiet chip, and unlike a filled one it stays
+ *   legible when the row takes its `--bg-hover` wash.
+ *
+ * - `cover` is for a card whose subject is artwork — shelf and people. There
+ *   is no room after a title there and no predictable colour underneath, so it
+ *   becomes a mark ON the cover in the same material as the shelf's "Reading"
+ *   badge (`.shelf-status`), in the opposite corner so a card can carry both.
  */
-export default function NewBadge({ date }: { date?: string }) {
+export default function NewBadge({
+  date,
+  variant = "chip",
+}: {
+  date?: string;
+  variant?: "chip" | "cover";
+}) {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -35,7 +49,13 @@ export default function NewBadge({ date }: { date?: string }) {
   if (!show) return null;
 
   return (
-    <span className="ml-2 rounded border border-[var(--border)] px-1.5 py-0.5 text-xs font-medium text-[var(--text-secondary)]">
+    <span
+      className={
+        variant === "cover"
+          ? "cover-new"
+          : "ml-2 rounded border border-[var(--border)] px-1.5 py-0.5 text-xs font-medium text-[var(--text-secondary)]"
+      }
+    >
       <T {...ui.newBadge} />
     </span>
   );

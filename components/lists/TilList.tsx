@@ -3,6 +3,7 @@ import type { ListProps } from "@/lib/section-types";
 import { renderMarkdown } from "@/lib/markdown";
 import { displayDate, displayDateUk } from "@/lib/vault";
 import T from "@/components/T";
+import NewBadge from "@/components/NewBadge";
 import { ui } from "@/lib/ui-strings";
 
 /** Entries longer than this (raw markdown chars) get truncated with an expand toggle. */
@@ -59,6 +60,9 @@ export default async function TilList({ section, entries }: ListProps) {
             >
               <T en={entry.title} uk={entry.titleUk} />
             </Link>
+            {/* Outside the link: it labels the entry, it isn't part of the
+                thing you click. Client-only — see components/NewBadge.tsx. */}
+            <NewBadge date={entry.date} />
           </h2>
           {rendered[i].preview ? (
             <>

@@ -41,6 +41,8 @@ export interface ShelfItem {
   statusLabel?: Str;
   /** `categories:` frontmatter — filter chips on the medium page. */
   categories: string[];
+  /** `date:` frontmatter — read by components/NewBadge.tsx. */
+  date?: string;
 }
 
 export interface ShelfGroup {
@@ -165,6 +167,7 @@ export function toShelfItem(entry: Entry): ShelfItem {
     status,
     statusLabel,
     categories: parseCategories(entry.meta),
+    date: entry.date,
   };
 }
 

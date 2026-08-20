@@ -42,6 +42,7 @@ export default function PeopleGrid({ section, entries }: ListProps) {
     coverSrcSet: srcSetFor(resolveCoverUrl(entry.sectionDir, entry.meta.cover)),
     contain: entry.meta.coverFit === "contain" || undefined,
     categories: parseCategories(entry.meta),
+    date: entry.date,
   }));
 
   const categories: string[] = [];
