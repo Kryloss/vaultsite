@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import type { LinkPreview as Preview } from "@/lib/previews";
@@ -21,8 +22,10 @@ const OPEN_DELAY = 350;
 const CLOSE_DELAY = 180;
 const CARD_WIDTH = 320;
 const MARGIN = 12;
-/** Enough room to render the tallest card below the link, else flip above. */
-const ESTIMATED_HEIGHT = 190;
+/** Enough room to render the tallest card below the link, else flip above.
+   Two lines of title over three of excerpt, plus padding — the cover no
+   longer sets a floor, it floats inside the text (see globals.css). */
+const ESTIMATED_HEIGHT = 155;
 
 interface Position {
   left: number;
@@ -160,8 +163,18 @@ export default function LinkPreview({ previews }: { previews: Preview[] }) {
       }}
     >
       {p.cover && (
+        // The cover floats and the excerpt wraps beneath it, so its height is
+        // free: --cover-ar lets CSS give every image its own proportions
+        // inside one box instead of cropping them all to 2:3.
         // eslint-disable-next-line @next/next/no-img-element
-        <img className="link-preview-cover" src={p.cover} alt="" />
+        <img
+          className="link-preview-cover"
+          src={p.cover}
+          srcSet={p.coverSrcSet}
+          sizes="80px"
+          alt=""
+          style={{ "--cover-ar": p.coverAr } as CSSProperties}
+        />
       )}
       <div className="link-preview-body">
         <p className="link-preview-meta">

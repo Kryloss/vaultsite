@@ -13,6 +13,7 @@ import {
   displayDateUk,
 } from "./vault";
 import { resolveCoverUrl } from "./markdown";
+import { dimsFor, srcSetFor } from "./blur";
 
 export interface LinkPreview {
   /** Site-absolute URL, e.g. "/posts/how-was-my-day" — the lookup key. */
@@ -29,6 +30,17 @@ export interface LinkPreview {
   dateLabelUk?: string;
   /** Cover image for section types that have one (people, shelf). */
   cover?: string;
+  /**
+   * The cover's intrinsic width ÷ height. The card sizes the image from this
+   * rather than cropping it into a fixed portrait box: the vault's covers run
+   * from 0.60 (a tall paperback) through 1.00 (a square portrait) to 5.05 (a
+   * show's logo banner), and a 2:3 box beheaded the square ones. Undefined for
+   * remote `cover: https://…` images, which have no build-time size — the card
+   * falls back to 2:3 and contains rather than crops. See DECISIONS #85.
+   */
+  coverAr?: number;
+  /** Narrower WebP copies — the card paints the cover at ~80px, not 1000px. */
+  coverSrcSet?: string;
 }
 
 const EXCERPT_CHARS = 180;
@@ -80,6 +92,8 @@ export function getLinkPreviews(): LinkPreview[] {
     });
 
     for (const entry of getEntries(section)) {
+      const cover = resolveCoverUrl(entry.sectionDir, entry.meta.cover);
+      const dims = dimsFor(cover);
       out.push({
         href: `/${section.slug}/${entry.slug}`,
         title: entry.title,
@@ -90,7 +104,9 @@ export function getLinkPreviews(): LinkPreview[] {
         excerptUk: entry.contentUk ? excerpt(entry.contentUk) : undefined,
         dateLabel: entry.date ? displayDate(entry.date) : undefined,
         dateLabelUk: entry.date ? displayDateUk(entry.date) : undefined,
-        cover: resolveCoverUrl(entry.sectionDir, entry.meta.cover),
+        cover,
+        coverAr: dims ? Number((dims.w / dims.h).toFixed(3)) : undefined,
+        coverSrcSet: cover ? srcSetFor(cover) : undefined,
       });
     }
   }

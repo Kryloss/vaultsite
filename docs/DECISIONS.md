@@ -218,6 +218,8 @@ Two fixes were applied, in order:
 
 **Spoilers** are a checkbox and its label (`||inline||`, and `> [!spoiler]` for a block), so they reveal with no JavaScript and never render as a dead control. In Obsidian a spoiler callout is just an ordinary callout. Their ids run through the same `idPrefix` as headings — both languages ship in one document, so an unprefixed id would have made the English spoiler toggle the Ukrainian one.
 
+Both kinds toggle **both ways**, but they get there differently. The inline label wraps its own text, so clicking a revealed one hides it again. The callout can't: its label is a transparent cover laid over the body (a `<label>` takes only phrasing content, and the body is arbitrary markdown), and that cover is `display: none` once revealed so the text stays selectable and links inside it work. The way back is a **second label on the same checkbox — the callout title**, which sits outside the blur, is always present, and isn't something you click by accident while reading. A small "Hide" appears beside it only once the body is showing. The focus ring follows the same logic: it rides the cover while hidden and the title once revealed, because the cover is gone by then and a ring on a `display: none` element is no ring at all.
+
 **Shelf status rows** (`shelfHighlights()`) are deliberately separate from `shelfGroups()`. They're display-only and must never reach `shelfMediumSlugs()`, or "In progress" would generate a page at `/shelf/type/in-progresses`. Items appear both in a status row and in their medium row, which is how every streaming shelf behaves.
 
 ## 24. Note maturity defaults to seedling (2026-07-26)

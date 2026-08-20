@@ -116,3 +116,22 @@ test("ordinary callouts and blockquotes are untouched by the pull-quote pass", a
   assert.match(html, /<blockquote>\s*<p>An ordinary quote\.<\/p>\s*<\/blockquote>/);
   assert.doesNotMatch(html, /pullquote/);
 });
+
+test("a spoiler can be hidden again: its title labels the same checkbox", async () => {
+  const html = await renderMarkdown(
+    "> [!spoiler] How the film ends\n> He was dead the whole time.",
+    "Posts",
+    "posts"
+  );
+  const id = html.match(/<input type="checkbox" id="([^"]+)" class="spoiler-toggle"/)?.[1];
+  assert.ok(id, "spoiler emits a toggle");
+  // Two labels for one checkbox: the cover reveals, the title puts it back —
+  // the cover is gone once revealed, so without the title there is no way out.
+  assert.match(html, new RegExp(`<label for="${id}" class="callout-title spoiler-title"`));
+  assert.match(html, new RegExp(`<label for="${id}" class="spoiler-cover"`));
+});
+
+test("the spoiler title carries a localised hide affordance", async () => {
+  const en = await renderMarkdown("> [!spoiler] Ending\n> Text.", "Posts", "posts");
+  assert.match(en, /class="callout-title spoiler-title" data-hide="Hide"/);
+});

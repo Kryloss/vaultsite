@@ -555,6 +555,8 @@ function transformCallouts(md: string, idPrefix = ""): string {
   const revealLabel = idPrefix.startsWith("uk-")
     ? "Показати спойлер"
     : "Reveal spoiler";
+  // Shown beside the title once revealed, as the way back to hidden.
+  const hideLabel = idPrefix.startsWith("uk-") ? "Сховати" : "Hide";
   for (let i = 0; i < lines.length; i++) {
     const m = lines[i].match(/^>\s*\[!(\w+)\][+-]?\s*(.*)$/);
     if (!m) {
@@ -581,13 +583,21 @@ function transformCallouts(md: string, idPrefix = ""): string {
     // once revealed, so the text underneath stays selectable and any links in
     // it work. A checkbox does the toggling, so there's no JavaScript and no
     // dead control for anyone without it; in Obsidian it stays a plain callout.
+    //
+    // The title is a second label for the same checkbox, which is what makes
+    // the spoiler re-hideable: once revealed the cover is gone, and the body
+    // can't be the target again without costing selection and links. The title
+    // is outside the blur, always present, and never something you click by
+    // accident while reading.
     if (type === "spoiler") {
       const id = `${idPrefix}sp-${++spoilerN}`;
       out.push(
         `<div class="callout spoiler-callout" data-callout="spoiler">`,
         "",
         `<input type="checkbox" id="${id}" class="spoiler-toggle" />`,
-        `<p class="callout-title">${escapeHtml(title)}</p>`,
+        `<label for="${id}" class="callout-title spoiler-title" data-hide="${escapeHtml(
+          hideLabel
+        )}">${escapeHtml(title)}</label>`,
         `<span class="spoiler-reveal">`,
         `<span class="spoiler-body">`,
         "",

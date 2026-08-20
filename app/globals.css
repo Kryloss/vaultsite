@@ -2384,6 +2384,36 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   font-weight: 600;
 }
 
+/* The title is a second label for the same checkbox — it's what puts a
+   revealed spoiler back. The cover is gone by then, and the body can't take
+   the click back without costing selection and any links inside it. */
+.spoiler-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  width: fit-content;
+  max-width: 100%;
+  cursor: pointer;
+}
+
+/* The way back only needs naming once the text is showing. */
+.spoiler-title::after {
+  content: attr(data-hide);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: var(--text-tertiary);
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease);
+}
+
+.spoiler-callout .spoiler-toggle:checked ~ .spoiler-title::after {
+  opacity: 0.6;
+}
+
+.spoiler-callout .spoiler-toggle:checked ~ .spoiler-title:hover::after {
+  opacity: 1;
+}
+
 /* The blurred passage is the target, not the title. .spoiler-cover is a
    transparent label laid over it — see the note in lib/markdown.ts for why
    it overlays rather than wraps. */
@@ -2432,6 +2462,14 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
 .spoiler-callout .spoiler-toggle:focus-visible ~ .spoiler-reveal .spoiler-cover {
   outline: 2px solid var(--text-secondary);
   outline-offset: 0;
+}
+
+/* Revealed, the cover is display:none and would take the focus ring with it —
+   so the ring moves to the title, which is the control that still works. */
+.spoiler-callout .spoiler-toggle:checked:focus-visible ~ .spoiler-title {
+  outline: 2px solid var(--text-secondary);
+  outline-offset: 2px;
+  border-radius: var(--r-xs);
 }
 
 .callout[data-callout="spoiler"] {

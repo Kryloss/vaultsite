@@ -1,0 +1,9 @@
+import { test } from "node:test";
+import { renderMarkdown } from "./markdown.ts";
+
+test("spoiler callout render", async () => {
+  const html = await renderMarkdown(
+    "> [!spoiler] How the film ends\n> He was dead the whole time.\n\nInline: ||secret here||\n"
+  );
+  console.log(html);
+});
