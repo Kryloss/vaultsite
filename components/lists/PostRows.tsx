@@ -3,6 +3,7 @@ import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
 import { categoryLabel } from "@/lib/categories";
 import { shortDate } from "@/lib/dates";
+import NewBadge from "@/components/NewBadge";
 import type { PostRow } from "@/components/lists/PostListClient";
 
 /**
@@ -77,6 +78,9 @@ export default function PostRows({
                           Draft
                         </span>
                       )}
+                      {/* Client-only, so it renders nothing here on the
+                          server — see components/NewBadge.tsx. */}
+                      <NewBadge date={row.date} />
                     </span>
                     {row.description && (
                       <span className="mt-0.5 block truncate text-sm text-[var(--text-secondary)]">

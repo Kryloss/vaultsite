@@ -9,6 +9,7 @@ import {
 import { renderMarkdown } from "@/lib/markdown";
 import T from "@/components/T";
 import SocialLinks from "@/components/SocialLinks";
+import NewBadge from "@/components/NewBadge";
 import { ui } from "@/lib/ui-strings";
 import { displayDateUk } from "@/lib/vault";
 import { pageMeta } from "@/lib/metadata";
@@ -106,6 +107,8 @@ export default async function HomePage() {
                 >
                   <span className="truncate font-medium text-[var(--text)]">
                     <T en={entry.title} uk={entry.titleUk} />
+                    {/* Client-only — see components/NewBadge.tsx. */}
+                    <NewBadge date={entry.date} />
                   </span>
                   {entry.date && (
                     <time

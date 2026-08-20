@@ -74,6 +74,8 @@ export const ui = {
 
   // entry pages
   draft: { en: "Draft", uk: "Чернетка" },
+  /** Dated after the day you were last here — see lib/new-notes.ts. */
+  newBadge: { en: "New", uk: "Нове" },
   minRead: { en: "min read", uk: "хв читання" },
   words: { en: "words", uk: "слів" },
   /** First link on every page, visible only when focused. */

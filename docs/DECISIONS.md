@@ -1319,3 +1319,23 @@ Brushing the left edge of the window slides the sidebar out (#—, the `peek` st
 **Three places had to drop a pending open**, and each was a real reversal rather than tidiness: the panel button overlaps the strip, so reaching for it arms a peek on the way, and a click that CLOSED the panel would be undone 90ms later; Escape pressed with the pointer still resting in the strip would be undone the same way; and unmount left a timer holding a `setState`.
 
 **Revisit when:** the strip's width changes. The delay and the width are one setting between them — a wider strip is easier to enter by accident and would want longer, a narrower one is hard enough to hit that the dwell stops earning its keep.
+
+## 84. "New" is measured against your last visit, not against the clock (2026-08-20)
+
+**Decision:** A note dated after the day you were last here carries a small **New** chip in the posts list and in home's recent-posts list. The marker lives in one localStorage key (`notes-seen`), the maths is `lib/new-notes.ts` (tested), and the chip is `components/NewBadge.tsx`.
+
+**A fixed recency window was the other option, and it says nothing about you.** "Posted in the last 7 days" needs no storage and could even be server-rendered, but a reader who comes every day sees the same badges all week, and one who comes back after a month sees none at all. The badge is only worth having if it answers *what have I not seen*, which is a question about the reader — so the site has to remember the reader, and the only thing it can remember is this browser.
+
+**The marker advances once per SESSION, not once per page load.** Stamping it on arrival is the obvious implementation and it destroys the feature: the first page you open clears every badge, so you only ever see them on whichever list you happened to land on. A gap of more than `SESSION_GAP_MS` (30 minutes) starts a new visit; anything shorter is the same visit, so the badges survive a reload and a browse around. The answer is also memoized for the life of the page, so a soft navigation doesn't clear the row you were looking at.
+
+**Comparison is by DAY, not by timestamp.** An entry's `date` is day-granular, so testing it against a millisecond clock is a coin flip across a timezone offset — a note dated today is "before" a visit made this morning in one timezone and "after" it in another. Both sides become a local `YYYY-MM-DD` and compare as plain strings, which ISO dates do correctly.
+
+**Nothing older than 30 days is ever badged, however long you have been away.** Strictly, everything published since your last visit IS new to you — but come back after a year and every row says New, and a list where everything is new is a list where nothing is. The cap is the admission that this is a nudge, not an inbox.
+
+**A first-ever visit badges nothing.** There is no previous visit to be new since, and marking the whole list on arrival tells a first-time reader the opposite of what the chip means.
+
+**The chip is monochrome, unlike the amber Draft chip beside it.** Draft only ever appears in `npm run dev` — it is a warning to the author, and the one place a colour is allowed to shout. New is part of the published page, which has no accent colour (#64). It takes the outline of an inactive filter chip, which is this design's quiet chip; a filled one built from `--surface` disappeared into the row's `--bg-hover` wash on hover.
+
+**It renders client-side only**, like every other reader-state signal here (`components/Series.tsx` and its read counts). `PostRows` is rendered on both sides — it is the Suspense fallback for `PostListClient` — so the badge had to be its own client component rather than a hook, or the whole list would have become client-only and the static HTML that crawlers and JS-off visitors get would have shipped empty.
+
+**Revisit when:** posting rate changes. The 30-day cap assumes a note every week or two; at a note a day it is too generous, and at one a quarter it hides things that really are unseen.

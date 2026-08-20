@@ -200,11 +200,16 @@ Important conventions:
 - Canonical metadata is required because `?lang=uk` is an indexable duplicate
   without it. Use `pageMeta()` and preserve JSON-LD, sitemap, RSS, and OG-image
   behavior when adding routes or content types.
-- Reading progress, read-note state, reading position, series state, keyboard
-  shortcuts, link previews, selection links, lightbox behavior, and command
-  palette actions are separate features with documented invariants. Search
-  `CLAUDE.md`, their implementation, tests, and matching decision records before
-  changing any of them.
+- Reading progress, read-note state, reading position, series state, the "New
+  since your last visit" badge, keyboard shortcuts, link previews, selection
+  links, lightbox behavior, and command palette actions are separate features
+  with documented invariants. Search `CLAUDE.md`, their implementation, tests,
+  and matching decision records before changing any of them.
+- Reader-state signals are CLIENT-ONLY and must start hidden: the site is
+  static, so anything derived from localStorage renders after hydration or it
+  mismatches. `components/NewBadge.tsx` is a component rather than a hook for
+  this reason — `components/lists/PostRows.tsx` also renders on the server as
+  a Suspense fallback, and a hook there would empty the static HTML.
 - Self-theming SVG diagrams are deliberately inlined; do not replace them with
   ordinary `<img>` output. Excalidraw JSON is not shipped.
 - Image notes pair a bilingual SVG/Excalidraw embed with an original photo via
