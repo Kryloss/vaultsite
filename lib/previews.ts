@@ -43,7 +43,9 @@ export interface LinkPreview {
   coverSrcSet?: string;
 }
 
-const EXCERPT_CHARS = 180;
+/* Short enough that the card stays about as tall as its cover — nothing is
+   line-clamped any more, so this is what bounds the card's height. */
+const EXCERPT_CHARS = 140;
 
 /** Markdown → a short, clean plain-text excerpt. */
 function excerpt(md: string): string {
@@ -68,7 +70,7 @@ function excerpt(md: string): string {
   if (text.length <= EXCERPT_CHARS) return text;
   const cut = text.slice(0, EXCERPT_CHARS);
   const lastSpace = cut.lastIndexOf(" ");
-  return `${(lastSpace > 80 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`;
+  return `${(lastSpace > 60 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`;
 }
 
 /**

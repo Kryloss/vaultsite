@@ -176,25 +176,23 @@ export default function LinkPreview({ previews }: { previews: Preview[] }) {
           style={{ "--cover-ar": p.coverAr } as CSSProperties}
         />
       )}
-      <div className="link-preview-body">
-        <p className="link-preview-meta">
-          <T en={p.section} uk={p.sectionUk} />
-          {p.dateLabel && (
-            <>
-              <span aria-hidden> · </span>
-              <T en={p.dateLabel} uk={p.dateLabelUk} />
-            </>
-          )}
-        </p>
-        <p className="link-preview-title">
-          <T en={p.title} uk={p.titleUk} />
-        </p>
-        {p.excerpt && (
-          <p className="link-preview-excerpt">
-            <T en={p.excerpt} uk={p.excerptUk} />
-          </p>
+      <p className="link-preview-meta">
+        <T en={p.section} uk={p.sectionUk} />
+        {p.dateLabel && (
+          <>
+            <span aria-hidden> · </span>
+            <T en={p.dateLabel} uk={p.dateLabelUk} />
+          </>
         )}
-      </div>
+      </p>
+      <p className="link-preview-title">
+        <T en={p.title} uk={p.titleUk} />
+      </p>
+      {p.excerpt && (
+        <p className="link-preview-excerpt">
+          <T en={p.excerpt} uk={p.excerptUk} />
+        </p>
+      )}
     </div>
   );
 }

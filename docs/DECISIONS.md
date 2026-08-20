@@ -106,7 +106,7 @@ Two fixes were applied, in order:
 
 ## 12. Hover link previews from a build-time index (2026-07-24)
 
-**Decision:** Internal links inside `.prose` show an Obsidian-style preview card on hover. `lib/previews.ts` builds an href → {title, excerpt, date, cover} index at build time; the layout passes it to `components/LinkPreview.tsx` as props, exactly like the Cmd+K search index. Excerpts are capped at 180 characters. The feature is pointer-only (`hover: hover and pointer: fine`) and the card is `pointer-events: none`.
+**Decision:** Internal links inside `.prose` show an Obsidian-style preview card on hover. `lib/previews.ts` builds an href → {title, excerpt, date, cover} index at build time; the layout passes it to `components/LinkPreview.tsx` as props, exactly like the Cmd+K search index. Excerpts are capped at 180 characters (140 since #85, which also gave the card its layout). The feature is pointer-only (`hover: hover and pointer: fine`) and the card is `pointer-events: none`.
 
 **Why:** Same reasoning as decision #8 — the site is small enough that shipping the index in the HTML payload beats any fetch, and it keeps decision #1 (no runtime infrastructure) intact. The index is roughly a tenth the size of the search index already in every page. Pointer-only because a tap should just follow the link; a non-interactive card can never swallow a click or get stuck open, which is where hover popovers usually go wrong.
 
@@ -1369,3 +1369,19 @@ The first version rendered in the posts list only, and shelf and people were lef
 **The date had to be carried onto two view models.** `ShelfItem` (`lib/shelf.ts`) and `PersonRow` (`components/lists/PeopleCards.tsx`) are slimmed-down projections of an entry, and neither kept `date` — nothing had needed it. Both now carry it, which is the only change outside the components themselves.
 
 **Revisit when:** a new section type is added. The rule is not "every list gets a badge" — it is that a list of ARRIVALS gets one, and a page about the present does not.
+
+## 85. The hover card gives every cover its own shape (2026-08-20)
+
+**Decision:** The link preview card (#12) no longer crops its cover into a fixed 44 × 66 portrait beside a column of text. The image floats, the excerpt wraps under it, and it is sized from its own intrinsic ratio — carried in the index as `coverAr` — inside a box of 80 × 84: `width: min(5rem, calc(5.25rem * var(--cover-ar)))` with a matching `aspect-ratio`. Width leads for a tall paperback, height for a wide banner, and nothing is ever cut.
+
+**A 2:3 box is a guess about book covers, and the vault disagrees with it.** The covers actually in `.image-manifest.json` run from 0.60 (a tall Hemingway paperback) through 0.63, 0.68, 0.76, 0.81 — and then 1.00 for the square portrait on the People note, and 5.05 for a show's logo banner. The old box was right for none of them and beheaded the portrait, which is the one image on the site where a face is the whole content. Sizing from the real dimensions costs nothing: `dimsFor()` already reads them at build time for `rehypeImageSize`, so this is a number the site had and wasn't using.
+
+**A cover that can't fit gets smaller, never cropped.** The `min()` is the whole rule: past the cap the height gives way instead of the image. Mr Robot's 5:1 banner renders 80 × 16 — a sliver, and an honest one. A remote `cover: https://…` has no build-time size, so it falls back to 2:3 with `object-fit: contain` — letterboxed rather than cut, since the fallback is a guess and a guess should not be destructive.
+
+**The cover floats because the alternative is a column of nothing.** In the flex row it was, a 66px image sat beside an 85px block of text with 19px of empty card under it, and any attempt to stretch the image to close that gap meant cropping again. Floated, the excerpt flows under the cover once it clears — the card is exactly as tall as its contents, whichever of the two is taller.
+
+**Which is why nothing inside the card may set `overflow` or `display: -webkit-box`.** Both establish a formatting context, and a box with its own formatting context is laid out *beside* a float in the space left over — it never flows under. The title and excerpt were `-webkit-box` line clamps and had to go, or the float would have bought nothing. `EXCERPT_CHARS` bounds the card's height instead, dropped from 180 to 140 now that it is the only thing doing so. There is a comment saying this above the rule; it is the kind of thing that gets "tidied" back in.
+
+**The cover is served from the responsive copies.** It paints at ~80px and was loading the original — a 1000 × 1000 PNG for the portrait. `srcSetFor()` was already there; the card just passes it a `sizes` of `80px`.
+
+**Revisit when:** a section type wants a cover with a wildly different shape again — the 80 × 84 box is sized for the covers this vault has, and it is one `min()` to move.

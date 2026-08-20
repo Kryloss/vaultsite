@@ -1710,11 +1710,12 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
 .link-preview {
   position: fixed;
   z-index: 60; /* under the lightbox (70) */
-  display: flex;
-  gap: 0.75rem;
   width: 320px;
   max-width: calc(100vw - 24px);
-  padding: 0.875rem;
+  padding: 0.75rem;
+  /* Contains the floated cover, so a card whose text runs shorter than its
+     image still closes underneath it. */
+  overflow: hidden;
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
   background: var(--bg);
@@ -1729,46 +1730,52 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   }
 }
 
-.link-preview-cover {
-  flex: none;
-  width: 44px;
-  height: 66px;
-  border-radius: var(--r-sm);
-  object-fit: cover;
-  background: var(--bg-hover);
-}
+/* The cover FLOATS rather than sitting in its own flex column: the excerpt
+   wraps under it once it clears, so the card is never a short image beside a
+   tall paragraph with a column of nothing between them.
 
-.link-preview-body {
-  min-width: 0; /* let the text truncate instead of stretching the card */
+   Nothing in the card may take `overflow` or `display: -webkit-box` — each
+   makes its own formatting context, which is laid out BESIDE a float instead
+   of flowing around it, i.e. the dead column again. That's why the title and
+   excerpt are no longer line-clamped; EXCERPT_CHARS bounds them instead.
+   DECISIONS #85. */
+.link-preview-cover {
+  float: left;
+  /* Every cover fits an 80 × 84 box AT ITS OWN RATIO — width leads for a tall
+     paperback, height for a wide logo banner. The old fixed 44 × 66 beheaded
+     the square portraits in People. */
+  width: min(5rem, calc(5.25rem * var(--cover-ar, 0.667)));
+  aspect-ratio: var(--cover-ar, 0.667);
+  height: auto;
+  margin: 0.125rem 0.6875rem 0.125rem 0;
+  border-radius: var(--r-sm);
+  /* Only bites on a remote `cover: https://…`, whose shape isn't known at
+     build time: it letterboxes into the fallback 2:3 rather than cropping. */
+  object-fit: contain;
 }
 
 .link-preview-meta {
   margin: 0;
   font-size: 0.75rem;
+  line-height: 1.35;
   color: var(--text-tertiary);
 }
 
 .link-preview-title {
-  margin: 0.125rem 0 0;
+  margin: 0.0625rem 0 0;
   font-size: 0.9375rem;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.3;
   color: var(--text);
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
+  overflow-wrap: break-word;
 }
 
 .link-preview-excerpt {
-  margin: 0.3125rem 0 0;
+  margin: 0.25rem 0 0;
   font-size: 0.8125rem;
-  line-height: 1.5;
+  line-height: 1.45;
   color: var(--text-secondary);
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  overflow: hidden;
+  overflow-wrap: break-word;
 }
 
 /* ---------- Heading anchors (lib/toc.ts) ---------- */
