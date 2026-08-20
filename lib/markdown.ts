@@ -3,6 +3,7 @@
  *
  * Preprocessing (regex, before the unified pipeline):
  * 1. Obsidian callouts: > [!note] Title  → styled <div class="callout">
+ *    (`[!spoiler]` blurs its body; `[!pull]` becomes a margin pull-quote)
  * 2. ![[image.png]] / ![[image.png|alt]] / ![[image.png|300]] → images
  *    (≤128px sized embeds render as circular avatars)
  * 3. [[Note Name]] / [[Note Name|label]] → internal links, resolved
@@ -599,6 +600,28 @@ function transformCallouts(md: string, idPrefix = ""): string {
         `</span>`,
         "",
         `</div>`
+      );
+      continue;
+    }
+
+    // `> [!pull]` lifts the quote out of the column and into the left margin,
+    // beside the paragraph it belongs to, instead of interrupting the read.
+    //
+    // A callout rather than a new syntax so Obsidian still renders it as a
+    // quote — an unknown callout type falls back to a plain one there, which
+    // is close enough to what it means. The callout's title, if given, becomes
+    // the attribution; unlike every other callout there's no generated one,
+    // because "Pull" is not a thing anybody wants above their own sentence.
+    if (type === "pull") {
+      out.push(
+        `<aside class="pullquote">`,
+        "",
+        ...body,
+        "",
+        ...(m[2].trim()
+          ? [`<p class="pullquote-cite">${escapeHtml(m[2].trim())}</p>`, ""]
+          : []),
+        `</aside>`
       );
       continue;
     }

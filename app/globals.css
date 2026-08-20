@@ -1941,10 +1941,98 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
    piece of floating chrome still painted in the page's own colour — invisible
    on a dark screen. It now shares the token with the contents pill opposite
    it, and the two are once again the same object at two corners. */
+/* --- The floating breadcrumb bar ------------------------------------------
+   The blur is LAYERED rather than a single `backdrop-filter`. One flat blur
+   ends exactly where the element does, so a pill over a page of text reads as
+   a frosted stamp sitting on top of it: sharp text, then abruptly soft, then
+   sharp again along a hard rim. Two layers — a gentle one across the whole
+   pill and a stronger one masked to fade out toward the edge — let it fall off
+   instead, so the bar sinks into the page rather than covering it.
+
+   The `z-index: -1` layers need their parent to be a stacking context, and
+   every surface here already is one — each is positioned with a `z-index` of
+   its own (30, 30, 50). It is tempting to add `isolation: isolate` to say so
+   out loud; don't. Isolation forms a BACKDROP ROOT, and a backdrop root is
+   precisely the boundary `backdrop-filter` stops sampling at — the layers
+   would blur the panel's own fill and nothing else. The blur and the thing
+   that guarantees it works are the same property here.
+
+   Without blur support the fill alone carries it: `--chrome-bg` is opaque
+   enough to read against.
+   NO `position` HERE. The bar is `fixed` from a utility class in Chrome.tsx,
+   and a `position: relative` in this file lands later in the stylesheet at the
+   same specificity, so it wins — the bar drops into normal flow, stretches to
+   the full width of its parent and scrolls away with the page. `fixed` already
+   makes it a containing block for the layers below; it needed nothing here. */
 .chrome-bar {
   background: var(--chrome-bg);
   box-shadow: inset 0 0 0 1px var(--chrome-ring);
 }
+
+/* --- The sidebar, on the same material ------------------------------------
+   The drawer used to be a flat panel of `--bg` with a hairline down its right
+   edge, which is a door: opaque, and either open or shut. On the same
+   translucent fill as the two floating bars it reads as a layer over the page
+   instead — you can still see where you were, which is the honest description
+   of a panel you opened by brushing the edge of the window and will lose again
+   the moment you move away.
+
+   NO `position` HERE — it's `fixed` from a utility in Chrome.tsx, and a class
+   in this file would beat it (see the note on `.chrome-bar`). */
+.sidebar-panel {
+  background: var(--chrome-bg);
+  /* INSET. A hairline, not a border, so it takes no layout and the panel stays
+     exactly `w-56` — the constellation's 174px strip is measured against that.
+     But an OUTSET shadow sits outside the box, and this box spends most of its
+     life translated fully off-screen with its right edge exactly on x=0: a 1px
+     line down the left of the window, always, on every page. Inset draws the
+     same hairline just inside the edge, and it leaves with the panel. */
+  box-shadow: inset -1px 0 0 0 var(--chrome-ring);
+  /* ONE uniform blur, and no graduated second layer — the pills get that and
+     this doesn't. A pill is small and floats free, so every side is an edge
+     and softening them all is what stops it reading as a stamp. A full-height
+     panel has one edge against the page, and fading the blur across its width
+     put a seam down the middle of it: heavily blurred on the left, barely on
+     the right, which looks like two panels side by side rather than one that
+     dissolves. The hairline already says where this one ends.
+
+     Directly on the element rather than a pseudo-element, since with a single
+     layer there is nothing to stack. */
+  backdrop-filter: blur(14px);
+}
+
+.chrome-bar::before,
+.chrome-bar::after,
+.toc-bar::before,
+.toc-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* The floor: enough to separate the bar from whatever runs under it. */
+.chrome-bar::before,
+.toc-bar::before {
+  backdrop-filter: blur(5px);
+}
+
+/* And the graduated one on top, strongest in the middle and gone by the rim.
+   `closest-side` keys the gradient to the pill's own height, so the fall-off
+   is the same on a narrow crumb and a wide one. */
+.chrome-bar::after,
+.toc-bar::after {
+  backdrop-filter: blur(16px);
+  mask-image: radial-gradient(
+    closest-side at 50% 50%,
+    #000 25%,
+    rgb(0 0 0 / 0.55) 65%,
+    transparent 100%
+  );
+}
+
 
 .bar-swap {
   display: grid;
@@ -2093,7 +2181,9 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   border-radius: var(--r-full);
   background: var(--chrome-bg);
   box-shadow: inset 0 0 0 1px var(--chrome-ring);
-  backdrop-filter: blur(12px);
+  /* Layered blur, shared with `.chrome-bar` — see the note there. Its own
+     `z-index: 30` above already makes this a stacking context, which is all
+     the `z-index: -1` layers need. */
   transition: background-color var(--dur-fast) var(--ease);
 }
 
@@ -3521,6 +3611,90 @@ svg.diagram tspan {
 @media (hover: hover) and (pointer: fine) {
   .edge-zone {
     display: block;
+  }
+}
+
+/* ==========================================================================
+   Typography and motion added 2026-08-13 — see docs/DECISIONS.md #81.
+   ========================================================================== */
+
+/* --- Pull-quotes (`> [!pull]` — lib/markdown.ts) ---------------------------
+   A line worth stopping on, lifted out of the column into the left margin so
+   it sits BESIDE the paragraph it came from instead of interrupting it.
+
+   Below 1280px there is no margin to move into, so it stays in flow and reads
+   as an emphasised quote. That's the honest fallback: unlike a sidenote, the
+   text is part of the argument and can't be tucked away into a list at the
+   bottom. */
+.prose .pullquote {
+  margin: 1.75rem 0;
+  padding-left: 1rem;
+  border-left: 2px solid var(--border);
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+.prose .pullquote p {
+  margin: 0.5rem 0;
+}
+
+.prose .pullquote p:first-child {
+  margin-top: 0;
+}
+
+.prose .pullquote p:last-child {
+  margin-bottom: 0;
+}
+
+/* The callout's title, if it was given one. An attribution, so it's quieter
+   than the quote and upright against it. */
+.prose .pullquote-cite {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  font-style: normal;
+  color: var(--text-tertiary);
+}
+
+.prose .pullquote-cite::before {
+  content: "— ";
+}
+
+@media (min-width: 1280px) {
+  /* THE SIDENOTES' GUTTER, to the pixel. Same width, same pull, same `clear`,
+     so a quote and a footnote in the same paragraph stack rather than land on
+     one another — see the geometry note on `.sidenote` above. The rule moves
+     to the right edge because in the margin the quote hangs off the text, and
+     a bar on its left would point away from the column it belongs to. */
+  .prose .pullquote {
+    float: left;
+    clear: left;
+    width: 12rem;
+    margin: 0.35rem 0 0.75rem -14.5rem;
+    padding: 0 1rem 0 0;
+    border-left: 0;
+    border-right: 2px solid var(--border);
+    text-align: right;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+
+  .prose .pullquote-cite {
+    font-size: 0.75rem;
+  }
+}
+
+/* Paper has no margins to hang things in. */
+@media print {
+  .prose .pullquote {
+    float: none;
+    width: auto;
+    margin: 1.5rem 0;
+    padding: 0 0 0 1rem;
+    border-left: 2px solid var(--border);
+    border-right: 0;
+    text-align: left;
   }
 }
 

@@ -28,7 +28,6 @@ import T from "@/components/T";
 import { useLang } from "@/components/useLang";
 import { ui } from "@/lib/ui-strings";
 import { shortcutKey } from "@/lib/shortcut-key";
-import { homeName } from "@/lib/site-config";
 
 export interface NavItem {
   slug: string;
@@ -323,16 +322,19 @@ export default function Chrome({
   const section = sectionSlug ? nav.find((i) => i.slug === sectionSlug) : undefined;
 
   // Site name first, section after — "Kyrylo · Music" reads the way the
-  // trail is walked (home, then in), rather than most-specific-first. Home
-  // has no parent, so the name stands alone there rather than leaving the bar
-  // empty — and switches to the surname, since it's naming the page rather
-  // than leading a path. See lib/site-config.ts.
+  // trail is walked (home, then in), rather than most-specific-first.
+  //
+  // HOME HAS NO CRUMB AT ALL. It used to carry the surname, on the reasoning
+  // that a bar naming nowhere should at least sign the page; but a crumb is a
+  // trail, and on home the trail is empty. Naming it there put a word in the
+  // bar whose only link pointed at the page you were already on, and paid for
+  // it in width across the top-left corner of the site's most-looked-at page.
+  // What's left is the panel button — the one control the bar has always had
+  // that actually goes somewhere — sitting on its own as a round chip.
   const isHome = segments.length === 0;
-  const crumbs: { en: string; uk?: string; href: string }[] = [
-    isHome
-      ? { ...homeName, href: "/" }
-      : { en: siteName, uk: siteNameUk, href: "/" },
-  ];
+  const crumbs: { en: string; uk?: string; href: string }[] = isHome
+    ? []
+    : [{ en: siteName, uk: siteNameUk, href: "/" }];
   // Skipped on the section's own page, which sits at the root.
   if (section && section.slug !== "home" && segments.length > 1)
     crumbs.push({ en: section.title, uk: section.titleUk, href: `/${section.slug}` });
@@ -356,7 +358,14 @@ export default function Chrome({
            share the `--chrome-bg` token with the contents pill in the opposite
            corner — they're the same object twice and can't be allowed to
            drift. */
-        className="chrome-bar fixed left-3 top-3 z-30 flex items-center gap-1 rounded-full px-1.5 py-1 backdrop-blur-md"
+        /* No `backdrop-blur-*` here: `.chrome-bar` layers its own, so the
+           blur can fall off toward the rim instead of stopping dead at it. */
+        /* Home has no crumb, so the chip is one 32px button: even padding all
+           round makes it an actual circle rather than a pill 4px wider than it
+           is tall, which at this size reads as a mistake. */
+        className={`chrome-bar fixed left-3 top-3 z-30 flex items-center rounded-full py-1 ${
+          crumbs.length > 0 ? "gap-1 px-1.5" : "px-1"
+        }`}
         data-compact={swap}
       >
         <button
@@ -388,38 +397,41 @@ export default function Chrome({
             The time is always rendered, even with nothing to say: an element
             mounted mid-swap has no previous style to animate from, which is
             its own kind of jump. */}
-        <span className="bar-swap">
-          <span className={`crumbs${swap ? " is-collapsed" : ""}`}>
-          {crumbs.map((crumb, i) => (
-            <Fragment key={crumb.href}>
-              {i > 0 && <span className="text-[var(--text-tertiary)]"> · </span>}
-              <Link
-                href={crumb.href}
-                className={`transition-colors hover:text-[var(--text)] ${
-                  /* The full-colour crumb is whichever one is CLOSEST to the
-                     current page — last now that the site name leads. On
-                     home there's only one crumb and it isn't naming
-                     anywhere closer than the page you're already on, so it
-                     stays the quiet grey rather than borrowing the emphasis
-                     that elsewhere marks "this is where you are". */
-                  i === crumbs.length - 1 && !isHome
-                    ? "text-[var(--text)]"
-                    : "text-[var(--text-secondary)]"
-                }`}
-              >
-                <T en={crumb.en} uk={crumb.uk} />
-              </Link>
-            </Fragment>
-          ))}
+        {crumbs.length > 0 && (
+          <span className="bar-swap">
+            <span className={`crumbs${swap ? " is-collapsed" : ""}`}>
+              {crumbs.map((crumb, i) => (
+                <Fragment key={crumb.href}>
+                  {i > 0 && (
+                    <span className="text-[var(--text-tertiary)]"> · </span>
+                  )}
+                  <Link
+                    href={crumb.href}
+                    className={`transition-colors hover:text-[var(--text)] ${
+                      /* The full-colour crumb is whichever one is CLOSEST to
+                         the current page — last now that the site name leads.
+                         Home renders no crumbs at all, so there's no longer a
+                         lone crumb that would be pointing at the page you're
+                         already standing on. */
+                      i === crumbs.length - 1
+                        ? "text-[var(--text)]"
+                        : "text-[var(--text-secondary)]"
+                    }`}
+                  >
+                    <T en={crumb.en} uk={crumb.uk} />
+                  </Link>
+                </Fragment>
+              ))}
+            </span>
+            <span className="bar-time" aria-hidden={timeLeft === null}>
+              {timeLeft !== null && (
+                <>
+                  {timeLeft} <T {...ui.minLeft} />
+                </>
+              )}
+            </span>
           </span>
-          <span className="bar-time" aria-hidden={timeLeft === null}>
-            {timeLeft !== null && (
-              <>
-                {timeLeft} <T {...ui.minLeft} />
-              </>
-            )}
-          </span>
-        </span>
+        )}
       </div>
 
       {/* The left edge, live to the pointer. A strip this narrow is under the
@@ -433,12 +445,25 @@ export default function Chrome({
       <div
         aria-hidden
         onClick={() => setOpenBy(null)}
+        /* THE WHOLE VIEWPORT, including behind the panel.
+           Two attempts stopped it short of the panel's edge — first a static
+           `left-56`, then a transform tracking the slide — on the theory that
+           a dimming layer under a translucent sidebar would tint the sidebar.
+           It does, and that turns out to be right: a translucent panel over a
+           dimmed page IS darker, the way every sheet on every platform is.
+           What's wrong is stopping the dim at the panel's edge, because then
+           the page reads bright THROUGH the panel and dark beside it, and the
+           sidebar looks like a window cut out of the page rather than a layer
+           over it. That's the doubled edge, and it only ever showed when
+           opening by the icon — the peek has no backdrop to give it away. */
         className={`fixed inset-0 z-40 bg-black/25 transition-opacity duration-300 ${
           modal ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       />
 
-      {/* Drawer — flat: page background, hairline border, text + icons only */}
+      {/* Drawer — text and icons only, on the same translucent material as the
+          two floating bars, with a hairline down its right edge. It was a flat
+          panel of `--bg` first, which reads as a door; see DECISIONS #81. */}
       <aside
         ref={drawerRef}
         id="site-menu"
@@ -454,7 +479,9 @@ export default function Chrome({
         inert={!open}
         onPointerEnter={cancelClose}
         onPointerLeave={unpeek}
-        className={`fixed inset-y-0 left-0 z-50 flex w-56 flex-col border-r border-[var(--border)] bg-[var(--bg)] py-5 transition-transform duration-300 ease-out ${
+        /* Fill, hairline and the layered blur come from `.sidebar-panel` in
+           globals.css, the same way the two floating bars get theirs. */
+        className={`sidebar-panel fixed inset-y-0 left-0 z-50 flex w-56 flex-col py-5 transition-transform duration-300 ease-out ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >

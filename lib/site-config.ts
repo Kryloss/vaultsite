@@ -17,15 +17,6 @@ export const siteNameUk = "Кирило";
  */
 export const authorName = "Kyrylo Leshchenko";
 
-/**
- * Breadcrumb label on the home page only.
- *
- * Everywhere else the site name is the tail of a path ("Posts · Kyrylo"), so
- * the first name reads as a possessive. On home there's no path — the crumb is
- * standing in for the page itself — and the surname reads as a signature.
- */
-export const homeName = { en: "Leshchenko", uk: "Лещенко" };
-
 /** Canonical URL (custom domain, connected on Vercel). */
 export const siteUrl = "https://kryloss.com";
 

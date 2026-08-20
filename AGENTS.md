@@ -268,6 +268,19 @@ Important conventions:
   Ukrainian layout. `docs/DECISIONS.md` #77.
 - Motion must answer interaction and disappear under reduced motion/print.
   Preserve the established `.press`, arrow-throw, stagger, and marker patterns.
+- Any `animation-timeline` declaration must sit inside `@supports`. The gate is
+  not decoration: without timeline support the same declarations run on the
+  default TIME timeline and the animation simply plays once on load. Never put
+  a scroll-driven animation on a property an element already transitions — the
+  animation wins and the transition silently stops working. A drop cap, a
+  heading hairline and a shelf parallax were built and then removed; see
+  `docs/DECISIONS.md` #81 before rebuilding any of them.
+- `app/globals.css` has no `@layer`, so a bare class selector there BEATS a
+  Tailwind utility of the same specificity. Do not set `position`, `display` or
+  `width` on a class whose element carries a utility for it — that is how the
+  floating breadcrumb ended up full-width and scrolling with the page (#81).
+- `> [!pull]` is a pull-quote, not a callout, and shares the sidenotes' gutter
+  geometry. Change one and the other has to move with it.
 
 ## Verification
 

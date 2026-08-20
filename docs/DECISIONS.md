@@ -1261,3 +1261,43 @@ In the drawer's flow rather than absolutely positioned, which follows from being
 **`today` is a parameter, not a clock read.** The last column depends on it, and a component that reads the clock can't be asserted. It's the build date, which is right for a static site: "now" is whenever it last deployed.
 
 **Revisit when:** the vault has a year or two of steady dates, at which point a day grid becomes worth having and probably wants a page rather than the drawer. Also if the shelf notes are ever re-dated to when things were actually read or watched — that alone would change what the honest resolution is.
+
+## 81. Pull-quotes, and a layered blur on the floating chrome (2026-08-13)
+
+**Decision:** Two things kept out of a batch of five — pull-quotes in the left margin (`> [!pull]` in `lib/markdown.ts`), and a blur that falls off at the edge on both floating bars (`.chrome-bar` and `.toc-bar`). A drop cap, a rule drawn under each heading, and parallax on the shelf covers were built alongside them and removed; the last section here says why that's worth recording.
+
+**Pull-quotes reuse the sidenotes' gutter, to the pixel.** `> [!pull]` — a callout, so Obsidian still shows it as a quote — becomes an `<aside class="pullquote">` floated into the left margin at 1280px and up, with the same width, the same `-14.5rem` pull and the same `clear: left` as a sidenote, so a quote and a footnote in the same paragraph stack instead of landing on one another. The callout's title becomes the attribution, and unlike every other callout there is no generated one: "Pull" is not a thing anybody wants printed above their own sentence.
+
+Below 1280px it stays in flow as an emphasised quote rather than disappearing. That's the difference from a sidenote, which can fall back to the list at the bottom of the page: a pull-quote is part of the argument, so it has to stay somewhere a reader can reach it.
+
+**The chrome's blur is layered.** One flat `backdrop-filter` ends exactly where the element does, so a pill over a page of text reads as a frosted stamp sitting on it: sharp, abruptly soft, then sharp again along a hard rim. Two layers — a gentle one across the whole surface, a stronger one masked to fade out toward the edge — let it fall off instead, and the chrome sinks into the page rather than covering it.
+
+The `z-index: -1` layers need their parent to be a stacking context so they sit above its background and below its text rather than vanishing behind the page — and all three already are, each being positioned with a `z-index` of its own. The first version added `isolation: isolate` to each anyway, to say so out loud. **That is the one property that must not be there:** isolation forms a BACKDROP ROOT, which is exactly the boundary `backdrop-filter` stops sampling at, so the layers would have blurred the surface's own fill and nothing behind it. The effect and the property that silently disables it were one line apart.
+
+All three share one set of rules — the breadcrumb top-left, the contents pill bottom-left and the sidebar are the same material, and the two pills were already built to the same height (#51).
+
+**The sidebar takes one uniform blur, not the graduated pair.** It was given the same two layers first, with the fall-off running sideways instead of radially — full height, one edge against the page, so fading toward the right seemed like the same idea rotated. It isn't. Across 224px the gradient is wide enough to see: heavily blurred on the left, barely on the right, with the transition visible as a seam down the middle. It reads as two panels side by side rather than one that dissolves, and it's most obvious while the panel slides, which is what made it look like an animation bug.
+
+The graduation is for a surface small enough that its edges are most of it. A pill floats free and every side is an edge, so softening them is what stops it reading as a stamp on the page. A full-height panel already has a hairline saying where it ends, and one even blur behind it is the whole of what it needs.
+
+**The sidebar stopped being a door.** It was a flat panel of `--bg` with a hairline down its right edge — opaque, and either open or shut. On the same translucent fill it reads as a layer over the page: you can still see where you were, which is the honest description of a panel you opened by brushing the edge of the window and will lose again the moment you move away.
+
+Two details had to move with it. The hairline is a `box-shadow` rather than a `border`, so it takes part in no layout and the panel is exactly `w-56` — the constellation's strip is measured against that width to the pixel (#80). It has to be an INSET shadow: an outset one sits outside the box, and this box spends most of its life translated fully off-screen with its right edge exactly on x=0, which put a 1px line down the left of the window on every page of the site.
+
+**And the modal backdrop had to be left alone, after two goes at "fixing" it.** A dimming layer under a translucent panel tints the panel, so it was first stopped at `left-56`, then given a transform tracking the slide so its edge met the panel's at every frame. Both were solving the wrong problem. A translucent panel over a dimmed page IS darker — that is what a sheet looks like on every platform there is. What's actually wrong is stopping the dim at the panel's edge: the page then reads bright THROUGH the panel and dark immediately beside it, so the sidebar looks like a window cut out of the page rather than a layer over it.
+
+That's the doubled edge, and the way it was reported is what identified it: it showed when opening with the ICON and not when peeking from the edge. The two paths differ in exactly one thing — the peek has no backdrop — so the backdrop was the only suspect left. The dimming covers the whole viewport again, the panel included.
+
+**Revisit when:** a pull-quote is wanted on a page whose gutter belongs to something else — the geometry is copied from `.sidenote`, and the two would have to move together.
+
+## 82. Home's breadcrumb is gone, not shortened (2026-08-20)
+
+The bar at the top-left named home with the surname — "Leshchenko", "Лещенко" (#68). It's removed: on home the chip is the panel button alone, a round 40px chip, and `homeName` is gone from `lib/site-config.ts` with it.
+
+**A crumb is a trail, and home's trail is empty.** Every other page's crumb answers "where does this sit" and links somewhere you aren't. Home's linked to `/` — the page already showing — so it was a word that could not be used, occupying width in the corner the eye lands on first, on the one page whose job is to be uncluttered. #68 had already noticed half of this, when it stopped giving that crumb the "you are here" colour because it hadn't earned the emphasis; this is the rest of the same observation.
+
+**The label cell isn't rendered at all on home, rather than emptied.** `.bar-swap` is a grid cell sized by its contents, so an empty one still carries `padding-right` and the pill would keep a few pixels of dead space on its right. `crumbs.length > 0` gates the whole span, and the same test picks the chip's padding — `px-1` when there's nothing but the button, so it's a circle rather than a pill 4px wider than it is tall.
+
+**Nothing was lost with it.** The name is the `<h1>` two lines below in the vault's own words ("Hey, I'm Kyrylo Leshchenko."), the sidebar wordmark still carries it, and `authorName` — not `homeName` — is what feeds JSON-LD and RSS. The breadcrumb's structured-data twin never emitted home anyway (#40).
+
+**Revisit when:** a page other than home ends up with zero crumbs. The padding rule keys off `crumbs.length`, not off `isHome`, so it would follow correctly — but the round chip currently reads as "this is home" and that meaning would stop being true.

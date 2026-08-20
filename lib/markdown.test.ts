@@ -79,3 +79,40 @@ test("image note controls are namespaced per rendered language body", async () =
   assert.match(en, /id="en-image-note-1-rendering-pipeline-diagram"/);
   assert.match(uk, /id="uk-image-note-1-rendering-pipeline-diagram"/);
 });
+
+test("[!pull] becomes a margin pull-quote, not a callout", async () => {
+  const html = await renderMarkdown(
+    "> [!pull] Kramatorsk, 2007\n> The plan from here: Cyber Science at TMU.",
+    "Posts",
+    "posts"
+  );
+
+  assert.match(html, /<aside class="pullquote">/);
+  // The body is still markdown, so it comes through as a paragraph.
+  assert.match(html, /<p>The plan from here: Cyber Science at TMU\.<\/p>/);
+  // The callout's title becomes the attribution — and ONLY when one is given.
+  assert.match(html, /<p class="pullquote-cite">Kramatorsk, 2007<\/p>/);
+  // Not a callout: no `.callout` wrapper, and no generated "Pull" title.
+  assert.doesNotMatch(html, /class="callout"/);
+  assert.doesNotMatch(html, /callout-title/);
+});
+
+test("a pull-quote with no title has no attribution line", async () => {
+  const html = await renderMarkdown("> [!pull]\n> Just the line.", "Posts", "posts");
+  assert.match(html, /<aside class="pullquote">/);
+  assert.doesNotMatch(html, /pullquote-cite/);
+  // Specifically not the callout fallback, which would title this "Pull".
+  assert.doesNotMatch(html, /Pull/);
+});
+
+test("ordinary callouts and blockquotes are untouched by the pull-quote pass", async () => {
+  const html = await renderMarkdown(
+    "> [!note] A note\n> Body.\n\n> An ordinary quote.",
+    "Posts",
+    "posts"
+  );
+  assert.match(html, /<div class="callout" data-callout="note">/);
+  assert.match(html, /<p class="callout-title">A note<\/p>/);
+  assert.match(html, /<blockquote>\s*<p>An ordinary quote\.<\/p>\s*<\/blockquote>/);
+  assert.doesNotMatch(html, /pullquote/);
+});
