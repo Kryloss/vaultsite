@@ -5,6 +5,13 @@ aliases:
   - L'ordine del tempo
   - Порядок часу
 author: Carlo Rovelli
+author_uk: Карло Ровеллі
+author_photo: carlo-rovelli.jpg
+# author photo: Wikimedia Commons — Fronteiras do Pensamento, CC BY-SA 2.0
+author_bio: >-
+  Italian theoretical physicist, one of the founders of loop quantum gravity, who writes about time for readers who will never see the equations.
+author_bio_uk: >-
+  Італійський фізик-теоретик, один із засновників петльової квантової гравітації; пише про час для читачів, які ніколи не побачать формул.
 medium: book
 categories: [Nonfiction, Science]
 date: 2026-07-25
@@ -18,7 +25,6 @@ cover: the-order-of-time.jpg
 
 | | |
 |---|---|
-| Author | Carlo Rovelli |
 | Published | 2017 (Italian, *L'ordine del tempo*) |
 | One-liner | Time isn't a river, and the equations never needed one |
 

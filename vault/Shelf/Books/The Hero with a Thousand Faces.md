@@ -6,6 +6,13 @@ aliases:
   - The Monomyth
   - Шлях героя
 author: Joseph Campbell
+author_uk: Джозеф Кемпбелл
+author_photo: joseph-campbell.jpg
+# author photo: Wikimedia Commons — Joan Halifax, CC BY 2.0
+author_bio: >-
+  American scholar of comparative mythology (1904–1987) who spent a career arguing that every culture is telling one story.
+author_bio_uk: >-
+  Американський дослідник порівняльної міфології (1904–1987), який усе життя доводив, що кожна культура розповідає одну й ту саму історію.
 medium: book
 categories: [Nonfiction, Philosophy]
 date: 2026-07-25
@@ -19,7 +26,6 @@ cover: hero-with-a-thousand-faces.jpg
 
 | | |
 |---|---|
-| Author | Joseph Campbell |
 | Published | 1949 |
 | One-liner | One story, retold by every culture that ever told stories |
 

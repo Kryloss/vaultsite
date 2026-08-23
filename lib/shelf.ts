@@ -152,7 +152,7 @@ export function entryMedium(entry: Entry): string | undefined {
 const CREATOR_ROLES: Record<string, Str> = {
   book: ui.creatorAuthor,
   movie: ui.creatorDirector,
-  show: ui.creatorShowrunner,
+  show: ui.creatorShowCreator,
   video: ui.creatorChannel,
   youtube: ui.creatorChannel,
 };

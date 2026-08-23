@@ -20,11 +20,13 @@ import { getSeries } from "@/lib/series";
 import {
   categoryLabel,
   categorySlug,
+  entryCreator,
   entryMedium,
   isShelfSection,
   mediumSlug,
 } from "@/lib/shelf";
 import { ui } from "@/lib/ui-strings";
+import Creator from "@/components/Creator";
 import Stars from "@/components/Stars";
 import T from "@/components/T";
 import Toc from "@/components/Toc";
@@ -97,6 +99,11 @@ export default async function EntryPage({ params }: Props) {
   // their medium's category page; everything else (posts) gets the section
   // page with `?category=`, which its list reads on arrival.
   const medium = entryMedium(entry);
+  /* Who made it — a portrait, their role and a sentence, rendered above the
+     note's own body. Shelf only: a post's author is Kyrylo, which the whole
+     site already says, and the People section's entries ARE the person. */
+  const creator = isShelfSection(section) ? entryCreator(entry) : undefined;
+
   const categoryHref = (category: string) =>
     isShelfSection(section) && medium
       ? `/${section.slug}/type/${mediumSlug(medium)}/${categorySlug(category)}`
@@ -237,6 +244,10 @@ export default async function EntryPage({ params }: Props) {
         {metaLine}
 
       </header>
+
+      {/* Above the article, so it comes before the note's "At a glance"
+          table — see components/Creator.tsx. */}
+      {creator && <Creator creator={creator} />}
 
       {uk ? (
         <>

@@ -3354,6 +3354,112 @@ a.series-link:hover {
   }
 }
 
+/* ---------- Shelf creator (components/Creator.tsx) ---------- */
+
+/* Who made the thing, above the note's own "At a glance" table.
+
+   A row, not a card: no border, no fill, no radius of its own. The page
+   already has a card in it — the At a glance table directly below — and two
+   framed blocks stacked at the top of an article read as a dashboard rather
+   than the opening of something you're about to read. What separates this
+   from the article is the hairline under it and the space, which is the same
+   pair the entry footer uses.
+
+   `--creator-size` is the ONE measurement here: the photo box, the initials
+   circle and the blur placeholder all derive from it, so shrinking the block
+   on a phone is one number rather than four. */
+.creator {
+  --creator-size: 4.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-bottom: 1.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* The circle. It holds its size against a flex row that would otherwise
+   squeeze it to fit a long bio — `flex: none` rather than a min-width, since
+   the height has to be pinned too or a portrait letterboxes itself. */
+.creator-photo {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: var(--creator-size);
+  height: var(--creator-size);
+  overflow: hidden;
+  border-radius: var(--r-full);
+  background: var(--surface);
+}
+
+.creator-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Initials, for a creator with no freely licensed portrait — a channel,
+   usually. Quiet on purpose: it stands in for a photo, it doesn't replace
+   one, so it should not draw more attention than the face would have. */
+.creator-initials {
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-tertiary);
+}
+
+/* `min-width: 0` so a long unbroken name (a channel handle, a URL) wraps
+   instead of pushing the flex row wider than the measure. */
+.creator-text {
+  min-width: 0;
+}
+
+/* The role — the label, so it's the quietest thing here and sits ABOVE the
+   name. Small caps rather than uppercase: the page is set in a serif, and
+   uppercasing a four-letter word in it produces a stub that reads as a
+   heading. Tracking is added back because small type in a text face needs
+   it. */
+.creator-role {
+  font-size: 0.75rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+}
+
+.creator-name {
+  margin-top: 0.05rem;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
+}
+
+/* Secondary, and capped at the reading measure minus the photo — a bio that
+   runs the full width competes with the article's first paragraph. */
+.creator-bio {
+  margin-top: 0.35rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+
+/* A phone has no room for a 72px circle beside three lines of type — the bio
+   ends up four words wide. Shrink the photo rather than dropping it: the face
+   is the point of the block. */
+@media (max-width: 480px) {
+  .creator {
+    --creator-size: 3.5rem;
+    gap: 0.875rem;
+  }
+  .creator-name {
+    font-size: 1rem;
+  }
+  .creator-bio {
+    font-size: 0.875rem;
+  }
+}
+
 /* ---------- People photos ---------- */
 
 /* Partly desaturated at rest, full colour under the pointer.

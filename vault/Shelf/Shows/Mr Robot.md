@@ -2,6 +2,13 @@
 title: Mr. Robot
 title_uk: Містер Робот
 author: Sam Esmail
+author_uk: Сем Есмейл
+author_photo: sam-esmail.jpg
+# author photo: Wikimedia Commons — Daniel Benavides, CC BY 2.0
+author_bio: >-
+  American writer-director. He created Mr. Robot and directed every episode of it from the second season on, which is why the show never loosens its grip.
+author_bio_uk: >-
+  Американський сценарист і режисер. Створив «Містера Робота» й зрежисував кожен його епізод, починаючи з другого сезону, — тому серіал жодного разу не послаблює хватку.
 medium: show
 categories: [Thriller, Tech]
 rating: 4.5
@@ -18,7 +25,6 @@ coverFit: contain
 
 | | |
 |---|---|
-| Creator | Sam Esmail |
 | Aired | 2015–2019, four seasons |
 | One-liner | A cybersecurity engineer gets recruited into a hacktivist collective |
 

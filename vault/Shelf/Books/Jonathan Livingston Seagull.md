@@ -5,6 +5,12 @@ aliases:
   - Джонатан Лівінгстон
   - Чайка Джонатан Лівінгстон
 author: Richard Bach
+author_uk: Річард Бах
+# no free portrait on Wikimedia Commons — the block falls back to initials
+author_bio: >-
+  American pilot and writer whose books keep coming back to flying as a way of talking about everything that isn't flying.
+author_bio_uk: >-
+  Американський пілот і письменник, чиї книжки раз за разом повертаються до польоту як способу говорити про все, що польотом не є.
 medium: book
 categories: [Fiction, Philosophy]
 date: 2026-07-25
@@ -18,7 +24,6 @@ cover: jonathan-livingston-seagull.jpg
 
 | | |
 |---|---|
-| Author | Richard Bach |
 | Published | 1970 |
 | One-liner | Practice, exile, mastery — in about a hundred pages |
 

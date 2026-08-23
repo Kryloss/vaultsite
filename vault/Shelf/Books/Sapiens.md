@@ -5,6 +5,13 @@ aliases:
   - "Sapiens: A Brief History of Humankind"
   - Людина розумна
 author: Yuval Noah Harari
+author_uk: Ювал Ной Харарі
+author_photo: yuval-noah-harari.jpg
+# author photo: Wikimedia Commons — Martin Kraft, CC BY-SA 4.0
+author_bio: >-
+  Israeli historian at the Hebrew University of Jerusalem, who writes very large stretches of the past for people who don't read history books.
+author_bio_uk: >-
+  Ізраїльський історик Єврейського університету в Єрусалимі, який пише про величезні відтинки минулого для тих, хто історичних книжок не читає.
 medium: book
 categories:
   - Nonfiction
@@ -22,7 +29,6 @@ status: reading
 
 | | |
 |---|---|
-| Author | Yuval Noah Harari |
 | Published | 2011 (English edition 2014) |
 | Read | July 2026 |
 | One-liner | How one unremarkable ape ended up running the planet |

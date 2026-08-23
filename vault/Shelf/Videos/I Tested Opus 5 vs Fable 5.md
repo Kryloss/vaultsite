@@ -2,6 +2,11 @@
 title: I Tested Opus 5 vs. Fable 5. What You Need to Know.
 title_uk: Я протестував Opus 5 проти Fable 5. Що варто знати.
 author: Nate Herk | AI Automation
+# no free portrait on Wikimedia Commons — the block falls back to initials
+author_bio: >-
+  A YouTube channel that builds AI agent workflows on camera — mostly in n8n, mostly end to end, with the failures left in.
+author_bio_uk: >-
+  YouTube-канал, на якому автор будує робочі процеси з AI-агентами наживо — здебільшого в n8n, від початку до кінця, не вирізаючи невдач.
 medium: video
 categories: [Tech, Education]
 video: https://www.youtube.com/watch?v=2J3uX8iRNng
@@ -14,7 +19,6 @@ description_uk: "Порівняння двох моделей Claude на одн
 
 | | |
 |---|---|
-| Channel | Nate Herk \| AI Automation |
 | Topic | Anthropic's Claude Opus 5 and Claude Fable 5, compared on the same prompts |
 | Released | — |
 

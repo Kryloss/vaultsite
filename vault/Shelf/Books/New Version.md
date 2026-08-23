@@ -5,6 +5,12 @@ aliases:
   - New Version
   - Нова версія
 author: Andrey Doronichev
+author_uk: Андрій Доронічев
+# no free portrait on Wikimedia Commons — the block falls back to initials
+author_bio: >-
+  Product manager turned founder. He ran YouTube's mobile app at Google before co-founding Optic, and the book turns those frameworks on the reader instead of a product.
+author_bio_uk: >-
+  Продакт-менеджер, який став засновником. Керував мобільним застосунком YouTube у Google, потім став співзасновником Optic; у книжці ті самі фреймворки спрямовані не на продукт, а на читача.
 medium: book
 categories:
   - Nonfiction
@@ -18,7 +24,6 @@ cover: new-version.jpeg
 
 | | |
 |---|---|
-| Author | Andrey Doronichev |
 | Published | 2026 |
 | One-liner | Ship a new version of yourself the way you'd ship a product |
 

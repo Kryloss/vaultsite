@@ -6,6 +6,13 @@ aliases:
   - Valerii Markus
   - Валерій Маркус
 author: Valerii Markus
+author_uk: Валерій Маркус
+author_photo: valerii-markus.jpg
+# author photo: Wikimedia Commons — Роман Ніколаєв, CC0
+author_bio: >-
+  Ukrainian soldier and writer, published under his legal name Valerii Ananiev. Former senior sergeant of the 47th Separate Mechanised Brigade, founder of the Magura NGO, and now serving in military intelligence.
+author_bio_uk: >-
+  Український військовий і письменник, книжка вийшла під його справжнім прізвищем — Ананьєв. Колишній головний сержант 47-ї окремої механізованої бригади, засновник ГО «Маґура», нині — військовослужбовець ГУР.
 medium: book
 categories: [Nonfiction, Biography]
 date: 2026-07-25
@@ -19,7 +26,6 @@ cover: footprints-on-the-road.jpg
 
 | | |
 |---|---|
-| Author | Valerii Markus (published as Valerii Ananiev) |
 | Published | 2018 |
 | One-liner | Military service and the war in the east, written from inside it |
 

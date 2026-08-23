@@ -4,6 +4,13 @@ title_uk: Старий і море
 aliases:
   - Старий і море
 author: Ernest Hemingway
+author_uk: Ернест Гемінгвей
+author_photo: ernest-hemingway.jpg
+# author photo: Wikimedia Commons — Lloyd Arnold, public domain
+author_bio: >-
+  American novelist and war correspondent (1899–1961). Won the Nobel Prize two years after this book, for prose stripped of everything he could take out of it.
+author_bio_uk: >-
+  Американський прозаїк і воєнний кореспондент (1899–1961). Отримав Нобелівську премію через два роки після цієї книжки — за прозу, з якої прибрано все, що можна було прибрати.
 medium: book
 categories: [Fiction]
 date: 2026-07-25
@@ -17,7 +24,6 @@ cover: the-old-man-and-the-sea.jpg
 
 | | |
 |---|---|
-| Author | Ernest Hemingway |
 | Published | 1952 |
 | One-liner | A fisherman's losing streak meets the biggest marlin in the Gulf Stream |
 

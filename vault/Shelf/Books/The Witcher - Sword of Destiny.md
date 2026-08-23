@@ -6,6 +6,13 @@ aliases:
   - Miecz przeznaczenia
   - Меч призначення
 author: Andrzej Sapkowski
+author_uk: Анджей Сапковський
+author_photo: andrzej-sapkowski.jpg
+# author photo: Wikimedia Commons — Niccolò Caranti, CC BY-SA 4.0
+author_bio: >-
+  Polish fantasy writer. He invented Geralt of Rivia for a magazine short-story competition in 1986 and has never really been allowed to write anything else.
+author_bio_uk: >-
+  Польський письменник-фантаст. Вигадав Ґеральта з Рівії для журнального конкурсу оповідань 1986 року — і відтоді йому фактично не дають писати про щось інше.
 medium: book
 categories: [Fiction, Fantasy]
 date: 2026-07-25
@@ -19,7 +26,6 @@ cover: sword-of-destiny.jpg
 
 | | |
 |---|---|
-| Author | Andrzej Sapkowski |
 | Published | 1992 (Polish, *Miecz przeznaczenia*) |
 | One-liner | Moral dilemmas, Yennefer, and the child of destiny |
 

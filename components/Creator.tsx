@@ -21,13 +21,19 @@ import type { ShelfCreator } from "@/lib/shelf";
  * `author_bio:` leaves role and name standing alone. That is not a rare
  * path — a novelist usually has a freely licensed portrait on Wikimedia
  * Commons and a YouTube channel usually has none, so both shapes ship.
+ *
+ * A plain <div>, not a <section>: a section is only worth having as a
+ * landmark if it can be named, an `aria-label` takes one string, and this
+ * site renders BOTH languages into every page (components/T.tsx) — so any
+ * name I could give it would be English for a Ukrainian reader. The role and
+ * the name are visible text and are read in order without it.
  */
 export default function Creator({ creator }: { creator: ShelfCreator }) {
   const { name, nameUk, role, photoUrl, photoBlur, photoSrcSet, bio, bioUk } =
     creator;
 
   return (
-    <section className="creator" aria-label={role.en}>
+    <div className="creator">
       <div className="creator-photo">
         {photoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -38,8 +44,7 @@ export default function Creator({ creator }: { creator: ShelfCreator }) {
                different size, so a single candidate width is honest. */
             sizes="72px"
             /* The name alone. "Portrait of X" is what the shape already
-               says, and a screen reader would read the role label sitting
-               beside it a second time. */
+               says, and the role label sits right beside it in text. */
             alt={name}
             width={72}
             height={72}
@@ -77,17 +82,21 @@ export default function Creator({ creator }: { creator: ShelfCreator }) {
           </p>
         )}
       </div>
-    </section>
+    </div>
   );
 }
 
 /**
- * "Yuval Noah Harari" → "YH". Two letters, first and last word, so a channel
- * called "WVFRM Podcast" reads "WP" rather than "WV" — the same rule the
- * People grid uses, kept identical on purpose.
+ * "Yuval Noah Harari" → "YH", for the creators with no free portrait.
+ *
+ * FIRST and LAST word, not the first two the People grid takes: a person's
+ * surname is the half you recognise, so a middle name must not push it out.
+ * Anything after a `|` is dropped first — a YouTube channel is often written
+ * "Nate Herk | AI Automation", where the tagline after the pipe is not part
+ * of the name and would otherwise supply the second letter.
  */
 function initials(name: string): string {
-  const words = name.split(/[\s|]+/).filter(Boolean);
+  const words = name.split("|")[0].trim().split(/\s+/).filter(Boolean);
   if (words.length === 0) return "";
   const first = words[0][0] ?? "";
   const last = words.length > 1 ? (words[words.length - 1][0] ?? "") : "";

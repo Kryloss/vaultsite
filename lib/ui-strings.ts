@@ -153,12 +153,12 @@ export const ui = {
   /* Shelf creator block (components/Creator.tsx). The role is chosen by the
      note's medium, so a name never appears without saying what it is TO the
      work — "Andrzej Sapkowski" on its own is a byline, "Author · Andrzej
-     Sapkowski" is a fact about the book. "Showrunner" rather than "Creator"
-     for shows: it's the word the credit actually uses, and "Creator" is what
-     this whole block is called, which would read as a tautology. */
+     Sapkowski" is a fact about the book. The Ukrainian for a show says
+     "Автор серіалу" and not the bare "Автор" a book takes: the two are the
+     same word in Ukrainian, and the longer one is what the credit reads. */
   creatorAuthor: { en: "Author", uk: "Автор" },
   creatorDirector: { en: "Director", uk: "Режисер" },
-  creatorShowrunner: { en: "Showrunner", uk: "Шоуранер" },
+  creatorShowCreator: { en: "Creator", uk: "Автор серіалу" },
   creatorChannel: { en: "Channel", uk: "Канал" },
 
   quotesEmpty: {

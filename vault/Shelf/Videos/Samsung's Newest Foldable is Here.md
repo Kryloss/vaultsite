@@ -2,6 +2,11 @@
 title: Samsung's Newest Foldable is Here!
 title_uk: Новий складаний смартфон Samsung уже тут!
 author: WVFRM Podcast
+# no free portrait on Wikimedia Commons for the channel — the block falls back to initials
+author_bio: >-
+  Waveform, the MKBHD podcast: Marques Brownlee, Andrew Manganelli and David Imel talking through the week in consumer tech.
+author_bio_uk: >-
+  Waveform, подкаст MKBHD: Маркес Браунлі, Ендрю Манганеллі та Девід Аймел обговорюють тиждень у споживчих технологіях.
 medium: video
 categories: [Tech]
 video: https://www.youtube.com/watch?v=WVsG3daysEM
@@ -14,7 +19,6 @@ description_uk: "Перші враження команди Waveform від но
 
 | | |
 |---|---|
-| Channel | WVFRM Podcast (Waveform) |
 | Topic | Hands-on with Samsung's newest foldable |
 | Released | — |
 

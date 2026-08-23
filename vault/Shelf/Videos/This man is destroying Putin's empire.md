@@ -2,6 +2,12 @@
 title: This man is destroying Putin's empire
 title_uk: Ця людина руйнує імперію путіна
 author: Caolan Robertson
+author_photo: caolan-robertson.jpg
+# author photo: Wikimedia Commons — Caolan Robertson, CC BY 4.0
+author_bio: >-
+  Irish-born journalist and documentary filmmaker who has been reporting from Ukraine since 2022.
+author_bio_uk: >-
+  Журналіст і документаліст ірландського походження, який висвітлює події в Україні з 2022 року.
 medium: video
 categories: [Politics]
 video: https://www.youtube.com/watch?v=3DA7EXbf_d4
@@ -14,7 +20,6 @@ description_uk: "Інтерв'ю з циклу репортажів Каолан
 
 | | |
 |---|---|
-| Channel | Caolan Robertson |
 | Who he is | Irish journalist, reporting from Ukraine since 2022 and living there full-time since mid-2024 |
 | Recognition | Ukraine's Order of Merit, 3rd Class (June 2026); Honorary Ambassador Award for Digital Diplomacy (2025) |
 | Released | — |

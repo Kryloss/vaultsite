@@ -161,7 +161,8 @@ Core contract:
   `title_uk:` in English frontmatter and a full sibling `.uk.md` body with the
   same structure, links, and embeds.
 - Factual People/current-event notes end with 2–4 sources used for verification.
-  Opinion, shelf, and music notes do not need a sources section.
+  Opinion, shelf, and music notes do not need a sources section — but a shelf
+  note's `author_bio:` is still a factual claim: verify it or omit the key.
 - Source images using the workflow's approved sources and licensing rules.
   Never use random image results or AI portraits of real people. Ask once before
   downloading a batch; use a remote cover URL only as fallback.
@@ -185,6 +186,12 @@ Important conventions:
   subfolder. Those folders still do not affect URLs.
 - Shelf `medium` may be explicit or inferred by `entryMedium()` from the filing
   folder. Do not invent another inference path.
+- Shelf entry pages open with a creator block (portrait, role, name, bio) built
+  from `author:` plus `author_uk`/`author_photo`/`author_bio`/`author_bio_uk`.
+  The role comes from `medium:` — there is no `role:` key — and the note's
+  `At a glance` table must not repeat the name in a row of its own. Portraits
+  live in `vault/Shelf/creators/`. Detail in `CLAUDE.md`; reasons in
+  `docs/DECISIONS.md` #86.
 - `draft: true` content appears in development and is excluded in production.
 
 ## Feature invariants worth checking before edits

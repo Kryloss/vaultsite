@@ -31,19 +31,22 @@ the vault. This doc is the playbook. Read CLAUDE.md first for the hard rules.
 3. **Structure** → apply the matching template below.
 4. **Cross-link** → scan the new text AND existing notes for link
    opportunities (see wiki rules). This is a big part of your value.
-5. **Source images** → covers for Shelf/People items, inline figures where
-   they help (see "Images & media sourcing" below). Don't skip this step.
+5. **Source images** → covers for Shelf/People items, the creator portrait for
+   a Shelf item (`author_photo:` — see the creator block above), inline figures
+   where they help (see "Images & media sourcing" below). Don't skip this step.
 6. **Write the file** → `vault/<Section>/<Natural Title>.md`. File name = the
    title in normal words (spaces fine, no slashes/colons); the engine slugs it.
    Where a section has subfolders, use the matching one — a book goes in
    `vault/Shelf/Books/`, a film in `Movies/`, a series in `Shows/`, a YouTube
-   note in `Videos/` — with its cover in that folder's `covers/`. Media for a
+   note in `Videos/` — with its cover in that folder's `covers/` and the
+   creator's portrait in the shared `vault/Shelf/creators/`. Media for a
    post goes in `vault/Posts/attachments/`, diagrams in
    `vault/Projects/attachments/`, scaffolding notes in `vault/Posts/Examples/`.
    Subfolders never change a URL (`Shelf/Books/Sapiens.md` is still
    `/shelf/sapiens`), so file by meaning.
 7. **Report** → tell him the file path, the URL it will get, links added,
-   images fetched (with their sources), and anything you fixed or assumed.
+   images fetched (with their sources), any creator left on the initials
+   fallback and why, and anything you fixed or assumed.
 
 ## Defaults
 
@@ -74,6 +77,13 @@ description: <one sentence>
 ---
 title: <Title>
 author: <author / director / creator / channel>
+author_uk: <the name in Ukrainian — omit for a channel name that isn't translated>
+author_photo: <slug>.jpg   # into vault/Shelf/creators/ — see Creator block below
+# author photo: Wikimedia Commons — <author>, <licence>
+author_bio: >-
+  <one or two sentences about them — see Creator block below>
+author_bio_uk: >-
+  <the same, in Ukrainian>
 medium: book | movie | show | video
 categories: [<one or more — see the vocabularies below>]
 rating: <0–5, halves allowed — ONLY if he gave one; never invent his rating>
@@ -85,7 +95,6 @@ video: <youtube url>       # medium: video only
 ## At a glance
 | | |
 |---|---|
-| Author | … |
 | Published | … |
 | One-liner | … |
 
@@ -99,6 +108,38 @@ provides none, omit this section or leave a placeholder he can fill>
 
 See **Categories** below — Shelf, Posts and People all use the same key.
 
+#### The creator block — every shelf note, no exceptions
+
+Above the "At a glance" table, a shelf entry page renders a round portrait,
+the role, the name and a short bio (`components/Creator.tsx`, DECISIONS #86).
+Filling it is part of writing the note, not an optional polish step.
+
+- **The role label is NOT written in the note.** It comes from `medium:` —
+  book → Author, movie → Director, show → Creator, video → Channel — in both
+  languages. Don't add a `role:` key; there isn't one.
+- **Never leave the creator row in the "At a glance" table.** The block prints
+  the name already, so a `| Author | … |` row six lines below it is the same
+  fact twice. If the row carried a detail beyond the name (an alternate
+  spelling, a pen name), move that detail into the bio rather than losing it.
+- **`author_bio:` is one or two sentences, and every clause has to be true.**
+  Nationality, profession, the institution they're at, the thing they're best
+  known for, dates for a dead writer. Verify it the same way a People note is
+  verified — Wikipedia in any language, an official page — and if you can't,
+  leave the key out. A missing bio renders cleanly; an invented one is a
+  factual error on a page that looks authoritative. No `## Sources` section is
+  needed for two sentences of this kind, which is the one thing that separates
+  it from a People note.
+- **Write it about the person, not the work.** The note already says what the
+  book is; the block says who was holding the pen. A sentence that could be
+  swapped between two of Kyrylo's shelf notes isn't worth the space.
+- **`author_uk:` where the name is normally transliterated** (Ювал Ной Харарі),
+  and omitted where it isn't — a YouTube channel keeps its Latin name in both
+  languages. If the note's `.uk.md` already spells the name somewhere, reuse
+  that spelling exactly rather than picking your own.
+- **`author_photo:` is optional and often absent.** No photo falls back to the
+  creator's initials, which is a finished state, not a gap. Never reach for a
+  worse source to avoid it — see the cascade below.
+
 ### Video shelf item — `vault/Shelf/Videos/<Title>.md`
 
 Same template as above with `medium: video`. Differences worth knowing:
@@ -108,6 +149,10 @@ Same template as above with `medium: video`. Differences worth knowing:
 title: <exact video title, as YouTube has it>
 title_uk: <translated title>
 author: <channel name>
+author_bio: >-
+  <one or two sentences about the channel — see Creator block below>
+author_bio_uk: >-
+  <the same, in Ukrainian>
 medium: video
 categories: [Tech, Education]
 video: https://www.youtube.com/watch?v=<id>
@@ -119,7 +164,6 @@ description_uk: "<one sentence>"
 ## At a glance
 | | |
 |---|---|
-| Channel | … |
 | Topic | … |
 | Released | <the video's upload date — NOT the day he watched it> |
 
@@ -266,6 +310,7 @@ after one attempt is not.
 | Book covers | 1. Open Library by ISBN (`covers.openlibrary.org/b/isbn/<ISBN>-L.jpg`, keyless — try multiple editions' ISBNs) 2. Open Library search API → cover ID 3. publisher page |
 | Movie/show art | 1. en-Wikipedia REST summary (`/api/rest_v1/page/summary/<Title>`) 2. `action=query&prop=pageimages` 3. season/franchise pages 4. other-language Wikipedias (de, fr, uk — often expose the poster when en doesn't) 5. Wikidata claims P18 (image) / P154 (logo) 6. `page/media-list` → Commons-hosted logo, used with `coverFit: contain` 7. typographic fallback tile + tell him |
 | People photos | 1. Wikimedia Commons ONLY (verify license; note author + license as a comment in the note) 2. official government/company portrait pages. Never anything else |
+| Shelf creator portraits (`author_photo:`) | 1. Wikimedia Commons by name, in ANY language's Wikipedia — a Ukrainian or Polish article often has a portrait the English one lacks 2. Commons file search 3. official publisher/studio portrait page. Never anything else, and **no photo is a fine answer** — the block falls back to initials |
 | Music artwork | Not needed — Apple Music embeds carry their own art |
 | Inline figures | Wikimedia Commons, official docs/press kits, his own screenshots |
 
@@ -273,6 +318,26 @@ after one attempt is not.
 — the card letterboxes it on the tile background instead of cropping. This is
 how a freely-licensed title logo becomes a perfectly good cover when no poster
 is available (see `vault/Shelf/Shows/Mr Robot.md`).
+
+**Creator portraits go in one shared folder, square-cropped on the way in.**
+Save to `vault/Shelf/creators/<name-slug>.jpg` — one folder for the whole
+shelf, not per-medium `covers/` folders, because the asset index is keyed by
+file name across the entire vault and an author who appears under two mediums
+would otherwise be two copies of one file. Then:
+
+1. **Take the ~400px thumbnail, not the original** — `iiurlwidth=400` on the
+   Commons `imageinfo` query. The block paints at 72px.
+2. **Crop to the face yourself.** These are stage shots, conference stills and
+   press photos; a centred square crop puts about half of them off-frame. Look
+   at the picture, pick the box, write out 320 × 320. Doing it here rather
+   than with `object-fit` also strips EXIF and keeps each file ~20 KB.
+3. **Record the credit** as a `# author photo: Wikimedia Commons — <artist>,
+   <licence>` comment directly under `author_photo:`, exactly as covers do.
+4. **A duo or a group is fine** — the Kapranov Brothers are two people and the
+   crop keeps both. Don't substitute one member for the whole.
+5. **Never substitute a related person.** A podcast channel is not its host: if
+   `author:` says "WVFRM Podcast", a portrait of Marques Brownlee is the wrong
+   picture with the right face. Initials instead.
 
 **Note:** some APIs are flaky or geo-filtered from sandboxes (iTunes Search
 often returns 0 results). Treat an empty response as "try the next source",
@@ -290,6 +355,9 @@ on the long side are plenty, JPG/PNG/WebP all fine.
 - Inline figures get a caption (`![[diia-app.jpg|The Diia app in 2020]]`) and,
   where the license requires, a credit line under the section using it.
 - Never generate fake "covers" or AI portraits of real people.
+- Creator portraits follow the People-photo rules exactly — licensed sources
+  only, credit recorded, and a missing photo is reported rather than filled
+  with a guess.
 
 ## Translation — ALL content, every time
 

@@ -2,6 +2,13 @@
 title: Inception
 title_uk: Початок
 author: Christopher Nolan
+author_uk: Крістофер Нолан
+author_photo: christopher-nolan.jpg
+# author photo: Wikimedia Commons — PhilipRomano, CC BY-SA 4.0
+author_bio: >-
+  British-American director and screenwriter who builds blockbusters out of structural puzzles and shoots as much of them as possible for real.
+author_bio_uk: >-
+  Британсько-американський режисер і сценарист, який будує блокбастери зі структурних головоломок і знімає їх якомога більше по-справжньому.
 medium: movie
 categories: [Sci-Fi, Thriller]
 rating: 5
@@ -16,7 +23,6 @@ cover: inception.jpg
 
 | | |
 |---|---|
-| Director | Christopher Nolan |
 | Released | 2010 |
 | One-liner | Thieves who steal ideas from dreams take a job to plant one instead |
 

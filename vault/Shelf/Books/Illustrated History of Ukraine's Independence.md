@@ -6,6 +6,13 @@ aliases:
   - Kapranov Brothers
   - Брати Капранови
 author: Kapranov Brothers
+author_uk: Брати Капранови
+author_photo: kapranov-brothers.jpg
+# author photo: Wikimedia Commons — Ilya, CC BY-SA 4.0
+author_bio: >-
+  Dmytro and Vitaliy Kapranov — Ukrainian writers, publicists and publishers who have spent thirty years putting Ukrainian history in front of people who thought it was boring.
+author_bio_uk: >-
+  Дмитро й Віталій Капранови — українські письменники, публіцисти та видавці, які тридцять років показують українську історію тим, хто вважав її нудною.
 medium: book
 categories: [Nonfiction, History]
 date: 2026-07-25
@@ -19,7 +26,6 @@ cover: illustrated-history-of-ukraines-independence.jpg
 
 | | |
 |---|---|
-| Authors | Kapranov Brothers (Vitalii and Dmytro) |
 | Published | 2013 (Зелений Пес) |
 | One-liner | Independence from 1991 onward, drawn rather than lectured |
 
