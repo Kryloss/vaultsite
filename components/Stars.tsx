@@ -1,6 +1,14 @@
 /**
  * Monochrome 5-star rating display. Supports halves (rating: 3.5).
  * Pure component — safe in both server and client components.
+ *
+ * Grey, not full text colour: a rating is metadata, and both places this
+ * renders are metadata rows — beside the date on an entry page, under the
+ * cover on a shelf card. At `--text` it was the darkest thing on either line
+ * and read as a headline. `--text-tertiary` is what the rest of those rows
+ * are set in, so the score now sits with the facts around it instead of
+ * above them. The empty stars stay on `--border`, which is far enough from
+ * tertiary in both themes to keep 3½ readable at 13px.
  */
 
 function Star({ className }: { className?: string }) {
@@ -49,7 +57,7 @@ export default function Stars({
               >
                 {/* fixed-size overlay so the clip lines up with the base star */}
                 <span
-                  className="block text-[var(--text)]"
+                  className="block text-[var(--text-tertiary)]"
                   style={{ width: size, height: size }}
                 >
                   <Star className="h-full w-full" />

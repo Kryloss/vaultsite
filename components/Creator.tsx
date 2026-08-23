@@ -1,5 +1,5 @@
 import T from "@/components/T";
-import type { ShelfCreator } from "@/lib/shelf";
+import { creatorInitials, type ShelfCreator } from "@/lib/shelf";
 
 /**
  * The person behind a shelf item — a round portrait, their role, their name
@@ -66,7 +66,7 @@ export default function Creator({ creator }: { creator: ShelfCreator }) {
           />
         ) : (
           <span className="creator-initials" aria-hidden>
-            {initials(name)}
+            {creatorInitials(name)}
           </span>
         )}
       </div>
@@ -86,21 +86,4 @@ export default function Creator({ creator }: { creator: ShelfCreator }) {
       </div>
     </div>
   );
-}
-
-/**
- * "Yuval Noah Harari" → "YH", for the creators with no free portrait.
- *
- * FIRST and LAST word, not the first two the People grid takes: a person's
- * surname is the half you recognise, so a middle name must not push it out.
- * Anything after a `|` is dropped first — a YouTube channel is often written
- * "Nate Herk | AI Automation", where the tagline after the pipe is not part
- * of the name and would otherwise supply the second letter.
- */
-function initials(name: string): string {
-  const words = name.split("|")[0].trim().split(/\s+/).filter(Boolean);
-  if (words.length === 0) return "";
-  const first = words[0][0] ?? "";
-  const last = words.length > 1 ? (words[words.length - 1][0] ?? "") : "";
-  return (first + last).toUpperCase();
 }

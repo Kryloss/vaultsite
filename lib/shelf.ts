@@ -188,6 +188,27 @@ export function entryCreator(entry: Entry): ShelfCreator | undefined {
   };
 }
 
+/**
+ * "Yuval Noah Harari" → "YH", for a creator with no portrait to show.
+ *
+ * FIRST and LAST word, not the first two the People grid takes: a surname is
+ * the half you recognise, so a middle name must not push it out. Anything
+ * after a `|` is dropped first — a YouTube channel is often written
+ * "Nate Herk | AI Automation", where the tagline after the pipe is not part of
+ * the name and would otherwise supply the second letter.
+ *
+ * Lives here rather than inside components/Creator.tsx so `npm test` can reach
+ * it. Every note in the vault currently has a photo, so this path renders
+ * nowhere — which is exactly why it needs a test rather than a reader.
+ */
+export function creatorInitials(name: string): string {
+  const words = name.split("|")[0].trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return "";
+  const first = words[0][0] ?? "";
+  const last = words.length > 1 ? (words[words.length - 1][0] ?? "") : "";
+  return (first + last).toUpperCase();
+}
+
 /** Frontmatter → the shape the cards render from. */
 export function toShelfItem(entry: Entry): ShelfItem {
   const medium = entryMedium(entry);

@@ -7,7 +7,12 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { categorySlug, entryMedium, mediumSlug } from "./shelf.ts";
+import {
+  categorySlug,
+  creatorInitials,
+  entryMedium,
+  mediumSlug,
+} from "./shelf.ts";
 import { slugify } from "./vault.ts";
 import type { Entry } from "./vault.ts";
 
@@ -61,4 +66,30 @@ test("slugify is stable — changing it breaks every URL", () => {
   assert.equal(slugify("Kyrylo’s notes"), "kyrylos-notes");
   assert.equal(slugify("Security+ journey"), "security-journey");
   assert.equal(slugify("  Trailing  spaces  "), "trailing-spaces");
+});
+
+/* The creator block's initials fallback (components/Creator.tsx). Nothing in
+   the vault renders it — every shelf note has a portrait — so a regression
+   here would ship invisibly and only show up the first time a creator has no
+   photo. That is the case for a test rather than a screenshot. */
+
+test("initials take the first and last word, not the first two", () => {
+  assert.equal(creatorInitials("Yuval Noah Harari"), "YH");
+  assert.equal(creatorInitials("Antoine de Saint-Exupéry"), "AS");
+  assert.equal(creatorInitials("Kapranov Brothers"), "KB");
+});
+
+test("a channel's tagline after a pipe is not part of the name", () => {
+  assert.equal(creatorInitials("Nate Herk | AI Automation"), "NH");
+  assert.equal(creatorInitials("WVFRM Podcast"), "WP");
+});
+
+test("one word gives one letter, and nothing gives nothing", () => {
+  assert.equal(creatorInitials("Waveform"), "W");
+  assert.equal(creatorInitials("   "), "");
+  assert.equal(creatorInitials(""), "");
+});
+
+test("initials are upper-cased and survive extra whitespace", () => {
+  assert.equal(creatorInitials("  ernest   hemingway  "), "EH");
 });
