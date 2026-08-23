@@ -26,8 +26,8 @@ export const ui = {
     uk: "Пошук сторінок і дописів…",
   },
   searchHint: {
-    en: "↑↓ navigate · ↵ open · esc close",
-    uk: "↑↓ навігація · ↵ відкрити · esc закрити",
+    en: "↑↓ navigate · ↵ open · shift+? shortcuts · esc close",
+    uk: "↑↓ навігація · ↵ відкрити · shift+? скорочення · esc закрити",
   },
   noResultsFor: { en: "No results for", uk: "Немає результатів для" },
 

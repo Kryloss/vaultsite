@@ -283,9 +283,18 @@ export default function Shortcuts({
       }
     };
 
+    /* The palette's footer advertises `?`, and its input swallows the key
+       before the handler above sees it — so it asks for the sheet by name.
+       An event rather than a prop, for the same reason the prev/next links
+       are read from the DOM: this component owns the sheet, and lifting that
+       state into Chrome to hand it back down would be a second copy of it. */
+    const onAsk = () => setSheet(true);
+
     window.addEventListener("keydown", onKey);
+    window.addEventListener("shortcuts", onAsk);
     return () => {
       window.removeEventListener("keydown", onKey);
+      window.removeEventListener("shortcuts", onAsk);
       window.clearTimeout(timer);
     };
   }, [router, sibling, moveList, onSearch, onMenu, toggleLang, sections]);

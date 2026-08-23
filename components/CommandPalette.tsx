@@ -9,6 +9,7 @@ import { useSearchIndex } from "@/components/useSearchIndex";
 import { recentPaths, remember } from "@/lib/recents";
 import { similarity, fold } from "@/lib/fuzzy";
 import { copyText } from "@/lib/clipboard";
+import { shortcutKey } from "@/lib/shortcut-key";
 import { ui, type Str } from "@/lib/ui-strings";
 
 /**
@@ -374,6 +375,18 @@ export default function CommandPalette({
                 setSelected((s) => Math.max(s - 1, 0));
               } else if (e.key === "Enter" && rows[selected]) {
                 runRow(rows[selected]);
+              } else if (shortcutKey(e) === "?" && !query) {
+                /* The footer offers `?` here, so it has to work here — the
+                   global handler ignores keys typed into an input, and would
+                   otherwise leave a lone "?" in the box. Read through
+                   shortcutKey for the same layout reasons as the global
+                   handler. Empty query only: a question mark past the first
+                   character belongs to whatever is being typed. Announced
+                   as an event rather than a prop because Shortcuts owns the
+                   sheet and reads the rest of its world from the DOM. */
+                e.preventDefault();
+                onClose();
+                window.dispatchEvent(new Event("shortcuts"));
               }
             }}
             placeholder={ui.searchPlaceholder[lang]}
