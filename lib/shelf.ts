@@ -45,6 +45,38 @@ export interface ShelfItem {
   date?: string;
 }
 
+/**
+ * The person (or channel) behind a shelf item, shown above the note's own
+ * "At a glance" table on the entry page — see components/Creator.tsx.
+ *
+ * Everything but the name is optional and the block degrades a field at a
+ * time: no photo falls back to initials, no bio leaves the name alone. That
+ * matters because the sources are uneven — most novelists have a freely
+ * licensed portrait on Wikimedia Commons and most YouTube channels do not,
+ * and a note should never be blocked on one.
+ */
+export interface ShelfCreator {
+  /** `author:` — the name exactly as the note writes it. */
+  name: string;
+  /** `author_uk:` — the name in Ukrainian, where transliterating it helps. */
+  nameUk?: string;
+  /**
+   * What they are TO THIS WORK, chosen by medium rather than written per
+   * note: the same person is an author on a book and a director on a film,
+   * and the note already says which medium it is.
+   */
+  role: Str;
+  /** `author_photo:` — resolved like `cover:`, so a bare file name is enough. */
+  photoUrl?: string;
+  /** Base64 blur-up placeholder for `photoUrl` — see lib/blur.ts. */
+  photoBlur?: string;
+  /** Narrower WebP copies — see srcSetFor() in lib/blur.ts. */
+  photoSrcSet?: string;
+  /** `author_bio:` / `author_bio_uk:` — one or two sentences, no more. */
+  bio?: string;
+  bioUk?: string;
+}
+
 export interface ShelfGroup {
   /** Canonical medium key from frontmatter, e.g. "video". */
   medium: string;
@@ -110,6 +142,50 @@ export function entryMedium(entry: Entry): string | undefined {
   const name = entry.folder.split("/").pop()!.toLowerCase();
   const singular = name.replace(/s$/, "");
   return MEDIUM_LABELS[singular] ? singular : undefined;
+}
+
+/**
+ * Role label per medium. Deliberately not a `Record<string, Str>` lookup with
+ * a shrug for anything missing: an unknown medium still has a human behind it,
+ * so it falls back to "Author" rather than rendering an unlabelled name.
+ */
+const CREATOR_ROLES: Record<string, Str> = {
+  book: ui.creatorAuthor,
+  movie: ui.creatorDirector,
+  show: ui.creatorShowrunner,
+  video: ui.creatorChannel,
+  youtube: ui.creatorChannel,
+};
+
+/**
+ * The creator block's data, or undefined when the note names nobody.
+ *
+ * `author:` is the only required key — it already exists on every shelf note
+ * and drives the card's byline — so adding the block to the site did not
+ * make a single existing note invalid.
+ */
+export function entryCreator(entry: Entry): ShelfCreator | undefined {
+  const name =
+    typeof entry.meta.author === "string" ? entry.meta.author.trim() : "";
+  if (!name) return undefined;
+
+  const medium = entryMedium(entry);
+  const photo = resolveCoverUrl(entry.sectionDir, entry.meta.author_photo);
+  const str = (key: string) => {
+    const v = entry.meta[key];
+    return typeof v === "string" && v.trim() ? v.trim() : undefined;
+  };
+
+  return {
+    name,
+    nameUk: str("author_uk"),
+    role: (medium && CREATOR_ROLES[medium]) || ui.creatorAuthor,
+    photoUrl: photo,
+    photoBlur: blurFor(photo),
+    photoSrcSet: srcSetFor(photo),
+    bio: str("author_bio"),
+    bioUk: str("author_bio_uk"),
+  };
 }
 
 /** Frontmatter → the shape the cards render from. */

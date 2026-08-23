@@ -149,6 +149,18 @@ export const ui = {
   wantToRead: { en: "To read", uk: "Прочитати" },
   wantToWatch: { en: "To watch", uk: "Подивитись" },
   quotesCategory: { en: "Quotes", uk: "Цитати" },
+
+  /* Shelf creator block (components/Creator.tsx). The role is chosen by the
+     note's medium, so a name never appears without saying what it is TO the
+     work — "Andrzej Sapkowski" on its own is a byline, "Author · Andrzej
+     Sapkowski" is a fact about the book. "Showrunner" rather than "Creator"
+     for shows: it's the word the credit actually uses, and "Creator" is what
+     this whole block is called, which would read as a tautology. */
+  creatorAuthor: { en: "Author", uk: "Автор" },
+  creatorDirector: { en: "Director", uk: "Режисер" },
+  creatorShowrunner: { en: "Showrunner", uk: "Шоуранер" },
+  creatorChannel: { en: "Channel", uk: "Канал" },
+
   quotesEmpty: {
     en: "No quotes saved yet — add a > blockquote to a book’s note.",
     uk: "Цитат поки немає — додайте > цитату в нотатку книги.",
