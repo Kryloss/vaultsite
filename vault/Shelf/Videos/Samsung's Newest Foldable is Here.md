@@ -2,7 +2,8 @@
 title: Samsung's Newest Foldable is Here!
 title_uk: Новий складаний смартфон Samsung уже тут!
 author: WVFRM Podcast
-# no free portrait on Wikimedia Commons for the channel — the block falls back to initials
+author_photo: wvfrm-podcast.jpg
+# author photo: the channel's own avatar, youtube.com/@Waveform
 author_bio: >-
   Waveform, the MKBHD podcast: Marques Brownlee, Andrew Manganelli and David Imel talking through the week in consumer tech.
 author_bio_uk: >-

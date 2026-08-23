@@ -40,8 +40,10 @@ export default function Creator({ creator }: { creator: ShelfCreator }) {
           <img
             src={photoUrl}
             srcSet={photoSrcSet}
-            /* One fixed box at every width — the block never reflows into a
-               different size, so a single candidate width is honest. */
+            /* 72px, dropping to 56px below 480px (`--creator-size` in
+               globals.css). One candidate covers both: the 256px variant is
+               what a 2x phone wants either way, and naming the larger box
+               errs toward the sharper file rather than a soft one. */
             sizes="72px"
             /* The name alone. "Portrait of X" is what the shape already
                says, and the role label sits right beside it in text. */

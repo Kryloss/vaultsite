@@ -2,7 +2,8 @@
 title: I Tested Opus 5 vs. Fable 5. What You Need to Know.
 title_uk: Я протестував Opus 5 проти Fable 5. Що варто знати.
 author: Nate Herk | AI Automation
-# no free portrait on Wikimedia Commons — the block falls back to initials
+author_photo: nate-herk.jpg
+# author photo: the channel's own avatar, youtube.com/@nateherk
 author_bio: >-
   A YouTube channel that builds AI agent workflows on camera — mostly in n8n, mostly end to end, with the failures left in.
 author_bio_uk: >-

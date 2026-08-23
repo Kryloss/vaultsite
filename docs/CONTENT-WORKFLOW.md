@@ -136,9 +136,11 @@ Filling it is part of writing the note, not an optional polish step.
   and omitted where it isn't — a YouTube channel keeps its Latin name in both
   languages. If the note's `.uk.md` already spells the name somewhere, reuse
   that spelling exactly rather than picking your own.
-- **`author_photo:` is optional and often absent.** No photo falls back to the
-  creator's initials, which is a finished state, not a gap. Never reach for a
-  worse source to avoid it — see the cascade below.
+- **`author_photo:` is optional, but work the cascade before giving up.** Every
+  creator on the shelf today has one, including two YouTube channels and an
+  author with no Wikipedia photo — see "Images & media sourcing" for the order
+  to try, which is longer than it looks. If it genuinely runs out, initials are
+  a finished state, not a gap; never reach for a worse source to avoid them.
 
 ### Video shelf item — `vault/Shelf/Videos/<Title>.md`
 
@@ -310,7 +312,7 @@ after one attempt is not.
 | Book covers | 1. Open Library by ISBN (`covers.openlibrary.org/b/isbn/<ISBN>-L.jpg`, keyless — try multiple editions' ISBNs) 2. Open Library search API → cover ID 3. publisher page |
 | Movie/show art | 1. en-Wikipedia REST summary (`/api/rest_v1/page/summary/<Title>`) 2. `action=query&prop=pageimages` 3. season/franchise pages 4. other-language Wikipedias (de, fr, uk — often expose the poster when en doesn't) 5. Wikidata claims P18 (image) / P154 (logo) 6. `page/media-list` → Commons-hosted logo, used with `coverFit: contain` 7. typographic fallback tile + tell him |
 | People photos | 1. Wikimedia Commons ONLY (verify license; note author + license as a comment in the note) 2. official government/company portrait pages. Never anything else |
-| Shelf creator portraits (`author_photo:`) | 1. Wikimedia Commons by name, in ANY language's Wikipedia — a Ukrainian or Polish article often has a portrait the English one lacks 2. Commons file search 3. official publisher/studio portrait page. Never anything else, and **no photo is a fine answer** — the block falls back to initials |
+| Shelf creator portraits (`author_photo:`) | 1. Wikimedia Commons by name, in ANY language's Wikipedia 2. Commons file search 3. the creator's own official site / publisher / studio page 4. **for a `medium: video` note only:** the channel's own YouTube avatar. Never anything else — and no photo is still a fine answer |
 | Music artwork | Not needed — Apple Music embeds carry their own art |
 | Inline figures | Wikimedia Commons, official docs/press kits, his own screenshots |
 
@@ -318,6 +320,42 @@ after one attempt is not.
 — the card letterboxes it on the tile background instead of cropping. This is
 how a freely-licensed title logo becomes a perfectly good cover when no poster
 is available (see `vault/Shelf/Shows/Mr Robot.md`).
+
+**Work the cascade properly — three of the four "no portrait" cases were the
+first source giving up too early.** In order:
+
+1. **English Wikipedia's `pageimages` is not the answer, it's the first
+   guess.** It returns whatever sits in the infobox, which for Richard Bach is
+   his *signature*. When that comes back looking wrong, try other languages:
+   `pl`, `nl`, `uk`, `de`, `fr`, `es` all have their own editorial choices, and
+   `pageimages` on each is one more keyless call.
+2. **Then search Commons directly** (`list=search&srnamespace=6`). A portrait
+   often exists under a name nobody links from the article — Bach's is filed
+   under the 1970 film shoot he was photographed at.
+3. **Confirm a suspicious file before using it.** That Bach photo is captioned
+   as two people. `prop=globalusage` settles it: the cropped version is the
+   infobox portrait on about twenty Wikipedias, which is twenty communities
+   agreeing it's him. Do this whenever a file could be someone else — a
+   misidentified face is worse than initials.
+4. **The creator's own official site.** Andrey Doronichev has no Commons photo
+   and a personal site with a portrait on it; that's the sanctioned
+   "official page" step, and the credit line says where it came from.
+5. **A YouTube channel: use the channel's own avatar.** Keyless, two requests,
+   exact — no searching and no guessing at identity:
+
+   ```
+   https://www.youtube.com/oembed?format=json&url=<video url>   → author_url
+   GET <author_url>  →  <meta property="og:image" content="…">
+   ```
+
+   The channel page's `og:image` **is** the avatar, served at 900×900 and
+   already square. This is the right source rather than a portrait of the
+   host: `author:` names the *channel*, so a photo of Marques Brownlee under
+   the byline "WVFRM Podcast" is the wrong picture with the right face — the
+   Waveform logo is what that channel actually looks like. A channel avatar is
+   the channel's own identifying artwork, used to identify the channel, which
+   is the same footing as a book cover or a poster. Credit it as
+   `# author photo: the channel's own avatar, youtube.com/@handle`.
 
 **Creator portraits go in one shared folder, square-cropped on the way in.**
 Save to `vault/Shelf/creators/<name-slug>.jpg` — one folder for the whole
@@ -337,7 +375,8 @@ would otherwise be two copies of one file. Then:
    crop keeps both. Don't substitute one member for the whole.
 5. **Never substitute a related person.** A podcast channel is not its host: if
    `author:` says "WVFRM Podcast", a portrait of Marques Brownlee is the wrong
-   picture with the right face. Initials instead.
+   picture with the right face — take the channel's avatar (step 5 of the
+   cascade above), or initials.
 
 **Note:** some APIs are flaky or geo-filtered from sandboxes (iTunes Search
 often returns 0 results). Treat an empty response as "try the next source",

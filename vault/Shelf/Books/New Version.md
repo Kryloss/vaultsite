@@ -6,7 +6,8 @@ aliases:
   - Нова версія
 author: Andrey Doronichev
 author_uk: Андрій Доронічев
-# no free portrait on Wikimedia Commons — the block falls back to initials
+author_photo: andrey-doronichev.jpg
+# author photo: doronichev.com — the author's own site
 author_bio: >-
   Product manager turned founder. He ran YouTube's mobile app at Google before co-founding Optic, and the book turns those frameworks on the reader instead of a product.
 author_bio_uk: >-

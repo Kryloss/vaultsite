@@ -132,6 +132,18 @@ export default async function EntryPage({ params }: Props) {
     );
   }
 
+  /* The rating, next to the date rather than beside the <h1>.
+
+     It belongs to the same family as everything else on this line: a fact the
+     note records about itself. Against a 46px serif title it was a row of
+     small glyphs with nothing to align to, and it made the one line of the
+     page that is a sentence into a sentence plus a score. Here it reads as
+     "watched on this date, rated this" — and shelf entries carry no reading
+     stats, so in practice the date and the stars are adjacent. */
+  if (typeof entry.meta.rating === "number") {
+    meta.push(<Stars rating={entry.meta.rating} size={13} />);
+  }
+
   if (stats) {
     /* Two entries, not one span with a middot typed inside it. That middot was
        surrounded by ordinary spaces while every other separator on the line is
@@ -227,20 +239,13 @@ export default async function EntryPage({ params }: Props) {
           <CopyMarkdownTitle en={entry.content} uk={entry.contentUk}>
             <T en={entry.title} uk={entry.titleUk} />
           </CopyMarkdownTitle>
-          {typeof entry.meta.rating === "number" && (
-            <Stars
-              rating={entry.meta.rating}
-              size={16}
-              className="ml-3 translate-y-[-2px] align-middle"
-            />
-          )}
           {entry.draft && (
             <span className="ml-3 inline-block translate-y-[-3px] rounded-md bg-amber-500/15 px-2 py-0.5 align-middle text-xs font-medium text-amber-500">
               <T {...ui.draft} />
             </span>
           )}
         </h1>
-        {/* Date · reading stats · maturity · series · #tags — built above. */}
+        {/* Date · rating · reading stats · maturity · series · #tags. */}
         {metaLine}
 
       </header>

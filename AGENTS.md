@@ -190,8 +190,10 @@ Important conventions:
   from `author:` plus `author_uk`/`author_photo`/`author_bio`/`author_bio_uk`.
   The role comes from `medium:` — there is no `role:` key — and the note's
   `At a glance` table must not repeat the name in a row of its own. Portraits
-  live in `vault/Shelf/creators/`. Detail in `CLAUDE.md`; reasons in
-  `docs/DECISIONS.md` #86.
+  live in `vault/Shelf/creators/`. Sourcing a portrait is a multi-step cascade
+  ending in the channel's own YouTube avatar for video notes — do not stop at
+  one failed lookup. Detail in `CLAUDE.md` and `docs/CONTENT-WORKFLOW.md`;
+  reasons in `docs/DECISIONS.md` #86.
 - `draft: true` content appears in development and is excluded in production.
 
 ## Feature invariants worth checking before edits

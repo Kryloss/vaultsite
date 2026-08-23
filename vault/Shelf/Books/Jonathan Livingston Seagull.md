@@ -6,7 +6,10 @@ aliases:
   - Чайка Джонатан Лівінгстон
 author: Richard Bach
 author_uk: Річард Бах
-# no free portrait on Wikimedia Commons — the block falls back to initials
+author_photo: richard-bach.jpg
+# author photo: Wikimedia Commons — Corsair133693, CC BY-SA 3.0 (the crop
+# used as his portrait on ~20 Wikipedias; he's photographed in 1970, the
+# year this book came out)
 author_bio: >-
   American pilot and writer whose books keep coming back to flying as a way of talking about everything that isn't flying.
 author_bio_uk: >-
