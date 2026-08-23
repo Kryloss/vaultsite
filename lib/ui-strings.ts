@@ -29,6 +29,8 @@ export const ui = {
     en: "↑↓ navigate · ↵ open · esc close",
     uk: "↑↓ навігація · ↵ відкрити · esc закрити",
   },
+  /** Follows searchHint while the box is empty — see CommandPalette. */
+  searchHintShortcuts: { en: "? shortcuts", uk: "? скорочення" },
   noResultsFor: { en: "No results for", uk: "Немає результатів для" },
 
   // home

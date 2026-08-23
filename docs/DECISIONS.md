@@ -1389,3 +1389,15 @@ The first version rendered in the posts list only, and shelf and people were lef
 **Cards that DO carry artwork keep the full ceiling, via `data-cover`.** Shrink-to-fit and floats don't mix: the cover is out of flow, so it contributes nothing to the card's max-content width — the card measures its text alone, then squeezes the cover into what's left and wraps a title that had been fitting. The component sets the attribute because it is the one place that already knows whether there's a cover; `:has()` would have worked too, but a card that silently reflows on browsers without it is a worse failure than an explicit flag.
 
 **Revisit when:** a section type wants a cover with a wildly different shape again — the 80 × 84 box is sized for the covers this vault has, and it is one `min()` to move.
+
+## 86. The palette advertises the cheat sheet, and answers for it (2026-08-23)
+
+**Decision:** The ⌘K footer reads `↑↓ navigate · ↵ open · esc close · ? shortcuts` while the search box is empty, and `?` pressed there closes the palette and opens the keyboard sheet.
+
+**A hint that doesn't work is worse than no hint.** `?` is a character to a focused input: `Shortcuts.tsx` bails on `isTyping(e.target)` — deliberately, so a shortcut never eats a keystroke someone meant to type — which means the sheet's own key is dead in the one panel most likely to be a reader's first stop. Printing the key in the footer without wiring it up would have taught the shortcut in the place it doesn't work. So the palette handles it itself, through `shortcutKey()` for the same reason ⌘K does (#77): `?` is Shift+é on a French layout.
+
+**Only while the box is empty.** Past the first character the key is a character again — a query can contain a question mark, and stealing it would be exactly the theft `isTyping` exists to prevent. The hint is rendered under the same condition, so what the footer offers is always what the key does.
+
+**An event, not lifted state.** The sheet's open/closed is one boolean owned by `Shortcuts.tsx`; the palette asks for it by dispatching `SHORTCUTS_EVENT` on `window`. Hoisting it into `Chrome` would give one boolean two owners and thread a prop through a component that has no other reason to know the sheet exists — the same trade `TIME_LEFT_EVENT` and `langchange` already make, and the same reason `Shortcuts` reads the prev/next links out of the DOM instead of taking them as props.
+
+**Revisit when:** a third surface needs to open the sheet, or the palette grows a second key of its own. Two is still cheaper as an event than as state; four would be worth a provider.

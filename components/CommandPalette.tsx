@@ -9,6 +9,8 @@ import { useSearchIndex } from "@/components/useSearchIndex";
 import { recentPaths, remember } from "@/lib/recents";
 import { similarity, fold } from "@/lib/fuzzy";
 import { copyText } from "@/lib/clipboard";
+import { shortcutKey } from "@/lib/shortcut-key";
+import { SHORTCUTS_EVENT } from "@/components/Shortcuts";
 import { ui, type Str } from "@/lib/ui-strings";
 
 /**
@@ -374,6 +376,18 @@ export default function CommandPalette({
                 setSelected((s) => Math.max(s - 1, 0));
               } else if (e.key === "Enter" && rows[selected]) {
                 runRow(rows[selected]);
+              } else if (!query && shortcutKey(e) === "?") {
+                /* The cheat sheet, from the one place its own key can't be
+                   heard: `?` is a character to a focused input, so the global
+                   listener (components/Shortcuts.tsx) stands down while the
+                   palette is open. Only with an empty box — once you're
+                   typing, the key is a character again, which is why the
+                   footer offers it only then. `shortcutKey` for the same
+                   reason ⌘K reads through it: `?` is Shift+é on a French
+                   layout (lib/shortcut-key.ts). */
+                e.preventDefault();
+                onClose();
+                window.dispatchEvent(new Event(SHORTCUTS_EVENT));
               }
             }}
             placeholder={ui.searchPlaceholder[lang]}
@@ -478,7 +492,17 @@ export default function CommandPalette({
           ) : scoped ? (
             <T {...ui.searchThisPage} />
           ) : (
-            <T {...ui.searchHint} />
+            <>
+              <T {...ui.searchHint} />
+              {/* Advertised only while the key is free to mean this — see the
+                  handler above. */}
+              {!query && (
+                <>
+                  {" · "}
+                  <T {...ui.searchHintShortcuts} />
+                </>
+              )}
+            </>
           )}
         </div>
           </>

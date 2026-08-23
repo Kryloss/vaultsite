@@ -38,6 +38,19 @@ import type { NavItem } from "@/components/Chrome";
 /** How long a pressed `g` waits for its second key before giving up. */
 const CHORD_MS = 1200;
 
+/**
+ * Name of the event that opens the sheet from elsewhere on the page.
+ *
+ * `?` reaches the listener below only when nothing is being typed into — so a
+ * surface that owns the keyboard has to ask. The command palette does, from
+ * its own empty search box, where it advertises the key in its footer.
+ *
+ * An event rather than lifting the sheet's state into Chrome, for the same
+ * reason TIME_LEFT_EVENT is one (components/ReadingProgress.tsx): the sheet
+ * belongs to this component, and one boolean doesn't justify a second owner.
+ */
+export const SHORTCUTS_EVENT = "shortcutsheet";
+
 /** Typing somewhere real — never steal the key. */
 function isTyping(el: EventTarget | null): boolean {
   if (!(el instanceof HTMLElement)) return false;
@@ -111,6 +124,12 @@ export default function Shortcuts({
   useEffect(() => {
     if (sheet) setEverOpen(true);
   }, [sheet]);
+
+  useEffect(() => {
+    const open = () => setSheet(true);
+    window.addEventListener(SHORTCUTS_EVENT, open);
+    return () => window.removeEventListener(SHORTCUTS_EVENT, open);
+  }, []);
 
   /**
    * Sections in sidebar order, minus home — it has its own key.
