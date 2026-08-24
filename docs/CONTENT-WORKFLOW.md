@@ -92,6 +92,7 @@ description: <one sentence>
 cover: <slug>.jpg          # videos: omit — the thumbnail comes from `video:`
 video: <youtube url>       # medium: video only
 ---
+## At a glance
 | | |
 |---|---|
 | Published | … |
@@ -116,12 +117,10 @@ Filling it is part of writing the note, not an optional polish step.
 - **The role label is NOT written in the note.** It comes from `medium:` —
   book → Author, movie → Director, show → Creator, video → Channel — in both
   languages. Don't add a `role:` key; there isn't one.
-- **A shelf note has NO `## At a glance` heading.** Its body opens straight
-  with the `| | |` table. The heading was deleted from every shelf note and
-  its `.uk.md` — a two-word label over three rows of facts, one line under a
-  creator block, announcing nothing the rows don't say themselves
-  (`docs/DECISIONS.md` #87). **People notes keep theirs**; this is a
-  shelf-only convention.
+- **Keep the `## At a glance` heading in the note.** It is not painted on the
+  page — the renderer clips it, on every section — but it stays in the
+  markdown so the table of contents can list it and `#at-a-glance` keeps
+  working (`docs/DECISIONS.md` #87). Deleting it was tried and reverted.
 - **Keep the `| | |` header row empty.** That empty header is what makes the
   block render as a quiet fact list instead of a bordered data-table card.
   Putting words in it switches the card back on.
@@ -171,6 +170,7 @@ date: YYYY-MM-DD          # the day it went on the shelf
 description: "<one sentence>"
 description_uk: "<one sentence>"
 ---
+## At a glance
 | | |
 |---|---|
 | Topic | … |

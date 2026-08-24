@@ -201,9 +201,11 @@ Important conventions:
 - Markdown supports wiki links/embeds, relative images, callouts, progress
   fields, GFM, syntax highlighting, figures, footnotes/sidenotes, Apple Music,
   YouTube, and self-theming SVGs. On SHELF ENTRY PAGES ONLY, a table with
-  all-empty header cells renders as a plain fact list rather than a card, and
-  those notes carry no `## At a glance` heading. People notes use the same
-  table shape and are deliberately unchanged — see `docs/DECISIONS.md` #87. Extend the existing build-time pipeline rather
+  all-empty header cells renders as a plain fact list rather than a card.
+  Its `## At a glance` heading is kept in the markdown but clipped by CSS on
+  EVERY section, so it survives in the table of contents — do not delete it
+  from a note. People notes keep the card and only lose the painted heading.
+  See `docs/DECISIONS.md` #87. Extend the existing build-time pipeline rather
   than adding client-side Markdown/highlighting work.
 - English and Ukrainian share routes. The selected language is client-persisted
   and restored before paint; translated bodies render as paired language blocks.

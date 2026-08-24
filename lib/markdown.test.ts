@@ -212,3 +212,38 @@ test("no rating means no extra row", async () => {
   assert.doesNotMatch(html, /Rating|Оцінка/);
   assert.doesNotMatch(html, /<svg/);
 });
+
+/*
+ * The heading over a fact block is hidden but NOT removed — it is what the
+ * table of contents lists and what `#at-a-glance` scrolls to. Deleting it
+ * from the markdown is what shipped first, and it took the row out of the
+ * outline too. This half runs on every section, shelf or not.
+ */
+
+const HEADED = `## At a glance\n\n${FACTS}`;
+
+test("the heading over a fact block is tagged for hiding, not deleted", async () => {
+  const html = await renderMarkdown(HEADED, "Shelf/Books", "shelf", {
+    factTables: true,
+  });
+  assert.match(html, /<h2[^>]*class="[^"]*fact-heading/);
+  assert.match(html, /At a glance/);
+  assert.match(html, /id="at-a-glance"/);
+});
+
+test("the heading is hidden on non-shelf sections too, card and all", async () => {
+  const html = await renderMarkdown(HEADED, "People", "people");
+  assert.match(html, /<h2[^>]*class="[^"]*fact-heading/);
+  // ...but the table itself keeps the card treatment (DECISIONS #87).
+  assert.doesNotMatch(html, /fact-table/);
+  assert.match(html, /<thead>/);
+});
+
+test("a heading over a REAL data table is left visible", async () => {
+  const html = await renderMarkdown(
+    `## Results\n\n| Syntax | Result |\n|---|---|\n| a | b |`,
+    "Posts",
+    "posts"
+  );
+  assert.doesNotMatch(html, /fact-heading/);
+});
