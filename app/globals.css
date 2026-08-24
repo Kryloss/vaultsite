@@ -4587,3 +4587,196 @@ html[data-intro][data-intro-fast] .prose > .avatar {
     display: none;
   }
 }
+
+/* ============================================================
+   Music page — the Apple Music treatment. See docs/DECISIONS.md #90.
+
+   Two ideas, both borrowed from Apple Music and both re-cut to fit a
+   monochrome serif page: a track list whose divider starts at the TEXT
+   column rather than the artwork's edge, and a wash of the newest note's
+   album art behind the page header.
+
+   Nothing here declares a `transition` shorthand. The rows carry `.press`,
+   whose transition sits ~1100 lines above; a shorthand written down here
+   would reset its transform and silently delete the pressed state
+   (docs/DECISIONS.md #52).
+   ============================================================ */
+
+/* The wash is anchored to `main`, not to `.page`, because it has to be as
+   wide as the window while the page column is 39rem — and `:has()` scopes
+   the positioning to the one page that has a wash, so no other route gains
+   a containing block it didn't ask for. */
+main:has(.music-wash) {
+  position: relative;
+}
+
+.music-wash {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* Tall enough to sit under the title, description and count line, short
+     enough that it's spent before the embed starts. */
+  height: clamp(220px, 34vh, 360px);
+  /* Behind the page's own text, which is in normal flow and unpositioned.
+     Same mechanism the chrome bars use — and, as there, nothing in this
+     subtree may take `isolation: isolate` (#81). */
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.music-wash img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Blurred past recognition — this is a colour, not a picture. The scale is
+     what keeps it a colour: a blur samples transparency beyond the image's
+     own edges, so an unscaled cover fades out at its rim and reads as a
+     rectangle floating on the page. */
+  transform: scale(1.2);
+  filter: blur(48px) saturate(1.3);
+  opacity: 0.28;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 92%);
+  mask-image: linear-gradient(to bottom, #000 0%, transparent 92%);
+}
+
+@media (prefers-color-scheme: dark) {
+  .music-wash img {
+    /* A dark page needs more of it to register at all, and slightly less
+       saturation or a bright cover glows rather than tints. */
+    opacity: 0.34;
+    filter: blur(48px) saturate(1.2) brightness(0.95);
+  }
+}
+
+/* Apple's hierarchy — a quiet count under the heading — in the site's own
+   typeface, since the sans is what we're deliberately not borrowing (#61). */
+.music-sub {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  font-size: 0.8125rem;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- the track list ---- */
+.music-tracks {
+  /* Defined on the list, not the row: the divider is drawn on the `li` and a
+     custom property only inherits downward, so a value set on the `<a>` is
+     invisible to the pseudo that has to line up with it. */
+  --music-art: 44px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.music-tracks li {
+  position: relative;
+}
+
+/* The divider starts at the TEXT column, not at the row's edge. It's the most
+   recognisable thing about an Apple Music list and it costs one pseudo —
+   drawn on the row rather than as a border so the artwork column stays clear
+   and the hover wash can still round its own corners underneath it. */
+.music-tracks li + li::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: calc(var(--music-art) + 0.75rem);
+  right: 0;
+  height: 1px;
+  background: var(--border);
+}
+
+.music-tracks a {
+  display: grid;
+  grid-template-columns: var(--music-art) minmax(0, 1fr) auto;
+  /* The date sits on the title's line and the description spans the whole
+     text column under it — Apple's two-line row. Placing by AREA rather than
+     by source order is what lets the description have the width the date
+     would otherwise take, which on a phone is most of the row. */
+  grid-template-areas:
+    "art title date"
+    "art desc  desc";
+  align-items: center;
+  column-gap: 0.75rem;
+  /* Pulled out of the measure and padded back in, so the hover wash extends
+     past the text the way every other list row on the site does. */
+  margin-inline: -0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--r-md);
+}
+
+
+.music-tracks a:hover {
+  background: var(--bg-hover);
+}
+
+.music-art {
+  width: var(--music-art);
+  height: var(--music-art);
+  border-radius: var(--r-sm);
+  background-color: var(--surface);
+  object-fit: cover;
+  display: block;
+  grid-area: art;
+  /* Album art is a physical object in Apple's layout; a hairline of shadow is
+     what keeps a white cover from dissolving into a white page. */
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
+}
+
+/* One line each, ellipsised. A note's description is a sentence, and two of
+   them wrapping turns a track list back into the rows this replaced. */
+.music-title,
+.music-desc {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.music-title {
+  grid-area: title;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.35;
+}
+
+.music-desc {
+  grid-area: desc;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.music-date {
+  grid-area: date;
+  justify-self: end;
+  padding-left: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Phones: the artwork comes down a step and the date loses the year, so the
+   text column keeps enough room to say something. */
+@media (max-width: 479px) {
+  .music-tracks {
+    --music-art: 38px;
+  }
+
+  .music-tracks a {
+    column-gap: 0.625rem;
+  }
+
+  .music-tracks li + li::before {
+    left: calc(var(--music-art) + 0.625rem);
+  }
+
+  .music-date {
+    font-size: 0.8125rem;
+  }
+}
