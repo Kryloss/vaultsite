@@ -1309,6 +1309,17 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
    as the prose above it — a frameless table indented by a phantom 1rem reads
    as a mistake. */
 .prose table.fact-table {
+  /* 8rem clears the widest label in either language — Ukrainian's
+     "Одним рядком" is 103px against 112px of usable column — and it is the
+     same 8rem the creator's text starts at (see `.creator`). */
+  --fact-label: 8rem;
+  /* MUST be fixed. Under the default `auto` layout a `width` on a cell is
+     only a hint: the English column settled at 112px and the Ukrainian one
+     at 119px, so the two languages did not line up with each other, let alone
+     with the creator above — and "Одним рядком" wrapped to two lines anyway.
+     Fixed makes the column exactly `--fact-label` and lets an over-long label
+     wrap inside it, which is the graceful failure rather than a silent shove. */
+  table-layout: fixed;
   border: none;
   border-radius: 0;
   overflow: visible;
@@ -1326,9 +1337,24 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   line-height: 1.5;
 }
 
+/* The rating's row. The svg has a viewBox and no intrinsic size, so it needs
+   a height here — sized in `em` so it tracks the row's type rather than a
+   pixel guess, and nudged onto the text baseline. */
+.prose .fact-table .stars {
+  display: inline-block;
+  height: 1.05em;
+  width: auto;
+  vertical-align: -0.13em;
+}
+
 .prose .fact-table td:first-child {
-  width: 1%;
-  padding-right: 1.5rem;
+  /* FIXED, not shrink-to-fit. At `width: 1%` the value column landed wherever
+     that note's longest label happened to end, so it moved between notes —
+     193px on a book, 166px on a video — and the shelf looked like it had been
+     laid out one page at a time. 7rem clears the widest label in either
+     language and is the same 7rem the creator's text starts at. */
+  width: var(--fact-label);
+  padding-right: 1rem;
   font-size: 0.875rem;
   font-weight: 400;
   color: var(--text-tertiary);
@@ -1358,15 +1384,15 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
 @media (max-width: 480px) {
   .prose table.fact-table {
     display: block;
-    margin-top: -0.75rem;
-    padding-bottom: 1.25rem;
+    margin-top: -0.9rem;
+    padding-bottom: 1rem;
   }
   .prose .fact-table tbody,
   .prose .fact-table tr {
     display: block;
   }
   .prose .fact-table tr + tr {
-    margin-top: 0.45rem;
+    margin-top: 0.35rem;
   }
   .prose .fact-table td,
   .prose .fact-table td:first-child {
@@ -3465,10 +3491,18 @@ a.series-link:hover {
    circle and the blur placeholder all derive from it, so shrinking the block
    on a phone is one number rather than four. */
 .creator {
-  --creator-size: 4.5rem;
+  /* 6rem + the 2rem gap = 8rem, which is exactly `--fact-label` below. The
+     creator's text and the fact list's VALUES therefore start on the same
+     vertical line, and the header block reads as one object instead of two
+     that happen to be stacked. The photo grew to make that line land where
+     the widest label in either language fits (Ukrainian's "Одним рядком" is
+     103px, and a 4.5rem photo beside a 1rem gap put the line at 88px, which
+     wrapped it). It costs no height: the role, name and bio beside it are
+     already taller than 96px. */
+  --creator-size: 6rem;
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
+  gap: 2rem;
   margin-top: 2rem;
 }
 
@@ -3564,7 +3598,7 @@ a.series-link:hover {
    than the screen. */
 @media (max-width: 480px) {
   .creator {
-    --creator-size: 3.5rem;
+    --creator-size: 3rem;
     display: grid;
     grid-template-columns: var(--creator-size) 1fr;
     column-gap: 0.875rem;
@@ -3600,7 +3634,7 @@ a.series-link:hover {
   .creator-bio {
     grid-column: 1 / -1;
     min-width: 0;
-    margin-top: 0.75rem;
+    margin-top: 0.6rem;
     font-size: 0.875rem;
     line-height: 1.5;
   }

@@ -161,6 +161,10 @@ export const ui = {
   creatorShowCreator: { en: "Creator", uk: "Автор серіалу" },
   creatorChannel: { en: "Channel", uk: "Канал" },
 
+  /* The rating's row in a shelf note's fact list — the stars live there now
+     rather than on the metadata line (`docs/DECISIONS.md` #88). */
+  ratingRow: { en: "Rating", uk: "Оцінка" },
+
   quotesEmpty: {
     en: "No quotes saved yet — add a > blockquote to a book’s note.",
     uk: "Цитат поки немає — додайте > цитату в нотатку книги.",

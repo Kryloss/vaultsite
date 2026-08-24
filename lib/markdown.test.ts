@@ -191,3 +191,24 @@ test("one filled header cell is enough to keep the header", async () => {
   assert.doesNotMatch(html, /fact-table/);
   assert.match(html, /<thead>/);
 });
+
+test("a rating becomes a row of the fact list, labelled and last", async () => {
+  const html = await renderMarkdown(FACTS, "Shelf/Books", "shelf", {
+    factTables: true,
+    rating: 4.5,
+    ratingLabel: "Оцінка",
+  });
+  assert.match(html, /<td>Оцінка<\/td>/);
+  // Last row: nothing from the note's own table follows it.
+  assert.ok(html.indexOf("Оцінка") > html.indexOf("Read"));
+  // Half star = a 90% clip on the nested svg — see lib/stars.ts.
+  assert.match(html, /width="90%"/);
+});
+
+test("no rating means no extra row", async () => {
+  const html = await renderMarkdown(FACTS, "Shelf/Books", "shelf", {
+    factTables: true,
+  });
+  assert.doesNotMatch(html, /Rating|Оцінка/);
+  assert.doesNotMatch(html, /<svg/);
+});

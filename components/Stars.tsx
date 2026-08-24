@@ -1,29 +1,22 @@
+import {
+  STAR_OFFSETS,
+  STAR_BOX,
+  STAR_PATH,
+  STARS_WIDTH,
+  ratingAriaLabel,
+  ratingWidth,
+} from "@/lib/stars";
+
 /**
- * Monochrome 5-star rating display. Supports halves (rating: 3.5).
+ * Monochrome 5-star rating. Supports halves (rating: 3.5).
  * Pure component — safe in both server and client components.
  *
- * Grey, not full text colour: a rating is metadata, and both places this
- * renders are metadata rows — beside the date on an entry page, under the
- * cover on a shelf card. At `--text` it was the darkest thing on either line
- * and read as a headline. `--text-tertiary` is what the rest of those rows
- * are set in, so the score now sits with the facts around it instead of
- * above them. The empty stars stay on `--border`, which is far enough from
- * tertiary in both themes to keep 3½ readable at 13px.
+ * Grey, not full text colour: a rating is metadata. On a shelf card it sits
+ * under the title with the author line, and on an entry page it is a row of
+ * the fact list — which is drawn by lib/markdown.ts, not by this component,
+ * from the same geometry in lib/stars.ts. See the note there for why the half
+ * star is a nested-svg clip rather than a per-star fill.
  */
-
-function Star({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className={className}
-      aria-hidden
-    >
-      <path d="M12 2.5l2.95 6.35 6.95.62-5.25 4.62 1.55 6.81L12 17.3l-6.2 3.6 1.55-6.81L2.1 9.47l6.95-.62L12 2.5z" />
-    </svg>
-  );
-}
-
 export default function Stars({
   rating,
   size = 14,
@@ -33,40 +26,33 @@ export default function Stars({
   size?: number;
   className?: string;
 }) {
-  const value = Math.round(Math.min(Math.max(rating, 0), 5) * 2) / 2;
+  const row = (fill: string) => (
+    <g fill={fill}>
+      {STAR_OFFSETS.map((x) => (
+        <path key={x} d={STAR_PATH} transform={`translate(${x} 0)`} />
+      ))}
+    </g>
+  );
 
   return (
-    <span
+    <svg
       role="img"
-      aria-label={`${value} out of 5 stars`}
-      className={`inline-flex items-center gap-[3px] ${className}`}
+      aria-label={ratingAriaLabel(rating)}
+      viewBox={`0 0 ${STARS_WIDTH} ${STAR_BOX}`}
+      height={size}
+      width={(size * STARS_WIDTH) / STAR_BOX}
+      className={`inline-block align-[-0.1em] ${className}`}
     >
-      {[1, 2, 3, 4, 5].map((i) => {
-        const fill = Math.min(Math.max(value - (i - 1), 0), 1); // 0 | 0.5 | 1
-        return (
-          <span
-            key={i}
-            className="relative inline-block"
-            style={{ width: size, height: size }}
-          >
-            <Star className="absolute inset-0 h-full w-full text-[var(--border)]" />
-            {fill > 0 && (
-              <span
-                className="absolute inset-y-0 left-0 overflow-hidden"
-                style={{ width: `${fill * 100}%` }}
-              >
-                {/* fixed-size overlay so the clip lines up with the base star */}
-                <span
-                  className="block text-[var(--text-tertiary)]"
-                  style={{ width: size, height: size }}
-                >
-                  <Star className="h-full w-full" />
-                </span>
-              </span>
-            )}
-          </span>
-        );
-      })}
-    </span>
+      {row("var(--border)")}
+      {/* Nested viewport = the clip. No id, so a page full of ratings can't
+          collide — see lib/stars.ts. */}
+      <svg
+        width={ratingWidth(rating)}
+        viewBox={`0 0 ${STARS_WIDTH} ${STAR_BOX}`}
+        preserveAspectRatio="xMinYMid slice"
+      >
+        {row("var(--text-tertiary)")}
+      </svg>
+    </svg>
   );
 }

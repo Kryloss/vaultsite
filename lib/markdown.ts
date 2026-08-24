@@ -36,6 +36,14 @@ import { highlightToHast, parseCodeMeta, langLabel } from "./highlight";
 import { rehypeHeadings, type Heading } from "./toc";
 import { dimsFor, srcSetFor } from "./blur";
 import { ui } from "./ui-strings";
+import {
+  STAR_BOX,
+  STAR_OFFSETS,
+  STAR_PATH,
+  STARS_WIDTH,
+  ratingAriaLabel,
+  ratingWidth,
+} from "./stars";
 
 /** Encode each path segment but keep "/" separators. */
 function encodePath(p: string): string {
@@ -924,8 +932,51 @@ function rehypeFigures() {
  * shipped the row to a screen reader as a set of blank column headers, and
  * that leaned on `:has()` for something a build step can simply decide.
  */
-function rehypeFactTables() {
+/** The star row as hast — same geometry as components/Stars.tsx, see lib/stars.ts. */
+function starsHast(rating: number): any {
+  const row = (fill: string) => ({
+    type: "element",
+    tagName: "g",
+    properties: { fill },
+    children: STAR_OFFSETS.map((x) => ({
+      type: "element",
+      tagName: "path",
+      properties: { d: STAR_PATH, transform: `translate(${x} 0)` },
+      children: [],
+    })),
+  });
+  const box = `0 0 ${STARS_WIDTH} ${STAR_BOX}`;
+  return {
+    type: "element",
+    tagName: "svg",
+    properties: {
+      role: "img",
+      "aria-label": ratingAriaLabel(rating),
+      viewBox: box,
+      className: ["stars"],
+    },
+    children: [
+      row("var(--border)"),
+      {
+        type: "element",
+        tagName: "svg",
+        properties: {
+          width: ratingWidth(rating),
+          viewBox: box,
+          preserveAspectRatio: "xMinYMid slice",
+        },
+        children: [row("var(--text-tertiary)")],
+      },
+    ],
+  };
+}
+
+function rehypeFactTables({
+  rating,
+  ratingLabel,
+}: { rating?: number; ratingLabel?: string } = {}) {
   return (tree: any) => {
+    let placedRating = false;
     const walk = (node: any) => {
       if (!node.children) return;
       for (const child of node.children) {
@@ -951,6 +1002,39 @@ function rehypeFactTables() {
             );
           if (blank) {
             child.children = child.children.filter((c: any) => c !== thead);
+
+            /* The rating joins the facts, in the FIRST fact table only. It is
+               frontmatter, not prose, so it can't be written in the note — and
+               the fact list is where it belongs: "read in July, and here's
+               what I thought" is one thought. Appended rather than prepended,
+               so the facts come first and the verdict closes them. */
+            if (typeof rating === "number" && !placedRating) {
+              placedRating = true;
+              const body =
+                child.children?.find(
+                  (c: any) => c.type === "element" && c.tagName === "tbody"
+                ) ?? child;
+              body.children.push({
+                type: "element",
+                tagName: "tr",
+                properties: {},
+                children: [
+                  {
+                    type: "element",
+                    tagName: "td",
+                    properties: {},
+                    children: [{ type: "text", value: ratingLabel ?? "Rating" }],
+                  },
+                  {
+                    type: "element",
+                    tagName: "td",
+                    properties: {},
+                    children: [starsHast(rating)],
+                  },
+                ],
+              });
+            }
+
             const cls = child.properties?.className;
             child.properties = {
               ...child.properties,
@@ -1397,6 +1481,14 @@ export interface RenderOptions {
   /** Set false where an in-page link makes no sense — the RSS feed. */
   anchors?: boolean;
   /**
+   * Rating out of 5 (halves allowed) to append to the fact list as its own
+   * row. Shelf entries only, and only alongside `factTables`. It lives in
+   * frontmatter, so the note itself can't write the row.
+   */
+  rating?: number;
+  /** Localised label for that row — "Rating" / "Оцінка". */
+  ratingLabel?: string;
+  /**
    * Render a headerless table as a plain fact list rather than a card.
    *
    * SHELF ENTRY PAGES ONLY, passed by app/[section]/[slug]/page.tsx. The
@@ -1446,7 +1538,11 @@ export async function renderWithHeadings(
     .use(rehypeStringify);
 
   // Shelf entries only — see RenderOptions.factTables.
-  if (options.factTables) pipeline.use(rehypeFactTables);
+  if (options.factTables)
+    pipeline.use(rehypeFactTables, {
+      rating: options.rating,
+      ratingLabel: options.ratingLabel,
+    });
 
   const file = await pipeline.process(pre);
   // Last step on purpose — see inlineDiagrams().

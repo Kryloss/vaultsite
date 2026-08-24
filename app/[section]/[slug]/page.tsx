@@ -27,7 +27,6 @@ import {
 } from "@/lib/shelf";
 import { ui } from "@/lib/ui-strings";
 import Creator from "@/components/Creator";
-import Stars from "@/components/Stars";
 import T from "@/components/T";
 import Toc from "@/components/Toc";
 import EntryFooter from "@/components/EntryFooter";
@@ -84,15 +83,25 @@ export default async function EntryPage({ params }: Props) {
   // pipeline because it answers a problem only these pages have: the creator
   // block above it is already a block, and two of them stack badly.
   const factTables = isShelfSection(section);
+  /* The rating rides into the fact list as a row rather than sitting on the
+     metadata line — see DECISIONS #88. Per-language, because the label is. */
+  const rating =
+    factTables && typeof entry.meta.rating === "number"
+      ? entry.meta.rating
+      : undefined;
   const en = await renderWithHeadings(entry.content, entry.sectionDir, sectionSlug, {
     anchorLabel: ui.headingAnchor.en,
     factTables,
+    rating,
+    ratingLabel: ui.ratingRow.en,
   });
   const uk = entry.contentUk
     ? await renderWithHeadings(entry.contentUk, entry.sectionDir, sectionSlug, {
         idPrefix: "uk-",
         anchorLabel: ui.headingAnchor.uk,
         factTables,
+        rating,
+        ratingLabel: ui.ratingRow.uk,
       })
     : null;
   const stats = section.type === "posts" ? readingStats(entry.content) : null;
@@ -137,18 +146,6 @@ export default async function EntryPage({ params }: Props) {
         <T en={displayDate(entry.date)} uk={displayDateUk(entry.date)} />
       </time>
     );
-  }
-
-  /* The rating, next to the date rather than beside the <h1>.
-
-     It belongs to the same family as everything else on this line: a fact the
-     note records about itself. Against a 46px serif title it was a row of
-     small glyphs with nothing to align to, and it made the one line of the
-     page that is a sentence into a sentence plus a score. Here it reads as
-     "watched on this date, rated this" — and shelf entries carry no reading
-     stats, so in practice the date and the stars are adjacent. */
-  if (typeof entry.meta.rating === "number") {
-    meta.push(<Stars rating={entry.meta.rating} size={13} />);
   }
 
   if (stats) {
@@ -252,7 +249,7 @@ export default async function EntryPage({ params }: Props) {
             </span>
           )}
         </h1>
-        {/* Date · rating · reading stats · maturity · series · #tags. */}
+        {/* Date · reading stats · maturity · series · #tags. */}
         {metaLine}
 
       </header>
