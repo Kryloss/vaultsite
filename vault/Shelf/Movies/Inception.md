@@ -19,6 +19,8 @@ cover: inception.jpg
 # cover source: Wikipedia (low-res theatrical poster, fair-use scale)
 ---
 
+## At a glance
+
 | | |
 |---|---|
 | Released | 2010 |

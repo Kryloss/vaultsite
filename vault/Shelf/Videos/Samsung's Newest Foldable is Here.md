@@ -16,6 +16,8 @@ description: "The Waveform crew's first take on Samsung's latest folding phone."
 description_uk: "Перші враження команди Waveform від нового складаного смартфона Samsung."
 ---
 
+## At a glance
+
 | | |
 |---|---|
 | Topic | Hands-on with Samsung's newest foldable |

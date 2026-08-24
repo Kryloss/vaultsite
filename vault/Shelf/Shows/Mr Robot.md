@@ -15,11 +15,13 @@ rating: 4.5
 date: 2026-07-17
 description: The rare hacker show that hackers actually respect.
 description_uk: Рідкісний серіал про хакерів, який поважають самі хакери.
-cover: mr-robot.png
-coverFit: contain
-# cover source: Wikimedia Commons (Mr._Robot_Logo.svg — freely licensed title logo)
-# to use a poster instead: replace cover with the poster file + delete coverFit
+cover: mr-robot.jpg
+# cover source: official promotional poster, supplied by Kyrylo (low-res 400x600,
+# fair-use scale) — replaces the freely licensed title logo, which was a 5:1
+# banner and the only card on the shelf that wasn't a 2:3 cover
 ---
+
+## At a glance
 
 | | |
 |---|---|

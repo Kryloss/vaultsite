@@ -1447,3 +1447,31 @@ The first version rendered in the posts list only, and shelf and people were lef
 **Together: 362px of header matter down to 288px on a 375px screen**, and the first heading of the actual writing moved from below the fold to 530px — on screen. The desktop layout is untouched.
 
 **Revisit when:** a note wants a genuinely tabular table with no header, on a shelf entry. It can't have one there — that shape means "fact list" on those pages. The escape hatch is to give it a header, which such a table wants anyway. Everywhere else the shape still means nothing.
+
+## 88. The rating is a fact, so it lives in the fact list (2026-08-23)
+
+**Decision:** A shelf note's `rating:` renders as the last row of its fact list — `Rating ★★★★½` — appended by `rehypeFactTables` (`lib/markdown.ts`) rather than rendered on the metadata line under the title. The geometry moves to `lib/stars.ts`, shared by that plugin and `components/Stars.tsx`, which still draws the rating on a shelf card.
+
+**Third placement, and the first one that answers what the rating IS.** It sat beside the `<h1>` (a row of glyphs with nothing to align to against a 46px serif, turning the one line of the page that is a sentence into a sentence plus a score), then on the metadata line (better, but a graphic mid-sentence, and on a phone it pushed the tags onto a second line and stranded a separator at the end of the first). The fact list was the answer all along: `Published 2011 / Read July 2026 / Rating ★★★★½` is one thought — what it is, when you read it, what you made of it. The metadata line goes back to date and tags, which is what it was before any of this.
+
+**It has to be injected, because a note cannot write it.** `rating:` is frontmatter, and the fact table is markdown. So the plugin appends the row, taking the localised label as an option the way `anchorLabel` already is — `ui.ratingRow`, English on the English body and Ukrainian on the Ukrainian one. Appended, not prepended: the facts come first and the verdict closes them.
+
+**The half star is a nested-`<svg>` clip, and that is what let one shape serve two renderers.** The old component built four nested spans per star with a percentage width and an absolutely positioned overlay — impossible to mirror sanely in hast. Now it is one row of five outline stars, then the same row again in the filled colour inside a nested `<svg>` whose width is the rating: a nested svg clips to its own viewport under `preserveAspectRatio="xMinYMid slice"`, so there is **no `<clipPath>` and therefore no id**. That matters more than the tidiness — a shelf grid renders a dozen ratings on one page, and generated SVG ids are the classic way for them to quietly clip each other.
+
+**Two renderers is deliberate, not a duplication that got away.** One is React, one is a rehype plugin over a syntax tree; neither can call the other. What would drift is the path and the arithmetic, and those are in `lib/stars.ts` with tests. Each renderer is a dozen lines of plumbing over it.
+
+## 89. The header block is one column, not two stacked (2026-08-23)
+
+**Decision:** On a shelf entry the creator's portrait grew to 6rem and its gap to 2rem, so its text starts at exactly 8rem — which is `--fact-label`, the fixed width of the fact list's label column. The creator's name, the bio, and every fact VALUE now begin on the same vertical line.
+
+**The column had to be fixed, and `width` alone does not fix it.** Under the default `table-layout: auto` a width on a cell is a hint the algorithm may overrule: the English column settled at 112px and the Ukrainian one at 119px, so the two languages did not line up with each other, never mind with the creator above them. `table-layout: fixed` makes the column exactly `--fact-label` and makes an over-long label wrap inside it instead of shoving the value column right — a graceful failure rather than a silent one.
+
+**8rem is set by Ukrainian, not by English.** `Одним рядком` is 103px against `Published`'s 67px, and script coverage decides layout numbers here the same way it decides typefaces (#59, #61). A 4.5rem photo beside a 1rem gap put the line at 88px, which wrapped it.
+
+**The photo grew for free.** The role, name and bio beside it already run taller than 96px, so a bigger portrait costs no height at all — it just stops looking small next to a 46px title.
+
+**Phones keep their own layout and got tighter again.** The portrait drops to 3rem there, the bio still runs full width below it, and the fact pairs still run on (#87). Together with the rating leaving the metadata line — which stops that line wrapping — the note's opening runs 362px to 299px, and the first heading of the actual writing sits at 523px on an 812px screen.
+
+**Mr. Robot got a real poster, and `coverFit: contain` now has no user.** It was a freely licensed 5:1 title logo standing in for cover art — the one card on the shelf that wasn't a 2:3 cover, and the shape that forced the hover preview to grow a whole sizing system to avoid beheading it (#85). Kyrylo supplied the official poster; it is filed at 400 × 600 like every other cover and the frontmatter drops `coverFit`. The FEATURE stays — a note may still have nothing but a banner one day — but the docs no longer point at Mr. Robot as the example, and the guidance now calls it a last resort rather than a shrug, because the fix here was simply to ask for the art.
+
+**Revisit when:** a fact label longer than `Одним рядком` appears. It will wrap inside the column rather than break the alignment, which is the point, but 8rem is one number to move.

@@ -20,6 +20,8 @@ cover: the-old-man-and-the-sea.jpg
 # cover source: Open Library covers API, ISBN 9780099908401 (Arrow Classic English edition)
 ---
 
+## At a glance
+
 | | |
 |---|---|
 | Published | 1952 |

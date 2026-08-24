@@ -22,6 +22,8 @@ cover: illustrated-history-of-ukraines-independence.jpg
 # cover source: publisher/retail listing for the Зелений Пес edition, ISBN 9789661515948
 ---
 
+## At a glance
+
 | | |
 |---|---|
 | Published | 2013 (Зелений Пес) |

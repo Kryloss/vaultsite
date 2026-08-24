@@ -22,6 +22,8 @@ cover: hero-with-a-thousand-faces.jpg
 # cover source: Open Library covers API, ISBN 9781577315933 (New World Library edition)
 ---
 
+## At a glance
+
 | | |
 |---|---|
 | Published | 1949 |

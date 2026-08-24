@@ -16,6 +16,8 @@ description: "A field interview from Caolan Robertson's Ukraine reporting."
 description_uk: "Інтерв'ю з циклу репортажів Каолана Робертсона з України."
 ---
 
+## At a glance
+
 | | |
 |---|---|
 | Who he is | Irish journalist, reporting from Ukraine since 2022 and living there full-time since mid-2024 |

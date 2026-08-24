@@ -972,15 +972,28 @@ function starsHast(rating: number): any {
 }
 
 function rehypeFactTables({
+  plain = false,
   rating,
   ratingLabel,
-}: { rating?: number; ratingLabel?: string } = {}) {
+}: { plain?: boolean; rating?: number; ratingLabel?: string } = {}) {
   return (tree: any) => {
     let placedRating = false;
     const walk = (node: any) => {
       if (!node.children) return;
       for (const child of node.children) {
         if (child.type === "element" && child.tagName === "table") {
+          /* The heading that introduces this block, if there is one — the
+             element immediately before the table, ignoring the whitespace
+             between them. */
+          const kids = node.children;
+          const i = kids.indexOf(child);
+          let prev: any = null;
+          for (let j = i - 1; j >= 0; j--) {
+            const c = kids[j];
+            if (c.type === "text" && !c.value.trim()) continue;
+            prev = c;
+            break;
+          }
           const thead = child.children?.find(
             (c: any) => c.type === "element" && c.tagName === "thead"
           );
@@ -1001,6 +1014,34 @@ function rehypeFactTables({
                 )
             );
           if (blank) {
+            /* Hide the heading, but keep the element. "At a glance" over a
+               list of facts labels nothing the rows don't say themselves —
+               but it is a real section of the note, so it stays in the DOM
+               for the table of contents, for its anchor, and for a screen
+               reader. This half runs on EVERY section, not just the shelf:
+               the words are redundant wherever the block appears. */
+            if (
+              prev?.type === "element" &&
+              (prev.tagName === "h2" || prev.tagName === "h3")
+            ) {
+              const h = prev.properties?.className;
+              prev.properties = {
+                ...prev.properties,
+                className: Array.isArray(h)
+                  ? [...h, "fact-heading"]
+                  : h
+                    ? [h, "fact-heading"]
+                    : ["fact-heading"],
+              };
+            }
+
+            /* Everything below is the SHELF's plain-list treatment and stays
+               opt-in — a People note keeps its card (DECISIONS #87). */
+            if (!plain) {
+              walk(child);
+              continue;
+            }
+
             child.children = child.children.filter((c: any) => c !== thead);
 
             /* The rating joins the facts, in the FIRST fact table only. It is
@@ -1537,12 +1578,14 @@ export async function renderWithHeadings(
     .use(rehypeHeadings, { ...options, collect: headings })
     .use(rehypeStringify);
 
-  // Shelf entries only — see RenderOptions.factTables.
-  if (options.factTables)
-    pipeline.use(rehypeFactTables, {
-      rating: options.rating,
-      ratingLabel: options.ratingLabel,
-    });
+  /* Always on: it hides the "At a glance" heading over ANY fact block. The
+     plain-list styling and the rating row are the shelf-only half, gated by
+     `plain` — see RenderOptions.factTables. */
+  pipeline.use(rehypeFactTables, {
+    plain: options.factTables,
+    rating: options.rating,
+    ratingLabel: options.ratingLabel,
+  });
 
   const file = await pipeline.process(pre);
   // Last step on purpose — see inlineDiagrams().

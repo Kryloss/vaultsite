@@ -324,9 +324,13 @@ after one attempt is not.
 | Inline figures | Wikimedia Commons, official docs/press kits, his own screenshots |
 
 **Wide art (logos, banners):** set `coverFit: contain` in the entry frontmatter
-— the card letterboxes it on the tile background instead of cropping. This is
-how a freely-licensed title logo becomes a perfectly good cover when no poster
-is available (see `vault/Shelf/Shows/Mr Robot.md`).
+— the card letterboxes it on the tile background instead of cropping. It is a
+LAST RESORT, not a shrug: a 5:1 banner on a 2:3 card is the one item on the
+shelf that doesn't look like the others, and it has knock-on costs (the hover
+preview had to grow a whole shape system partly to serve it — DECISIONS #85).
+Mr. Robot used to be the example here and no longer is; a real poster replaced
+it, and nothing in the vault sets `coverFit` today. Exhaust the poster cascade
+above, and ask Kyrylo before settling for a logo — he may well have the art.
 
 **Work the cascade properly — three of the four "no portrait" cases were the
 first source giving up too early.** In order:

@@ -1280,6 +1280,35 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   white-space: nowrap;
 }
 
+/* The "At a glance" heading over a fact block: present, not painted.
+
+   The words label nothing the rows don't already say, and over three lines of
+   facts at the same weight as a real section heading they were the loudest
+   thing in the block. But it IS a section of the note, so the element stays —
+   it is what the table of contents lists, what `#at-a-glance` scrolls to, and
+   what a screen reader announces before reading the facts. Deleting it from
+   the markdown (which is what shipped first) took it out of the contents too,
+   and the outline is the one place the label is genuinely useful.
+
+   Clipped rather than `display: none`, which would remove it from the
+   accessibility tree and from the scroll-spy's measurements. `position:
+   absolute` keeps its static position, so the spy still finds the block where
+   the reader sees it, and it contributes no height or margin of its own —
+   the table below supplies the spacing.
+
+   `rehypeFactTables` in lib/markdown.ts tags it, on every section. */
+.prose h2.fact-heading,
+.prose h3.fact-heading {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* Hide fully-empty header rows (Obsidian tables like `| | |`).
 
    Still needed: only SHELF ENTRY pages run `rehypeFactTables`, which deletes
