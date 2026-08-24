@@ -4600,30 +4600,54 @@ html[data-intro][data-intro-fast] .prose > .avatar {
   border: 1px solid var(--border);
   border-radius: var(--r-xl);
   background: var(--surface);
+  /* Named, not a shorthand: a `transition:` here would sit below `.press` in
+     this file and reset the transform its rows are pressed with (#52). */
+  transition-property: border-color, box-shadow;
+  transition-duration: var(--dur);
+  transition-timing-function: var(--ease);
+}
+
+/* The outline answers the pointer. At rest the card is held by `--border`, a
+   hairline that deliberately retreats; under the pointer it firms up and takes
+   a soft ring, so the whole list reads as one object you are addressing before
+   any single row lights up. Built from `--text` like every other state on the
+   site — there is no accent to reach for (#64) — and it is the CARD that
+   responds, never the heading above it, which is type and not a control. */
+.music-card:hover {
+  border-color: color-mix(in srgb, var(--text) 20%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 5%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .music-card {
+    transition: none;
+  }
 }
 
 .music-wash {
   position: absolute;
   inset: 0;
+  overflow: hidden;
   pointer-events: none;
+  /* How far the artwork hangs past the box on every side. It must EXCEED the
+     blur radius: `blur()` samples transparency beyond the image's own edges,
+     so the picture fades out at its rim, and if that rim is inside the box
+     you can see where it ended — a soft horizontal line across the card. A
+     `transform: scale()` was doing this job and was set to 1.2, which on a
+     190px row pushes the rim out 19px against a 48px blur: not nearly enough.
+     A fixed bleed says the thing that actually matters in the same units as
+     the blur it has to clear. */
+  --wash-bleed: 120px;
+  /* The mask lives on the BOX, not the artwork, so its geometry stays tied to
+     what you can see rather than to an image that now hangs 120px past it. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgb(0 0 0 / 0.35) 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, rgb(0 0 0 / 0.35) 100%);
 }
 
 .music-wash img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  /* Blurred past recognition — this is a colour, not a picture. The scale is
-     what keeps it a colour: a blur samples transparency beyond the image's
-     own edges, so an unscaled cover fades out at its rim and reads as a
-     rectangle floating inside the card. */
-  transform: scale(1.2);
+  /* Blurred past recognition — this is a colour, not a picture. */
   filter: blur(48px) saturate(1.3);
   opacity: 0.3;
-  /* Never all the way out: the bottom of the card keeps a third of the tint,
-     so the card reads as one tinted surface rather than as a coloured band
-     with a plain list under it. */
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgb(0 0 0 / 0.35) 100%);
-  mask-image: linear-gradient(to bottom, #000 0%, rgb(0 0 0 / 0.35) 100%);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -4633,6 +4657,21 @@ html[data-intro][data-intro-fast] .prose > .avatar {
     opacity: 0.36;
     filter: blur(48px) saturate(1.2) brightness(0.95);
   }
+}
+
+/* The bleed itself, shared by both washes — see `--wash-bleed` above. */
+.music-wash img,
+.note-wash img {
+  display: block;
+  width: calc(100% + var(--wash-bleed) * 2);
+  /* `max-width: none` is load-bearing, not tidying: the reset caps every image
+     at `max-width: 100%`, which silently ate the horizontal half of the bleed
+     while the explicit height sailed through — so the left and right rims kept
+     showing after the top and bottom stopped. */
+  max-width: none;
+  height: calc(100% + var(--wash-bleed) * 2);
+  margin: calc(var(--wash-bleed) * -1);
+  object-fit: cover;
 }
 
 /* ---- the track list ---- */
@@ -4792,28 +4831,56 @@ main:has(.note-wash) {
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
+  /* Clears the 72px blur with room to spare — see `--wash-bleed` on the card. */
+  --wash-bleed: 180px;
+  /* Out on every side, so it has no edge to read as a shape. The ellipse is
+     taller than wide relative to the box (85% × 100%) — spread across a window
+     rather than a 39rem column, a falloff wider than the element has nowhere
+     to fade and stops at a rim. On the BOX, not the artwork, or the geometry
+     would be measured against an image hanging 180px past what you see. */
+  -webkit-mask-image: radial-gradient(85% 100% at 50% 0%, #000 15%, transparent 100%);
+  mask-image: radial-gradient(85% 100% at 50% 0%, #000 15%, transparent 100%);
 }
 
 .note-wash img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  /* Scaled for the same reason as the card's: a blur samples transparency
-     past the image's edges, and an unscaled cover fades out at its own rim. */
-  transform: scale(1.25);
   filter: blur(72px) saturate(1.3);
   opacity: 0.3;
-  /* Out on every side, so it has no edge to read as a shape. The ellipse is
-     now taller than wide relative to the box (85% × 100%) — spread across a
-     window rather than a 39rem column, a falloff wider than the element has
-     nowhere to fade and stops at a rim. */
-  -webkit-mask-image: radial-gradient(85% 100% at 50% 0%, #000 15%, transparent 100%);
-  mask-image: radial-gradient(85% 100% at 50% 0%, #000 15%, transparent 100%);
 }
 
 @media (prefers-color-scheme: dark) {
   .note-wash img {
     opacity: 0.36;
     filter: blur(72px) saturate(1.2) brightness(0.95);
+  }
+}
+
+/* Both washes arrive rather than appearing. A field of colour that cuts in at
+   full strength is the one thing on the page that doesn't move like the rest
+   of it — `.page-in` is already fading the article in around it.
+
+   ONE keyframe, and it only names the START. With `both`, the end of the
+   animation is the element's OWN computed opacity, so the light value (0.30)
+   and the dark one (0.36) are each honoured without the keyframes knowing
+   either — a `to { opacity: 0.3 }` here would silently flatten dark mode. */
+@keyframes wash-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.note-wash img,
+.music-wash img {
+  /* --dur-slow, not a fourth duration typed in at the call site (#58). It is
+     the step meant for things that travel far, and nothing on the page covers
+     more ground than this does. */
+  animation: wash-in var(--dur-slow) var(--ease) both;
+}
+
+/* No entrance for a reader who asked for less motion, and none in print —
+   in both cases the wash is simply already there at its full value. */
+@media (prefers-reduced-motion: reduce), print {
+  .note-wash img,
+  .music-wash img {
+    animation: none;
   }
 }

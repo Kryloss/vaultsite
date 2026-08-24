@@ -28,6 +28,8 @@ artist_bio_uk: >-
 
 What I like most is how it sounds like a summary of everything they've tried: the heavy synth stuff, the rap verses, Josh Dun's drums pushed way up front. It debuted top-three in the US and hit number one in a few countries, so clearly the long-game storytelling worked.
 
+https://music.apple.com/ca/album/lavish/1733370881?i=1733371051
+
 https://music.apple.com/us/album/clancy/1733370881
 
 Favourite deep cut: the back half of the album, where it gets quieter and more honest. That contrast — big anthems up front, small confessions at the end — is very them.
