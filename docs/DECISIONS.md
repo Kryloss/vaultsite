@@ -1677,3 +1677,19 @@ The first version rendered in the posts list only, and shelf and people were lef
 **Apple's layout switch was MEASURED, and that is what makes the phone rule safe.** The section page's playlist is two-column on a desktop and stacked on a phone, so its crop has to follow the window — and picking the site's usual 640px phone breakpoint would have been wrong, because at 639px the column is still 591px and firmly two-column, which is precisely the case that cuts the Play button. Loading the embed directly and narrowing it puts the switch between **450px (stacked) and 480px (two-column)**. The rule fires at a 480px WINDOW, where the column is 432px — inside the stacked range with room — and that covers every phone in portrait. Above it the playlist keeps the wide crop and its link, which is the failure that costs nothing.
 
 **Revisit when:** a player looks clipped in the wrong place. That is the failure mode this trades for the 56px, and it will present as a cut-off title or a half Play button rather than as an error.
+
+## 101. The bottom crop broke playback, and cannot exist (2026-08-24)
+
+**Decision:** `--am-crop-bottom` is 0 everywhere and stays there. The top crop (#100) remains: 24px on a song player, 34px on an album or playlist.
+
+**Apple's player has a PLAYING STATE, and every measurement behind #100 was taken while it was idle.** Press Play and the bottom band stops being the "View in Apple Music" link and the disclosure line and becomes a progress bar and the transport controls — previous, pause, next — which run to the iframe's last pixel. So the crop that tidied the idle player sliced the controls in half the moment anyone actually used it, on desktop and phone alike. It shipped that way and Kyrylo found it in minutes.
+
+**There is no number that satisfies both states.** They are the same band used for different things: hide the link while idle and you have taken the controls while playing. The choice is the disclosure line and the "View in Apple Music" link, or working playback controls, and that is not a close call — the player exists to be played.
+
+**The three bottom values that were carefully derived — 14px, 22px, 50px — were all wrong for the same reason**, and the care taken over them is the point. They were measured, split per player type, split again per layout, and checked at 1:1 in four places. None of that could help, because the flaw was not in the arithmetic: an entire STATE of the thing being cropped had never been looked at. **Measuring a component only tells you about the state you measured it in.**
+
+**The top crop survives because the header does not move.** The Apple Music wordmark and Sign In row sit above the content whether the player is idle or playing, so removing them takes nothing in either state. That is the difference, and it is why the whole crop did not have to be abandoned.
+
+**The one gain: the numbers stop compounding.** `--gutter-player-h` was 300px, then 264px when the crop landed; it is 277px now — the iframe's 450px less the 34px top crop, times the 0.6667 scale. Every entry that touches a player's size has had to restate this figure. It is stated in one place and derived nowhere else.
+
+**Revisit when:** never, unless Apple gives the embed a parameter for its own chrome. The next person to reach for `--am-crop-bottom` should press Play first.

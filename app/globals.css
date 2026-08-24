@@ -577,50 +577,33 @@ body::after {
 :root {
   /* The Apple Music wordmark and the Sign In row. */
   --am-crop-top: 34px;
-  /* The "See how your data is managed" line, on an ALBUM or playlist player.
-     The two player types do not share this number: measured at 14px here the
-     album's disclosure line peeks back in at the bottom right. */
-  --am-crop-bottom: 22px;
+  /* ZERO, and it has to stay zero. See the note below. */
+  --am-crop-bottom: 0px;
 }
 
-/* The compact SONG player's bottom band is smaller. Apple leaves about 24px
-   under its buttons, of which ~10px is padding — so the album's 22px took the
-   line AND the breathing room, and the controls ended up against the edge.
-   14px removes the line and keeps the padding Apple would have left. */
+/* ---- why the bottom is not cropped (#101) ----
+
+   It was, at 14px / 22px / 50px depending on the player, and every one of
+   those was wrong for a reason none of the measuring caught: Apple's player
+   has a PLAYING STATE. Start a track and the bottom band stops being the
+   "View in Apple Music" link and the disclosure line and becomes a progress
+   bar and the transport controls — previous, pause, next — which run to the
+   iframe's last pixel. So any bottom crop that hides the link while idle
+   slices the controls in half the moment someone presses Play, on desktop and
+   phone alike.
+
+   There is no number that satisfies both states, because they are the same
+   band used for different things. The choice is the link and the disclosure
+   line, or working playback controls, and it is not a close call.
+
+   The TOP crop is safe and stays: the Apple Music wordmark and Sign In row sit
+   above the content in BOTH states, so removing them takes nothing either way. */
+
 .apple-music-block[data-kind="song"] {
-  --am-crop-bottom: 14px;
-  /* And less off the top than an album: the compact player's header band is
+  /* Less off the top than an album: the compact player's header band is
      shorter, so 34px there took the wordmark AND the padding above the
      artwork, leaving it flush against the card's edge. */
   --am-crop-top: 24px;
-}
-
-/* An album player is TWO LAYOUTS, and the bottom crop cannot be one number.
-
-   Wide (in the writing, and on the section page) it is two columns: the track
-   list on the right ends with "View in Apple Music" level with the Play button
-   on the left — so cropping the link would cut the Play button with it. Those
-   keep the default.
-
-   Narrow (the gutter player, the phone sheet) it stacks, and the link sits
-   BELOW Play, where it can be taken on its own. 50px is that row plus the
-   disclosure line under it, leaving Play its padding. */
-.music-sheet .am-crop {
-  --am-crop-bottom: 50px;
-}
-
-/* The section page's playlist is wide enough to be two-column on a desktop and
-   narrow enough to stack on a phone, so its crop has to follow the WINDOW.
-
-   480px is not a guess: Apple's player was measured switching between the two
-   layouts somewhere between 450px and 480px wide. At a 480px window the column
-   is 432px (the window less two 1.5rem gutters), which is inside the stacked
-   range with room to spare — and it covers every phone in portrait. Above it
-   the playlist keeps the wide crop and its link, which is the safe failure. */
-@media (max-width: 480px) {
-  .am-crop {
-    --am-crop-bottom: 50px;
-  }
 }
 
 .am-crop {
@@ -4981,10 +4964,6 @@ main:has(.note-wash) {
     transform-origin: top left;
     margin: 0;
     z-index: 1;
-    /* Narrow enough that Apple stacks the player, so "View in Apple Music"
-       sits below Play and can be cropped without it — see the note on
-       `.music-sheet .am-crop`. */
-    --am-crop-bottom: 50px;
   }
 
   /* Both want the same column, so the contents start below the player instead
@@ -4992,7 +4971,7 @@ main:has(.note-wash) {
      iframe's own 450px: minus the 56px Apple's cropped chrome took (#100),
      then × 0.6667 for the scale (#97). */
   .music-note:has(.apple-music-block[data-kind="album"]) .toc-rail {
-    --gutter-player-h: 264px;
+    --gutter-player-h: 277px;
     top: calc(5rem + var(--gutter-player-h) + 2rem);
     max-height: calc(100vh - 8rem - var(--gutter-player-h) - 2rem);
   }
