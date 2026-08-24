@@ -5,7 +5,6 @@
  * Any https://music.apple.com/... link (playlist, album, song, artist) can be
  * embedded by swapping the host to embed.music.apple.com.
  */
-import { ui } from "./ui-strings";
 
 const APPLE_MUSIC_RE = /^https:\/\/music\.apple\.com\/[^\s<>")]+$/;
 
@@ -38,22 +37,23 @@ export function appleMusicEmbedHeight(url: string): number {
 export const APPLE_MUSIC_IFRAME_ALLOW =
   "autoplay *; encrypted-media *; fullscreen *; clipboard-write";
 
-/** iframe HTML string — used by the markdown pipeline to auto-embed pasted links. */
+/**
+ * iframe HTML string — used by the markdown pipeline to auto-embed pasted links.
+ *
+ * NO footer link. There was one — "Open in Apple Music", added so a stalled
+ * gray-skeleton embed was never a dead end (DECISIONS #10) — and it is gone by
+ * request (#92). A LOADED player already carries Apple's own "View in Apple
+ * Music" and "View in App" links inside the iframe, which made ours the second
+ * copy of the same link directly under the first. What it cost is the stalled
+ * case: that one has no way out now, so if the gray skeleton comes back, this
+ * is the thing to restore.
+ */
 export function appleMusicEmbedHtml(url: string): string {
   const src = appleMusicEmbedUrl(url);
-  const web = url.trim();
   const height = appleMusicEmbedHeight(url);
-  // Card with an in-widget "Open in Apple Music" footer link so a stalled
-  // gray-skeleton embed is never a dead end (mirrors the music-page embed).
-  // Both languages are emitted as spans (the <T> pattern) so the label follows
-  // the site's language toggle — CSS on html[data-lang] shows the active one.
-  const label =
-    `<span class="lang-en">${ui.openInAppleMusic.en}</span>` +
-    `<span class="lang-uk">${ui.openInAppleMusic.uk}</span>`;
   return (
     `<div class="apple-music-block">` +
     `<iframe class="apple-music-embed" title="Apple Music player" allow="${APPLE_MUSIC_IFRAME_ALLOW}" credentialless height="${height}" src="${src}"></iframe>` +
-    `<div class="apple-music-footer"><a class="apple-music-fallback" href="${web}" target="_blank" rel="noopener noreferrer">${label} ↗</a></div>` +
     `</div>`
   );
 }

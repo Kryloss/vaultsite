@@ -53,6 +53,9 @@ export const ui = {
     en: "Notes on what I’m hearing",
     uk: "Нотатки про почуте",
   },
+  /* Parked, not dead: the embeds' footer link was removed (#92) and this is
+     what restoring it needs, already translated. Delete it only when that
+     decision is settled rather than "for now". */
   openInAppleMusic: { en: "Open in Apple Music", uk: "Відкрити в Apple Music" },
   /* No arrow in the string: it's rendered as its own element so it can move
      on hover and be thrown on press (see `.arrow-glyph` in globals.css). An

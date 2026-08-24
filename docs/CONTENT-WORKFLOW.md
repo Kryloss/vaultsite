@@ -224,8 +224,44 @@ Same frontmatter as a post (no category needed). Remember: the section page
 shows the first ~1000 characters inline, so front-load the interesting part.
 
 ### Music note — `vault/Music/<Title>.md`
-Post frontmatter. An Apple Music link pasted on its own line becomes a player —
-keep any he provides on separate lines.
+An Apple Music link pasted on its own line becomes a player — keep any he
+provides on separate lines. A music note is shaped like a shelf item, not like
+a post: it opens with the artist and a short fact list.
+
+```yaml
+title: Clancy
+date: 2026-07-17
+description: One line, shown on the section's track row.
+description_uk: The Ukrainian one — music rows DO show it (they read it from meta).
+cover: clancy.jpg          # album art → the track row, the card tint and the OG card
+artist: Twenty One Pilots  # `artist:`, not `author:` — the role reads "Artist"
+artist_photo: twenty-one-pilots.jpg
+artist_bio: >-
+  A sentence or two. Optional, like every key below the name.
+artist_bio_uk: >-
+  Той самий текст українською.
+rating: 4.5                # optional, halves allowed — HIS score, never invent one
+```
+
+Then open the body with the fact block, exactly as a shelf note does — the
+`## At a glance` heading stays in the markdown and is clipped by CSS, so never
+delete it:
+
+```markdown
+## At a glance
+
+| | |
+|---|---|
+| Released | 2024 |
+| Label | Fueled by Ramen |
+| Length | 47 min · 13 tracks |
+```
+
+The `.uk.md` sibling opens with `## Коротко` and the same table translated.
+Album facts come from the same keyless iTunes lookup as the art:
+`https://itunes.apple.com/lookup?id=<album id>&entity=song` gives the release
+date, track count, label (in `copyright`) and, by summing `trackTimeMillis`,
+the running time.
 
 ## Series — notes that are one arc
 

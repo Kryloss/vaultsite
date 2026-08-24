@@ -58,7 +58,10 @@ export default async function Image({
 
   return ogImage(
     entry?.title ?? siteName,
-    section ? `${section.title} · ${siteName}` : siteName,
+    /* Owner first, then section — the same order and separator the on-page
+       breadcrumb uses ("Kyrylo · Music"), so a shared card reads like the
+       page it links to instead of reversing it. */
+    section ? `${siteName} · ${section.title}` : siteName,
     {
       cover,
       coverShape: isMusic ? "square" : item?.isVideo ? "wide" : "tall",

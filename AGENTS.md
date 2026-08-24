@@ -196,7 +196,10 @@ Important conventions:
   reasons in `docs/DECISIONS.md` #86.
 - The `music` section type renders its notes as an Apple-Music-style track
   list (entry `cover:` album art, divider inset to the text column) inside a
-  card tinted by the newest cover, blurred. The tint is artwork in a frame, not
+  card tinted by the newest cover, blurred. A music NOTE opens like a shelf
+  note — an artist block from `artist:` plus a plain fact list — and tints its
+  own opening with its own cover, window-wide and dissolving rather than
+  framed. The Apple Music embeds carry no footer link of ours (#92). The tint is artwork in a frame, not
   an accent — nothing reads from it, and the row hover is deliberately
   translucent so it doesn't blank it. Detail in `CLAUDE.md`; reasons in
   `docs/DECISIONS.md` #90.
@@ -206,7 +209,7 @@ Important conventions:
 
 - Markdown supports wiki links/embeds, relative images, callouts, progress
   fields, GFM, syntax highlighting, figures, footnotes/sidenotes, Apple Music,
-  YouTube, and self-theming SVGs. On SHELF ENTRY PAGES ONLY, a table with
+  YouTube, and self-theming SVGs. On SHELF AND MUSIC ENTRY PAGES ONLY, a table with
   all-empty header cells renders as a plain fact list rather than a card.
   Its `## At a glance` heading is kept in the markdown but clipped by CSS on
   EVERY section, so it survives in the table of contents — do not delete it
