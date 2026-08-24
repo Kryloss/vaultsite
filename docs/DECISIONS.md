@@ -1611,3 +1611,43 @@ The first version rendered in the posts list only, and shelf and people were lef
 **The sheet was a frame around a frame, exactly like the section page's playlist had been (#94).** Border, padding, translucent fill and a blur, wrapped around a widget that draws its own rounded card — so the player floated inside a second card with a dark rim. All of it is gone; what remains is a drop shadow, which lifts the player off the page without drawing an edge. Its `max-height` also went to 80vh so the sheet can never become the thing that clips the player.
 
 **Measured after:** desktop 320 × 452 at `top: 5rem`, bottom at 532px on a 900px window; the phone sheet has `border-width: 0`, `padding: 0`, a transparent background, and holds the full 450px iframe inside its own bounds. The 437px I first measured on that iframe was the sheet's opening `scale(0.97)` caught mid-transition, not a clip.
+
+## 97. The players follow the reader's theme, and shrink by scaling (2026-08-24)
+
+**Decision:** Every Apple Music embed URL gains `theme=auto`. The gutter player is scaled to two thirds rather than resized. Track players are capped at 20rem instead of filling the column.
+
+**`theme=auto` is the site's own theming model, handed to Apple.** Verified against Apple directly before writing any code: the same embed URL renders a dark player on a dark system and a light one on a light system — the skeleton itself changes colour, so it is decided inside the iframe by `prefers-color-scheme`. That is exactly how this site themes (#62: OS only, no toggle), which means the players match the page with **no JavaScript, no second copy of the markup for the other theme, and nothing that stops the site being static.** The alternative considered — rendering a light iframe and a dark one and letting CSS pick, the way `<T>` does for language — would have been idiomatic here and is simply not needed. Appended with `&` when the link already has a query, which a song link always does (`?i=<track id>`).
+
+**Smaller had to mean SCALED, because it could not mean shorter.** #96 established that cutting the box takes the Play button, which is last in Apple's layout. `transform: scale(0.6667)` makes the player 1.5× smaller on the page while the iframe still renders at its full 20rem × 450px — so every track row and the Play button survive at two thirds size. Painted footprint 213 × 301. This is the general shape of the answer for any embed you cannot restyle: change how big it is drawn, never how much of it there is.
+
+**`transform-origin: top left` pins it to the gutter's own edge** — the one the contents rail shares. Shrinking therefore pulls the player away from the WINDOW rather than away from the writing, so the column keeps its neighbour and the extra space falls where there was already nothing.
+
+**The rail's offset reads the PAINTED height.** `--gutter-player-h` is 300px, not the iframe's 450px: a transform does not change layout, so anything positioned against the player has to be told the visual size rather than the box.
+
+**A track player was the widest thing in its own paragraph.** It is an EXAMPLE of a sentence (#94), and a full-column player made the example louder than the point. 20rem is a little over half the 39rem column and, deliberately, still above the ~300px Apple's compact player wants — half exactly (288px) would have squeezed it below that. On a phone the column is already narrower, so the cap stops applying on its own and nothing needed a media query.
+
+## 98. `zoom` for the track player, `transform` for the gutter one (2026-08-24)
+
+**Decision:** From 640px up a track player is drawn at half size — painted 20rem × ~89px against the 175px it takes on its own — using `zoom: 0.5` on a source that is 40rem wide. Phones keep the player exactly as it was.
+
+**The two players shrink by different properties, and the reason is flow.** The gutter album player is `position: fixed`, so `transform: scale()` costs it nothing — nothing is laid out around it (#97). A track player is IN FLOW inside a paragraph, and a transform there shrinks the picture while leaving the full-size hole behind it: the writing would close up around a 175px gap containing an 89px player. `zoom` scales layout as well as paint, so the text closes up around what it can actually see, with no negative margins to keep in sync. **Neither property is the general answer; the question is whether anything is laid out against the thing being shrunk.**
+
+**The source had to be doubled before it could be halved.** Scaling halves both axes, so a 20rem player at `zoom: 0.5` would have been 10rem wide — half the width that was deliberately chosen one entry ago. Setting the source to 40rem lands the painted width back on 20rem while the height halves. It also hands Apple a comfortable 640px to lay out in, well past the ~300px its compact form wants, so nothing inside is squeezed. The margin is doubled to 3rem for the same reason — `zoom` shrinks that too, and 3rem is what leaves the 1.5rem every other block has.
+
+**Phones are excluded deliberately, not by omission.** There the column is already narrow, the player is the only thing in it, and half of Apple's type at that size is not a control anyone can use. The rule sits inside `@media (min-width: 640px)` and a phone measures `zoom: 1`, full column width, full 177px height, 1.5rem margins — unchanged.
+
+**Apple's embed came back during this pass, so the last three entries' visual claims are now confirmed rather than inferred.** The gutter player renders dark with its **Play button present** (#96's revert was right), `theme=auto` produces genuinely dark players on a dark page and light on a light one (#97), and the half-size track player shows artwork, title, Play, the Apple Music link and the data line — everything, just smaller.
+
+**Hiding the artwork inside a player is not possible and should not be attempted.** The embed is a cross-origin iframe: its internals cannot be styled, and Apple exposes no parameter for layout — only `theme`, the track id, language and an affiliate token. The one mechanical route is cropping the artwork column away inside an `overflow: hidden` wrapper, which cuts a fixed rectangle out of a layout Apple can change at any time and would break silently when they do. A player without artwork means a custom player, which means MusicKit JS, a paid developer account and a runtime token — the three things this site is built not to have (#92).
+
+## 99. The track player goes back to normal; the gutter opens at 1280 (2026-08-24)
+
+**Decision:** #98 is reverted — a track player takes the column at its own 175px again, with no `zoom`, no `max-width`, no doubled source and no margin compensation. #97's `max-width: 20rem` goes with it. The album player's gutter breakpoint drops from 1400px to 1280px.
+
+**Reverted, not tuned.** Two passes narrowed the track player and then halved its height, and the result was a control drawn at half of Apple's type in the middle of an article. The player is the one thing on the page a reader might actually operate, and making it the smallest thing there had it exactly backwards. `data-kind` stays — it is what puts the ALBUM in the gutter and keeps a song out of it (#94), which is a placement decision and was never about size.
+
+**`theme=auto` is kept.** It was a separate change (#97) and the reason for it is unrelated to sizing: the players match the page's theme.
+
+**The scaling is what let the breakpoint come down.** 1400px was chosen when the player was drawn full size and needed 39rem past centre. At two thirds (#97) it paints 213px and ends about 34rem past centre, which clears a 1280px window by 99px — so the gutter can open at the contents rail's own breakpoint and the two arrive together. **The gain is vertical:** between 1280 and 1400 the player used to sit in the writing, and that is 450px of page it no longer costs. Measured on the Clancy note: the article went from ~1169px to 719px at 1280px wide.
+
+**Its layout box does hang 8px past the window and that is fine.** A transform shrinks paint, not layout, so the box still measures 320px — but the element is `position: fixed`, which does not contribute to `scrollWidth`. Verified rather than assumed: `scrollWidth === clientWidth === 1280`, no horizontal scrollbar.

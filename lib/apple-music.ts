@@ -46,9 +46,18 @@ export function isAppleMusicSong(url: string): boolean {
   return url.includes("?i=") || url.includes("&i=") || url.includes("/song/");
 }
 
-/** Single songs get the compact 175px player; playlists/albums the full 450px. */
+/**
+ * Single songs get the compact player; playlists and albums the full 450px.
+ *
+ * 150px, not the 175px Apple's own snippet uses. The player does not reflow to
+ * the height it is given — it lays out and is clipped (#93) — so the number is
+ * only safe if it was measured, and it was: at 150px every part is still
+ * there, at 130px Apple's data-disclosure line goes, and at 110px the Play
+ * button is cut in half. 150 is the floor that loses nothing, and it makes a
+ * track player 14% shorter in the middle of an article (#99).
+ */
 export function appleMusicEmbedHeight(url: string): number {
-  return isAppleMusicSong(url) ? 175 : 450;
+  return isAppleMusicSong(url) ? 150 : 450;
 }
 
 /**
