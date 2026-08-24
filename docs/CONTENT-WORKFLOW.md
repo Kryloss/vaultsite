@@ -92,7 +92,6 @@ description: <one sentence>
 cover: <slug>.jpg          # videos: omit — the thumbnail comes from `video:`
 video: <youtube url>       # medium: video only
 ---
-## At a glance
 | | |
 |---|---|
 | Published | … |
@@ -110,17 +109,26 @@ See **Categories** below — Shelf, Posts and People all use the same key.
 
 #### The creator block — every shelf note, no exceptions
 
-Above the "At a glance" table, a shelf entry page renders a round portrait,
+Above the fact table, a shelf entry page renders a round portrait,
 the role, the name and a short bio (`components/Creator.tsx`, DECISIONS #86).
 Filling it is part of writing the note, not an optional polish step.
 
 - **The role label is NOT written in the note.** It comes from `medium:` —
   book → Author, movie → Director, show → Creator, video → Channel — in both
   languages. Don't add a `role:` key; there isn't one.
-- **Never leave the creator row in the "At a glance" table.** The block prints
-  the name already, so a `| Author | … |` row six lines below it is the same
-  fact twice. If the row carried a detail beyond the name (an alternate
-  spelling, a pen name), move that detail into the bio rather than losing it.
+- **A shelf note has NO `## At a glance` heading.** Its body opens straight
+  with the `| | |` table. The heading was deleted from every shelf note and
+  its `.uk.md` — a two-word label over three rows of facts, one line under a
+  creator block, announcing nothing the rows don't say themselves
+  (`docs/DECISIONS.md` #87). **People notes keep theirs**; this is a
+  shelf-only convention.
+- **Keep the `| | |` header row empty.** That empty header is what makes the
+  block render as a quiet fact list instead of a bordered data-table card.
+  Putting words in it switches the card back on.
+- **Never leave the creator row in the fact table.** The block prints the name
+  already, so a `| Author | … |` row below it is the same fact twice. If the
+  row carried a detail beyond the name (an alternate spelling, a pen name),
+  move that detail into the bio rather than losing it.
 - **`author_bio:` is one or two sentences, and every clause has to be true.**
   Nationality, profession, the institution they're at, the thing they're best
   known for, dates for a dead writer. Verify it the same way a People note is
@@ -163,7 +171,6 @@ date: YYYY-MM-DD          # the day it went on the shelf
 description: "<one sentence>"
 description_uk: "<one sentence>"
 ---
-## At a glance
 | | |
 |---|---|
 | Topic | … |

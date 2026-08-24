@@ -189,7 +189,7 @@ Important conventions:
 - Shelf entry pages open with a creator block (portrait, role, name, bio) built
   from `author:` plus `author_uk`/`author_photo`/`author_bio`/`author_bio_uk`.
   The role comes from `medium:` — there is no `role:` key — and the note's
-  `At a glance` table must not repeat the name in a row of its own. Portraits
+  fact table must not repeat the name in a row of its own. Portraits
   live in `vault/Shelf/creators/`. Sourcing a portrait is a multi-step cascade
   ending in the channel's own YouTube avatar for video notes — do not stop at
   one failed lookup. Detail in `CLAUDE.md` and `docs/CONTENT-WORKFLOW.md`;
@@ -200,7 +200,10 @@ Important conventions:
 
 - Markdown supports wiki links/embeds, relative images, callouts, progress
   fields, GFM, syntax highlighting, figures, footnotes/sidenotes, Apple Music,
-  YouTube, and self-theming SVGs. Extend the existing build-time pipeline rather
+  YouTube, and self-theming SVGs. On SHELF ENTRY PAGES ONLY, a table with
+  all-empty header cells renders as a plain fact list rather than a card, and
+  those notes carry no `## At a glance` heading. People notes use the same
+  table shape and are deliberately unchanged — see `docs/DECISIONS.md` #87. Extend the existing build-time pipeline rather
   than adding client-side Markdown/highlighting work.
 - English and Ukrainian share routes. The selected language is client-persisted
   and restored before paint; translated bodies render as paired language blocks.

@@ -79,13 +79,20 @@ export default async function EntryPage({ params }: Props) {
 
   // The Ukrainian body renders as a second <article> in the same document, so
   // its heading ids are namespaced to keep "#setup" unambiguous — see lib/toc.ts.
+  // Shelf entries render a headerless table as a plain fact list instead of a
+  // card — see RenderOptions.factTables. Scoped here rather than in the
+  // pipeline because it answers a problem only these pages have: the creator
+  // block above it is already a block, and two of them stack badly.
+  const factTables = isShelfSection(section);
   const en = await renderWithHeadings(entry.content, entry.sectionDir, sectionSlug, {
     anchorLabel: ui.headingAnchor.en,
+    factTables,
   });
   const uk = entry.contentUk
     ? await renderWithHeadings(entry.contentUk, entry.sectionDir, sectionSlug, {
         idPrefix: "uk-",
         anchorLabel: ui.headingAnchor.uk,
+        factTables,
       })
     : null;
   const stats = section.type === "posts" ? readingStats(entry.content) : null;

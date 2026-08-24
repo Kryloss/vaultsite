@@ -21,8 +21,6 @@ coverFit: contain
 # to use a poster instead: replace cover with the poster file + delete coverFit
 ---
 
-## At a glance
-
 | | |
 |---|---|
 | Aired | 2015–2019, four seasons |

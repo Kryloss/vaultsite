@@ -22,8 +22,6 @@ cover: the-last-wish.jpg
 # cover source: Open Library covers API, ISBN 9780316029186 (Orbit English edition)
 ---
 
-## At a glance
-
 | | |
 |---|---|
 | Published | 1993 (Polish, *Ostatnie życzenie*) |

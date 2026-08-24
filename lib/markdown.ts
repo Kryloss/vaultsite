@@ -903,6 +903,73 @@ function rehypeFigures() {
   };
 }
 /**
+ * rehype step: a HEADERLESS two-column table is a fact list, not a data table.
+ *
+ * Obsidian has no syntax for a table without a header, so the convention in
+ * this vault is to leave the header cells empty:
+ *
+ *     | | |
+ *     |---|---|
+ *     | Published | 2011 |
+ *
+ * Those tables are the "At a glance" block at the top of every shelf note —
+ * two or three key–value rows. The default table style is a card (border,
+ * radius, row dividers, a filled header strip), which is right for a table you
+ * READ ACROSS and wrong for this: it made three short facts the heaviest
+ * object on the page, directly under a creator block that is also boxed. The
+ * class lets globals.css strip the furniture back to plain rows.
+ *
+ * The empty <thead> is DELETED here rather than hidden in CSS. It used to be
+ * `.prose thead tr:not(:has(th:not(:empty)))` — a display:none that still
+ * shipped the row to a screen reader as a set of blank column headers, and
+ * that leaned on `:has()` for something a build step can simply decide.
+ */
+function rehypeFactTables() {
+  return (tree: any) => {
+    const walk = (node: any) => {
+      if (!node.children) return;
+      for (const child of node.children) {
+        if (child.type === "element" && child.tagName === "table") {
+          const thead = child.children?.find(
+            (c: any) => c.type === "element" && c.tagName === "thead"
+          );
+          const cells = (thead?.children ?? [])
+            .filter((r: any) => r.type === "element" && r.tagName === "tr")
+            .flatMap((r: any) =>
+              (r.children ?? []).filter(
+                (c: any) => c.type === "element" && c.tagName === "th"
+              )
+            );
+          // Every header cell blank, and there was a header row to begin with.
+          const blank =
+            cells.length > 0 &&
+            cells.every(
+              (c: any) =>
+                !c.children?.some(
+                  (t: any) => t.type !== "text" || t.value.trim()
+                )
+            );
+          if (blank) {
+            child.children = child.children.filter((c: any) => c !== thead);
+            const cls = child.properties?.className;
+            child.properties = {
+              ...child.properties,
+              className: Array.isArray(cls)
+                ? [...cls, "fact-table"]
+                : cls
+                  ? [cls, "fact-table"]
+                  : ["fact-table"],
+            };
+          }
+        }
+        walk(child);
+      }
+    };
+    walk(tree);
+  };
+}
+
+/**
  * rehype step: carry a fence's info string (```bash title="scan.sh") onto the
  * <code> element as a real attribute.
  *
@@ -1329,6 +1396,16 @@ export interface RenderOptions {
   anchorLabel?: string;
   /** Set false where an in-page link makes no sense — the RSS feed. */
   anchors?: boolean;
+  /**
+   * Render a headerless table as a plain fact list rather than a card.
+   *
+   * SHELF ENTRY PAGES ONLY, passed by app/[section]/[slug]/page.tsx. The
+   * problem it solves is specific to them: a shelf note opens with a boxed
+   * creator block, and a second boxed object directly under it read as a
+   * dashboard. A People note has no creator block above its table and never
+   * had that problem, so its table keeps the card it has always had.
+   */
+  factTables?: boolean;
 }
 
 /**
@@ -1345,7 +1422,7 @@ export async function renderWithHeadings(
   // document, so an unprefixed id would toggle the other language's spoiler.
   const pre = preprocessObsidian(md, sectionDir, sectionSlug, options.idPrefix);
   const headings: Heading[] = [];
-  const file = await unified()
+  const pipeline = unified()
     .use(remarkParse)
     .use(remarkGfm)
     .use(remarkRehype, {
@@ -1366,8 +1443,12 @@ export async function renderWithHeadings(
     .use(rehypeSlug)
     // After rehype-slug on purpose — it needs the ids rehype-slug mints.
     .use(rehypeHeadings, { ...options, collect: headings })
-    .use(rehypeStringify)
-    .process(pre);
+    .use(rehypeStringify);
+
+  // Shelf entries only — see RenderOptions.factTables.
+  if (options.factTables) pipeline.use(rehypeFactTables);
+
+  const file = await pipeline.process(pre);
   // Last step on purpose — see inlineDiagrams().
   return { html: inlineDiagrams(String(file)), headings };
 }

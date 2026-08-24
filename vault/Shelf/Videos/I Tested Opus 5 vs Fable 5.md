@@ -16,8 +16,6 @@ description: "A side-by-side run of two Claude models on the same tasks."
 description_uk: "Порівняння двох моделей Claude на однакових задачах."
 ---
 
-## At a glance
-
 | | |
 |---|---|
 | Topic | Anthropic's Claude Opus 5 and Claude Fable 5, compared on the same prompts |

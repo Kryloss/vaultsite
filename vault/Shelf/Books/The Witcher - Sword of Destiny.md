@@ -22,8 +22,6 @@ cover: sword-of-destiny.jpg
 # cover source: Open Library covers API, ISBN 9780316389709 (Orbit English edition)
 ---
 
-## At a glance
-
 | | |
 |---|---|
 | Published | 1992 (Polish, *Miecz przeznaczenia*) |

@@ -21,8 +21,6 @@ cover: the-little-prince.jpg
 # cover source: Open Library covers API, ISBN 9780156012195 (Harcourt English edition)
 ---
 
-## At a glance
-
 | | |
 |---|---|
 | Published | 1943 |

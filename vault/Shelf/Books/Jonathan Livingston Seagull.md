@@ -23,8 +23,6 @@ cover: jonathan-livingston-seagull.jpg
 # cover source: Open Library covers API, ISBN 9780743278904 (Scribner English edition)
 ---
 
-## At a glance
-
 | | |
 |---|---|
 | Published | 1970 |

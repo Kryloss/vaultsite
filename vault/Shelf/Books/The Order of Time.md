@@ -21,8 +21,6 @@ cover: the-order-of-time.jpg
 # cover source: Open Library covers API, ISBN 9780241292525 (Penguin English edition)
 ---
 
-## At a glance
-
 | | |
 |---|---|
 | Published | 2017 (Italian, *L'ordine del tempo*) |

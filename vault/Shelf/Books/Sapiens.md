@@ -25,8 +25,6 @@ cover: sapiens.jpg
 status: reading
 ---
 
-## At a glance
-
 | | |
 |---|---|
 | Published | 2011 (English edition 2014) |

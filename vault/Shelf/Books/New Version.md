@@ -21,8 +21,6 @@ description_uk: Продуктові стратегії та стартап-фр
 cover: new-version.jpeg
 ---
 
-## At a glance
-
 | | |
 |---|---|
 | Published | 2026 |

@@ -1280,9 +1280,72 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   white-space: nowrap;
 }
 
-/* Hide fully-empty header rows (Obsidian tables like `| | |`) */
+/* Hide fully-empty header rows (Obsidian tables like `| | |`).
+
+   Still needed: only SHELF ENTRY pages run `rehypeFactTables`, which deletes
+   the row outright. Everywhere else — People notes, anything else that writes
+   a headerless table — the row is still in the HTML and this hides it, which
+   is what it did before the shelf treatment existed. */
 .prose thead tr:not(:has(th:not(:empty))) {
   display: none;
+}
+
+/* A headerless table is a FACT LIST, not a data table — the "At a glance"
+   block at the top of every shelf note (`rehypeFactTables` in lib/markdown.ts
+   tags it; the empty <thead> is deleted there rather than hidden by the rule
+   above). SHELF ENTRY PAGES ONLY — a People note has no creator block above
+   its table, never had two boxes stacked, and keeps the card.
+
+   Everything the card treatment adds is removed: no border, no radius, no row
+   dividers, no fill. Three short key–value rows do not need a frame, and with
+   one they were the heaviest object on the page — sitting directly under a
+   creator block that is also boxed, before the reader had reached a single
+   sentence of the note. What's left is rows of type, which is what they are.
+
+   The label column loses its weight too. It was `--text` at 500, the same
+   colour as the value beside it, so both halves of every row asked to be read
+   equally; tertiary makes it a label and lets the eye go to the answer. The
+   first cell also loses its left padding so the list hangs on the same margin
+   as the prose above it — a frameless table indented by a phantom 1rem reads
+   as a mistake. */
+.prose table.fact-table {
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+  margin: 1rem 0 1.25rem;
+}
+
+.prose .fact-table td {
+  border-bottom: none;
+  padding: 0.2rem 1rem 0.2rem 0;
+  line-height: 1.5;
+}
+
+.prose .fact-table td:first-child {
+  width: 1%;
+  padding-right: 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--text-tertiary);
+}
+
+/* On a phone the label and its value stop fitting side by side, and a
+   `white-space: nowrap` label wins the fight by squeezing the value into a
+   two-word column. Stack them instead: label over value, still no frame. */
+@media (max-width: 480px) {
+  .prose .fact-table td,
+  .prose .fact-table td:first-child {
+    display: block;
+    width: auto;
+    padding: 0;
+    white-space: normal;
+  }
+  .prose .fact-table td:first-child {
+    padding-top: 0.5rem;
+  }
+  .prose .fact-table tr:first-child td:first-child {
+    padding-top: 0;
+  }
 }
 
 /* ---------- Footnotes & sidenotes (rehypeSidenotes in lib/markdown.ts) ----------

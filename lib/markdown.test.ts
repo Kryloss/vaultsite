@@ -135,3 +135,59 @@ test("the spoiler title carries a localised hide affordance", async () => {
   const en = await renderMarkdown("> [!spoiler] Ending\n> Text.", "Posts", "posts");
   assert.match(en, /class="callout-title spoiler-title" data-hide="Hide"/);
 });
+
+/*
+ * Fact tables. Obsidian can't write a headerless table, so this vault leaves
+ * the header cells empty — and that shape is the "At a glance" block on a
+ * shelf note. Two things have to hold: it is told apart from a real data
+ * table (which keeps the card treatment), and it is OPT-IN, because only
+ * shelf entry pages ask for it. A People note writes the same `| | |` shape
+ * and must be unaffected.
+ */
+
+const FACTS = `| | |
+|---|---|
+| Published | 2011 |
+| Read | July 2026 |`;
+
+test("a headerless table is tagged as a fact list and loses its empty thead", async () => {
+  const html = await renderMarkdown(FACTS, "Shelf/Books", "shelf", {
+    factTables: true,
+  });
+  assert.match(html, /<table class="fact-table">/);
+  assert.doesNotMatch(html, /<thead>/);
+  assert.match(html, /<td>Published<\/td>/);
+});
+
+test("without the flag the same table is untouched — People keeps its card", async () => {
+  const html = await renderMarkdown(FACTS, "People", "people");
+  assert.doesNotMatch(html, /fact-table/);
+  // The empty header row is still in the HTML; CSS hides it, as it always did.
+  assert.match(html, /<thead>/);
+});
+
+test("a table with real headers is left alone even on a shelf note", async () => {
+  const html = await renderMarkdown(
+    `| Syntax | Result |
+|---|---|
+| \`code\` | code |`,
+    "Shelf/Books",
+    "shelf",
+    { factTables: true }
+  );
+  assert.doesNotMatch(html, /fact-table/);
+  assert.match(html, /<thead>/);
+});
+
+test("one filled header cell is enough to keep the header", async () => {
+  const html = await renderMarkdown(
+    `| | Result |
+|---|---|
+| a | b |`,
+    "Shelf/Books",
+    "shelf",
+    { factTables: true }
+  );
+  assert.doesNotMatch(html, /fact-table/);
+  assert.match(html, /<thead>/);
+});
