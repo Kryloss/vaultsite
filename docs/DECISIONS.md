@@ -1604,7 +1604,7 @@ The first version rendered in the posts list only, and shelf and people were lef
 
 **The clip took the control, not the tail.** #95 shortened the gutter player to 23rem on the reasoning that "the artwork, the title and the Play button are the top two thirds". That was wrong about the layout: Apple stacks header, album row, track list, and **Play last** — so a short box removes the one control the player exists for, and leaves the part you can read anywhere. Clipping is only ever safe against content whose tail is expendable, and this one's tail is the button. `--gutter-player-h` survives solely to place the contents rail below the player; the box itself no longer has a height of ours. **The player's height is not a knob** — the note is in `CLAUDE.md` so this is not re-derived a third time.
 
-**A square, because a round crop of a square cover is a worse picture of the record.** The pill kept the contents pill's 2.5rem box so the corner still reads as one family of controls, but took `--r-md` instead of `--r-full`. The headphones glyph stays as the fallback for a note with no `cover:`.
+**A square, because a round crop of a square cover is a worse picture of the record.** It took `--r-md` instead of `--r-full`, and later came down to **2.25rem** against the contents pill's 2.5rem — a cover is a picture and does not need the tap target a bare glyph does. Its `top` gains back the 0.125rem the height lost, so the two pills stay centred on the same line as the breadcrumb bar opposite rather than merely sharing a top edge (measured: both centres at y=32). The headphones glyph stays as the fallback for a note with no `cover:`.
 
 **The cover earns that spot on a phone specifically.** On a phone the reader has seen no artwork at all: the inline embed is hidden (#95) and the wash is blurred past recognition by design. The pill is the only place the record shows its face, which also makes the control self-describing in a way a generic glyph was not.
 
@@ -1654,7 +1654,7 @@ The first version rendered in the posts list only, and shelf and people were lef
 
 ## 100. Apple's chrome is cropped off the players (2026-08-24)
 
-**Decision:** Every Apple Music player is clipped by `--am-crop-top: 34px` and `--am-crop-bottom: 22px`, removing the Apple Music wordmark and Sign In row from the top and the "See how your data is managed" line from the bottom. 56px off each player, at all three mount points: the markdown blocks, the section page's playlist, and the phone sheet.
+**Decision:** Every Apple Music player is clipped by `--am-crop-top: 34px` and a per-player `--am-crop-bottom` (14px song / 22px wide album / 50px narrow album), removing the Apple Music wordmark and Sign In row from the top and the "See how your data is managed" line from the bottom. 56px off each player, at all three mount points: the markdown blocks, the section page's playlist, and the phone sheet.
 
 **Requested after being advised against, which is why this entry is long.** The recommendation was to leave all three alone, with three reasons given: it reaches inside an iframe we do not control, Apple's Embedded Content terms require the player to be displayed unaltered and unobscured, and the data line is a privacy disclosure — Apple telling the READER how the embedded player handles their data, which is the one of the three that is not ours to remove for pixels. Kyrylo chose to crop both. It is his site and his call with Apple, and the reasons are recorded here rather than argued again.
 
@@ -1663,5 +1663,17 @@ The first version rendered in the posts list only, and shelf and people were lef
 **It compounds with everything else that has a number.** The gutter player's painted height is now two removes from the iframe's own 450px — minus 56 for the crop, then × 0.6667 for the scale (#97) — so `--gutter-player-h` is 264px. Anything else positioned against a player has to be told the same story.
 
 **`.am-crop` carries the radius as well as the clip.** Cropping the top removes the rounded corners Apple draws on their own card, so the wrapper supplies `--r-lg` in their place; without it the players end in square corners against a page where nothing else does.
+
+**The TOP crop is two numbers too.** A song player's header band is shorter than an album's, so the album's 34px took the wordmark AND the padding above the artwork, leaving it flush against the card's edge. The song takes **24px**; the album keeps 34px.
+
+**The bottom crop is THREE numbers, because Apple has three bottoms.** One value was wrong within a day of shipping, in both directions at once:
+
+- **Song player: 14px.** Apple leaves about 24px under its buttons, of which ~10px is padding. The album's 22px took the disclosure line AND the breathing room, and the controls ended up against the card's edge.
+- **Album or playlist, wide: 22px.** Its bottom band is genuinely bigger — at 14px the disclosure line peeks back in at the bottom right.
+- **Album or playlist, narrow: 50px.** See below.
+
+**"View in Apple Music" can only be cropped in one of the album player's two layouts, and that is a property of Apple's design, not a setting.** Wide — inline in the writing, and on the section page — the player is TWO COLUMNS: the track list on the right ends with that link sitting level with the Play button on the left, so cropping the link takes the Play button with it. Narrow — the gutter player and the phone sheet — it stacks, the link sits BELOW Play, and it can be taken on its own. So the 50px applies to exactly those two places and the wide ones keep 22px. **If the wide player ever loses its Play button, someone has applied the narrow number to it.**
+
+**Apple's layout switch was MEASURED, and that is what makes the phone rule safe.** The section page's playlist is two-column on a desktop and stacked on a phone, so its crop has to follow the window — and picking the site's usual 640px phone breakpoint would have been wrong, because at 639px the column is still 591px and firmly two-column, which is precisely the case that cuts the Play button. Loading the embed directly and narrowing it puts the switch between **450px (stacked) and 480px (two-column)**. The rule fires at a 480px WINDOW, where the column is 432px — inside the stacked range with room — and that covers every phone in portrait. Above it the playlist keeps the wide crop and its link, which is the failure that costs nothing.
 
 **Revisit when:** a player looks clipped in the wrong place. That is the failure mode this trades for the 56px, and it will present as a cut-off title or a half Play button rather than as an error.

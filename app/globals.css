@@ -577,11 +577,22 @@ body::after {
 :root {
   /* The Apple Music wordmark and the Sign In row. */
   --am-crop-top: 34px;
-  /* The "See how your data is managed" line. Apple leaves about 24px under
-     the buttons for it, of which ~10px is padding — so 22px took the line AND
-     the breathing room, and the controls ended up against the edge. 14 keeps
-     the padding Apple would have left. */
+  /* The "See how your data is managed" line, on an ALBUM or playlist player.
+     The two player types do not share this number: measured at 14px here the
+     album's disclosure line peeks back in at the bottom right. */
+  --am-crop-bottom: 22px;
+}
+
+/* The compact SONG player's bottom band is smaller. Apple leaves about 24px
+   under its buttons, of which ~10px is padding — so the album's 22px took the
+   line AND the breathing room, and the controls ended up against the edge.
+   14px removes the line and keeps the padding Apple would have left. */
+.apple-music-block[data-kind="song"] {
   --am-crop-bottom: 14px;
+  /* And less off the top than an album: the compact player's header band is
+     shorter, so 34px there took the wordmark AND the padding above the
+     artwork, leaving it flush against the card's edge. */
+  --am-crop-top: 24px;
 }
 
 /* An album player is TWO LAYOUTS, and the bottom crop cannot be one number.
@@ -596,6 +607,20 @@ body::after {
    disclosure line under it, leaving Play its padding. */
 .music-sheet .am-crop {
   --am-crop-bottom: 50px;
+}
+
+/* The section page's playlist is wide enough to be two-column on a desktop and
+   narrow enough to stack on a phone, so its crop has to follow the WINDOW.
+
+   480px is not a guess: Apple's player was measured switching between the two
+   layouts somewhere between 450px and 480px wide. At a 480px window the column
+   is 432px (the window less two 1.5rem gutters), which is inside the stacked
+   range with room to spare — and it covers every phone in portrait. Above it
+   the playlist keeps the wide crop and its link, which is the safe failure. */
+@media (max-width: 480px) {
+  .am-crop {
+    --am-crop-bottom: 50px;
+  }
 }
 
 .am-crop {
@@ -5084,6 +5109,14 @@ main:has(.note-wash) {
 @media (max-width: 639px) {
   .music-pill {
     display: flex;
+    /* A little smaller than the 2.5rem contents pill beside it — the cover is
+       a picture, and it does not need the tap target a bare glyph does. `top`
+       gains the 0.125rem the height lost, so the two pills stay centred on the
+       same line as the breadcrumb bar opposite them rather than merely sharing
+       an edge. */
+    width: 2.25rem;
+    height: 2.25rem;
+    top: 0.875rem;
   }
 
   .music-sheet,
