@@ -12,9 +12,25 @@ export function isAppleMusicUrl(url: string): boolean {
   return APPLE_MUSIC_RE.test(url.trim());
 }
 
-/** music.apple.com → embed.music.apple.com */
+/**
+ * music.apple.com → embed.music.apple.com, in the reader's own theme.
+ *
+ * `theme=auto` makes the player follow `prefers-color-scheme` INSIDE the
+ * iframe — verified against Apple directly: the same URL renders dark on a
+ * dark system and light on a light one. That is the site's exact theming
+ * model (#62 — there is no manual toggle, only the OS), so the players match
+ * the page with no JavaScript, no second copy of the markup for the other
+ * theme, and nothing that stops the site being static.
+ *
+ * Appended with `&` when the link already carries a query, which a song link
+ * always does (`?i=<track id>`).
+ */
 export function appleMusicEmbedUrl(url: string): string {
-  return url.trim().replace("://music.apple.com/", "://embed.music.apple.com/");
+  const embed = url
+    .trim()
+    .replace("://music.apple.com/", "://embed.music.apple.com/");
+  if (/[?&]theme=/.test(embed)) return embed;
+  return `${embed}${embed.includes("?") ? "&" : "?"}theme=auto`;
 }
 
 /**

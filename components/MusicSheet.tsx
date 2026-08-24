@@ -29,7 +29,14 @@ import {
  * gated behind the first open — which here also means the iframe is never
  * fetched by a reader who does not tap it.
  */
-export default function MusicSheet({ url }: { url: string }) {
+export default function MusicSheet({
+  url,
+  cover,
+}: {
+  url: string;
+  /** The note's album art. Without one the headphones glyph stands in. */
+  cover?: string;
+}) {
   const { lang } = useLang();
   const [open, setOpen] = useState(false);
   const [everOpen, setEverOpen] = useState(false);
@@ -58,7 +65,16 @@ export default function MusicSheet({ url }: { url: string }) {
         title={label}
         className="music-pill press"
       >
-        <HeadphonesIcon className="music-pill-icon" />
+        {cover ? (
+          /* The cover IS the control: on a phone the reader has not seen the
+             artwork yet — the inline embed is hidden and the wash is blurred
+             past recognition — so this is the one place the record shows its
+             face. Decorative, since the button's own label names it. */
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className="music-pill-art" src={cover} alt="" width={40} height={40} />
+        ) : (
+          <HeadphonesIcon className="music-pill-icon" />
+        )}
       </button>
 
       <div

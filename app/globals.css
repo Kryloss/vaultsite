@@ -4891,30 +4891,26 @@ main:has(.note-wash) {
     top: 5rem;
     left: calc(50% + 20.5rem);
     width: 20rem;
-    /* SHORTER than the iframe's own 450px. Apple's player clips rather than
-       reflows (#93), so this trims from the bottom — the artwork, the title
-       and the Play button are the top two thirds and all survive; what goes is
-       the tail of the track list. Wider and shorter suits the two-column
-       layout the extra width should buy. */
-    height: var(--gutter-player-h);
+    /* FULL height in the iframe, and SMALLER on the page — the two are not the
+       same thing here. Apple's player clips rather than reflows (#93) and its
+       Play button is the LAST thing in the layout, so cutting the box takes
+       the control before anything else; that was tried and reverted (#96).
+       Scaling is the way to make it smaller without deciding what to lose:
+       the player still renders at 20rem × 450px and simply paints at two
+       thirds, so every row and the Play button survive at 1.5× smaller.
+       Origin `top left` pins it to the gutter's own edge, the one the
+       contents rail shares, so shrinking pulls it away from the window rather
+       than away from the writing. */
+    transform: scale(0.6667);
+    transform-origin: top left;
     margin: 0;
     z-index: 1;
   }
 
-  /* One number, read three times: the box, the iframe filling it, and where
-     the contents rail has to start. */
-  .music-note .apple-music-block[data-kind="album"],
-  .music-note:has(.apple-music-block[data-kind="album"]) .toc-rail {
-    --gutter-player-h: 23rem;
-  }
-
-  .music-note .apple-music-block[data-kind="album"] .apple-music-embed {
-    height: 100%;
-  }
-
   /* Both want the same column, so the contents start below the player instead
-     of behind it. */
+     of behind it. The PAINTED height, not the iframe's: 450px × 0.6667. */
   .music-note:has(.apple-music-block[data-kind="album"]) .toc-rail {
+    --gutter-player-h: 300px;
     top: calc(5rem + var(--gutter-player-h) + 2rem);
     max-height: calc(100vh - 8rem - var(--gutter-player-h) - 2rem);
   }
@@ -4941,10 +4937,24 @@ main:has(.note-wash) {
   width: 2.5rem;
   height: 2.5rem;
   padding: 0;
-  border-radius: var(--r-full);
+  /* A square, not the contents pill's circle: it holds album art, and a round
+     crop of a square cover is a worse picture of the record than the record.
+     Same 2.5rem box as its neighbours, so the corner still reads as one
+     family of controls. */
+  border-radius: var(--r-md);
+  overflow: hidden;
   background: var(--chrome-bg);
   box-shadow: inset 0 0 0 1px var(--chrome-ring);
   color: var(--text);
+}
+
+/* The cover fills the button edge to edge. The hairline above sits over it and
+   is what keeps a pale sleeve from dissolving into a light page. */
+.music-pill-art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .music-pill-icon {
@@ -4960,15 +4970,17 @@ main:has(.note-wash) {
   z-index: 45;
   display: none;
   width: min(21rem, calc(100vw - 1.5rem));
-  max-height: 70vh;
+  /* Room for the whole 450px player, Play button included — the sheet must
+     never become the thing that clips it. */
+  max-height: 80vh;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 0.5rem;
-  border: 1px solid var(--border);
+  /* No padding, border or fill of our own: Apple's widget draws its own
+     rounded surface, so a frame here was a frame around a frame — the same
+     doubling the section page's playlist had (#94). What is left is the drop
+     shadow, which lifts the player off the page without drawing an edge. */
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.28);
   border-radius: var(--r-lg);
-  background: var(--chrome-bg);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 6px 20px rgb(0 0 0 / 0.08);
   transform-origin: 100% 0;
   opacity: 0;
   visibility: hidden;
@@ -5044,4 +5056,13 @@ main:has(.note-wash) {
   .music-sheet-backdrop {
     transition-duration: 0.01ms;
   }
+}
+
+/* A track player is an EXAMPLE of a sentence, so it should not be the widest
+   thing in the paragraph it belongs to. Roughly half the 39rem column — and
+   20rem is also above the ~300px Apple's compact player wants, so it reflows
+   properly instead of being squeezed. Narrower screens are unaffected: the
+   column is already under 20rem there, and `max-width` simply stops applying. */
+.apple-music-block[data-kind="song"] {
+  max-width: 20rem;
 }

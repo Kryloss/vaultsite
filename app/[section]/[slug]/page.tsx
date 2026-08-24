@@ -265,7 +265,7 @@ export default async function EntryPage({ params }: Props) {
       {/* `minutes` also drives the time-remaining pill — posts only. */}
       <ReadingProgress minutes={stats?.minutes} />
       <ReadingPosition />
-      {albumUrl && <MusicSheet url={albumUrl} />}
+      {albumUrl && <MusicSheet url={albumUrl} cover={noteWash} />}
       {/* Hover cards for the internal links in THIS note only — see
           previewsInHtml() in lib/previews.ts. */}
       <LinkPreview previews={previewsInHtml(en.html, uk?.html)} />
