@@ -577,33 +577,53 @@ body::after {
 :root {
   /* The Apple Music wordmark and the Sign In row. */
   --am-crop-top: 34px;
-  /* ZERO, and it has to stay zero. See the note below. */
-  --am-crop-bottom: 0px;
+  /* Exactly the height of "See how your data is managed" on an album or
+     playlist player, measured from Apple's own DOM: the link's box starts
+     432px down a 450px player, so 18px removes it and stops. */
+  --am-crop-bottom: 18px;
 }
 
-/* ---- why the bottom is not cropped (#101) ----
+/* ---- what can be cropped, and what cannot (#102) ----
 
-   It was, at 14px / 22px / 50px depending on the player, and every one of
-   those was wrong for a reason none of the measuring caught: Apple's player
-   has a PLAYING STATE. Start a track and the bottom band stops being the
-   "View in Apple Music" link and the disclosure line and becomes a progress
-   bar and the transport controls — previous, pause, next — which run to the
-   iframe's last pixel. So any bottom crop that hides the link while idle
-   slices the controls in half the moment someone presses Play, on desktop and
-   phone alike.
+   Established by playing the embed at every size it is used at, top-level so
+   the Play button could actually be clicked. Two facts came out of it:
 
-   There is no number that satisfies both states, because they are the same
-   band used for different things. The choice is the link and the disclosure
-   line, or working playback controls, and it is not a close call.
+   1. "See how your data is managed" is ALWAYS the bottom-most element — song
+      or album, wide or stacked, idle or playing. Apple never puts anything
+      under it. So a crop sized to that line and no further is safe in every
+      state, which is what `--am-crop-bottom` now is.
 
-   The TOP crop is safe and stays: the Apple Music wordmark and Sign In row sit
-   above the content in BOTH states, so removing them takes nothing either way. */
+   2. "View in Apple Music" is NOT safe to crop, and that was the bug (#101).
+      In a stacked player it sits below Play while idle — but the moment a
+      track starts, the progress bar and the transport controls take that same
+      band, and a crop deep enough to hide the link slices the controls in
+      half. The 50px that hid it is exactly what broke playback.
+
+   Both numbers come from Apple's OWN DOM — the embed loaded top-level, played
+   through `button.play-initial`, then walked through its shadow roots for
+   `a.legal-link` and the playback controls — rather than from reading pixels
+   off a screenshot. Measured, idle and playing:
+
+     song  (576×150): link top 134, controls end 129  →  crop 16, 5px clear
+     album (576×450): link top 432, controls end 416  →  crop 18, 16px clear
+     album (336×450): link top 432, controls end 423  →  crop 18, 9px clear
+
+   The song player's numbers are IDENTICAL in both states: it puts the progress
+   bar and the play button on one row and never reaches for the bottom band.
+   Only the album's controls move, and even then they stop above the link.
+
+   **The next person to change a bottom value must press Play first.** The
+   idle player will happily accept a number that destroys the playing one. */
 
 .apple-music-block[data-kind="song"] {
   /* Less off the top than an album: the compact player's header band is
      shorter, so 34px there took the wordmark AND the padding above the
      artwork, leaving it flush against the card's edge. */
   --am-crop-top: 24px;
+  /* Its own number, measured the same way: the link starts 134px down a 150px
+     player. The controls end at 129, so this leaves them 5px — Apple's own
+     spacing, and the reason this is 16 and not a round 20. */
+  --am-crop-bottom: 16px;
 }
 
 .am-crop {
@@ -4971,7 +4991,7 @@ main:has(.note-wash) {
      iframe's own 450px: minus the 56px Apple's cropped chrome took (#100),
      then × 0.6667 for the scale (#97). */
   .music-note:has(.apple-music-block[data-kind="album"]) .toc-rail {
-    --gutter-player-h: 277px;
+    --gutter-player-h: 265px;
     top: calc(5rem + var(--gutter-player-h) + 2rem);
     max-height: calc(100vh - 8rem - var(--gutter-player-h) - 2rem);
   }

@@ -1693,3 +1693,25 @@ The first version rendered in the posts list only, and shelf and people were lef
 **The one gain: the numbers stop compounding.** `--gutter-player-h` was 300px, then 264px when the crop landed; it is 277px now — the iframe's 450px less the 34px top crop, times the 0.6667 scale. Every entry that touches a player's size has had to restate this figure. It is stated in one place and derived nowhere else.
 
 **Revisit when:** never, unless Apple gives the embed a parameter for its own chrome. The next person to reach for `--am-crop-bottom` should press Play first.
+
+## 102. What can be cropped, measured from Apple's own DOM (2026-08-24)
+
+**Decision:** The bottom crop comes back, sized to the disclosure line and nothing further: **16px on a song player, 18px on an album or playlist**. "View in Apple Music" stays. The values are read off Apple's layout rather than estimated.
+
+**The rule that came out of it: `a.legal-link` is always the bottom-most thing Apple renders.** Song or album, wide or stacked, idle or playing — nothing is ever placed under it. So a crop that stops at the top of that link is safe in every state, and #101's "the bottom cannot be cropped at all" was too strong a conclusion drawn from one broken case.
+
+**What #101 actually got wrong was the SIZE, not the idea.** The 50px that hid "View in Apple Music" reached past the link and into the band the transport controls take over during playback. The link and the controls share that space; the disclosure line does not.
+
+**Measured properly this time, by driving the player instead of looking at it.** The embed was loaded top-level (where its Play button can be clicked, unlike the `credentialless` iframe on the site), started via `button.play-initial`, then walked through its shadow roots — the player's markup is entirely inside them, which is why an ordinary `querySelectorAll` finds only `<html>` and `<body>`. Both states, all three sizes:
+
+```
+song  (576 × 150): link top 134, controls end 129  →  crop 16, 5px clear
+album (576 × 450): link top 432, controls end 416  →  crop 18, 16px clear
+album (336 × 450): link top 432, controls end 423  →  crop 18, 9px clear
+```
+
+**The song player is identical in both states** — it puts the progress bar and the play button on one row and never reaches for the bottom band, which is why the earlier 14px felt fine even though nobody had pressed Play on it. Only the album's controls move, and even then they stop above the link.
+
+**The estimates that came before were both ~1px into the controls.** Reading a screenshot gave 20px and 26px; the DOM gives 16px and 18px. Everything up to here would have looked correct in a screenshot and clipped the edge of a control in use, which is the same failure as #101 in miniature. **Numbers about someone else's layout should be read out of that layout, not off a picture of it.**
+
+**Revisit when:** the disclosure line moves, which would be the first time Apple has put anything beneath it. The probe is worth re-running rather than re-derived: load the embed top-level, click `button.play-initial`, walk the shadow roots for `a.legal-link`, and take the window height minus its `top`.
