@@ -231,6 +231,9 @@ export default async function EntryPage({ params }: Props) {
        than having every entry's file path threaded through the layout. Same
        read-the-page approach as the prev/next shortcuts. */
     <Page
+      /* Scopes the gutter player to music notes only — an album link pasted
+         into a post keeps its place in the writing (#94). */
+      className={section.type === "music" ? "music-note" : ""}
       data-vault-source={`vault/${entry.sectionDir}/${entry.fileName}.md`}
       data-vault-source-uk={
         entry.contentUk

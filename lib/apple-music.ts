@@ -17,10 +17,22 @@ export function appleMusicEmbedUrl(url: string): string {
   return url.trim().replace("://music.apple.com/", "://embed.music.apple.com/");
 }
 
+/**
+ * Is this a link to ONE track rather than to an album or playlist?
+ *
+ * A song carries its track id in `i=`, or is a `/song/` URL. The distinction
+ * decides the player's height here, and on a music note it also decides where
+ * the player goes: the album is the note's subject and moves to the gutter,
+ * while a song is an example of a sentence and stays beside that sentence
+ * (DECISIONS #94).
+ */
+export function isAppleMusicSong(url: string): boolean {
+  return url.includes("?i=") || url.includes("&i=") || url.includes("/song/");
+}
+
 /** Single songs get the compact 175px player; playlists/albums the full 450px. */
 export function appleMusicEmbedHeight(url: string): number {
-  const isSong = url.includes("?i=") || url.includes("&i=") || url.includes("/song/");
-  return isSong ? 175 : 450;
+  return isAppleMusicSong(url) ? 175 : 450;
 }
 
 /**
@@ -51,8 +63,11 @@ export const APPLE_MUSIC_IFRAME_ALLOW =
 export function appleMusicEmbedHtml(url: string): string {
   const src = appleMusicEmbedUrl(url);
   const height = appleMusicEmbedHeight(url);
+  /* The kind is stamped on the block so CSS can tell an album from a track
+     without re-parsing the URL — see `.music-note` in globals.css. */
+  const kind = isAppleMusicSong(url) ? "song" : "album";
   return (
-    `<div class="apple-music-block">` +
+    `<div class="apple-music-block" data-kind="${kind}">` +
     `<iframe class="apple-music-embed" title="Apple Music player" allow="${APPLE_MUSIC_IFRAME_ALLOW}" credentialless height="${height}" src="${src}"></iframe>` +
     `</div>`
   );

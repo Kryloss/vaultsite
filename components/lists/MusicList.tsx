@@ -68,23 +68,25 @@ export default function MusicList({ section, entries }: ListProps) {
             playlists.length > 1 ? "md:grid-cols-2" : ""
           }`}
         >
+          {/* No wrapper card. Apple's widget draws its own rounded surface, so
+              ours was a second frame around the first — a ring of `--surface`
+              with the player's own card floating inside it, most visible in
+              dark mode. The iframe IS the element now, and the player reaches
+              both edges of the column (#94).
+
+              credentialless: fresh ephemeral storage each load (Chromium) so
+              stale Apple state can't stall the player — see DECISIONS #10. */}
           {playlists.map((url) => (
-            <div
+            <iframe
               key={url}
-              className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm transition-shadow duration-300 hover:shadow-md"
-            >
-              {/* credentialless: fresh ephemeral storage each load (Chromium)
-                  so stale Apple state can't stall the player — see DECISIONS #10 */}
-              <iframe
-                src={appleMusicEmbedUrl(url)}
-                height={appleMusicEmbedHeight(url)}
-                title="Apple Music player"
-                className="block w-full"
-                style={{ border: 0 }}
-                allow={APPLE_MUSIC_IFRAME_ALLOW}
-                credentialless=""
-              />
-            </div>
+              src={appleMusicEmbedUrl(url)}
+              height={appleMusicEmbedHeight(url)}
+              title="Apple Music player"
+              className="block w-full"
+              style={{ border: 0 }}
+              allow={APPLE_MUSIC_IFRAME_ALLOW}
+              credentialless=""
+            />
           ))}
         </div>
       ) : (

@@ -4600,28 +4600,6 @@ html[data-intro][data-intro-fast] .prose > .avatar {
   border: 1px solid var(--border);
   border-radius: var(--r-xl);
   background: var(--surface);
-  /* Named, not a shorthand: a `transition:` here would sit below `.press` in
-     this file and reset the transform its rows are pressed with (#52). */
-  transition-property: border-color, box-shadow;
-  transition-duration: var(--dur);
-  transition-timing-function: var(--ease);
-}
-
-/* The outline answers the pointer. At rest the card is held by `--border`, a
-   hairline that deliberately retreats; under the pointer it firms up and takes
-   a soft ring, so the whole list reads as one object you are addressing before
-   any single row lights up. Built from `--text` like every other state on the
-   site — there is no accent to reach for (#64) — and it is the CARD that
-   responds, never the heading above it, which is type and not a control. */
-.music-card:hover {
-  border-color: color-mix(in srgb, var(--text) 20%, transparent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 5%, transparent);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .music-card {
-    transition: none;
-  }
 }
 
 .music-wash {
@@ -4882,5 +4860,44 @@ main:has(.note-wash) {
   .note-wash img,
   .music-wash img {
     animation: none;
+  }
+}
+
+/* ---- a music note's album player sits in the gutter (DECISIONS #94) ----
+
+   On a review, the album IS the subject: it belongs beside the whole note
+   rather than at the one paragraph that happened to mention it. It moves into
+   the right gutter — the contents rail's column, and the same geometry, so the
+   page keeps one margin for "things about the article" and the left one for
+   sidenotes.
+
+   A SONG embed never moves. It is an example of a sentence and has to stay
+   next to that sentence to be one.
+
+   1400px, not the rail's 1280px. The player needs to be meaningfully wider
+   than the rail's 13rem — Apple's album player is a two-column layout and a
+   rail's width would squeeze it — and 21rem + 18rem reaches 39rem past centre,
+   which only clears the window comfortably from about 1400px. Between 1280 and
+   1400 the contents rail is out and the player stays in the writing, which is
+   the layout this page had before and is no worse for it. */
+@media (min-width: 1400px) {
+  .music-note .apple-music-block[data-kind="album"] {
+    position: fixed;
+    /* `top` matches .toc-rail; `left` sits 1.5rem past the text column's own
+       right edge (50% + 19.5rem), which is tighter than the rail because the
+       player needs the width more than it needs the gap. */
+    top: 9rem;
+    left: calc(50% + 21rem);
+    width: 18rem;
+    margin: 0;
+    z-index: 1;
+  }
+
+  /* Both want the same column, so the contents start below the player instead
+     of behind it. The player's height is its iframe's own 450px. */
+  .music-note:has(.apple-music-block[data-kind="album"]) .toc-rail {
+    --gutter-player-h: 450px;
+    top: calc(9rem + var(--gutter-player-h) + 2rem);
+    max-height: calc(100vh - 12rem - var(--gutter-player-h) - 2rem);
   }
 }
