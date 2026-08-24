@@ -320,7 +320,7 @@ after one attempt is not.
 | Movie/show art | 1. en-Wikipedia REST summary (`/api/rest_v1/page/summary/<Title>`) 2. `action=query&prop=pageimages` 3. season/franchise pages 4. other-language Wikipedias (de, fr, uk — often expose the poster when en doesn't) 5. Wikidata claims P18 (image) / P154 (logo) 6. `page/media-list` → Commons-hosted logo, used with `coverFit: contain` 7. typographic fallback tile + tell him |
 | People photos | 1. Wikimedia Commons ONLY (verify license; note author + license as a comment in the note) 2. official government/company portrait pages. Never anything else |
 | Shelf creator portraits (`author_photo:`) | 1. Wikimedia Commons by name, in ANY language's Wikipedia 2. Commons file search 3. the creator's own official site / publisher / studio page 4. **for a `medium: video` note only:** the channel's own YouTube avatar. Never anything else — and no photo is still a fine answer |
-| Music artwork | Not needed — Apple Music embeds carry their own art |
+| Music artwork (`cover:`) | 1. iTunes Search API, keyless: `https://itunes.apple.com/search?term=<artist+album>&entity=album&limit=1` → take `artworkUrl100` and swap `100x100bb` for `600x600bb` 2. the album's own Apple Music page 3. the label's press page. Save into `vault/Music/covers/`. The playlist EMBED still carries its own art — this is for the note's track row, and for the tint of the track-list card, which is the newest note's cover (DECISIONS #90) |
 | Inline figures | Wikimedia Commons, official docs/press kits, his own screenshots |
 
 **Wide art (logos, banners):** set `coverFit: contain` in the entry frontmatter

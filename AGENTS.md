@@ -194,6 +194,12 @@ Important conventions:
   ending in the channel's own YouTube avatar for video notes — do not stop at
   one failed lookup. Detail in `CLAUDE.md` and `docs/CONTENT-WORKFLOW.md`;
   reasons in `docs/DECISIONS.md` #86.
+- The `music` section type renders its notes as an Apple-Music-style track
+  list (entry `cover:` album art, divider inset to the text column) inside a
+  card tinted by the newest cover, blurred. The tint is artwork in a frame, not
+  an accent — nothing reads from it, and the row hover is deliberately
+  translucent so it doesn't blank it. Detail in `CLAUDE.md`; reasons in
+  `docs/DECISIONS.md` #90.
 - `draft: true` content appears in development and is excluded in production.
 
 ## Feature invariants worth checking before edits

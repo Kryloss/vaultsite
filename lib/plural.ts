@@ -48,11 +48,3 @@ export function noteCount(n: number): Str {
     uk: uk(n, "нотатка", "нотатки", "нотаток"),
   };
 }
-
-/** "1 playlist" / "1 плейлист", ready for `<T>`. */
-export function playlistCount(n: number): Str {
-  return {
-    en: en(n, "playlist", "playlists"),
-    uk: uk(n, "плейлист", "плейлисти", "плейлистів"),
-  };
-}

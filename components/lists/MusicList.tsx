@@ -9,7 +9,6 @@ import {
 import { resolveCoverUrl } from "@/lib/markdown";
 import { blurFor, srcSetFor } from "@/lib/blur";
 import { displayDate, displayDateUk } from "@/lib/vault";
-import { noteCount, playlistCount } from "@/lib/plural";
 import T from "@/components/T";
 import NewBadge from "@/components/NewBadge";
 import { ui } from "@/lib/ui-strings";
@@ -27,7 +26,7 @@ import { ui } from "@/lib/ui-strings";
  * Entries can set `cover:` — an album cover filed beside the note, resolved
  * exactly the way the shelf and people lists resolve theirs. It does two jobs:
  * the artwork on the note's own row, and (for the newest one) the blurred wash
- * behind the page header. See DECISIONS #90.
+ * that gives the track-list card its colour. See DECISIONS #90.
  *
  * Embeds use Apple's free embed.music.apple.com iframes — no API key, no cost.
  */
@@ -55,38 +54,14 @@ export default function MusicList({ section, entries }: ListProps) {
     };
   });
 
-  /* The wash is the NEWEST note's artwork, so the page recolours itself every
-     time one is published — the one place on the site where colour reaches
-     page chrome rather than sitting inside a picture frame (DECISIONS #90).
-     `entries` arrives newest-first, and a note without a cover is skipped
-     rather than leaving the header bare. */
+  /* The card's wash is the NEWEST note's artwork, so the list recolours
+     itself every time one is published (DECISIONS #90). `entries` arrives
+     newest-first, and a note without a cover is skipped rather than leaving
+     the card untinted. */
   const washCover = rows.find((r) => r.cover)?.cover;
 
   return (
     <div>
-      {washCover && (
-        /* Decorative: the same artwork is already on the row below it, where
-           it carries the note's name. aria-hidden keeps it out of the tree. */
-        <div className="music-wash" aria-hidden="true">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={washCover} alt="" />
-        </div>
-      )}
-
-      {entries.length > 0 && (
-        /* Apple's hierarchy — a quiet count line under the description — in
-           the site's own typeface. Both halves come from data already here. */
-        <p className="music-sub">
-          <T {...noteCount(entries.length)} />
-          {playlists.length > 0 && (
-            <>
-              <span aria-hidden="true">·</span>
-              <T {...playlistCount(playlists.length)} />
-            </>
-          )}
-        </p>
-      )}
-
       {playlists.length > 0 ? (
         <div
           className={`mt-8 grid grid-cols-1 gap-5 ${
@@ -153,68 +128,79 @@ export default function MusicList({ section, entries }: ListProps) {
               title and description stacked tight against it, then the date.
               The divider is drawn by CSS from the TEXT column rather than the
               artwork's edge — see `.music-tracks` in globals.css. */}
-          <ul className="music-tracks stagger mt-2">
-            {rows.map(({ entry, cover, coverBlur, coverSrcSet, descriptionUk }) => (
-              <li key={entry.slug}>
-                <Link
-                  href={`/${section.slug}/${entry.slug}`}
-                  className="press press-soft"
-                >
-                  {cover ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      className="music-art"
-                      src={cover}
-                      srcSet={coverSrcSet}
-                      /* Never painted wider than 44px, at up to 3x. */
-                      sizes="132px"
-                      alt=""
-                      width={44}
-                      height={44}
-                      /* Blur-up: the placeholder is the image's OWN
-                         background, so the cover paints straight over it with
-                         no JS and no swap. See lib/blur.ts. */
-                      style={
-                        coverBlur
-                          ? {
-                              backgroundImage: `url(${coverBlur})`,
-                              backgroundSize: "cover",
-                              backgroundPosition: "center",
-                            }
-                          : undefined
-                      }
-                    />
-                  ) : (
-                    /* No cover: an empty surface square, so every row keeps
-                       the same text column and the dividers stay aligned. */
-                    <span className="music-art" aria-hidden="true" />
-                  )}
-                  <span className="music-title">
-                    <T en={entry.title} uk={entry.titleUk} />
-                    {/* Client-only — see components/NewBadge.tsx. */}
-                    <NewBadge date={entry.date} />
-                  </span>
-                  {entry.date && (
-                    <time dateTime={entry.date} className="music-date">
-                      <T
-                        en={displayDate(entry.date)}
-                        uk={displayDateUk(entry.date)}
+          <div className="music-card">
+            {washCover && (
+              /* The card's own colour: the newest note's cover, blurred past
+                 recognition, clipped to the card. Decorative — the same
+                 artwork is on a row below it, where it carries a name. */
+              <div className="music-wash" aria-hidden="true">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={washCover} alt="" />
+              </div>
+            )}
+            <ul className="music-tracks stagger">
+              {rows.map(({ entry, cover, coverBlur, coverSrcSet, descriptionUk }) => (
+                <li key={entry.slug}>
+                  <Link
+                    href={`/${section.slug}/${entry.slug}`}
+                    className="press press-soft"
+                  >
+                    {cover ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        className="music-art"
+                        src={cover}
+                        srcSet={coverSrcSet}
+                        /* Never painted wider than 44px, at up to 3x. */
+                        sizes="132px"
+                        alt=""
+                        width={44}
+                        height={44}
+                        /* Blur-up: the placeholder is the image's OWN
+                           background, so the cover paints straight over it with
+                           no JS and no swap. See lib/blur.ts. */
+                        style={
+                          coverBlur
+                            ? {
+                                backgroundImage: `url(${coverBlur})`,
+                                backgroundSize: "cover",
+                                backgroundPosition: "center",
+                              }
+                            : undefined
+                        }
                       />
-                    </time>
-                  )}
-                  {/* Placed by grid area, not by source order: the date shares
-                      the title's line and the description runs the full width
-                      beneath both. On a phone that's the difference between a
-                      readable sentence and four words and an ellipsis. */}
-                  {entry.description && (
-                    <span className="music-desc">
-                      <T en={entry.description} uk={descriptionUk} />
+                    ) : (
+                      /* No cover: an empty surface square, so every row keeps
+                         the same text column and the dividers stay aligned. */
+                      <span className="music-art" aria-hidden="true" />
+                    )}
+                    <span className="music-title">
+                      <T en={entry.title} uk={entry.titleUk} />
+                      {/* Client-only — see components/NewBadge.tsx. */}
+                      <NewBadge date={entry.date} />
                     </span>
-                  )}
-                </Link>
-              </li>
-            ))}
-          </ul>
+                    {entry.date && (
+                      <time dateTime={entry.date} className="music-date">
+                        <T
+                          en={displayDate(entry.date)}
+                          uk={displayDateUk(entry.date)}
+                        />
+                      </time>
+                    )}
+                    {/* Placed by grid area, not by source order: the date shares
+                        the title's line and the description runs the full width
+                        beneath both. On a phone that's the difference between a
+                        readable sentence and four words and an ellipsis. */}
+                    {entry.description && (
+                      <span className="music-desc">
+                        <T en={entry.description} uk={descriptionUk} />
+                      </span>
+                    )}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </>
       )}
     </div>
