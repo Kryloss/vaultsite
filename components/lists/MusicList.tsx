@@ -77,16 +77,19 @@ export default function MusicList({ section, entries }: ListProps) {
               credentialless: fresh ephemeral storage each load (Chromium) so
               stale Apple state can't stall the player — see DECISIONS #10. */}
           {playlists.map((url) => (
-            <iframe
-              key={url}
-              src={appleMusicEmbedUrl(url)}
-              height={appleMusicEmbedHeight(url)}
-              title="Apple Music player"
-              className="block w-full"
-              style={{ border: 0 }}
-              allow={APPLE_MUSIC_IFRAME_ALLOW}
-              credentialless=""
-            />
+            /* `.am-crop` is the box Apple's chrome is clipped against — see
+               the note on `--am-crop-top` in globals.css. */
+            <div key={url} className="am-crop">
+              <iframe
+                src={appleMusicEmbedUrl(url)}
+                height={appleMusicEmbedHeight(url)}
+                title="Apple Music player"
+                className="block w-full"
+                style={{ border: 0 }}
+                allow={APPLE_MUSIC_IFRAME_ALLOW}
+                credentialless=""
+              />
+            </div>
           ))}
         </div>
       ) : (

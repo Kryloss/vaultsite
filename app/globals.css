@@ -557,6 +557,58 @@ body::after {
   border: 0;
 }
 
+/* ---- cropping Apple's own chrome off the player (DECISIONS #100) ----
+
+   Requested explicitly, and it reaches INSIDE an iframe we do not control, so
+   read this before touching the numbers.
+
+   The mechanism is negative margins under `overflow: hidden`: pulling the
+   iframe up by `--am-crop-top` shrinks its parent's content box by the same
+   amount and the parent clips what is now above it, so the crop works at ANY
+   iframe height — 150px song, 450px album — without either one being named
+   here. That is the only part of this that is robust.
+
+   What is NOT robust: the two numbers. They are measured against Apple's
+   current layout, and Apple can change their padding whenever they like, at
+   which point this silently starts slicing the title or the Play button on a
+   live page with nothing in the build to catch it. If a player ever looks
+   wrong, THESE ARE THE FIRST THING TO CHECK — and setting both to 0 restores
+   the untouched player. */
+:root {
+  /* The Apple Music wordmark and the Sign In row. */
+  --am-crop-top: 34px;
+  /* The "See how your data is managed" line. Apple leaves about 24px under
+     the buttons for it, of which ~10px is padding — so 22px took the line AND
+     the breathing room, and the controls ended up against the edge. 14 keeps
+     the padding Apple would have left. */
+  --am-crop-bottom: 14px;
+}
+
+/* An album player is TWO LAYOUTS, and the bottom crop cannot be one number.
+
+   Wide (in the writing, and on the section page) it is two columns: the track
+   list on the right ends with "View in Apple Music" level with the Play button
+   on the left — so cropping the link would cut the Play button with it. Those
+   keep the default.
+
+   Narrow (the gutter player, the phone sheet) it stacks, and the link sits
+   BELOW Play, where it can be taken on its own. 50px is that row plus the
+   disclosure line under it, leaving Play its padding. */
+.music-sheet .am-crop {
+  --am-crop-bottom: 50px;
+}
+
+.am-crop {
+  overflow: hidden;
+  border-radius: var(--r-lg);
+}
+
+.am-crop > iframe,
+.apple-music-block .apple-music-embed {
+  margin-top: calc(var(--am-crop-top) * -1);
+  margin-bottom: calc(var(--am-crop-bottom) * -1);
+}
+
 
 /* Shelf medium rows (components/lists/ShelfGrid.tsx) — horizontal scrollers.
    The scrollbar is hidden because the rows are short and the cards are
@@ -4904,12 +4956,18 @@ main:has(.note-wash) {
     transform-origin: top left;
     margin: 0;
     z-index: 1;
+    /* Narrow enough that Apple stacks the player, so "View in Apple Music"
+       sits below Play and can be cropped without it — see the note on
+       `.music-sheet .am-crop`. */
+    --am-crop-bottom: 50px;
   }
 
   /* Both want the same column, so the contents start below the player instead
-     of behind it. The PAINTED height, not the iframe's: 450px × 0.6667. */
+     of behind it. The PAINTED height, which is now two removes from the
+     iframe's own 450px: minus the 56px Apple's cropped chrome took (#100),
+     then × 0.6667 for the scale (#97). */
   .music-note:has(.apple-music-block[data-kind="album"]) .toc-rail {
-    --gutter-player-h: 300px;
+    --gutter-player-h: 264px;
     top: calc(5rem + var(--gutter-player-h) + 2rem);
     max-height: calc(100vh - 8rem - var(--gutter-player-h) - 2rem);
   }

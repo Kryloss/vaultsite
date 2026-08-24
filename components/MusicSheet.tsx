@@ -88,14 +88,16 @@ export default function MusicSheet({
         {everOpen && (
           /* credentialless: fresh ephemeral storage each load — see
              DECISIONS #10 and lib/apple-music.ts. */
-          <iframe
-            src={appleMusicEmbedUrl(url)}
-            height={appleMusicEmbedHeight(url)}
-            title="Apple Music player"
-            className="music-sheet-embed"
-            allow={APPLE_MUSIC_IFRAME_ALLOW}
-            credentialless=""
-          />
+          <div className="am-crop">
+            <iframe
+              src={appleMusicEmbedUrl(url)}
+              height={appleMusicEmbedHeight(url)}
+              title="Apple Music player"
+              className="music-sheet-embed"
+              allow={APPLE_MUSIC_IFRAME_ALLOW}
+              credentialless=""
+            />
+          </div>
         )}
       </div>
     </>
