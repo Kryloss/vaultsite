@@ -12,7 +12,7 @@ import {
   readingStats,
   parseCategories,
 } from "@/lib/vault";
-import { renderWithHeadings } from "@/lib/markdown";
+import { renderWithHeadings, resolveCoverUrl } from "@/lib/markdown";
 import { pageMeta } from "@/lib/metadata";
 import { previewsInHtml } from "@/lib/previews";
 import { getSiblings } from "@/lib/siblings";
@@ -23,6 +23,7 @@ import {
   entryCreator,
   entryMedium,
   isShelfSection,
+  opensWithHeaderBlock,
   mediumSlug,
 } from "@/lib/shelf";
 import { ui } from "@/lib/ui-strings";
@@ -78,11 +79,11 @@ export default async function EntryPage({ params }: Props) {
 
   // The Ukrainian body renders as a second <article> in the same document, so
   // its heading ids are namespaced to keep "#setup" unambiguous — see lib/toc.ts.
-  // Shelf entries render a headerless table as a plain fact list instead of a
-  // card — see RenderOptions.factTables. Scoped here rather than in the
-  // pipeline because it answers a problem only these pages have: the creator
-  // block above it is already a block, and two of them stack badly.
-  const factTables = isShelfSection(section);
+  // Shelf and music entries render a headerless table as a plain fact list
+  // instead of a card — see RenderOptions.factTables. Scoped here rather than
+  // in the pipeline because it answers a problem only these pages have: the
+  // creator block above it is already a block, and two of them stack badly.
+  const factTables = opensWithHeaderBlock(section);
   /* The rating rides into the fact list as a row rather than sitting on the
      metadata line — see DECISIONS #88. Per-language, because the label is. */
   const rating =
@@ -116,9 +117,21 @@ export default async function EntryPage({ params }: Props) {
   // page with `?category=`, which its list reads on arrival.
   const medium = entryMedium(entry);
   /* Who made it — a portrait, their role and a sentence, rendered above the
-     note's own body. Shelf only: a post's author is Kyrylo, which the whole
-     site already says, and the People section's entries ARE the person. */
-  const creator = isShelfSection(section) ? entryCreator(entry) : undefined;
+     note's own body. Shelf and music only: a post's author is Kyrylo, which
+     the whole site already says, and the People section's entries ARE the
+     person. On a music note the key is `artist:` and the role reads Artist;
+     `entryCreator` picks that from the key itself, so nothing here has to
+     know which section it is. */
+  const creator = opensWithHeaderBlock(section) ? entryCreator(entry) : undefined;
+  /* Music notes tint their opening with their own cover, the way the section's
+     track list is tinted by the newest one — so a note and the list it came
+     from read as the same place. Music only: a shelf note already opens with
+     the artwork itself on the card in every list that links to it, and a
+     second, blurrier copy of it behind the title adds nothing. */
+  const noteWash =
+    section.type === "music"
+      ? resolveCoverUrl(entry.sectionDir, entry.meta.cover)
+      : undefined;
 
   const categoryHref = (category: string) =>
     isShelfSection(section) && medium
@@ -225,6 +238,18 @@ export default async function EntryPage({ params }: Props) {
           : undefined
       }
     >
+      {noteWash && (
+        /* The note's own artwork, blurred past recognition, dissolving behind
+           its opening. A WASH, not a card: `.creator` is deliberately a row
+           with no border, fill or radius (#86), and framing it here would
+           reverse that. Decorative — the cover is legible on the section's
+           list and inside the note's own player. */
+        <div className="note-wash" aria-hidden="true">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={noteWash} alt="" />
+        </div>
+      )}
+
       <JsonLd data={entryJsonLd(section, entry)} />
       <JsonLd data={breadcrumbJsonLd(section, entry)} />
       {/* `minutes` also drives the time-remaining pill — posts only. */}

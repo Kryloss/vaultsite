@@ -165,26 +165,35 @@ const CREATOR_ROLES: Record<string, Str> = {
  * make a single existing note invalid.
  */
 export function entryCreator(entry: Entry): ShelfCreator | undefined {
-  const name =
-    typeof entry.meta.author === "string" ? entry.meta.author.trim() : "";
-  if (!name) return undefined;
-
-  const medium = entryMedium(entry);
-  const photo = resolveCoverUrl(entry.sectionDir, entry.meta.author_photo);
   const str = (key: string) => {
     const v = entry.meta[key];
     return typeof v === "string" && v.trim() ? v.trim() : undefined;
   };
 
+  /* Two keys name the same slot, and WHICH ONE the note used is what picks
+     the role — so a music note needs no `medium:` and this function needs no
+     knowledge of the section it's in. `artist:` says Artist; `author:` falls
+     back to the medium the way it always has. Everything below the name
+     follows the same prefix, so a note writes one family of keys, not two. */
+  const key = str("artist") ? "artist" : "author";
+  const name = str(key);
+  if (!name) return undefined;
+
+  const medium = entryMedium(entry);
+  const photo = resolveCoverUrl(entry.sectionDir, entry.meta[`${key}_photo`]);
+
   return {
     name,
-    nameUk: str("author_uk"),
-    role: (medium && CREATOR_ROLES[medium]) || ui.creatorAuthor,
+    nameUk: str(`${key}_uk`),
+    role:
+      key === "artist"
+        ? ui.creatorArtist
+        : (medium && CREATOR_ROLES[medium]) || ui.creatorAuthor,
     photoUrl: photo,
     photoBlur: blurFor(photo),
     photoSrcSet: srcSetFor(photo),
-    bio: str("author_bio"),
-    bioUk: str("author_bio_uk"),
+    bio: str(`${key}_bio`),
+    bioUk: str(`${key}_bio_uk`),
   };
 }
 
@@ -352,4 +361,19 @@ export const SHELF_TYPES = ["shelf", "books"];
 
 export function isShelfSection(section: Section): boolean {
   return SHELF_TYPES.includes(section.type);
+}
+
+/**
+ * Does this section's notes open with a header block — a creator, then a
+ * plain fact list — rather than going straight into the writing?
+ *
+ * ONE predicate for both, deliberately. The fact list is styled as plain rows
+ * instead of a card BECAUSE the creator block sits above it and two framed
+ * blocks stack badly (#87); they are two halves of one decision, and gating
+ * them on separate conditions is how they would drift apart. Music joined
+ * shelf here: an album has a maker and a handful of facts, which is the same
+ * shape as a book.
+ */
+export function opensWithHeaderBlock(section: Section): boolean {
+  return isShelfSection(section) || section.type === "music";
 }

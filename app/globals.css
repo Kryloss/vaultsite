@@ -4773,3 +4773,55 @@ html[data-intro][data-intro-fast] .prose > .avatar {
     font-size: 0.8125rem;
   }
 }
+
+/* A music note tints its own opening with its own cover — the same idea as
+   the section's track-list card, so a note and the list it came from read as
+   one place (DECISIONS #91).
+
+   A WASH, NOT A CARD. `.creator` is deliberately a row with no border, fill
+   or radius, because two framed blocks stacked at the top of an article read
+   as a dashboard rather than the opening of something you're about to read
+   (#86) — so this dissolves on every side instead of ending at a rim, and
+   adds no height at all. The section page frames its wash; a note lets it
+   fade out. Neither is an accent (#64): both are artwork out of focus. */
+.page:has(.note-wash) {
+  /* Scoped by `:has()` so only a note with a wash gains a containing block,
+     and `z-index: 0` keeps the negative layer below INSIDE the page rather
+     than escaping to the root — a `position: relative` alone would not. */
+  position: relative;
+  z-index: 0;
+}
+
+.note-wash {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: clamp(260px, 40vh, 420px);
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.note-wash img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Scaled for the same reason as the card's: a blur samples transparency
+     past the image's edges, and an unscaled cover fades out at its own rim. */
+  transform: scale(1.25);
+  filter: blur(56px) saturate(1.3);
+  opacity: 0.26;
+  /* Out on every side, so it has no edge to read as a shape. Wider than tall
+     (140% × 100%) because the page column is narrow and a circular falloff
+     would pinch the colour into a stripe down the middle. */
+  -webkit-mask-image: radial-gradient(140% 100% at 50% 0%, #000 25%, transparent 100%);
+  mask-image: radial-gradient(140% 100% at 50% 0%, #000 25%, transparent 100%);
+}
+
+@media (prefers-color-scheme: dark) {
+  .note-wash img {
+    opacity: 0.32;
+    filter: blur(56px) saturate(1.2) brightness(0.95);
+  }
+}

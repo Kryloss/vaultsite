@@ -8,7 +8,7 @@
  */
 import { authorName, siteName, siteUrl, socials } from "./site-config";
 import { resolveCoverUrl } from "./markdown";
-import { entryMedium } from "./shelf";
+import { entryMedium, entryCreator } from "./shelf";
 import {
   youtubeEmbedUrl,
   youtubeId,
@@ -190,6 +190,28 @@ export function entryJsonLd(section: Section, entry: Entry): object | null {
     const rating = entry.meta.rating;
     if (typeof rating === "number") return reviewWrapper(work, rating, url);
     return { "@context": "https://schema.org", ...work, url };
+  }
+
+  /* Music: the note is about an ALBUM, not an article about one — same
+     reasoning as the shelf above, and it reuses the same Review wrapper when
+     the note carries a rating. `byArtist` comes from `entryCreator`, so it
+     reads whichever key the note used and cannot disagree with the artist
+     block printed on the page. Without an artist named there is no album
+     worth claiming, so it falls through to the article shape below. */
+  if (section.type === "music") {
+    const artist = entryCreator(entry);
+    if (artist) {
+      const album: any = {
+        "@type": "MusicAlbum",
+        name: entry.title,
+        byArtist: { "@type": "MusicGroup", name: artist.name },
+        ...(entry.description ? { description: entry.description } : {}),
+        ...(image ? { image } : {}),
+      };
+      const rating = entry.meta.rating;
+      if (typeof rating === "number") return reviewWrapper(album, rating, url);
+      return { "@context": "https://schema.org", ...album, url };
+    }
   }
 
   // Everything else that has a date reads as an article.

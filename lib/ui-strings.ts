@@ -160,6 +160,7 @@ export const ui = {
   creatorDirector: { en: "Director", uk: "Режисер" },
   creatorShowCreator: { en: "Creator", uk: "Автор серіалу" },
   creatorChannel: { en: "Channel", uk: "Канал" },
+  creatorArtist: { en: "Artist", uk: "Виконавець" },
 
   /* The rating's row in a shelf note's fact list — the stars live there now
      rather than on the metadata line (`docs/DECISIONS.md` #88). */

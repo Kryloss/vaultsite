@@ -5,8 +5,9 @@ import {
   getEntries,
   getEntry,
 } from "@/lib/vault";
-import { isShelfSection, toShelfItem } from "@/lib/shelf";
+import { isShelfSection, toShelfItem, entryCreator } from "@/lib/shelf";
 import { siteName } from "@/lib/site-config";
+import { resolveCoverUrl } from "@/lib/markdown";
 
 export const size = OG_SIZE;
 export const contentType = "image/png";
@@ -41,17 +42,29 @@ export default async function Image({
      paste into a link preview. */
   const item =
     entry && section && isShelfSection(section) ? toShelfItem(entry) : undefined;
-  const cover = ogCover(item?.coverUrl);
+
+  /* A music note carries album art in the same `cover:` key but is no
+     ShelfItem, so it resolves its own — otherwise a shared link to a note
+     that HAS artwork falls back to the plain text card, which is the one
+     place the section still looked unfinished. Square, because an album is. */
+  const isMusic = section?.type === "music";
+  const cover = ogCover(
+    isMusic && entry
+      ? resolveCoverUrl(entry.sectionDir, entry.meta.cover)
+      : item?.coverUrl
+  );
+
+  const byline = isMusic && entry ? entryCreator(entry)?.name : item?.author;
 
   return ogImage(
     entry?.title ?? siteName,
     section ? `${section.title} · ${siteName}` : siteName,
     {
       cover,
-      wide: item?.isVideo,
+      coverShape: isMusic ? "square" : item?.isVideo ? "wide" : "tall",
       // Only worth a line when there's art beside it; on the plain card it
       // would sit where the section name already is.
-      byline: cover ? item?.author : undefined,
+      byline: cover ? byline : undefined,
     }
   );
 }

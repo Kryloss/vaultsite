@@ -54,16 +54,24 @@ export interface OgOptions {
   /** Cover art, from ogCover(). Switches the card to the split layout. */
   cover?: string;
   /**
-   * Cover shape. Book jackets and posters are 2:3, video thumbnails 16:9 —
-   * the frame matches so nothing is cropped or letterboxed.
+   * Cover shape. Book jackets and posters are 2:3, video thumbnails 16:9,
+   * album art 1:1 — the frame matches so nothing is cropped or letterboxed.
    */
-  wide?: boolean;
+  coverShape?: "tall" | "wide" | "square";
   /** Third line under the subtitle: an author, director or channel. */
   byline?: string;
 }
 
 export function ogImage(title: string, subtitle?: string, opts: OgOptions = {}) {
-  const { cover, wide, byline } = opts;
+  const { cover, coverShape = "tall", byline } = opts;
+  /* Panel width and image box per shape, so the three live in one place
+     rather than as conditionals sprinkled through the JSX. The panel is
+     always wider than the art it holds by roughly the same padding. */
+  const frame = {
+    tall: { panel: 460, w: 332, h: 498 },
+    wide: { panel: 620, w: 508, h: 286 },
+    square: { panel: 540, w: 412, h: 412 },
+  }[coverShape];
 
   /* Shelf notes are about a thing that already has a picture, and the picture
      is what someone recognises in a feed before they read a word of the title.
@@ -141,9 +149,9 @@ export function ogImage(title: string, subtitle?: string, opts: OgOptions = {}) 
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              width: wide ? 620 : 460,
+              width: frame.panel,
               height: "100%",
-              padding: wide ? 56 : 64,
+              padding: 64,
               // A hairline of lift so the artwork doesn't dissolve into the
               // near-black panel when the cover itself is dark.
               background: "#111113",
@@ -154,8 +162,8 @@ export function ogImage(title: string, subtitle?: string, opts: OgOptions = {}) 
             <img
               src={cover}
               alt=""
-              width={wide ? 508 : 332}
-              height={wide ? 286 : 498}
+              width={frame.w}
+              height={frame.h}
               style={{ objectFit: "cover", borderRadius: 12 }}
             />
           </div>
