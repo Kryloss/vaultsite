@@ -4883,21 +4883,165 @@ main:has(.note-wash) {
 @media (min-width: 1400px) {
   .music-note .apple-music-block[data-kind="album"] {
     position: fixed;
-    /* `top` matches .toc-rail; `left` sits 1.5rem past the text column's own
-       right edge (50% + 19.5rem), which is tighter than the rail because the
-       player needs the width more than it needs the gap. */
-    top: 9rem;
-    left: calc(50% + 21rem);
-    width: 18rem;
+    /* Above the page's own content, which starts at `--page-y` (7rem here) —
+       nothing else is in this gutter that high, since the floating breadcrumb
+       is `left-3`. `left` sits 1rem past the text column's right edge
+       (50% + 19.5rem): the gap gives way before the width does, because a
+       two-column player needs the room more than it needs the air. */
+    top: 5rem;
+    left: calc(50% + 20.5rem);
+    width: 20rem;
+    /* SHORTER than the iframe's own 450px. Apple's player clips rather than
+       reflows (#93), so this trims from the bottom — the artwork, the title
+       and the Play button are the top two thirds and all survive; what goes is
+       the tail of the track list. Wider and shorter suits the two-column
+       layout the extra width should buy. */
+    height: var(--gutter-player-h);
     margin: 0;
     z-index: 1;
   }
 
-  /* Both want the same column, so the contents start below the player instead
-     of behind it. The player's height is its iframe's own 450px. */
+  /* One number, read three times: the box, the iframe filling it, and where
+     the contents rail has to start. */
+  .music-note .apple-music-block[data-kind="album"],
   .music-note:has(.apple-music-block[data-kind="album"]) .toc-rail {
-    --gutter-player-h: 450px;
-    top: calc(9rem + var(--gutter-player-h) + 2rem);
-    max-height: calc(100vh - 12rem - var(--gutter-player-h) - 2rem);
+    --gutter-player-h: 23rem;
+  }
+
+  .music-note .apple-music-block[data-kind="album"] .apple-music-embed {
+    height: 100%;
+  }
+
+  /* Both want the same column, so the contents start below the player instead
+     of behind it. */
+  .music-note:has(.apple-music-block[data-kind="album"]) .toc-rail {
+    top: calc(5rem + var(--gutter-player-h) + 2rem);
+    max-height: calc(100vh - 8rem - var(--gutter-player-h) - 2rem);
+  }
+}
+
+/* ---- the album as a phone control (DECISIONS #95) ----
+
+   A 450px player dropped into the middle of a phone screen is most of the
+   screen. Below 640px the note's album embed is hidden and this square icon
+   takes its place in the TOP-RIGHT corner — built to the same 2.5rem the
+   contents pill and the floating breadcrumb are (#51), so the corners of a
+   phone hold one family of controls rather than three sizes of chip.
+
+   Hidden everywhere else: from 640px up the inline embed IS the player and
+   this control would be a second way to the same thing. */
+.music-pill {
+  display: none;
+  position: fixed;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 30;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border-radius: var(--r-full);
+  background: var(--chrome-bg);
+  box-shadow: inset 0 0 0 1px var(--chrome-ring);
+  color: var(--text);
+}
+
+.music-pill-icon {
+  flex-shrink: 0;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.music-sheet {
+  position: fixed;
+  top: 3.625rem; /* icon: 0.75rem offset + 2.5rem tall + 0.5rem gap */
+  right: 0.75rem;
+  z-index: 45;
+  display: none;
+  width: min(21rem, calc(100vw - 1.5rem));
+  max-height: 70vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--chrome-bg);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.08);
+  transform-origin: 100% 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px) scale(0.97);
+  transition:
+    opacity var(--dur) var(--ease),
+    transform var(--dur) var(--ease),
+    visibility 0s linear var(--dur);
+}
+
+.music-sheet[data-open="true"] {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition-delay: 0s;
+}
+
+.music-sheet-embed {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-radius: var(--r-md);
+}
+
+.music-sheet-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgb(0 0 0 / 0.25);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--dur) var(--ease),
+    visibility 0s linear var(--dur);
+}
+
+.music-sheet-backdrop[data-open="true"] {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+@media (max-width: 639px) {
+  .music-pill {
+    display: flex;
+  }
+
+  .music-sheet,
+  .music-sheet-backdrop {
+    display: block;
+  }
+
+  /* The icon IS the player here, so the slab in the writing goes. Its iframe
+     carries `loading="lazy"`, and a display:none lazy iframe is never fetched
+     — so hiding it costs a phone nothing rather than costing it a hidden
+     download. */
+  .music-note .apple-music-block[data-kind="album"] {
+    display: none;
+  }
+
+  /* Two pills can't share one corner. When the note also has a contents icon,
+     the album steps left by exactly one pill and its gap, and its sheet goes
+     with it. `:has()` asks the page whether the rail rendered at all, which is
+     the only thing that decides it. */
+  .page:has(.toc-bar) .music-pill {
+    right: 3.75rem; /* 0.75rem + 2.5rem pill + 0.5rem gap */
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .music-sheet,
+  .music-sheet-backdrop {
+    transition-duration: 0.01ms;
   }
 }

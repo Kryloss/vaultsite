@@ -50,6 +50,22 @@ export const APPLE_MUSIC_IFRAME_ALLOW =
   "autoplay *; encrypted-media *; fullscreen *; clipboard-write";
 
 /**
+ * The first ALBUM or playlist link in a note's markdown, if it has one.
+ *
+ * Standalone links are what the pipeline turns into players, so this looks for
+ * the same shape: a line that is nothing but an Apple Music URL. Songs are
+ * skipped — a track is an example of the sentence it sits beside and is never
+ * the note's subject (#94).
+ */
+export function firstAlbumUrl(markdown: string): string | undefined {
+  for (const line of markdown.split("\n")) {
+    const s = line.trim();
+    if (isAppleMusicUrl(s) && !isAppleMusicSong(s)) return s;
+  }
+  return undefined;
+}
+
+/**
  * iframe HTML string — used by the markdown pipeline to auto-embed pasted links.
  *
  * NO footer link. There was one — "Open in Apple Music", added so a stalled
@@ -68,7 +84,7 @@ export function appleMusicEmbedHtml(url: string): string {
   const kind = isAppleMusicSong(url) ? "song" : "album";
   return (
     `<div class="apple-music-block" data-kind="${kind}">` +
-    `<iframe class="apple-music-embed" title="Apple Music player" allow="${APPLE_MUSIC_IFRAME_ALLOW}" credentialless height="${height}" src="${src}"></iframe>` +
+    `<iframe class="apple-music-embed" title="Apple Music player" allow="${APPLE_MUSIC_IFRAME_ALLOW}" credentialless loading="lazy" height="${height}" src="${src}"></iframe>` +
     `</div>`
   );
 }

@@ -13,6 +13,7 @@ import {
   parseCategories,
 } from "@/lib/vault";
 import { renderWithHeadings, resolveCoverUrl } from "@/lib/markdown";
+import { firstAlbumUrl } from "@/lib/apple-music";
 import { pageMeta } from "@/lib/metadata";
 import { previewsInHtml } from "@/lib/previews";
 import { getSiblings } from "@/lib/siblings";
@@ -35,6 +36,7 @@ import Series from "@/components/Series";
 import LinkPreview from "@/components/LinkPreview";
 import CopyMarkdown, { CopyMarkdownTitle } from "@/components/CopyMarkdown";
 import ReadingProgress from "@/components/ReadingProgress";
+import MusicSheet from "@/components/MusicSheet";
 import ReadingPosition from "@/components/ReadingPosition";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbJsonLd, entryJsonLd } from "@/lib/jsonld";
@@ -132,6 +134,11 @@ export default async function EntryPage({ params }: Props) {
     section.type === "music"
       ? resolveCoverUrl(entry.sectionDir, entry.meta.cover)
       : undefined;
+  /* Phones get the album as an icon in the corner instead of a 450px slab in
+     the middle of the writing — see components/MusicSheet.tsx. Both language
+     bodies embed the same album, so one URL serves either. */
+  const albumUrl =
+    section.type === "music" ? firstAlbumUrl(entry.content) : undefined;
 
   const categoryHref = (category: string) =>
     isShelfSection(section) && medium
@@ -258,6 +265,7 @@ export default async function EntryPage({ params }: Props) {
       {/* `minutes` also drives the time-remaining pill — posts only. */}
       <ReadingProgress minutes={stats?.minutes} />
       <ReadingPosition />
+      {albumUrl && <MusicSheet url={albumUrl} />}
       {/* Hover cards for the internal links in THIS note only — see
           previewsInHtml() in lib/previews.ts. */}
       <LinkPreview previews={previewsInHtml(en.html, uk?.html)} />
