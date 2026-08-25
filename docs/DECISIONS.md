@@ -1830,7 +1830,7 @@ album (336 × 450): link top 432, controls end 423  →  crop 18, 9px clear
 
 **The serif is embedded separately because `next/og` is not the page.** The live site registers Source Serif through `next/font`, but Satori renders an image from JSX and needs the font bytes in its own `ImageResponse` options. Static regular and bold TTFs therefore live under `assets/fonts/` with Adobe's OFL and provenance. They are build inputs only; the page continues to use the existing variable Cyrillic font and optical-size axis. This is deliberate duplication at an integration boundary, not a second type system.
 
-**The mark is redrawn from `app/icon.svg`, not imported as an image.** Inline paths render reliably in Satori, can be scaled from the small masthead to the oversized background without another asset read, and stay monochrome. If the favicon's geometry changes, both copies must change together.
+**The mark is redrawn from `app/icon.svg`, not imported as an image.** Inline paths render reliably in Satori, can be scaled from the small masthead to the oversized background without another asset read, and stay monochrome. The standalone favicon uses one neutral `#71717a` fill: dark enough for light tab chrome, light enough for dark tab chrome, and no longer an accent on a site that deliberately has none. If the favicon's geometry changes, both copies must change together.
 
 **Checked as a family, because no one card proves the system.** The browser matrix includes root, section, plain article, People, tall Shelf, wide video, square Music, and the longest current cover title. All are 1200×630; the long titles hold their hierarchy, the three artwork shapes remain whole, and the plain fallback still looks intentional.
 
