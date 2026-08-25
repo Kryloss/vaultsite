@@ -17,17 +17,17 @@ categories: [Politics]
 video: https://www.youtube.com/watch?v=GgbgoeBW3JI
 uploaded: 2026-08-21
 date: 2026-08-25
-description: "How anonymous Telegram channels became one of Ukraine's most-read news sources, and what is known about who runs them."
-description_uk: "Як анонімні Telegram-канали стали одним із головних джерел новин в Україні — і що відомо про тих, хто за ними стоїть."
+description: "How anonymous Telegram channels became Ukraine's most-read news."
+description_uk: "Як анонімні Telegram-канали стали головним джерелом новин в Україні."
 ---
 
 ## At a glance
 
 | | |
 |---|---|
-| Subject | How anonymous Telegram channels grew into a main news source for millions of Ukrainians, with no editorial process and no named owners |
-| Channels discussed | "Trukha", "Rezydent", "Lehitymnyi" — named in the video's own description |
-| Host | Oleksiy Kovzhun — media expert and political consultant, co-host of ҐРУНТ's "The Long War" |
+| Subject | Anonymous Telegram channels as a main news source, with no editors and no named owners |
+| Channels | "Trukha", "Rezydent", "Lehitymnyi" |
+| Host | Oleksiy Kovzhun — media expert and political consultant |
 | Language | Ukrainian |
 | Released | 2026-08-21 |
 
@@ -35,10 +35,9 @@ https://www.youtube.com/watch?v=GgbgoeBW3JI
 
 A companion piece, from the other side of the desk, is [[I made propaganda for my Religion class]] — the same question of where reporting ends and persuasion begins.
 
-## Why it's on the shelf
+## Review
 
-<!-- Your thoughts go here — I left this empty on purpose rather than
-     inventing an opinion for you. Delete this comment when you write it. -->
+*To be written.*
 
 ## Sources
 

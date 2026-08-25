@@ -74,6 +74,30 @@ export function resolveCoverUrl(
   return resolveImageUrl(sectionDir, clean);
 }
 
+/**
+ * The `<name>.uk.<ext>` sibling of a `cover:`-style frontmatter value, if the
+ * vault holds one.
+ *
+ * The same convention markdown embeds already use for diagrams and images —
+ * put a Ukrainian file beside the English one and it swaps with the language
+ * toggle, with no second frontmatter key to write or forget. Exported so the
+ * shelf can offer it to `spine:`, where the book's own words are printed on
+ * the artwork and a translated edition is a genuinely different photograph.
+ *
+ * Returns undefined for a remote URL: there is no sibling to look beside.
+ */
+export function resolveLangVariantUrl(
+  sectionDir: string,
+  value: unknown
+): string | undefined {
+  if (typeof value !== "string" || !value.trim()) return undefined;
+  const clean = value.trim().replace(/^!?\[\[/, "").replace(/\]\]$/, "");
+  if (/^https?:\/\//i.test(clean)) return undefined;
+  const ukName = langVariantName(clean);
+  if (!ukName || !assetExists(sectionDir, ukName)) return undefined;
+  return resolveImageUrl(sectionDir, ukName);
+}
+
 /** Memoized wiki index (built once per build process). */
 let wikiIndex: Map<string, string> | null = null;
 function wiki(): Map<string, string> {

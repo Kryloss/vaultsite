@@ -49,15 +49,19 @@ const AR_MIN = 1.3;
 const AR_MAX = 1.7;
 
 /**
- * A spine is 44px wide (`--spine-w`), so this range is also what makes it
- * read as a BOOK rather than as a tab: at 196–232px — the first numbers this
- * shipped with — a spine is barely five times its own width, which is a
- * pamphlet, and the title had ~32 characters of room before it clipped. Every
- * title but three was truncated on the real shelf. At ~6.5 : 1 the proportion
- * is a hardback's and most titles fit whole.
+ * The range was 196–232 when spines were drawn at 44px wide — barely five
+ * times their own width, which reads as a pamphlet, and it clipped every
+ * title but three. 240–288 fixed the proportion.
+ *
+ * It is now 288–348 so the books RISE out of their row: the shortest just
+ * clears the "Books" heading and the tallest reaches the row above, which is
+ * what a shelf on a wall actually does to the space around it. The feet do
+ * not move — `.book-shelf-rise` in globals.css takes the extra height out of
+ * the margin above rather than pushing the row down, and that margin is
+ * DERIVED from `SPINE_H_MAX`, so re-derive it if this changes.
  */
-export const SPINE_H_MIN = 240;
-export const SPINE_H_MAX = 288;
+export const SPINE_H_MIN = 288;
+export const SPINE_H_MAX = 348;
 /** A book with no cover to measure stands at the middle of the range. */
 export const SPINE_H_DEFAULT = Math.round((SPINE_H_MIN + SPINE_H_MAX) / 2);
 

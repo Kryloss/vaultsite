@@ -184,7 +184,15 @@ export async function channelAvatarUrl(channelUrl) {
   return html.match(/<meta property="og:image" content="([^"]+)"/)?.[1];
 }
 
-/** The video's own publication date, for `uploaded:` on an already-shelved note. */
+/**
+ * The video's own publication date, for `uploaded:` on an already-shelved note.
+ *
+ * Scrapes the watch page, which YouTube serves behind a captcha to datacentre
+ * IPs — so this works from a laptop and NOT from the scheduled cloud run (which
+ * got a 3KB consent page instead, and correctly declined to guess). The nightly
+ * job never needs it: the playlist feed carries `uploaded` for everything in
+ * the queue. This is the backfill path, for a video already on the shelf.
+ */
 export async function fetchUploadDate(videoId) {
   const html = await fetchText(`https://www.youtube.com/watch?v=${videoId}`);
   return html.match(/"uploadDate":"([0-9]{4}-[0-9]{2}-[0-9]{2})/)?.[1];

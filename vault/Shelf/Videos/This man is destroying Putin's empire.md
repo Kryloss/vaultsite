@@ -27,10 +27,9 @@ description_uk: "Інтерв'ю з циклу репортажів Каолан
 
 https://www.youtube.com/watch?v=3DA7EXbf_d4
 
-## Why it's on the shelf
+## Review
 
-<!-- Your thoughts go here — I left this empty on purpose rather than
-     inventing an opinion for you. Delete this comment when you write it. -->
+*To be written.*
 
 ## Sources
 

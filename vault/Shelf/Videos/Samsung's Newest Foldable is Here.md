@@ -26,7 +26,6 @@ description_uk: "Перші враження команди Waveform від но
 
 https://www.youtube.com/watch?v=WVsG3daysEM
 
-## Why it's on the shelf
+## Review
 
-<!-- Your thoughts go here — I left this empty rather than inventing an
-     opinion for you. Delete this comment when you write it. -->
+*To be written.*

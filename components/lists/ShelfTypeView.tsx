@@ -1,6 +1,5 @@
 import Link from "next/link";
 import ShelfCard from "@/components/lists/ShelfCard";
-import BookSpines from "@/components/lists/BookSpines";
 import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
 import QuotesView from "@/components/lists/QuotesView";
@@ -14,8 +13,15 @@ import {
 import type { BookQuotes } from "@/lib/quotes";
 
 /**
- * A shelf medium page: heading, category chips, grid. Shared by
- * /<section>/type/<medium> and /<section>/type/<medium>/<category>.
+ * A shelf medium page: heading, category chips, and a grid of full-size
+ * covers. Shared by /<section>/type/<medium> and
+ * /<section>/type/<medium>/<category>.
+ *
+ * Books are NOT a special case here, deliberately. The standing spines live
+ * on the section page's books row (components/lists/BookSpines.tsx); this is
+ * the page you reach once you have chosen books, and cover art is what a book
+ * is recognised by. It shipped the other way round once — see DECISIONS #110
+ * before swapping it back.
  *
  * Server component on purpose. Filtering used to be client state driven by a
  * `?category=` query param, but reading the URL during an App Router
@@ -50,7 +56,6 @@ export default function ShelfTypeView({
     : group.items;
   const base = `/${sectionSlug}/type/${group.slug}`;
   const hasQuotes = Boolean(quotes && quotes.length > 0);
-  const isBooks = group.slug === "books";
   const quoteCount = quotes?.reduce((n, b) => n + b.quotes.length, 0) ?? 0;
 
   /* Shared by both views: a filtered page can come back empty whichever
@@ -118,16 +123,6 @@ export default function ShelfTypeView({
 
       {showQuotes ? (
         <QuotesView sectionSlug={sectionSlug} books={quotes ?? []} />
-      ) : isBooks ? (
-        /* Books get the shelf, every other medium keeps the grid — see the
-           head of BookSpines.tsx for why the two views differ on purpose.
-           Category pages get spines too: a shelf of three books is still a
-           shelf, and a second grammar for the filtered view would be one
-           more thing to keep in step. */
-        <>
-          <BookSpines items={items} sectionSlug={sectionSlug} />
-          {empty}
-        </>
       ) : (
         <>
           {/* Every card here is the same shape, so a plain grid is safe. */}

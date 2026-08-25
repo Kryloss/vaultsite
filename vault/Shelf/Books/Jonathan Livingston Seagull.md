@@ -20,6 +20,7 @@ date: 2026-07-25
 description: A bird who refuses to fly only for the food.
 description_uk: Птах, який відмовляється літати лише заради їжі.
 cover: jonathan-livingston-seagull.jpg
+spine: jonathan-livingston-seagull-spine.jpg
 # cover source: Open Library covers API, ISBN 9780743278904 (Scribner English edition)
 ---
 
@@ -32,9 +33,9 @@ cover: jonathan-livingston-seagull.jpg
 
 A philosophical fable about a young seagull who strives to transcend ordinary flight to achieve self-mastery, freedom, and artistic perfection.
 
-## Why it's on the shelf
+## Review
 
-<!-- Your thoughts go here. What stuck, what you'd argue with, why it earned a spot. -->
+*To be written.*
 
 ## Quotes
 

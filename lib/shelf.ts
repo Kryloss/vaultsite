@@ -6,7 +6,7 @@
  * the medium rows replaced the old filter chips.
  */
 import { parseCategories, slugify, type Entry, type Section } from "./vault";
-import { resolveCoverUrl } from "./markdown";
+import { resolveCoverUrl, resolveLangVariantUrl } from "./markdown";
 import { blurFor, domFor, dimsFor, srcSetFor } from "./blur";
 import { youtubeId, youtubeThumbnail } from "./youtube";
 import { ui, type Str } from "./ui-strings";
@@ -55,6 +55,27 @@ export interface ShelfItem {
   spineUrl?: string;
   spineAr?: number;
   spineBlur?: string;
+  /**
+   * The `<name>.uk.<ext>` sibling of `spine:`, when the vault has one — the
+   * same convention markdown embeds use, so no second frontmatter key.
+   *
+   * Worth having here in a way it would not be for a cover: the spine's words
+   * are printed ON the artwork, so a Ukrainian edition is a different
+   * photograph, not the same one relabelled. Width still comes from
+   * `spineAr` — the English one — so the shelf does not shift when the reader
+   * toggles language.
+   */
+  spineUkUrl?: string;
+  spineUkBlur?: string;
+  /**
+   * The Ukrainian scan's OWN aspect ratio. Two photographs of the same book
+   * rarely agree to better than a few percent, and forcing one width on both
+   * makes `object-fit: cover` eat the difference — which on The Last Wish
+   * meant the wolf at its foot. Each language gets its own exact width
+   * instead; the book's apparent thickness then changes by a pixel or so
+   * across the toggle, which is invisible, and nothing is ever cropped.
+   */
+  spineUkAr?: number;
   /** "contain" letterboxes wide art (logos) instead of cropping to fill. */
   coverFit?: "contain";
   /** 0–5, halves allowed. */
@@ -260,6 +281,8 @@ export function toShelfItem(entry: Entry): ShelfItem {
   // Resolved exactly like `cover:`, so a bare file name in the note is enough.
   const spine = resolveCoverUrl(entry.sectionDir, entry.meta.spine);
   const spineDims = dimsFor(spine);
+  const spineUk = resolveLangVariantUrl(entry.sectionDir, entry.meta.spine);
+  const spineUkDims = dimsFor(spineUk);
 
   // `status:` badges the card and pins it to a row at the top of the shelf.
   // Anything unrecognised — or nothing at all — reads as finished.
@@ -305,6 +328,9 @@ export function toShelfItem(entry: Entry): ShelfItem {
     spineUrl: spine,
     spineAr: spineDims ? spineDims.h / spineDims.w : undefined,
     spineBlur: blurFor(spine),
+    spineUkUrl: spineUk,
+    spineUkBlur: blurFor(spineUk),
+    spineUkAr: spineUkDims ? spineUkDims.h / spineUkDims.w : undefined,
     coverFit:
       entry.meta.coverFit === "contain" ? ("contain" as const) : undefined,
     rating:

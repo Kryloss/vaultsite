@@ -3,13 +3,19 @@ import type { ListProps } from "@/lib/section-types";
 import { shelfGroups } from "@/lib/shelf";
 import ShelfCard from "@/components/lists/ShelfCard";
 import ShelfRow from "@/components/lists/ShelfRow";
+import BookSpines from "@/components/lists/BookSpines";
 import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
 
 /**
- * "shelf" section type — one horizontally-scrolling row per medium (videos,
- * movies, shows, books), Netflix style. Each row header links to
- * /<section>/type/<medium>, which lists everything of that type in a grid.
+ * "shelf" section type — one row per medium (videos, movies, shows, books).
+ * Each row header links to /<section>/type/<medium>, which lists everything of
+ * that type in a grid of covers.
+ *
+ * Three of the four rows are horizontally-scrolling Netflix strips. BOOKS are
+ * a shelf of standing spines instead (components/lists/BookSpines.tsx): it
+ * fits the whole collection in one screen without a scroller, and it is the
+ * row that looks like the thing the section is named after. DECISIONS #110.
  *
  * Rows exist because mixing 16:9 video cards and 2:3 covers in one grid leaves
  * vertical holes: a grid row is as tall as its tallest item. Grouping by medium
@@ -69,26 +75,42 @@ export default function ShelfGrid({ section, entries }: ListProps) {
             )}
           </h2>
 
-          {/* Horizontal scroller. Every row is the same height — the card
-              WIDTHS are computed from `--shelf-card-h` (globals.css) and the
-              medium's aspect ratio, so a 16:9 video card is wide rather than
-              short and the shelves down the page line up. */}
-          <ShelfRow className="shelf-row stagger mt-3 flex snap-x snap-proximity gap-5 overflow-x-auto pb-1">
-            {group.items.map((item) => (
-              <li
-                key={item.slug}
-                className={`shrink-0 snap-start ${
-                  item.isVideo ? "shelf-card-wide" : "shelf-card-tall"
-                }`}
-              >
-                <ShelfCard
-                  item={item}
-                  sectionSlug={section.slug}
-                  showRating={false}
-                />
-              </li>
-            ))}
-          </ShelfRow>
+          {group.medium === "book" ? (
+            /* Books stand up. It is the one row that needs no scroller —
+               eleven spines fit the column with room to spare — and the one
+               that looks like what the section is called. Their covers are
+               not lost: the medium page behind this heading is a grid of
+               them. See components/lists/BookSpines.tsx. */
+            <BookSpines
+              items={group.items}
+              sectionSlug={section.slug}
+              className="mt-3"
+            />
+          ) : (
+            /* Horizontal scroller. Every row is the same height — the card
+               WIDTHS are computed from `--shelf-card-h` (globals.css) and the
+               medium's aspect ratio, so a 16:9 video card is wide rather than
+               short and the shelves down the page line up. Books opt out of
+               that agreement on purpose: a spine is a different object from a
+               card, with its own hairline under it, so it is not being
+               dragged to a height that belongs to artwork. */
+            <ShelfRow className="shelf-row stagger mt-3 flex snap-x snap-proximity gap-5 overflow-x-auto pb-1">
+              {group.items.map((item) => (
+                <li
+                  key={item.slug}
+                  className={`shrink-0 snap-start ${
+                    item.isVideo ? "shelf-card-wide" : "shelf-card-tall"
+                  }`}
+                >
+                  <ShelfCard
+                    item={item}
+                    sectionSlug={section.slug}
+                    showRating={false}
+                  />
+                </li>
+              ))}
+            </ShelfRow>
+          )}
         </section>
       ))}
     </div>

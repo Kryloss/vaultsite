@@ -17,29 +17,26 @@ categories: [Politics]
 video: https://www.youtube.com/watch?v=qP2pzC7ZaqE
 uploaded: 2026-08-21
 date: 2026-08-25
-description: "Danylo Mokryk and Pavlo Kazarin on whether Ukraine can hold elections during the war, and whether anti-corruption work and national security are really a trade-off."
-description_uk: "Данило Мокрик і Павло Казарін про те, чи можливі вибори під час війни й чи справді антикорупція та національна безпека — вибір одне за рахунок іншого."
+description: "Mokryk and Kazarin on wartime elections and the anti-corruption trade-off."
+description_uk: "Мокрик і Казарін про вибори під час війни й ціну антикорупції."
 ---
 
 ## At a glance
 
 | | |
 |---|---|
-| Subject | Wartime elections, the NABU disclosures and the protests around them, and the distance between people serving and people avoiding mobilisation |
+| Subject | Wartime elections, the NABU disclosures, and the protests around them |
 | Prompted by | [[Mykhailo Fedorov]]'s call for elections in Ukraine |
-| Host | Danylo Mokryk — investigative journalist, five and a half years at Bihus.Info, now at The Kyiv Independent |
-| Guest | Pavlo Kazarin — journalist and publicist, author of *The Wild West of Eastern Europe*, in the Armed Forces since February 2022; Shevchenko National Prize, 2025 |
-| Series | МокРозбір, episode 8 |
-| Length | Over 1 hour 20 minutes |
+| Host | Danylo Mokryk — investigative journalist, The Kyiv Independent |
+| Guest | Pavlo Kazarin — journalist, in the Armed Forces since 2022 |
 | Language | Ukrainian |
 | Released | 2026-08-21 |
 
 https://www.youtube.com/watch?v=qP2pzC7ZaqE
 
-## Why it's on the shelf
+## Review
 
-<!-- Your thoughts go here — I left this empty on purpose rather than
-     inventing an opinion for you. Delete this comment when you write it. -->
+*To be written.*
 
 ## Sources
 

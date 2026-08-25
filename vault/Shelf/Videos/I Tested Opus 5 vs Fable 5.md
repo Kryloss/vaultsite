@@ -26,7 +26,6 @@ description_uk: "Порівняння двох моделей Claude на одн
 
 https://www.youtube.com/watch?v=2J3uX8iRNng
 
-## Why it's on the shelf
+## Review
 
-<!-- Your thoughts go here — I left this empty rather than inventing an
-     opinion for you. Delete this comment when you write it. -->
+*To be written.*

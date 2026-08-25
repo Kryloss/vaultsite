@@ -19,6 +19,7 @@ date: 2026-07-25
 description: The collection where Geralt stops dodging destiny and meets Ciri.
 description_uk: Збірка, у якій Ґеральт перестає тікати від призначення і зустрічає Цірі.
 cover: sword-of-destiny.jpg
+spine: sword-of-destiny-spine.jpg
 # cover source: Open Library covers API, ISBN 9780316389709 (Orbit English edition)
 ---
 
@@ -31,9 +32,9 @@ cover: sword-of-destiny.jpg
 
 A short-story collection following monster hunter Geralt of Rivia as he encounters complex moral dilemmas, navigates his romance with Yennefer, and meets his child of destiny, Ciri. Published a year before [[The Witcher - The Last Wish|The Last Wish]], but written to be read second — the frame story in that book reorders the series for newcomers.
 
-## Why it's on the shelf
+## Review
 
-<!-- Your thoughts go here. What stuck, what you'd argue with, why it earned a spot. -->
+*To be written.*
 
 ## Quotes
 

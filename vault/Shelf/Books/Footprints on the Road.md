@@ -19,6 +19,8 @@ date: 2026-07-25
 description: A soldier's own account of 2014 and what came after it.
 description_uk: Розповідь солдата про 2014-й і про те, що було далі.
 cover: footprints-on-the-road.jpg
+# spine: only the Ukrainian edition exists, so it shows in both languages
+spine: footprints-on-the-road-spine.jpg
 # cover source: Ukrainian Wikipedia (cover of the 2018 edition, low-res)
 ---
 
@@ -31,9 +33,9 @@ cover: footprints-on-the-road.jpg
 
 An autobiographical novel providing a candid, firsthand account of military service, war in Eastern Ukraine starting in 2014, combat reality, and personal reflection. The print edition carries around a hundred QR codes linking to real photos and footage from the front.
 
-## Why it's on the shelf
+## Review
 
-<!-- Your thoughts go here. What stuck, what you'd argue with, why it earned a spot. -->
+*To be written.*
 
 ## Quotes
 

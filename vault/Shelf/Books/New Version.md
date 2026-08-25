@@ -19,6 +19,8 @@ date: 2026-07-25
 description: Product strategy and startup frameworks, pointed at yourself.
 description_uk: Продуктові стратегії та стартап-фреймворки, спрямовані на себе самого.
 cover: new-version.jpeg
+# spine: the Ukrainian edition is the only one there is, so it shows in both languages
+spine: new-version-spine.jpg
 ---
 
 ## At a glance
@@ -30,9 +32,9 @@ cover: new-version.jpeg
 
 A personal development guide by Silicon Valley tech entrepreneur Andrey Doronichev, applying product-building strategies and startup frameworks to self-transformation and personal growth. Written for people whose current life still works but no longer fits — a new country, a new industry, or a career AI is about to rearrange. Available in Ukrainian, Russian and English editions.
 
-## Why it's on the shelf
+## Review
 
-<!-- Your thoughts go here. What stuck, what you'd argue with, why it earned a spot. -->
+*To be written.*
 
 ## Quotes
 

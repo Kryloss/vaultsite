@@ -19,6 +19,7 @@ date: 2026-07-25
 description: The book that named the Hero's Journey and found it in every culture.
 description_uk: Книжка, що дала ім'я Шляху героя й знайшла його в кожній культурі.
 cover: hero-with-a-thousand-faces.jpg
+spine: hero-with-a-thousand-faces-spine.jpg
 # cover source: Open Library covers API, ISBN 9781577315933 (New World Library edition)
 ---
 
@@ -31,9 +32,9 @@ cover: hero-with-a-thousand-faces.jpg
 
 A landmark work in comparative mythology outlining the "Monomyth" (the Hero's Journey) — the universal narrative archetype found across cultures throughout human history.
 
-## Why it's on the shelf
+## Review
 
-<!-- Your thoughts go here. What stuck, what you'd argue with, why it earned a spot. -->
+*To be written.*
 
 ## Quotes
 

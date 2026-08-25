@@ -18,6 +18,7 @@ date: 2026-07-25
 description: Physics quietly taking apart the thing you thought you understood best.
 description_uk: Фізика, що тихо розбирає на частини те, що ти вважав найзрозумілішим.
 cover: the-order-of-time.jpg
+spine: the-order-of-time-spine.jpg
 # cover source: Open Library covers API, ISBN 9780241292525 (Penguin English edition)
 ---
 
@@ -30,9 +31,9 @@ cover: the-order-of-time.jpg
 
 A theoretical physics exploration into the mysteries of time, quantum gravity, and why our perception of temporal flow differs from fundamental physics.
 
-## Why it's on the shelf
+## Review
 
-<!-- Your thoughts go here. What stuck, what you'd argue with, why it earned a spot. -->
+*To be written.*
 
 ## Quotes
 

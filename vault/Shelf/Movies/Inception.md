@@ -26,7 +26,7 @@ cover: inception.jpg
 | Released | 2010 |
 | One-liner | Thieves who steal ideas from dreams take a job to plant one instead |
 
-## Why it's on the shelf
+## Review
 
 The premise is basically penetration testing for the subconscious: study the target, find the way in, avoid detection by the mind's defenses, get out clean. Swap "dream levels" for "network layers" and it's an attack-chain diagram with a Hans Zimmer score.
 

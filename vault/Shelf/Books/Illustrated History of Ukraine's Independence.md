@@ -19,6 +19,8 @@ date: 2026-07-25
 description: Ukrainian statehood told as a comic, one epoch per page.
 description_uk: Історія української державності, розказана як комікс — по епосі на сторінку.
 cover: illustrated-history-of-ukraines-independence.jpg
+# spine: only the Ukrainian edition exists, so it shows in both languages
+spine: illustrated-history-of-ukraines-independence-spine.jpg
 # cover source: publisher/retail listing for the Зелений Пес edition, ISBN 9789661515948
 ---
 
@@ -31,9 +33,9 @@ cover: illustrated-history-of-ukraines-independence.jpg
 
 A concise, visual graphic guide detailing the history of Ukrainian statehood, key historical milestones, and the nation's struggle for independence. Every page is drawn in comic style around the events, figures and turning points of independent Ukraine.
 
-## Why it's on the shelf
+## Review
 
-<!-- Your thoughts go here. What stuck, what you'd argue with, why it earned a spot. -->
+*To be written.*
 
 ## Quotes
 

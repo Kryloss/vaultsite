@@ -98,8 +98,8 @@ video: <youtube url>       # medium: video only
 | Published | … |
 | One-liner | … |
 
-## Why it's on the shelf
-<his thoughts>
+## Review
+<his thoughts — if he gave none, the literal placeholder `*To be written.*`>
 
 ## Quotes
 <his quotes as blockquotes — NEVER add quotes from the work yourself; if he
@@ -178,21 +178,26 @@ description_uk: "<one sentence>"
 
 <the video URL, alone on its own line — it becomes an embedded player>
 
-## Why it's on the shelf
-<his thoughts — leave an HTML comment placeholder if he gave none>
+## Review
+<his thoughts — if he gave none, the literal placeholder `*To be written.*`>
 ```
 
 - **No `cover:`.** The thumbnail is derived from the video ID at build time.
 - **Get the title and channel from the horse's mouth**, not from a search
   result — YouTube's oEmbed endpoint is keyless and exact:
   `https://www.youtube.com/oembed?url=<video url>&format=json`
-- **`Released` is the upload date, and so is `uploaded:`.** oEmbed does NOT
-  return it and watch pages don't fetch cleanly, so it usually can't be
-  verified from here. Leave both blank and ask him rather than guessing — and
-  never quietly reuse today's date, which is the day *he* watched it, not the
-  day it went up. The frontmatter key earns its keep: with `uploaded:` the page
-  ships a full `VideoObject` and can appear as a video result in Google;
-  without it the note falls back to a plain `CreativeWork` (DECISIONS #41).
+- **`Released` is the upload date, and so is `uploaded:`.** It IS derivable, as
+  of #109: the playlist feed carries it, and `node scripts/youtube-shelf.mjs
+  uploaded <video-id>` reads it off the watch page for any other video. Never
+  quietly reuse today's date, which is the day *he* shelved it, not the day it
+  went up. The key earns its keep: with `uploaded:` the page ships a full
+  `VideoObject` and can appear as a video result in Google; without it the note
+  falls back to a plain `CreativeWork` (DECISIONS #41).
+- **Keep it short.** `description:` is one clause of roughly 70–90 characters —
+  it is the OG card's subtitle and the link-preview excerpt, not a summary.
+  The fact table is three or four rows, each a phrase rather than a sentence;
+  a `Length` row is never one of them, and neither is a series or episode
+  number. The video says how long it is.
 - The row layout uses 16:9 cards for videos; nothing else needs configuring.
 
 ### Person — `vault/People/<Full Name>.md`

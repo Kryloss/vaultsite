@@ -18,6 +18,7 @@ date: 2026-07-25
 description: A children's book that turns out not to be one.
 description_uk: Дитяча книжка, яка виявляється зовсім не дитячою.
 cover: the-little-prince.jpg
+spine: the-little-prince-spine.jpg
 # cover source: Open Library covers API, ISBN 9780156012195 (Harcourt English edition)
 ---
 
@@ -30,9 +31,9 @@ cover: the-little-prince.jpg
 
 A poetic novella following a young prince visiting various planets, offering profound observations on human nature, love, solitude, and friendship.
 
-## Why it's on the shelf
+## Review
 
-<!-- Your thoughts go here. What stuck, what you'd argue with, why it earned a spot. -->
+*To be written.*
 
 ## Quotes
 

@@ -115,3 +115,4 @@ test("a photographed spine stands at its own thickness", () => {
   assert.equal(width, 36);
   assert.ok(width < 44, "a real spine is not forced to the uniform width");
 });
+

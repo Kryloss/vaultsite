@@ -52,6 +52,14 @@ node scripts/youtube-shelf.mjs uploaded <video-id>  # a video's own publish date
 YouTube link in a post's body is an illustration, not a shelf entry, so it does
 not count.
 
+**`uploaded` only works from a laptop.** It scrapes the watch page, and YouTube
+serves datacentre IPs a captcha instead — the first scheduled run got a 3KB
+consent page. The nightly job never needs it, because the playlist feed already
+carries `uploaded` for everything in the queue; this command is for backfilling
+a video that is already on the shelf. **Nothing else about a video is fetchable
+from the cloud runner either** — running time included, which is one more reason
+the fact table has no `Length` row.
+
 The `avatar` command refuses a name with no Latin letters rather than writing a
 file called `.jpg`. A Cyrillic channel needs a transliterated name — the folder's
 `andrey-doronichev.jpg` is the precedent — passed in explicitly.
@@ -78,21 +86,30 @@ pins `MAX_INLINE_SVG`.
      `CreativeWork` to `VideoObject` (DECISIONS #41).
    - **`date:`** ← today. That is when it was shelved, which is a different
      fact and must not be confused with `uploaded:`.
-   - **`description:` / `description_uk:`** ← one sentence. The feed's
-     description is mostly sponsor copy and timestamps; condense the two useful
-     lines out of it, never paste it.
+   - **`description:` / `description_uk:`** ← **one clause, about 70–90
+     characters.** It is the OG card's subtitle and the link-preview excerpt,
+     not a summary, and the existing video notes sit in that band. The feed's
+     own description is mostly sponsor copy and timestamps; condense the one
+     useful line out of it, never paste it.
    - **`categories:`** ← from the vocabulary already in the vault (Tech,
      Education, Politics, Nonfiction, …). Do not invent a new one for a single
      video.
    - **Fact table.** The headerless `| | |` shape, `## At a glance` heading kept
-     in the markdown (#87). Useful rows only. `Language` earns its place when
-     the video is not in English.
+     in the markdown (#87). **Three or four rows, each a phrase, not a
+     sentence.** `Released` always; `Topic`/`Subject` always; `Host`/`Guest`
+     when a person carries the video; `Language` when it is not in English.
+     **Never a `Length` row and never a series or episode number** — the video
+     states its own running time, and the note is not a catalogue entry.
    - **Wiki links.** Check whether the vault already knows the people or
      subjects involved and link them — `aliases:` are matched vault-wide. This
      is expected, not optional.
    - **`.uk.md` sibling**, body-only, same structure and links.
-3. **Leave `## Why it's on the shelf` empty**, with the comment the existing
-   notes carry. Never invent an opinion; that section is Kyrylo's.
+3. **The last section is `## Review` (uk: `## Відгук`) and its body is the
+   literal placeholder `*To be written.*` / `*Буде написано.*`** — never an
+   invented opinion. It reads as a promise rather than a blank, which an empty
+   heading under an HTML comment did not: the comment is invisible on the page,
+   so the section rendered as a heading with nothing beneath it. Kyrylo replaces
+   the line when he has something to say.
 4. `npm test`, then `npm run build`.
 5. Push to a branch, open a PR, then **merge it** (`gh pr merge --squash
    --delete-branch`). Merging publishes the note: Vercel deploys `main`.

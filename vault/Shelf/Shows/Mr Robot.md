@@ -28,7 +28,7 @@ cover: mr-robot.jpg
 | Aired | 2015–2019, four seasons |
 | One-liner | A cybersecurity engineer gets recruited into a hacktivist collective |
 
-## Why it's on the shelf
+## Review
 
 Most shows treat hacking as green text raining down a screen. This one shows real tools, real techniques, and — more importantly — the actual weak point in every system: people. Half the major breaches in the show start with social engineering, which matches what you learn studying for any security cert.
 

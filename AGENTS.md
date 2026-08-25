@@ -110,11 +110,14 @@ Routes:
 - `app/[section]/page.tsx` renders section pages.
 - `app/[section]/[slug]/page.tsx` renders entry pages.
 - Shelf medium/category routes are special filtered views documented in
-  `CLAUDE.md` and `lib/shelf.ts`. The BOOK medium page renders standing spines
-  rather than the cover grid every other medium keeps — rows are faces, the
-  shelf is spines. A note with `spine:` shows a photograph of the real spine at
-  its true thickness; the rest are generated from the cover's dominant colour
-  (`components/lists/BookSpines.tsx`, DECISIONS #110).
+  `CLAUDE.md` and `lib/shelf.ts`. The SECTION page's books row is a shelf of
+  standing spines; every medium page, books included, is a grid of full-size
+  covers — compact overview, rich detail. A note with `spine:` shows a
+  photograph of the real spine at its true thickness, with a
+  `<name>.uk.<ext>` sibling swapping by language; the rest are generated from
+  the cover's dominant colour (`components/lists/BookSpines.tsx`,
+  DECISIONS #110). Bilingual IMAGES that swap by CSS must not be
+  `loading="lazy"` — the hidden one never loads.
 
 ## Working agreements for code changes
 

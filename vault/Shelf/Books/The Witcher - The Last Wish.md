@@ -19,6 +19,7 @@ date: 2026-07-25
 description: The short-story collection where the Witcher universe actually starts.
 description_uk: Збірка оповідань, з якої насправді починається всесвіт «Відьмака».
 cover: the-last-wish.jpg
+spine: the-last-wish-spine.jpg
 # cover source: Open Library covers API, ISBN 9780316029186 (Orbit English edition)
 ---
 
@@ -31,9 +32,9 @@ cover: the-last-wish.jpg
 
 The introductory short-story anthology to The Witcher universe, introducing Geralt's origins, his code of conduct, and how his fate became bound to Yennefer. Read it before [[The Witcher - Sword of Destiny|Sword of Destiny]] — the two collections set up everything the novels then spend five books paying off.
 
-## Why it's on the shelf
+## Review
 
-<!-- Your thoughts go here. What stuck, what you'd argue with, why it earned a spot. -->
+*To be written.*
 
 ## Quotes
 
