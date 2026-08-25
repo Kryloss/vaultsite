@@ -94,16 +94,26 @@ pins `MAX_INLINE_SVG`.
 3. **Leave `## Why it's on the shelf` empty**, with the comment the existing
    notes carry. Never invent an opinion; that section is Kyrylo's.
 4. `npm test`, then `npm run build`.
-5. Push to a branch and open a PR — **never commit to `main`**. Obsidian Git
-   auto-commits and pushes this repo every 10 minutes, and a cloud push racing
-   it leaves the owner a conflict on his laptop.
-6. Report: video, note path, future URL, image fetched and its source, links
-   added, and anything assumed.
+5. Push to a branch, open a PR, then **merge it** (`gh pr merge --squash
+   --delete-branch`). Merging publishes the note: Vercel deploys `main`.
+   **Never commit or push to `main` directly.** Obsidian Git syncs `main` from
+   the owner's laptop every 10 minutes; a direct push from a cloud run races it
+   and leaves him a conflict, whereas a server-side merge is absorbed cleanly by
+   his `pullBeforePush` setting on the next sync.
+6. Send one short notification naming what was published — and only when
+   something was.
+7. The PR body is the report: video, note path, future URL, image fetched and
+   its source, links added, and anything assumed. It survives the merge, so it
+   is where the owner reads back what happened.
 
 ## Notes on judgment
 
 - **A note is not an endorsement**, and the shelf carries political material.
   State what a video is and who made it, verified; leave the verdict to the
   empty section.
-- A video whose subject the vault has no business publishing is a **question,
-  not a commit**. Open the PR with the note omitted and say why.
+- **Merging publishes to a live site under the owner's name**, which is why the
+  bar for holding a note back is low. A video whose subject the vault has no
+  business publishing is a question, not a merge: leave that note out of the
+  branch, publish the rest, and say why in both the PR body and the
+  notification. The owner chose self-merge for speed, not to remove the
+  judgment.

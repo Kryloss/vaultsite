@@ -22,6 +22,7 @@ date: 2026-07-17
 description: A brief history of humankind.
 description_uk: Коротка історія людства.
 cover: sapiens.jpg
+spine: sapiens-spine.jpg
 status: reading
 ---
 

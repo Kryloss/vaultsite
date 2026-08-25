@@ -7,7 +7,7 @@
  */
 import { parseCategories, slugify, type Entry, type Section } from "./vault";
 import { resolveCoverUrl } from "./markdown";
-import { blurFor, srcSetFor } from "./blur";
+import { blurFor, domFor, dimsFor, srcSetFor } from "./blur";
 import { youtubeId, youtubeThumbnail } from "./youtube";
 import { ui, type Str } from "./ui-strings";
 import { categoryLabel } from "./categories";
@@ -20,12 +20,41 @@ export interface ShelfItem {
   title: string;
   titleUk?: string;
   author?: string;
+  /**
+   * `author_uk:` — already written on every shelf note for the creator block.
+   * Read by the book spines, where the byline sits directly beside a Cyrillic
+   * title and a Latin name next to it reads as an untranslated page. The
+   * cards don't use it yet; they set the author below their own title, where
+   * it is far less conspicuous.
+   */
+  authorUk?: string;
   medium?: string;
   coverUrl?: string;
   /** Base64 blur-up placeholder for `coverUrl` — see lib/blur.ts. */
   coverBlur?: string;
   /** Narrower WebP copies of the cover — see srcSetFor() in lib/blur.ts. */
   coverSrcSet?: string;
+  /**
+   * The cover's dominant colour and its aspect ratio (h / w) — the two things
+   * a book spine is built from on a medium page. Both come from the image
+   * manifest, so a remote `cover: https://…` has neither and the spine falls
+   * back. See lib/spine.ts and components/lists/BookSpines.tsx.
+   */
+  coverDom?: string;
+  coverAr?: number;
+  /**
+   * `spine:` — a PHOTOGRAPH of the book's actual spine, which replaces the
+   * generated one on the shelf. Optional and rare: it has to be sourced per
+   * book, so most books keep the spine derived from their cover.
+   *
+   * `spineAr` (h / w) is what makes it worth having. The generated spine has
+   * a uniform width because thickness would want a page count the vault has
+   * not got — but a real spine photograph IS the thickness, measured rather
+   * than invented, so a book with one stands at its true width.
+   */
+  spineUrl?: string;
+  spineAr?: number;
+  spineBlur?: string;
   /** "contain" letterboxes wide art (logos) instead of cropping to fill. */
   coverFit?: "contain";
   /** 0–5, halves allowed. */
@@ -227,6 +256,10 @@ export function toShelfItem(entry: Entry): ShelfItem {
   const link = entry.meta.video ?? entry.meta.url;
   const videoId = typeof link === "string" ? youtubeId(link) : undefined;
   const cover = resolveCoverUrl(entry.sectionDir, entry.meta.cover);
+  const coverDims = dimsFor(cover);
+  // Resolved exactly like `cover:`, so a bare file name in the note is enough.
+  const spine = resolveCoverUrl(entry.sectionDir, entry.meta.spine);
+  const spineDims = dimsFor(spine);
 
   // `status:` badges the card and pins it to a row at the top of the shelf.
   // Anything unrecognised — or nothing at all — reads as finished.
@@ -260,11 +293,18 @@ export function toShelfItem(entry: Entry): ShelfItem {
     titleUk: entry.titleUk,
     author:
       typeof entry.meta.author === "string" ? entry.meta.author : undefined,
+    authorUk:
+      typeof entry.meta.author_uk === "string" ? entry.meta.author_uk : undefined,
     medium,
     coverUrl: cover ?? (videoId ? youtubeThumbnail(videoId) : undefined),
     // Only vault files have one; YouTube thumbnails are remote.
     coverBlur: blurFor(cover),
     coverSrcSet: srcSetFor(cover),
+    coverDom: domFor(cover),
+    coverAr: coverDims ? coverDims.h / coverDims.w : undefined,
+    spineUrl: spine,
+    spineAr: spineDims ? spineDims.h / spineDims.w : undefined,
+    spineBlur: blurFor(spine),
     coverFit:
       entry.meta.coverFit === "contain" ? ("contain" as const) : undefined,
     rating:

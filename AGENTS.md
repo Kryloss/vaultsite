@@ -110,7 +110,11 @@ Routes:
 - `app/[section]/page.tsx` renders section pages.
 - `app/[section]/[slug]/page.tsx` renders entry pages.
 - Shelf medium/category routes are special filtered views documented in
-  `CLAUDE.md` and `lib/shelf.ts`.
+  `CLAUDE.md` and `lib/shelf.ts`. The BOOK medium page renders standing spines
+  rather than the cover grid every other medium keeps — rows are faces, the
+  shelf is spines. A note with `spine:` shows a photograph of the real spine at
+  its true thickness; the rest are generated from the cover's dominant colour
+  (`components/lists/BookSpines.tsx`, DECISIONS #110).
 
 ## Working agreements for code changes
 
@@ -249,9 +253,9 @@ Important conventions:
   this reason — `components/lists/PostRows.tsx` and `PeopleCards.tsx` also
   render on the server as Suspense fallbacks, and a hook there would empty the
   static HTML. It renders in every section list except `now`, in one of two
-  shapes: a chip after a title in text rows, or a mark on the cover of a shelf
-  or people card. A new section type that lists ARRIVALS should mount it; a
-  page about the present should not.
+  shapes: a chip after a title in text rows, a mark on the cover of a shelf or
+  people card, or a dot at the head of a book spine. A new section type that
+  lists ARRIVALS should mount it; a page about the present should not.
 - Self-theming SVG diagrams are deliberately inlined; do not replace them with
   ordinary `<img>` output. Excalidraw JSON is not shipped.
 - Image notes pair a bilingual SVG/Excalidraw embed with an original photo via
@@ -365,5 +369,4 @@ npm run build
 - Additional section types such as stack.
 - Plans for work not yet started live in `docs/plans/` — transient, and
   deleted once the work ships and its reasoning moves to `docs/DECISIONS.md`.
-  Currently `docs/plans/shelf-spines.md`. Read the plan before touching the
-  shelf medium page; do not implement it without a request.
+  The folder is currently empty.
