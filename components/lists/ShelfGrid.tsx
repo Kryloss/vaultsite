@@ -48,7 +48,14 @@ export default function ShelfGrid({ section, entries }: ListProps) {
     <div className="mt-8 flex flex-col gap-6">
       {groups.map((group) => (
         <section key={group.medium}>
-          <h2 className="text-lg font-semibold tracking-tight text-[var(--text)]">
+          <h2
+            /* Books only: that row's scroller reserves padding for the hover
+               cover and overlaps this heading, so it has to sit above it to
+               stay clickable. See `.book-shelf-heading`. */
+            className={`text-lg font-semibold tracking-tight text-[var(--text)]${
+              group.medium === "book" ? " book-shelf-heading" : ""
+            }`}
+          >
             {/* "Everything else" has no medium page to link to. The chevron is
                 shown even for a single item so the page stays discoverable. */}
             {group.medium === "unsorted" ? (

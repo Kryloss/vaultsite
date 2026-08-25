@@ -5619,6 +5619,25 @@ html[data-lang="uk"] .book-spine {
   width: var(--spine-w-uk, var(--spine-w));
 }
 
+/* The books heading stays clickable above the shelf.
+
+   The row reserves `--cover-reach` of padding so a hover cover is not clipped
+   by its own scroller, and hands it back as negative margin — which means the
+   element's BOX starts about 160px higher than the books appear, directly over
+   the "Books" link. Padding takes pointer events like any other part of an
+   element, so the scroller was swallowing the click and showing a grab cursor
+   on the title.
+
+   Raising the heading is the fix rather than shrinking the padding: the
+   padding is the cover's only room, and the heading has to sit above the row
+   for the same reason it reads above it. A hover cover still paints over the
+   heading when one rises that far — `.book-slot`'s z-index is higher — which
+   is correct for a transient popover. */
+.book-shelf-heading {
+  position: relative;
+  z-index: 1;
+}
+
 /* The books row sits under its heading at the same distance every other row
    does — MEASURED to the first book, not to the row's box.
 
