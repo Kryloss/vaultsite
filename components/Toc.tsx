@@ -11,12 +11,17 @@ import type { Heading } from "@/lib/toc";
  * Table of contents, in two presentations driven by one piece of state:
  *
  * - **Wide screens** — a fixed rail to the right of the article.
- * - **Narrow screens** — a floating pill at the bottom, built like the
- *   breadcrumb bar in Chrome.tsx: same rounded-full blurred chip, an icon
- *   button, and truncated text saying where you are. Tapping it opens the
- *   outline. The rail has no room to exist below 1168px — the width its own
- *   geometry needs, derived in `globals.css` — which is exactly where a long
- *   post needs it most.
+ * - **Narrow screens** — one floating icon in the top-right corner, built like
+ *   the breadcrumb bar opposite it in Chrome.tsx: same rounded-full blurred
+ *   chip, same 2.5rem square. Tapping it hangs the outline underneath. The rail
+ *   has no room to exist below 1168px — the width its own geometry needs,
+ *   derived in `globals.css` — which is exactly where a long post needs it
+ *   most.
+ *
+ * There is no third presentation. A labelled pill at the bottom-left used to
+ * sit between 640px and the rail, and it is gone (DECISIONS #108): the icon is
+ * the same object at every width below the rail. The label survives as the
+ * button's `title`, which is where a pointer can still ask where it is.
  *
  * Bilingual like everything else: both outlines ship in the HTML and CSS shows
  * the active one. The scroll-spy walks the merged list and skips anything whose
@@ -29,24 +34,6 @@ import type { Heading } from "@/lib/toc";
  *
  * Jumping to a heading pins the highlight to it (see `held` below).
  */
-
-/**
- * Longest label the phone pill shows before truncating. `.toc-bar` has no
- * fixed width to speak of — just a `max-width` cap — so an untruncated
- * heading or title wrapped inside it across two or three lines instead of
- * eliding; this cuts the string itself rather than leaning on CSS
- * `text-overflow`, so the pill stays the one-line chip it was built as
- * regardless of font metrics. Same word-boundary convention as the excerpt
- * cut in `lib/previews.ts` — cutting mid-word reads as broken, not trimmed.
- */
-const LABEL_CHARS = 32;
-
-function truncateLabel(text: string): string {
-  if (text.length <= LABEL_CHARS) return text;
-  const cut = text.slice(0, LABEL_CHARS);
-  const lastSpace = cut.lastIndexOf(" ");
-  return `${(lastSpace > 12 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`;
-}
 
 /** Keys that mean "the reader is moving the page themselves". */
 const SCROLL_KEYS = new Set([
@@ -336,11 +323,11 @@ export default function Toc({
         {outline}
       </nav>
 
-      {/* Narrow screens: the same outline behind a breadcrumb-style pill.
-          On a phone it is just the three-line icon, in the top-right corner
-          and sized to match the floating bar opposite it; the label is hidden
-          there and the sheet hangs underneath. Above that width the label is
-          the whole control and the icon is hidden, as it always was. */}
+      {/* Narrow screens: the same outline behind the three-line icon, in the
+          top-right corner and sized to match the floating bar opposite it,
+          with the sheet hanging underneath. `hereLabel` is no longer printed
+          anywhere — it is the tooltip, and the sheet's own title row says the
+          same thing to anyone who opens it. */}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -351,7 +338,6 @@ export default function Toc({
         className="toc-bar"
       >
         <MenuIcon className="toc-bar-icon" />
-        <span className="toc-bar-label">{truncateLabel(hereLabel)}</span>
       </button>
 
       {/* Always rendered, shown by `data-open`, rather than mounted on demand:

@@ -13,6 +13,10 @@
  *   every content <img> as width/height attributes. Without them the browser
  *   doesn't know how tall an image will be until it arrives, so it reserves no
  *   space and every paragraph below jumps down the moment it does.
+ * - `dom` — the one colour the image is "about", used as the ground of a book
+ *   spine on a shelf medium page (see scripts/dominant-colour.mjs and
+ *   lib/spine.ts). Only meaningful for cover art; it costs nothing to write
+ *   for every raster and saves a second pass over the same file.
  * - `srcset` — narrower WebP copies written beside the original, so a phone
  *   downloads a 40 KB cover instead of the 1.3 MB PNG that was pasted into
  *   the note. The originals are never touched: they're the owner's files, and
@@ -24,6 +28,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import { dominantColour } from "./dominant-colour.mjs";
 
 const VAULT = path.join(process.cwd(), "vault");
 const OUT = path.join(process.cwd(), "public", "vault-assets");
@@ -157,6 +162,21 @@ async function writeImageManifest() {
       } catch {
         /* unreadable image — no placeholder */
       }
+
+      /* Dominant colour, from 64 pixels. Same discipline as `blur` and
+         `srcset`: a nicety, never a build blocker. If this throws, the field
+         is simply absent and the spine falls back to `--surface`. */
+      try {
+        const { data, info } = await sharp(full)
+          .resize(8, 8, { fit: "cover" })
+          .raw()
+          .toBuffer({ resolveWithObject: true });
+        const dom = dominantColour(data, info.channels);
+        if (dom) entry.dom = dom;
+      } catch {
+        /* unreadable image — no dominant colour */
+      }
+
       if (Object.keys(entry).length) manifest[publicUrl(rel)] = entry;
     })
   );

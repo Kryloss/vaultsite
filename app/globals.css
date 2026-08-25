@@ -1681,8 +1681,12 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
 
    The same chip as .toc-bar below — rounded-full, translucent, blurred — so
    the two read as one family rather than two unrelated things stuck to the
-   window. Below 1168px it takes the bottom-RIGHT corner, since the contents
-   pill owns the bottom-left. */
+   window. Below 1168px it takes the bottom-RIGHT corner. That used to be
+   because the contents pill owned the bottom-left; the pill has since moved
+   to the top-right at every width (#108) and this stays where it is, because
+   the corner it shares with `.time-left` is the one it was designed against —
+   the offer is only made before the reader has scrolled and the number only
+   appears once they have, so the two are never on screen together. */
 .resume-reading {
   position: fixed;
   right: 0.75rem;
@@ -2432,20 +2436,35 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   }
 }
 
-/* ---------- Mobile table of contents (components/Toc.tsx) ---------- */
+/* ---------- Contents pill (components/Toc.tsx) ---------- */
 
-/* Same chip as the breadcrumb bar in Chrome.tsx — rounded-full, translucent
-   background, blurred backdrop — mirrored to the bottom of the screen. */
+/* ONE presentation at every width below the rail: the three-line icon alone,
+   in the TOP-RIGHT corner, a 2.5rem square around an 18px glyph — the same box
+   as the floating breadcrumb bar opposite it and as the music note's album pill
+   (DECISIONS #51), so the top of the window holds one family of controls. Same
+   chip material as the breadcrumb too: rounded-full, translucent, blurred.
+
+   There used to be a THIRD presentation between 640 and 1167px — this chip at
+   the BOTTOM-LEFT, wearing a truncated label saying where you were — and it is
+   deleted (DECISIONS #108). One control shouldn't change corner, shape and
+   contents on the way down; the icon is the same object from a phone to the
+   width where the rail takes over. The bottom of the screen belongs to the
+   reading-position offer, the time-remaining pill and a thumb.
+
+   The whole media-query dance this section used to do (a `max-width: 639px`
+   override written LAST so it could win on position, DECISIONS #52) went with
+   it: there is nothing left to override. */
 .toc-bar {
   position: fixed;
-  left: 0.75rem;
-  bottom: 0.75rem;
+  right: 0.75rem;
+  top: 0.75rem;
   z-index: 30;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  max-width: calc(100vw - 1.5rem);
-  padding: 0.4375rem 0.875rem;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
   border-radius: var(--r-full);
   background: var(--chrome-bg);
   box-shadow: inset 0 0 0 1px var(--chrome-ring);
@@ -2462,22 +2481,11 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
 /* Sized to match the breadcrumb icon opposite it (Chrome.tsx's `h-[18px]
    w-[18px]`) — an SVG with no width/height falls back to the browser's
    300×150 replaced-element default, which is what an unset `<MenuIcon>`
-   here rendered at before. `flex-shrink: 0` keeps it from being squeezed
-   by the label next to it. */
+   here rendered at before. It is the pill's only content now that the label
+   is gone, so the 2.5rem box above is what makes the tap target. */
 .toc-bar-icon {
-  flex-shrink: 0;
   width: 1.125rem;
   height: 1.125rem;
-}
-
-/* Belt and suspenders alongside the JS character cap in components/Toc.tsx
-   — the cut string can still overflow on a narrow phone in the rare
-   language/font combination where it doesn't, so this keeps the pill a
-   single line regardless. */
-.toc-bar-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 /* The rail owns wide screens; the pill owns everything below it. */
@@ -2503,27 +2511,30 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   transition-delay: 0s;
 }
 
-/* Grows upward out of the pill — the same translucent blurred material and
-   timing as .series-sheet, but rising rather than falling: the pill sits at
-   the very bottom of the screen (640–1167px; below that it moves to the
-   top-right, see the phone override at the end of this file — DECISIONS
-   #51), so there's no room below it to grow into. This is the size for
-   that range; the phone override below narrows and shortens it. */
+/* Hangs straight down out of the pill — the same translucent blurred material
+   and timing as .series-sheet, falling rather than rising, since the pill is
+   at the top of the window at every width it exists (DECISIONS #51, #108).
+
+   13.5rem wide, which is the rail's own 13rem plus the padding: the outline is
+   the same width whether it is a rail or a sheet, and rows ellipsise in both.
+   55vh so it covers a CORNER of the article rather than the article — it is an
+   index, and one you dismiss by picking a row. Both numbers were the phone's
+   and are now simply the sheet's; there is no second size. */
 .toc-sheet {
   position: fixed;
-  left: 0.75rem;
-  bottom: 3.625rem; /* pill: 0.75rem offset + ~2.375rem tall + 0.5rem gap */
+  right: 0.75rem;
+  top: 3.625rem; /* pill: 0.75rem offset + 2.5rem tall + 0.5rem gap */
   z-index: 45;
-  transform-origin: 0 100%;
+  transform-origin: 100% 0;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(6px) scale(0.97);
+  transform: translateY(-6px) scale(0.97);
   transition:
     opacity var(--dur) var(--ease),
     transform var(--dur) var(--ease),
     visibility 0s linear var(--dur);
-  width: min(18rem, calc(100vw - 1.5rem));
-  max-height: 70vh;
+  width: min(13.5rem, calc(100vw - 1.5rem));
+  max-height: 55vh;
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 0.5rem;
@@ -2565,46 +2576,17 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   }
 }
 
-/* The phone's top corners (DECISIONS #51). Written LAST and after every
-   base `.toc-bar`/`.toc-sheet` rule above on purpose: a media query adds no
-   specificity, so the override and the base declaration are exactly equal
-   and whichever comes later in the file wins (DECISIONS #52) — written
-   above the base rules the first time, it looked like the query simply
-   wasn't matching. */
-@media (max-width: 639px) {
-  /* Icon-only now, and moved to match the breadcrumb bar opposite it —
-     sized the same way, a 2.5rem square around an 18px glyph. The bottom
-     of the screen is left empty for the reading-position pill and a
-     thumb. */
-  .toc-bar {
-    left: auto;
-    right: 0.75rem;
-    top: 0.75rem;
-    bottom: auto;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    padding: 0;
-  }
-
-  .toc-bar-label {
+/* The sheet goes wherever its pill goes. Open the outline on a narrow window
+   and widen it past the rail's breakpoint and the panel would otherwise be
+   left floating over the rail with nothing left on screen to close it —
+   visible now that both live in the same corner, where the old bottom-left
+   pill's sheet merely sat in an empty margin. Placed AFTER every `.toc-sheet`
+   rule above, not with the `.toc-bar` hide: a media query adds no specificity,
+   so position is the tie-breaker (DECISIONS #52). */
+@media (min-width: 1168px) {
+  .toc-sheet,
+  .toc-sheet-backdrop {
     display: none;
-  }
-
-  /* Hangs directly under the icon now that the icon lives at the top —
-     anchor and transform-origin both invert with it, or the panel would
-     read as arriving from the wrong corner. Narrower, shorter and tighter
-     than the 640–1167px version above: it's an index, so it should cover a
-     corner of the article rather than the article. */
-  .toc-sheet {
-    left: auto;
-    right: 0.75rem;
-    top: 3.625rem; /* icon: 0.75rem offset + 2.5rem tall + 0.5rem gap */
-    bottom: auto;
-    transform-origin: 100% 0;
-    transform: translateY(-6px) scale(0.97);
-    width: 13.5rem;
-    max-height: 55vh;
   }
 }
 
@@ -2970,11 +2952,11 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
 
 /* ---------- Time remaining (components/ReadingProgress.tsx) ---------- */
 
-/* Bottom-right, mirroring the contents pill at bottom-left: that one says
-   where you are, this one says how much is left. Same chip material as
-   `.toc-bar` and `.resume-reading`, so the three read as one family.
-   It shares the corner with `.resume-reading`, which is only offered before
-   the reader has scrolled — and this only appears once they have. */
+/* Bottom-right, diagonally opposite the contents pill: that one says where you
+   are, this one says how much is left. Same chip material as `.toc-bar` and
+   `.resume-reading`, so the three read as one family. It shares the corner
+   with `.resume-reading`, which is only offered before the reader has
+   scrolled — and this only appears once they have. */
 .time-left {
   position: fixed;
   right: 0.75rem;
@@ -5527,4 +5509,243 @@ main:has(.note-wash) {
   color: var(--text-secondary);
   -webkit-text-fill-color: currentColor;
   opacity: 1;
+}
+
+/* ---------- Book spines (components/lists/BookSpines.tsx) ---------- */
+
+/* The book medium page as an actual shelf. The section page keeps its row of
+   faces; this is the other half of the pair — rows are faces, the shelf is
+   spines — so the two views of the same eleven books are different objects
+   rather than one being a bigger copy of the other.
+
+   THIS BLOCK IS BELOW `.press` ON PURPOSE. A spine composes a lift into the
+   same transform the press dips, and `.press:active` (specificity 0,2,0)
+   declares `transform` outright — so the composed `:active` rule below has to
+   both outrank it and come after it, exactly like `.lightbox-arrow` and
+   `.selection-pill` a few hundred lines up. `globals.css` has no `@layer`;
+   position is the argument (#51, #52, #55, #81).
+
+   Nothing here sets `position`, `display` or `width` on an element that also
+   carries a Tailwind utility for it — the markup deliberately carries no
+   layout utilities at all, so a bare class selector can own the geometry
+   without silently beating one (#81). */
+.book-shelf {
+  /* Eleven spines plus gaps fit the 39rem measure with room to grow. */
+  --spine-w: 44px;
+  /* Books touch on a real shelf; 3px is just enough to keep the hairlines
+     between them distinct. It is padding on the slot rather than a flex
+     column-gap, so adjacent slots' bottom borders MEET and the shelf reads as
+     one continuous line — including on a phone, where the row wraps and each
+     line needs its own. */
+  --spine-gap: 3px;
+
+  display: flex;
+  flex-wrap: wrap;
+  /* Heights vary UPWARD from the shelf: every slot's bottom edge is the same
+     line, which is the only thing making a row of unequal boxes read as
+     books rather than as a broken grid. */
+  align-items: flex-end;
+  /* Row gap only. The horizontal spacing is the slot's own padding — see
+     `--spine-gap`. Enough vertical room that a tall spine on the second line
+     clears the line above it. */
+  row-gap: 2.25rem;
+}
+
+.book-slot {
+  display: flex;
+  align-items: flex-end;
+  padding-right: var(--spine-gap);
+  /* One hairline. That is the entire piece of furniture: no wood, no ledge,
+     no shadow under a plank. The books supply the colour and the shelf
+     supplies none — the same discipline as `.music-wash`. */
+  border-bottom: 1px solid var(--border);
+}
+
+.book-spine {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  width: var(--spine-w);
+  height: var(--spine-h, 214px);
+  padding: 0.5rem 0;
+  border-radius: var(--r-xs);
+  overflow: hidden;
+
+  /* The cover's own colour, or the designed fallback when there is none to
+     borrow — a remote `cover: https://…`, or a file sharp couldn't read.
+     Every book in the vault has a local cover today, so the fallback is the
+     path the content never exercises; it is covered by lib/spine.test.ts.
+
+     These do NOT flip with the theme. The colour belongs to the book, and the
+     contrast that matters is internal to the spine — its own ink on its own
+     ground — so the page underneath never enters into it and one value serves
+     light and dark alike. It is also not an accent: nothing here is the
+     site's colour, which is why this doesn't reopen #64. */
+  background: var(--spine-bg, var(--surface));
+  color: var(--spine-fg, var(--text-secondary));
+
+  /* One rule doing two jobs: it separates two adjacent books, and it keeps a
+     near-white spine from dissolving into a light page. Built from `--text`
+     so it tracks the theme even though the fill does not. */
+  border: 1px solid color-mix(in srgb, var(--text) 12%, transparent);
+}
+
+/* The element the language toggle owns, and the reason there are two of them
+   per spine: `title` is one attribute and cannot hold both languages, so a
+   long Ukrainian title needs its own tooltip (components/T.tsx).
+
+   IT MUST NOT BE GIVEN A `display`. The toggle hides the inactive language
+   with `display: none` two thousand lines above this, and `globals.css` has
+   no `@layer` — so a bare `.book-spine-text { display: flex }` here wins on
+   position and paints both languages at once. It did exactly that on the
+   first pass. The flex sits one level down instead, on an element the toggle
+   never selects (#51, #52, #81). Everything below is safe: `flex`, `overflow`
+   and `min-height` don't collide with `display`. */
+.book-spine-text {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Vertical type, top to bottom — the North American convention, and the one
+   with no rotation to get wrong. `text-orientation: mixed` is the default and
+   is what keeps Latin and Cyrillic both rotated as whole words rather than
+   stacked letter by letter.
+
+   Real text, so it stays selectable, searchable and readable aloud. An image
+   of words would be none of those. */
+.book-spine-lines {
+  writing-mode: vertical-rl;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  height: 100%;
+  /* One line each, ellipsised, with the full string in `title` — the
+     treatment `.toc-link` gets. `text-overflow` works in vertical writing
+     mode; the axis it clips on is the one `white-space: nowrap` protects. */
+  overflow: hidden;
+  font-size: 0.8125rem;
+  line-height: 1.1;
+}
+
+.book-spine-title,
+.book-spine-author {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.book-spine-title {
+  font-weight: 500;
+  /* The title gets whatever is left after the author has taken its share. */
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.book-spine-author {
+  /* Demoted the way `.entry-meta` is, but in the spine's own ink rather than
+     a theme token — `--text-secondary` on a dark cover colour would vanish. */
+  opacity: 0.72;
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: 40%;
+}
+
+/* New since your last visit (components/NewBadge.tsx, variant="dot"). A 44px
+   spine has no room for the chip or the cover pill, and a word turned on its
+   side beside a title turned on its side is unreadable — so it is a mark at
+   the head of the spine, in the spine's own ink so it reads against whatever
+   colour the cover supplied. The word survives as `sr-only` text. */
+.spine-new {
+  flex: none;
+  width: 5px;
+  height: 5px;
+  border-radius: var(--r-full);
+  background: currentColor;
+  opacity: 0.85;
+}
+
+/* ---- States ----
+
+   The lift is a composed transform, never a `margin` or a `bottom`: the slot's
+   height is what puts the hairline under the book, so moving the spine must
+   not change its layout box or the shelf line would move with it. */
+.book-spine {
+  transform: translateY(calc(-1 * var(--spine-lift, 0px)))
+    scale(var(--spine-press, 1));
+  transition-property: transform, color, background-color, border-color,
+    opacity, box-shadow;
+  transition-duration: var(--dur);
+  transition-timing-function: var(--ease);
+}
+
+/* Pulled out, the way you take a book off a shelf. */
+.book-spine:hover,
+.book-spine:focus-visible {
+  --spine-lift: 8px;
+}
+
+/* Part-way through it, so it sits proud AT REST — which is what people
+   actually do with a book they are reading. `data-status` rather than a
+   badge: there is no room for one, and the position says it better.
+
+   Position is invisible to a screen reader, so BookSpines keeps the existing
+   `statusLabel` as `sr-only` text inside the spine. */
+.book-spine[data-status="progress"] {
+  --spine-lift: 14px;
+}
+
+.book-spine[data-status="progress"]:hover,
+.book-spine[data-status="progress"]:focus-visible {
+  --spine-lift: 22px;
+}
+
+/* Composed by hand, and it has to outrank `.press:active` above — a bare
+   `scale()` there would drop the lift for as long as the book is held. */
+.book-spine:active {
+  --spine-press: 0.97;
+  transition-duration: 0ms;
+}
+
+/* A spine is a coloured block, so the default ring can land on a colour close
+   to its own. `--text` with a gap in the spine's own ground is the design
+   system's ring, and it reads on every cover colour. */
+.book-spine:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+/* One step down on a phone, where the row wraps: eight spines to a line
+   instead of eleven, and the type comes down with the width. The heights are
+   set per spine from the cover's aspect ratio, so they scale on their own. */
+@media (max-width: 479px) {
+  .book-shelf {
+    --spine-w: 38px;
+  }
+
+  .book-spine-lines {
+    font-size: 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The OFFSET stays — a book sitting proud of the shelf is position, not
+     motion, and it is carrying the reading state. Only the travel goes, along
+     with the press, matching how the blanket rule near the top of this file
+     is exempted for every other composed transform. */
+  .book-spine:hover,
+  .book-spine:focus-visible,
+  .book-spine[data-status="progress"]:hover,
+  .book-spine[data-status="progress"]:focus-visible {
+    --spine-lift: 0px;
+  }
+
+  .book-spine[data-status="progress"] {
+    --spine-lift: 14px;
+  }
+
+  .book-spine:active {
+    --spine-press: 1;
+  }
 }

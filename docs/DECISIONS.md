@@ -1849,3 +1849,19 @@ album (336 × 450): link top 432, controls end 423  →  crop 18, 9px clear
 **The music gutter player stays at 1400px** (#99). Its layout box is 320px wide even though it paints at 213, so it needs the room the rail doesn't; moving the rail down only widens the gap between the two breakpoints, and does not reopen that question.
 
 **Revisit when:** `--measure`, the rail's 13rem width or the 2.5rem gutter changes — the number is that arithmetic and has to be re-derived, not nudged.
+
+## 108. The contents control has one shape, not three (2026-08-25)
+
+**Decision:** the floating contents pill is the three-line icon in the **top-right corner at every width below the rail**. The labelled chip that sat at the bottom-left between 640px and the rail's breakpoint is deleted, along with `.toc-bar-label`, the `LABEL_CHARS` cap and `truncateLabel()` in `components/Toc.tsx`. Two presentations remain: the rail from 1168px (#107), and this icon below it.
+
+**Three shapes for one control is two too many.** #51 moved the phone version to the top-right and explicitly left everything above 640px alone, which was the cautious call at the time and left the site with a control that changed corner, shape and contents on the way down: a labelled bottom-left chip on a laptop, a bare top-right icon on a phone. Nobody resizes a window slowly enough to see that as a transition; they see two different features. The icon is now the same object from a 320px phone to the width where the rail takes over.
+
+**The top-right is the right corner to keep.** It pairs with the floating breadcrumb bar opposite it — same 2.5rem square, same chip material — so the top of the window reads as one family, which is exactly what #51 argued for the album pill too (`.music-pill` steps left when both are present, and still does). It also leaves the bottom of the screen to `.resume-reading`, `.time-left` and a thumb.
+
+**The label is not lost, it is demoted.** "Where you are" survives as the button's `title` — the tooltip a pointer can still ask for — and the sheet's own first row says it again to anyone who opens it. Nothing was printed on screen that the sheet doesn't now say.
+
+**The sheet keeps the phone's numbers as its only numbers:** 13.5rem wide, 55vh tall, hanging under the icon. 13.5rem is the rail's 13rem plus the sheet's padding, so the outline is the same width whether it is a rail or a sheet, and rows ellipsise in both. The old 18rem/70vh variant went with the bottom-left chip.
+
+**A whole ordering hazard went with it.** This section used to end in a `max-width: 639px` block written LAST on purpose, because a media query adds no specificity and only position could make it win (#52). With one presentation there is nothing to override, so that block is gone rather than rewritten.
+
+**Revisit when:** the outline needs to be readable without opening it. That is the one thing the label did, and a rail — not a wider pill — is the answer the site already has.

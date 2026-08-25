@@ -7,7 +7,7 @@
  */
 import { parseCategories, slugify, type Entry, type Section } from "./vault";
 import { resolveCoverUrl } from "./markdown";
-import { blurFor, srcSetFor } from "./blur";
+import { blurFor, domFor, dimsFor, srcSetFor } from "./blur";
 import { youtubeId, youtubeThumbnail } from "./youtube";
 import { ui, type Str } from "./ui-strings";
 import { categoryLabel } from "./categories";
@@ -26,6 +26,14 @@ export interface ShelfItem {
   coverBlur?: string;
   /** Narrower WebP copies of the cover — see srcSetFor() in lib/blur.ts. */
   coverSrcSet?: string;
+  /**
+   * The cover's dominant colour and its aspect ratio (h / w) — the two things
+   * a book spine is built from on a medium page. Both come from the image
+   * manifest, so a remote `cover: https://…` has neither and the spine falls
+   * back. See lib/spine.ts and components/lists/BookSpines.tsx.
+   */
+  coverDom?: string;
+  coverAr?: number;
   /** "contain" letterboxes wide art (logos) instead of cropping to fill. */
   coverFit?: "contain";
   /** 0–5, halves allowed. */
@@ -227,6 +235,7 @@ export function toShelfItem(entry: Entry): ShelfItem {
   const link = entry.meta.video ?? entry.meta.url;
   const videoId = typeof link === "string" ? youtubeId(link) : undefined;
   const cover = resolveCoverUrl(entry.sectionDir, entry.meta.cover);
+  const coverDims = dimsFor(cover);
 
   // `status:` badges the card and pins it to a row at the top of the shelf.
   // Anything unrecognised — or nothing at all — reads as finished.
@@ -265,6 +274,8 @@ export function toShelfItem(entry: Entry): ShelfItem {
     // Only vault files have one; YouTube thumbnails are remote.
     coverBlur: blurFor(cover),
     coverSrcSet: srcSetFor(cover),
+    coverDom: domFor(cover),
+    coverAr: coverDims ? coverDims.h / coverDims.w : undefined,
     coverFit:
       entry.meta.coverFit === "contain" ? ("contain" as const) : undefined,
     rating:
