@@ -208,7 +208,7 @@ export function ogImage(title: string, subtitle?: string, opts: OgOptions = {}) 
             <VaultMark size={500} fill="#151518" />
           </div>
 
-          {/* Registration corners: an editorial frame, not another card
+          {/* Registration ticks: an editorial detail, not another card
               inside the card. They also survive tiny social-feed previews. */}
           <div
             style={{
@@ -224,17 +224,6 @@ export function ogImage(title: string, subtitle?: string, opts: OgOptions = {}) 
           <div
             style={{
               position: "absolute",
-              top: 25,
-              left: 25,
-              display: "flex",
-              width: 1,
-              height: 42,
-              background: "#38383d",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
               right: 25,
               bottom: 25,
               display: "flex",
@@ -245,22 +234,7 @@ export function ogImage(title: string, subtitle?: string, opts: OgOptions = {}) 
           />
           <div
             style={{
-              position: "absolute",
-              right: 25,
-              bottom: 25,
-              display: "flex",
-              width: 1,
-              height: 42,
-              background: "#38383d",
-            }}
-          />
-
-          <div
-            style={{
               position: "relative",
-              // String form keeps Satori from normalising this unitless
-              // property to `1px` and warning on every generated route.
-              zIndex: "1",
               display: "flex",
               flex: 1,
               minWidth: 0,
@@ -355,7 +329,6 @@ export function ogImage(title: string, subtitle?: string, opts: OgOptions = {}) 
             <div
               style={{
                 position: "relative",
-                zIndex: "2",
                 display: "flex",
                 flex: "none",
                 alignItems: "center",

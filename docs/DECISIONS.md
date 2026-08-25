@@ -1818,7 +1818,7 @@ album (336 × 450): link top 432, controls end 423  →  crop 18, 9px clear
 
 ## 106. A shared link is a card from the vault (2026-08-25)
 
-**Decision:** Every Open Graph route uses one editorial vault-card system in `lib/og.tsx`: Source Serif 4, the favicon's double-chevron in monochrome, an inset hairline with two registration corners, a deterministic dot fingerprint made from the title, and either an oversized ghosted mark or mounted artwork. Cover art is the only colour.
+**Decision:** Every Open Graph route uses one editorial vault-card system in `lib/og.tsx`: Source Serif 4, the favicon's double-chevron in monochrome, an inset hairline with two short horizontal registration ticks, a deterministic dot fingerprint made from the title, and either an oversized ghosted mark or mounted artwork. Cover art is the only colour.
 
 **The old cards belonged to a starter, not to this site.** They were a black rectangle, one white bar and a generic sans-serif title. Shelf and Music cards added useful artwork, but the text half still looked like a presentation template. A shared link is often the first view of the site somebody gets, so it should carry the same editorial voice as the page it opens: the same serif, the same monochrome discipline, and the same mark as the favicon.
 
