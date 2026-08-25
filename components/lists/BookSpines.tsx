@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import NewBadge from "@/components/NewBadge";
+import ShelfRow from "@/components/lists/ShelfRow";
 import T from "@/components/T";
 import { spineHeight, spineStyle } from "@/lib/spine";
 import type { ShelfItem } from "@/lib/shelf";
@@ -58,9 +59,14 @@ export default function BookSpines({
   className?: string;
 }) {
   return (
-    /* `.stagger` stays on the <ul>: the j/k keyboard shortcuts find rows
+    /* The same scroller the other medium rows use, so the shelf is dragged
+       exactly the way they are — and `.shelf-row` is what its `cursor: grab`
+       and `.is-dragging` rules are scoped to, so the class has to be here
+       rather than reimplemented.
+
+       `.stagger` stays on the <ul>: the j/k keyboard shortcuts find rows
        through it, and every list on the site already carries it. */
-    <ul className={`book-shelf stagger ${className}`}>
+    <ShelfRow className={`shelf-row book-shelf stagger ${className}`}>
       {items.map((item) => {
         const { bg, fg } = spineStyle(item.coverDom);
         const uk =
@@ -261,6 +267,6 @@ export default function BookSpines({
           </li>
         );
       })}
-    </ul>
+    </ShelfRow>
   );
 }

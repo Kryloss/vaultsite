@@ -5547,23 +5547,39 @@ main:has(.note-wash) {
      `.book-spine-cover`. One knob, because the width derives from it. */
   --spine-cover-h: 6rem;
 
-  /* Books touch on a real shelf; 3px is just enough to keep the hairlines
-     between them distinct. It is padding on the slot rather than a flex
+  /* Books nearly touch on a real shelf. 3px was as tight as that idea goes and
+     read as a solid block once the spines got large; 6px lets each book be its
+     own object without opening the row into a row of separate cards. It is padding on the slot rather than a flex
      column-gap, so adjacent slots' bottom borders MEET and the shelf reads as
      one continuous line — including on a phone, where the row wraps and each
      line needs its own. */
-  --spine-gap: 3px;
+  --spine-gap: 6px;
+
+  /* How far anything rises above the books: the hover cover sits at
+     `bottom: calc(100% + 0.5rem)` and is `--spine-cover-h` tall, and the book
+     being READ is `scale(1.045)` from its foot, so it stands ~18px above its
+     own layout box and carries its cover up with it. 1.25rem covers both with
+     room to spare — measured, because 0.5rem left 6px of vertical overflow
+     and a scrollbar to go with it. */
+  --cover-reach: calc(var(--spine-cover-h) + 1.25rem);
 
   display: flex;
-  flex-wrap: wrap;
+  /* ONE LINE, and it scrolls. Wrapping was the first behaviour and it turned
+     a shelf into a bookcase of stacked rows the moment the books got large;
+     a shelf is one line of books you look along. */
+  flex-wrap: nowrap;
+  overflow-x: auto;
   /* Heights vary UPWARD from the shelf: every slot's bottom edge is the same
      line, which is the only thing making a row of unequal boxes read as
      books rather than as a broken grid. */
   align-items: flex-end;
-  /* Row gap only. The horizontal spacing is the slot's own padding — see
-     `--spine-gap`. Enough vertical room that a tall spine on the second line
-     clears the line above it. */
-  row-gap: 2.25rem;
+
+  /* Room for the hover cover INSIDE the scroller. `overflow-x: auto` makes
+     `overflow-y` compute to `auto` as well — `visible` is not a legal pairing
+     — so without this the face that rises above a book is clipped off at the
+     row's top edge, or worse, adds a vertical scrollbar. The padding is given
+     back in `.book-shelf-gap`, so the books do not move. */
+  padding-top: var(--cover-reach);
 }
 
 .book-slot {
@@ -5618,14 +5634,19 @@ html[data-lang="uk"] .book-spine {
    or the shelf's order changes; it is 12px (the shared `mt-3`) minus the
    difference, and the difference depends on how tall the leftmost book is. */
 .book-shelf-gap {
-  margin-top: -36px;
+  /* −38px is the measured alignment (see above); `--cover-reach` gives back
+     the padding the scroller needs for the hover cover, so the two are
+     written as one sum rather than folded into a single mystery number. */
+  margin-top: calc(-38px - var(--cover-reach));
 }
 
 /* Not on a phone: the row wraps there, and pulling a wrapped block upward puts
    its first line through the heading. */
+/* On a phone the row is dragged rather than pulled up under the heading —
+   there is no room to stand books above a title on a 375px screen. */
 @media (max-width: 479px) {
   .book-shelf-gap {
-    margin-top: 0.75rem;
+    margin-top: calc(0.75rem - var(--cover-reach));
   }
 }
 

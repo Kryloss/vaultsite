@@ -53,16 +53,19 @@ const AR_MAX = 1.7;
  * times their own width, which reads as a pamphlet, and it clipped every
  * title but three. 240–288 fixed the proportion.
  *
- * It is now 312–380, simply because the books read better larger — they are
- * the subject of the row, not a strip of thumbnails in it.
+ * It is now 344–416, simply because the books read better larger — they are
+ * the subject of the row, not a strip of thumbnails in it. At 6px apart and
+ * this tall the eleven books take 576px of the 624px column, so the row is
+ * close to full: check `rowWidth` against the measure before enlarging again,
+ * because the next step wraps it onto two lines.
  *
  * They do NOT rise past their heading. That was tried: a negative margin
  * pulled the row upward so the tall spines reached the Shows strip above, and
  * it put the books through their own title. The row is taller now and sits
  * where it belongs, with `.book-shelf-gap` giving it air under the heading.
  */
-export const SPINE_H_MIN = 312;
-export const SPINE_H_MAX = 380;
+export const SPINE_H_MIN = 344;
+export const SPINE_H_MAX = 416;
 /** A book with no cover to measure stands at the middle of the range. */
 export const SPINE_H_DEFAULT = Math.round((SPINE_H_MIN + SPINE_H_MAX) / 2);
 
