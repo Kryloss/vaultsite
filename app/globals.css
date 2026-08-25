@@ -5558,10 +5558,13 @@ main:has(.note-wash) {
   /* How far anything rises above the books: the hover cover sits at
      `bottom: calc(100% + 0.5rem)` and is `--spine-cover-h` tall, and the book
      being READ is `scale(1.045)` from its foot, so it stands ~18px above its
-     own layout box and carries its cover up with it. 1.25rem covers both with
-     room to spare — measured, because 0.5rem left 6px of vertical overflow
-     and a scrollbar to go with it. */
-  --cover-reach: calc(var(--spine-cover-h) + 1.25rem);
+     own layout box and carries its cover up with it — and the hover lift adds
+     8px on top of that. MEASURED against the worst case (Sapiens, which is
+     the reading book): 0.5rem clipped its cover by 9px and 1.25rem still
+     clipped it by 1, so this is 1.75rem with ~11px to spare. Check it by
+     forcing the covers visible and comparing their tops to the row's, not by
+     looking — a 1px clip is invisible and still wrong. */
+  --cover-reach: calc(var(--spine-cover-h) + 1.75rem);
 
   display: flex;
   /* ONE LINE, and it scrolls. Wrapping was the first behaviour and it turned
