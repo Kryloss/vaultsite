@@ -1,6 +1,5 @@
 import Link from "next/link";
 import ShelfCard from "@/components/lists/ShelfCard";
-import BookSpines from "@/components/lists/BookSpines";
 import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
 import QuotesView from "@/components/lists/QuotesView";
@@ -50,16 +49,7 @@ export default function ShelfTypeView({
     : group.items;
   const base = `/${sectionSlug}/type/${group.slug}`;
   const hasQuotes = Boolean(quotes && quotes.length > 0);
-  const isBooks = group.slug === "books";
   const quoteCount = quotes?.reduce((n, b) => n + b.quotes.length, 0) ?? 0;
-
-  /* Shared by both views: a filtered page can come back empty whichever
-     grammar it uses, and an empty shelf still needs to say so. */
-  const empty = items.length === 0 && (
-    <p className="mt-10 text-sm text-[var(--text-tertiary)]">
-      <T {...ui.nothingOnShelf} />
-    </p>
-  );
 
   const chip = (
     label: React.ReactNode,
@@ -118,16 +108,6 @@ export default function ShelfTypeView({
 
       {showQuotes ? (
         <QuotesView sectionSlug={sectionSlug} books={quotes ?? []} />
-      ) : isBooks ? (
-        /* Books get the shelf, every other medium keeps the grid — see the
-           head of BookSpines.tsx for why the two views differ on purpose.
-           Category pages get spines too: a shelf of three books is still a
-           shelf, and a second grammar for the filtered view would be one
-           more thing to keep in step. */
-        <>
-          <BookSpines items={items} sectionSlug={sectionSlug} />
-          {empty}
-        </>
       ) : (
         <>
           {/* Every card here is the same shape, so a plain grid is safe. */}
@@ -145,7 +125,11 @@ export default function ShelfTypeView({
             ))}
           </ul>
 
-          {empty}
+          {items.length === 0 && (
+            <p className="mt-10 text-sm text-[var(--text-tertiary)]">
+              <T {...ui.nothingOnShelf} />
+            </p>
+          )}
         </>
       )}
     </div>

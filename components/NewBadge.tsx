@@ -32,20 +32,13 @@ import { isNew, newSince } from "@/lib/new-notes";
  *   is no room after a title there and no predictable colour underneath, so it
  *   becomes a mark ON the cover in the same material as the shelf's "Reading"
  *   badge (`.shelf-status`), in the opposite corner so a card can carry both.
- *
- * - `dot` is for a book spine, which is 44px wide: neither of the above fits,
- *   and a word turned on its side beside a title turned on its side is
- *   unreadable. It becomes a mark at the head of the spine, in the spine's own
- *   `--spine-fg` so it works against whatever colour the cover supplied. The
- *   word itself stays as `sr-only` text, so nothing is lost to anyone who
- *   can't see a dot.
  */
 export default function NewBadge({
   date,
   variant = "chip",
 }: {
   date?: string;
-  variant?: "chip" | "cover" | "dot";
+  variant?: "chip" | "cover";
 }) {
   const [show, setShow] = useState(false);
 
@@ -54,15 +47,6 @@ export default function NewBadge({
   }, [date]);
 
   if (!show) return null;
-
-  if (variant === "dot")
-    return (
-      <span className="spine-new">
-        <span className="sr-only">
-          <T {...ui.newBadge} />
-        </span>
-      </span>
-    );
 
   return (
     <span

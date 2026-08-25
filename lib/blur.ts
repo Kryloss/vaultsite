@@ -24,12 +24,6 @@ export interface ImageMeta {
   h?: number;
   /** Ready-made srcset over the narrower WebP copies sync-assets wrote. */
   srcset?: string;
-  /**
-   * `#rrggbb` — the one colour the image is "about". Written by
-   * scripts/dominant-colour.mjs; clamped into a legible band by lib/spine.ts
-   * before anything paints it.
-   */
-  dom?: string;
 }
 
 let manifest: Record<string, ImageMeta> | null = null;
@@ -86,17 +80,4 @@ export function dimsFor(url?: string): { w: number; h: number } | undefined {
  */
 export function srcSetFor(url?: string): string | undefined {
   return imageMeta(url)?.srcset;
-}
-
-/**
- * The dominant colour of a vault asset, or undefined for a remote cover and
- * for anything sharp couldn't read.
- *
- * Raw, not yet legible: it is whatever the artwork actually is, which may be
- * black, white or neon. `spineStyle()` in lib/spine.ts is what clamps it into
- * a band you can put text on — kept separate so the manifest records a fact
- * about the image and the presentation layer owns the presentation.
- */
-export function domFor(url?: string): string | undefined {
-  return imageMeta(url)?.dom;
 }
