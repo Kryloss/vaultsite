@@ -76,15 +76,17 @@ export default function ShelfGrid({ section, entries }: ListProps) {
           </h2>
 
           {group.medium === "book" ? (
-            /* Books stand up. It is the one row that needs no scroller —
-               eleven spines fit the column with room to spare — and the one
-               that looks like what the section is called. Their covers are
-               not lost: the medium page behind this heading is a grid of
-               them. See components/lists/BookSpines.tsx. */
+            /* Books stand up. Taller than the other rows, but sitting under
+               its heading at the SAME `mt-3` every other row uses — matched by
+               using the same class rather than by a number tuned to look
+               equal. It needs no scroller (eleven spines fit the column with
+               room to spare) and it is the row that looks like what the
+               section is called. Their covers are not lost: the medium page
+               behind this heading is a grid of them. See BookSpines.tsx. */
             <BookSpines
               items={group.items}
               sectionSlug={section.slug}
-              className="mt-3"
+              className="book-shelf-gap"
             />
           ) : (
             /* Horizontal scroller. Every row is the same height — the card

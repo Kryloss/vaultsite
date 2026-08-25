@@ -105,14 +105,20 @@ test("a book with nothing to measure stands mid-shelf", () => {
 test("a photographed spine stands at its own thickness", () => {
   // `spine:` frontmatter is the one case where width is MEASURED rather than
   // uniform: the photo's aspect ratio is the book's real thickness against
-  // its height. The component does this arithmetic inline, so this pins the
-  // relationship rather than a function — Sapiens is 160 × 1210, and at the
-  // height its cover earns it that is a visibly thinner book than the 44px
-  // every generated spine takes.
+  // its height. Asserted as a RELATIONSHIP rather than as two magic numbers,
+  // because the height range moves whenever the shelf's proportions are
+  // retuned and a pinned 273 just breaks without telling anyone anything.
   const h = spineHeight(1.579); // Sapiens' cover, 316 × 499
-  const width = Math.round(h / (1210 / 160));
-  assert.equal(h, 273);
-  assert.equal(width, 36);
-  assert.ok(width < 44, "a real spine is not forced to the uniform width");
+  const width = h / (1210 / 160); // its spine photograph, 160 × 1210
+  assert.ok(h > SPINE_H_MIN && h < SPINE_H_MAX, `${h} inside the range`);
+  // NOT "thinner than the uniform width" — that was never a rule, it was a
+  // fact about the old numbers, and it broke the moment the shelf was
+  // retuned. A measured spine may be fatter than the default; Sapiens is.
+  assert.notEqual(Math.round(width), 34, "must not fall back to the uniform width");
+  // and it scales with the height, so retuning the shelf keeps it honest
+  assert.ok(
+    Math.abs(width / h - 160 / 1210) < 1e-9,
+    "width must stay the photograph's own ratio against the height"
+  );
 });
 

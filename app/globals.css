@@ -5600,6 +5600,35 @@ html[data-lang="uk"] .book-spine {
   width: var(--spine-w-uk, var(--spine-w));
 }
 
+/* The books row sits under its heading at the same distance every other row
+   does — MEASURED to the first book, not to the row's box.
+
+   The box is not the right thing to match. Every card in the Shows strip is
+   the same height, so the row's top edge and the first card's top are the same
+   line; books are bottom-aligned and differ in height, so matching the boxes
+   left the first book 66px below the heading against the Shows strip's 18px,
+   and the eye reads the book, not the box.
+
+   Pulling the row up by that difference puts the first book on the same line
+   a Shows card would occupy. The TALL books then stand above the heading —
+   which is fine, and is the point: the heading's own text is 74px wide and the
+   tall spines are far to its right, so nothing is ever covered.
+
+   Re-derive by measuring `heading→first item` on both rows if the height range
+   or the shelf's order changes; it is 12px (the shared `mt-3`) minus the
+   difference, and the difference depends on how tall the leftmost book is. */
+.book-shelf-gap {
+  margin-top: -36px;
+}
+
+/* Not on a phone: the row wraps there, and pulling a wrapped block upward puts
+   its first line through the heading. */
+@media (max-width: 479px) {
+  .book-shelf-gap {
+    margin-top: 0.75rem;
+  }
+}
+
 /* Raised only while the pointer (or the keyboard) is on the book, so the
    shelf's paint order is otherwise untouched and two covers can never fight. */
 .book-slot:has(.book-spine:hover),
