@@ -48,7 +48,7 @@ Append new entries at the bottom. Format: number, date, decision, why, revisit-w
 
 ## 8. Fully static search, SEO, and feeds (2026-07-17)
 
-**Decision:** Cmd+K search runs over a build-time JSON index passed as props (no backend, no client fetch). Sitemap/robots/RSS/OG images are all generated at build. OG images use `next/og` with the dark theme, no custom fonts.
+**Decision:** Cmd+K search runs over a build-time JSON index passed as props (no backend, no client fetch). Sitemap/robots/RSS/OG images are all generated at build. OG images use `next/og`; their current editorial treatment and embedded Source Serif font are recorded in #106.
 **Why:** Keeps decision #1 (no runtime infrastructure) intact; the site is small enough that shipping the whole index in the HTML payload is cheap (capped at 1500 chars of plain text per page).
 **Revisit when:** Content grows past ~100 entries — move the search index to a static JSON file fetched on first palette open, or a worker-based index (e.g. Pagefind).
 
@@ -736,13 +736,13 @@ The gradient needs `gradientUnits="userSpaceOnUse"`. Without it the coordinates 
 
 A shared link to a book note used to render the same dark text card as everything else. But a shelf note is *about* a thing that already has a picture, and the picture is what someone recognises in a feed before they've read a word of the title.
 
-`ogImage()` now takes an optional cover and splits the card: text left, artwork right, bled to the full height so it reads as a jacket rather than a thumbnail pasted onto a slide. The frame follows the medium — 2:3 for covers, 16:9 for videos — so nothing is cropped or letterboxed. The author gets a line, but only when there's art beside it; on the plain card it would sit where the section name already is.
+`ogImage()` takes an optional cover and splits the card: text left, artwork right. The frame follows the medium — tall for covers, 16:9 for videos, and later square for Music — and the author gets a line when one exists. #106 replaces the original full-bleed treatment with a mounted object and `object-fit: contain`: real jackets do not all share an exact 2:3 ratio, so preserving every edge matters more than filling every pixel of the approximate mount.
 
 **The image is inlined as a data URL, not linked.** These are generated *during* the build, when there is no server running to serve the site's own `/vault-assets/` files — a relative path renders as nothing, silently. Remote YouTube thumbnails are passed through, since Satori fetches those itself.
 
 **Every failure path is a shrug.** Unknown format (Satori decodes no WebP or AVIF), missing file, unreadable — `ogCover()` returns undefined and the note falls back to the text card. A preview image that throws would fail the build of the page it belongs to, which is a steep price for a picture.
 
-**Shelf only.** A post has no cover, and the photograph on a People note is a person's face, which is not a thing to paste into a link preview.
+**Shelf and Music only.** A post has no cover, and the photograph on a People note is a person's face, which is not a thing to paste into a link preview.
 
 ## 58. The global layer: one shell, and tokens instead of accumulation (2026-07-31)
 
@@ -1815,3 +1815,23 @@ album (336 × 450): link top 432, controls end 423  →  crop 18, 9px clear
 **A self-inflicted bug worth recording:** renaming the grid AREA to `meta` while `.music-meta` still declared `grid-area: date` left the cell with no area to occupy. It was auto-placed, the columns collapsed, and the title measured **0px wide** — the whole row looked rearranged. Grid areas are matched by NAME in two places, and changing one is a two-file edit even when both are in the same file.
 
 **Still true on a 375px phone: "GASOLINE" itself truncates by ~28px.** The label and the date are both whole and the ellipsis now matches the text it cuts, so this is a graceful failure rather than the broken one. The clean fix, if it ever matters, is to move the date onto the description's line on phones — `"art head head" / "art desc meta"` — which hands the whole first line to the title. Not taken because it moves the layout more than the problem warrants.
+
+## 106. A shared link is a card from the vault (2026-08-25)
+
+**Decision:** Every Open Graph route uses one editorial vault-card system in `lib/og.tsx`: Source Serif 4, the favicon's double-chevron in monochrome, an inset hairline with two registration corners, a deterministic dot fingerprint made from the title, and either an oversized ghosted mark or mounted artwork. Cover art is the only colour.
+
+**The old cards belonged to a starter, not to this site.** They were a black rectangle, one white bar and a generic sans-serif title. Shelf and Music cards added useful artwork, but the text half still looked like a presentation template. A shared link is often the first view of the site somebody gets, so it should carry the same editorial voice as the page it opens: the same serif, the same monochrome discipline, and the same mark as the favicon.
+
+**One renderer is the identity.** Root, section and entry routes already called `ogImage()`, so the redesign stays there rather than giving each route its own composition. Text-only pages use the large mark as their image; Shelf and Music replace that visual weight with the thing the note is about. People remain text-only — a person's portrait is not a cover to paste onto a social card — and an undecodable or missing cover still falls back without failing the build.
+
+**The title makes its own fingerprint.** Twenty dots take bits from a stable hash of the title, with the first and last held on so even a sparse result has an edge. That makes cards visibly related but not duplicated, and does it without assigning colours to sections, generating decorative images, storing another frontmatter field, or changing when the title changes. It is identity at the scale of a feed, not data anyone has to decode.
+
+**Artwork is mounted, not used as a palette.** The offset plate lets a cover feel like an object placed in the card while keeping the frame monochrome. Tall, wide and square mounts preserve the recognisable silhouette of a book, video or record. The image uses `object-fit: contain`: an actual jacket can be narrower or wider than the nominal mount, and cropping its edge in order to make the box perfectly full was the wrong trade. The old renderer used `cover` while claiming nothing was cropped; this makes the claim true.
+
+**The serif is embedded separately because `next/og` is not the page.** The live site registers Source Serif through `next/font`, but Satori renders an image from JSX and needs the font bytes in its own `ImageResponse` options. Static regular and bold TTFs therefore live under `assets/fonts/` with Adobe's OFL and provenance. They are build inputs only; the page continues to use the existing variable Cyrillic font and optical-size axis. This is deliberate duplication at an integration boundary, not a second type system.
+
+**The mark is redrawn from `app/icon.svg`, not imported as an image.** Inline paths render reliably in Satori, can be scaled from the small masthead to the oversized background without another asset read, and stay monochrome. If the favicon's geometry changes, both copies must change together.
+
+**Checked as a family, because no one card proves the system.** The browser matrix includes root, section, plain article, People, tall Shelf, wide video, square Music, and the longest current cover title. All are 1200×630; the long titles hold their hierarchy, the three artwork shapes remain whole, and the plain fallback still looks intentional.
+
+**Revisit when:** the favicon mark changes, a fourth kind of artwork needs a genuinely different silhouette, or a title longer than the current responsive thresholds can hold. Do not introduce section accent colours to solve any of those — the art already has colour, and the text-only card's fingerprint is its variation.

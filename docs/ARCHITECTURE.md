@@ -66,7 +66,7 @@ Everything is built from tokens at the top of `globals.css`:
 Two behaviours are worth knowing before editing the stylesheet:
 
 - **`.press`** dips any control to 97% while it's held (`.press-soft` → 99% for cards). Opt-in, because scaling an inline prose link reads as a rendering fault. The block sits at the very END of `globals.css` — several components declare their own `transition:` shorthand hundreds of lines earlier, and a shorthand resets transform. Overrides belong below what they override (DECISIONS #52, #55).
-- Typeface: **Source Serif 4** and nothing else. It sets everything except code; its own italic is the quotes voice. Self-hosted by `next/font` with the **cyrillic** subset (non-negotiable — every note carries a Ukrainian translation) and with `axes: ["opsz"]`, without which the optical-size axis isn't in the file and `font-optical-sizing` has nothing to act on (DECISIONS #61).
+- Typeface: **Source Serif 4** and nothing else. It sets everything except code; its own italic is the quotes voice. Self-hosted by `next/font` with the **cyrillic** subset (non-negotiable — every note carries a Ukrainian translation) and with `axes: ["opsz"]`, without which the optical-size axis isn't in the file and `font-optical-sizing` has nothing to act on (DECISIONS #61). The build-time `next/og` renderer cannot read that CSS font registration, so `assets/fonts/` carries static regular and bold TTFs of the same family for shared-link cards only (DECISIONS #106).
 
 ## Repo layout note
 
