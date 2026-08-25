@@ -24,6 +24,7 @@ import { TIME_LEFT_EVENT } from "@/components/ReadingProgress";
 import { warmSearchIndex } from "@/components/useSearchIndex";
 import Shortcuts from "@/components/Shortcuts";
 import ResistanceDay from "@/components/ResistanceDay";
+import type { ObservanceId } from "@/lib/observances";
 import T from "@/components/T";
 import { useLang } from "@/components/useLang";
 import { ui } from "@/lib/ui-strings";
@@ -66,6 +67,7 @@ export default function Chrome({
   siteName,
   siteNameUk,
   resistanceDay,
+  observance,
   constellation,
   children,
 }: {
@@ -75,6 +77,8 @@ export default function Chrome({
   siteNameUk: string;
   /** Build-time day count for the sidebar line — see lib/resistance.ts */
   resistanceDay: number;
+  /** Build-time answer to "is today a Ukrainian national day" — see lib/observances.ts */
+  observance: ObservanceId | null;
   /**
    * The note grid for the drawer's footer, rendered as an ELEMENT by the
    * layout rather than built from props here.
@@ -629,7 +633,7 @@ export default function Chrome({
           <SocialLinks iconClass="h-[21px] w-[21px]" gap="gap-4" />
           {/* Sized to fit the w-56 sidebar on one line — see lib/resistance.ts */}
           <p className="mt-4 whitespace-nowrap text-[11px] tracking-tight text-[var(--text-tertiary)]">
-            <ResistanceDay initial={resistanceDay} />
+            <ResistanceDay initial={resistanceDay} initialObservance={observance} />
           </p>
         </div>
       </aside>

@@ -1715,3 +1715,103 @@ album (336 × 450): link top 432, controls end 423  →  crop 18, 9px clear
 **The estimates that came before were both ~1px into the controls.** Reading a screenshot gave 20px and 26px; the DOM gives 16px and 18px. Everything up to here would have looked correct in a screenshot and clipped the edge of a control in use, which is the same failure as #101 in miniature. **Numbers about someone else's layout should be read out of that layout, not off a picture of it.**
 
 **Revisit when:** the disclosure line moves, which would be the first time Apple has put anything beneath it. The probe is worth re-running rather than re-derived: load the embed top-level, click `button.play-initial`, walk the shadow roots for `a.legal-link`, and take the window height minus its `top`.
+
+## 103. The music page is a list of artists, not a list of notes (2026-08-24)
+
+**Decision:** `/music` groups its notes under the artist they name. One card per artist, ordered by whichever has the newest note, tinted with that artist's most recent cover. Each card opens with a portrait, the artist's name and a short description; each row prints what the note is about — `Clancy · Album`, `GASOLINE · Track` — in grey after the title. Grouping and ordering live in `lib/music.ts`.
+
+**A flat list answered the wrong question.** Ordered by date, the section said "what did he write last", which the Posts section already does better and with more of it. What a music page is asked is "what is he listening to", and that question is about ARTISTS with the writing hanging off them. Publishing a note about Twenty One Pilots should move Twenty One Pilots, not just add a row.
+
+**The two biographies are deliberately different texts, and that is the whole shape of the feature.** The artist's description lives ONCE, in the section's `main.md` under `artists:`, and is about the band. A note's own `artist_bio:` is about that RECORD — Clancy's now explains where the album sits in the Dema story, where it used to repeat the band's history. Before this the same paragraph was in the note and would have been in every future note about them, which is how copies drift apart. **`main.md` describes the artist; a note describes a record.**
+
+**The artist list belongs to the section, not to a folder of artist notes.** A `.md` file anywhere under `vault/Music/` becomes an entry with its own URL — that is the vault's central convention — so artists cannot be files without becoming pages nobody asked for. `section.meta` is the documented escape hatch for exactly this, and `playlists:` was already there.
+
+**The tint is the newest cover, so the card repaints itself.** `cover` on a group is `notes.find(n => n.cover)` over a newest-first list, which means adding a Clancy note both moves the card to the top and recolours it, with nothing to maintain. Same mechanism as #90, now once per artist rather than once per page.
+
+**`format:` is inferred before it is required.** A note that embeds an Apple Music link carrying a track id is a Track; anything else is an Album. That covers the two common cases with no frontmatter, and leaves `format:` for what no link can reveal — an EP, a single, a live record. The label is bilingual through `lib/ui-strings.ts` and never written into the title, the same rule as a shelf creator's role.
+
+**The New mark sits with the DATE, not the title, and it is undressed there.** It says when a note arrived, which is the same kind of fact as the date beside it; trailing the title it read as a new *kind of record*, because the grey format label follows there. `NewBadge` ships as a bordered chip — right where it follows a title in a row of text, wrong in a corner that already holds artwork, a format label and a card edge. In this cell it loses the border, the fill, the padding and its own `ml-2`, and takes the date's colour and size: what marks it is the word. Overridden HERE rather than in the component, because the chip is still correct on posts, projects and home, and this is the one place it stands beside a date.
+
+**The rows are indented so their covers sit centred under the portrait, and the indent is derived, not typed.** The covers were already left-aligned with it, which looks like a near-miss rather than an alignment once the portrait is 5rem and a cover is 44px. `--music-row-pad` is `0.5rem + (var(--artist-photo) - var(--music-art)) / 2` — half the difference between the two — so the alignment survives either size changing, and the phone's smaller pair needs no second number. It is also why `--artist-photo` is declared on `.music-card` rather than on `.artist-head`: the rows have to be able to read it. The divider's left edge is computed from the same variable, so it still starts at the text column.
+
+**Nothing falls out of the page.** A note naming no artist joins one trailing group with no card; a note naming an artist `main.md` has never heard of still gets a card and a tint, with only the portrait and description missing. Both degrade the way a shelf creator does rather than vanishing.
+
+**The portrait breaks the card's TOP edge, and that required the card to stop clipping.** `.music-card` was `overflow: hidden`, which is what kept the tint inside its rounded corners — so the wash now rounds its own corners with `border-radius: inherit` and the card is `overflow: visible`. The portrait is 5rem and rises 1.75rem, of which the card's own 0.25rem of padding is spent, leaving 23px genuinely above the card. 4rem and 19px on a phone.
+
+**Through the top rather than the left, which is what let it grow.** It broke the LEFT edge first. Two things were wrong with that: a horizontal overhang eats the page's gutter, so on a phone the portrait crept toward the window and the size had to be capped to keep it off; and sliding out sideways reads as artwork escaping the card rather than as a badge pinned to it. Rising through the top costs no horizontal room at all, so the portrait went from 4rem to 5rem in the same layout.
+
+**Its cost is vertical, and it has to be paid.** A portrait 23px above the card lands on whatever is above it — at the old 1rem gap it sat on the previous card, and under the heading it sat on "Notes on what I'm hearing". The stacking gap is 2.5rem and the first card's is 2.25rem; measured after, the second card's portrait clears the one above by 17px and the first clears the heading by 13px.
+
+**It is positioned ABSOLUTELY, and that is not a detail.** As a flex child a negative margin drags the name and bio with it, and every attempt to push the text back moved the portrait back by exactly the same amount — the overhang and the text column cannot be separated while they share a flow. Out of flow, they are independent numbers.
+
+**A shadow, not a ring.** Half the circle sits over the card and half over the page, so a ring would have to be two different colours to look right in both places. A shadow is correct in both.
+
+**An artist links to their People note when one exists.** The portrait and the name become links; the BIO never does — it is a paragraph, and a paragraph-sized target that navigates is a trap for anyone trying to select it. Matching is by title in either language, file name, slug or `aliases:` — the same set `getWikiIndex()` uses — so a music note linking "Måneskin" finds a profile filed under any of its spellings. **Nothing appears when there is no profile**, which is the normal case and must not look like a broken control.
+
+**That link is covered by `npm test`, because the vault cannot exercise it.** No People note is about a musician today, so the path renders nowhere — exactly the kind of thing a reader finds broken rather than a build. `buildPersonIndex()` takes its entries rather than reading them, so it is testable without touching disk; it was also checked end to end by temporarily aliasing an existing People note, watching both links appear, and removing the alias again. The same reasoning covers `format:`, where the vault only ever exercises the inferred branch.
+
+**Måneskin was added as a second artist** so the grouping is exercised by the vault and not only by a test: one artist proves nothing about ordering. Its GASOLINE note carries the band's photo (Wikimedia Commons, Paolo Santambrogio, **CC BY-SA 4.0** — attribution required and recorded in the frontmatter) and RUSH!'s cover from the same keyless iTunes lookup as everything else. The note's body is factual only; the "Why it's here" section is a heading and a comment, because the opinion in it is Kyrylo's to write.
+
+---
+
+## 104. On fifteen days a year the counter names the day (2026-08-24)
+
+**The sidebar's "Day N of Ukraine's resistance" steps aside on Ukrainian national days** and names the day instead. Eight CELEBRATIONS — Unity, Vyshyvanka, Constitution, Flag, Independence, Defenders, Dignity and Freedom, Armed Forces — and seven days of REMEMBRANCE: the Heavenly Hundred (20 Feb, which is also day 1 of the count), the full-scale invasion (24 Feb), Chornobyl, Remembrance and Victory over Nazism, the Day of Mourning, Ukraine's fallen defenders (29 Aug) and the Holodomor. Dates and kinds in `lib/observances.ts`, words in `observanceName` in `lib/ui-strings.ts`, both treatments at the foot of `globals.css`. Every other day it counts, exactly as before.
+
+**A running total is the wrong sentence on Independence Day.** The counter is a statement about endurance, and it is the right one 357 days a year. On the day the country celebrates itself, "Day 4569" answers a question nobody asked — it measures the war where the day is about the state. Replacing the line rather than adding one keeps the sidebar's shape: still one quiet line at the foot, still the donation link, still no call to action.
+
+**Two kinds, and the flag belongs to only one of them.** A `celebration` takes blue over yellow. A `remembrance` never does — it goes monochrome at `--text-secondary`, no gradient and no fade. Mourning is not celebrated in the national colours, and a memorial painted in them reads as a poster for the state rather than a note about the dead. The site already has a register for grave emphasis and it is the absence of colour (#64): on a page with nothing else coloured, text weight IS the emphasis, so the remembrance line is just the ordinary one standing up straighter. `--text-secondary` rather than the full `--text`, which at 11px in an otherwise grey corner would make a memorial the loudest thing in the drawer.
+
+**`kind` on the row is the only thing that decides it.** Adding a day is one line in `DAYS` and one string pair; nothing in the component or the CSS learns a new name. The first cut of this shipped celebrations only — the argument for excluding memorials was that the counter already carries that weight — and adding them was a table edit rather than a rewrite precisely because the treatment hangs off `kind`.
+
+**These are not the flag's own hex values, and that is the point.** `#FFD700` on white is barely a mark at 11px, and `#0057B7` on a near-black page is a hole rather than a colour — so light mode takes a deeper gold (`#a67c00`) and dark mode the true yellow with a lifted blue (`#5b9bea`). What survives in both is the flag's RELATIONSHIP — blue over yellow, both legible — which is the part that means anything. Two tokens, `--ua-blue` / `--ua-yellow`, used by one line on eight days.
+
+**This is not an accent colour and must not become one.** #64 deleted `--accent` after four passes, and it stands. This is closer to the callouts' four hues: colour that carries meaning, in one place, where the meaning IS the colour.
+
+**Blue over yellow inside one glyph, with a hard edge.** A two-stop gradient (`0 62%`, then `62% 100%` — not `blue, yellow`) clipped to the text. A flag is two bands meeting at an edge; a fade would read as a gradient effect, which is a different and much worse idea.
+
+**`line-height: 1` on an inline-block is load-bearing, and 62% is measured.** The gradient is sized against the element's box, and an inline box is as tall as its line-height — at the paragraph's 1.5 the seam falls below the letters and the whole line paints blue. Tight to the text, the box is exactly one font-size tall, and Source Serif 4's baseline and x-height put the middle of a lowercase letter at 62% of it. So lowercase gets one clean band each way, capitals and ascenders run blue, descenders run yellow. It's a ratio, so it holds at any size. 50% reads almost entirely yellow and 68% almost entirely blue; both were looked at before 62% was picked.
+
+**Then held back to 0.7, so it greys.** Two saturated colours at full strength in the quietest corner of the page pulled harder than anything else in the sidebar, which is backwards — the line is a note at the foot of the drawer, not a banner. Opacity rather than duller tokens: blending toward the page mutes the colour in BOTH themes at once, so neither palette had to be re-tuned and the flag survives the fade. It lands at roughly the weight of the `--text-tertiary` counter it replaces, which is the target. 0.55 was too far — the gold half all but vanishes on white.
+
+**One line in both languages is a hard constraint, and it chose the wording.** The sidebar gives 176px at 11px. Measured in the browser, the widest of the sixteen strings is `День захисників і захисниць` at 154px — which is why the fuller official title (`День захисників і захисниць України`) isn't used. The existing Ukrainian counter is 188px and already spills into the padding; nothing here does.
+
+**Re-checked in the browser like the count, and for the same reason.** The site is fully static, so the build-time answer is baked in — a deploy from the 23rd would still be saying Flag Day on the 24th. `ResistanceDay` takes both as `initial` props (so the static HTML is right for crawlers and hydration has nothing to disagree about) and re-reads both from `new Date()` in one effect.
+
+**Two dates move with the calendar**, so they can't be table rows: Vyshyvanka Day is the third Thursday of May and Holodomor Remembrance Day the fourth Saturday of November. One `nthWeekday()` places both. November is the reason it has to be right — Holodomor lands between the 22nd and 28th, and Dignity and Freedom Day is the 21st, so an off-by-one week would silently print the wrong day.
+
+**Covered by `npm test`, because the vault can't exercise it.** Fifteen days of the year render this and the other 350 don't, so nothing but a test sees the branch until the morning it ships broken. `lib/observances.test.ts` pins every fixed date, checks a day number can't match in the wrong month, asserts the two moving dates land on the right weekday inside the right week across five years (and that Holodomor never collides with the 21st), and asserts that no day of mourning is classed as a celebration — which is the one mistake here that would actually matter.
+
+**It reads the READER'S local calendar date**, the same components `resistanceDay()` already reads — not Kyiv time. A visitor in Ontario sees Independence Day on their own 24 August, which is the day they'd think of it.
+
+
+## 104. The gutter player was not moving — the viewport was (2026-08-24)
+
+**Decision:** A page carrying the gutter album player sets `overscroll-behavior-y: none`, scoped to that page and to the width where the player exists. The artist cards' internal spacing is tightened.
+
+**It looked like a positioning bug and was not one.** The player drifts "for a bit" when a scroll reaches the top or the bottom. The obvious suspects were both checked and both cleared: it computes as `position: fixed`, and NO ancestor carries a `transform`, `filter`, `perspective`, `will-change` or `contain` — any of which would have made an ancestor its containing block and left it scrolling with the page. What moves it is the browser's elastic overscroll: past either end the compositor bounces the WHOLE viewport, fixed layers included, and settles back. **A fixed element cannot opt out of that.** The only lever is the bounce, which is why the fix is on `html` and not on the player.
+
+**Scoped to the problem, because the property has a cost.** `overscroll-behavior: none` on the root would also disable a phone's pull-to-refresh, and it removes the elastic feel everywhere. The rule sits inside the 1400px block and behind `html:has(.music-note .apple-music-block[data-kind="album"])`, so it applies only where the player is and only at a width no phone reaches. **Widening it to bare `html` would also steady the contents rail, the floating breadcrumb and the reading-position pill**, which bounce for exactly the same reason — that is a one-line change if the elastic scroll is ever judged to cost more than it gives.
+
+**The cards got tighter.** Head padding went from `0.875/1rem` to `0.625/0.5rem` and the rows from `0.5rem` to `0.375/0.4375rem`, with the bio's lead-in trimmed too. The card is a list with a header, not a panel, and the risen portrait already gives the top plenty of weight. The portrait still clears the first row by 77px, so nothing was traded for the space.
+
+**The middot between New and the date is a pseudo on the DATE, not an element between them.** `NewBadge` renders nothing at all when a note isn't new, so a separator written into the markup would strand itself in front of every older row. `.music-meta > span + .music-date::before` can only match when the badge is genuinely there — including after it mounts on the client, since the badge is client-only. Measured on the two live rows: the new one reads `New · August 24, 2026`, the older one `July 17, 2026` with the pseudo computing to `none`.
+
+**The head's padding is asymmetric on purpose.** Top stays tight; the BOTTOM went back up to 1rem, because it is the only thing separating the artist's description from the notes — two different kinds of text that need a visible seam. 16px between the bio and the first row.
+
+**A measuring note, recorded because it cost time twice:** the portraits read as `naturalWidth: 0` and rendered as alt text through several checks. Neither was real — once because the dev server had died and the page was a stale render, and once because `loading="lazy"` had simply not fired yet at the moment of measurement. A fresh `new Image()` against the same URL returned 256, and `curl` returned 200 with the right byte count. **When an image looks broken, check the server and the lazy state before the markup.**
+
+
+## 105. The format label must not share the title's ellipsis (2026-08-24)
+
+**Decision:** A row's title and its format label are a FLEX PAIR inside one grid cell — the title shrinks and ellipsises, the label never does. On phones the New mark is dropped, and the portrait and covers move 4px closer to the card's left edge.
+
+**The label was inside the title's span, so it inherited the truncation.** On a phone the row read `GASOLINE · Tr…`: the label was being cut, and the ellipsis drew in the TITLE's colour, so grey text ended in white dots. Splitting them means the title is the part that gives way — which is the right order, because the title is repeated on the row's own page and the label appears nowhere else.
+
+**`min-width: 0` on the flex wrapper is the load-bearing line.** Without it a flex item refuses to shrink below its content width, so the title would push the label out of the row instead of ellipsising. That one declaration is the difference between the pair working and the pair being worse than what it replaced.
+
+**Track beats New when the row runs out of width.** The date and the label each say something nothing else on the row says; "New" repeats what the date already tells a reader who can see it. So it is the part that goes below 480px, where it and its separator are ~46px of a 301px row. Its middot goes with it — the separator is a pseudo on the date and is hidden by the same rule, so nothing is left stranded.
+
+**A self-inflicted bug worth recording:** renaming the grid AREA to `meta` while `.music-meta` still declared `grid-area: date` left the cell with no area to occupy. It was auto-placed, the columns collapsed, and the title measured **0px wide** — the whole row looked rearranged. Grid areas are matched by NAME in two places, and changing one is a two-file edit even when both are in the same file.
+
+**Still true on a 375px phone: "GASOLINE" itself truncates by ~28px.** The label and the date are both whole and the ellipsis now matches the text it cuts, so this is a graceful failure rather than the broken one. The clean fix, if it ever matters, is to move the date onto the description's line on phones — `"art head head" / "art desc meta"` — which hands the whole first line to the title. Not taken because it moves the layout more than the problem warrants.

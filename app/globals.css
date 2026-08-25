@@ -39,6 +39,20 @@
   --border: #ededf0;
   --code-bg: #f4f4f5;
 
+  /* ---- The flag, and the only colour on the page that isn't a callout ----
+     Used by ONE line, on eight days a year (`.observance` at the foot of this
+     file, components/ResistanceDay.tsx). It is not an accent token and must
+     not become one — #64 stands.
+
+     These are not the flag's own #0057B7 / #FFD700. That yellow on white is
+     barely a mark at 11px, so light mode takes a deeper gold; dark mode takes
+     the true yellow and lifts the blue, since #0057B7 on a near-black page is
+     a hole rather than a colour. The flag's RELATIONSHIP survives in both —
+     blue over yellow, and both legible — which is the part that means
+     something. */
+  --ua-blue: #0057b7;
+  --ua-yellow: #a67c00;
+
   /* The site's typeface. Source Serif 4 for everything except code — see the
      `body` rule below and docs/DECISIONS.md #59. */
   --font-prose: var(--font-source-serif), Georgia, "Times New Roman", serif;
@@ -114,6 +128,9 @@
        reads as a pill instead of a hole. */
     --chrome-bg: color-mix(in srgb, var(--surface) 88%, transparent);
     --chrome-ring: color-mix(in srgb, #ffffff 10%, transparent);
+    /* See the light values above for why these two aren't #0057B7 / #FFD700. */
+    --ua-blue: #5b9bea;
+    --ua-yellow: #ffd700;
   }
 }
 
@@ -4672,20 +4689,55 @@ html[data-intro][data-intro-fast] .prose > .avatar {
    page header first; contained, it stops being an exception to the site's
    monochrome (#64), because the artwork is inside a frame again like every
    other picture here. Card, border and radius match the embed above it. */
+/* One card PER ARTIST now, so they stack. The gap is larger than it looks like
+   it needs to be because the portrait rises 1.5rem through the card's top edge:
+   at the old 1rem it landed on the card above, and at the heading it landed on
+   "Notes on what I'm hearing". */
+.music-card + .music-card {
+  margin-top: 2.5rem;
+}
+
 .music-card {
   position: relative;
-  overflow: hidden;
-  margin-top: 0.75rem;
+  /* NOT `hidden`: the artist's portrait hangs off the left edge, and clipping
+     here would cut it in half. The wash clips itself instead — see the
+     `border-radius: inherit` on `.music-wash`, which is what keeps the tint
+     inside the card's rounded corners now that the card no longer does it. */
+  overflow: visible;
+  /* Clears the risen portrait under the section heading — see the note on
+     `.music-card + .music-card`. */
+  margin-top: 2.25rem;
   padding: 0.25rem 0.75rem;
   border: 1px solid var(--border);
   border-radius: var(--r-xl);
   background: var(--surface);
+  /* Lives on the CARD, not on `.artist-head`, because the track rows below
+     need it too: their covers are indented to sit centred under the portrait,
+     and that indent is the difference between the two sizes. */
+  --artist-photo: 5rem;
+  /* A little lift. Two shadows, not one: a tight dark edge so the card has a
+     bottom, and a wide soft one so it sits ABOVE the page rather than being
+     drawn on it. */
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.05),
+    0 10px 24px -12px rgb(0 0 0 / 0.18);
+}
+
+@media (prefers-color-scheme: dark) {
+  .music-card {
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.4),
+      0 12px 28px -12px rgb(0 0 0 / 0.55);
+  }
 }
 
 .music-wash {
   position: absolute;
   inset: 0;
   overflow: hidden;
+  /* The card stopped clipping (see `.music-card`), so the tint has to round
+     its own corners or it paints square ones over the card's radius. */
+  border-radius: inherit;
   pointer-events: none;
   /* How far the artwork hangs past the box on every side. It must EXCEED the
      blur radius: `blur()` samples transparency beyond the image's own edges,
@@ -4734,6 +4786,16 @@ html[data-intro][data-intro-fast] .prose > .avatar {
 
 /* ---- the track list ---- */
 .music-tracks {
+  /* The row's own left inset. It is not a chosen number: it is whatever puts a
+     44px cover centred under the portrait above it, which is half the
+     difference between the two. Both sizes are variables, so the alignment
+     survives either of them changing — and it is the reason `--artist-photo`
+     is declared on the card rather than on the head. */
+  --music-row-pad: calc((var(--artist-photo) - var(--music-art)) / 2);
+  /* How far the hover box holds off the card's right padding. On the LEFT it
+     holds off by the row's whole inset instead: the highlight starts AT the
+     cover (see `.music-tracks a`). */
+  --music-row-gutter: 0.4375rem;
   /* Above the wash. `position` alone is enough — the wash is an earlier
      sibling, so no z-index (and no `isolation`, #81) is needed to order them. */
   position: relative;
@@ -4746,8 +4808,13 @@ html[data-intro][data-intro-fast] .prose > .avatar {
   padding: 0;
 }
 
+/* The row's spacing lives HERE, not on the link, because the hover box must
+   be exactly as tall as the cover it starts at — any vertical padding on the
+   link would make the highlight taller than the artwork. Outside the link, the
+   same air separates the rows and leaves the divider centred between them. */
 .music-tracks li {
   position: relative;
+  padding: 0.3125rem 0;
 }
 
 /* The divider starts at the TEXT column, not at the row's edge. It's the most
@@ -4758,8 +4825,9 @@ html[data-intro][data-intro-fast] .prose > .avatar {
   content: "";
   position: absolute;
   top: 0;
-  left: calc(var(--music-art) + 1.25rem);
-  right: 0.5rem;
+  /* Starts at the TEXT column: the row's inset, the cover, and the gap. */
+  left: calc(var(--music-row-pad) + var(--music-art) + 0.75rem);
+  right: var(--music-row-gutter);
   height: 1px;
   background: var(--border);
 }
@@ -4772,14 +4840,19 @@ html[data-intro][data-intro-fast] .prose > .avatar {
      by source order is what lets the description have the width the date
      would otherwise take, which on a phone is most of the row. */
   grid-template-areas:
-    "art title date"
-    "art desc  desc";
+    "art head meta"
+    "art desc desc";
   align-items: center;
   column-gap: 0.75rem;
-  /* Inside a card, so no negative margin: the card's own padding is what
-     holds the hover wash off the border. */
-  padding: 0.5rem 0.5rem;
-  border-radius: var(--r-md);
+  /* The link IS the hover box, so it is inset to exactly what the highlight
+     should cover: it begins at the cover's own left edge (the row inset is a
+     margin, not padding) and carries no vertical padding, so it is the cover's
+     height. What it wraps is the artwork and the text beside it — nothing
+     else. The radius matches the cover's so the highlight follows those
+     corners instead of drawing a second, rounder pair around them. */
+  margin: 0 var(--music-row-gutter) 0 var(--music-row-pad);
+  padding: 0 0.4375rem 0 0;
+  border-radius: var(--r-sm);
 }
 
 
@@ -4801,6 +4874,25 @@ html[data-intro][data-intro-fast] .prose > .avatar {
   /* Album art is a physical object in Apple's layout; a hairline of shadow is
      what keeps a white cover from dissolving into a white page. */
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
+  transition: transform var(--dur-fast) var(--ease);
+}
+
+/* The cover lifts a little under the pointer — the row's own answer, and the
+   only thing in it that is an object rather than text. Small on purpose: the
+   highlight behind it is exactly the cover's height, so a larger scale would
+   have the artwork breaking out of the box that is meant to hold it. */
+.music-tracks a:hover .music-art {
+  transform: scale(1.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .music-art {
+    transition: none;
+  }
+
+  .music-tracks a:hover .music-art {
+    transform: none;
+  }
 }
 
 /* One line each, ellipsised. A note's description is a sentence, and two of
@@ -4813,8 +4905,18 @@ html[data-intro][data-intro-fast] .prose > .avatar {
   text-overflow: ellipsis;
 }
 
+/* The pair. `min-width: 0` is what lets the title inside it shrink at all —
+   without it a flex item refuses to go below its content width and the label
+   is pushed out of the row instead. */
+.music-head {
+  grid-area: head;
+  display: flex;
+  align-items: baseline;
+  min-width: 0;
+}
+
 .music-title {
-  grid-area: title;
+  min-width: 0;
   font-weight: 600;
   color: var(--text);
   line-height: 1.35;
@@ -4827,10 +4929,165 @@ html[data-intro][data-intro-fast] .prose > .avatar {
   line-height: 1.4;
 }
 
-.music-date {
-  grid-area: date;
+/* What the note is about, after its title and never inside it. Grey, because
+   it is a fact about the row rather than part of what the row is called — the
+   same demotion `.entry-meta` gets. */
+.music-format {
+  /* Never shrinks, never truncates: that is the whole point of the pair. */
+  flex: none;
+  display: flex;
+  gap: 0.3125rem;
+  padding-left: 0.3125rem;
+  white-space: nowrap;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: var(--text-tertiary);
+}
+
+/* ---- who the card is about ----
+
+   The shelf creator block's shape, at a smaller size: this one heads a list
+   rather than an article, so it sits closer to the rows under it. No rule
+   beneath it — the space does that job, exactly as `.creator` decided (#86).
+   Above the wash, like the rows. */
+.artist-head {
+  /* How far the portrait rises through the card's TOP edge. It broke the LEFT
+     edge first; through the top it reads as a badge pinned to the card rather
+     than as artwork sliding out of it, and it costs no horizontal room, which
+     is what let the portrait grow. The card's own 0.25rem of padding is spent
+     first, so the visible rise is this minus that. */
+  --artist-rise: 1.75rem;
+  position: relative;
+  /* Room for a portrait that is no longer in the flow — see below. The
+     top padding is deliberately small: the card is a list with a header, not a
+     panel, and the risen portrait already gives the top plenty of weight. The
+     BOTTOM is larger on purpose — it is the only thing separating the artist's
+     description from the notes, which are a different kind of text and need to
+     start somewhere the eye can find. */
+  padding: 0.625rem 0.5rem 1rem 6.125rem;
+}
+
+/* ABSOLUTE, not a flex item. As a flex child a negative margin would drag the
+   name and bio with it, and every attempt to push the text back moved the
+   portrait back by the same amount — the two cannot be separated while they
+   share a flow. Out of flow, the overhang and the text column are independent. */
+.artist-photo {
+  position: absolute;
+  top: calc(var(--artist-rise) * -1);
+  /* Flush with the card's own padding; the covers below are centred under it
+     by `--music-row-pad`, so the two stay one column. */
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: var(--artist-photo);
+  height: var(--artist-photo);
+  overflow: hidden;
+  border-radius: var(--r-full);
+  background: var(--surface);
+  /* It reads as sitting ON the card rather than in it. A shadow rather than a
+     ring: a ring would have to be the page's colour to look right off the card
+     and the card's to look right on it, and half of it is over each. */
+  box-shadow:
+    0 2px 6px rgb(0 0 0 / 0.18),
+    0 8px 20px -8px rgb(0 0 0 / 0.28);
+}
+
+.artist-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.artist-initials {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  letter-spacing: 0.02em;
+}
+
+.artist-text {
+  min-width: 0;
+}
+
+.artist-name {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+/* The name opens the artist's People note when there is one. No underline at
+   rest — it sits in a card of its own and the portrait beside it is the same
+   target — but it answers the pointer like every other action here. */
+.artist-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.artist-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+}
+
+.artist-bio {
+  margin: 0.1rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+/* The date cell holds the New mark as well, to the LEFT of the date. It marks
+   the note's arrival, which is a fact about when — so it belongs with the other
+   one rather than trailing the title. */
+.music-meta {
+  grid-area: meta;
   justify-self: end;
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
   padding-left: 0.75rem;
+}
+
+/* The separator between the mark and the date, as a pseudo on the DATE rather
+   than an element between them. `NewBadge` renders nothing at all when a note
+   isn't new, so a middot written into the markup would strand itself in front
+   of every older row; `span + .music-date` can only match when the badge is
+   really there, including after it mounts on the client. */
+.music-meta > span + .music-date::before {
+  content: "·";
+  margin-right: 0.375rem;
+  color: var(--text-tertiary);
+}
+
+/* The New mark, undressed.
+
+   `NewBadge` ships as a bordered chip, which is right where it follows a title
+   in a row of text and wrong here: beside the date it is a second boxed thing
+   in a corner that already has artwork, a format label and a card edge. Sitting
+   WITH the date, it should read as part of the same quiet line — so the border,
+   the fill and the padding go, and it takes the date's own colour and size.
+   What still marks it is the word.
+
+   Overridden here rather than in the component: the chip is correct on posts,
+   projects, music rows elsewhere and home, and this is the one place it sits
+   beside a date. A bare class beats the Tailwind utilities it is undoing —
+   `.music-meta > span` is (0,1,1) against `.ml-2`'s (0,1,0). */
+.music-meta > span {
+  margin-left: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--text-tertiary);
+}
+
+.music-date {
   font-size: 0.875rem;
   color: var(--text-tertiary);
   font-variant-numeric: tabular-nums;
@@ -4843,16 +5100,39 @@ html[data-intro][data-intro-fast] .prose > .avatar {
     --music-art: 38px;
   }
 
+  .music-card {
+    --artist-photo: 4rem;
+  }
+
+  .artist-head {
+    --artist-rise: 1.5rem;
+    padding: 0.5rem 0.5rem 0.875rem 4.875rem;
+  }
+
   .music-tracks a {
     column-gap: 0.625rem;
   }
 
-  .music-tracks li + li::before {
-    left: calc(var(--music-art) + 1.125rem);
-  }
-
   .music-date {
     font-size: 0.8125rem;
+  }
+
+  /* The column gap already separates the date from the title; the extra inset
+     is 12px the title needs more. */
+  .music-meta {
+    padding-left: 0;
+  }
+
+  /* Track beats New on a narrow row. The date and the format label both say
+     something the row cannot say twice — the label is the only place the note's
+     kind appears, and the date is the only place its age does. "New" repeats
+     the date's job for a reader who can already see it, so it is the part that
+     goes when the row runs out of width. At 375px it and its separator are
+     ~46px of a 301px row, which is the difference between a whole title and a
+     truncated one. */
+  .music-meta > span,
+  .music-meta > span + .music-date::before {
+    display: none;
   }
 }
 
@@ -4984,6 +5264,24 @@ main:has(.note-wash) {
     transform-origin: top left;
     margin: 0;
     z-index: 1;
+  }
+
+  /* No rubber band on a page with a gutter player.
+
+     `position: fixed` pins the player to the viewport, and it genuinely is
+     pinned — no ancestor transform or filter is containing it. What moves it is
+     the browser's elastic overscroll: past the top or the bottom, the compositor
+     bounces the WHOLE viewport, fixed layers included, and settles back. A fixed
+     element cannot opt out of that; the only lever is the bounce itself.
+
+     Scoped as tightly as the problem: only a page that has the player, and only
+     at the width where the player exists. That keeps the elastic feel everywhere
+     else, and — because this width is a desktop one — never touches a phone's
+     pull-to-refresh, which `overscroll-behavior: none` would also disable.
+     Widening it to `html` alone would steady the contents rail and the floating
+     breadcrumb too, which bounce for the same reason. */
+  html:has(.music-note .apple-music-block[data-kind="album"]) {
+    overscroll-behavior-y: none;
   }
 
   /* Both want the same column, so the contents start below the player instead
@@ -5145,4 +5443,76 @@ main:has(.note-wash) {
   .music-sheet-backdrop {
     transition-duration: 0.01ms;
   }
+}
+
+/* ---------- The sidebar line on a Ukrainian national day ----------
+   components/ResistanceDay.tsx, dates in lib/observances.ts.
+
+   Blue over yellow in one glyph: a two-stop gradient with NO blend (`0 50%`
+   then `50% 100%`, not `blue, yellow`) clipped to the text. A flag is two
+   bands meeting at an edge; a fade would read as a gradient effect, which is
+   a different and much worse idea.
+
+   `line-height: 1` on an inline-block is doing real work. The gradient is
+   measured against the element's box, and an inline box is as tall as the
+   line-height — at the paragraph's 1.5 the seam lands well below the letters
+   and the whole line paints blue. Tight to the text, the split falls where
+   the eye expects it. 54% rather than 50% because Source Serif's box carries
+   more descender than the lowercase actually uses.
+
+   The `<a>` keeps `no-underline` and drops `text-inherit`: `-webkit-text-fill-
+   color` is what actually paints the glyphs here, so `color` is only the
+   fallback for a browser without `background-clip: text`. */
+.observance {
+  display: inline-block;
+  line-height: 1;
+  background-image: linear-gradient(
+    to bottom,
+    var(--ua-blue) 0 62%,
+    var(--ua-yellow) 62% 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: var(--ua-blue);
+  /* Held back to roughly the weight of the `--text-tertiary` it replaces. At
+     full strength two saturated colours in the quietest corner of the page
+     pulled harder than anything else in the sidebar, which is backwards — the
+     line is a note at the foot of the drawer, not a banner. Blending toward
+     the page greys the colour without touching either token, so the flag
+     survives in both themes and neither had to be tuned separately. 0.55 was
+     too far: the gold half all but vanishes on white. */
+  opacity: 0.7;
+}
+
+@supports (-webkit-background-clip: text) or (background-clip: text) {
+  .observance {
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+/* A day of REMEMBRANCE takes none of that. Same line, same place, no flag:
+   mourning is not celebrated in blue and yellow, and a memorial painted in
+   the national colours reads as a poster for the state rather than a note
+   about the dead. Monochrome is also the site's own register for emphasis
+   (#64) — on a page with no other colour, text colour IS the weight — so the
+   grave version of this line is just the ordinary one standing up straighter.
+
+   `--text-secondary` rather than the full `--text`: it has to read as
+   different from the tertiary counter without becoming the loudest thing in
+   the drawer, which black at 11px in an otherwise grey corner would be. No
+   opacity either — the fade above exists to grey a colour, and there is no
+   colour here to grey.
+
+   It has to sit BELOW the `@supports` block, not merely below `.observance`:
+   that block is what paints the glyphs, via `-webkit-text-fill-color`, and it
+   is the thing this rule has to overrule. Written directly under `.observance`
+   — where it reads better — the fill stayed transparent, the gradient was
+   already gone, and every remembrance day rendered as a blank line.
+   `globals.css` has no `@layer`, so position is the whole argument (#51, #52,
+   #55, #81). */
+.observance-quiet {
+  background-image: none;
+  color: var(--text-secondary);
+  -webkit-text-fill-color: currentColor;
+  opacity: 1;
 }

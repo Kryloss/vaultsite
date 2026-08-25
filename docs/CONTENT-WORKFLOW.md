@@ -234,7 +234,11 @@ date: 2026-07-17
 description: One line, shown on the section's track row.
 description_uk: The Ukrainian one — music rows DO show it (they read it from meta).
 cover: clancy.jpg          # album art → the track row, the card tint and the OG card
-artist: Twenty One Pilots  # `artist:`, not `author:` — the role reads "Artist"
+artist: Twenty One Pilots  # `artist:`, not `author:` — the role reads "Artist";
+                           # it is also what the /music page groups the note under
+format: album              # album|track|single|ep|mixtape|live|compilation.
+                           # Optional: a link with a track id infers Track, anything
+                           # else Album — write it for an EP or a single.
 artist_photo: twenty-one-pilots.jpg
 artist_bio: >-
   A sentence or two. Optional, like every key below the name.
@@ -258,6 +262,24 @@ delete it:
 ```
 
 The `.uk.md` sibling opens with `## Коротко` and the same table translated.
+
+**A new artist also needs a card.** The /music page groups notes by `artist:`,
+and the card's portrait and description come from `artists:` in
+`vault/Music/main.md` — not from the note:
+
+```yaml
+artists:
+  - name: Måneskin
+    photo: maneskin.jpg      # square-cropped to 320px before entering the vault
+    bio: >-
+      Who the band IS. One or two sentences.
+    bio_uk: >-
+      Те саме українською.
+```
+
+Keep the two apart: `bio` here is about the artist and is written once; the
+note's `artist_bio:` is about that record. A note whose artist is missing from
+this list still gets a card — just no portrait and no description.
 Album facts come from the same keyless iTunes lookup as the art:
 `https://itunes.apple.com/lookup?id=<album id>&entity=song` gives the release
 date, track count, label (in `copyright`) and, by summing `trackTimeMillis`,

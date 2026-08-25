@@ -8,10 +8,13 @@ cover: clancy.jpg
 artist: Twenty One Pilots
 artist_photo: twenty-one-pilots.jpg
 # artist photo: Wikimedia Commons — Nnunghi, CC0 (Clancy Tour, Dublin)
+# The bio HERE is about this record. The band's own description lives once, in
+# the section's main.md, and drives their card on /music.
 artist_bio: >-
-  Ohio duo — Tyler Joseph writes and sings, Josh Dun drums. Together since 2009, they spent ten years building a single story across Blurryface, Trench and Clancy.
+  Their fifth album, and the end of the Dema story. It follows Scaled And Icy, which the band framed as a broadcast made under the Bishops' control — so Clancy is the record where the narrator finally speaks for himself.
 artist_bio_uk: >-
-  Дует з Огайо — Тайлер Джозеф пише пісні та співає, Джош Дан грає на барабанах. Разом із 2009 року вони десять років вибудовували одну історію через Blurryface, Trench і Clancy.
+  П'ятий альбом гурту й фінал історії Деми. Він іде після Scaled And Icy, який гурт подавав як передачу, зроблену під контролем Єпископів, — тож Clancy це платівка, де оповідач нарешті говорить від себе.
+format: album
 # Add your score when you're ready — halves are allowed, and it renders as the
 # last row of the fact list below:  rating: 4.5
 ---

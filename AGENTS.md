@@ -94,6 +94,7 @@ simple, documented, low-maintenance solutions over clever abstractions.
 | `lib/markdown.ts` | Obsidian preprocessing and Markdown-to-HTML pipeline |
 | `lib/section-types.tsx` | Section `type` → list component registry |
 | `lib/ui-strings.ts` | Fixed English/Ukrainian UI strings |
+| `lib/observances.ts` | Ukrainian national days the sidebar counter steps aside for, and their kind |
 | `lib/plural.ts` | Counted nouns — any string with a number in it |
 | `lib/dates.ts` | Date formatting with no `fs` behind it, safe for client code |
 | `lib/metadata.ts`, `lib/jsonld.ts` | Canonicals, Open Graph, and structured data |
@@ -138,7 +139,12 @@ Routes:
   which an English reader will never notice.
 - Keep the design monochrome. State emphasis uses `--text`; there is no
   `--accent` token. Existing semantic callout colors and documented hover-only
-  brand/photo exceptions may remain.
+  brand/photo exceptions may remain, as does the sidebar's flag-coloured line
+  on Ukrainian CELEBRATION days (`--ua-blue`/`--ua-yellow`, `.observance`,
+  `lib/observances.ts`, DECISIONS #104). Those two tokens belong to that one
+  line on eight days a year — do not reuse them as an accent. Days of
+  REMEMBRANCE deliberately get no flag: `.observance-quiet` keeps them
+  monochrome, and that distinction is not a detail to tidy away.
 - Respect accessibility patterns already present: semantic controls, keyboard
   behavior, focus management/restoration, `inert` for closed dialogs, reduced
   motion, and usable touch states.
@@ -194,9 +200,11 @@ Important conventions:
   ending in the channel's own YouTube avatar for video notes — do not stop at
   one failed lookup. Detail in `CLAUDE.md` and `docs/CONTENT-WORKFLOW.md`;
   reasons in `docs/DECISIONS.md` #86.
-- The `music` section type renders its notes as an Apple-Music-style track
-  list (entry `cover:` album art, divider inset to the text column) inside a
-  card tinted by the newest cover, blurred. A music NOTE opens like a shelf
+- The `music` section type groups its notes BY ARTIST — one card each, newest
+  artist first, tinted by that artist's newest cover, with an Apple-Music-style
+  track list inside. An artist's general description lives in the section's
+  `main.md` (`artists:`); a note's `artist_bio:` is about that record. The two
+  are different texts on purpose. A music NOTE opens like a shelf
   note — an artist block from `artist:` plus a plain fact list — and tints its
   own opening with its own cover, window-wide and dissolving rather than
   framed. The Apple Music embeds carry no footer link of ours (#92). The tint is artwork in a frame, not
@@ -348,3 +356,7 @@ npm run build
 - Supabase-backed dynamic features such as views, reactions, or AMA. Content
   must remain in the static vault even if these are added later.
 - Additional section types such as stack.
+- Plans for work not yet started live in `docs/plans/` — transient, and
+  deleted once the work ships and its reasoning moves to `docs/DECISIONS.md`.
+  Currently `docs/plans/shelf-spines.md`. Read the plan before touching the
+  shelf medium page; do not implement it without a request.

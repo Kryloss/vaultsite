@@ -13,6 +13,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { siteJsonLd } from "@/lib/jsonld";
 import { getSections, getEntries } from "@/lib/vault";
 import { resistanceDay } from "@/lib/resistance";
+import { observance } from "@/lib/observances";
 import { siteName, siteNameUk, siteUrl, siteDescription } from "@/lib/site-config";
 
 /**
@@ -206,6 +207,7 @@ export default function RootLayout({
           siteName={siteName}
           siteNameUk={siteNameUk}
           resistanceDay={resistanceDay()}
+          observance={observance()}
           constellation={<Constellation notes={notes} today={today} />}
         >
           {children}

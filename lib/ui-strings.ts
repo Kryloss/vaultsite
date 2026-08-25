@@ -8,6 +8,8 @@
  * The language toggle (components/T.tsx + globals.css) shows the active one.
  * Add a new key here rather than hard-coding English anywhere in a component.
  */
+import type { ObservanceId } from "@/lib/observances";
+
 export interface Str {
   en: string;
   uk: string;
@@ -217,3 +219,38 @@ export const ui = {
   backHome: { en: "Back home", uk: "На головну" },
   didYouMean: { en: "Did you mean…", uk: "Можливо, ви шукали…" },
 } satisfies Record<string, Str>;
+
+/**
+ * The days the resistance counter steps aside for — keyed by ObservanceId, so
+ * lib/observances.ts holds the dates and the kind, and this holds the words.
+ * Its own export rather than a key inside `ui`, which is flat by construction
+ * (`Record<string, Str>` above) and should stay that way.
+ *
+ * Both languages have to fit the w-56 sidebar on ONE line at 11px, which is
+ * what rules out the fuller official titles — "День пам’яті Чорнобильської
+ * трагедії", "День захисників і захисниць України". The counter is the width
+ * budget, and it is about 32 characters. Every string here was measured.
+ *
+ * The remembrance days are named plainly and without adjectives. The line has
+ * one job on those mornings, which is to say what the day is.
+ */
+export const observanceName = {
+  // ---- celebrations (flag colours) ----
+  unity: { en: "Ukraine’s Unity Day", uk: "День Соборності України" },
+  vyshyvanka: { en: "Vyshyvanka Day", uk: "День вишиванки" },
+  constitution: { en: "Constitution Day", uk: "День Конституції" },
+  flag: { en: "Ukraine’s Flag Day", uk: "День Прапора України" },
+  independence: { en: "Ukraine’s Independence Day", uk: "День Незалежності України" },
+  defenders: { en: "Defenders Day", uk: "День захисників і захисниць" },
+  dignity: { en: "Dignity and Freedom Day", uk: "День Гідності і Свободи" },
+  armedForces: { en: "Armed Forces Day", uk: "День Збройних Сил України" },
+
+  // ---- remembrance (monochrome) ----
+  heavenlyHundred: { en: "Heroes of the Heavenly Hundred", uk: "День Героїв Небесної Сотні" },
+  invasion: { en: "Full-scale invasion, 2022", uk: "Повномасштабне вторгнення" },
+  chornobyl: { en: "Chornobyl, 1986", uk: "Чорнобильська трагедія" },
+  victoryOverNazism: { en: "Remembrance and Victory Day", uk: "День пам’яті та перемоги" },
+  mourning: { en: "Day of Mourning", uk: "День скорботи" },
+  fallenDefenders: { en: "Remembering Ukraine’s fallen", uk: "День пам’яті захисників" },
+  holodomor: { en: "Holodomor Remembrance Day", uk: "День пам’яті Голодомору" },
+} satisfies Record<ObservanceId, Str>;
