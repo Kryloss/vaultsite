@@ -14,8 +14,9 @@ import type { Heading } from "@/lib/toc";
  * - **Narrow screens** — a floating pill at the bottom, built like the
  *   breadcrumb bar in Chrome.tsx: same rounded-full blurred chip, an icon
  *   button, and truncated text saying where you are. Tapping it opens the
- *   outline. The rail has no room to exist below 1280px, which is exactly
- *   where a long post needs it most.
+ *   outline. The rail has no room to exist below 1168px — the width its own
+ *   geometry needs, derived in `globals.css` — which is exactly where a long
+ *   post needs it most.
  *
  * Bilingual like everything else: both outlines ship in the HTML and CSS shows
  * the active one. The scroll-spy walks the merged list and skips anything whose

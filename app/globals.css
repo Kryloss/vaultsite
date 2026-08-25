@@ -1521,7 +1521,7 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
 /* ---------- Footnotes & sidenotes (rehypeSidenotes in lib/markdown.ts) ----------
 
    A footnote is written `[^1]` in Obsidian and renders twice: as the list at
-   the bottom of the note, and — from 1280px up, where there's margin to spare —
+   the bottom of the note, and — from 1168px up, where there's margin to spare —
    as a note in the LEFT gutter beside the sentence that raised it. Exactly one
    of the two is visible at any width. The right gutter is the table of
    contents' (.toc-rail), which appears at the same breakpoint.
@@ -1582,7 +1582,7 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   display: none;
 }
 
-@media (min-width: 1280px) {
+@media (min-width: 1168px) {
   /* Floated entirely outside the text column: the margin box sits left of the
      content edge, so it never shortens a line box and the paragraph stays a
      clean rectangle. `clear` keeps two notes in the same paragraph from
@@ -1681,7 +1681,7 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
 
    The same chip as .toc-bar below — rounded-full, translucent, blurred — so
    the two read as one family rather than two unrelated things stuck to the
-   window. Below 1280px it takes the bottom-RIGHT corner, since the contents
+   window. Below 1168px it takes the bottom-RIGHT corner, since the contents
    pill owns the bottom-left. */
 .resume-reading {
   position: fixed;
@@ -1707,10 +1707,10 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   background: color-mix(in srgb, var(--bg-hover) 88%, transparent);
 }
 
-/* From 1280px the contents rail exists, and this drops to the foot of that
+/* From 1168px the contents rail exists, and this drops to the foot of that
    same column — beside the article instead of out at the window's edge.
    `left` matches .toc-rail exactly; see the geometry note there. */
-@media (min-width: 1280px) {
+@media (min-width: 1168px) {
   .resume-reading {
     left: calc(50% + 22rem);
     right: auto;
@@ -2068,9 +2068,20 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
 
 /* ---------- Table of contents (components/Toc.tsx) ---------- */
 
-/* A fixed rail beside the article. The page is a centered max-w-2xl column
-   (half-width 21rem), so the rail starts one rem-gap past its right edge and
-   only appears once the viewport can hold both without crowding. */
+/* A fixed rail beside the article. The page is a centred `--measure` column
+   (39rem, so 19.5rem either side of centre) and the rail starts 2.5rem past
+   its right edge, 13rem wide — its outer edge lands 35rem from centre.
+
+   THE BREAKPOINT IS THAT ARITHMETIC, not a device size: 35rem of content plus
+   a `--gutter` (1.5rem) of air off the window is 36.5rem, so the rail has room
+   from 73rem = **1168px**. It sat at Tailwind's 1280px before, which left 80px
+   of empty margin at the breakpoint and took the rail away from every window
+   between the two while it still fitted (DECISIONS #107). Change `--measure`
+   and this number has to be re-derived.
+
+   1168px is shared, deliberately: the sidenotes and pull-quotes in the LEFT
+   gutter and `.resume-reading` moving under this column all use it, so the
+   page gains both margins in one step rather than going lopsided. */
 .toc-rail {
   display: none;
   position: fixed;
@@ -2085,7 +2096,7 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   line-height: 1.5;
 }
 
-@media (min-width: 1280px) {
+@media (min-width: 1168px) {
   .toc-rail {
     display: block;
   }
@@ -2470,7 +2481,7 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
 }
 
 /* The rail owns wide screens; the pill owns everything below it. */
-@media (min-width: 1280px) {
+@media (min-width: 1168px) {
   .toc-bar {
     display: none;
   }
@@ -2494,7 +2505,7 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
 
 /* Grows upward out of the pill — the same translucent blurred material and
    timing as .series-sheet, but rising rather than falling: the pill sits at
-   the very bottom of the screen (640–1279px; below that it moves to the
+   the very bottom of the screen (640–1167px; below that it moves to the
    top-right, see the phone override at the end of this file — DECISIONS
    #51), so there's no room below it to grow into. This is the size for
    that range; the phone override below narrows and shortens it. */
@@ -2583,7 +2594,7 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   /* Hangs directly under the icon now that the icon lives at the top —
      anchor and transform-origin both invert with it, or the panel would
      read as arriving from the wrong corner. Narrower, shorter and tighter
-     than the 640–1279px version above: it's an index, so it should cover a
+     than the 640–1167px version above: it's an index, so it should cover a
      corner of the article rather than the article. */
   .toc-sheet {
     left: auto;
@@ -2982,7 +2993,7 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
 }
 
 /* It stays in the window's corner at every width it appears at, unlike
-   `.resume-reading`, which moves in under the contents rail from 1280px
+   `.resume-reading`, which moves in under the contents rail from 1168px
    (DECISIONS #39). Two pills that can both be on screen shouldn't want the
    same spot — and the far corner is empty, since the rail sits inboard of it. */
 
@@ -4095,7 +4106,7 @@ svg.diagram tspan {
    A line worth stopping on, lifted out of the column into the left margin so
    it sits BESIDE the paragraph it came from instead of interrupting it.
 
-   Below 1280px there is no margin to move into, so it stays in flow and reads
+   Below 1168px there is no margin to move into, so it stays in flow and reads
    as an emphasised quote. That's the honest fallback: unlike a sidenote, the
    text is part of the argument and can't be tucked away into a list at the
    bottom. */
@@ -4134,7 +4145,7 @@ svg.diagram tspan {
   content: "— ";
 }
 
-@media (min-width: 1280px) {
+@media (min-width: 1168px) {
   /* THE SIDENOTES' GUTTER, to the pixel. Same width, same pull, same `clear`,
      so a quote and a footnote in the same paragraph stack rather than land on
      one another — see the geometry note on `.sidenote` above. The rule moves
@@ -5234,11 +5245,12 @@ main:has(.note-wash) {
    A SONG embed never moves. It is an example of a sentence and has to stay
    next to that sentence to be one.
 
-   1400px, not the rail's 1280px. The player takes 21rem + 20rem of layout past
+   1400px, not the rail's 1168px. The player takes 21rem + 20rem of layout past
    centre — a transform shrinks paint, not layout — and that only clears a
-   window comfortably from about 1400px. Between 1280 and 1400 the contents
-   rail is out and the player stays in the writing. Dropping this to 1280 was
-   tried and reverted (#99). */
+   window comfortably from about 1400px. Between 1168 and 1400 the contents
+   rail is out and the player stays in the writing. Dropping this to the rail's
+   breakpoint was tried and reverted (#99, when that number was 1280 — moving
+   the rail to 1168 makes the gap wider, and does not reopen the question). */
 @media (min-width: 1400px) {
   .music-note .apple-music-block[data-kind="album"] {
     position: fixed;

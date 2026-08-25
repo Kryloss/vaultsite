@@ -1835,3 +1835,17 @@ album (336 × 450): link top 432, controls end 423  →  crop 18, 9px clear
 **Checked as a family, because no one card proves the system.** The browser matrix includes root, section, plain article, People, tall Shelf, wide video, square Music, and the longest current cover title. All are 1200×630; the long titles hold their hierarchy, the three artwork shapes remain whole, and the plain fallback still looks intentional.
 
 **Revisit when:** the favicon mark changes, a fourth kind of artwork needs a genuinely different silhouette, or a title longer than the current responsive thresholds can hold. Do not introduce section accent colours to solve any of those — the art already has colour, and the text-only card's fingerprint is its variation.
+
+## 107. The gutters' breakpoint is derived, not borrowed (2026-08-25)
+
+**Decision:** the width at which the article grows its two margins — the contents rail on the right, sidenotes and pull-quotes on the left, and `.resume-reading` dropping under the rail's column — moves from **1280px to 1168px**. Five media queries in `globals.css`, one number, still shared between all of them.
+
+**1280 was Tailwind's `xl`, not a measurement.** The rail's geometry decides when it fits: the page is a centred `--measure` (39rem, so 19.5rem either side of centre), the rail starts 2.5rem past the text and is 13rem wide, so its outer edge lands 35rem from centre. Add a `--gutter` (1.5rem) of air off the window and the rail has room from 36.5rem of half-width — **73rem, or 1168px**. At 1280 there were 80px of empty margin left over at the breakpoint itself, and every window between 1168 and 1280 lost the rail to the floating pill while the rail still fitted. That's the whole bug: a laptop window that isn't maximised reads as a phone.
+
+**1120px is the floor and is not taken.** That's where the rail's edge touches the window with zero margin. 1168 keeps the rail exactly as far from the window edge as the text is from the edge of its own box, which is the only value here that isn't arbitrary. Measured in the browser rather than reasoned about: at 1168 the rail sits 24px off the edge and the sidenote column starts 64px in, well clear of the 16px `.edge-zone`.
+
+**All four things move together, deliberately.** The left gutter only needs 65rem and could have arrived earlier, but a page with sidenotes and no contents rail (or the reverse) is lopsided — the comment on `.sidenote` has always said the two appear at the same width, and this keeps that true. `.resume-reading` has to move with the rail for the same reason it did before: from the width where the rail exists, the pill belongs at the foot of that column instead of out at the window's edge.
+
+**The music gutter player stays at 1400px** (#99). Its layout box is 320px wide even though it paints at 213, so it needs the room the rail doesn't; moving the rail down only widens the gap between the two breakpoints, and does not reopen that question.
+
+**Revisit when:** `--measure`, the rail's 13rem width or the 2.5rem gutter changes — the number is that arithmetic and has to be re-derived, not nudged.

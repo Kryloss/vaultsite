@@ -1357,7 +1357,7 @@ function rehypeImageSize() {
  * the sentence that raised it instead of sending the reader to the bottom.
  *
  * The footnote list remark-gfm builds is left exactly where it is — CSS hides
- * one or the other (`.sidenote` below 1280px, `section.footnotes.all-sidenoted`
+ * one or the other (`.sidenote` below 1168px, `section.footnotes.all-sidenoted`
  * above), the same show-one-hide-the-other trick the language toggle uses. That
  * keeps the note reachable without JS, in print, and in a feed reader, and it
  * keeps the `↩` backref working for anyone who lands there from a narrow
