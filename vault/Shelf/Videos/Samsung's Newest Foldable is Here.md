@@ -11,6 +11,7 @@ author_bio_uk: >-
 medium: video
 categories: [Tech]
 video: https://www.youtube.com/watch?v=WVsG3daysEM
+uploaded: 2026-07-24
 date: 2026-07-25
 description: "The Waveform crew's first take on Samsung's latest folding phone."
 description_uk: "Перші враження команди Waveform від нового складаного смартфона Samsung."
@@ -21,7 +22,7 @@ description_uk: "Перші враження команди Waveform від но
 | | |
 |---|---|
 | Topic | Hands-on with Samsung's newest foldable |
-| Released | — |
+| Released | 2026-07-24 |
 
 https://www.youtube.com/watch?v=WVsG3daysEM
 

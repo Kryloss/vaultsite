@@ -11,6 +11,7 @@ author_bio_uk: >-
 medium: video
 categories: [Tech, Education]
 video: https://www.youtube.com/watch?v=2J3uX8iRNng
+uploaded: 2026-07-24
 date: 2026-07-25
 description: "A side-by-side run of two Claude models on the same tasks."
 description_uk: "Порівняння двох моделей Claude на однакових задачах."
@@ -21,7 +22,7 @@ description_uk: "Порівняння двох моделей Claude на одн
 | | |
 |---|---|
 | Topic | Anthropic's Claude Opus 5 and Claude Fable 5, compared on the same prompts |
-| Released | — |
+| Released | 2026-07-24 |
 
 https://www.youtube.com/watch?v=2J3uX8iRNng
 

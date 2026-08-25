@@ -11,6 +11,7 @@ author_bio_uk: >-
 medium: video
 categories: [Politics]
 video: https://www.youtube.com/watch?v=3DA7EXbf_d4
+uploaded: 2026-07-21
 date: 2026-07-25
 description: "A field interview from Caolan Robertson's Ukraine reporting."
 description_uk: "Інтерв'ю з циклу репортажів Каолана Робертсона з України."
@@ -22,7 +23,7 @@ description_uk: "Інтерв'ю з циклу репортажів Каолан
 |---|---|
 | Who he is | Irish journalist, reporting from Ukraine since 2022 and living there full-time since mid-2024 |
 | Recognition | Ukraine's Order of Merit, 3rd Class (June 2026); Honorary Ambassador Award for Digital Diplomacy (2025) |
-| Released | — |
+| Released | 2026-07-21 |
 
 https://www.youtube.com/watch?v=3DA7EXbf_d4
 

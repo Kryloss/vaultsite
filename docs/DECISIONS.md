@@ -1865,3 +1865,25 @@ album (336 × 450): link top 432, controls end 423  →  crop 18, 9px clear
 **A whole ordering hazard went with it.** This section used to end in a `max-width: 639px` block written LAST on purpose, because a media query adds no specificity and only position could make it win (#52). With one presentation there is nothing to override, so that block is gone rather than rewritten.
 
 **Revisit when:** the outline needs to be readable without opening it. That is the one thing the label did, and a rail — not a wider pill — is the answer the site already has.
+
+## 109. The shelf's video queue is a YouTube playlist, not watch history (2026-08-25)
+
+**Decision:** videos reach the shelf through a public YouTube playlist called `Shelf`, read as an Atom feed by `scripts/youtube-shelf.mjs` and turned into notes by a scheduled cloud task following `docs/YOUTUBE-SHELF.md`.
+
+**Watch history was the obvious input and it does not exist.** Google removed watch-history and watch-later from the YouTube Data API in 2016; Takeout still exports history, by hand, which is not something a nightly job can use. A playlist is the substitute and is two taps in the app.
+
+**It is also the better signal.** History records everything clicked and abandoned. The shelf is a judgment about what was worth keeping, and saving to a playlist is that judgment being made at the moment it is felt, on a phone, without opening Obsidian.
+
+**Keyless, which is why it fits.** The playlist feed, oEmbed and the channel page's `og:image` need no API key, no OAuth and no Google Cloud project — the same footing as the iTunes lookup behind music covers (#90) and the channel-avatar cascade already documented for creator photos (#86). A key would have been the first secret this repo ever had to hold.
+
+**The playlist IS the queue, and nothing else records state.** No skip list, no seen-file, no database. A video in the playlist with no note is pending on every run; removing it from the playlist is how you decline it. The alternative — a committed list of refused video ids — is a second source of truth that would drift from the playlist the first time he tidied it on his phone.
+
+**The script writes no notes.** It fetches, parses, diffs and downloads; the agent writes the note. A shelf note needs a translated title, two descriptions, categories and a verified channel bio, none of which is string formatting. The split keeps the deterministic half testable without a network and without a model, which is what `scripts/youtube-shelf.test.mjs` covers — including a pin against `lib/youtube.ts`'s video-ID regex, since a plain `node scripts/…mjs` run cannot import the TypeScript module (the same mirror-and-pin as `MAX_INLINE_SVG`).
+
+**`uploaded:` is the quiet win.** #41 left the key explicit and unfilled because nothing on the site could derive a video's publish date without the Data API — so every video note described itself as a `CreativeWork` and Search Console asked for `uploadDate` forever. The playlist feed carries it. All four existing video notes were backfilled when this shipped, and their fact tables now print a date instead of an em dash.
+
+**"Why it's on the shelf" stays empty.** The task publishes facts, a cover, a creator block and both languages; the opinion is left blank with the comment the earlier notes already carry. A cron that writes Kyrylo's verdicts is the failure mode this whole feature has to avoid, and an empty heading is a better prompt than an invented paragraph.
+
+**PR, never a push to `main`.** Obsidian Git commits and pushes this checkout every 10 minutes. A cloud task pushing to the same branch races it and leaves a conflict on the laptop, which is the one cost the owner would actually feel.
+
+**Revisit when:** the playlist stops being the only queue — a second one for "watched, not shelved", or per-language playlists. The script already takes a playlist id as an argument for exactly that.

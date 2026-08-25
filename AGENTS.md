@@ -13,6 +13,7 @@ to the whole repository.
    - Content intake or vault edits → `docs/CONTENT-WORKFLOW.md`
    - New section/list type → `docs/ADDING-PAGE-TYPES.md`
    - Excalidraw or diagrams → `docs/EXCALIDRAW.md`
+   - A YouTube video reaching the shelf → `docs/YOUTUBE-SHELF.md`
    - Existing architectural/design behavior → search `docs/DECISIONS.md`
    - Detailed feature inventory → search the relevant section of `CLAUDE.md`
 
