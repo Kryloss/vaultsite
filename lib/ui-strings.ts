@@ -165,6 +165,18 @@ export const ui = {
   creatorChannel: { en: "Channel", uk: "Канал" },
   creatorArtist: { en: "Artist", uk: "Виконавець" },
 
+  /* What a music note is ABOUT, printed in grey after its title. Derived from
+     `format:` — or, when the note doesn't say, from whether the Apple Music
+     link it embeds points at one track or a whole release. Never written into
+     the title itself, the same way a shelf creator's role never is. */
+  formatAlbum: { en: "Album", uk: "Альбом" },
+  formatTrack: { en: "Track", uk: "Трек" },
+  formatSingle: { en: "Single", uk: "Сингл" },
+  formatEp: { en: "EP", uk: "EP" },
+  formatMixtape: { en: "Mixtape", uk: "Мікстейп" },
+  formatLive: { en: "Live album", uk: "Концертний альбом" },
+  formatCompilation: { en: "Compilation", uk: "Збірка" },
+
   /* The rating's row in a shelf note's fact list — the stars live there now
      rather than on the metadata line (`docs/DECISIONS.md` #88). */
   ratingRow: { en: "Rating", uk: "Оцінка" },
