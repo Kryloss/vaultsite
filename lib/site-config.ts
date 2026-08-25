@@ -21,9 +21,13 @@ export const authorName = "Kyrylo Leshchenko";
 export const siteUrl = "https://kryloss.com";
 
 /**
- * Public repo, used by the Cmd+K "open this note on GitHub" action to link at
- * a note's raw vault source. Set to an empty string to drop the action — the
- * palette hides it when there's nothing to point at.
+ * The repo, used by the Cmd+K "open this note on GitHub" action to link at a
+ * note's raw vault source. **The repo has to stay PUBLIC for this to work** —
+ * every reader who isn't signed in as the owner gets a GitHub 404 otherwise,
+ * and nothing on the site can tell, so the dead link is invisible from here.
+ * It was private for a while and this comment said "Public repo" throughout.
+ * If it ever goes private again, set this to an empty string to drop the
+ * action — the palette hides it when there's nothing to point at.
  */
 export const repoUrl = "https://github.com/Kryloss/vaultsite";
 /** Branch the site deploys from — the one a note's source should be read on. */
