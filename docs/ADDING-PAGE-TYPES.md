@@ -65,6 +65,24 @@ Push, and `/projects` renders as a grid. Unknown types fall back to `PostList`, 
 
 Add frontmatter keys to the entry notes (e.g. `url:`, `tech:`) and read them where needed. To surface new keys in the `Entry` object, extend the interface and the mapping in `lib/vault.ts → getEntries()`. Keep new keys optional so existing content never breaks.
 
+## If a type needs to place the section's own prose
+
+By default `app/[section]/page.tsx` prints `main.md`'s body above the list. A type that needs it somewhere else — music puts it under the Apple Music player — adds itself to `bodyBelow` in `lib/section-types.tsx` and renders the `body` prop wherever it belongs:
+
+```tsx
+export default function MusicList({ section, entries, body }: ListProps) {
+  return (
+    <div>
+      {/* …the playlist embed… */}
+      {body}
+      {/* …the notes… */}
+    </div>
+  );
+}
+```
+
+The page still renders the markdown (both languages, both `<article>` elements) and hands down one finished node — render it as a whole and never split the pair, or the language toggle shows both at once. Types that don't opt in receive `undefined`. Reasoning: `docs/DECISIONS.md` #111.
+
 ## Guidelines
 
 - **A list component never sets its own page container.** The route already wraps everything in `components/Page.tsx`, which owns the measure, gutters and vertical rhythm. Start at `mt-8` and let the shell handle the edges.

@@ -93,7 +93,7 @@ simple, documented, low-maintenance solutions over clever abstractions.
 | `components/lists/` | Section-specific list renderers |
 | `lib/vault.ts` | Section/entry discovery, slugs, frontmatter, sorting, indexes |
 | `lib/markdown.ts` | Obsidian preprocessing and Markdown-to-HTML pipeline |
-| `lib/section-types.tsx` | Section `type` → list component registry |
+| `lib/section-types.tsx` | Section `type` → list component registry (+ `listRendersBody`, which types place `main.md`'s prose themselves) |
 | `lib/ui-strings.ts` | Fixed English/Ukrainian UI strings |
 | `lib/observances.ts` | Ukrainian national days the sidebar counter steps aside for, and their kind |
 | `lib/plural.ts` | Counted nouns — any string with a number in it |

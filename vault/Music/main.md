@@ -25,4 +25,6 @@ artists:
       Четвірка з Рима — Даміано Давід співає, Вікторія Де Анджеліс на басу, Томас Раджі на гітарі, Ітан Торкіо на барабанах. Пройшли шлях від вуличних виступів на Віа-дель-Корсо до перемоги на Євробаченні 2021 року.
 ---
 
-Mostly Twenty One Pilots lately — the band that somehow makes rap, rock, ukulele, and existential dread work in the same song. Below is the rotation, and further down my notes on specific albums and tracks.
+The words come before the sound for me. I'll read everything about whoever made a record before I can properly fall into it, which is a slow way to listen and the reason there are notes on this page at all. What I end up with usually lands somewhere between poppy rap and metal-rock that isn't too heavy.
+
+Above is the rotation. Below, the artists I keep going back to.

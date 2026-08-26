@@ -12,8 +12,27 @@ kept small on purpose (the PDF needs no Ukrainian, links, or goals).
 
 Run manually after editing the résumé (NOT part of the build):
 
-    pip install weasyprint
-    python3 scripts/build-resume-pdf.py
+    DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib \
+        ~/.venvs/vaultsite-resume/bin/python scripts/build-resume-pdf.py
+
+`pip install weasyprint` on its own is NOT enough, for three reasons that each
+fail differently:
+
+  * WeasyPrint needs native Pango/cairo (`brew install pango`), and macOS' loader
+    will not find Homebrew's copies without DYLD_FALLBACK_LIBRARY_PATH — without
+    it the import dies on libgobject-2.0-0.
+  * Install into a venv, not system python (there is no `pip` on PATH, only a
+    `pip3` pointing into Xcode's Python 3.9). Keep the venv OUTSIDE the repo:
+    Obsidian Git auto-commits everything it finds here.
+  * **Lato must be installed as a system font** (`brew install --cask
+    font-lato`). This is the quiet one: the CSS below asks for Lato and falls
+    back to DejaVu Sans, which is wider — the résumé silently spills onto a
+    SECOND PAGE and nothing warns you. If the output grows a page, check the
+    font before touching the layout.
+
+Verify a rebuild by diffing the extracted text against the committed PDF
+(`git show HEAD:"vault/Now/Kyrylo Leshchenko Resume.pdf"`) — the only difference
+should be the edit you just made.
 
 The regenerated PDF sits in the vault, so sync-assets.mjs publishes it at
 /vault-assets/Now/... and the download button on the Now page picks it up.

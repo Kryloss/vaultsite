@@ -5,6 +5,7 @@ date: 2026-08-06
 category: Cybersecurity
 description: Why I'm building a planner nobody asked for, and the decisions underneath it.
 description_uk: Чому я роблю планер, якого ніхто не просив, і які рішення за ним стоять.
+draft: true
 ---
 
 There are hundreds of planners and I'm building another one. It's called [[Dispatch]], it runs on my Mac and my phone, and right now it barely works — which is the honest reason to write about it while the decisions are still visible.

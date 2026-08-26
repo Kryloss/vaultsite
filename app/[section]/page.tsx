@@ -4,7 +4,7 @@ import { getSections, getSectionBySlug, getEntries } from "@/lib/vault";
 import { renderMarkdown } from "@/lib/markdown";
 import { pageMeta } from "@/lib/metadata";
 import { previewsInHtml } from "@/lib/previews";
-import { getListComponent } from "@/lib/section-types";
+import { getListComponent, listRendersBody } from "@/lib/section-types";
 import { ui } from "@/lib/ui-strings";
 import T from "@/components/T";
 import JsonLd from "@/components/JsonLd";
@@ -58,6 +58,30 @@ export default async function SectionPage({ params }: Props) {
     : "";
   const List = getListComponent(section.type);
 
+  /* The section's own prose. Most types print it here, above the list; the
+     few that place it themselves (music puts it under the playlist embed)
+     take it as a prop instead — see `listRendersBody`. */
+  const body =
+    html && htmlUk ? (
+      <>
+        <article
+          className="prose mt-6 lang-en"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+        <article
+          className="prose mt-6 lang-uk"
+          lang="uk"
+          dangerouslySetInnerHTML={{ __html: htmlUk }}
+        />
+      </>
+    ) : html ? (
+      <article
+        className="prose mt-6"
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
+    ) : null;
+  const ownBody = listRendersBody(section.type);
+
   return (
     <Page>
       <JsonLd data={breadcrumbJsonLd(section)} />
@@ -76,26 +100,13 @@ export default async function SectionPage({ params }: Props) {
         )}
       </header>
 
-      {html && htmlUk ? (
-        <>
-          <article
-            className="prose mt-6 lang-en"
-            dangerouslySetInnerHTML={{ __html: html }}
-          />
-          <article
-            className="prose mt-6 lang-uk"
-            lang="uk"
-            dangerouslySetInnerHTML={{ __html: htmlUk }}
-          />
-        </>
-      ) : html ? (
-        <article
-          className="prose mt-6"
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
-      ) : null}
+      {!ownBody && body}
 
-      <List section={section} entries={entries} />
+      <List
+        section={section}
+        entries={entries}
+        body={ownBody ? body : undefined}
+      />
     </Page>
   );
 }

@@ -23,6 +23,25 @@ import NowList from "@/components/lists/NowList";
 export interface ListProps {
   section: Section;
   entries: Entry[];
+  /**
+   * The section's own prose from main.md, already rendered (both languages).
+   * Passed ONLY to the types listed in `bodyBelow` — every other section page
+   * prints it above the list itself, and this is undefined there.
+   */
+  body?: ReactNode;
+}
+
+/**
+ * Section types that place the section's prose THEMSELVES, below something in
+ * their own list. Music is the one: its opening paragraphs read as a note on
+ * the playlist embed, so they belong under it rather than above the page's
+ * first widget. See docs/DECISIONS.md #111.
+ */
+const bodyBelow = new Set(["music"]);
+
+/** True when this type takes `body` and renders it; the page then doesn't. */
+export function listRendersBody(type: string): boolean {
+  return bodyBelow.has(type);
 }
 
 /** Sync or async server component that renders a section's entry list. */

@@ -4,6 +4,6 @@ title_uk: Полиця
 icon: 📚
 order: 4
 type: shelf
-description: Books, movies, shows, and videos — with the thoughts worth keeping.
-description_uk: Книги, фільми, серіали та відео — і думки, які варто зберегти.
+description: I forget everything I read and watch, so I keep what's worth remembering.
+description_uk: Я постійно забуваю, що читав і дивився, тому лишаю тут варте пам'яті.
 ---

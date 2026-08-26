@@ -33,9 +33,9 @@ Rerun `python3 scripts/build-resume-pdf.py` after editing the résumé.
 
 ## Goals
 
-- [ ] Pass the CompTIA Security+ exam → [[My Security+ journey]]
 - [ ] Land a co-op placement in first year
 	- Requires at least a 3.0 GPA
+- [ ] Pass the CompTIA Security+ exam → [[My Security+ journey]]
 - [ ] Find a tech-related job
 
 ## Résumé
@@ -76,7 +76,7 @@ Dependable team leader with two years of supervision and customer-service experi
 ### Certifications
 
 #### CompTIA Security+ (SY0-701) → [[My Security+ journey]]
-*In progress* · Studying toward the exam this summer
+*In progress* · Studying toward the exam
 
 ### Strengths
 

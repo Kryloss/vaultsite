@@ -10,6 +10,7 @@ description_uk: Що я вчу, як я це вчу і що справді пр�
 aliases:
   - CompTIA Security+
   - Security+
+draft: true
 ---
 
 I'm working through the CompTIA Security+ (SY0-701) objectives this summer, between espresso shots. This post is the running log — it gets updated as I go, which is exactly what a site published from an Obsidian vault is good at.

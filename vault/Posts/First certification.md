@@ -9,7 +9,7 @@ description: Why CompTIA Security+ is my first real credential — and the study
 description_uk: Чому CompTIA Security+ — моє перше справжнє посвідчення, і система підготовки, яку я під нього збудував.
 aliases:
   - Security+ SY0-701
-draft: false
+draft: true
 ---
 
 Everyone starts somewhere. For me, the first real step into cybersecurity isn't a job or a degree — it's a certification I haven't earned yet: **CompTIA Security+ (SY0-701)**. Entry ticket, the one a lot of junior security roles list as required or preferred, and the thing I want in hand before [[Mykhailo Fedorov|the kind of work]] I'm aiming for at TMU actually begins.

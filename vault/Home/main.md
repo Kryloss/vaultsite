@@ -9,10 +9,10 @@ description_uk: Студент з Онтаріо на шляху в кіберб
 ![[me.jpeg|93]]
 # Hey, I'm Kyrylo Leshchenko.  
 
-I'm a student in Ontario, Canada, working my way toward a career in cybersecurity. I was born in [[I made propaganda for my Religion class|Kramatorsk]], Ukraine, in 2007, and these days I split my time between school, pulling espresso shots at Starbucks, and studying for the [[CompTIA Security+]].
+I'm a student at TMU in Canada, trying to get into IT. I was born in Ukraine, and right now I split my time between studying and working at Starbucks.
 
-Before Starbucks I spent two years at Tim Hortons, the last stretch as a supervisor — which taught me more about handling pressure and people than any textbook so far. The plan from here: Cyber Science at TMU.
+I made this site to keep a database of my own life. In the future I might turn it into a business page or just abandon it.
 
-This site is where I keep my writing, projects, notes, and the occasional strong opinion. It's a work in progress, like me.
+I'm not trying to publicize it in any way, but if I write into the void, I'll drop it even faster. So if you somehow ended up here, you can dig into what I do in my free time :)
 
-Curious what I'm up to right now? See [[Now/main|Now]].
+Curious what I'm up to now? Take a look [[Now/main|here]].

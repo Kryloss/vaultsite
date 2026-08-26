@@ -34,7 +34,7 @@ import { ui } from "@/lib/ui-strings";
  *
  * Embeds use Apple's free embed.music.apple.com iframes — no API key, no cost.
  */
-export default function MusicList({ section, entries }: ListProps) {
+export default function MusicList({ section, entries, body }: ListProps) {
   const raw = section.meta.playlists ?? section.meta.playlist;
   const playlists = (Array.isArray(raw) ? raw : raw ? [raw] : [])
     .map(String)
@@ -90,6 +90,12 @@ export default function MusicList({ section, entries }: ListProps) {
           />
         </p>
       )}
+
+      {/* The section's prose sits UNDER the player, not above it: it reads as a
+          note on what's in the playlist, and the embed is what the page is
+          for. Handed down by app/[section]/page.tsx — see `listRendersBody`
+          in lib/section-types.tsx and docs/DECISIONS.md #111. */}
+      {body}
 
       {groups.length > 0 && (
         <>
