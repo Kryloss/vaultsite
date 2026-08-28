@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, type ReactNode } from "react";
+import { useRef, type CSSProperties, type ReactNode } from "react";
 
 /**
  * The horizontal scroller behind each shelf row: grab it and drag.
@@ -28,9 +28,12 @@ const DRAG_THRESHOLD = 6;
 
 export default function ShelfRow({
   className = "",
+  style,
   children,
 }: {
   className?: string;
+  /** Custom properties the row is measured with — see BookSpines' lead gap. */
+  style?: CSSProperties;
   children: ReactNode;
 }) {
   const ref = useRef<HTMLUListElement>(null);
@@ -92,6 +95,7 @@ export default function ShelfRow({
       <ul
         ref={ref}
         className={className}
+        style={style}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}

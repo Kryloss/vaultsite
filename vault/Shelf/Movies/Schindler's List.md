@@ -13,6 +13,11 @@ author_bio_uk: >-
   найкомерційно успішніший кінематографіст в історії.
 medium: movie
 categories: [Drama, History]
+imdb_id: tt0108052
+imdb: 9.0
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 1,600,199 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: A profiteer of the Holocaust turns into the reason eleven hundred people survived it.
 description_uk: Той, хто наживався на Голокості, стає причиною, чому тисяча сто людей його пережили.

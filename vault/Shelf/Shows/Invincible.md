@@ -13,6 +13,11 @@ author_bio_uk: >-
   Comics, де тепер є партнером.
 medium: show
 categories: [Animation, Sci-Fi]
+imdb_id: tt6741278
+imdb: 8.7
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 351,367 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: A superhero cartoon that turns very hard on you in its first season.
 description_uk: Мультсеріал про супергероїв, який дуже різко обертається проти глядача вже в першому сезоні.

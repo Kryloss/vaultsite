@@ -13,6 +13,11 @@ author_bio_uk: >-
   розумом» для Netflix.
 medium: show
 categories: [Drama, Crime, Thriller]
+imdb_id: tt5290382
+imdb: 8.6
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 404,392 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: The invention of criminal profiling, told mostly through conversations in rooms.
 description_uk: Винайдення кримінального профайлінгу, розказане здебільшого через розмови в кімнатах.

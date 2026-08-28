@@ -98,6 +98,52 @@ export function ExternalLinkIcon({ className }: IconProps) {
   );
 }
 
+export function UndoIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
+      <path d="m9 7-5 5 5 5" />
+      <path d="M5 12h8a6 6 0 0 1 6 6v1" />
+    </svg>
+  );
+}
+
+export function RedoIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
+      <path d="m15 7 5 5-5 5" />
+      <path d="M19 12h-8a6 6 0 0 0-6 6v1" />
+    </svg>
+  );
+}
+
+export function SaveIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
+      <path d="M5 3h12l3 3v15H4V4a1 1 0 0 1 1-1Z" />
+      <path d="M8 3v6h8V3M8 21v-7h8v7" />
+    </svg>
+  );
+}
+
+/** Obsidian's faceted crystal, kept as a quiet one-colour outline. */
+export function ObsidianIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
+      <path d="m9 2 7 2 4 6-2 9-6 3-7-4-1-8Z" />
+      <path d="m9 2 3 7 8 1M12 9l-7 9M12 9v13" />
+    </svg>
+  );
+}
+
+export function ReloadIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
+      <path d="M20 7v5h-5" />
+      <path d="M19 12a7.5 7.5 0 1 0-2 5" />
+    </svg>
+  );
+}
+
 export function CoffeeIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>

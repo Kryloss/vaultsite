@@ -78,8 +78,18 @@ export interface ShelfItem {
   spineUkAr?: number;
   /** "contain" letterboxes wide art (logos) instead of cropping to fill. */
   coverFit?: "contain";
-  /** 0–5, halves allowed. */
+  /** 0–5, halves allowed. Kyrylo's own verdict, drawn as stars. */
   rating?: number;
+  /**
+   * `imdb:` — IMDb's average, 0–10. Somebody else's number, so it is shown as
+   * a number and never as his stars (DECISIONS #114). Written into the vault
+   * by `scripts/imdb-ratings.mjs` rather than fetched at build: the site is
+   * static, and a build that reaches the network can fail for reasons that
+   * have nothing to do with the code.
+   */
+  imdb?: number;
+  /** `imdb_id:` — the tconst the rating was looked up by. */
+  imdbId?: string;
   /** Renders as a 16:9 card instead of a 2:3 cover. */
   isVideo?: boolean;
   /**
@@ -346,6 +356,9 @@ export function toShelfItem(entry: Entry): ShelfItem {
       entry.meta.coverFit === "contain" ? ("contain" as const) : undefined,
     rating:
       typeof entry.meta.rating === "number" ? entry.meta.rating : undefined,
+    imdb: typeof entry.meta.imdb === "number" ? entry.meta.imdb : undefined,
+    imdbId:
+      typeof entry.meta.imdb_id === "string" ? entry.meta.imdb_id : undefined,
     isVideo: medium === "video" || medium === "youtube" || Boolean(videoId),
     status,
     statusLabel,
@@ -401,6 +414,15 @@ export function sortForTop(items: ShelfItem[]): ShelfItem[] {
     const br = typeof b.rating === "number";
     if (ar !== br) return ar ? -1 : 1;
     if (ar && br && a.rating !== b.rating) return b.rating! - a.rating!;
+    /* Below his own verdict — or in place of it, while almost nothing is
+       rated — IMDb's average orders the rest. The two scales are never mixed
+       into one number: a rated entry outranks an unrated one whatever IMDb
+       thinks of either, which keeps the list HIS shelf rather than a copy of
+       IMDb's. Within each half the ordering is just consistent. */
+    const ai = typeof a.imdb === "number";
+    const bi = typeof b.imdb === "number";
+    if (ai !== bi) return ai ? -1 : 1;
+    if (ai && bi && a.imdb !== b.imdb) return b.imdb! - a.imdb!;
     if (a.date !== b.date) return (b.date ?? "").localeCompare(a.date ?? "");
     return a.title.localeCompare(b.title);
   });

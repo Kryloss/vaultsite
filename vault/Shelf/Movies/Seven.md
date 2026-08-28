@@ -15,6 +15,11 @@ author_bio_uk: >-
   «Чужому 3», а відтоді десятиліттями знімає прискіпливі знебарвлені трилери.
 medium: movie
 categories: [Thriller, Crime, Mystery]
+imdb_id: tt0114369
+imdb: 8.6
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 2,053,341 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: A serial-killer procedural that refuses to give the detectives, or you, a way out.
 description_uk: Детектив про серійного вбивцю, який відмовляє у виході і слідчим, і глядачеві.

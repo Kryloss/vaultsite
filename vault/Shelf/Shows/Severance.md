@@ -13,6 +13,11 @@ author_bio_uk: >-
   вільний час, працюючи на тимчасових офісних посадах.
 medium: show
 categories: [Sci-Fi, Thriller, Mystery]
+imdb_id: tt11280740
+imdb: 8.6
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 403,333 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: Work-life balance solved surgically, which turns out to create two people.
 description_uk: Баланс роботи й життя, розв'язаний хірургічно, — і з однієї людини виходить дві.

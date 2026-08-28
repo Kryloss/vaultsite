@@ -17,6 +17,12 @@
 
 Git is the single source of truth. The deployed site never reads the filesystem at runtime — `dynamicParams = false` on all dynamic routes, so the full site is static HTML on Vercel's CDN.
 
+`npm run dev` is the one deliberate exception: it supervises a loopback-only
+writer for the local authoring dock. The sidecar is bound to `127.0.0.1`, and
+Next's `/__vault-editor/*` rewrite exists only in development. Production
+builds replace the dock client with a null component, emit no rewrite or
+filesystem endpoint, and remain static.
+
 ## Content model
 
 - **Section** = TOP-LEVEL folder in `vault/` containing `main.md`. Gets a route (`/posts`), a sidebar item, and a list of its entries. The folder `Home` is special only in that its slug `home` renders at `/`.

@@ -13,6 +13,11 @@ author_bio_uk: >-
   найкомерційно успішніший кінематографіст в історії.
 medium: movie
 categories: [Crime, Drama]
+imdb_id: tt0264464
+imdb: 8.1
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 1,261,298 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: A con-man chase that turns into the only real relationship either man has.
 description_uk: Погоня за шахраєм, що перетворюється на єдині справжні стосунки в житті обох.

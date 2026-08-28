@@ -13,6 +13,11 @@ author_bio_uk: >-
   «Тьма» стала першим німецькомовним оригіналом Netflix.
 medium: show
 categories: [Sci-Fi, Mystery, Thriller]
+imdb_id: tt5753856
+imdb: 8.7
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 559,465 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: A time-travel plot that closes every loop it opens.
 description_uk: Сюжет про подорожі в часі, який замикає кожну петлю, яку відкрив.

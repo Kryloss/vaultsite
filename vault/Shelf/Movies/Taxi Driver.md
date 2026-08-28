@@ -13,6 +13,11 @@ author_bio_uk: >-
   The Film Foundation — один із найактивніших охоронців кіноспадщини.
 medium: movie
 categories: [Drama, Crime]
+imdb_id: tt0075314
+imdb: 8.2
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 1,039,725 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: Loneliness in a city, filmed from behind a windscreen.
 description_uk: Самотність у місті, знята з-за лобового скла.

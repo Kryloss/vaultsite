@@ -13,6 +13,11 @@ author_bio_uk: >-
   написав і зрежисував усю трилогію «Як приборкати дракона».
 medium: movie
 categories: [Animation, Fantasy]
+imdb_id: tt0892769
+imdb: 8.1
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 906,779 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: A boy declines to kill the thing everyone around him is sure is the enemy.
 description_uk: Хлопець відмовляється вбити те, що всі довкола вважають ворогом.

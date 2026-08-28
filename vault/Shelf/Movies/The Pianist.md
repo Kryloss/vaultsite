@@ -13,6 +13,11 @@ author_bio_uk: >-
   переховується від вироку в США за статевий злочин проти 13-річної.
 medium: movie
 categories: [Drama, History]
+imdb_id: tt0253474
+imdb: 8.5
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 1,022,760 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: Survival in Warsaw, filmed by a director who survived a ghetto himself.
 description_uk: Виживання у Варшаві, зняте режисером, який сам пережив гетто.

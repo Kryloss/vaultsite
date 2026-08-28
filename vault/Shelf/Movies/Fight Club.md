@@ -13,6 +13,11 @@ author_bio_uk: >-
   «Чужому 3», а відтоді десятиліттями знімає прискіпливі знебарвлені трилери.
 medium: movie
 categories: [Drama, Thriller]
+imdb_id: tt0137523
+imdb: 8.8
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 2,653,669 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: An insomniac office worker goes looking for something real and finds something worse.
 description_uk: Офісний працівник із безсонням шукає щось справжнє й знаходить дещо гірше.

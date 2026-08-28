@@ -12,6 +12,11 @@ author_bio_uk: >-
 medium: movie
 categories: [Sci-Fi, Thriller]
 rating: 5
+imdb_id: tt1375666
+imdb: 8.8
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 2,861,434 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-07-17
 description: A heist movie where the vault is a person's mind.
 description_uk: Фільм-пограбування, де сейфом є людський розум.

@@ -13,7 +13,6 @@ import {
 } from "react";
 import {
   PanelIcon,
-  ExternalLinkIcon,
   SearchIcon,
   resolveIcon,
   CanadaFlag,
@@ -30,7 +29,6 @@ import T from "@/components/T";
 import { useLang } from "@/components/useLang";
 import { ui } from "@/lib/ui-strings";
 import { shortcutKey } from "@/lib/shortcut-key";
-import { siteUrl } from "@/lib/site-config";
 
 /**
  * How long the pointer has to stay in the left edge strip before the panel
@@ -50,14 +48,6 @@ import { siteUrl } from "@/lib/site-config";
  * velocity, just the shortest dwell that distinguishes arriving from crossing.
  */
 const PEEK_DELAY = 90;
-
-/** The public equivalent of the browser's exact current local URL. */
-function currentPublicUrl() {
-  return new URL(
-    `${window.location.pathname}${window.location.search}${window.location.hash}`,
-    siteUrl
-  ).href;
-}
 
 export interface NavItem {
   slug: string;
@@ -131,20 +121,8 @@ export default function Chrome({
    * room for one. Null on any page that isn't a timed article.
    */
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
-  const [publicHref, setPublicHref] = useState<string | null>(null);
   const { lang, toggle: toggleLang } = useLang();
   const pathname = usePathname();
-
-  // A development escape hatch, absent from both the server render and every
-  // non-local host. Build the href from `window.location` so filtered views
-  // and heading links keep their query and hash as well as their pathname.
-  useEffect(() => {
-    if (window.location.hostname !== "localhost") {
-      setPublicHref(null);
-      return;
-    }
-    setPublicHref(currentPublicUrl());
-  }, [pathname]);
 
   /**
    * The hover peek, and the two delays that make an invisible edge target
@@ -526,21 +504,6 @@ export default function Chrome({
               )}
             </span>
           </span>
-        )}
-        {publicHref && (
-          <a
-            href={publicHref}
-            aria-label={ui.openPublicPage[lang]}
-            title={ui.openPublicPage[lang]}
-            /* Re-read the URL at activation time in case only its query or
-               hash changed since the route itself last rendered. */
-            onClick={(event) => {
-              event.currentTarget.href = currentPublicUrl();
-            }}
-            className="press ml-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[var(--text-secondary)] hover:text-[var(--text)]"
-          >
-            <ExternalLinkIcon className="h-3.5 w-3.5" />
-          </a>
         )}
       </div>
 

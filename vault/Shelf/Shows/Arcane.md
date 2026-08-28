@@ -11,6 +11,11 @@ author_bio_uk: >-
   роками керував музичним напрямом студії.
 medium: show
 categories: [Animation, Fantasy]
+imdb_id: tt11126994
+imdb: 9.0
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 454,857 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: A game adaptation that turned out to be about two sisters.
 description_uk: Екранізація гри, яка виявилася історією про двох сестер.

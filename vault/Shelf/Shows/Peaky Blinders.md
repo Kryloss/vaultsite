@@ -13,6 +13,11 @@ author_bio_uk: >-
   формату, що став «Хто хоче стати мільйонером?».
 medium: show
 categories: [Drama, Crime]
+imdb_id: tt2442560
+imdb: 8.7
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 790,325 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: A Birmingham crime family filmed like a rock album.
 description_uk: Бірмінгемська кримінальна родина, знята як рок-альбом.

@@ -13,6 +13,11 @@ author_bio_uk: >-
   наймолодшим лауреатом «Оскара» за режисуру.
 medium: movie
 categories: [Drama, Music]
+imdb_id: tt2582802
+imdb: 8.5
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 1,177,281 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: A film about mentorship that never decides whether the mentor was right.
 description_uk: Фільм про наставництво, який так і не вирішує, чи мав наставник рацію.

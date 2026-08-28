@@ -56,6 +56,9 @@ Kyrylo's personal portfolio, published directly from an Obsidian vault. The
 - Subfolders are for Obsidian filing only. They never become URL segments.
 - Git is the source of truth: Obsidian Git → GitHub → Vercel.
 - The deployed site is fully static. Content is read only at build time.
+- `npm run dev` additionally starts the localhost-only authoring sidecar
+  documented in `CLAUDE.md` and DECISIONS #118; it is never part of a build or
+  production server.
 
 The owner is a high-school student rather than a professional developer. Prefer
 simple, documented, low-maintenance solutions over clever abstractions.
@@ -114,8 +117,14 @@ Routes:
   standing spines; a medium page is a grid of full-size covers — compact
   overview, rich detail — except movies and shows, which open on a ranked
   `Top` list instead of an `All` grid (`hasTopList()`/`sortForTop()`,
-  DECISIONS #113). Category chips still open the grid everywhere, and a
-  rating is never invented: unrated entries fall to the end of the list.
+  DECISIONS #113). Category chips still open the grid everywhere. That list
+  shows TWO ratings and never merges them (DECISIONS #114): stars are
+  Kyrylo's `rating:`, the labelled number is IMDb's `imdb:`. Never draw
+  IMDb's average as stars. `imdb_id:` is written by hand, once; `imdb:` is
+  refreshed by `node scripts/imdb-ratings.mjs` (`--check` to dry-run) and
+  lives in the vault rather than being fetched at build. A movie/show ENTRY
+  page also parks its poster in the right gutter from 1400px, reusing the
+  music player's geometry (`components/NoteCover.tsx`, DECISIONS #115).
   The books row SCALES TO FIT its column rather than scrolling, so spine
   height is derived via `aspect-ratio` (DECISIONS #112). A note with `spine:` shows a
   photograph of the real spine at its true thickness, with a
@@ -225,6 +234,15 @@ Important conventions:
   an accent — nothing reads from it, and the row hover is deliberately
   translucent so it doesn't blank it. Detail in `CLAUDE.md`; reasons in
   `docs/DECISIONS.md` #90.
+- The `/music` list is FILTERABLE: a search box and an All / ENG / UA / RU
+  language switch on the heading's line. Every music note carries `lang:`
+  (`en`/`uk`/`ru`, or a list — a song can be two). The list half is a client
+  component (`components/lists/MusicNotes.tsx`), so the pure shapes and the
+  filter live in `lib/music-filter.ts`, which must never import `fs` — the same
+  split, for the same reason, as `lib/dates.ts` against `lib/vault.ts`. The UA
+  chip is painted in the flag's colours, which is the ONE place outside the
+  sidebar's national days those colours appear; see `docs/DECISIONS.md` #117
+  before adding a second.
 - `draft: true` content appears in development and is excluded in production.
 
 ## Feature invariants worth checking before edits

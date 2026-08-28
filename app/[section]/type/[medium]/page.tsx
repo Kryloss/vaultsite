@@ -55,7 +55,14 @@ export default async function ShelfMediumPage({ params }: Props) {
   if (!group) notFound();
 
   return (
-    <Page>
+    <Page
+      data-dev-vault-source={`vault/${section.dirName}/main.md`}
+      data-dev-vault-source-uk={
+        section.contentUk !== undefined
+          ? `vault/${section.dirName}/main.uk.md`
+          : undefined
+      }
+    >
 
       {/* Passed so the Quotes chip shows here too — the page it leads to is
           /books/quotes, handled by the [category] route. */}

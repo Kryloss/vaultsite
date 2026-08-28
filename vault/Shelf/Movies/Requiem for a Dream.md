@@ -13,6 +13,11 @@ author_bio_uk: >-
   і фізичний розпад.
 medium: movie
 categories: [Drama]
+imdb_id: tt0180093
+imdb: 8.3
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 983,154 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: Four addictions, cut to the same rhythm, ending four different ways.
 description_uk: Чотири залежності, змонтовані в один ритм, і чотири різні фінали.

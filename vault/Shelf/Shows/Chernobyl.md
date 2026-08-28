@@ -13,6 +13,11 @@ author_bio_uk: >-
   «Чорнобиля», а згодом став співавтором «The Last of Us» від HBO.
 medium: show
 categories: [Drama, History]
+imdb_id: tt7366338
+imdb: 9.3
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 1,060,204 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: What it costs when a state decides the truth is negotiable.
 description_uk: Ціна того, що держава вирішила, ніби правда — предмет торгу.

@@ -13,6 +13,11 @@ author_bio_uk: >-
   фермерує в Оксфордширі.
 medium: show
 categories: [Documentary, Comedy]
+imdb_id: tt10541088
+imdb: 9.0
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 90,019 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: A comedy about farming that accidentally became the best argument for farmers.
 description_uk: Комедія про фермерство, яка ненароком стала найкращим аргументом на захист фермерів.

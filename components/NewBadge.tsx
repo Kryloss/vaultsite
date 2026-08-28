@@ -66,11 +66,7 @@ export default function NewBadge({
 
   return (
     <span
-      className={
-        variant === "cover"
-          ? "cover-new"
-          : "ml-2 rounded border border-[var(--border)] px-1.5 py-0.5 text-xs font-medium text-[var(--text-secondary)]"
-      }
+      className={variant === "cover" ? "cover-new" : "new-chip"}
     >
       <T {...ui.newBadge} />
     </span>

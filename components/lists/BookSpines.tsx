@@ -58,6 +58,11 @@ export default function BookSpines({
       follows a heading. The shelf itself is identical in both. */
   className?: string;
 }) {
+  /* Both heights come from the same `spineHeight()` the spines themselves
+     use, so the pull below cannot disagree with what gets painted. */
+  const heights = items.map((item) => spineHeight(item.coverAr));
+  const leadGap = heights.length ? Math.max(...heights) - heights[0] : 0;
+
   return (
     /* The same scroller the other medium rows use, so the shelf is dragged
        exactly the way they are — and `.shelf-row` is what its `cursor: grab`
@@ -66,7 +71,24 @@ export default function BookSpines({
 
        `.stagger` stays on the <ul>: the j/k keyboard shortcuts find rows
        through it, and every list on the site already carries it. */
-    <ShelfRow className={`shelf-row book-shelf stagger ${className}`}>
+    <ShelfRow
+      className={`shelf-row book-shelf stagger ${className}`}
+      /* How much SHORTER the leftmost book is than the tallest one.
+         `.book-shelf-gap` pulls the row up by exactly this, so the FIRST book
+         — not the row's box — sits under the heading at the same distance a
+         Shows card does. The books are bottom-aligned, so the box's top
+         belongs to whichever book happens to be tallest, which is the wrong
+         thing to match against a row of equal-height cards.
+
+         It used to be a literal −38px: that difference, measured once on a
+         shelf where a short book led the row and the tall ones stood far to
+         its right, over empty space. 11/22/63 broke both halves of that at
+         once — digits sort before letters so it leads the row, and it is one
+         of the tallest books on it — and the fixed pull ran 34px too far and
+         stood the book straight through the "Books" heading. Derived from the
+         items, it cannot drift again whatever is added or however it sorts. */
+      style={{ "--shelf-lead": `${leadGap}px` } as CSSProperties}
+    >
       {items.map((item) => {
         const { bg, fg } = spineStyle(item.coverDom);
         const uk =

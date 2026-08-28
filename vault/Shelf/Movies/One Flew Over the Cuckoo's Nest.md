@@ -13,6 +13,11 @@ author_bio_uk: >-
   Чехословаччини після Празької весни й здобув в Америці два «Оскари» за режисуру.
 medium: movie
 categories: [Drama]
+imdb_id: tt0073486
+imdb: 8.6
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 1,165,180 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: What an institution does to the one patient who will not be managed.
 description_uk: Що робить установа з єдиним пацієнтом, якого не вдається вгамувати.

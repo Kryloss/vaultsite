@@ -15,6 +15,12 @@ artist_bio: >-
 artist_bio_uk: >-
   П'ятий альбом гурту й фінал історії Деми. Він іде після Scaled And Icy, який гурт подавав як передачу, зроблену під контролем Єпископів, — тож Clancy це платівка, де оповідач нарешті говорить від себе.
 format: album
+# Which shelf this belongs on, not strictly what it is sung in — see
+# docs/DECISIONS.md #117. Нервы sing in Russian and are a Ukrainian band;
+# BLIND8 are Ukrainian and aim at an English-speaking listener.
+lang: en
+# Apple's own genre for this release, split on the slash.
+genres: [Alternative]
 # Add your score when you're ready — halves are allowed, and it renders as the
 # last row of the fact list below:  rating: 4.5
 ---

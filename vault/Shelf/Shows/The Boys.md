@@ -13,6 +13,11 @@ author_bio_uk: >-
   перш ніж адаптувати «Пацанів» для Amazon.
 medium: show
 categories: [Sci-Fi, Drama]
+imdb_id: tt1190634
+imdb: 8.5
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 1,021,897 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: Superheroes as a public-relations product, and the people cleaning up after them.
 description_uk: Супергерої як піар-продукт — і ті, хто прибирає після них.

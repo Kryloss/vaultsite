@@ -13,6 +13,11 @@ author_bio_uk: >-
   до великої наукової фантастики майже без зміни регістру.
 medium: movie
 categories: [Thriller, Crime, Mystery]
+imdb_id: tt1392214
+imdb: 8.2
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 955,127 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: How far a father will go, filmed without ever telling you he was right.
 description_uk: Як далеко зайде батько — зняте так, що вам жодного разу не кажуть, що він мав рацію.

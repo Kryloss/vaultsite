@@ -13,6 +13,11 @@ author_bio_uk: >-
   угорців. Тричі екранізував Стівена Кінга, двічі — як тюремну драму.
 medium: movie
 categories: [Drama]
+imdb_id: tt0111161
+imdb: 9.3
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 3,230,054 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: Two men serving life find out how long patience can be made to last.
 description_uk: Двоє довічно ув'язнених дізнаються, наскільки довгим можна зробити терпіння.

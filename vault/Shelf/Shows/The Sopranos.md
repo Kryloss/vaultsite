@@ -13,6 +13,11 @@ author_bio_uk: >-
   телебаченні, перш ніж створити «Клан Сопрано» й вести його шість сезонів.
 medium: show
 categories: [Drama, Crime]
+imdb_id: tt0141842
+imdb: 9.2
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 593,346 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: The show that made television take itself seriously.
 description_uk: Серіал, після якого телебачення почало сприймати себе всерйоз.

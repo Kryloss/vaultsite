@@ -13,6 +13,11 @@ author_bio_uk: >-
   перш ніж створити «Пуститися берега» й стати співавтором «Кращий подзвоніть Солу».
 medium: show
 categories: [Drama, Crime, Thriller]
+imdb_id: tt0903747
+imdb: 9.5
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 2,666,648 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: A chemistry teacher becomes what he keeps insisting he is not.
 description_uk: Учитель хімії стає тим, ким він раз по раз запевняє, що не є.

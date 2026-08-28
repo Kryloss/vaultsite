@@ -13,6 +13,11 @@ author_bio_uk: >-
   фермерує в Оксфордширі.
 medium: show
 categories: [Entertainment, Documentary]
+imdb_id: tt1628033
+imdb: 8.7
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 137,975 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: Three men, some cars, and a format that was never really about the cars.
 description_uk: Троє чоловіків, кілька автівок і формат, який ніколи не був про автівки.

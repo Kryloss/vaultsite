@@ -13,6 +13,11 @@ author_bio_uk: >-
   головоломок і знімає їх якомога більше по-справжньому.
 medium: movie
 categories: [Sci-Fi, Drama]
+imdb_id: tt0816692
+imdb: 8.7
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 2,596,768 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: A film about relativity that is really a film about a father missing his daughter's life.
 description_uk: Фільм про теорію відносності, який насправді про батька, що пропускає життя своєї доньки.

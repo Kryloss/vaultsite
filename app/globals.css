@@ -4443,6 +4443,222 @@ svg.diagram tspan {
   }
 }
 
+/* ---------- Local vault editor (components/DevTools.tsx) -----------------
+   Development-only UI, but made from the same chrome material as the public
+   controls so opening it does not make the preview look like another site.
+   Bottom-left is the one free corner: reading offers and time remain right. */
+.dev-dock {
+  position: fixed;
+  left: max(0.75rem, env(safe-area-inset-left));
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
+  z-index: 30;
+  display: flex;
+  max-width: calc(100vw - max(0.75rem, env(safe-area-inset-left)) - 0.75rem);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.dev-dock-bar,
+.dev-editor-panel {
+  background: var(--chrome-bg);
+  box-shadow: inset 0 0 0 1px var(--chrome-ring);
+  backdrop-filter: blur(14px);
+}
+
+.dev-dock-bar {
+  display: flex;
+  width: max-content;
+  max-width: 2.75rem;
+  align-items: center;
+  gap: 0.125rem;
+  overflow: hidden;
+  padding: 0.25rem 0.375rem;
+  border-radius: var(--r-full);
+  transition: max-width var(--dur-slow) var(--ease);
+}
+
+.dev-dock[data-expanded] .dev-dock-bar {
+  max-width: min(24rem, calc(100vw - 1.5rem));
+}
+
+.dev-tool-button {
+  display: flex;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 2rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-md);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.dev-tool-button:hover:not(:disabled) {
+  color: var(--text);
+  background: color-mix(in srgb, var(--bg-hover) 76%, transparent);
+}
+
+.dev-tool-button:disabled {
+  color: var(--text-tertiary);
+  cursor: default;
+  opacity: 0.34;
+}
+
+.dev-tool-divider {
+  width: 1px;
+  height: 1rem;
+  flex: 0 0 1px;
+  margin: 0 0.125rem;
+  background: var(--border);
+}
+
+.dev-save:not(:disabled) {
+  color: var(--text);
+}
+
+.dev-editor-panel {
+  width: min(
+    23rem,
+    calc(100vw - max(0.75rem, env(safe-area-inset-left)) - 0.75rem)
+  );
+  max-height: calc(100vh - 5rem);
+  max-height: calc(100dvh - 5rem - env(safe-area-inset-bottom));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.875rem;
+  border-radius: var(--r-xl);
+  animation: item-in var(--dur) var(--ease) both;
+}
+
+.dev-editor-heading {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.dev-dirty {
+  width: 0.375rem;
+  height: 0.375rem;
+  flex: 0 0 0.375rem;
+  border-radius: var(--r-full);
+  background: var(--text);
+}
+
+.dev-editor-fields {
+  display: grid;
+  gap: 0.625rem;
+  margin-top: 0.75rem;
+}
+
+.dev-editor-fields label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.dev-editor-fields input,
+.dev-editor-fields textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  outline: none;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.dev-editor-fields input {
+  height: 2.25rem;
+  padding: 0 0.625rem;
+}
+
+.dev-editor-fields textarea {
+  min-height: 4.75rem;
+  max-height: 40dvh;
+  resize: vertical;
+  padding: 0.5rem 0.625rem;
+}
+
+.dev-editor-fields input:focus,
+.dev-editor-fields textarea:focus {
+  border-color: var(--text-tertiary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--text) 10%, transparent);
+}
+
+.dev-editor-fields input::placeholder,
+.dev-editor-fields textarea::placeholder {
+  color: var(--text-tertiary);
+  opacity: 0.72;
+}
+
+.dev-editor-note,
+.dev-editor-status {
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.dev-editor-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.dev-reload {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: var(--r-md);
+  padding: 0.25rem 0.4375rem;
+  color: var(--text);
+  background: var(--bg-hover);
+}
+
+/* Editability is revealed only while the dock is open. It costs no layout and
+   never changes the production-looking collapsed preview. */
+html[data-dev-tools] [data-dev-field-en] {
+  border-radius: var(--r-xs);
+  cursor: text;
+}
+
+html[data-dev-tools] [data-dev-field-en]:hover {
+  box-shadow: 0 0 0 1px var(--text-tertiary);
+}
+
+@media (max-width: 359px) {
+  .dev-dock-bar {
+    flex-wrap: wrap;
+    border-radius: var(--r-xl);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dev-dock-bar {
+    transition: none;
+  }
+
+  .dev-editor-panel {
+    animation: none;
+  }
+}
+
+@media print {
+  .dev-dock {
+    display: none;
+  }
+}
 /* --- First-visit intro: home types itself in (components/Intro.tsx) --------
    Everything here hangs off ONE attribute, `data-intro` on <html>, set by the
    gate script in app/layout.tsx and cleared by the driver. That's deliberate:
@@ -4465,7 +4681,8 @@ svg.diagram tspan {
    this list is the chrome that is actually on screen. */
 html[data-intro] .skip-link,
 html[data-intro] .chrome-bar,
-html[data-intro] .edge-zone {
+html[data-intro] .edge-zone,
+html[data-intro] .dev-dock {
   opacity: 0;
   /* Invisible controls that still take clicks are worse than visible ones —
      and the edge zone would otherwise peek the sidebar open mid-sentence. */
@@ -4607,7 +4824,8 @@ html[data-intro="body"] .page > *:not(.prose) {
    in, and it should just be there again. */
 html[data-intro="body"] .skip-link,
 html[data-intro="body"] .chrome-bar,
-html[data-intro="body"] .edge-zone {
+html[data-intro="body"] .edge-zone,
+html[data-intro="body"] .dev-dock {
   animation: intro-chrome var(--dur-slow) var(--ease) 220ms both;
   pointer-events: auto;
 }
@@ -4628,7 +4846,8 @@ html[data-intro][data-intro-fast] .prose > *:not(h1):not(.avatar),
 html[data-intro][data-intro-fast] .page > *:not(.prose),
 html[data-intro][data-intro-fast] .skip-link,
 html[data-intro][data-intro-fast] .chrome-bar,
-html[data-intro][data-intro-fast] .edge-zone {
+html[data-intro][data-intro-fast] .edge-zone,
+html[data-intro][data-intro-fast] .dev-dock {
   animation-name: intro-chrome;
   animation-duration: 160ms;
   animation-delay: 0ms;
@@ -4645,6 +4864,7 @@ html[data-intro][data-intro-fast] .prose > .avatar {
   html[data-intro] .skip-link,
   html[data-intro] .chrome-bar,
   html[data-intro] .edge-zone,
+  html[data-intro] .dev-dock,
   html[data-intro] .page > *:not(.prose),
   html[data-intro] .prose > *,
   html[data-intro] .prose > h1,
@@ -4778,6 +4998,180 @@ html[data-intro][data-intro-fast] .prose > .avatar {
 }
 
 /* ---- the track list ---- */
+/* ---------- The /music toolbar: search + language switch ----------
+   components/lists/MusicNotes.tsx.
+
+   The heading and the two controls share one line, and the HEADING is what
+   gives way when the line runs out: a title can wrap, a search field and four
+   chips have a floor below which they stop being usable. */
+.music-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin-top: 3rem;
+}
+
+/* The `mt-12 text-lg font-semibold` this replaced, written out: the heading is
+   now a flex child rather than a block, so its margin belongs to the row. */
+.music-toolbar-title {
+  margin: 0;
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+
+.music-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  /* Pushed to the far edge even when the heading has wrapped away. */
+  margin-left: auto;
+  /* Takes the room the heading leaves rather than a width of its own. At a
+     fixed 13rem the search box plus four chips came to 393px against the 576px
+     the measure gives this row, and the whole toolbar wrapped to a second line
+     — which is the one thing it was asked not to do. */
+  /* The BASIS is what keeps this on the heading's line. With `auto`, flexbox
+     measures the controls at their content width (393px against 576px of row)
+     and wraps the whole block to a second line rather than shrinking it —
+     wrapping is decided before shrinking is. A basis under the space actually
+     left (576 − the English heading's 211 − the gap) keeps it up here, and
+     `grow` then hands it whatever the heading did not use. */
+  flex: 1 1 19rem;
+  min-width: 0;
+  justify-content: flex-end;
+}
+
+.music-search {
+  /* Grows into whatever the chips don't need, down to a floor where it is
+     still a usable field rather than a stub. The chips never shrink: they are
+     the control, and a squeezed "ENG" is unreadable in a way a shorter
+     placeholder is not. */
+  flex: 1 1 auto;
+  min-width: 6rem;
+  max-width: 13rem;
+  padding: 0.3125rem 0.6875rem;
+  font-size: 0.8125rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-full);
+  outline: none;
+}
+
+.music-search::placeholder {
+  color: var(--text-tertiary);
+}
+
+.music-search:focus-visible {
+  border-color: var(--text-tertiary);
+}
+
+/* Safari paints its own round X inside `type="search"`; it lands on top of the
+   pill's own radius and reads as a second, smaller control. */
+.music-search::-webkit-search-decoration,
+.music-search::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.music-langs {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex: none;
+}
+
+/* NO `transition` here on purpose: `.press` declares its own and sits at the
+   foot of this file, so a shorthand written on this class would be the later
+   rule for `transform` and would flatten the press (#55). */
+.music-lang-chip {
+  border: 1px solid var(--border);
+  border-radius: var(--r-full);
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  line-height: 1.1;
+  color: var(--text-secondary);
+  background: transparent;
+  cursor: pointer;
+}
+
+.music-lang-chip:hover {
+  border-color: var(--text-tertiary);
+  color: var(--text);
+}
+
+.music-lang-chip.is-active {
+  border-color: var(--text);
+  background: var(--text);
+  color: var(--bg);
+  font-weight: 500;
+}
+
+/* ---- UA in the flag's colours ----
+   The same two-stop gradient clipped to the text as the sidebar's national-day
+   line (`.observance` at the foot of this file), and the same tokens.
+
+   This is the SECOND place the flag appears, and it is worth being honest that
+   it stretches #64: the rule there says the colours are for one line on
+   fifteen days a year and must not become an accent. A permanent control is a
+   different thing from a dated line, and it was asked for deliberately — see
+   docs/DECISIONS.md #117. The 0.85 holds it just off full strength so it sits
+   with the two grey chips beside it rather than jumping out of the row.
+
+   `line-height: 1.1` above is load-bearing for the same reason it is there:
+   the gradient measures against the element's box, so a tall line pushes the
+   seam below the letters and the whole chip paints blue. */
+.music-lang-chip[data-lang-code="uk"] {
+  background-image: linear-gradient(
+    to bottom,
+    var(--ua-blue) 0 62%,
+    var(--ua-yellow) 62% 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: var(--ua-blue);
+  opacity: 0.85;
+}
+
+@supports (-webkit-background-clip: text) or (background-clip: text) {
+  .music-lang-chip[data-lang-code="uk"] {
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+/* Active UA cannot take the inversion the other chips take, for a mechanical
+   reason and a visual one. `background-clip: text` clips EVERY background to
+   the glyphs, so a filled chip is not available to this one at all; and the
+   flag's blue on a near-black fill would be the hole the token comment warns
+   about. Selected is carried by the border going to `--text` and the weight,
+   which is the same signal the others use, minus the fill they can afford. */
+.music-lang-chip[data-lang-code="uk"].is-active {
+  background-color: transparent;
+  border-color: var(--text);
+  opacity: 1;
+  font-weight: 500;
+}
+
+/* A phone gets the search on its own full-width line: at 13rem beside four
+   chips there is no room for either. */
+@media (max-width: 560px) {
+  .music-controls {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .music-search {
+    width: 100%;
+    /* The desktop cap has to go too, or the field stops at 13rem and leaves a
+       ragged gap to the right of a line it is supposed to own. */
+    max-width: none;
+  }
+}
+
 .music-tracks {
   /* The row's own left inset. It is not a chosen number: it is whatever puts a
      44px cover centred under the portrait above it, which is half the
@@ -4807,7 +5201,10 @@ html[data-intro][data-intro-fast] .prose > .avatar {
    same air separates the rows and leaves the divider centred between them. */
 .music-tracks li {
   position: relative;
-  padding: 0.3125rem 0;
+  /* The gap between two rows is TWICE this. Raised from 0.3125rem, which put
+     adjacent covers 10px apart and read as one block of artwork rather than a
+     list of records — the divider was doing all the separating on its own. */
+  padding: 0.5625rem 0;
 }
 
 /* The divider starts at the TEXT column, not at the row's edge. It's the most
@@ -5670,10 +6067,18 @@ html[data-lang="uk"] .book-spine {
    or the shelf's order changes; it is 12px (the shared `mt-3`) minus the
    difference, and the difference depends on how tall the leftmost book is. */
 .book-shelf-gap {
-  /* −38px is the measured alignment (see above); `--cover-reach` gives back
-     the padding the scroller needs for the hover cover, so the two are
-     written as one sum rather than folded into a single mystery number. */
-  margin-top: calc(-38px - var(--cover-reach));
+  /* `0.75rem` is the shared `mt-3` every other row sits at; `--shelf-lead` is
+     how much SHORTER the leftmost book is than the tallest, emitted per row by
+     BookSpines because only the component knows the heights. Together they put
+     the first book exactly where a Shows card would be. `--cover-reach` gives
+     back the padding the scroller needs for the hover cover, so all three are
+     written as one sum rather than folded into a single mystery number.
+
+     This was a literal −38px — which is `0.75rem - 50px`, the difference
+     measured on the shelf as it stood. That number quietly assumed a SHORT
+     book led the row; 11/22/63 sorts first, is tall, and stood through the
+     heading. See the note in BookSpines.tsx. */
+  margin-top: calc(0.75rem - var(--shelf-lead, 50px) - var(--cover-reach));
 }
 
 /* Not on a phone: the row wraps there, and pulling a wrapped block upward puts
@@ -6051,11 +6456,21 @@ html[data-lang="uk"] .book-spine {
    the rules belong to the writing beside them. Same reasoning as the music
    track list, which does it the same way. */
 .top-list {
+  /* Wide enough for two tabular digits and no wider. It was 1.75rem, which is
+     28px for a number that measures 14.8px at its widest ("18" at 0.875rem) —
+     half the column was empty, and with the gap beside it the rank pushed the
+     artwork 42px into the row before anything you came to look at began. A
+     three-figure shelf would want more; nothing here is close, and the count
+     in the heading says when that changes. */
+  --top-rank-w: 1.125rem;
   --top-art-w: 44px;
-  --top-gap: 0.875rem;
+  --top-gap: 0.75rem;
   /* Where the text column starts, and therefore where a divider starts.
-     Derived from the two columns to its left so either can change. */
-  --top-text-x: calc(1.75rem + var(--top-gap) + var(--top-art-w) + var(--top-gap));
+     DERIVED from everything to its left, so changing the rank width or the gap
+     moves the rules with it instead of leaving them behind. */
+  --top-text-x: calc(
+    var(--top-rank-w) + var(--top-gap) + var(--top-art-w) + var(--top-gap)
+  );
   list-style: none;
   padding: 0;
   margin-top: 2rem;
@@ -6076,7 +6491,7 @@ html[data-lang="uk"] .book-spine {
 
 .top-row {
   display: grid;
-  grid-template-columns: 1.75rem var(--top-art-w) minmax(0, 1fr) auto;
+  grid-template-columns: var(--top-rank-w) var(--top-art-w) minmax(0, 1fr) auto;
   grid-template-areas:
     "rank art title rating"
     "rank art desc  rating";
@@ -6147,8 +6562,11 @@ html[data-lang="uk"] .book-spine {
 .top-rating {
   grid-area: rating;
   display: flex;
+  /* Centre, not baseline: the IMDb pair is now two stacked lines and the stars
+     are a single 14px glyph row, so a shared baseline would hang the stars off
+     the number's first line. */
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.625rem;
   padding-left: 0.75rem;
   white-space: nowrap;
 }
@@ -6159,42 +6577,55 @@ html[data-lang="uk"] .book-spine {
   color: var(--text-secondary);
 }
 
-/* An absence, stated. A blank cell on a page whose first chip says "Top"
-   reads as something that failed to render. */
-.top-unrated {
-  font-size: 0.8125rem;
+/* IMDb's number, and the label that says whose it is. Set quietly and small:
+   it is a fact about the film from elsewhere, not the shelf's own voice, and
+   the stars beside it are what carries Kyrylo's. */
+.top-imdb {
+  display: inline-flex;
+  /* Stacked, number over label: the pair reads as a figure with its caption
+     and occupies ONE column, which is width the description gets back. */
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.15;
+}
+
+.top-imdb-mark {
+  /* Smaller than anything else in the row on purpose. It is not information
+     you read, it is the attribution that stops the number being mistaken for
+     the stars beside it — it has to be legible and nothing more. */
+  font-size: 0.5625rem;
+  letter-spacing: 0.06em;
   color: var(--text-tertiary);
 }
 
 @media (max-width: 599px) {
-  /* The rating drops under the writing rather than squeezing the title into
-     nothing — the same call the shelf's fact rows make below 480px. */
+  /* The rating stays on the TITLE's line, to its right, and the description
+     takes the full width underneath. Giving the rating its own row was the
+     first arrangement and it wasted a line on every entry, pushing four rows
+     onto a phone screen where five fit — and it put the stars a long way from
+     the title they belong to. `auto` on the last column lets the stars and the
+     IMDb block take what they need; the title has `minmax(0, 1fr)` and
+     ellipsises, which is what should give way when a name is long. */
   .top-row {
-    grid-template-columns: 1.5rem var(--top-art-w) minmax(0, 1fr);
+    grid-template-columns: var(--top-rank-w) var(--top-art-w) minmax(0, 1fr) auto;
     grid-template-areas:
-      "rank art title"
-      "rank art desc"
-      "rank art rating";
+      "rank art title rating"
+      "rank art desc  desc";
     align-items: start;
     row-gap: 0.1875rem;
   }
 
-  .top-list {
-    --top-gap: 0.75rem;
-    --top-text-x: calc(1.5rem + var(--top-gap) + var(--top-art-w) + var(--top-gap));
-  }
-
+  /* Back to the title's own line rather than the top of a three-row stack. */
+  .top-title,
   .top-rating {
-    padding-left: 0;
+    align-self: center;
   }
 
-  /* The dash earns its place in a desktop COLUMN, where the eye runs down a
-     line of ratings and a gap in it would look like a fault. Given its own
-     row on a phone there is no column to hold open, and it reads as a stray
-     mark under the sentence — so the mark goes and the words stay, since
-     `.sr-only` is out of flow and the empty cell collapses. */
-  .top-unrated {
-    display: none;
+  /* Tighter than the desktop column now that it shares a line with the title:
+     the pair has to earn its place beside a name that is being ellipsised. */
+  .top-rating {
+    gap: 0.5rem;
+    padding-left: 0.5rem;
   }
 
   .top-desc {
@@ -6205,4 +6636,151 @@ html[data-lang="uk"] .book-spine {
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
   }
+}
+
+/* ── A film or show's poster in the gutter (components/NoteCover.tsx) ─────
+   DECISIONS #115. The album player's idea (#98) applied to artwork that does
+   not play: the note is about a thing with a face, and a wide window has a
+   column to its right that only the contents rail otherwise uses.
+
+   Hidden by default and shown only at the width where the gutter exists —
+   there is deliberately no inline fallback. A player drops into the writing
+   at narrow widths because it is something you operate; a poster is something
+   you look at, and the note's opening (creator block, facts, then the body —
+   #86, #87) is a designed sequence that artwork should not be spliced into.
+   Every list that links here already leads with the cover. */
+.note-cover {
+  display: none;
+}
+
+/* 1400px, matching the album player exactly rather than the rail's 1168px.
+   Between the two the rail is already out in the gutter and a poster beside
+   it would be two objects fighting for one column. */
+@media (min-width: 1400px) {
+  .note-cover {
+    display: block;
+    position: fixed;
+    /* Above the page's own content, which starts at `--page-y`; `left` sits
+       1rem past the text column's right edge (50% + 19.5rem). Both numbers are
+       the player's, so the two never disagree about where the gutter is. */
+    top: 5rem;
+    /* 13rem is the gutter's own width: the contents rail's, and what the album
+       player paints at once it is scaled to two thirds. */
+    left: calc(50% + 20.5rem);
+    width: 13rem;
+    z-index: 1;
+  }
+
+  .note-cover img {
+    display: block;
+    width: 100%;
+    /* The artwork's OWN ratio, so a 2:3 poster and the squarer True Detective
+       card are both shown whole. `cover` then has nothing to crop, the same
+       reasoning as a photographed book spine (#110). */
+    aspect-ratio: 1 / var(--cover-ar, 1.5);
+    object-fit: cover;
+    border-radius: var(--r-md);
+    border: 1px solid var(--border);
+    background-color: var(--surface);
+    background-size: cover;
+    background-position: center;
+  }
+
+  /* Both want the same column, so the contents start below the poster instead
+     of behind it — the album player's arrangement. `--note-cover-h` is the
+     PAINTED height, emitted per note from the cover's own ratio, so the rail
+     starts under a tall poster and a short one alike. */
+  .page:has(.note-cover) .toc-rail {
+    top: calc(5rem + var(--note-cover-h, 312px) + 2rem);
+    max-height: calc(100vh - 8rem - var(--note-cover-h, 312px) - 2rem);
+  }
+}
+
+/* ── The "New" and "Draft" chips (components/NewBadge.tsx, PostRows) ─────
+   DECISIONS #116. Both were strings of utilities on the element. They are
+   named classes sharing one geometry rule now, because the correction below is
+   a single optical judgement that has to hold in a post row, a music row, the
+   shelf's Top list and on home — and one place to state it is the only way
+   that stays true.
+
+   THE PROBLEM. The chip's TEXT is baseline-aligned with the title beside it,
+   which is right and looks right. Its BOX was not. A box drawn around 12px
+   text on a 16px title's baseline hung 6px BELOW that baseline while stopping
+   5.3px short above the title's cap line — and in the Top list, where a
+   description sits directly under the title, those 6px crowd the line below
+   and the chip reads as sagging toward it.
+
+   THE FIX, in two parts. The box HUGS its own text (`line-height: 1` instead
+   of the 1rem it inherited, which was 4px of leading the chip never needed),
+   and the padding it keeps is ASYMMETRIC — 4px above, 1px below. Same
+   baseline, shorter box, and what is left sits square on the title's band:
+   measured against a 16px title, 4.28px above the cap and 4.0px below the
+   baseline, from 5.28 and 6.0. The overhang that caused this is a third
+   smaller.
+
+   Nudging the whole chip with `vertical-align` was the other option and it is
+   the wrong one — it fixes the outline by breaking the text alignment that
+   already worked.
+
+   Tuned against a 16px title, which is what every list here sets. */
+.new-chip,
+.draft-chip {
+  display: inline-block;
+  margin-left: 0.5rem;
+  /* Draft is a FILLED chip with no visible outline, but it carries the border
+     anyway, transparent, so both chips are the same box and one rule can place
+     them. Without it Draft would sit 1px off from the New beside it. */
+  border: 1px solid transparent;
+  border-radius: var(--r-xs);
+  /* Symmetric now that the whole chip is lifted below — the lift does the
+     placing, the padding only has to keep the box even around its own text. */
+  padding: 0.15625rem 0.375rem;
+  font-size: 0.75rem;
+  /* THE LIFT. Small text sharing a big text's baseline sits optically LOW:
+     the chip's caps are 8px against the title's 10.7, so their midlines are
+     1.3px apart even though the baselines agree. Raising the chip by half that
+     difference puts the two runs of text on the same optical line, which is
+     what the eye is actually comparing — and moves the box with it, so the
+     outline stops reading low as well.
+
+     Expressed in the chip's own em so it holds if the chip is ever resized. */
+  vertical-align: 0.11em;
+  /* Held explicitly, and at 1: the box's height is part of the arithmetic
+     above, and inheriting a list's line-height puts leading back inside it. */
+  line-height: 1;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.new-chip {
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
+/* Dev-only — `draft: true` entries never reach a production build. Amber
+   because it is a WARNING about the page you are looking at, which is the one
+   sanctioned exception to the monochrome rule (#64). */
+.draft-chip {
+  background: color-mix(in srgb, #f59e0b 15%, transparent);
+  color: #f59e0b;
+}
+
+/* Beside the note's own <h1>, which is 46px against a list row's 16px. The
+   shared rule's baseline placing is right for a title the chip's own size and
+   wrong here: against a cap that is 30px tall, a 19px chip sitting on the
+   baseline hugs the bottom of the letters instead of reading beside them. So
+   this one centres — `middle` scales with the heading, which is fluid — and
+   keeps the 3px lift the old inline `translate-y-[-3px]` had, because `middle`
+   aligns to the x-height and a title this size wants a little more than that.
+
+   Deliberately preserving how this already looked. It was not what was
+   reported, and the shared geometry was not worth changing it for. */
+.draft-chip-title {
+  margin-left: 0.75rem;
+  border-radius: var(--r-sm);
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  vertical-align: middle;
+  position: relative;
+  top: -3px;
 }

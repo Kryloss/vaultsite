@@ -5,7 +5,7 @@
   "scripts": {
     "validate:image-notes": "node scripts/validate-image-notes.mjs",
     "predev": "npm run validate:image-notes && node scripts/sync-assets.mjs",
-    "dev": "next dev",
+    "dev": "node scripts/dev.mjs",
     "prebuild": "npm run validate:image-notes && node scripts/sync-assets.mjs",
     "build": "next build",
     "start": "next start",

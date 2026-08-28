@@ -19,6 +19,12 @@ artist_bio: >-
 artist_bio_uk: >-
   Вийшов окремо в липні 2022-го й простояв так два роки, доки у 2024-му нарешті не з'явився POST HUMAN: NeX GEn і не дав йому місце.
 format: single
+# Which shelf this belongs on, not strictly what it is sung in — see
+# docs/DECISIONS.md #117. Нервы sing in Russian and are a Ukrainian band;
+# BLIND8 are Ukrainian and aim at an English-speaking listener.
+lang: en
+# Apple's own genre for this release, split on the slash.
+genres: [Rock]
 # Add your score when you're ready — halves are allowed, and it renders as the
 # last row of the fact list below:  rating: 4.5
 ---

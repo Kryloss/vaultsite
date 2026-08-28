@@ -10,6 +10,11 @@ author_bio_uk: >-
   Псевдонім автора «Зошита смерті»; особу, яка за ним стоїть, ніколи публічно не розкривали.
 medium: show
 categories: [Anime, Thriller]
+imdb_id: tt0877057
+imdb: 8.9
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 496,406 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: Two very clever people trying to identify each other before the other one wins.
 description_uk: Двоє дуже розумних людей намагаються вирахувати одне одного, доки хтось не переміг.

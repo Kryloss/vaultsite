@@ -9,6 +9,7 @@ import HeadingAnchors from "@/components/HeadingAnchors";
 import JsonLd from "@/components/JsonLd";
 import SelectionLink from "@/components/SelectionLink";
 import ArrowThrow from "@/components/ArrowThrow";
+import DevToolsSlot from "@/components/DevToolsSlot";
 import { Analytics } from "@vercel/analytics/next";
 import { siteJsonLd } from "@/lib/jsonld";
 import { getSections, getEntries } from "@/lib/vault";
@@ -212,6 +213,7 @@ export default function RootLayout({
         >
           {children}
         </Chrome>
+        <DevToolsSlot />
         <Lightbox />
         <JsonLd data={siteJsonLd()} />
         <CodeCopy />

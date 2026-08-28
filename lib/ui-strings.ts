@@ -18,10 +18,6 @@ export interface Str {
 export const ui = {
   // chrome / sidebar
   publishedFrom: { en: "Published from Obsidian", uk: "Опубліковано з Obsidian" },
-  openPublicPage: {
-    en: "Open this page on the public site",
-    uk: "Відкрити цю сторінку на публічному сайті",
-  },
   /** {n} is replaced with the day number — see components/ResistanceDay.tsx */
   resistanceDay: {
     en: "Day {n} of Ukraine’s resistance",
@@ -50,7 +46,9 @@ export const ui = {
      so their first chip names the ordering instead of the absence of a
      filter. Books and videos still say "All". See DECISIONS #113. */
   filterTop: { en: "Top", uk: "Топ" },
-  unrated: { en: "Not rated yet", uk: "Ще без оцінки" },
+  /* Spoken after the number, for a reader who cannot see the label
+     beside it — the stars are Kyrylo's, this one is IMDb's. */
+  imdbRating: { en: "IMDb rating", uk: "Оцінка IMDb" },
   mediumBooks: { en: "Books", uk: "Книги" },
   mediumMovies: { en: "Movies", uk: "Фільми" },
   mediumShows: { en: "Shows", uk: "Серіали" },
@@ -63,6 +61,25 @@ export const ui = {
   notesOnHearing: {
     en: "Notes on what I’m hearing",
     uk: "Нотатки про почуте",
+  },
+  /* The /music toolbar. The three language chips are CODES and stay identical
+     in both languages — a code is a label for the language itself, so
+     translating "UA" into Ukrainian would be translating the thing being
+     named. Only "All" and the prose below get a pair. */
+  /* Short enough to survive the field at its narrowest — the full sentence is
+     on the aria-label, which is where a screen reader looks anyway. */
+  musicSearch: { en: "Search artists, tracks…", uk: "Пошук виконавців…" },
+  musicSearchLabel: {
+    en: "Search artists, tracks, EPs and albums",
+    uk: "Пошук виконавців, треків, EP та альбомів",
+  },
+  musicFilterLangLabel: { en: "Filter by language", uk: "Фільтр за мовою" },
+  musicLangEn: { en: "English", uk: "Англійська" },
+  musicLangUk: { en: "Ukrainian", uk: "Українська" },
+  musicLangRu: { en: "Russian", uk: "Російська" },
+  musicNoMatches: {
+    en: "Nothing matches that. Try another word, or a different language.",
+    uk: "Нічого не знайдено. Спробуйте інше слово або іншу мову.",
   },
   /* Parked, not dead: the embeds' footer link was removed (#92) and this is
      what restoring it needs, already translated. Delete it only when that
@@ -227,6 +244,51 @@ export const ui = {
   },
   backHome: { en: "Back home", uk: "На головну" },
   didYouMean: { en: "Did you mean…", uk: "Можливо, ви шукали…" },
+} satisfies Record<string, Str>;
+
+/** Local-only editor copy. Kept out of `ui` so public client chunks do not
+ * carry authoring-only strings. */
+export const devUi = {
+  openPublicPage: {
+    en: "Open this page on the public site",
+    uk: "Відкрити цю сторінку на публічному сайті",
+  },
+  devToolsOpen: { en: "Open developer tools", uk: "Відкрити інструменти розробника" },
+  devToolsClose: { en: "Close developer tools", uk: "Закрити інструменти розробника" },
+  devToolsGroup: { en: "Developer tools", uk: "Інструменти розробника" },
+  devPageFields: { en: "Page fields", uk: "Поля сторінки" },
+  devUnsaved: { en: "Unsaved changes", uk: "Незбережені зміни" },
+  devOpenObsidian: { en: "Open this file in Obsidian", uk: "Відкрити цей файл в Obsidian" },
+  devUndo: { en: "Undo", uk: "Скасувати" },
+  devRedo: { en: "Redo", uk: "Повторити" },
+  devCancel: { en: "Cancel changes", uk: "Скасувати зміни" },
+  devSave: { en: "Save to vault", uk: "Зберегти у сховищі" },
+  devReload: { en: "Reload file", uk: "Перезавантажити файл" },
+  devRetry: { en: "Retry", uk: "Спробувати ще раз" },
+  devTitle: { en: "Title", uk: "Назва" },
+  devDescription: { en: "Description", uk: "Опис" },
+  devLoading: { en: "Loading page fields…", uk: "Завантаження полів сторінки…" },
+  devNoSource: {
+    en: "This generated view has no single vault file to edit.",
+    uk: "Це згенероване подання не має одного файлу сховища для редагування.",
+  },
+  devSaved: { en: "Saved to the vault.", uk: "Збережено у сховищі." },
+  devConflict: {
+    en: "The file changed in Obsidian. Your draft was kept.",
+    uk: "Файл змінився в Obsidian. Вашу чернетку збережено.",
+  },
+  devUnavailable: {
+    en: "The local editor service is unavailable. Restart npm run dev.",
+    uk: "Локальна служба редактора недоступна. Перезапустіть npm run dev.",
+  },
+  devSaveFailed: {
+    en: "The file could not be saved. Your draft was kept.",
+    uk: "Не вдалося зберегти файл. Вашу чернетку збережено.",
+  },
+  devDiscardNavigation: {
+    en: "Discard unsaved developer-tool changes and leave this page?",
+    uk: "Відкинути незбережені зміни в інструментах розробника й залишити сторінку?",
+  },
 } satisfies Record<string, Str>;
 
 /**

@@ -15,6 +15,11 @@ author_bio_uk: >-
   років і завершив її 2021 року.
 medium: show
 categories: [Anime, Fantasy]
+imdb_id: tt2560140
+imdb: 9.1
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 742,077 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: Starts as a monster story and ends somewhere much harder to summarise.
 description_uk: Починається як історія про монстрів, а закінчується там, де переказати вже значно важче.

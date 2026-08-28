@@ -13,6 +13,11 @@ author_bio_uk: >-
   дядька Стена, і Білла Шифра.
 medium: show
 categories: [Animation, Mystery, Comedy]
+imdb_id: tt1865718
+imdb: 8.9
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 183,947 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: A children's cartoon with a plot that actually pays off.
 description_uk: Дитячий мультсеріал із сюжетом, який справді доводять до кінця.

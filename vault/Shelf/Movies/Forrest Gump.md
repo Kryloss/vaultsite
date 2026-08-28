@@ -13,6 +13,11 @@ author_bio_uk: >-
   Спілберга й від часів «Назад у майбутнє» невпинно штовхає вперед кінотехнології.
 medium: movie
 categories: [Drama]
+imdb_id: tt0109830
+imdb: 8.8
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 2,528,797 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: Thirty years of American history, walked through by someone not trying to be part of it.
 description_uk: Тридцять років американської історії, пройдені людиною, яка й не намагалася стати їх частиною.

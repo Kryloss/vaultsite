@@ -59,7 +59,12 @@ export default async function HomePage() {
   );
 
   return (
-    <Page>
+    <Page
+      data-dev-vault-source={`vault/${home.dirName}/main.md`}
+      data-dev-vault-source-uk={
+        home.contentUk !== undefined ? `vault/${home.dirName}/main.uk.md` : undefined
+      }
+    >
       <LinkPreview previews={previewsInHtml(html, htmlUk)} />
       {/* Renders nothing. Types the heading below on a reader's first ever
           visit; the pre-paint half of it lives in app/layout.tsx. */}

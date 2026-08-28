@@ -1984,6 +1984,12 @@ The floor is 70% of natural width. Past that a shelf has genuinely outgrown its 
 
 The residual 4px of `scrollWidth` is the last book's hover cover, which is `position: absolute`, invisible at rest and always overhung its slot. The books themselves fit: measured, the last spine's right edge clears the row's by 5px.
 
+**The same book broke the heading, for a second reason, and that number is now derived too.** `.book-shelf-gap` pulled the row up by a literal −38px so the FIRST book — not the row's box — sat under the "Books" heading at the same distance a Shows card does. Books are bottom-aligned, so the box's top belongs to whichever book is tallest, which is the wrong thing to match against a row of equal-height cards; −38px is `0.75rem - 50px`, and 50px was how much shorter the leftmost book was than the tallest one **on the shelf as it stood when that was measured**.
+
+11/22/63 broke both halves of that assumption at once. Digits sort before letters, so it leads the row; and it is one of the tallest books on it, so the difference fell from 50px to 16px. The pull ran 34px too far and stood the book straight through the heading — measured, its top sat 17.6px **above** the heading's bottom edge, directly behind the word "Books". The comment in `globals.css` had even written the assumption down ("the tall spines are far to its right, so nothing is ever covered"); it was simply no longer true.
+
+`BookSpines` now emits that difference as `--shelf-lead` from the same `spineHeight()` the spines are drawn with, and the margin is `calc(0.75rem - var(--shelf-lead) - var(--cover-reach))`. Measured after: the first book sits **16.4px below** the heading and no book intrudes on its text. The tallest still rises above the heading's line, far to the right over empty space, which is what the original comment wanted.
+
 ## 113. Films and shows lead with a ranked list, not the whole grid (2026-08-28)
 
 The medium pages opened on an "All" chip and a grid of every cover. That is the right answer for books — the section page shows their spines, so the medium page is the payoff where you finally see the art (#110) — and for videos, where a channel upload is not something you place in a top ten. It is the wrong answer for the two mediums you actually rank against each other.
@@ -1999,3 +2005,128 @@ The absence is spelled with a dash, not with the words. "Not rated yet" set eigh
 `ShelfItem` gained `description` and `descriptionUk`. The grid never needed either. `descriptionUk` comes out of `entry.meta` because `Entry` models no Ukrainian description — the route `lib/music.ts` already takes; move it onto `Entry` when a third caller wants it.
 
 The divider starts at the **text column**, not the row's edge, the same as the music track list: the art column reads as a margin of objects and the rules belong to the writing beside them.
+
+**The rank column is sized to the digits.** It shipped at 1.75rem — 28px holding a number that measures 14.8px at its widest ("18" in tabular figures) — and with the gap beside it the position pushed the artwork 42px into the row before anything you came to look at began. It is 1.125rem now, the gap 0.75rem, and the poster starts at 30px with the text at 86px instead of 100; the title column gained 16px of that and the descriptions read further before they truncate. `--top-text-x` is derived from those three values rather than repeating them, so the dividers move with the columns instead of being left behind — they were a hand-written copy of the same sum before, in two places. Two figures is the assumption; a hundred-item shelf would want another 6px, and the count in the heading is where that shows.
+
+
+## 114. IMDb's number is IMDb's, and the stars stay his (2026-08-28)
+
+The Top list shipped drawing one rating twice: stars for `rating:` and the same value spelled out beside them. Kyrylo read the digits as IMDb's, which is the natural reading of a number next to a title in a list shaped like IMDb's — and is the more useful pair of facts anyway. **The stars are now his verdict out of five and the number is IMDb's average out of ten.**
+
+They are never merged and never swapped. Drawing IMDb's average as stars would put a stranger's opinion in his handwriting, on a shelf whose whole premise is that the opinions are his. `sortForTop` keeps the same separation: a rated entry outranks an unrated one *whatever* IMDb thinks of either, and IMDb only orders the tail he has not judged. Today that tail is almost the whole list, so the page reads as a real ranking immediately instead of waiting on 35 ratings — but the first entry he rates jumps above a 9.5, which is correct. The list is his shelf, not a mirror of IMDb's.
+
+**The number is labelled.** A bare figure beside stars reads as the stars written out in digits, which is exactly the misreading that prompted this, and a list of rows has no column header to carry the label instead. "IMDb" set small in `--text-tertiary` costs about 30px and removes the ambiguity; screen readers get the words after the number.
+
+The label ended up **under** the number rather than beside it, at 0.5625rem. Beside it, it was a second object on the row's most crowded line; stacked, it reads as a caption belonging to the figure above it and the pair takes one column instead of two — width every description gets back. The stars sit beside that pair and are centred rather than baseline-aligned, since the IMDb block is two lines and a shared baseline hung the stars off its first one.
+
+**On a phone the rating sits beside the title, not under it.** Its own row was the first arrangement and it cost a line on every entry — four rows fitting a phone screen where five do now — and it put the stars a long way from the name they belong to. The description takes the full width beneath instead, where it has room for two lines. The title is the column that gives way when a name is long, which is right: it is the one thing you can still identify from its first half.
+
+**The rating lives in the vault, not in the build.** `imdb:` is written into frontmatter by `scripts/imdb-ratings.mjs` and read like any other key. Fetching it at build time would put a network call on the critical path of a static site — a build that can fail for reasons that have nothing to do with the code — and Vercel rebuilds on every Obsidian sync.
+
+Two keys, deliberately split by who owns them:
+
+- **`imdb_id:`** is the identity (`tt0903747`) and is written ONCE, by hand. The script never guesses one, because resolving a title to a tconst is precisely where it would go wrong silently — "Seven", "Dark" and "Prisoners" each name several films, and a wrong id prints a confident wrong number. The 36 in the vault came from each title's Wikidata item (property P345), which is a human-curated mapping rather than a string match.
+- **`imdb:`** is the value, and the script owns it. `node scripts/imdb-ratings.mjs` refreshes every note that has an id; `--check` reports drift and changes nothing.
+
+The source is IMDb's own published dataset — `title.ratings.tsv.gz` from datasets.imdbws.com: no key, refreshed daily by IMDb, and licensed for personal and non-commercial use, which is what this site is. OMDb wanted an API key and Wikidata does not carry ratings at all. The script streams the ~1.7M rows and stops as soon as every id is accounted for, so nothing large is held in memory or written to the repo.
+
+## 115. A film's poster goes in the gutter, like an album's player (2026-08-28)
+
+A shelf note about a film showed no artwork at all. Every list that links to it leads with the cover, and the OG card mounts it on a plate — then you arrive and the thing has no face. Music had already solved the shape of this: an album note puts its player in the right gutter from 1400px (#98), in the column only the contents rail otherwise uses, without moving a word of the writing.
+
+**`components/NoteCover.tsx` does the same for a film or show poster**, and deliberately borrows the player's exact geometry — `top: 5rem`, `left: calc(50% + 20.5rem)`, the 1400px breakpoint — rather than picking its own. Two elements that occupy one gutter should not disagree about where that gutter is. The width is 13rem, which is the contents rail's own and what the album player paints at once it is scaled to two thirds.
+
+**Films and shows only.** A book's face is the row of spines it came from and its whole medium page (#110); a video note embeds the video, which is its poster already playing. `medium === "movie" || medium === "show"` is the whole test.
+
+**Gutter or nothing — there is no inline fallback below 1400px**, and this is where it departs from the album embed. A player drops into the writing at narrow widths because it is something you *operate*, and a reader who cannot reach it has lost a function. A poster is something you *look at*, and the note's opening is a designed sequence — creator block, then the fact list, then the body (#86, #87). Splicing artwork into that at narrow widths is redesigning the page rather than enriching a wide one, and every list that links here already opens with the cover.
+
+Two details are load-bearing:
+
+- **The poster keeps its own aspect ratio**, from `coverAr`, so a 2:3 poster and True Detective's squarer card are both shown whole and `object-fit: cover` has nothing to crop. Same reasoning as a photographed spine.
+- **`--note-cover-h` is set on `.page`, not on the aside.** The contents rail is the aside's SIBLING, and custom properties inherit downward only — set on `.note-cover` it would never reach `.toc-rail`, which would silently fall back to a guessed height and start the rail behind a tall poster. The value is the painted height, derived per note from the cover's own ratio.
+
+Also in this pass, from the same reading of the Top list: **the IMDb label moved under its number and got smaller** (0.5625rem). Beside the figure it was a second thing on the row's most crowded line; stacked, it reads as a caption belonging to the number above it and the pair takes one column instead of two, which is width every description gets back. The stars sit beside that pair, centred rather than baseline-aligned — the IMDb block is two lines now and a shared baseline hung the stars off its first one.
+
+
+## 116. The chips' box, not their text (2026-08-28)
+
+The "New" chip read as sitting low next to a title, everywhere it appears. The text was not the problem — it is baseline-aligned with the title beside it and looks it. The BOX was, and it was reported precisely: *"text looks aligned, but because it has a squared outline it feels lower."*
+
+The first fix moved a pixel of padding from the bottom to the top, centring the box on the title's cap band: measured, 1.09px low became 0.34px. **It still felt low**, and specifically in the Top list. That was the useful clue. Balance against the cap band is not the whole story — the box was 22px tall and hung **6px below the baseline**, and in a list where a description sits directly under the title, six pixels of empty outline reaching toward the next line reads as a chip sagging into it. The number said centred; the eye said low; the eye was reading something the number did not measure.
+
+**So the box was made to hug its own text.** `line-height: 1` instead of the 1rem it had inherited — 4px of leading a 12px chip never needed — and the padding it keeps is asymmetric, 4px above and 1px below. Same baseline, same text position, a box 19px instead of 22px:
+
+| | before | after |
+|---|---|---|
+| box height | 22px | 19px |
+| above the title's cap | 5.28px | 4.33px |
+| below the title's baseline | 6.0px | 4.0px |
+
+The overhang that caused the complaint is a third smaller, and what is left is balanced to 0.33px.
+
+Nudging the whole chip with `vertical-align` was the obvious alternative and it is the wrong one — it fixes the outline by breaking the text alignment that already worked. Worth recording, because it is the first thing anyone reaches for.
+
+**Draft moved with it.** It is the same object in the same place, and the two appear on one row in dev; leaving one corrected and the other not would have been a new misalignment rather than a fixed one. Both are now named classes — `.new-chip` and `.draft-chip` — sharing one geometry rule, because this is a single optical judgement that has to hold in a post row, a music row, the shelf's Top list and on home, and one place to state it is the only way that stays true. Draft carries a TRANSPARENT 1px border so that its filled box is exactly the size of New's outlined one; without it the two would sit a pixel apart.
+
+Two things deliberately unchanged. The **music list** still strips the chip to plain text at the date's size — that override is `.music-meta > span`, structural rather than named, so it survived the rename and still outranks the new class on specificity. And the Draft chip **beside a note's `<h1>`** keeps `vertical-align: middle` and its 3px lift: against a 46px title with a 30px cap, a 19px chip on the baseline hugs the bottom of the letters instead of reading beside them. That was not what was reported and the shared geometry was not worth changing it for.
+## 118. Local editing is a separate loopback tool, not a deployed CMS (2026-08-28)
+
+The local preview now has a pencil dock: collapsed it is one quiet control at
+bottom-left and the page — including the breadcrumb bar — looks like the public
+site. Expanded, it reveals the same-route public link, “Open this file in
+Obsidian,” language switching, title and description fields, Undo, Redo, Cancel,
+and Save. The public link moved out of the breadcrumb because an authoring
+escape hatch should not permanently alter the page being previewed.
+
+Next's own development badge is disabled. It also occupies bottom-left at a
+higher stacking level, so the pencil was visible but every click landed on the
+framework badge underneath it. The other three corners already belong to the
+breadcrumb, contents control, and reading progress; moving the collision would
+only trade which real control it covered. Compile errors keep Next's ordinary
+overlay, which is the development signal that matters.
+
+**The writer is a sidecar, not an App Router route.** `npm run dev` supervises
+Next and `scripts/dev-editor.mjs`, bound to `127.0.0.1`. Next adds an external
+rewrite for `/__vault-editor/*` only in development; `next build` and `next
+start` have neither a writer process nor a filesystem endpoint, so the deployed
+site remains fully static. Hiding a button by hostname would not have secured a
+write API. A production webpack replacement also swaps the editor client module
+for a null component, keeping its request code out of public chunks. The three
+checks are independent: the component requires a
+development build and the exact `localhost` hostname, the rewrite exists only
+in development, and the sidecar requires the supervisor-derived exact origin,
+same-origin fetch metadata, and an in-memory random token. It emits no CORS
+permission and accepts only bounded JSON.
+
+**A URL never becomes a filesystem path.** Each real route puts its known
+authoring source on `<Page>`; synthetic shelf filters point at the section's
+`main.md`. The sidecar still treats that attribute as hostile: it requires a
+POSIX `.md` path beneath `vault/`, rejects traversal and backslashes, resolves
+symlinks with `realpath`, and verifies containment. The Obsidian action is
+returned as an already encoded absolute-path URI, using the active `.uk.md`
+sibling when it exists. It is only an open target: both languages' titles and
+descriptions live in the primary file's frontmatter.
+
+**The first writable surface is narrow on purpose.** Only `title`, `title_uk`,
+`description`, and `description_uk` are accepted. The patcher replaces just
+those top-level scalar ranges and preserves all other YAML bytes, comments,
+ordering, line endings, and Markdown body. A whole-object YAML serialization
+would create large, noisy vault rewrites for a one-sentence edit. Save compares
+the SHA-256 revision of the exact source, validates the result, writes and
+fsyncs a uniquely named sibling, rechecks the revision, then atomically renames
+it. If Obsidian changed the file meanwhile, the browser draft survives and the
+user must explicitly reload. Undo/Redo affect drafts only; even Undo after Save
+needs a second Save before it touches disk. Unsaved drafts are retained by
+source across soft navigation; a hard reload still uses the browser's unsaved
+changes warning.
+
+**Attachments and body editing are deferred, not represented by dead buttons.**
+An attachment is a transaction across an asset, Markdown, the generated image
+manifest, and live development caches; body editing also needs a faithful
+Markdown/source map rather than editing rendered HTML. Until those contracts
+exist, Obsidian is the complete editor and the URI button is the honest route
+to it.
+
+**Revisit when:** the metadata editor has been used enough to justify either a
+source-aware body editor or an attachment transaction with collision handling,
+rollback, asset synchronization, and cache invalidation.

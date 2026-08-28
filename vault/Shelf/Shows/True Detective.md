@@ -13,6 +13,11 @@ author_bio_uk: >-
   написав кожен епізод його першого сезону.
 medium: show
 categories: [Drama, Crime, Mystery]
+imdb_id: tt2356777
+imdb: 8.8
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 767,396 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: Two detectives, seventeen years, and a case that says more about them than the killer.
 description_uk: Двоє детективів, сімнадцять років і справа, яка каже про них більше, ніж про вбивцю.

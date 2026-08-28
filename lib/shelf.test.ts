@@ -172,3 +172,48 @@ test("hasTopList covers films and shows only", () => {
   assert.equal(hasTopList("video"), false);
   assert.equal(hasTopList(undefined), false);
 });
+
+test("sortForTop orders the unrated tail by IMDb, best down", () => {
+  const out = sortForTop([
+    item({ slug: "mid", imdb: 8.2, date: "2026-08-28" }),
+    item({ slug: "best", imdb: 9.5, date: "2026-08-28" }),
+    item({ slug: "low", imdb: 7.1, date: "2026-08-28" }),
+  ]);
+  assert.deepEqual(
+    out.map((i) => i.slug),
+    ["best", "mid", "low"]
+  );
+});
+
+test("his rating outranks a higher IMDb score — the list stays his shelf", () => {
+  const out = sortForTop([
+    item({ slug: "imdb-darling", imdb: 9.5 }),
+    item({ slug: "his-pick", rating: 0.5, imdb: 4.0 }),
+  ]);
+  assert.deepEqual(
+    out.map((i) => i.slug),
+    ["his-pick", "imdb-darling"]
+  );
+});
+
+test("sortForTop falls back to date when IMDb is missing too", () => {
+  const out = sortForTop([
+    item({ slug: "old", date: "2024-01-01" }),
+    item({ slug: "new", date: "2026-08-28" }),
+  ]);
+  assert.deepEqual(
+    out.map((i) => i.slug),
+    ["new", "old"]
+  );
+});
+
+test("an entry with an IMDb score sorts above one with none", () => {
+  const out = sortForTop([
+    item({ slug: "none", date: "2026-08-28" }),
+    item({ slug: "scored", imdb: 6.0, date: "2020-01-01" }),
+  ]);
+  assert.deepEqual(
+    out.map((i) => i.slug),
+    ["scored", "none"]
+  );
+});

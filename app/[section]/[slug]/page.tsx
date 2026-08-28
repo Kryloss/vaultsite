@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { CSSProperties } from "react";
 import { Fragment, type ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -26,6 +27,7 @@ import {
   isShelfSection,
   opensWithHeaderBlock,
   mediumSlug,
+  toShelfItem,
 } from "@/lib/shelf";
 import { ui } from "@/lib/ui-strings";
 import Creator from "@/components/Creator";
@@ -37,6 +39,7 @@ import LinkPreview from "@/components/LinkPreview";
 import CopyMarkdown, { CopyMarkdownTitle } from "@/components/CopyMarkdown";
 import ReadingProgress from "@/components/ReadingProgress";
 import MusicSheet from "@/components/MusicSheet";
+import NoteCover, { GUTTER_COVER_W } from "@/components/NoteCover";
 import ReadingPosition from "@/components/ReadingPosition";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbJsonLd, entryJsonLd } from "@/lib/jsonld";
@@ -130,6 +133,14 @@ export default async function EntryPage({ params }: Props) {
      from read as the same place. Music only: a shelf note already opens with
      the artwork itself on the card in every list that links to it, and a
      second, blurrier copy of it behind the title adds nothing. */
+  /* A film or show shows its poster in the right gutter, the way a music note
+     shows its album (#115). Reuses `toShelfItem` rather than resolving the
+     cover again here, so the note and every card that links to it are looking
+     at the same resolved artwork, blur placeholder and srcset. */
+  const gutterCover =
+    isShelfSection(section) && (medium === "movie" || medium === "show")
+      ? toShelfItem(entry)
+      : undefined;
   const noteWash =
     section.type === "music"
       ? resolveCoverUrl(entry.sectionDir, entry.meta.cover)
@@ -241,13 +252,41 @@ export default async function EntryPage({ params }: Props) {
       /* Scopes the gutter player to music notes only — an album link pasted
          into a post keeps its place in the writing (#94). */
       className={section.type === "music" ? "music-note" : ""}
+      /* The poster's PAINTED height, so the contents rail starts exactly below
+         it rather than at a number guessed for the tallest poster. It lives on
+         `.page` because the rail is the aside's SIBLING — a custom property
+         set on `.note-cover` would never reach it. */
+      style={
+        gutterCover?.coverUrl
+          ? ({
+              "--note-cover-h": `${Math.round(
+                GUTTER_COVER_W * (gutterCover.coverAr ?? 1.5)
+              )}px`,
+            } as CSSProperties)
+          : undefined
+      }
       data-vault-source={`vault/${entry.sectionDir}/${entry.fileName}.md`}
       data-vault-source-uk={
         entry.contentUk
           ? `vault/${entry.sectionDir}/${entry.fileName}.uk.md`
           : undefined
       }
+      data-dev-vault-source={`vault/${entry.sectionDir}/${entry.fileName}.md`}
+      data-dev-vault-source-uk={
+        entry.contentUk
+          ? `vault/${entry.sectionDir}/${entry.fileName}.uk.md`
+          : undefined
+      }
     >
+      {gutterCover?.coverUrl && (
+        <NoteCover
+          src={gutterCover.coverUrl}
+          srcSet={gutterCover.coverSrcSet}
+          blur={gutterCover.coverBlur}
+          ar={gutterCover.coverAr}
+        />
+      )}
+
       {noteWash && (
         /* The note's own artwork, blurred past recognition, dissolving behind
            its opening. A WASH, not a card: `.creator` is deliberately a row
@@ -276,11 +315,16 @@ export default async function EntryPage({ params }: Props) {
               left of the title and stays hidden until the heading is
               hovered/focused — same reveal-on-hover treatment as the ToC pill. */}
           <CopyMarkdown en={entry.content} uk={entry.contentUk} />
-          <CopyMarkdownTitle en={entry.content} uk={entry.contentUk}>
+          <CopyMarkdownTitle
+            en={entry.content}
+            uk={entry.contentUk}
+            devFieldEn="title"
+            devFieldUk="title_uk"
+          >
             <T en={entry.title} uk={entry.titleUk} />
           </CopyMarkdownTitle>
           {entry.draft && (
-            <span className="ml-3 inline-block translate-y-[-3px] rounded-md bg-amber-500/15 px-2 py-0.5 align-middle text-xs font-medium text-amber-500">
+            <span className="draft-chip draft-chip-title">
               <T {...ui.draft} />
             </span>
           )}

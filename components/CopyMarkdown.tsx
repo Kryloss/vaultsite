@@ -79,10 +79,14 @@ export default function CopyMarkdown({ en, uk }: { en: string; uk?: string }) {
 export function CopyMarkdownTitle({
   en,
   uk,
+  devFieldEn,
+  devFieldUk,
   children,
 }: {
   en: string;
   uk?: string;
+  devFieldEn?: string;
+  devFieldUk?: string;
   children: React.ReactNode;
 }) {
   const { copy } = useCopyMarkdown(en, uk);
@@ -141,7 +145,13 @@ export function CopyMarkdownTitle({
 
   return (
     <span onClick={onClick} className="copy-md-title">
-      <span ref={textRef}>{children}</span>
+      <span
+        ref={textRef}
+        data-dev-field-en={devFieldEn}
+        data-dev-field-uk={devFieldUk}
+      >
+        {children}
+      </span>
       {/* Positioned OUT of flow against the measured line-1 endpoint
           above, so tapping (opacity-only) never touches layout. Same
           plain checkmark the desktop button swaps to, not a filled badge

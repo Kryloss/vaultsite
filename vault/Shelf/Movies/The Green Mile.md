@@ -13,6 +13,11 @@ author_bio_uk: >-
   угорців. Тричі екранізував Стівена Кінга, двічі — як тюремну драму.
 medium: movie
 categories: [Drama, Fantasy]
+imdb_id: tt0120689
+imdb: 8.6
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 1,581,256 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: Death row, told from the side of the men who work there.
 description_uk: Камера смертників — з боку тих, хто там працює.

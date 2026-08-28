@@ -82,28 +82,35 @@ export default function ShelfTopList({
               <NewBadge date={item.date} />
             </span>
 
-            {/* The rating, or an explicit absence. Blank would read as a
-                rendering fault on a page whose first chip says "Top" — but
-                the absence is spelled with a dash rather than the words,
-                because almost every row is unrated today and "Not rated yet"
-                set eighteen times over is a column of noise that costs the
-                description the width it needs. The words stay for a screen
-                reader, which has no column to lose. */}
+            {/* TWO VERDICTS, kept visibly apart (DECISIONS #114). The stars
+                are Kyrylo's out of five and appear only where he has actually
+                given one; the number is IMDb's out of ten and is somebody
+                else's. Drawing IMDb's average as stars would put a stranger's
+                opinion in his handwriting, which is the one thing this shelf
+                must not do.
+
+                The number is LABELLED rather than left bare. Side by side a
+                bare figure reads as the stars written out in digits — the
+                exact misreading that made this change necessary — and there is
+                no column header on a list of rows to carry the label instead. */}
             <span className="top-rating">
-              {typeof item.rating === "number" ? (
-                <>
-                  <Stars rating={item.rating} />
-                  <span className="top-score">{item.rating.toFixed(1)}</span>
-                </>
-              ) : (
-                <>
-                  <span className="top-unrated" aria-hidden>
-                    —
+              {typeof item.rating === "number" && (
+                <Stars rating={item.rating} />
+              )}
+              {typeof item.imdb === "number" && (
+                <span className="top-imdb">
+                  <span className="top-score">{item.imdb.toFixed(1)}</span>
+                  {/* Under the number, not beside it: stacked, the label reads
+                      as a caption belonging to the figure above it, and the
+                      pair takes one column instead of two — which is width the
+                      description gets back on every row. */}
+                  <span className="top-imdb-mark" aria-hidden>
+                    IMDb
                   </span>
                   <span className="sr-only">
-                    <T {...ui.unrated} />
+                    <T {...ui.imdbRating} />
                   </span>
-                </>
+                </span>
               )}
             </span>
 

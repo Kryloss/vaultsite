@@ -93,7 +93,14 @@ export default async function ShelfCategoryPage({ params }: Props) {
   if (!name && !showQuotes) notFound();
 
   return (
-    <Page>
+    <Page
+      data-dev-vault-source={`vault/${section.dirName}/main.md`}
+      data-dev-vault-source-uk={
+        section.contentUk !== undefined
+          ? `vault/${section.dirName}/main.uk.md`
+          : undefined
+      }
+    >
 
       <ShelfTypeView
         sectionSlug={section.slug}

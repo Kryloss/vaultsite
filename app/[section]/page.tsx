@@ -83,18 +83,33 @@ export default async function SectionPage({ params }: Props) {
   const ownBody = listRendersBody(section.type);
 
   return (
-    <Page>
+    <Page
+      data-dev-vault-source={`vault/${section.dirName}/main.md`}
+      data-dev-vault-source-uk={
+        section.contentUk !== undefined
+          ? `vault/${section.dirName}/main.uk.md`
+          : undefined
+      }
+    >
       <JsonLd data={breadcrumbJsonLd(section)} />
       {/* Hover cards for the internal links in this section's own prose. The
           entry list below links to notes too, but those rows already show a
           title and a date — a card repeating them adds nothing. */}
       <LinkPreview previews={previewsInHtml(html, htmlUk)} />
       <header>
-        <h1 className="page-title text-2xl font-semibold tracking-tight text-[var(--text)]">
+        <h1
+          className="page-title text-2xl font-semibold tracking-tight text-[var(--text)]"
+          data-dev-field-en="title"
+          data-dev-field-uk="title_uk"
+        >
           <T en={section.title} uk={section.titleUk} />
         </h1>
         {section.description && (
-          <p className="mt-2 text-[var(--text-secondary)]">
+          <p
+            className="mt-2 text-[var(--text-secondary)]"
+            data-dev-field-en="description"
+            data-dev-field-uk="description_uk"
+          >
             <T en={section.description} uk={section.descriptionUk} />
           </p>
         )}

@@ -74,7 +74,7 @@ export default function PostRows({
                     <span className="block truncate font-medium text-[var(--text)]">
                       <T en={row.title} uk={row.titleUk} />
                       {row.draft && (
-                        <span className="ml-2 rounded bg-amber-500/15 px-1.5 py-0.5 text-xs font-medium text-amber-500">
+                        <span className="draft-chip">
                           Draft
                         </span>
                       )}

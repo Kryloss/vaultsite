@@ -543,19 +543,8 @@ function plainText(md: string): string {
    components that reach the browser, and this module's `fs` imports can't
    follow them. See the note at the top of that file. */
 
-/** "2026-07-16" → "July 16, 2026" (UTC-safe, no timezone drift). */
-export function displayDate(iso: string, locale = "en-US"): string {
-  const [y, m, d] = iso.split("-").map(Number);
-  if (!y || !m || !d) return iso;
-  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString(locale, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    timeZone: "UTC",
-  });
-}
-
-/** "2026-07-16" → "16 липня 2026 р." (Ukrainian long date). */
-export function displayDateUk(iso: string): string {
-  return displayDate(iso, "uk-UA");
-}
+/* `displayDate` and `displayDateUk` moved to lib/dates.ts alongside
+   `shortDate`, for the same reason: the /music list is a client component now,
+   and anything it imports must not reach `fs`. Re-exported here so the dozen
+   existing callers keep their import. */
+export { displayDate, displayDateUk } from "@/lib/dates";

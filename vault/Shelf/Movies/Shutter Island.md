@@ -13,6 +13,11 @@ author_bio_uk: >-
   The Film Foundation — один із найактивніших охоронців кіноспадщини.
 medium: movie
 categories: [Thriller, Mystery]
+imdb_id: tt1130884
+imdb: 8.2
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 1,678,407 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: A missing-person case on an island where nobody's account holds together.
 description_uk: Справа про зникнення на острові, де жодне свідчення не тримається купи.

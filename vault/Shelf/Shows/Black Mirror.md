@@ -13,6 +13,11 @@ author_bio_uk: >-
   перш ніж створити «Чорне дзеркало».
 medium: show
 categories: [Sci-Fi, Drama]
+imdb_id: tt2085059
+imdb: 8.7
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 746,923 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: One technology per episode, followed to the place nobody wanted it to go.
 description_uk: Одна технологія на епізод, доведена туди, куди її ніхто не хотів довести.

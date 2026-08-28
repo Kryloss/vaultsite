@@ -13,6 +13,11 @@ author_bio_uk: >-
   поліція: Лос-Анджелес», перш ніж створити «Пітт».
 medium: show
 categories: [Drama]
+imdb_id: tt31938062
+imdb: 8.9
+# imdb: averageRating from IMDb's own public dataset
+#       (datasets.imdbws.com), 166,690 votes at import.
+#       Refresh with: node scripts/imdb-ratings.mjs
 date: 2026-08-28
 description: One emergency-room shift, told an hour at a time.
 description_uk: Одна зміна у відділенні невідкладної допомоги, розказана по годині за раз.
