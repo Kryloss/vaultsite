@@ -18,6 +18,10 @@ export interface Str {
 export const ui = {
   // chrome / sidebar
   publishedFrom: { en: "Published from Obsidian", uk: "Опубліковано з Obsidian" },
+  openPublicPage: {
+    en: "Open this page on the public site",
+    uk: "Відкрити цю сторінку на публічному сайті",
+  },
   /** {n} is replaced with the day number — see components/ResistanceDay.tsx */
   resistanceDay: {
     en: "Day {n} of Ukraine’s resistance",
