@@ -93,6 +93,17 @@ export interface ShelfItem {
   categories: string[];
   /** `date:` frontmatter — read by components/NewBadge.tsx. */
   date?: string;
+  /**
+   * `description:` — the note's one-line summary. The grid has no room for it
+   * and never asked; the Top list (components/lists/ShelfTopList.tsx) is a
+   * row of text and it is the line that makes a row worth reading.
+   *
+   * `descriptionUk` comes out of `entry.meta`, not off `Entry`, which models
+   * no Ukrainian description — the same route the music list already takes.
+   * Move it onto `Entry` if a third caller wants it.
+   */
+  description?: string;
+  descriptionUk?: string;
 }
 
 /**
@@ -340,6 +351,11 @@ export function toShelfItem(entry: Entry): ShelfItem {
     statusLabel,
     categories: parseCategories(entry.meta),
     date: entry.date,
+    description: entry.description,
+    descriptionUk:
+      typeof entry.meta.description_uk === "string"
+        ? entry.meta.description_uk
+        : undefined,
   };
 }
 
@@ -350,6 +366,45 @@ export function toShelfItem(entry: Entry): ShelfItem {
  * without making anything easier to find. The rows are one medium each, and
  * they stay that way.
  */
+
+/**
+ * Mediums whose medium page leads with the ranked Top list instead of the
+ * whole grid: films and shows, the two you actually rank against each other.
+ *
+ * Books are excluded because their medium page is the payoff for the section
+ * page's spines — you came here to see the covers (DECISIONS #110) — and
+ * videos because a channel upload is not something you place in a top ten.
+ */
+const TOP_MEDIUMS = new Set(["movie", "show"]);
+
+/** Does this medium open on a Top list? See DECISIONS #113. */
+export function hasTopList(medium?: string): boolean {
+  return Boolean(medium && TOP_MEDIUMS.has(medium));
+}
+
+/**
+ * The Top ordering: rated first, best down.
+ *
+ * Unrated entries do NOT interleave and do not get invented a score — a
+ * rating is Kyrylo's and nothing else on the site guesses at one. They fall
+ * to the end in date order, newest first, so the list stays a usable index of
+ * everything while it fills in rather than hiding what he hasn't judged yet.
+ * That matters right now: the shelf is 35 films and shows old and almost
+ * none of them are rated, so a list of only the rated ones would be empty.
+ *
+ * Ties break on date and then title, so the order is total and a rebuild
+ * never reshuffles equal entries.
+ */
+export function sortForTop(items: ShelfItem[]): ShelfItem[] {
+  return [...items].sort((a, b) => {
+    const ar = typeof a.rating === "number";
+    const br = typeof b.rating === "number";
+    if (ar !== br) return ar ? -1 : 1;
+    if (ar && br && a.rating !== b.rating) return b.rating! - a.rating!;
+    if (a.date !== b.date) return (b.date ?? "").localeCompare(a.date ?? "");
+    return a.title.localeCompare(b.title);
+  });
+}
 
 /** Every category used within one medium, alphabetical. */
 export function groupCategories(group: ShelfGroup): string[] {

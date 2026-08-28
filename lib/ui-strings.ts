@@ -42,6 +42,11 @@ export const ui = {
 
   // filters
   filterAll: { en: "All", uk: "Усі" },
+  /* Films and shows lead with a ranked list rather than the whole grid,
+     so their first chip names the ordering instead of the absence of a
+     filter. Books and videos still say "All". See DECISIONS #113. */
+  filterTop: { en: "Top", uk: "Топ" },
+  unrated: { en: "Not rated yet", uk: "Ще без оцінки" },
   mediumBooks: { en: "Books", uk: "Книги" },
   mediumMovies: { en: "Movies", uk: "Фільми" },
   mediumShows: { en: "Shows", uk: "Серіали" },

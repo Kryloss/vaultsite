@@ -111,8 +111,13 @@ Routes:
 - `app/[section]/[slug]/page.tsx` renders entry pages.
 - Shelf medium/category routes are special filtered views documented in
   `CLAUDE.md` and `lib/shelf.ts`. The SECTION page's books row is a shelf of
-  standing spines; every medium page, books included, is a grid of full-size
-  covers — compact overview, rich detail. A note with `spine:` shows a
+  standing spines; a medium page is a grid of full-size covers — compact
+  overview, rich detail — except movies and shows, which open on a ranked
+  `Top` list instead of an `All` grid (`hasTopList()`/`sortForTop()`,
+  DECISIONS #113). Category chips still open the grid everywhere, and a
+  rating is never invented: unrated entries fall to the end of the list.
+  The books row SCALES TO FIT its column rather than scrolling, so spine
+  height is derived via `aspect-ratio` (DECISIONS #112). A note with `spine:` shows a
   photograph of the real spine at its true thickness, with a
   `<name>.uk.<ext>` sibling swapping by language; the rest are generated from
   the cover's dominant colour (`components/lists/BookSpines.tsx`,

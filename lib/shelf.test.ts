@@ -11,7 +11,10 @@ import {
   categorySlug,
   creatorInitials,
   entryMedium,
+  hasTopList,
   mediumSlug,
+  sortForTop,
+  type ShelfItem,
 } from "./shelf.ts";
 import { slugify } from "./vault.ts";
 import type { Entry } from "./vault.ts";
@@ -92,4 +95,80 @@ test("one word gives one letter, and nothing gives nothing", () => {
 
 test("initials are upper-cased and survive extra whitespace", () => {
   assert.equal(creatorInitials("  ernest   hemingway  "), "EH");
+});
+
+/*
+ * The Top ordering (DECISIONS #113). Worth a test rather than a look: the
+ * vault has almost no ratings today, so the branch the reader actually sees
+ * is the unrated tail, and the rated branch would otherwise ship unexercised.
+ */
+function item(over: Partial<ShelfItem> & { slug: string }): ShelfItem {
+  return { title: over.slug, categories: [], ...over };
+}
+
+test("sortForTop puts rated entries first, best down", () => {
+  const out = sortForTop([
+    item({ slug: "c", rating: 3 }),
+    item({ slug: "a", rating: 5 }),
+    item({ slug: "b", rating: 4.5 }),
+  ]);
+  assert.deepEqual(
+    out.map((i) => i.slug),
+    ["a", "b", "c"]
+  );
+});
+
+test("sortForTop drops unrated entries below every rated one", () => {
+  const out = sortForTop([
+    item({ slug: "unrated", date: "2026-08-28" }),
+    item({ slug: "rated-low", rating: 0.5, date: "2020-01-01" }),
+  ]);
+  assert.deepEqual(
+    out.map((i) => i.slug),
+    ["rated-low", "unrated"]
+  );
+});
+
+test("sortForTop orders the unrated tail newest first", () => {
+  const out = sortForTop([
+    item({ slug: "old", date: "2024-01-01" }),
+    item({ slug: "new", date: "2026-08-28" }),
+    item({ slug: "mid", date: "2025-05-05" }),
+  ]);
+  assert.deepEqual(
+    out.map((i) => i.slug),
+    ["new", "mid", "old"]
+  );
+});
+
+test("sortForTop breaks a full tie on title, so a rebuild never reshuffles", () => {
+  const same = { rating: 4, date: "2026-08-28" };
+  const out = sortForTop([
+    item({ slug: "z", title: "Zodiac", ...same }),
+    item({ slug: "a", title: "Amadeus", ...same }),
+  ]);
+  assert.deepEqual(
+    out.map((i) => i.title),
+    ["Amadeus", "Zodiac"]
+  );
+});
+
+test("sortForTop does not mutate its input", () => {
+  const input = [item({ slug: "a" }), item({ slug: "b", rating: 5 })];
+  const copy = input.map((i) => i.slug);
+  sortForTop(input);
+  assert.deepEqual(
+    input.map((i) => i.slug),
+    copy
+  );
+});
+
+test("hasTopList covers films and shows only", () => {
+  assert.equal(hasTopList("movie"), true);
+  assert.equal(hasTopList("show"), true);
+  // Books keep the cover grid their spines row points at (#110); a channel
+  // upload is not something you place in a top ten.
+  assert.equal(hasTopList("book"), false);
+  assert.equal(hasTopList("video"), false);
+  assert.equal(hasTopList(undefined), false);
 });

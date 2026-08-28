@@ -29,6 +29,9 @@ const CATEGORY_LABELS: Record<string, Str> = {
   comedy: { en: "Comedy", uk: "Комедія" },
   documentary: { en: "Documentary", uk: "Документальне" },
   anime: { en: "Anime", uk: "Аніме" },
+  animation: { en: "Animation", uk: "Анімація" },
+  crime: { en: "Crime", uk: "Кримінал" },
+  mystery: { en: "Mystery", uk: "Детектив" },
   // book
   nonfiction: { en: "Nonfiction", uk: "Нонфікшн" },
   fiction: { en: "Fiction", uk: "Художня література" },

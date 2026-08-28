@@ -3,10 +3,12 @@ import ShelfCard from "@/components/lists/ShelfCard";
 import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
 import QuotesView from "@/components/lists/QuotesView";
+import ShelfTopList from "@/components/lists/ShelfTopList";
 import {
   categoryLabel,
   categorySlug,
   groupCategories,
+  hasTopList,
   itemsInCategory,
   type ShelfGroup,
 } from "@/lib/shelf";
@@ -55,6 +57,10 @@ export default function ShelfTypeView({
     ? itemsInCategory(group, activeCategory)
     : group.items;
   const base = `/${sectionSlug}/type/${group.slug}`;
+  /* Films and shows lead with the ranked list; books and videos keep the
+     grid and the plain "All" chip. Only the UNFILTERED view changes — a
+     category is a set to look at, so it stays covers (DECISIONS #113). */
+  const topList = hasTopList(group.medium) && !activeCategory && !showQuotes;
   const hasQuotes = Boolean(quotes && quotes.length > 0);
   const quoteCount = quotes?.reduce((n, b) => n + b.quotes.length, 0) ?? 0;
 
@@ -100,7 +106,11 @@ export default function ShelfTypeView({
 
       {(categories.length > 0 || hasQuotes) && (
         <div className="mt-6 flex flex-wrap gap-2">
-          {chip(<T {...ui.filterAll} />, base, !activeCategory && !showQuotes)}
+          {chip(
+            <T {...(hasTopList(group.medium) ? ui.filterTop : ui.filterAll)} />,
+            base,
+            !activeCategory && !showQuotes
+          )}
           {/* Straight after All, and only when there's something behind it.
               Set apart typographically rather than by ornament, because it
               isn't a category — it opens a different kind of page. */}
@@ -123,6 +133,11 @@ export default function ShelfTypeView({
 
       {showQuotes ? (
         <QuotesView sectionSlug={sectionSlug} books={quotes ?? []} />
+      ) : topList ? (
+        <>
+          <ShelfTopList items={items} sectionSlug={sectionSlug} />
+          {empty}
+        </>
       ) : (
         <>
           {/* Every card here is the same shape, so a plain grid is safe. */}

@@ -1963,3 +1963,39 @@ Every section page printed `main.md`'s body in one place: under the title, above
 **The `.lang-en`/`.lang-uk` pair moved as one node**, which is what keeps the language toggle working — those two articles are a unit, and splitting them across two call sites is how a section would end up showing both languages at once (the trap written up in #110 for spines).
 
 **Revisit when:** a second type wants this. One member in a set is a flag with extra steps; two would justify it, and three would suggest the page should read placement out of the registry entry itself rather than out of a side table.
+
+## 112. The book shelf scales to fit instead of scrolling (2026-08-28)
+
+A twelfth book broke the row. Eleven spines took 576px of the 624px column — which `lib/spine.ts` said outright, along with "check `rowWidth` against the measure before enlarging again" — and 11/22/63 arrived as the widest book on the shelf at 60px. The row became 630px of books in a 576px container, and `.shelf-row`'s `overflow-x: auto` did what it is there for: it cut Sapiens in half at the right-hand edge.
+
+Which looked like a bug rather than a scroller, because on this row it is one. #110 made the books row the one medium that **needs no scroller** — that is the argument for spines over covers on the section page, where the whole point is fitting the collection in a glance beside three other mediums. A row you have to drag is the cover strip we replaced.
+
+**Each slot now has an explicit shrink floor instead of `min-width: auto`, so flexbox scales the whole shelf down when it would overflow.** Flex distributes a deficit in proportion to base size, which is exactly a uniform scale: every book keeps its width *relative to the others*, and the collection stays a picture of itself. At twelve books the factor is 0.916 and the row lands on 576.000px against a 576px column.
+
+Height had to follow or the books would have stretched. It is now **derived rather than declared** — `aspect-ratio` against `--spine-wn` / `--spine-hn`, the same two numbers `--spine-h` used to carry, unitless because `aspect-ratio` takes a ratio and not a pair of lengths. At the natural width this computes to exactly the old `--spine-h`, so a row with room to spare did not move a pixel.
+
+Three things are load-bearing:
+
+- **`max-width: 100%` on `.book-spine`.** A flex item cannot shrink below its own `width`, so without it the slot shrank and the spine kept overflowing it.
+- **The custom properties moved from the spine to the `.book-slot`.** The slot needs `--spine-w` to compute its own floor, and a parent does not inherit from its child. Everything downstream is unchanged — custom properties inherit.
+- **The Ukrainian ratio moves with the Ukrainian width.** `html[data-lang="uk"] .book-spine` already overrode `width`; overriding `aspect-ratio` beside it is what stops the Ukrainian scan being sized to the English one's shape and cropped by `object-fit: cover` — the exact failure the per-language width exists to prevent.
+
+The floor is 70% of natural width. Past that a shelf has genuinely outgrown its column and going back to the drag-scroller every other medium row uses is the honest degradation; shrinking towards nothing is not. Nothing in the vault is near it.
+
+The residual 4px of `scrollWidth` is the last book's hover cover, which is `position: absolute`, invisible at rest and always overhung its slot. The books themselves fit: measured, the last spine's right edge clears the row's by 5px.
+
+## 113. Films and shows lead with a ranked list, not the whole grid (2026-08-28)
+
+The medium pages opened on an "All" chip and a grid of every cover. That is the right answer for books — the section page shows their spines, so the medium page is the payoff where you finally see the art (#110) — and for videos, where a channel upload is not something you place in a top ten. It is the wrong answer for the two mediums you actually rank against each other.
+
+**On `/shelf/type/movies` and `/shelf/type/shows` the first chip now says "Top" and opens an IMDb-style list**: position, small cover, title, the note's one-line description, rating. `hasTopList()` is the single predicate, so no other medium learns a new behaviour.
+
+**Only the unfiltered view changes.** Crime, Drama and the rest still open the grid, deliberately: choosing a category is choosing a *set to look at*, and covers are how you look at a set. Choosing "Top" is asking an ordered question, and an ordered question wants rows — a grid can carry a rank number but nobody reads a grid in order, and it has no room for the sentence that says why the thing is there.
+
+**The list is not rated-only, and nothing invents a rating.** A rating is Kyrylo's; `sortForTop` puts rated entries first, best down, and drops the unrated to the end in date order rather than scoring them. This matters right now rather than hypothetically: thirty-five films and shows arrived at once and one of them is rated, so a rated-only list would have been a page with a single row on it and no index of anything else. Ties break on date then title, so the order is total and a rebuild never reshuffles equal entries.
+
+The absence is spelled with a dash, not with the words. "Not rated yet" set eighteen times down a column is noise, and it cost the description the width that makes a row worth reading; the words stay as `sr-only`, which has no column to lose. On a phone the dash goes too — there it gets a row of its own, where there is no column to hold open and it reads as a stray mark under the sentence.
+
+`ShelfItem` gained `description` and `descriptionUk`. The grid never needed either. `descriptionUk` comes out of `entry.meta` because `Entry` models no Ukrainian description — the route `lib/music.ts` already takes; move it onto `Entry` when a third caller wants it.
+
+The divider starts at the **text column**, not the row's edge, the same as the music track list: the art column reads as a margin of objects and the rules belong to the writing beside them.

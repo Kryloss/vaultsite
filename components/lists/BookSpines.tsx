@@ -94,12 +94,29 @@ export default function BookSpines({
           item.spineUkUrl && item.spineUkAr ? h / item.spineUkAr : undefined;
         const style = {
           "--spine-h": `${h}px`,
+          /* The same two numbers UNITLESS, because `aspect-ratio` takes a
+             ratio and not a pair of lengths. They are what lets the row
+             shrink to fit: `.book-spine` sizes from `width` and derives its
+             height from this, so when flexbox takes width off an overcrowded
+             row every book loses the same FRACTION and the shelf keeps its
+             proportions instead of clipping the last book. See #112. */
+          "--spine-hn": `${h}`,
           ...(bg ? { "--spine-bg": bg, "--spine-fg": fg } : {}),
           /* Height stays the SHARED one either way: books on a shelf differ
              in height a little and in thickness a lot, and height is what the
              eye runs along. Only the width is per-book. */
-          ...(width ? { "--spine-w": `${width.toFixed(2)}px` } : {}),
-          ...(widthUk ? { "--spine-w-uk": `${widthUk.toFixed(2)}px` } : {}),
+          ...(width
+            ? {
+                "--spine-w": `${width.toFixed(2)}px`,
+                "--spine-wn": `${width.toFixed(2)}`,
+              }
+            : {}),
+          ...(widthUk
+            ? {
+                "--spine-w-uk": `${widthUk.toFixed(2)}px`,
+                "--spine-wn-uk": `${widthUk.toFixed(2)}`,
+              }
+            : {}),
         } as CSSProperties;
 
         /* One line, ellipsised, with the full string in the tooltip — the
@@ -154,11 +171,14 @@ export default function BookSpines({
         );
 
         return (
-          <li key={item.slug} className="book-slot">
+          /* The custom properties live on the SLOT, not on the spine, because
+             the slot needs `--spine-w` for its own shrink floor. They still
+             reach `.book-spine` — custom properties inherit — so every rule
+             that reads them is unchanged. */
+          <li key={item.slug} className="book-slot" style={style}>
             <Link
               href={`/${sectionSlug}/${item.slug}`}
               className="book-spine press"
-              style={style}
               /* Reading state is POSITION here — the book sits proud of the
                  shelf, which is what people actually do with one they are
                  part-way through. Position says nothing to a screen reader,
