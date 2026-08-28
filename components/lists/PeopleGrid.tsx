@@ -37,6 +37,7 @@ export default function PeopleGrid({ section, entries }: ListProps) {
     title: entry.title,
     titleUk: entry.titleUk,
     description: entry.description,
+    descriptionUk: entry.descriptionUk,
     cover: resolveCoverUrl(entry.sectionDir, entry.meta.cover),
     coverBlur: blurFor(resolveCoverUrl(entry.sectionDir, entry.meta.cover)),
     coverSrcSet: srcSetFor(resolveCoverUrl(entry.sectionDir, entry.meta.cover)),

@@ -73,6 +73,8 @@ export interface Entry {
   titleUk?: string;
   date?: string;
   description?: string;
+  /** Ukrainian description from `description_uk:` frontmatter. */
+  descriptionUk?: string;
   /** Raw markdown body */
   content: string;
   /** Ukrainian body from an optional sibling `<name>.uk.md` (toggle-swapped). */
@@ -235,6 +237,7 @@ export function getEntries(section: Section): Entry[] {
       titleUk: ukTitle(data),
       date: data.date ? String(formatDateValue(data.date)) : undefined,
       description: data.description as string | undefined,
+      descriptionUk: ukDescription(data),
       content,
       contentUk,
       meta: data,
@@ -297,6 +300,14 @@ export function parseCategories(meta: Record<string, unknown>): string[] {
 /** Ukrainian title from frontmatter (`title_uk:`), if present. */
 export function ukTitle(meta: Record<string, unknown>): string | undefined {
   const v = meta.title_uk ?? meta.titleUk;
+  return typeof v === "string" && v.trim() ? v.trim() : undefined;
+}
+
+/** Ukrainian description from frontmatter (`description_uk:`), if present. */
+export function ukDescription(
+  meta: Record<string, unknown>
+): string | undefined {
+  const v = meta.description_uk ?? meta.descriptionUk;
   return typeof v === "string" && v.trim() ? v.trim() : undefined;
 }
 

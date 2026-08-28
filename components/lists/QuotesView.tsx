@@ -33,7 +33,11 @@ export default function QuotesView({
             <Link href={`/${sectionSlug}/${book.slug}`}>
               <T en={book.title} uk={book.titleUk} />
             </Link>
-            {book.author && <span className="quote-author">{book.author}</span>}
+            {book.author && (
+              <span className="quote-author">
+                <T en={book.author} uk={book.authorUk} />
+              </span>
+            )}
           </h2>
           <div className="mt-3 flex flex-col gap-3">
             {book.quotes.map((q, i) => (

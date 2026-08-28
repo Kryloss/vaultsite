@@ -26,6 +26,7 @@ export default function PostList({ section, entries }: ListProps) {
     title: entry.title,
     titleUk: entry.titleUk,
     description: entry.description,
+    descriptionUk: entry.descriptionUk,
     date: entry.date,
     draft: entry.draft,
     category:

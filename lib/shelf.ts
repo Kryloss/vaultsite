@@ -24,8 +24,7 @@ export interface ShelfItem {
    * `author_uk:` — already written on every shelf note for the creator block.
    * Read by the book spines, where the byline sits directly beside a Cyrillic
    * title and a Latin name next to it reads as an untranslated page. The
-   * cards don't use it yet; they set the author below their own title, where
-   * it is far less conspicuous.
+   * cards use it below their own title as well.
    */
   authorUk?: string;
   medium?: string;
@@ -108,9 +107,8 @@ export interface ShelfItem {
    * and never asked; the Top list (components/lists/ShelfTopList.tsx) is a
    * row of text and it is the line that makes a row worth reading.
    *
-   * `descriptionUk` comes out of `entry.meta`, not off `Entry`, which models
-   * no Ukrainian description — the same route the music list already takes.
-   * Move it onto `Entry` if a third caller wants it.
+   * `descriptionUk` is part of `Entry`, so every list can use the same
+   * bilingual description without reaching into frontmatter itself.
    */
   description?: string;
   descriptionUk?: string;
@@ -365,10 +363,7 @@ export function toShelfItem(entry: Entry): ShelfItem {
     categories: parseCategories(entry.meta),
     date: entry.date,
     description: entry.description,
-    descriptionUk:
-      typeof entry.meta.description_uk === "string"
-        ? entry.meta.description_uk
-        : undefined,
+    descriptionUk: entry.descriptionUk,
   };
 }
 

@@ -9,6 +9,7 @@ export interface PostRow {
   title: string;
   titleUk?: string;
   description?: string;
+  descriptionUk?: string;
   date?: string;
   draft: boolean;
   category?: string;

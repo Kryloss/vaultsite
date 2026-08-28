@@ -73,10 +73,10 @@ export default function ShelfCard({
           /* Spine-style fallback cover */
           <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-3 text-center">
             <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-tertiary)]">
-              {item.author ?? "—"}
+              <T en={item.author ?? "—"} uk={item.authorUk} />
             </span>
             <span className="text-sm font-semibold leading-snug text-[var(--text-secondary)]">
-              {item.title}
+              <T en={item.title} uk={item.titleUk} />
             </span>
             <span className="h-px w-8 bg-[var(--border)]" />
           </div>
@@ -97,7 +97,7 @@ export default function ShelfCard({
       </span>
       {item.author && (
         <span className="mt-0.5 block truncate text-sm leading-snug text-[var(--text-secondary)]">
-          {item.author}
+          <T en={item.author} uk={item.authorUk} />
         </span>
       )}
       {showRating && typeof item.rating === "number" && (

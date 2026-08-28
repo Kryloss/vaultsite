@@ -63,8 +63,7 @@ export interface MusicNote {
   title: string;
   titleUk?: string;
   description?: string;
-  /* `Entry` models no `descriptionUk` — only `Section` does — so it is read
-     out of `meta`, the documented escape hatch. See DECISIONS #90. */
+  /** Ukrainian description from the entry's `description_uk:` frontmatter. */
   descriptionUk?: string;
   date?: string;
   format: Str;

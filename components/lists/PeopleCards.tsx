@@ -9,6 +9,7 @@ export interface PersonRow {
   title: string;
   titleUk?: string;
   description?: string;
+  descriptionUk?: string;
   cover?: string;
   /** Base64 blur-up placeholder for `cover` — see lib/blur.ts. */
   coverBlur?: string;
@@ -124,7 +125,7 @@ export default function PeopleCards({
               </span>
               {row.description && (
                 <span className="mt-0.5 block truncate text-sm leading-snug text-[var(--text-secondary)]">
-                  {row.description}
+                  <T en={row.description} uk={row.descriptionUk} />
                 </span>
               )}
             </Link>

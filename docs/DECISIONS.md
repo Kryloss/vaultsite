@@ -2072,17 +2072,14 @@ Two things deliberately unchanged. The **music list** still strips the chip to p
 ## 118. Local editing is a separate loopback tool, not a deployed CMS (2026-08-28)
 
 The local preview now has a pencil dock: collapsed it is one quiet control at
-bottom-left and the page — including the breadcrumb bar — looks like the public
+bottom-right and the page — including the breadcrumb bar — looks like the public
 site. Expanded, it reveals the same-route public link, “Open this file in
 Obsidian,” language switching, title and description fields, Undo, Redo, Cancel,
 and Save. The public link moved out of the breadcrumb because an authoring
 escape hatch should not permanently alter the page being previewed.
 
-Next's own development badge is disabled. It also occupies bottom-left at a
-higher stacking level, so the pencil was visible but every click landed on the
-framework badge underneath it. The other three corners already belong to the
-breadcrumb, contents control, and reading progress; moving the collision would
-only trade which real control it covered. Compile errors keep Next's ordinary
+Next's own development badge is disabled so the local dock is the only
+development affordance in the preview. Compile errors keep Next's ordinary
 overlay, which is the development signal that matters.
 
 **The writer is a sidecar, not an App Router route.** `npm run dev` supervises

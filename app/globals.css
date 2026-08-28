@@ -4446,16 +4446,17 @@ svg.diagram tspan {
 /* ---------- Local vault editor (components/DevTools.tsx) -----------------
    Development-only UI, but made from the same chrome material as the public
    controls so opening it does not make the preview look like another site.
-   Bottom-left is the one free corner: reading offers and time remain right. */
+   Bottom-right keeps it close to the page edge without covering the reading
+   controls on the right rail. */
 .dev-dock {
   position: fixed;
-  left: max(0.75rem, env(safe-area-inset-left));
+  right: max(0.75rem, env(safe-area-inset-right));
   bottom: max(0.75rem, env(safe-area-inset-bottom));
   z-index: 30;
   display: flex;
-  max-width: calc(100vw - max(0.75rem, env(safe-area-inset-left)) - 0.75rem);
+  max-width: calc(100vw - max(0.75rem, env(safe-area-inset-right)) - 0.75rem);
   flex-direction: column;
-  align-items: flex-start;
+  align-items: flex-end;
   gap: 0.5rem;
 }
 
@@ -4496,7 +4497,6 @@ svg.diagram tspan {
 
 .dev-tool-button:hover:not(:disabled) {
   color: var(--text);
-  background: color-mix(in srgb, var(--bg-hover) 76%, transparent);
 }
 
 .dev-tool-button:disabled {
@@ -4520,7 +4520,7 @@ svg.diagram tspan {
 .dev-editor-panel {
   width: min(
     23rem,
-    calc(100vw - max(0.75rem, env(safe-area-inset-left)) - 0.75rem)
+    calc(100vw - max(0.75rem, env(safe-area-inset-right)) - 0.75rem)
   );
   max-height: calc(100vh - 5rem);
   max-height: calc(100dvh - 5rem - env(safe-area-inset-bottom));

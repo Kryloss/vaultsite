@@ -84,7 +84,7 @@ export default function PostRows({
                     </span>
                     {row.description && (
                       <span className="mt-0.5 block truncate text-sm text-[var(--text-secondary)]">
-                        {row.description}
+                        <T en={row.description} uk={row.descriptionUk} />
                       </span>
                     )}
                   </span>
@@ -129,4 +129,3 @@ function groupByYear(rows: PostRow[]): { label: string; items: PostRow[] }[] {
   }
   return years;
 }
-

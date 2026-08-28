@@ -14,6 +14,7 @@ export interface BookQuotes {
   title: string;
   titleUk?: string;
   author?: string;
+  authorUk?: string;
   /** Each quote in both languages; `uk` only when the counts line up. */
   quotes: { en: string; uk?: string }[];
 }
@@ -84,6 +85,10 @@ export function getBookQuotes(entries: Entry[]): BookQuotes[] {
       titleUk: entry.titleUk,
       author:
         typeof entry.meta.author === "string" ? entry.meta.author : undefined,
+      authorUk:
+        typeof entry.meta.author_uk === "string"
+          ? entry.meta.author_uk
+          : undefined,
       quotes: en.map((text, i) => ({
         en: text,
         uk: paired ? uk[i] : undefined,
