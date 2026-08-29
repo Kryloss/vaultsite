@@ -23,6 +23,8 @@ description: A time-travel plot that closes every loop it opens.
 description_uk: Сюжет про подорожі в часі, який замикає кожну петлю, яку відкрив.
 cover: dark-series.jpg
 # cover source: Wikipedia (low-res promotional poster, fair-use scale)
+top_order: 14
+rating: 4
 ---
 
 ## At a glance

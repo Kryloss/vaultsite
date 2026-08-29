@@ -207,6 +207,29 @@ test("sortForTop falls back to date when IMDb is missing too", () => {
   );
 });
 
+test("manual Top-list order wins over ratings and stays stable", () => {
+  const out = sortForTop([
+    item({ slug: "rated", rating: 5, topOrder: 2 }),
+    item({ slug: "first", rating: 1, topOrder: 0 }),
+    item({ slug: "second", rating: 4, topOrder: 1 }),
+  ]);
+  assert.deepEqual(
+    out.map((i) => i.slug),
+    ["first", "second", "rated"]
+  );
+});
+
+test("unranked entries trail manually ordered entries", () => {
+  const out = sortForTop([
+    item({ slug: "unranked", rating: 5 }),
+    item({ slug: "ordered", rating: 0, topOrder: 0 }),
+  ]);
+  assert.deepEqual(
+    out.map((i) => i.slug),
+    ["ordered", "unranked"]
+  );
+});
+
 test("an entry with an IMDb score sorts above one with none", () => {
   const out = sortForTop([
     item({ slug: "none", date: "2026-08-28" }),

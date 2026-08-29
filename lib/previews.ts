@@ -103,7 +103,9 @@ export function getLinkPreviews(): LinkPreview[] {
         section: section.title,
         sectionUk: section.titleUk,
         excerpt: entry.description?.trim() || excerpt(entry.content),
-        excerptUk: entry.contentUk ? excerpt(entry.contentUk) : undefined,
+        excerptUk:
+          entry.descriptionUk?.trim() ||
+          (entry.contentUk ? excerpt(entry.contentUk) : undefined),
         dateLabel: entry.date ? displayDate(entry.date) : undefined,
         dateLabelUk: entry.date ? displayDateUk(entry.date) : undefined,
         cover,

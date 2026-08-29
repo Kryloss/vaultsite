@@ -23,6 +23,8 @@ description: A film about mentorship that never decides whether the mentor was r
 description_uk: Фільм про наставництво, який так і не вирішує, чи мав наставник рацію.
 cover: whiplash.jpg
 # cover source: Wikipedia (low-res theatrical poster, fair-use scale)
+top_order: 0
+rating: 5
 ---
 
 ## At a glance

@@ -10,9 +10,11 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   artistInitials,
+  collectGenres,
   buildPersonIndex,
   entryFormat,
   filterGroups,
+  noteGenres,
   noteLangs,
 } from "./music.ts";
 import type { ArtistGroup, MusicNote } from "./music-filter.ts";
@@ -132,9 +134,16 @@ function note(fields: Partial<MusicNote>): MusicNote {
     title: "A Track",
     format: ui.formatTrack,
     langs: [],
+    genres: [],
     ...fields,
   };
 }
+
+/** The groups half of the result — what every assertion below is about. */
+const filt = (
+  groups: ArtistGroup[],
+  opts: Parameters<typeof filterGroups>[1]
+) => filterGroups(groups, opts).groups;
 
 function group(key: string, notes: MusicNote[], artist?: string): ArtistGroup {
   return {
@@ -159,8 +168,9 @@ test("noteLangs takes a string, a list, or nothing", () => {
 
 test("no query and no language returns the list untouched", () => {
   const groups = [group("a", [note({})], "Someone")];
-  assert.equal(filterGroups(groups, {}), groups);
-  assert.equal(filterGroups(groups, { query: "   ", lang: null }), groups);
+  assert.equal(filt(groups, {}), groups);
+  assert.equal(filt(groups, { query: "   ", lang: null }), groups);
+  assert.equal(filterGroups(groups, {}).fuzzy, false);
 });
 
 test("a language keeps only notes sung in it", () => {
@@ -168,29 +178,29 @@ test("a language keeps only notes sung in it", () => {
     group("a", [note({ slug: "uk1", langs: ["uk"] })], "A"),
     group("b", [note({ slug: "ru1", langs: ["ru"] })], "B"),
   ];
-  const uk = filterGroups(groups, { lang: "uk" });
+  const uk = filt(groups, { lang: "uk" });
   assert.equal(uk.length, 1);
   assert.equal(uk[0].notes[0].slug, "uk1");
 });
 
 test("a bilingual note answers to BOTH of its languages", () => {
   const groups = [group("a", [note({ slug: "pray", langs: ["en", "uk"] })], "A")];
-  assert.equal(filterGroups(groups, { lang: "en" })[0].notes.length, 1);
-  assert.equal(filterGroups(groups, { lang: "uk" })[0].notes.length, 1);
-  assert.equal(filterGroups(groups, { lang: "ru" }).length, 0);
+  assert.equal(filt(groups, { lang: "en" })[0].notes.length, 1);
+  assert.equal(filt(groups, { lang: "uk" })[0].notes.length, 1);
+  assert.equal(filt(groups, { lang: "ru" }).length, 0);
 });
 
 test("a note with no lang: is reachable only through All", () => {
   const groups = [group("a", [note({ langs: [] })], "A")];
-  assert.equal(filterGroups(groups, { lang: null }).length, 1);
+  assert.equal(filt(groups, { lang: null }).length, 1);
   for (const l of ["en", "uk", "ru"] as const) {
-    assert.equal(filterGroups(groups, { lang: l }).length, 0);
+    assert.equal(filt(groups, { lang: l }).length, 0);
   }
 });
 
 test("an artist whose every row was filtered out is not a result", () => {
   const groups = [group("a", [note({ langs: ["ru"] })], "A")];
-  assert.equal(filterGroups(groups, { lang: "uk" }).length, 0);
+  assert.equal(filt(groups, { lang: "uk" }).length, 0);
 });
 
 test("search matches the artist, so a matching card stays whole", () => {
@@ -198,7 +208,7 @@ test("search matches the artist, so a matching card stays whole", () => {
     group("noize mc", [note({ slug: "x", title: "Open Air" }), note({ slug: "y", title: "Vykhod" })], "Noize MC"),
     group("other", [note({ slug: "z", title: "Something" })], "Other"),
   ];
-  const hit = filterGroups(groups, { query: "noize" });
+  const hit = filt(groups, { query: "noize" });
   assert.equal(hit.length, 1);
   /* Both rows survive: the query matched the artist, and a card whose head
      matched but whose rows all vanished would read as a bug. */
@@ -210,9 +220,9 @@ test("search matches titles, descriptions and the format label", () => {
     group("a", [note({ slug: "ep", title: "Zed", format: ui.formatEp })], "A"),
     group("b", [note({ slug: "d", title: "Yon", description: "a quiet one" })], "B"),
   ];
-  assert.equal(filterGroups(groups, { query: "ep" })[0].notes[0].slug, "ep");
-  assert.equal(filterGroups(groups, { query: "quiet" })[0].notes[0].slug, "d");
-  assert.equal(filterGroups(groups, { query: "нічого" }).length, 0);
+  assert.equal(filt(groups, { query: "ep" })[0].notes[0].slug, "ep");
+  assert.equal(filt(groups, { query: "quiet" })[0].notes[0].slug, "d");
+  assert.equal(filt(groups, { query: "нічого" }).length, 0);
 });
 
 test("a term PREFIXES a word — it is not found in the middle of one", () => {
@@ -222,32 +232,32 @@ test("a term PREFIXES a word — it is not found in the middle of one", () => {
     group("a", [note({ slug: "ep", title: "Zed", format: ui.formatEp })], "A"),
     group("b", [note({ slug: "no", title: "Polaroid", description: "Stepan made it" })], "B"),
   ];
-  const hit = filterGroups(groups, { query: "ep" });
+  const hit = filt(groups, { query: "ep" });
   assert.equal(hit.length, 1);
   assert.equal(hit[0].notes[0].slug, "ep");
   /* Still a prefix search, so a half-typed word finds its row. */
-  assert.equal(filterGroups(groups, { query: "pola" })[0].notes[0].slug, "no");
+  assert.equal(filt(groups, { query: "pola" })[0].notes[0].slug, "no");
 });
 
 test("every term must match, so a second word narrows", () => {
   const groups = [
     group("a", [note({ slug: "keep", title: "Open Air" }), note({ slug: "drop", title: "Open Road" })], "A"),
   ];
-  assert.equal(filterGroups(groups, { query: "open" })[0].notes.length, 2);
-  const hit = filterGroups(groups, { query: "open air" });
+  assert.equal(filt(groups, { query: "open" })[0].notes.length, 2);
+  const hit = filt(groups, { query: "open air" });
   assert.equal(hit[0].notes.length, 1);
   assert.equal(hit[0].notes[0].slug, "keep");
 });
 
 test("a query of only punctuation is not a filter", () => {
   const groups = [group("a", [note({})], "A")];
-  assert.equal(filterGroups(groups, { query: "—  ." }), groups);
+  assert.equal(filt(groups, { query: "—  ." }), groups);
 });
 
 test("search is case-insensitive across scripts", () => {
   const groups = [group("a", [note({ title: "Вороны" })], "Нервы")];
-  assert.equal(filterGroups(groups, { query: "ВОРОН" }).length, 1);
-  assert.equal(filterGroups(groups, { query: "нервы" }).length, 1);
+  assert.equal(filt(groups, { query: "ВОРОН" }).length, 1);
+  assert.equal(filt(groups, { query: "нервы" }).length, 1);
 });
 
 test("the two filters compose", () => {
@@ -255,13 +265,97 @@ test("the two filters compose", () => {
     group("a", [note({ slug: "keep", title: "Open Air", langs: ["ru"] }),
                 note({ slug: "drop", title: "Open Air", langs: ["uk"] })], "A"),
   ];
-  const hit = filterGroups(groups, { query: "open", lang: "ru" });
+  const hit = filt(groups, { query: "open", lang: "ru" });
   assert.equal(hit[0].notes.length, 1);
   assert.equal(hit[0].notes[0].slug, "keep");
 });
 
 test("filtering never mutates the groups it was given", () => {
   const groups = [group("a", [note({ langs: ["uk"] }), note({ langs: ["ru"] })], "A")];
-  filterGroups(groups, { lang: "uk" });
+  filt(groups, { lang: "uk" });
   assert.equal(groups[0].notes.length, 2);
+});
+
+
+/* ---------- Genres, folding, and the typo pass ---------- */
+
+test("noteGenres takes a string or a list and de-duplicates", () => {
+  assert.deepEqual(noteGenres({ genres: ["Rock", "Rap"] }), ["Rock", "Rap"]);
+  assert.deepEqual(noteGenres({ genre: "Pop" }), ["Pop"]);
+  assert.deepEqual(noteGenres({ genres: ["Rock", "rock"] }), ["Rock"]);
+  assert.deepEqual(noteGenres({}), []);
+});
+
+test("collectGenres unions a group's notes, sorted and deduped", () => {
+  assert.deepEqual(
+    collectGenres([note({ genres: ["Rap", "Alternative"] }), note({ genres: ["rap", "Rock"] })]),
+    ["Alternative", "Rap", "Rock"]
+  );
+});
+
+test("an artist's hidden tags answer a search, so 'rap' returns rap ARTISTS", () => {
+  /* The note itself is filed under Rock; the ARTIST is tagged Rap because
+     another of their releases is. Searching "rap" has to return this card —
+     that is the whole reason the tags exist. */
+  const groups = [
+    { ...group("a", [note({ slug: "rocky", genres: ["Rock"] })], "A"),
+      artist: { name: "A", tags: ["Rap"] } },
+    group("b", [note({ slug: "other", genres: ["Pop"] })], "B"),
+  ];
+  const hit = filt(groups, { query: "rap" });
+  assert.equal(hit.length, 1);
+  assert.equal(hit[0].notes[0].slug, "rocky");
+});
+
+test("genre is searchable as text too, so typing 'rock' works", () => {
+  const groups = [group("a", [note({ genres: ["Rock"] })], "A")];
+  assert.equal(filt(groups, { query: "rock" }).length, 1);
+});
+
+test("search folds accents, so 'maneskin' finds Måneskin", () => {
+  const groups = [group("a", [note({ title: "GASOLINE" })], "Måneskin")];
+  assert.equal(filt(groups, { query: "maneskin" }).length, 1);
+  assert.equal(filt(groups, { query: "Måneskin" }).length, 1);
+});
+
+test("a typo falls back to the trigram pass and says so", () => {
+  const groups = [group("a", [note({ title: "Bulletproof" })], "BLIND8")];
+  /* Nothing prefixes "bulletpoof", so the literal pass is empty and the
+     palette's fallback answers instead — flagged, because these are near
+     misses rather than matches. */
+  const res = filterGroups(groups, { query: "bulletpoof" });
+  assert.equal(res.groups.length, 1);
+  assert.equal(res.fuzzy, true);
+});
+
+test("a literal hit never reports itself as fuzzy", () => {
+  const groups = [group("a", [note({ title: "Bulletproof" })], "BLIND8")];
+  const res = filterGroups(groups, { query: "bullet" });
+  assert.equal(res.groups.length, 1);
+  assert.equal(res.fuzzy, false);
+});
+
+test("nonsense matches nothing, fuzzily or otherwise", () => {
+  const groups = [group("a", [note({ title: "Bulletproof" })], "BLIND8")];
+  const res = filterGroups(groups, { query: "qqqqzzzz" });
+  assert.equal(res.groups.length, 0);
+  assert.equal(res.fuzzy, false);
+});
+
+test("language is never fuzzy — it is pressed, not typed", () => {
+  const groups = [group("a", [note({ langs: ["uk"], genres: ["Rock"] })], "A")];
+  assert.equal(filt(groups, { lang: "ru" }).length, 0);
+});
+
+test("query and language compose", () => {
+  const groups = [
+    group("a", [
+      note({ slug: "keep", title: "Open Air", langs: ["ru"] }),
+      note({ slug: "wrongLang", title: "Open Air", langs: ["uk"] }),
+      note({ slug: "wrongTitle", title: "Closed Road", langs: ["ru"] }),
+    ], "A"),
+  ];
+  const hit = filt(groups, { query: "open", lang: "ru" });
+  assert.equal(hit[0].notes.length, 1);
+  assert.equal(hit[0].notes[0].slug, "keep");
 });

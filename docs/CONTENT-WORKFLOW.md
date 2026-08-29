@@ -87,6 +87,7 @@ author_bio_uk: >-
 medium: book | movie | show | video
 categories: [<one or more — see the vocabularies below>]
 rating: <0–5, halves allowed — ONLY if he gave one; never invent his rating>
+top_order: <zero-based manual Top position — normally written by the localhost editor>
 date: YYYY-MM-DD
 description: <one sentence>
 cover: <slug>.jpg          # videos: omit — the thumbnail comes from `video:`
@@ -107,6 +108,11 @@ provides none, omit this section or leave a placeholder he can fill>
 ```
 
 See **Categories** below — Shelf, Posts and People all use the same key.
+
+`top_order:` is only for the unfiltered movie/show Top lists. Leave it absent
+when the list should use its derived fallback; the localhost drag editor writes
+consecutive positions for the whole visible list when you intentionally arrange
+it. Never invent or renumber it as part of ordinary content cleanup.
 
 #### The creator block — every shelf note, no exceptions
 
@@ -249,8 +255,32 @@ artist_bio: >-
   A sentence or two. Optional, like every key below the name.
 artist_bio_uk: >-
   Той самий текст українською.
+lang: uk                   # WHICH SHELF, not what it is sung in. See below.
+genres: [Rap]              # Apple's own primaryGenreName, split on the slash
 rating: 4.5                # optional, halves allowed — HIS score, never invent one
 ```
+
+**`lang:` is the shelf, not the lyrics.** It drives the ENG/UA/RU button on the
+section page and it records a judgement rather than a fact about the language:
+Нервы sing in Russian and are a Ukrainian band, so `uk`; Ляпис Трубецкой are
+Belarusian singing in Russian with Ukrainian residency, so `uk`; BLIND8 and
+Tricky Nicki are Ukrainian and write for an English-speaking listener, so `en`.
+Ask if a new artist is not obvious — don't infer it from the words. A list
+(`lang: [en, uk]`) for a record that is genuinely both, like PRAY's English
+verse and Ukrainian chorus.
+
+**`genres:` comes from the same lookup as the artwork** — `primaryGenreName` in
+the iTunes response, split on the slash and on the space: `Hip-Hop/Rap` → `[Rap]`,
+`Pop Punk` → `[Pop, Punk]`, `Alternative Rap` → `[Rap, Alternative]`. Apple's
+answer, not yours; the point is a taxonomy nobody has to maintain.
+
+Nothing renders it. It exists so that typing "rap" into the section's search
+box returns rap artists — and the ARTIST is tagged automatically at build time
+with the union of their notes' genres (`groupByArtist` in `lib/music.ts`), so
+one note filed under Rap makes the whole card answer to the word. **There is no
+step to do here beyond putting `genres:` on the note**; the artist tagging is
+derived and cannot drift. `tags:` on an artist in `main.md` adds extra search
+terms by hand, for a word no release of theirs is filed under.
 
 Then open the body with the fact block, exactly as a shelf note does — the
 `## At a glance` heading stays in the markdown and is clipped by CSS, so never
@@ -280,6 +310,9 @@ artists:
       Who the band IS. One or two sentences.
     bio_uk: >-
       Те саме українською.
+    tags: [glam]             # optional, invisible — extra words the artist
+                             # should answer to in search. Their genres are
+                             # added automatically; this is only for the rest.
 ```
 
 Keep the two apart: `bio` here is about the artist and is written once; the

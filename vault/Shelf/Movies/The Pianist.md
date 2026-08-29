@@ -23,6 +23,8 @@ description: Survival in Warsaw, filmed by a director who survived a ghetto hims
 description_uk: Виживання у Варшаві, зняте режисером, який сам пережив гетто.
 cover: the-pianist.jpg
 # cover source: Wikipedia (low-res theatrical poster, fair-use scale)
+top_order: 9
+rating: 5
 ---
 
 ## At a glance

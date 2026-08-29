@@ -27,6 +27,8 @@ cover: attack-on-titan.jpg
 # cover source: Wikipedia (low-res key visual, fair-use scale). The original Japanese
 # artwork — there is no English-language cover for this on Wikipedia in any language
 # edition; the file happens to be hosted on uk.wikipedia but the art is untranslated.
+top_order: 1
+rating: 5
 ---
 
 ## At a glance

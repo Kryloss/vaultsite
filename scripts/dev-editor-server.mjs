@@ -1,6 +1,11 @@
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import http from "node:http";
-import { DevEditorError, readDocument, saveDocument } from "./dev-editor-core.mjs";
+import {
+  DevEditorError,
+  readDocument,
+  reorderDocuments,
+  saveDocument,
+} from "./dev-editor-core.mjs";
 
 const DEFAULT_MAX_BODY = 64 * 1024;
 
@@ -148,6 +153,10 @@ export function createDevEditorServer({
       }
       if (url.pathname === "/save") {
         send(res, 200, await saveDocument(repoRoot, body));
+        return;
+      }
+      if (url.pathname === "/reorder") {
+        send(res, 200, await reorderDocuments(repoRoot, body));
         return;
       }
       throw new DevEditorError("Unknown vault editor endpoint.", 404, "not_found");

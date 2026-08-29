@@ -23,6 +23,8 @@ description: A missing-person case on an island where nobody's account holds tog
 description_uk: Справа про зникнення на острові, де жодне свідчення не тримається купи.
 cover: shutter-island.jpg
 # cover source: Wikipedia (low-res theatrical poster, fair-use scale)
+top_order: 12
+rating: 5
 ---
 
 ## At a glance

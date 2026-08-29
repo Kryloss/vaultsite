@@ -23,6 +23,8 @@ description: Death row, told from the side of the men who work there.
 description_uk: Камера смертників — з боку тих, хто там працює.
 cover: the-green-mile.jpg
 # cover source: Wikipedia (low-res theatrical poster, fair-use scale)
+top_order: 6
+rating: 5
 ---
 
 ## At a glance

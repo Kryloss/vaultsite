@@ -23,6 +23,8 @@ description: A superhero cartoon that turns very hard on you in its first season
 description_uk: Мультсеріал про супергероїв, який дуже різко обертається проти глядача вже в першому сезоні.
 cover: invincible.jpg
 # cover source: Wikipedia (low-res promotional poster, fair-use scale)
+top_order: 5
+rating: 4.5
 ---
 
 ## At a glance

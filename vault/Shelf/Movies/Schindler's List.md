@@ -23,6 +23,8 @@ description: A profiteer of the Holocaust turns into the reason eleven hundred p
 description_uk: Той, хто наживався на Голокості, стає причиною, чому тисяча сто людей його пережили.
 cover: schindlers-list.jpg
 # cover source: Wikipedia (low-res theatrical poster, fair-use scale)
+top_order: 1
+rating: 5
 ---
 
 ## At a glance

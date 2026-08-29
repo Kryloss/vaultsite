@@ -1500,7 +1500,11 @@ The first version rendered in the posts list only, and shelf and people were lef
 
 **The rows are placed by grid AREA, and that is what saved the phone layout.** The first build stacked title and description in a wrapper beside the date; on a 375px screen the Ukrainian date (`17 липня 2026 р.`) left the description 140px — four words and an ellipsis. Placing the four children into `"art title date" / "art desc desc"` gives the description the date's width back: 279px on a phone, and at desktop it stopped being truncated at all. Dates stay FULL here, since DD.MM is posts-only.
 
-**Entry descriptions are translated from `meta`.** `Entry` models no `descriptionUk` — only `Section` does — so no list has ever shown a translated description, though the notes write `description_uk:` anyway. The row reads it out of `entry.meta`, the documented escape hatch, rather than widening the engine's model for one section type. **Revisit when:** a second list wants it, at which point it belongs on `Entry` for everyone.
+**Entry descriptions now belong to `Entry`.** The vault already writes
+`description_uk:` alongside every entry description, so the model exposes it as
+`descriptionUk` and every title-adjacent list can send the pair through `T`.
+Missing translations still fall back to English, preserving the primary-language
+contract.
 
 **The album row was specified and deliberately not built.** A horizontally scrolling row of square covers is the most Apple-looking thing available and it is nearly free — `components/lists/ShelfRow.tsx` with the aspect changed from 2:3 to 1:1. It waits on content: `vault/Music/` holds one note, and a shelf row with one card reads as broken rather than as a shelf. Build it at four or five.
 
@@ -1524,7 +1528,8 @@ The first version rendered in the posts list only, and shelf and people were lef
 
 **Album facts have a keyless source, like the art.** `itunes.apple.com/lookup?id=<album>&entity=song` returns the release date, track count and label (inside `copyright`), and summing `trackTimeMillis` gives the running time. So the fact block is a lookup rather than a research task, the same way `artworkUrl100` → `600x600bb` made the cover one.
 
-**Revisit when:** a second section wants translated entry descriptions. `Entry` still models no `descriptionUk` and the music list reads it out of `meta` (#90); at two callers it belongs on `Entry` for everyone.
+The same `descriptionUk` field is shared by the music, People, Posts and Shelf
+lists, so none of them needs a section-specific frontmatter escape hatch.
 
 ## 92. The note's colour spreads; the embed's footer goes (2026-08-24)
 
@@ -2000,9 +2005,15 @@ The medium pages opened on an "All" chip and a grid of every cover. That is the 
 
 **The list is not rated-only, and nothing invents a rating.** A rating is Kyrylo's; `sortForTop` puts rated entries first, best down, and drops the unrated to the end in date order rather than scoring them. This matters right now rather than hypothetically: thirty-five films and shows arrived at once and one of them is rated, so a rated-only list would have been a page with a single row on it and no index of anything else. Ties break on date then title, so the order is total and a rebuild never reshuffles equal entries.
 
+That derived order is now only the legacy fallback. The localhost editor can
+drag the unfiltered rows and writes consecutive zero-based `top_order:` values
+to the participating notes; once present, those values are authoritative and
+ratings can change without moving a title the author deliberately placed.
+
 The absence is spelled with a dash, not with the words. "Not rated yet" set eighteen times down a column is noise, and it cost the description the width that makes a row worth reading; the words stay as `sr-only`, which has no column to lose. On a phone the dash goes too — there it gets a row of its own, where there is no column to hold open and it reads as a stray mark under the sentence.
 
-`ShelfItem` gained `description` and `descriptionUk`. The grid never needed either. `descriptionUk` comes out of `entry.meta` because `Entry` models no Ukrainian description — the route `lib/music.ts` already takes; move it onto `Entry` when a third caller wants it.
+`ShelfItem` carries the shared `description`/`descriptionUk` pair from `Entry`.
+The grid still has no use for it, while the Top list renders both languages.
 
 The divider starts at the **text column**, not the row's edge, the same as the music track list: the art column reads as a margin of objects and the rules belong to the writing beside them.
 
@@ -2013,7 +2024,7 @@ The divider starts at the **text column**, not the row's edge, the same as the m
 
 The Top list shipped drawing one rating twice: stars for `rating:` and the same value spelled out beside them. Kyrylo read the digits as IMDb's, which is the natural reading of a number next to a title in a list shaped like IMDb's — and is the more useful pair of facts anyway. **The stars are now his verdict out of five and the number is IMDb's average out of ten.**
 
-They are never merged and never swapped. Drawing IMDb's average as stars would put a stranger's opinion in his handwriting, on a shelf whose whole premise is that the opinions are his. `sortForTop` keeps the same separation: a rated entry outranks an unrated one *whatever* IMDb thinks of either, and IMDb only orders the tail he has not judged. Today that tail is almost the whole list, so the page reads as a real ranking immediately instead of waiting on 35 ratings — but the first entry he rates jumps above a 9.5, which is correct. The list is his shelf, not a mirror of IMDb's.
+They are never merged and never swapped. Drawing IMDb's average as stars would put a stranger's opinion in his handwriting, on a shelf whose whole premise is that the opinions are his. `sortForTop` keeps the same separation in its legacy fallback: a rated entry outranks an unrated one *whatever* IMDb thinks of either, and IMDb only orders the tail he has not judged. A saved manual `top_order:` takes precedence over that fallback, so the first entry he rates does not jump past a deliberate placement. The list is his shelf, not a mirror of IMDb's.
 
 **The number is labelled.** A bare figure beside stars reads as the stars written out in digits, which is exactly the misreading that prompted this, and a list of rows has no column header to carry the label instead. "IMDb" set small in `--text-tertiary` costs about 30px and removes the ambiguity; screen readers get the words after the number.
 
@@ -2048,82 +2059,56 @@ Two details are load-bearing:
 Also in this pass, from the same reading of the Top list: **the IMDb label moved under its number and got smaller** (0.5625rem). Beside the figure it was a second thing on the row's most crowded line; stacked, it reads as a caption belonging to the number above it and the pair takes one column instead of two, which is width every description gets back. The stars sit beside that pair, centred rather than baseline-aligned — the IMDb block is two lines now and a shared baseline hung the stars off its first one.
 
 
-## 116. The chips' box, not their text (2026-08-28)
+## 116. The "New" and "Draft" chips sit on the title's optical line (2026-08-28)
 
-The "New" chip read as sitting low next to a title, everywhere it appears. The text was not the problem — it is baseline-aligned with the title beside it and looks it. The BOX was, and it was reported precisely: *"text looks aligned, but because it has a squared outline it feels lower."*
+The chips read as sitting low beside a title. It took three passes to find out why, and the first two were the interesting part.
 
-The first fix moved a pixel of padding from the bottom to the top, centring the box on the title's cap band: measured, 1.09px low became 0.34px. **It still felt low**, and specifically in the Top list. That was the useful clue. Balance against the cap band is not the whole story — the box was 22px tall and hung **6px below the baseline**, and in a list where a description sits directly under the title, six pixels of empty outline reaching toward the next line reads as a chip sagging into it. The number said centred; the eye said low; the eye was reading something the number did not measure.
+**Pass one — the box.** The text is baseline-aligned with the title, which is right; the box was not centred on it. A pixel of padding moved from the bottom to the top put the box on the title's cap band: 1.09px low became 0.34px. Still felt low.
 
-**So the box was made to hug its own text.** `line-height: 1` instead of the 1rem it had inherited — 4px of leading a 12px chip never needed — and the padding it keeps is asymmetric, 4px above and 1px below. Same baseline, same text position, a box 19px instead of 22px:
+**Pass two — the overhang.** The box was 22px tall and hung **6px below the baseline**, and the complaint was specific to the Top list, where a description sits directly under the title: six pixels of empty outline reaching toward the next line reads as a chip sagging into it. `line-height: 1` in place of the inherited `1rem` — 4px of leading a 12px chip never needed — cut the box to 19px and the overhang to 4px. Better. Still felt low.
 
-| | before | after |
-|---|---|---|
-| box height | 22px | 19px |
-| above the title's cap | 5.28px | 4.33px |
-| below the title's baseline | 6.0px | 4.0px |
+**Pass three — the text itself, which is what was wrong all along.** Small text sharing a big text's baseline sits *optically* low. The chip's caps are 8px against the title's 10.7, so with the baselines in perfect agreement their midlines are still **1.34px apart**. Everything measured as aligned because the thing being measured — the baseline — was never the thing the eye was comparing.
 
-The overhang that caused the complaint is a third smaller, and what is left is balanced to 0.33px.
+So the whole chip is lifted by half that difference, `vertical-align: 0.11em`, and the padding went symmetric because the lift now does the placing. Measured after: the chip's text midline sits **0.02px** from the title's, and the box stays balanced around it (4.14px above the cap, 4.19px below the baseline).
 
-Nudging the whole chip with `vertical-align` was the obvious alternative and it is the wrong one — it fixes the outline by breaking the text alignment that already worked. Worth recording, because it is the first thing anyone reaches for.
+**A correction to what this file said an hour ago.** Passes one and two both recorded that nudging the chip with `vertical-align` was "the obvious alternative and the wrong one", on the grounds that it would move the text and break an alignment that already worked. That reasoning was backwards: the text alignment was not working — it only measured as working. Moving the text was the fix. The lesson worth keeping is not about `vertical-align` at all: **when a measurement says centred and it still looks wrong, the reference is wrong, not the eye.**
 
-**Draft moved with it.** It is the same object in the same place, and the two appear on one row in dev; leaving one corrected and the other not would have been a new misalignment rather than a fixed one. Both are now named classes — `.new-chip` and `.draft-chip` — sharing one geometry rule, because this is a single optical judgement that has to hold in a post row, a music row, the shelf's Top list and on home, and one place to state it is the only way that stays true. Draft carries a TRANSPARENT 1px border so that its filled box is exactly the size of New's outlined one; without it the two would sit a pixel apart.
+**Draft moved with it**, and is now literally the same rule — `.new-chip` and `.draft-chip` share one geometry block, since this is a single optical judgement that has to hold in a post row, a music row, the shelf's Top list and on home. Draft carries a TRANSPARENT 1px border so its filled box is exactly the size of New's outlined one; without it the two would sit a pixel apart on the row where both appear. Verified identical: 19px box, 0.02px text offset, 4.14/4.19.
 
-Two things deliberately unchanged. The **music list** still strips the chip to plain text at the date's size — that override is `.music-meta > span`, structural rather than named, so it survived the rename and still outranks the new class on specificity. And the Draft chip **beside a note's `<h1>`** keeps `vertical-align: middle` and its 3px lift: against a 46px title with a 30px cap, a 19px chip on the baseline hugs the bottom of the letters instead of reading beside them. That was not what was reported and the shared geometry was not worth changing it for.
-## 118. Local editing is a separate loopback tool, not a deployed CMS (2026-08-28)
+Two things deliberately unchanged. The **music list** strips the chip to plain text at the date's size — that override is `.music-meta > span`, structural rather than named, so it survived the rename and still outranks the class. And **`.draft-chip-title`**, beside a note's 46px `<h1>`, keeps `vertical-align: middle` and its 3px lift: against a 30px cap, a 19px chip placed by any baseline rule hugs the bottom of the letters instead of reading beside them. That was not what was reported, and the shared geometry was not worth changing a look that already worked.
 
-The local preview now has a pencil dock: collapsed it is one quiet control at
-bottom-right and the page — including the breadcrumb bar — looks like the public
-site. Expanded, it reveals the same-route public link, “Open this file in
-Obsidian,” language switching, title and description fields, Undo, Redo, Cancel,
-and Save. The public link moved out of the breadcrumb because an authoring
-escape hatch should not permanently alter the page being previewed.
+## 117. The music list gets a search box, a language button and genres — and the flag marks the Russian shelf (2026-08-28)
 
-Next's own development badge is disabled so the local dock is the only
-development affordance in the preview. Compile errors keep Next's ordinary
-overlay, which is the development signal that matters.
+Twenty-nine notes across twenty-six artists is past the size where a page you scroll is a page you can use. So `/music` gained a search box and a language filter on the heading's line, and then gained genres.
 
-**The writer is a sidecar, not an App Router route.** `npm run dev` supervises
-Next and `scripts/dev-editor.mjs`, bound to `127.0.0.1`. Next adds an external
-rewrite for `/__vault-editor/*` only in development; `next build` and `next
-start` have neither a writer process nor a filesystem endpoint, so the deployed
-site remains fully static. Hiding a button by hostname would not have secured a
-write API. A production webpack replacement also swaps the editor client module
-for a null component, keeping its request code out of public chunks. The three
-checks are independent: the component requires a
-development build and the exact `localhost` hostname, the rewrite exists only
-in development, and the sidecar requires the supervisor-derived exact origin,
-same-origin fetch metadata, and an in-memory random token. It emits no CORS
-permission and accepts only bounded JSON.
+**The switch is ONE button that steps through its own states.** All → ENG → UA → RU → All, one press per step, the label saying where you are. It took two wrong turns to get there. Four chips in a row was first, and it does not fit: at the 39rem measure four chips plus a usable field plus the heading push the toolbar onto a second line. A dropdown was second, and it is a popover, an outside-click listener and two interactions to express four states — machinery for a control that has fewer positions than a light switch. Cycling is one press, no layer, no focus trap.
 
-**A URL never becomes a filesystem path.** Each real route puts its known
-authoring source on `<Page>`; synthetic shelf filters point at the section's
-`main.md`. The sidecar still treats that attribute as hostile: it requires a
-POSIX `.md` path beneath `vault/`, rejects traversal and backslashes, resolves
-symlinks with `realpath`, and verifies containment. The Obsidian action is
-returned as an already encoded absolute-path URI, using the active `.uk.md`
-sibling when it exists. It is only an open target: both languages' titles and
-descriptions live in the primary file's frontmatter.
+The button carries `min-width: 3.25rem` so the row does not twitch as the label steps between four different widths — measured, it holds 52px throughout.
 
-**The first writable surface is narrow on purpose.** Only `title`, `title_uk`,
-`description`, and `description_uk` are accepted. The patcher replaces just
-those top-level scalar ranges and preserves all other YAML bytes, comments,
-ordering, line endings, and Markdown body. A whole-object YAML serialization
-would create large, noisy vault rewrites for a one-sentence edit. Save compares
-the SHA-256 revision of the exact source, validates the result, writes and
-fsyncs a uniquely named sibling, rechecks the revision, then atomically renames
-it. If Obsidian changed the file meanwhile, the browser draft survives and the
-user must explicitly reload. Undo/Redo affect drafts only; even Undo after Save
-needs a second Save before it touches disk. Unsaved drafts are retained by
-source across soft navigation; a hard reload still uses the browser's unsaved
-changes warning.
+Keeping heading, field and button on ONE line at every width is a requirement rather than a preference, so `.music-toolbar` is `flex-wrap: nowrap` and the heading is the only part allowed to give: at 375px it wraps to two lines inside its own cell and the controls hold their row.
 
-**Attachments and body editing are deferred, not represented by dead buttons.**
-An attachment is a transaction across an asset, Markdown, the generated image
-manifest, and live development caches; body editing also needs a faithful
-Markdown/source map rather than editing rendered HTML. Until those contracts
-exist, Obsidian is the complete editor and the URI button is the honest route
-to it.
+**`lang:` is not the language a record is sung in.** It is the shelf it belongs on, and the difference is the whole point. Нервы sing in Russian and are a Ukrainian band — Milkovsky was born in Pokrovsk — so they are `uk`. Ляпис Трубецкой are Belarusian, sing in Russian, and Mikhalok holds Ukrainian residency and the Honoured Artist title: `uk`. BLIND8 and Tricky Nicki are Ukrainian and write for an English-speaking listener, so they stay `en`. Language is the strongest signal and it is not the only one. The key records a decision rather than deriving one, which is why it is written per note instead of inferred from the artist — an artist can move, and Milkovsky already has.
 
-**Revisit when:** the metadata editor has been used enough to justify either a
-source-aware body editor or an attachment transaction with collision handling,
-rollback, asset synchronization, and cache invalidation.
+It is a LIST, because a record can sit on two shelves: PRAY is an English verse with a Ukrainian chorus. A note naming none is reachable through All and nothing else — an absent answer is not a third answer.
+
+**The flag marks the RUSSIAN shelf.** The `RU` option takes the same blue-over-gold gradient, the same `--ua-blue`/`--ua-yellow` tokens and the same `background-clip: text` as the sidebar's national-day line. It was put there deliberately and specifically: on a Ukrainian listener's page the Russian-language shelf is the one worth marking, and marking it in these colours says who is doing the listening.
+
+That stretches #104, which says in as many words that these colours are for one line on fifteen days a year and **must not become an accent**. A permanent control is a different thing from a dated line. It was asked for, so it is built, and this is the note recording the cost: the flag is no longer only a date, and #104's argument is one exception weaker than it was. A third use ends that rule — rewrite it then, rather than eroding it again.
+
+The selected RU row cannot take the fill the other options take, for a mechanical reason before an aesthetic one: `background-clip: text` clips **every** background to the glyphs, so a filled RU row is not available at all — and the flag's blue on a near-black fill would be the hole the token comment warns about. Selected is carried by the border and the weight.
+
+**Search runs the Cmd+K palette's two passes.** A literal pass where every term must PREFIX a word — not appear inside one, because "ep" is a format and it also sits inside "St**ep**an" and "Ind**ep**endence", so substring matching answered a search for EPs with four cards and one EP. Then, only when that finds nothing, `similarity()` from `lib/fuzzy.ts` against the short identifying strings, so "bulletpoof" still finds Bulletproof. The fallback is LABELLED, as the palette labels its own: a result that is approximately what you asked for has to say so. Queries are folded through `fold()`, so "maneskin" finds Måneskin.
+
+The trigram pass deliberately skips the description. Trigram overlap divides by the longer string, so a short query against a twenty-word sentence scores near zero however well it matches — including it would mean the fallback silently never fires for exactly the rows that have one.
+
+**Genres are search terms, not a filter.** They were briefly a panel of chips under the search field, and that was a misreading: the ask was a smarter SEARCH, not another control. So `genres:` on a note — Apple's own `primaryGenreName` split on the slash, "Hip-Hop/Rap" to Rap, "Pop Punk" to Pop and Punk — is folded into the searchable text and nothing draws it. Typing "rap" returns rap artists, which is the whole specification.
+
+**And the ARTIST is tagged automatically.** `groupByArtist()` gives each artist the union of their notes' genres, invisibly. Without it "rock" would return only the individual rows Apple happened to file under Rock, splitting a card in half; with it BLIND8 come back whole for both "rock" and "alternative" though only one release is filed under each. It is derived on every build rather than written into `main.md`, which is the difference between a summary that cannot drift and one that has to be maintained — adding a music note tags its artist with no extra step, which is what makes this part of the workflow rather than a chore beside it. A hand-written `tags:` on an artist merges in extra words for anything no release of theirs is filed under.
+
+Language is never fuzzy — it is pressed, not typed, so there is no typo to forgive.
+
+**Two modules had to split first.** `lib/music.ts` reads the vault, so it imports `fs` and can never enter a client bundle; the shapes, the language model and the filter moved to `lib/music-filter.ts`, which has no filesystem behind it. `displayDate`/`displayDateUk` moved from `lib/vault.ts` to `lib/dates.ts` for the same reason `shortDate` already lived there. Both are re-exported from their old homes, so every existing caller is untouched. The list is still in the static HTML — a client component is server-rendered for the first paint — so crawlers and JS-off readers get all twenty-nine rows, just without the controls doing anything.
+
+The controls are local state, not URL params. The posts category chips are links because a post's own chip has to deep-link back into a filtered list (#13); nothing here links to a filtered view, a half-typed query is not an address, and putting keystrokes in the URL fills the reader's history with them.
+
+Track rows also got more air (5px of padding to 9px, so adjacent rows sit 18px apart). At the old spacing the covers read as one block of artwork with the divider doing all the separating on its own.

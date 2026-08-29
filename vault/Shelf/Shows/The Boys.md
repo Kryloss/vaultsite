@@ -23,6 +23,8 @@ description: Superheroes as a public-relations product, and the people cleaning 
 description_uk: Супергерої як піар-продукт — і ті, хто прибирає після них.
 cover: the-boys.jpg
 # cover source: Wikipedia (low-res promotional poster, fair-use scale)
+top_order: 17
+rating: 3.5
 ---
 
 ## At a glance

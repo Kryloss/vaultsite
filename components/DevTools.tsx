@@ -37,9 +37,11 @@ interface PageSource {
 interface EditorDocument {
   source: string;
   revision: string;
-  fields: DevFields;
+  fields: DevFields & { rating?: number | null };
   obsidian: { en: string; uk: string };
 }
+
+const SAVED_EVENT = "vault-dev-editor-saved";
 
 type EditorMessage = "saved" | "conflict" | "unavailable" | "saveFailed";
 
@@ -216,6 +218,29 @@ export default function DevTools() {
     if (devEditorDirty(editor)) pageDrafts.set(source.source, editor);
     else pageDrafts.delete(source.source);
   }, [editor, source.source]);
+
+  // The Top-list star editor can save the same document independently. Keep
+  // this panel's revision current without replacing an in-progress title or
+  // description draft; the next Save then remains conflict-safe.
+  useEffect(() => {
+    const saved = (event: Event) => {
+      const detail = (event as CustomEvent<{ source?: string; revision?: string }>).detail;
+      if (
+        !detail ||
+        detail.source !== documentInfo?.source ||
+        typeof detail.revision !== "string"
+      )
+        return;
+      setDocumentInfo((current) =>
+        current ? { ...current, revision: detail.revision! } : current
+      );
+      dispatch({ type: "revision", revision: detail.revision });
+      setMessage(null);
+      setConflict(false);
+    };
+    window.addEventListener(SAVED_EVENT, saved);
+    return () => window.removeEventListener(SAVED_EVENT, saved);
+  }, [documentInfo?.source]);
 
   useEffect(() => {
     if (!expanded || !documentInfo || !editor || !focusEditorOnLoad.current) return;

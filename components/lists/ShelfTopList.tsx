@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import NewBadge from "@/components/NewBadge";
-import Stars from "@/components/Stars";
+import DevRatingEditorSlot from "@/components/DevRatingEditorSlot";
+import DevTopReorderSlot from "@/components/DevTopReorderSlot";
 import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
 import { sortForTop, type ShelfItem } from "@/lib/shelf";
@@ -34,15 +35,24 @@ export default function ShelfTopList({
   sectionSlug: string;
 }) {
   const ranked = sortForTop(items);
+  const devTopList = process.env.NODE_ENV === "development";
 
   return (
-    <ol className="stagger top-list mt-8">
-      {ranked.map((item, i) => (
-        <li key={item.slug} className="top-slot">
-          <Link
-            href={`/${sectionSlug}/${item.slug}`}
-            className="top-row press press-soft"
+    <>
+      <ol
+        className="stagger top-list mt-8"
+        data-dev-top-list={devTopList ? "true" : undefined}
+      >
+        {ranked.map((item, i) => (
+          <li
+            key={item.slug}
+            className="top-slot"
+            data-dev-top-source={devTopList ? item.source : undefined}
           >
+            <Link
+              href={`/${sectionSlug}/${item.slug}`}
+              className="top-row press press-soft"
+            >
             {/* Tabular so the column is a column: the numbers are read down
                 the page, not across, and proportional digits make a ragged
                 left edge out of 1 next to 11. */}
@@ -94,9 +104,12 @@ export default function ShelfTopList({
                 exact misreading that made this change necessary — and there is
                 no column header on a list of rows to carry the label instead. */}
             <span className="top-rating">
-              {typeof item.rating === "number" && (
-                <Stars rating={item.rating} />
-              )}
+              <DevRatingEditorSlot
+                source={item.source}
+                rating={item.rating}
+                title={item.title}
+                titleUk={item.titleUk}
+              />
               {typeof item.imdb === "number" && (
                 <span className="top-imdb">
                   <span className="top-score">{item.imdb.toFixed(1)}</span>
@@ -119,9 +132,11 @@ export default function ShelfTopList({
                 <T en={item.description} uk={item.descriptionUk} />
               </span>
             )}
-          </Link>
-        </li>
-      ))}
-    </ol>
+            </Link>
+          </li>
+        ))}
+      </ol>
+      <DevTopReorderSlot />
+    </>
   );
 }

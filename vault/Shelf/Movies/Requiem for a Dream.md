@@ -23,6 +23,8 @@ description: Four addictions, cut to the same rhythm, ending four different ways
 description_uk: Чотири залежності, змонтовані в один ритм, і чотири різні фінали.
 cover: requiem-for-a-dream.jpg
 # cover source: Wikipedia (low-res theatrical poster, fair-use scale)
+top_order: 13
+rating: 4
 ---
 
 ## At a glance

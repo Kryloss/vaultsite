@@ -199,14 +199,25 @@ test("reads, saves, and reports a stale revision conflict over HTTP", async (t) 
     body: JSON.stringify({
       source: SOURCE,
       revision: opened.revision,
-      changes: { description: "Saved through HTTP." },
+      changes: { description: "Saved through HTTP.", rating: 4.5 },
     }),
   });
   assert.equal(savedResponse.status, 200);
   const saved = await payload(savedResponse);
   assert.equal(saved.fields.description, "Saved through HTTP.");
+  assert.equal(saved.fields.rating, 4.5);
   assert.notEqual(saved.revision, opened.revision);
   assert.match(await fs.promises.readFile(file, "utf8"), /description: Saved through HTTP\./);
+
+  const orderResponse = await fetch(`${base}/reorder`, {
+    method: "POST",
+    headers: editorHeaders(token),
+    body: JSON.stringify({ items: [{ source: SOURCE, order: 0 }] }),
+  });
+  assert.equal(orderResponse.status, 200);
+  const ordered = await payload(orderResponse);
+  assert.equal(ordered.documents[0].fields.top_order, 0);
+  assert.match(await fs.promises.readFile(file, "utf8"), /^top_order: 0$/m);
 
   const conflictResponse = await fetch(`${base}/save`, {
     method: "POST",

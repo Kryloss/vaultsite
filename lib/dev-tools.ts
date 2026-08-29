@@ -22,6 +22,7 @@ export type DevEditorAction =
   | { type: "cancel" }
   | { type: "saved"; fields: DevFields; revision: string }
   | { type: "loaded"; fields: DevFields; revision: string }
+  | { type: "revision"; revision: string }
   | { type: "restored"; state: DevEditorState };
 
 export function isDevToolsAvailable(environment: string | undefined, hostname: string) {
@@ -62,6 +63,8 @@ export function devEditorReducer(
       return action.state;
     case "loaded":
       return createDevEditorState(action.fields, action.revision);
+    case "revision":
+      return { ...state, revision: action.revision };
     case "edit": {
       if (state.draft[action.key] === action.value) return state;
       return {

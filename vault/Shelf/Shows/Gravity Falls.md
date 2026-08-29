@@ -23,6 +23,8 @@ description: A children's cartoon with a plot that actually pays off.
 description_uk: Дитячий мультсеріал із сюжетом, який справді доводять до кінця.
 cover: gravity-falls.jpg
 # cover source: Wikipedia (low-res promotional poster, fair-use scale)
+top_order: 3
+rating: 5
 ---
 
 ## At a glance

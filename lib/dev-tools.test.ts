@@ -124,3 +124,17 @@ test("a soft-navigation draft can be restored without changing its baseline", ()
   assert.equal(restored.baseline.description, fields.description);
   assert.equal(devEditorDirty(restored), true);
 });
+
+test("an external rating save updates the revision without losing a draft", () => {
+  let state = createDevEditorState(fields, "rev-1");
+  state = devEditorReducer(state, {
+    type: "edit",
+    key: "title",
+    value: "Draft title",
+    record: true,
+  });
+  state = devEditorReducer(state, { type: "revision", revision: "rev-2" });
+  assert.equal(state.revision, "rev-2");
+  assert.equal(state.draft.title, "Draft title");
+  assert.equal(devEditorDirty(state), true);
+});

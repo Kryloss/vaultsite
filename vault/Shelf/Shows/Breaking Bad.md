@@ -23,6 +23,8 @@ description: A chemistry teacher becomes what he keeps insisting he is not.
 description_uk: Учитель хімії стає тим, ким він раз по раз запевняє, що не є.
 cover: breaking-bad.jpg
 # cover source: Wikipedia (low-res promotional poster, fair-use scale)
+top_order: 8
+rating: 4.5
 ---
 
 ## At a glance

@@ -23,6 +23,8 @@ description: A film about relativity that is really a film about a father missin
 description_uk: Фільм про теорію відносності, який насправді про батька, що пропускає життя своєї доньки.
 cover: interstellar.jpg
 # cover source: Wikipedia (low-res theatrical poster, fair-use scale)
+top_order: 2
+rating: 5
 ---
 
 ## At a glance

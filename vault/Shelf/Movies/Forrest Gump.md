@@ -23,6 +23,8 @@ description: Thirty years of American history, walked through by someone not try
 description_uk: Тридцять років американської історії, пройдені людиною, яка й не намагалася стати їх частиною.
 cover: forrest-gump.jpg
 # cover source: Wikipedia (low-res theatrical poster, fair-use scale)
+top_order: 8
+rating: 5
 ---
 
 ## At a glance

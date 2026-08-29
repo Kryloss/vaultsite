@@ -23,6 +23,8 @@ description: A Birmingham crime family filmed like a rock album.
 description_uk: Бірмінгемська кримінальна родина, знята як рок-альбом.
 cover: peaky-blinders.jpg
 # cover source: Wikipedia (low-res promotional poster, fair-use scale)
+top_order: 0
+rating: 5
 ---
 
 ## At a glance

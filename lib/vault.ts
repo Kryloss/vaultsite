@@ -516,7 +516,7 @@ export function getSearchIndex(): SearchItem[] {
         sectionUk: section.titleUk,
         href,
         text: plainText(
-          `${entry.titleUk ?? ""} ${entry.description ?? ""} ${entry.content}`
+          `${entry.titleUk ?? ""} ${entry.description ?? ""} ${entry.descriptionUk ?? ""} ${entry.content}`
         ),
       });
       // Headings become their own results, labelled with the note they're in,

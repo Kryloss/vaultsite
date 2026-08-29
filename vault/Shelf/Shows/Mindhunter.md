@@ -23,6 +23,8 @@ description: The invention of criminal profiling, told mostly through conversati
 description_uk: Винайдення кримінального профайлінгу, розказане здебільшого через розмови в кімнатах.
 cover: mindhunter.jpg
 # cover source: Wikipedia (low-res promotional poster, fair-use scale)
+top_order: 11
+rating: 5
 ---
 
 ## At a glance

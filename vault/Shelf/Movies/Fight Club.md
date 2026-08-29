@@ -23,6 +23,8 @@ description: An insomniac office worker goes looking for something real and find
 description_uk: Офісний працівник із безсонням шукає щось справжнє й знаходить дещо гірше.
 cover: fight-club.jpg
 # cover source: Wikipedia (low-res theatrical poster, fair-use scale)
+top_order: 4
+rating: 5
 ---
 
 ## At a glance

@@ -22,6 +22,8 @@ cover: death-note.jpg
 # cover source: Wikipedia (low-res Vol. 1 cover art, fair-use scale). The original
 # Japanese artwork: no English-language cover for this exists on Wikipedia in any
 # language edition, and the localised posters are Ukrainian-language dub art.
+top_order: 4
+rating: 4
 ---
 
 ## At a glance

@@ -74,6 +74,10 @@ export const ui = {
     uk: "Пошук виконавців, треків, EP та альбомів",
   },
   musicFilterLangLabel: { en: "Filter by language", uk: "Фільтр за мовою" },
+  /* Shown when the literal pass found nothing and these are trigram
+     near-misses instead — the palette labels its fallback for the same
+     reason: a result that is approximately what you asked for must say so. */
+  musicFuzzy: { en: "Closest matches", uk: "Найближчі збіги" },
   musicLangEn: { en: "English", uk: "Англійська" },
   musicLangUk: { en: "Ukrainian", uk: "Українська" },
   musicLangRu: { en: "Russian", uk: "Російська" },
@@ -267,6 +271,15 @@ export const devUi = {
   devRetry: { en: "Retry", uk: "Спробувати ще раз" },
   devTitle: { en: "Title", uk: "Назва" },
   devDescription: { en: "Description", uk: "Опис" },
+  devRatingFor: { en: "Rating for", uk: "Оцінка для" },
+  devUnrated: { en: "Unrated", uk: "Без оцінки" },
+  devSaving: { en: "Saving…", uk: "Збереження…" },
+  devReorderSaving: { en: "Saving Top-list order…", uk: "Збереження порядку списку…" },
+  devReorderSaved: { en: "Top-list order saved.", uk: "Порядок списку збережено." },
+  devReorderFailed: {
+    en: "The Top-list order could not be saved.",
+    uk: "Не вдалося зберегти порядок списку.",
+  },
   devLoading: { en: "Loading page fields…", uk: "Завантаження полів сторінки…" },
   devNoSource: {
     en: "This generated view has no single vault file to edit.",

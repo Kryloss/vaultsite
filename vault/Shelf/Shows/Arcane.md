@@ -21,6 +21,8 @@ description: A game adaptation that turned out to be about two sisters.
 description_uk: Екранізація гри, яка виявилася історією про двох сестер.
 cover: arcane.jpg
 # cover source: Wikipedia (low-res promotional poster, fair-use scale)
+top_order: 7
+rating: 4
 ---
 
 ## At a glance

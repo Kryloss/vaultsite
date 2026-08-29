@@ -11,7 +11,7 @@ author_bio_uk: >-
   Британсько-американський режисер і сценарист, який будує блокбастери зі структурних головоломок і знімає їх якомога більше по-справжньому.
 medium: movie
 categories: [Sci-Fi, Thriller]
-rating: 5
+rating: 4.5
 imdb_id: tt1375666
 imdb: 8.8
 # imdb: averageRating from IMDb's own public dataset
@@ -22,6 +22,7 @@ description: A heist movie where the vault is a person's mind.
 description_uk: Фільм-пограбування, де сейфом є людський розум.
 cover: inception.jpg
 # cover source: Wikipedia (low-res theatrical poster, fair-use scale)
+top_order: 5
 ---
 
 ## At a glance

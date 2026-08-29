@@ -23,6 +23,8 @@ description: Three Los Angeles crime stories told badly out of order, on purpose
 description_uk: Три лос-анджелеські кримінальні історії, розказані навмисно не по черзі.
 cover: pulp-fiction.jpg
 # cover source: Wikipedia (low-res theatrical poster, fair-use scale)
+top_order: 7
+rating: 5
 ---
 
 ## At a glance

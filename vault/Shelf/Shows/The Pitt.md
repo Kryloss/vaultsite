@@ -23,6 +23,8 @@ description: One emergency-room shift, told an hour at a time.
 description_uk: Одна зміна у відділенні невідкладної допомоги, розказана по годині за раз.
 cover: the-pitt.jpg
 # cover source: Wikipedia (low-res promotional poster, fair-use scale)
+top_order: 6
+rating: 5
 ---
 
 ## At a glance

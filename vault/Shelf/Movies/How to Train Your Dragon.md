@@ -23,6 +23,8 @@ description: A boy declines to kill the thing everyone around him is sure is the
 description_uk: Хлопець відмовляється вбити те, що всі довкола вважають ворогом.
 cover: how-to-train-your-dragon.jpg
 # cover source: Wikipedia (low-res theatrical poster, fair-use scale)
+top_order: 16
+rating: 5
 ---
 
 ## At a glance

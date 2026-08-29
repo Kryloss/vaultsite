@@ -23,6 +23,8 @@ description: Work-life balance solved surgically, which turns out to create two 
 description_uk: Баланс роботи й життя, розв'язаний хірургічно, — і з однієї людини виходить дві.
 cover: severance.jpg
 # cover source: Wikipedia (low-res promotional poster, fair-use scale)
+top_order: 13
+rating: 5
 ---
 
 ## At a glance

@@ -4517,6 +4517,19 @@ svg.diagram tspan {
   color: var(--text);
 }
 
+.dev-rating-editor {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--r-xs);
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+.dev-rating-editor:focus-visible {
+  outline: 2px solid var(--text-tertiary);
+  outline-offset: 2px;
+}
+
 .dev-editor-panel {
   width: min(
     23rem,
@@ -4998,23 +5011,25 @@ html[data-intro][data-intro-fast] .prose > .avatar {
 }
 
 /* ---- the track list ---- */
-/* ---------- The /music toolbar: search + language switch ----------
+/* ---------- The /music toolbar: search + language button ----------
    components/lists/MusicNotes.tsx.
 
-   The heading and the two controls share one line, and the HEADING is what
-   gives way when the line runs out: a title can wrap, a search field and four
-   chips have a floor below which they stop being usable. */
+   Heading, search and the language button share ONE line at every width and
+   never break to a second row. That is a requirement, not a preference, so
+   `flex-wrap` is `nowrap` and the HEADING is the only part that gives: it
+   wraps its own text inside its cell. Four chips in a row could not hold this
+   — a single button that names its own state is a quarter of the width, which
+   is most of why it is one button now. */
 .music-toolbar {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem 1rem;
+  flex-wrap: nowrap;
+  align-items: baseline;
+  gap: 1rem;
   margin-top: 3rem;
 }
 
 /* The `mt-12 text-lg font-semibold` this replaced, written out: the heading is
-   now a flex child rather than a block, so its margin belongs to the row. */
+   a flex child now, so its margin belongs to the row. */
 .music-toolbar-title {
   margin: 0;
   font-size: 1.125rem;
@@ -5022,36 +5037,27 @@ html[data-intro][data-intro-fast] .prose > .avatar {
   font-weight: 600;
   letter-spacing: -0.015em;
   color: var(--text);
+  /* Shrinks and wraps rather than pushing the controls off the line. */
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .music-controls {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  /* Pushed to the far edge even when the heading has wrapped away. */
-  margin-left: auto;
-  /* Takes the room the heading leaves rather than a width of its own. At a
-     fixed 13rem the search box plus four chips came to 393px against the 576px
-     the measure gives this row, and the whole toolbar wrapped to a second line
-     — which is the one thing it was asked not to do. */
-  /* The BASIS is what keeps this on the heading's line. With `auto`, flexbox
-     measures the controls at their content width (393px against 576px of row)
-     and wraps the whole block to a second line rather than shrinking it —
-     wrapping is decided before shrinking is. A basis under the space actually
-     left (576 − the English heading's 211 − the gap) keeps it up here, and
-     `grow` then hands it whatever the heading did not use. */
-  flex: 1 1 19rem;
+  flex: 0 1 auto;
   min-width: 0;
+  margin-left: auto;
   justify-content: flex-end;
 }
 
 .music-search {
-  /* Grows into whatever the chips don't need, down to a floor where it is
-     still a usable field rather than a stub. The chips never shrink: they are
-     the control, and a squeezed "ENG" is unreadable in a way a shorter
-     placeholder is not. */
   flex: 1 1 auto;
-  min-width: 6rem;
+  /* A floor where it is still a field rather than a stub. Below this the
+     heading wraps another line instead — the heading has somewhere to go and
+     the input does not. */
+  min-width: 4.5rem;
   max-width: 13rem;
   padding: 0.3125rem 0.6875rem;
   font-size: 0.8125rem;
@@ -5071,24 +5077,26 @@ html[data-intro][data-intro-fast] .prose > .avatar {
 }
 
 /* Safari paints its own round X inside `type="search"`; it lands on top of the
-   pill's own radius and reads as a second, smaller control. */
+   pill's radius and reads as a second, smaller control. */
 .music-search::-webkit-search-decoration,
 .music-search::-webkit-search-cancel-button {
   -webkit-appearance: none;
   appearance: none;
 }
 
-.music-langs {
-  display: flex;
+/* ---- The language button ----
+   ONE button that names its own state and steps to the next on press:
+   All → ENG → UA → RU → All. A dropdown was the version before this and it
+   was a popover and two interactions for four states; four chips in a row was
+   the version before that and it pushed the toolbar onto a second line. */
+.music-lang-button {
+  display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  justify-content: center;
   flex: none;
-}
-
-/* NO `transition` here on purpose: `.press` declares its own and sits at the
-   foot of this file, so a shorthand written on this class would be the later
-   rule for `transform` and would flatten the press (#55). */
-.music-lang-chip {
+  /* A fixed floor so the row does not twitch as the label steps between
+     "All", "ENG", "UA" and "RU" — four different widths on one control. */
+  min-width: 3.25rem;
   border: 1px solid var(--border);
   border-radius: var(--r-full);
   padding: 0.25rem 0.625rem;
@@ -5097,35 +5105,44 @@ html[data-intro][data-intro-fast] .prose > .avatar {
   color: var(--text-secondary);
   background: transparent;
   cursor: pointer;
+  white-space: nowrap;
 }
 
-.music-lang-chip:hover {
+/* NO `transition` here on purpose: `.press` declares its own at the foot of
+   this file, and a shorthand written on this class would be the later rule for
+   `transform` and would flatten the press (#55). */
+.music-lang-button:hover {
   border-color: var(--text-tertiary);
   color: var(--text);
 }
 
-.music-lang-chip.is-active {
+/* Anything but All is a filter that is ON, and the button is the only thing
+   saying so — there is no list behind it to check. */
+.music-lang-button[data-lang-code] {
   border-color: var(--text);
-  background: var(--text);
-  color: var(--bg);
+  color: var(--text);
   font-weight: 500;
 }
 
-/* ---- UA in the flag's colours ----
+/* ---- RU in the flag's colours ----
    The same two-stop gradient clipped to the text as the sidebar's national-day
-   line (`.observance` at the foot of this file), and the same tokens.
+   line (`.observance` at the foot of this file), and the same tokens. It marks
+   the RUSSIAN-language shelf, on the deliberate reading that a Ukrainian
+   listener's Russian-language records are the ones worth marking — the owner
+   asked for it there specifically. See docs/DECISIONS.md #117.
 
-   This is the SECOND place the flag appears, and it is worth being honest that
-   it stretches #64: the rule there says the colours are for one line on
-   fifteen days a year and must not become an accent. A permanent control is a
-   different thing from a dated line, and it was asked for deliberately — see
-   docs/DECISIONS.md #117. The 0.85 holds it just off full strength so it sits
-   with the two grey chips beside it rather than jumping out of the row.
+   This is the second place the flag appears and it stretches #104, which says
+   the colours are for one line on fifteen days a year and must not become an
+   accent. Written down rather than quietly widened; a third use ends that rule
+   and it should be rewritten instead of eroded again.
 
-   `line-height: 1.1` above is load-bearing for the same reason it is there:
-   the gradient measures against the element's box, so a tall line pushes the
-   seam below the letters and the whole chip paints blue. */
-.music-lang-chip[data-lang-code="uk"] {
+   `line-height` and `display: inline-block` on the painted span are both
+   load-bearing, for the reason `.observance` gives: the gradient measures
+   against the element's box, so without a box of its own, or with a tall line,
+   the seam lands below the letters and the whole label paints blue. */
+.music-lang-button[data-lang-code="ru"] .music-lang-value {
+  display: inline-block;
+  line-height: 1.1;
   background-image: linear-gradient(
     to bottom,
     var(--ua-blue) 0 62%,
@@ -5134,42 +5151,22 @@ html[data-intro][data-intro-fast] .prose > .avatar {
   -webkit-background-clip: text;
   background-clip: text;
   color: var(--ua-blue);
-  opacity: 0.85;
 }
 
 @supports (-webkit-background-clip: text) or (background-clip: text) {
-  .music-lang-chip[data-lang-code="uk"] {
+  .music-lang-button[data-lang-code="ru"] .music-lang-value {
     -webkit-text-fill-color: transparent;
   }
 }
 
-/* Active UA cannot take the inversion the other chips take, for a mechanical
-   reason and a visual one. `background-clip: text` clips EVERY background to
-   the glyphs, so a filled chip is not available to this one at all; and the
-   flag's blue on a near-black fill would be the hole the token comment warns
-   about. Selected is carried by the border going to `--text` and the weight,
-   which is the same signal the others use, minus the fill they can afford. */
-.music-lang-chip[data-lang-code="uk"].is-active {
-  background-color: transparent;
-  border-color: var(--text);
-  opacity: 1;
-  font-weight: 500;
-}
-
-/* A phone gets the search on its own full-width line: at 13rem beside four
-   chips there is no room for either. */
-@media (max-width: 560px) {
-  .music-controls {
-    width: 100%;
-    flex-wrap: wrap;
-  }
-
-  .music-search {
-    width: 100%;
-    /* The desktop cap has to go too, or the field stops at 13rem and leaves a
-       ragged gap to the right of a line it is supposed to own. */
-    max-width: none;
-  }
+/* Trigram near-misses, labelled — the palette labels its fallback for the same
+   reason: a result that is approximately what you asked for must say so. */
+.music-fuzzy-note {
+  margin-top: 1.25rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
 }
 
 .music-tracks {
@@ -6478,6 +6475,24 @@ html[data-lang="uk"] .book-spine {
 
 .top-slot {
   position: relative;
+}
+
+/* The localhost editor makes Top rows movable only while the dock is open.
+   Source markers and this affordance are absent from the production build. */
+html[data-dev-tools] .top-list[data-dev-top-list] .top-slot {
+  cursor: grab;
+}
+
+html[data-dev-tools] .top-list[data-dev-top-list] .top-row {
+  user-select: none;
+}
+
+html[data-dev-tools] .top-list[data-dev-top-list][data-dev-reordering] .top-slot {
+  cursor: grabbing;
+}
+
+html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
+  opacity: 0.58;
 }
 
 .top-slot + .top-slot::before {

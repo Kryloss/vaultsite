@@ -23,6 +23,8 @@ description: One technology per episode, followed to the place nobody wanted it 
 description_uk: Одна технологія на епізод, доведена туди, куди її ніхто не хотів довести.
 cover: black-mirror.jpg
 # cover source: Wikipedia (low-res promotional poster, fair-use scale)
+top_order: 12
+rating: 4
 ---
 
 ## At a glance

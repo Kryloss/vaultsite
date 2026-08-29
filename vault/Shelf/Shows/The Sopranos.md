@@ -23,6 +23,7 @@ description: The show that made television take itself seriously.
 description_uk: Серіал, після якого телебачення почало сприймати себе всерйоз.
 cover: the-sopranos.jpg
 # cover source: Wikipedia (low-res promotional poster, fair-use scale)
+top_order: 15
 ---
 
 ## At a glance

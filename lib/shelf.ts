@@ -17,6 +17,8 @@ export { categoryLabel };
 
 export interface ShelfItem {
   slug: string;
+  /** Primary Markdown source, used only by the localhost Top-list editor. */
+  source?: string;
   title: string;
   titleUk?: string;
   author?: string;
@@ -79,6 +81,8 @@ export interface ShelfItem {
   coverFit?: "contain";
   /** 0–5, halves allowed. Kyrylo's own verdict, drawn as stars. */
   rating?: number;
+  /** `top_order:` — manual position in a movie/show Top list, starting at 0. */
+  topOrder?: number;
   /**
    * `imdb:` — IMDb's average, 0–10. Somebody else's number, so it is shown as
    * a number and never as his stars (DECISIONS #114). Written into the vault
@@ -331,6 +335,7 @@ export function toShelfItem(entry: Entry): ShelfItem {
 
   return {
     slug: entry.slug,
+    source: `vault/${entry.sectionDir}/${entry.fileName}.md`,
     title: entry.title,
     titleUk: entry.titleUk,
     author:
@@ -354,6 +359,12 @@ export function toShelfItem(entry: Entry): ShelfItem {
       entry.meta.coverFit === "contain" ? ("contain" as const) : undefined,
     rating:
       typeof entry.meta.rating === "number" ? entry.meta.rating : undefined,
+    topOrder:
+      typeof entry.meta.top_order === "number" &&
+      Number.isSafeInteger(entry.meta.top_order) &&
+      entry.meta.top_order >= 0
+        ? entry.meta.top_order
+        : undefined,
     imdb: typeof entry.meta.imdb === "number" ? entry.meta.imdb : undefined,
     imdbId:
       typeof entry.meta.imdb_id === "string" ? entry.meta.imdb_id : undefined,
@@ -391,7 +402,8 @@ export function hasTopList(medium?: string): boolean {
 }
 
 /**
- * The Top ordering: rated first, best down.
+ * The Top ordering: a saved `top_order:` wins; otherwise use the original
+ * derived fallback while a list is being introduced to the editor.
  *
  * Unrated entries do NOT interleave and do not get invented a score — a
  * rating is Kyrylo's and nothing else on the site guesses at one. They fall
@@ -405,6 +417,14 @@ export function hasTopList(medium?: string): boolean {
  */
 export function sortForTop(items: ShelfItem[]): ShelfItem[] {
   return [...items].sort((a, b) => {
+    const ao = typeof a.topOrder === "number" ? a.topOrder : undefined;
+    const bo = typeof b.topOrder === "number" ? b.topOrder : undefined;
+    if (ao !== undefined || bo !== undefined) {
+      if (ao === undefined) return 1;
+      if (bo === undefined) return -1;
+      if (ao !== bo) return ao - bo;
+    }
+
     const ar = typeof a.rating === "number";
     const br = typeof b.rating === "number";
     if (ar !== br) return ar ? -1 : 1;

@@ -23,6 +23,8 @@ description: Two detectives, seventeen years, and a case that says more about th
 description_uk: Двоє детективів, сімнадцять років і справа, яка каже про них більше, ніж про вбивцю.
 cover: true-detective.jpg
 # cover source: Wikipedia (low-res promotional poster, fair-use scale)
+top_order: 10
+rating: 4.5
 ---
 
 ## At a glance

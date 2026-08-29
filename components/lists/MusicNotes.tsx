@@ -39,32 +39,41 @@ export default function MusicNotes({
 }) {
   const [query, setQuery] = useState("");
   const [lang, setLang] = useState<MusicLang | null>(null);
-  /* The placeholder and the labels are ATTRIBUTES, so they can't be a <T> pair
+  /* The placeholder and the label are ATTRIBUTES, so they can't be a <T> pair
      of spans — this is the one place a component has to know which language is
      showing. Same hook the command palette's search box uses. */
   const { lang: uiLang } = useLang();
 
-  const shown = useMemo(
+  const { groups: shown, fuzzy } = useMemo(
     () => filterGroups(groups, { query, lang }),
     [groups, query, lang]
   );
 
   /* Only offer a language the page can actually show. With one note in a
-     language the chip is still worth having; with none it is a dead control
-     that answers every press with an empty list. */
-  const available = useMemo(() => {
+     language the step is still worth having; with none it is a dead position
+     in the cycle that answers with an empty list. */
+  const langs = useMemo(() => {
     const seen = new Set<MusicLang>();
     for (const g of groups) for (const n of g.notes) for (const l of n.langs) seen.add(l);
     return MUSIC_LANGS.filter((l) => seen.has(l));
   }, [groups]);
 
+  /* All → ENG → UA → RU → All. The button IS the control: one press moves one
+     step and the label says where you are. A menu was the version before this
+     and it was two interactions and a popover for four states. */
+  const cycle = () => {
+    const order: (MusicLang | null)[] = [null, ...langs];
+    const at = order.findIndex((l) => l === lang);
+    setLang(order[(at + 1) % order.length]);
+  };
+
   const filtering = query.trim() !== "" || lang !== null;
 
   return (
     <>
-      {/* Heading and controls on one line, and the heading is what gives way:
-          it wraps to its own row first, because the controls have a minimum
-          usable width and a title does not. */}
+      {/* Heading, search and the language button on ONE line, at every width.
+          The heading is the only part allowed to give way: it wraps inside its
+          own cell rather than pushing the controls to a second row. */}
       <div className="music-toolbar">
         <h2 className="music-toolbar-title">
           <T {...ui.notesOnHearing} />
@@ -75,36 +84,39 @@ export default function MusicNotes({
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape" && query) setQuery("");
+            }}
             placeholder={ui.musicSearch[uiLang]}
             aria-label={ui.musicSearchLabel[uiLang]}
             className="music-search"
             spellCheck={false}
           />
 
-          {available.length > 0 && (
-            <div
-              className="music-langs"
-              role="group"
+          {langs.length > 0 && (
+            <button
+              type="button"
+              className="music-lang-button press"
+              /* Stamped with the CURRENT value so the label paints blue and
+                 gold while RU is the one selected — see globals.css. */
+              data-lang-code={lang ?? undefined}
               aria-label={ui.musicFilterLangLabel[uiLang]}
+              title={lang ? LANG_NAME[lang][uiLang] : ui.filterAll[uiLang]}
+              onClick={cycle}
             >
-              <LangChip active={lang === null} onClick={() => setLang(null)}>
-                <T {...ui.filterAll} />
-              </LangChip>
-              {available.map((l) => (
-                <LangChip
-                  key={l}
-                  code={l}
-                  active={lang === l}
-                  title={LANG_NAME[l][uiLang]}
-                  onClick={() => setLang(lang === l ? null : l)}
-                >
-                  {LANG_CODE[l]}
-                </LangChip>
-              ))}
-            </div>
+              <span className="music-lang-value">
+                {lang ? LANG_CODE[lang] : <T {...ui.filterAll} />}
+              </span>
+            </button>
           )}
         </div>
       </div>
+
+      {fuzzy && (
+        <p className="music-fuzzy-note">
+          <T {...ui.musicFuzzy} />
+        </p>
+      )}
 
       {shown.length === 0 ? (
         <p className="mt-8 text-sm text-[var(--text-tertiary)]">
@@ -126,7 +138,7 @@ export default function MusicNotes({
   );
 }
 
-/** The chip labels are codes, identical in both languages. */
+/** The button's labels are codes, identical in both languages. */
 const LANG_CODE: Record<MusicLang, string> = {
   en: "ENG",
   uk: "UA",
@@ -138,37 +150,6 @@ const LANG_NAME: Record<MusicLang, Str> = {
   uk: ui.musicLangUk,
   ru: ui.musicLangRu,
 };
-
-/**
- * One filter chip. `code` is stamped on the element so CSS can single out UA
- * for the flag treatment without this component knowing what a flag is.
- */
-function LangChip({
-  children,
-  active,
-  onClick,
-  code,
-  title,
-}: {
-  children: React.ReactNode;
-  active: boolean;
-  onClick: () => void;
-  code?: MusicLang;
-  title?: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      data-lang-code={code}
-      aria-pressed={active}
-      title={title}
-      className={`music-lang-chip press ${active ? "is-active" : ""}`}
-    >
-      {children}
-    </button>
-  );
-}
 
 function ArtistCard({
   group,

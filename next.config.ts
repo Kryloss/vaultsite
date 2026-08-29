@@ -44,6 +44,22 @@ const nextConfig: NextConfig = {
         ...config.resolve.alias,
         "@/components/DevTools$": disabled,
         [path.resolve(process.cwd(), "components/DevTools.tsx")]: disabled,
+        "@/components/DevRatingEditor$": path.resolve(
+          process.cwd(),
+          "components/DevRatingEditorDisabled.tsx"
+        ),
+        [path.resolve(process.cwd(), "components/DevRatingEditor.tsx")]: path.resolve(
+          process.cwd(),
+          "components/DevRatingEditorDisabled.tsx"
+        ),
+        "@/components/DevTopReorder$": path.resolve(
+          process.cwd(),
+          "components/DevTopReorderDisabled.tsx"
+        ),
+        [path.resolve(process.cwd(), "components/DevTopReorder.tsx")]: path.resolve(
+          process.cwd(),
+          "components/DevTopReorderDisabled.tsx"
+        ),
       };
     }
     return config;

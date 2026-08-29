@@ -23,6 +23,8 @@ description: Two men serving life find out how long patience can be made to last
 description_uk: Двоє довічно ув'язнених дізнаються, наскільки довгим можна зробити терпіння.
 cover: shawshank-redemption.jpg
 # cover source: Wikipedia (low-res theatrical poster, fair-use scale)
+top_order: 10
+rating: 4.5
 ---
 
 ## At a glance

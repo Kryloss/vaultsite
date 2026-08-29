@@ -122,7 +122,9 @@ Routes:
   Kyrylo's `rating:`, the labelled number is IMDb's `imdb:`. Never draw
   IMDb's average as stars. `imdb_id:` is written by hand, once; `imdb:` is
   refreshed by `node scripts/imdb-ratings.mjs` (`--check` to dry-run) and
-  lives in the vault rather than being fetched at build. A movie/show ENTRY
+  lives in the vault rather than being fetched at build. In localhost editing,
+  dragged rows persist consecutive `top_order:` values; those manual positions
+  take precedence over the derived rating/IMDb/date fallback. A movie/show ENTRY
   page also parks its poster in the right gutter from 1400px, reusing the
   music player's geometry (`components/NoteCover.tsx`, DECISIONS #115).
   The books row SCALES TO FIT its column rather than scrolling, so spine
@@ -204,9 +206,9 @@ Important conventions:
 - Section `main.md`: `title`, `icon`, `order`, `description`, `type`, optional
   `slug`, optional `draft`; the complete frontmatter is exposed as
   `section.meta`.
-- Entry: `title`, `date`, `description`, optional `slug`, optional `draft` (or
-  `published: false`), optional `series`/`series_uk`/`part`; complete
-  frontmatter is exposed as `entry.meta`.
+- Entry: `title`, `date`, `description`, optional `description_uk`, optional
+  `slug`, optional `draft` (or `published: false`), optional
+  `series`/`series_uk`/`part`; complete frontmatter is exposed as `entry.meta`.
 - Section body translations use `main.uk.md`; entry translations use
   `<name>.uk.md`, body only.
 - Section links use `[[Folder/main|Label]]`. Bare section names can create the
@@ -234,15 +236,23 @@ Important conventions:
   an accent — nothing reads from it, and the row hover is deliberately
   translucent so it doesn't blank it. Detail in `CLAUDE.md`; reasons in
   `docs/DECISIONS.md` #90.
-- The `/music` list is FILTERABLE: a search box and an All / ENG / UA / RU
-  language switch on the heading's line. Every music note carries `lang:`
-  (`en`/`uk`/`ru`, or a list — a song can be two). The list half is a client
+- The `/music` list is FILTERABLE: a search box plus ONE language button that
+  CYCLES All → ENG → UA → RU on press, showing the current step — both on the
+  heading's line, at every width, with the heading wrapping instead. Notes carry
+  `lang:` (`en`/`uk`/`ru`, or a list), which is the SHELF a record belongs on
+  rather than strictly what it is sung in — Нервы sing in Russian and are `uk`;
+  BLIND8 are Ukrainian and are `en`. Don't "fix" it from the lyrics. Notes also
+  carry `genres:` (Apple's genre split on the slash); these are SEARCH TERMS,
+  not filters and not chips, and each artist is auto-tagged at build time with
+  the union of their notes' genres so "rap" returns rap artists. Search is the
+  Cmd+K palette's two passes — literal word-prefix, then a labelled trigram
+  fallback. The list half is a client
   component (`components/lists/MusicNotes.tsx`), so the pure shapes and the
   filter live in `lib/music-filter.ts`, which must never import `fs` — the same
-  split, for the same reason, as `lib/dates.ts` against `lib/vault.ts`. The UA
-  chip is painted in the flag's colours, which is the ONE place outside the
-  sidebar's national days those colours appear; see `docs/DECISIONS.md` #117
-  before adding a second.
+  split, for the same reason, as `lib/dates.ts` against `lib/vault.ts`. The
+  button's label is painted in the flag's colours while RU is selected, the ONE
+  place outside the sidebar's national days those colours appear; see
+  `docs/DECISIONS.md` #117 before adding a second.
 - `draft: true` content appears in development and is excluded in production.
 
 ## Feature invariants worth checking before edits

@@ -25,6 +25,8 @@ description: A serial-killer procedural that refuses to give the detectives, or 
 description_uk: Детектив про серійного вбивцю, який відмовляє у виході і слідчим, і глядачеві.
 cover: seven.jpg
 # cover source: Wikipedia (low-res theatrical poster, fair-use scale)
+top_order: 3
+rating: 5
 ---
 
 ## At a glance

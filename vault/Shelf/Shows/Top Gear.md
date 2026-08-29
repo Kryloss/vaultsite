@@ -27,6 +27,7 @@ cover: top-gear.jpg
 # in any of the 43 language editions, and Apple's official series art is SQUARE, which
 # a 2:3 card would either crop or letterbox. This is the only official 2:3 Top Gear
 # artwork available, and it carries the logo and all three presenters.
+top_order: 16
 ---
 
 ## At a glance

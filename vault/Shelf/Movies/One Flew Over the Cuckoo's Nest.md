@@ -23,6 +23,8 @@ description: What an institution does to the one patient who will not be managed
 description_uk: Що робить установа з єдиним пацієнтом, якого не вдається вгамувати.
 cover: one-flew-over-the-cuckoos-nest.jpg
 # cover source: Wikipedia (low-res theatrical poster, fair-use scale)
+top_order: 11
+rating: 5
 ---
 
 ## At a glance

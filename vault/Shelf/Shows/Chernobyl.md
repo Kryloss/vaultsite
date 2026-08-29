@@ -23,6 +23,8 @@ description: What it costs when a state decides the truth is negotiable.
 description_uk: Ціна того, що держава вирішила, ніби правда — предмет торгу.
 cover: chernobyl.jpg
 # cover source: Wikipedia (low-res promotional poster, fair-use scale)
+top_order: 2
+rating: 5
 ---
 
 ## At a glance

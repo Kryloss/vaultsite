@@ -8,6 +8,7 @@ import {
   DevEditorError,
   patchFrontmatter,
   readDocument,
+  reorderDocuments,
   resolveVaultMarkdown,
   saveDocument,
 } from "./dev-editor-core.mjs";
@@ -85,6 +86,25 @@ test("rejects unsupported fields and an empty English title", () => {
     () => patchFrontmatter(sample, { title_uk: "Два\nрядки" }),
     (error) => error instanceof DevEditorError && error.code === "multiline_title"
   );
+  assert.throws(
+    () => patchFrontmatter(sample, { rating: 4.3 }),
+    (error) => error instanceof DevEditorError && error.code === "invalid_rating"
+  );
+  assert.throws(
+    () => patchFrontmatter(sample, { rating: 5.5 }),
+    (error) => error instanceof DevEditorError && error.code === "invalid_rating"
+  );
+  assert.throws(
+    () => patchFrontmatter(sample, { top_order: 1.5 }),
+    (error) => error instanceof DevEditorError && error.code === "invalid_top_order"
+  );
+});
+
+test("patches a half-star rating without rewriting the body", () => {
+  const next = patchFrontmatter(sample, { rating: 4.5 });
+  assert.match(next, /^rating: 4\.5$/m);
+  assert.match(next, /Body with \[\[Wiki links\]\] and \*formatting\*\./);
+  assert.equal(matter(next).data.rating, 4.5);
 });
 
 test("preserves BOM, CRLF, nested keys, and rejects duplicate editable keys", () => {
@@ -142,9 +162,10 @@ test("saves atomically and refuses to overwrite a newer Obsidian edit", async (t
   const saved = await saveDocument(root, {
     source,
     revision: opened.revision,
-    changes: { description: "Edited locally." },
+    changes: { description: "Edited locally.", rating: 4.5 },
   });
   assert.equal(saved.fields.description, "Edited locally.");
+  assert.equal(saved.fields.rating, 4.5);
   assert.match(await fs.promises.readFile(file, "utf8"), /description: Edited locally\./);
 
   await fs.promises.appendFile(file, "\nObsidian changed this.\n");
@@ -156,6 +177,46 @@ test("saves atomically and refuses to overwrite a newer Obsidian edit", async (t
     }),
     (error) => error instanceof DevEditorError && error.code === "revision_conflict"
   );
+});
+
+test("reorders several notes with one conflict-checked operation", async (t) => {
+  const root = await fs.promises.mkdtemp(path.join(os.tmpdir(), "vault-editor-order-"));
+  const dir = path.join(root, "vault", "Shelf", "Movies");
+  await fs.promises.mkdir(dir, { recursive: true });
+  const a = path.join(dir, "A.md");
+  const b = path.join(dir, "B.md");
+  const sourceA = "vault/Shelf/Movies/A.md";
+  const sourceB = "vault/Shelf/Movies/B.md";
+  await fs.promises.writeFile(a, sample.replace("Original", "A"));
+  await fs.promises.writeFile(b, sample.replace("Original", "B"));
+  t.after(() => fs.promises.rm(root, { recursive: true, force: true }));
+
+  const saved = await reorderDocuments(root, {
+    items: [
+      { source: sourceA, order: 1 },
+      { source: sourceB, order: 0 },
+    ],
+  });
+  assert.deepEqual(
+    saved.documents.map((document) => [document.source, document.fields.top_order]),
+    [
+      [sourceA, 1],
+      [sourceB, 0],
+    ]
+  );
+  assert.match(await fs.promises.readFile(a, "utf8"), /^top_order: 1$/m);
+  assert.match(await fs.promises.readFile(b, "utf8"), /^top_order: 0$/m);
+
+  await fs.promises.appendFile(a, "\nObsidian changed this.\n");
+  const repeated = await reorderDocuments(root, {
+    items: [
+      { source: sourceA, order: 0 },
+      { source: sourceB, order: 1 },
+    ],
+  });
+  assert.equal(repeated.documents[0].fields.top_order, 0);
+  assert.match(await fs.promises.readFile(a, "utf8"), /Obsidian changed this\./);
+  assert.match(await fs.promises.readFile(b, "utf8"), /^top_order: 1$/m);
 });
 
 test("a semantic no-op preserves bytes and opens an existing Ukrainian sibling", async (t) => {

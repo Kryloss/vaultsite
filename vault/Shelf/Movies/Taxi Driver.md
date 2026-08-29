@@ -23,6 +23,8 @@ description: Loneliness in a city, filmed from behind a windscreen.
 description_uk: Самотність у місті, знята з-за лобового скла.
 cover: taxi-driver.jpg
 # cover source: Wikipedia (low-res theatrical poster, fair-use scale)
+top_order: 14
+rating: 4.5
 ---
 
 ## At a glance
