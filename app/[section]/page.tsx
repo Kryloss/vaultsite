@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import { getSections, getSectionBySlug, getEntries } from "@/lib/vault";
+import { getSections, getSectionBySlug, getEntries, parseCategories } from "@/lib/vault";
 import { renderMarkdown } from "@/lib/markdown";
 import { pageMeta } from "@/lib/metadata";
 import { previewsInHtml } from "@/lib/previews";
@@ -11,6 +11,7 @@ import JsonLd from "@/components/JsonLd";
 import LinkPreview from "@/components/LinkPreview";
 import { breadcrumbJsonLd } from "@/lib/jsonld";
 import Page from "@/components/Page";
+import DevCreateEntrySlot from "@/components/DevCreateEntrySlot";
 
 interface Props {
   params: Promise<{ section: string }>;
@@ -57,6 +58,9 @@ export default async function SectionPage({ params }: Props) {
       })
     : "";
   const List = getListComponent(section.type);
+  const categoryOptions = [...new Set(entries.flatMap((entry) => parseCategories(entry.meta)))].sort(
+    (a, b) => a.localeCompare(b)
+  );
 
   /* The section's own prose. Most types print it here, above the list; the
      few that place it themselves (music puts it under the playlist embed)
@@ -66,17 +70,20 @@ export default async function SectionPage({ params }: Props) {
       <>
         <article
           className="prose mt-6 lang-en"
+          data-dev-body-field="body"
           dangerouslySetInnerHTML={{ __html: html }}
         />
         <article
           className="prose mt-6 lang-uk"
           lang="uk"
+          data-dev-body-field="body_uk"
           dangerouslySetInnerHTML={{ __html: htmlUk }}
         />
       </>
     ) : html ? (
       <article
         className="prose mt-6"
+        data-dev-body-field="body"
         dangerouslySetInnerHTML={{ __html: html }}
       />
     ) : null;
@@ -97,13 +104,21 @@ export default async function SectionPage({ params }: Props) {
           title and a date — a card repeating them adds nothing. */}
       <LinkPreview previews={previewsInHtml(html, htmlUk)} />
       <header>
-        <h1
-          className="page-title text-2xl font-semibold tracking-tight text-[var(--text)]"
-          data-dev-field-en="title"
-          data-dev-field-uk="title_uk"
-        >
-          <T en={section.title} uk={section.titleUk} />
-        </h1>
+        <div className="dev-page-title-row">
+          <h1
+            className="page-title text-2xl font-semibold tracking-tight text-[var(--text)]"
+            data-dev-field-en="title"
+            data-dev-field-uk="title_uk"
+          >
+            <T en={section.title} uk={section.titleUk} />
+          </h1>
+          <DevCreateEntrySlot
+            sectionSource={`vault/${section.dirName}/main.md`}
+            sectionType={section.type}
+            sectionTitle={section.title}
+            categories={categoryOptions}
+          />
+        </div>
         {section.description && (
           <p
             className="mt-2 text-[var(--text-secondary)]"

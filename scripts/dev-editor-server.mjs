@@ -2,12 +2,18 @@ import { randomBytes, timingSafeEqual } from "node:crypto";
 import http from "node:http";
 import {
   DevEditorError,
+  createEntry,
   readDocument,
+  readPageDocument,
   reorderDocuments,
   saveDocument,
+  savePageDocument,
+  toggleNowGoal,
 } from "./dev-editor-core.mjs";
 
-const DEFAULT_MAX_BODY = 64 * 1024;
+// A page save may carry both language bodies. Each one is capped separately
+// at 512 KiB by the core, with room here for JSON escaping and metadata.
+const DEFAULT_MAX_BODY = 2 * 1024 * 1024;
 
 function expectedLocalUrl(value, expectedOrigin) {
   if (!value) return false;
@@ -151,8 +157,24 @@ export function createDevEditorServer({
         send(res, 200, readDocument(repoRoot, body.source));
         return;
       }
+      if (url.pathname === "/page-document") {
+        send(res, 200, await readPageDocument(repoRoot, body.source, body.sourceUk));
+        return;
+      }
       if (url.pathname === "/save") {
         send(res, 200, await saveDocument(repoRoot, body));
+        return;
+      }
+      if (url.pathname === "/save-page") {
+        send(res, 200, await savePageDocument(repoRoot, body));
+        return;
+      }
+      if (url.pathname === "/create-entry") {
+        send(res, 201, await createEntry(repoRoot, body));
+        return;
+      }
+      if (url.pathname === "/toggle-now-goal") {
+        send(res, 200, await toggleNowGoal(repoRoot, body));
         return;
       }
       if (url.pathname === "/reorder") {

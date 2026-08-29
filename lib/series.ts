@@ -102,6 +102,11 @@ interface Member {
   entry: Entry;
 }
 
+export interface SeriesOption {
+  name: string;
+  nameUk?: string;
+}
+
 /**
  * Reading order: `part:` when given, then oldest first, then by title.
  *
@@ -151,6 +156,20 @@ function getSeriesIndex(): Map<string, Member[]> {
 
   for (const members of index.values()) members.sort(byReadingOrder);
   return index;
+}
+
+/** Existing series names for the localhost entry-options picker. */
+export function getSeriesOptions(): SeriesOption[] {
+  return [...getSeriesIndex().values()]
+    .map((members) => ({
+      name: seriesName(members[0]?.entry.meta) ?? "",
+      nameUk: members
+        .map((member) => member.entry.meta.series_uk)
+        .find((value): value is string => typeof value === "string" && value.trim().length > 0)
+        ?.trim(),
+    }))
+    .filter((option) => option.name)
+    .sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /**

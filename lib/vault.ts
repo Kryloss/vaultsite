@@ -143,7 +143,14 @@ export function getSections(): Section[] {
       order: typeof data.order === "number" ? data.order : 100,
       type,
       content: now ? now.intro : content,
-      contentUk: now ? now.introUk : contentUk,
+      // Keep translation-file EXISTENCE even when a structured Now body has
+      // no prose intro. Local goal toggles still need main.uk.md so the paired
+      // checkbox can be updated atomically.
+      contentUk: now
+        ? contentUk !== undefined
+          ? now.introUk ?? ""
+          : undefined
+        : contentUk,
       meta: now ? nowMeta(data, now) : data,
       draft: isDraft(data),
     });

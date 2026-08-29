@@ -136,6 +136,10 @@ export function CopyMarkdownTitle({
   }, [lang]);
 
   const onClick = async () => {
+    // The localhost authoring dock turns the nested title span into the edit
+    // target. In that mode a tap belongs to the caret, never to the public
+    // mobile copy shortcut wrapped around it.
+    if (document.documentElement.hasAttribute("data-dev-tools")) return;
     if (!window.matchMedia("(max-width: 639px), (hover: none)").matches) return;
     if (!(await copy())) return;
     setFlash(true);

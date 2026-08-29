@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import {
   CloseIcon,
@@ -36,9 +37,18 @@ interface PageSource {
 
 interface EditorDocument {
   source: string;
+  sourceUk?: string;
   revision: string;
-  fields: DevFields & { rating?: number | null };
+  revisionUk?: string;
+  fields: DevFields;
   obsidian: { en: string; uk: string };
+}
+
+type BodyFieldKey = "body" | "body_uk";
+
+interface ActiveBodyEditor {
+  host: HTMLElement;
+  key: BodyFieldKey;
 }
 
 const SAVED_EVENT = "vault-dev-editor-saved";
@@ -55,12 +65,19 @@ const editorMessages = {
 // A soft Next.js navigation keeps this module alive. Preserve a draft by its
 // source file so opening search, following a shortcut, and coming back cannot
 // silently throw work away. Hard reloads still use the browser's unload guard.
-const pageDrafts = new Map<string, DevEditorState>();
+interface PageDraft {
+  editor: DevEditorState;
+  revisionUk?: string;
+}
+
+const pageDrafts = new Map<string, PageDraft>();
 const EMPTY_FIELDS: DevFields = {
   title: "",
   title_uk: "",
   description: "",
   description_uk: "",
+  body: "",
+  body_uk: "",
 };
 
 class EditorRequestError extends Error {
@@ -88,6 +105,18 @@ function pageSource(): PageSource {
   };
 }
 
+function localizedValue(fields: DevFields, key: DevFieldKey) {
+  if (key === "title_uk" && !fields.title_uk) return fields.title;
+  if (key === "description_uk" && !fields.description_uk) return fields.description;
+  return fields[key];
+}
+
+function fieldTarget(marker: HTMLElement, lang: "en" | "uk") {
+  return (
+    marker.querySelector<HTMLElement>(lang === "uk" ? ".lang-uk" : ".lang-en") ?? marker
+  );
+}
+
 export default function DevTools() {
   const pathname = usePathname();
   const router = useRouter();
@@ -101,19 +130,29 @@ export default function DevTools() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<EditorMessage | null>(null);
   const [conflict, setConflict] = useState(false);
+  const [activeBody, setActiveBody] = useState<ActiveBodyEditor | null>(null);
   const tokenRef = useRef<string | null>(null);
   const pageGeneration = useRef(0);
   const loadRequest = useRef(0);
   const editGroup = useRef<{ key: DevFieldKey; at: number } | null>(null);
   const pencilRef = useRef<HTMLButtonElement>(null);
-  const titleRef = useRef<HTMLInputElement>(null);
-  const descriptionRef = useRef<HTMLTextAreaElement>(null);
+  const bodyEditorRef = useRef<HTMLTextAreaElement>(null);
   const focusEditorOnLoad = useRef(false);
 
   const dirty = editor ? devEditorDirty(editor) : false;
-  const titleKey: DevFieldKey = lang === "uk" ? "title_uk" : "title";
-  const descriptionKey: DevFieldKey = lang === "uk" ? "description_uk" : "description";
+  const bodyKey: BodyFieldKey = lang === "uk" && source.sourceUk ? "body_uk" : "body";
   const messageText = message ? editorMessages[message][lang] : null;
+  const activeBodyValue = activeBody && editor ? editor.draft[activeBody.key] : undefined;
+
+  const edit = useCallback((key: DevFieldKey, value: string) => {
+    const now = performance.now();
+    const previous = editGroup.current;
+    const record = !previous || previous.key !== key || now - previous.at > 700;
+    editGroup.current = { key, at: now };
+    dispatch({ type: "edit", key, value, record });
+    setMessage(null);
+    setConflict(false);
+  }, []);
 
   useEffect(() => {
     setAvailable(isDevToolsAvailable(process.env.NODE_ENV, window.location.hostname));
@@ -129,6 +168,7 @@ export default function DevTools() {
     dispatch({ type: "loaded", fields: EMPTY_FIELDS, revision: "" });
     setMessage(null);
     setConflict(false);
+    setActiveBody(null);
     setLoading(false);
     setSaving(false);
     const frame = requestAnimationFrame(() => {
@@ -189,13 +229,22 @@ export default function DevTools() {
     setMessage(null);
     setConflict(false);
     try {
-      const payload = await request<EditorDocument>("document", { source: source.source });
+      const payload = await request<EditorDocument>("page-document", {
+        source: source.source,
+        sourceUk: source.sourceUk,
+      });
       if (generation !== pageGeneration.current || requestId !== loadRequest.current) return;
-      setDocumentInfo(payload);
       const remembered = restoreDraft ? pageDrafts.get(payload.source) : undefined;
+      // A remembered draft must retain the complete revision snapshot it was
+      // based on. Using the freshly loaded UK revision here would let an old
+      // translated draft overwrite a newer Obsidian edit when English stayed
+      // unchanged.
+      setDocumentInfo(
+        remembered ? { ...payload, revisionUk: remembered.revisionUk } : payload
+      );
       dispatch(
         remembered
-          ? { type: "restored", state: remembered }
+          ? { type: "restored", state: remembered.editor }
           : { type: "loaded", fields: payload.fields, revision: payload.revision }
       );
     } catch {
@@ -207,51 +256,270 @@ export default function DevTools() {
         setLoading(false);
       }
     }
-  }, [request, source.source]);
+  }, [request, source.source, source.sourceUk]);
 
   useEffect(() => {
     if (expanded && source.source && !documentInfo && !loading && !message) void loadDocument();
   }, [documentInfo, expanded, loadDocument, loading, message, source.source]);
 
   useEffect(() => {
-    if (!source.source || !editor) return;
-    if (devEditorDirty(editor)) pageDrafts.set(source.source, editor);
+    if (!source.source || !editor || !documentInfo) return;
+    if (devEditorDirty(editor)) {
+      pageDrafts.set(source.source, { editor, revisionUk: documentInfo.revisionUk });
+    }
     else pageDrafts.delete(source.source);
-  }, [editor, source.source]);
+  }, [documentInfo, editor, source.source]);
 
   // The Top-list star editor can save the same document independently. Keep
-  // this panel's revision current without replacing an in-progress title or
-  // description draft; the next Save then remains conflict-safe.
+  // this page draft's revision current without replacing in-progress text;
+  // the next Save then remains conflict-safe.
   useEffect(() => {
     const saved = (event: Event) => {
-      const detail = (event as CustomEvent<{ source?: string; revision?: string }>).detail;
+      const detail = (
+        event as CustomEvent<{
+          source?: string;
+          revision?: string;
+          revisionUk?: string;
+          fields?: DevFields;
+        }>
+      ).detail;
       if (
         !detail ||
         detail.source !== documentInfo?.source ||
         typeof detail.revision !== "string"
       )
         return;
+      if (detail.fields && dirty) {
+        // A specialised page control should refuse while this draft is dirty.
+        // If a race still lets it save, retaining the old revisions makes the
+        // next page Save conflict instead of overwriting that external change.
+        setConflict(true);
+        setMessage("conflict");
+        return;
+      }
       setDocumentInfo((current) =>
-        current ? { ...current, revision: detail.revision! } : current
+        current
+          ? {
+              ...current,
+              revision: detail.revision!,
+              revisionUk: detail.revisionUk ?? current.revisionUk,
+              fields: detail.fields ?? current.fields,
+            }
+          : current
       );
-      dispatch({ type: "revision", revision: detail.revision });
+      dispatch(
+        detail.fields
+          ? { type: "saved", fields: detail.fields, revision: detail.revision }
+          : { type: "revision", revision: detail.revision }
+      );
       setMessage(null);
       setConflict(false);
     };
     window.addEventListener(SAVED_EVENT, saved);
     return () => window.removeEventListener(SAVED_EVENT, saved);
-  }, [documentInfo?.source]);
-
-  useEffect(() => {
-    if (!expanded || !documentInfo || !editor || !focusEditorOnLoad.current) return;
-    focusEditorOnLoad.current = false;
-    titleRef.current?.focus();
-  }, [documentInfo, editor, expanded]);
+  }, [dirty, documentInfo?.source]);
 
   useEffect(() => {
     document.documentElement.toggleAttribute("data-dev-tools", expanded && available);
     return () => document.documentElement.removeAttribute("data-dev-tools");
   }, [available, expanded]);
+
+  useEffect(() => {
+    document.documentElement.toggleAttribute("data-dev-dirty", dirty || saving);
+    return () => document.documentElement.removeAttribute("data-dev-dirty");
+  }, [dirty, saving]);
+
+  // Keep the visible text in sync with Undo/Redo/Cancel without replacing a
+  // focused node on every keystroke (which would move the caret).
+  useEffect(() => {
+    if (!editor || !documentInfo) return;
+    const model = expanded ? editor.draft : editor.baseline;
+    const markers = document.querySelectorAll<HTMLElement>("[data-dev-field-en]");
+    for (const marker of markers) {
+      const enKey = marker.dataset.devFieldEn as DevFieldKey | undefined;
+      const ukKey = marker.dataset.devFieldUk as DevFieldKey | undefined;
+      if (!enKey || !ukKey || enKey === "body" || enKey === "body_uk") continue;
+
+      const enSpan = marker.querySelector<HTMLElement>(".lang-en");
+      const ukSpan = marker.querySelector<HTMLElement>(".lang-uk");
+      if (enSpan && ukSpan) {
+        const enValue = expanded && lang === "en" ? model[enKey] : localizedValue(model, enKey);
+        const ukValue = expanded && lang === "uk" ? model[ukKey] : localizedValue(model, ukKey);
+        if (enSpan.textContent !== enValue) enSpan.textContent = enValue;
+        if (ukSpan.textContent !== ukValue) ukSpan.textContent = ukValue;
+      } else {
+        const key = lang === "uk" ? ukKey : enKey;
+        const value = expanded ? model[key] : localizedValue(model, key);
+        if (marker.textContent !== value) marker.textContent = value;
+      }
+    }
+  }, [documentInfo, editor, expanded, lang]);
+
+  // Title and description stay where the public page renders them. While the
+  // dock is open, only the active language span becomes a plain-text editing
+  // surface. These listeners stay mounted through ordinary input so focus and
+  // selection remain native.
+  useEffect(() => {
+    if (!expanded || !editor || !documentInfo) return;
+    const cleanups: Array<() => void> = [];
+    const markers = document.querySelectorAll<HTMLElement>("[data-dev-field-en]");
+    for (const marker of markers) {
+      const enKey = marker.dataset.devFieldEn as DevFieldKey | undefined;
+      const ukKey = marker.dataset.devFieldUk as DevFieldKey | undefined;
+      if (!enKey || !ukKey || enKey === "body" || enKey === "body_uk") continue;
+      const key = lang === "uk" ? ukKey : enKey;
+      const target = fieldTarget(marker, lang);
+      const label = key.startsWith("title") ? devUi.devTitle[lang] : devUi.devDescription[lang];
+      target.contentEditable = "plaintext-only";
+      target.spellcheck = true;
+      target.dataset.devInlineEditable = key;
+      target.setAttribute("role", "textbox");
+      target.setAttribute("aria-label", label);
+      target.setAttribute("aria-multiline", "false");
+      if (key.endsWith("_uk")) {
+        target.dataset.devInlinePlaceholder = localizedValue(editor.draft, enKey);
+      }
+
+      const input = () => {
+        const limit = key.startsWith("title") ? 300 : 4000;
+        const value = (target.textContent ?? "").slice(0, limit);
+        if (target.textContent !== value) target.textContent = value;
+        edit(key, value);
+      };
+      const beforeInput = (event: InputEvent) => {
+        if (event.inputType === "insertParagraph" || event.inputType === "insertLineBreak") {
+          event.preventDefault();
+        }
+      };
+      const paste = (event: ClipboardEvent) => {
+        event.preventDefault();
+        const text = (event.clipboardData?.getData("text/plain") ?? "")
+          .replace(/\s*\r?\n+\s*/g, " ");
+        document.execCommand("insertText", false, text);
+      };
+      const blur = () => {
+        editGroup.current = null;
+      };
+      target.addEventListener("input", input);
+      target.addEventListener("beforeinput", beforeInput);
+      target.addEventListener("paste", paste);
+      target.addEventListener("blur", blur);
+      cleanups.push(() => {
+        target.removeEventListener("input", input);
+        target.removeEventListener("beforeinput", beforeInput);
+        target.removeEventListener("paste", paste);
+        target.removeEventListener("blur", blur);
+        target.removeAttribute("contenteditable");
+        target.removeAttribute("spellcheck");
+        target.removeAttribute("data-dev-inline-editable");
+        target.removeAttribute("role");
+        target.removeAttribute("aria-label");
+        target.removeAttribute("aria-multiline");
+        target.removeAttribute("data-dev-inline-placeholder");
+      });
+    }
+    return () => cleanups.forEach((cleanup) => cleanup());
+  }, [documentInfo?.source, edit, expanded, lang]);
+
+  // The body is Markdown, not rendered HTML. Clicking its prose swaps that
+  // article for a source textarea in the same place; this preserves wiki
+  // links, embeds, callouts and tables exactly instead of reverse-converting a
+  // mutated DOM. Third-party controls keep their ordinary interaction until
+  // the prose itself is selected.
+  useEffect(() => {
+    if (!expanded || !editor || !documentInfo) return;
+    const hosts = [...document.querySelectorAll<HTMLElement>("[data-dev-body-field]")];
+    const activate = (host: HTMLElement) => {
+      const key = host.dataset.devBodyField as BodyFieldKey | undefined;
+      if (key !== bodyKey) return;
+      host.style.setProperty("--dev-body-min-h", `${Math.ceil(host.getBoundingClientRect().height)}px`);
+      setActiveBody({ host, key });
+    };
+
+    for (const host of hosts) {
+      host.dataset.devBodyReady = "true";
+      host.tabIndex = 0;
+      host.setAttribute("aria-label", devUi.devBody[lang]);
+    }
+    const click = (event: MouseEvent) => {
+      const target = event.target instanceof Element ? event.target : null;
+      if (
+        !target ||
+        target.closest(
+          ".dev-body-editor, iframe, video, audio, button, input, select, label, .apple-music-block, .youtube-block"
+        )
+      )
+        return;
+      const host = target.closest<HTMLElement>("[data-dev-body-field]");
+      if (!host) return;
+      event.preventDefault();
+      event.stopPropagation();
+      activate(host);
+    };
+    const keydown = (event: KeyboardEvent) => {
+      if (event.key !== "Enter" || event.target instanceof HTMLTextAreaElement) return;
+      const target = event.target instanceof Element ? event.target : null;
+      const host = target?.closest<HTMLElement>("[data-dev-body-field]");
+      if (!host) return;
+      event.preventDefault();
+      activate(host);
+    };
+    document.addEventListener("click", click, true);
+    document.addEventListener("keydown", keydown, true);
+    return () => {
+      document.removeEventListener("click", click, true);
+      document.removeEventListener("keydown", keydown, true);
+      for (const host of hosts) {
+        delete host.dataset.devBodyReady;
+        host.removeAttribute("tabindex");
+        host.removeAttribute("aria-label");
+      }
+    };
+  }, [bodyKey, documentInfo?.source, expanded, lang]);
+
+  useEffect(() => {
+    if (expanded) return;
+    setActiveBody(null);
+  }, [expanded]);
+
+  useEffect(() => {
+    setActiveBody(null);
+  }, [lang, pathname]);
+
+  useEffect(() => {
+    const host = activeBody?.host;
+    if (!host || !host.isConnected) return;
+    host.dataset.devBodyEditing = "true";
+    const frame = requestAnimationFrame(() => {
+      const textarea = bodyEditorRef.current;
+      if (!textarea) return;
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
+      textarea.focus();
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      delete host.dataset.devBodyEditing;
+      host.style.removeProperty("--dev-body-min-h");
+    };
+  }, [activeBody]);
+
+  useEffect(() => {
+    if (activeBodyValue === undefined) return;
+    const frame = requestAnimationFrame(() => {
+      const textarea = bodyEditorRef.current;
+      if (!textarea) return;
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [activeBodyValue]);
+
+  useEffect(() => {
+    if (!expanded || !documentInfo || !editor || !focusEditorOnLoad.current) return;
+    focusEditorOnLoad.current = false;
+    document.querySelector<HTMLElement>("[data-dev-inline-editable]")?.focus();
+  }, [documentInfo, editor, expanded]);
 
   useEffect(() => {
     if (!dirty && !saving) return;
@@ -295,43 +563,10 @@ export default function DevTools() {
     };
   }, [dirty, lang, saving, source.source]);
 
-  // Page titles/descriptions opt into this delegated click target. The values
-  // themselves still come from the validated source file; textContent would
-  // concatenate both language spans rendered by <T>.
-  useEffect(() => {
-    if (!expanded || !editor) return;
-    const focusField = (event: MouseEvent) => {
-      const target = (event.target as Element | null)?.closest<HTMLElement>(
-        "[data-dev-field-en]"
-      );
-      if (!target || target.closest(".dev-dock")) return;
-      const key = (lang === "uk" ? target.dataset.devFieldUk : target.dataset.devFieldEn) as
-        | DevFieldKey
-        | undefined;
-      if (!key) return;
-      event.preventDefault();
-      event.stopPropagation();
-      const control = key.startsWith("title") ? titleRef.current : descriptionRef.current;
-      control?.focus();
-      control?.select();
-    };
-    document.addEventListener("click", focusField, true);
-    return () => document.removeEventListener("click", focusField, true);
-  }, [editor, expanded, lang]);
-
-  const edit = (key: DevFieldKey, value: string) => {
-    const now = performance.now();
-    const previous = editGroup.current;
-    const record = !previous || previous.key !== key || now - previous.at > 700;
-    editGroup.current = { key, at: now };
-    dispatch({ type: "edit", key, value, record });
-    setMessage(null);
-    setConflict(false);
-  };
-
   const cancel = () => {
     dispatch({ type: "cancel" });
     editGroup.current = null;
+    setActiveBody(null);
     setMessage(null);
     setConflict(false);
   };
@@ -347,15 +582,18 @@ export default function DevTools() {
     setMessage(null);
     setConflict(false);
     try {
-      const payload = await request<EditorDocument>("save", {
+      const payload = await request<EditorDocument>("save-page", {
         source: documentInfo.source,
+        sourceUk: documentInfo.sourceUk,
         revision: editor.revision,
+        revisionUk: documentInfo.revisionUk,
         changes: devEditorChanges(editor),
       });
       if (generation !== pageGeneration.current) return;
       setDocumentInfo(payload);
       dispatch({ type: "saved", fields: payload.fields, revision: payload.revision });
       editGroup.current = null;
+      setActiveBody(null);
       setMessage("saved");
       router.refresh();
     } catch (error) {
@@ -391,95 +629,79 @@ export default function DevTools() {
   const publicHref = publicPageUrl(siteUrl, window.location, lang);
   const obsidianHref = documentInfo?.obsidian[lang];
   const canSave = Boolean(editor && dirty && editor.draft.title.trim() && !saving);
+  const feedbackVisible = expanded && (loading || Boolean(message) || !source.source);
+  const bodyPortal =
+    activeBody && editor && activeBody.host.isConnected
+      ? createPortal(
+          <textarea
+            ref={bodyEditorRef}
+            className="dev-body-editor"
+            value={editor.draft[activeBody.key]}
+            lang={activeBody.key === "body_uk" ? "uk" : undefined}
+            aria-label={devUi.devBody[lang]}
+            spellCheck
+            onChange={(event) => {
+              edit(activeBody.key, event.target.value);
+              event.currentTarget.style.height = "auto";
+              event.currentTarget.style.height = `${event.currentTarget.scrollHeight}px`;
+            }}
+            onBlur={() => {
+              editGroup.current = null;
+            }}
+          />,
+          activeBody.host
+        )
+      : null;
 
   return (
-    <div className="dev-dock" data-expanded={expanded || undefined}>
-      {expanded && (
-        <section
-          id="dev-editor-panel"
-          className="dev-editor-panel"
-          aria-label={devUi.devPageFields[lang]}
-        >
-          <div className="dev-editor-heading">
-            <span className="truncate">{source.source?.replace(/^vault\//, "")}</span>
-            {dirty && (
-              <>
-                <span className="dev-dirty" aria-hidden />
-                <span className="sr-only">{devUi.devUnsaved[lang]}</span>
-              </>
-            )}
-          </div>
+    <>
+      {bodyPortal}
+      <div className="dev-dock" data-expanded={expanded || undefined}>
+        {feedbackVisible && (
+          <section
+            id="dev-editor-feedback"
+            className="dev-editor-panel dev-editor-feedback"
+            aria-label={devUi.devPageFields[lang]}
+          >
+            {loading ? (
+              <p className="dev-editor-note" role="status">
+                {devUi.devLoading[lang]}
+              </p>
+            ) : !source.source ? (
+              <p className="dev-editor-note">{devUi.devNoSource[lang]}</p>
+            ) : message ? (
+              <div className="dev-editor-status" aria-live="polite">
+                <span>{messageText}</span>
+                {documentInfo && conflict ? (
+                  <button
+                    type="button"
+                    className="press dev-reload"
+                    onClick={() => void loadDocument(false)}
+                  >
+                    <ReloadIcon className="h-3.5 w-3.5" />
+                    {devUi.devReload[lang]}
+                  </button>
+                ) : !documentInfo ? (
+                  <button
+                    type="button"
+                    className="press dev-reload"
+                    onClick={() => void loadDocument()}
+                  >
+                    <ReloadIcon className="h-3.5 w-3.5" />
+                    {devUi.devRetry[lang]}
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+          </section>
+        )}
 
-          {loading ? (
-            <p className="dev-editor-note" role="status">
-              {devUi.devLoading[lang]}
-            </p>
-          ) : editor && documentInfo ? (
-            <div className="dev-editor-fields">
-              <label>
-                <span>{devUi.devTitle[lang]}</span>
-                <input
-                  ref={titleRef}
-                  value={editor.draft[titleKey]}
-                  placeholder={lang === "uk" ? editor.draft.title : undefined}
-                  required={lang === "en"}
-                  maxLength={300}
-                  lang={lang === "uk" ? "uk" : undefined}
-                  onChange={(event) => edit(titleKey, event.target.value)}
-                  onBlur={() => (editGroup.current = null)}
-                />
-              </label>
-              <label>
-                <span>{devUi.devDescription[lang]}</span>
-                <textarea
-                  ref={descriptionRef}
-                  value={editor.draft[descriptionKey]}
-                  placeholder={lang === "uk" ? editor.draft.description : undefined}
-                  maxLength={4000}
-                  rows={3}
-                  lang={lang === "uk" ? "uk" : undefined}
-                  onChange={(event) => edit(descriptionKey, event.target.value)}
-                  onBlur={() => (editGroup.current = null)}
-                />
-              </label>
-            </div>
-          ) : source.source ? null : (
-            <p className="dev-editor-note">{devUi.devNoSource[lang]}</p>
-          )}
-
-          {message && (
-            <div className="dev-editor-status" aria-live="polite">
-              <span>{messageText}</span>
-              {documentInfo && conflict ? (
-                <button
-                  type="button"
-                  className="press dev-reload"
-                  onClick={() => void loadDocument(false)}
-                >
-                  <ReloadIcon className="h-3.5 w-3.5" />
-                  {devUi.devReload[lang]}
-                </button>
-              ) : !documentInfo && source.source ? (
-                <button
-                  type="button"
-                  className="press dev-reload"
-                  onClick={() => void loadDocument()}
-                >
-                  <ReloadIcon className="h-3.5 w-3.5" />
-                  {devUi.devRetry[lang]}
-                </button>
-              ) : null}
-            </div>
-          )}
-        </section>
-      )}
-
-      <div className="dev-dock-bar" role="group" aria-label={devUi.devToolsGroup[lang]}>
+        <div className="dev-dock-bar" role="group" aria-label={devUi.devToolsGroup[lang]}>
         <button
           ref={pencilRef}
           type="button"
           aria-expanded={expanded}
-          aria-controls={expanded ? "dev-editor-panel" : undefined}
+          aria-controls={feedbackVisible ? "dev-editor-feedback" : undefined}
           aria-label={(expanded ? devUi.devToolsClose : devUi.devToolsOpen)[lang]}
           title={(expanded ? devUi.devToolsClose : devUi.devToolsOpen)[lang]}
           onClick={(event) => {
@@ -489,6 +711,12 @@ export default function DevTools() {
           className="press dev-tool-button"
         >
           <PenIcon className="h-[17px] w-[17px]" />
+          {dirty && (
+            <>
+              <span className="dev-tool-dirty" aria-hidden />
+              <span className="sr-only">{devUi.devUnsaved[lang]}</span>
+            </>
+          )}
         </button>
 
         {expanded && (
@@ -587,7 +815,8 @@ export default function DevTools() {
             </button>
           </>
         )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

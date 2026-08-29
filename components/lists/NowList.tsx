@@ -1,13 +1,14 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { ListProps } from "@/lib/section-types";
-import { CheckIcon, ClockIcon, ArrowIcon } from "@/components/icons";
+import { ClockIcon, ArrowIcon } from "@/components/icons";
 import { getWikiIndex } from "@/lib/vault";
 import type { ResumeData } from "@/lib/resume";
 import { resumeHeadings } from "@/lib/resume";
 import Resume from "@/components/Resume";
 import Toc from "@/components/Toc";
 import T from "@/components/T";
+import DevNowGoalToggleSlot from "@/components/DevNowGoalToggleSlot";
 
 /** Below this many résumé blocks a rail/pill is noise, not navigation — same
  *  threshold the entry page uses for markdown headings (app/[section]/[slug]/page.tsx). */
@@ -57,6 +58,9 @@ export default function NowList({ section }: ListProps) {
   const resumeData = section.meta.resume as ResumeData | undefined;
   const headings = resumeData ? resumeHeadings(resumeData) : { en: [], uk: [] };
   const showToc = headings.en.length >= MIN_TOC_HEADINGS;
+  const source = `vault/${section.dirName}/main.md`;
+  const sourceUk =
+    section.contentUk !== undefined ? `vault/${section.dirName}/main.uk.md` : undefined;
 
   const hrefFor = (link?: string): string | undefined => {
     if (!link) return undefined;
@@ -81,67 +85,68 @@ export default function NowList({ section }: ListProps) {
       <ul className="mt-5 flex flex-col gap-3">
         {goals.map((goal, i) => {
           const href = hrefFor(goal.link);
-          const inner: ReactNode = (
-            <>
-              {/* Hollow = open, filled = done — the resume timeline uses the
-                  same fill-vs-outline language for current vs. past. */}
-              <span
-                aria-hidden
-                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-colors ${
-                  goal.done
-                    ? "border-[var(--text)] bg-[var(--text)] text-[var(--bg)]"
-                    : "border-[var(--border)] text-transparent"
-                }`}
-              >
-                <CheckIcon className="h-[17px] w-[17px]" />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="flex items-baseline justify-between gap-2">
-                  <span
-                    className={`font-medium ${
-                      goal.done
-                        ? "text-[var(--text-tertiary)] line-through"
-                        : "text-[var(--text)]"
-                    }`}
-                  >
-                    <T en={goal.label ?? ""} uk={goal.label_uk} />
-                  </span>
-                  {href && (
-                    <ArrowIcon className="h-4 w-4 shrink-0 -translate-x-1 text-[var(--text-tertiary)] opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
-                  )}
+          const text: ReactNode = (
+            <span className="min-w-0 flex-1">
+              <span className="flex items-baseline justify-between gap-2">
+                <span
+                  className={`font-medium ${
+                    goal.done
+                      ? "text-[var(--text-tertiary)] line-through"
+                      : "text-[var(--text)]"
+                  }`}
+                >
+                  <T en={goal.label ?? ""} uk={goal.label_uk} />
                 </span>
-                {goal.note && (
-                  <span className="mt-0.5 block text-sm text-[var(--text-secondary)]">
-                    <T en={goal.note} uk={goal.note_uk} />
-                  </span>
+                {href && (
+                  <ArrowIcon className="h-4 w-4 shrink-0 -translate-x-1 text-[var(--text-tertiary)] opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
                 )}
               </span>
-            </>
+              {goal.note && (
+                <span className="mt-0.5 block text-sm text-[var(--text-secondary)]">
+                  <T en={goal.note} uk={goal.note_uk} />
+                </span>
+              )}
+            </span>
           );
 
           const cardClass =
-            "group flex items-center gap-3.5 rounded-xl border border-[var(--border)] px-4 py-3.5 transition-colors";
+            `now-goal-card group flex items-center gap-3.5 rounded-xl border border-[var(--border)] px-4 py-3.5 transition-colors${
+              href ? " press press-soft hover:bg-[var(--bg-hover)]" : ""
+            }`;
 
           return (
             <li key={i}>
-              {href ? (
-                isInternal(href) ? (
-                  <Link href={href} className={`${cardClass} press press-soft hover:bg-[var(--bg-hover)]`}>
-                    {inner}
-                  </Link>
+              <div className={cardClass}>
+                {/* Hollow = open, filled = done — the resume timeline uses the
+                    same fill-vs-outline language for current vs. past. The
+                    control is a SIBLING of the stretched link, never an
+                    interactive element nested inside another one. */}
+                <DevNowGoalToggleSlot
+                  source={source}
+                  sourceUk={sourceUk}
+                  index={i}
+                  label={goal.label ?? ""}
+                  done={goal.done === true}
+                />
+                {href ? (
+                  isInternal(href) ? (
+                    <Link href={href} className="now-goal-link">
+                      {text}
+                    </Link>
+                  ) : (
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="now-goal-link"
+                    >
+                      {text}
+                    </a>
+                  )
                 ) : (
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={`${cardClass} press press-soft hover:bg-[var(--bg-hover)]`}
-                  >
-                    {inner}
-                  </a>
-                )
-              ) : (
-                <div className={cardClass}>{inner}</div>
-              )}
+                  text
+                )}
+              </div>
             </li>
           );
         })}

@@ -35,15 +35,26 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // Replace the editor module with a null component in production so its
-  // request paths and client code never enter public chunks.
+  // Replace the editor and contextual server slots in production so their
+  // request paths and client islands never enter public chunks. A NODE_ENV
+  // branch around import() is not enough for webpack to omit that import.
   webpack(config, { dev }) {
     if (!dev) {
       const disabled = path.resolve(process.cwd(), "components/DevToolsDisabled.tsx");
+      const nowGoalDisabled = path.resolve(
+        process.cwd(),
+        "components/DevNowGoalToggleSlotDisabled.tsx"
+      );
       config.resolve.alias = {
         ...config.resolve.alias,
         "@/components/DevTools$": disabled,
         [path.resolve(process.cwd(), "components/DevTools.tsx")]: disabled,
+        "@/components/DevCreateEntrySlot$": disabled,
+        [path.resolve(process.cwd(), "components/DevCreateEntrySlot.tsx")]: disabled,
+        "@/components/DevEntryOptionsSlot$": disabled,
+        [path.resolve(process.cwd(), "components/DevEntryOptionsSlot.tsx")]: disabled,
+        "@/components/DevNowGoalToggleSlot$": nowGoalDisabled,
+        [path.resolve(process.cwd(), "components/DevNowGoalToggleSlot.tsx")]: nowGoalDisabled,
         "@/components/DevRatingEditor$": path.resolve(
           process.cwd(),
           "components/DevRatingEditorDisabled.tsx"

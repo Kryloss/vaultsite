@@ -2083,7 +2083,9 @@ Twenty-nine notes across twenty-six artists is past the size where a page you sc
 
 **The switch is ONE button that steps through its own states.** All → ENG → UA → RU → All, one press per step, the label saying where you are. It took two wrong turns to get there. Four chips in a row was first, and it does not fit: at the 39rem measure four chips plus a usable field plus the heading push the toolbar onto a second line. A dropdown was second, and it is a popover, an outside-click listener and two interactions to express four states — machinery for a control that has fewer positions than a light switch. Cycling is one press, no layer, no focus trap.
 
-The button carries `min-width: 3.25rem` so the row does not twitch as the label steps between four different widths — measured, it holds 52px throughout.
+The button carries `min-width: 3.5rem` so the row does not twitch as the label steps between four different widths — measured, it holds 56px throughout.
+
+It is also the **same material as the search field beside it**: one rule sets padding, size, line-height, surface, hairline and radius for both, so they read as a pair rather than as a field with a control next to it — and it stays that way when a language is chosen. A selected step does NOT ring the button: the label already says "ENG" instead of "All", so an outline states the same thing twice, and the moment it appeared the button stopped matching the field it is paired with. Only the weight thickens. The shared `line-height` is the part that is easy to miss — with everything else equal the button still landed a pixel short, because an input's default leading and a button's are not the same. Measured after: both 26.3px, same top.
 
 Keeping heading, field and button on ONE line at every width is a requirement rather than a preference, so `.music-toolbar` is `flex-wrap: nowrap` and the heading is the only part allowed to give: at 375px it wraps to two lines inside its own cell and the controls hold their row.
 
@@ -2112,3 +2114,196 @@ Language is never fuzzy — it is pressed, not typed, so there is no typo to for
 The controls are local state, not URL params. The posts category chips are links because a post's own chip has to deep-link back into a filtered list (#13); nothing here links to a filtered view, a half-typed query is not an address, and putting keystrokes in the URL fills the reader's history with them.
 
 Track rows also got more air (5px of padding to 9px, so adjacent rows sit 18px apart). At the old spacing the covers read as one block of artwork with the divider doing all the separating on its own.
+
+## 118. Local editing is a separate loopback tool, and prose edits as source in place (2026-08-28)
+
+The local preview has a bottom-right pencil dock. Collapsed, it is the only
+authoring mark and the rest of the page is the public preview. Expanded, it
+shows the public-page and Obsidian exits, language, history, Cancel and Save;
+the title and description become plain-text editors where they already render.
+There is no second title/description form in the dock.
+
+**Rendered prose is not an editable source format.** The Markdown pipeline
+expands wiki links, embeds, callouts, figures, footnotes and tables into HTML.
+Turning a mutated DOM back into Markdown would silently rewrite or discard
+those structures. Clicking the current page's prose therefore swaps that
+article for a textarea containing the exact Markdown body, in the same place
+and at the same minimum height. This is direct editing without pretending the
+HTML is lossless. Third-party players, generated controls, dates, counts and
+lists remain read-only. A row in a generated list belongs to another source
+file; editing every visible projection would be a multi-document editor, not a
+page editor.
+
+**The writer is a sidecar, not a deployed route.** `npm run dev` supervises
+Next and a process bound to `127.0.0.1`; Next rewrites
+`/__vault-editor/*` only in development. The client additionally requires the
+exact `localhost` hostname, while the sidecar requires the exact supervisor
+origin, same-origin fetch metadata and a random session token and emits no
+CORS permission. Production replaces the client with a null component and has
+no rewrite or writer, so the deployed site stays static. The sidecar does not
+hot-reload; restart `npm run dev` after changing its endpoints.
+
+**A URL never becomes a write path.** Server-rendered pages expose their known
+primary and optional Ukrainian source paths. The writer requires existing
+`.md` files beneath `vault/`, rejects traversal and backslashes, resolves
+symlinks, and rechecks real containment. The translated path must be exactly
+the primary path's `.uk.md` sibling.
+
+**One browser draft spans the page's source-owned text.** Undo, Redo and Cancel
+cover `title`, `title_uk`, `description`, `description_uk`, `body` and
+`body_uk`; nothing reaches disk until Save. The primary file's YAML scalars are
+patched without serialising unrelated frontmatter, and its body is replaced
+only after the closing fence. The Ukrainian sibling is body-only and is
+treated that way. A draft retained across soft navigation also retains BOTH
+revisions from its opening snapshot; loading the current Ukrainian revision
+beside an old translated draft would defeat the conflict check. Both exact-byte
+revisions are checked before staging and
+again before replacement. If either changed in Obsidian, the browser keeps the
+draft. A two-language save stages backups and restores both files if the final
+replacement pass fails, so the pair cannot intentionally land half-saved.
+
+Attachments remain an Obsidian operation. They need collision handling, asset
+copy, Markdown insertion, manifest regeneration and rollback as one
+transaction; a decorative Attach button would promise a contract that does not
+exist.
+
+## 119. Top-list ratings and order are author-owned vault data (2026-08-28)
+
+While the dock is open, movie/show Top-list stars become a half-star slider and
+the rows can be dragged. Ratings write only `rating:` on that note. A drag
+writes the complete visible order as consecutive zero-based `top_order:`
+values across the participating notes; `sortForTop()` treats that manual order
+as authoritative, with rating/IMDb/date retained only as the fallback before a
+manual order exists.
+
+The multi-file reorder validates every source, stages every changed note,
+rechecks the snapshot, and uses backups around the rename pass. The row moves
+immediately for feedback, but a failed request restores the original DOM order
+and suppresses link navigation only after the drag threshold is crossed. A
+normal click keeps opening the note. Rating saves publish their new revision to
+the page editor so an unrelated title/body draft does not conflict with the
+author's own just-completed star change.
+
+## 120. A shelf note shows its face at both ends of the range — and the creator joins the poster in the gutter (2026-08-28)
+
+#115 gave a film and a show their poster in the right gutter from 1400px and stopped there on purpose: *gutter or nothing*, because the note's opening is a designed sequence (creator block, fact list, body — #86, #87) and artwork spliced into it would be a redesign rather than an enrichment. Asked for the redesign, this is it — and it is confined to the two widths where it earns its place.
+
+**On a phone, the cover sits to the LEFT of the title.** Not inside the opening — *beside* it, which is the arrangement every list that links here already uses, so nothing about the sequence below changes. `.note-thumb` is 4.5rem wide, keeps the artwork's own `coverAr`, and is `display: none` from 640px up. It is a separate element from the gutter poster, not the same one re-placed: the two carry different `sizes`, and both are `loading="lazy"` precisely so a viewer at one width never fetches the other's copy — a lazy image that is never displayed is never requested (#95). Videos are excluded: a video note's cover is a YouTube still and the video itself is embedded a few lines below.
+
+**Books get the phone thumbnail; only films and shows get the gutter.** The predicate for artwork on the page (a shelf note with a resolved cover, not a video) is deliberately wider than the predicate for the gutter column (`movie | show`, unchanged from #115) — a book has a face worth showing on a phone, where nothing else on the page shows it, while on a wide window its spine row and medium page already do (#110).
+
+**From 1400px the creator block moves under the poster.** The two things the page knows *about the work* — its face and its maker — become one object in one column, and the writing starts at the top of the measure with nothing above it. `.note-gutter` is the wrapper that makes this cheap: poster and creator stack in NORMAL FLOW inside one fixed element, so no height has to be emitted, measured or guessed. Everywhere else it is `display: contents`, so the creator block is exactly where it always was and the wrapper costs nothing. In the column the block is a caption rather than an introduction — 3.25rem portrait, everything one size down, bio in `--text-tertiary`.
+
+**The contents rail is the guard, and it wins.** The rail wants that column too, and #115's arrangement starts it below the poster by a height the page emits (`--note-cover-h`). It cannot start below a *bio*, whose height is a paragraph of prose — so a note with an outline keeps #115 exactly as shipped (poster in the gutter, creator in the writing, rail under the poster) and only a note without one gets the column. `:not(:has(.toc-rail))` is the whole test. Every film and show in the vault has exactly two headings, one short of `MIN_TOC_HEADINGS`, so the column is the branch that runs today; the guard exists so that a third heading changes the layout instead of overlapping it.
+
+**Between a phone and 1400px nothing changed.** A laptop is the width where neither the gutter nor a header row has room to spare, and the ask was for the two ends.
+
+### Second pass: the facts join them, and the role stays beside the face
+
+**The fact list moved into the column too** — poster, then creator, then Aired / One-liner / Rating, with the measure left holding the title and the writing. That needed the table to become a SIBLING of the other two, and it was inside the article, so `rehypeLiftFacts` (lib/markdown.ts, behind `RenderOptions.liftFacts`) takes the first `.fact-table` out of the tree after `rehypeFactTables` has tagged it and appended the rating row, and hands it back as `factsHtml`. The page renders it inside `.note-gutter` in a `<div class="prose note-facts mt-8">` — `.prose` because every rule that styles that table is written against that ancestor, `mt-8` because that is the margin the article used to give it, so **below 1400px it lands in exactly the place, with exactly the spacing, it had before**. Both languages are lifted separately and keep their `.lang-en` / `.lang-uk` pair.
+
+The `## At a glance` heading is deliberately NOT lifted. It is clipped but real (#87): it holds the block's row in the outline, its `#at-a-glance` anchor and the scroll-spy's measurement, and all three belong to the article. Only the table moves.
+
+**In the column the pair stacks, label over value.** 208px cannot hold a two-column table — the 8rem label alone would leave 80px for the value. The label is set like `.creator-role` right above it (all-small-caps, tracked, tertiary) so the column reads as one object instead of three treatments in a stack, and the hairline that closes the fact list in the measure is dropped: out there it separates the header matter from the writing, and there is no writing under it to separate.
+
+**The role and the name stay BESIDE the portrait.** Stacking all four parts of the creator block under each other was the first version of the column and it was wrong for the reason the 480px layout already records: the role and the name are short and they are what the picture is captioning, so the portrait and its two lines read as one object, where a face with a caption underneath reads as two. Only the bio drops full-width below the pair. It is the same grid, the same `display: contents` on `.creator-text`, and the same reset of the flex `gap` into a zero row gap — a second use of a layout the phone had already argued for.
+
+**Known cost:** on a short, wide window (below roughly 700px tall) the column runs past the foot of the screen and scrolls inside itself, which is the contents rail's own behaviour in the same situation. Nothing is clipped silently.
+
+**Fourth pass: the thumbnail is the DEFAULT, and the gutters switch it off.** Written phone-only, it left a hole in the middle of the range — the gutter copy does not arrive until 1168px (a person, in the rail) or 1400px (a film's poster), so between 640px and there a note showed no artwork at all, and a BOOK, which never gets a gutter copy anywhere, lost its cover at every width above 640px. Inverted: `.note-thumb` is visible wherever there is artwork, and each gutter takes it over at ITS OWN breakpoint via `.page:has(.toc-portrait)` and `.page:has(.note-cover)`. Keyed on the gutter element being present rather than on the section, so a book simply keeps its thumbnail everywhere and nothing has to be told which case it is in.
+
+Two details that came with it. The size stays **3rem at every width** — it is a label, and a label that grows with the window is a picture. And `.copy-md`, which hangs in the title's left margin, is shifted back by exactly what the artwork added (`calc(-2.25rem - var(--note-thumb-w) - var(--note-thumb-gap))`, derived from the two properties rather than re-typed) so it lands where it does on every other note; between 640 and 768px, where the page's ~38px gutter cannot hold a button that now wants 100, it is hidden instead — a control that reveals itself off-screen is worse than no control, and Cmd+K reaches the same clipboard.
+
+**Third pass: the phone cover is 3rem, not 4.5rem.** At 72px wide the artwork stands 108px tall, against a one-line title and its meta line that come to about 62px — so every short-titled note opened with 45px of empty column beside the poster, which is the opposite of what a thumbnail beside a title is for. At 48px it is near enough the Top list's own 44px art, and it is the TYPE that drives the block's height: a long title now grows past the cover instead of the cover reaching past the type.
+
+## 121. A People note's portrait goes at the foot of the contents rail (2026-08-28)
+
+The same question #120 answered for a film — a note about something with a face should show that face — with a different answer, because a person is not a film.
+
+**A film's poster is one fact about it among several**, which is why it shares a gutter column with the creator block and the fact list and why the arrangement had to be argued for. **A person's portrait IS the note's subject.** There is nothing for it to compete with, so it does not need a column of its own: it goes where the reader's eye already goes for orientation, at the foot of the contents rail, under the outline.
+
+**IN the rail, not beneath it.** The rail's height is however many headings the note has. A sibling positioned below it would have to be told that number — the same problem the poster and the creator solved with a shared wrapper (#120) — and a child simply follows the list. `components/Toc.tsx` gained a `below` slot for exactly this: rail only, never the phone sheet, which is a popover you open to jump somewhere and dismiss, and a picture in it is in the way of that. It rides the rail's own scroll on a short window, like everything else in that column.
+
+**Indented to the rail's text column** (`.toc-link` pads 0.75rem), so the portrait lines up with the headings above it rather than with the hairline. **Full colour**: `.person-photo`'s desaturation is a hover exception on the people GRID (#56), and a picture at rest here is the same case as the shelf's creator portraits, which keep theirs (#86).
+
+**A People note with no outline still has a person.** Two headings — an "At a glance" and a "Sources" — is an ordinary short note and falls below `MIN_TOC_HEADINGS`, so the page renders the portrait as its own `.note-portrait` aside in the rail's own place: its geometry, its 1168px breakpoint, nothing new invented. That branch is not theoretical; the one People note in the vault today happens to have exactly three headings.
+
+**On a phone it is the same thumbnail the shelf gets** (#120) — small, to the left of the title — because at that width the question is identical and so is the answer.
+
+**And the "At a glance" block goes under the face**, which is the shelf's column (#120) arriving on this page too: the writing column keeps the title and the prose, and everything the note knows *about the person* — their picture, where they were born, what they are known for, what they did and when — is one object in the gutter.
+
+Three things had to give for that:
+
+- **Detection moved off the class.** `rehypeLiftFacts` looked for `.fact-table`, which only the SHELF's plain-list treatment adds; a People note keeps its card (#87) and so has no class to find. `rehypeFactTables` now marks the block it has identified on the hast node's `data` instead — never serialized, so nothing about the rendered page changes for a note that doesn't move its table, and detection stays in the one function that knows what a fact block is. As an attribute it re-ordered `class` in every shelf note's markup, which three tests noticed immediately.
+- **The gutter copy is not inside `.prose`.** Every rule that draws the card is written against that ancestor, and at 195px there is no card to keep — so the copy is styled from nothing, stacked label over value, which is shorter than undoing the card and is the same arrangement the shelf's column argues for.
+- **The block is rendered TWICE**, once in the gutter and once back in the article. The shelf could move a single copy because its wrapper was `display: contents` at narrow widths; here the destination is the rail, which is a different parent, and CSS cannot move an element between parents. Only one copy is ever DISPLAYED — the rail is `display: none` below 1168px, and `.page:has(.toc-facts) .note-facts` stands the article's copy down above it — so a screen reader meets exactly one at any width. It is the trade the outline itself already makes between the rail and the phone sheet.
+
+**A one-line `description:` under the portrait was built first and removed.** It read well, but it was the wrong sentence: what belongs under a face is what the note actually says about the person, and that is the fact block.
+
+## 122. Local authoring belongs beside the thing it changes (2026-08-29)
+
+The pencil dock remains the GLOBAL switch, not the place every authoring field
+has to live. When it is closed, the preview stays the public page. When it is
+open, creation and structured options appear in context: a small `+` beside a
+supported section title, “Page options” beneath an entry header, and semantic
+checkboxes on the Now goal cards. The dock still owns public/Obsidian exits,
+language, history and the current page's text draft. This keeps a growing form
+from turning the fixed bar into an editor nobody can read.
+
+**Creation produces a safe unfinished object, never a plausible publication.**
+Posts, Music, People, Shelf and Projects each get a template derived from the
+section's server-read `type:`; the browser cannot choose an arbitrary writer.
+Every new note requires English and Ukrainian title/description, writes
+`draft: true`, and creates the primary file plus its body-only `.uk.md` sibling.
+Shelf chooses Book/Movie/Show/Video and files the pair in the matching vault
+subfolder without changing its URL. Music captures artist, format, the owner's
+ENG/UA/RU shelf decision, optional Apple genres and optional player URL. Image,
+portrait, biography, fact and source work remains visibly scaffolded for later
+completion rather than guessed by a form.
+
+A title is both content and a filename, so creation validates it as both. The
+sidecar starts from a real top-level `main.md`, resolves the known destination,
+rejects traversal and unsafe filesystem names, and checks BOTH the destination
+filename and every existing entry's effective route slug. The pair is staged
+beside its destination and linked into place exclusively; if the second create
+fails, only the first newly created file is rolled back. Existing content is
+never opened for truncation.
+
+**Page options patch established frontmatter rather than inventing a second
+model.** Draft accepts either historical `published: false` or current
+`draft: true` on read and normalises an edited Draft to the latter. Categories
+accept existing or new comma-separated `#` labels and preserve the section's
+singular `category:` convention for one Post; other/multiple values use
+`categories:`. A category absent from `lib/categories.ts` is still valid and
+falls back to the same label in Ukrainian until a translation is added. “New
+# type” means this new frontmatter value, NOT a new section `type:` renderer.
+Actual renderers remain code changes governed by `docs/ADDING-PAGE-TYPES.md`.
+
+Post series use the existing vault-wide contract: matching `series:`, optional
+positive `part:`, and one `series_uk:` stored on any one member. Selecting an
+established translated series locks its Ukrainian name instead of copying that
+field onto every part; creating a new series requires the Ukrainian name. The
+sidecar compares changes against the RAW YAML keys, not the normalized values
+shown by the picker. That distinction is load-bearing: comparing against a
+semantic Draft or a category folded from singular `category:` could remove the
+old key while mistakenly deciding its replacement was already present.
+
+**A rendered Now checkbox edits exactly one source marker in both languages.**
+Only top-level task items under a recognised `## Goals`/`## Цілі` heading
+participate. The browser sends its rendered English label as a stale-order
+guard; the sidecar finds the indexed task, compares the plain label, changes
+only `[ ]`/`[x]`, then stages `main.md` and `main.uk.md` through the same paired
+replacement/rollback path as a page save. The checkbox is a sibling of a
+goal's stretched link, never an interactive control nested inside a link.
+
+All contextual actions use the same exact-localhost, development-only sidecar
+and session token as #118. They refuse while the main editor is dirty or saving,
+so two browser drafts cannot race over one revision. Server slots dynamically
+import their client islands only in development, but that source branch is NOT
+a production boundary on its own: webpack still discovered and emitted those
+imports. `next.config.ts` therefore aliases the contextual slots to null/static
+production replacements, just as it replaces the global dock. The production
+audit must find no editor endpoints or client copy in JavaScript and no editor
+controls in static HTML; dormant global CSS is harmless without a mounted
+component. Attachments remain outside this contract for the transaction reasons
+in #118.

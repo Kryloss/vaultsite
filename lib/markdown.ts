@@ -1059,6 +1059,22 @@ function rehypeFactTables({
               };
             }
 
+            /* The marker the lift step looks for. Set BEFORE the opt-in
+               branch below, because a People note keeps its card and so never
+               gets the `fact-table` class — but its block is still the one a
+               page might want to place somewhere else (#121). Detection lives
+               here, in the one function that knows what a fact block is.
+
+               On `data`, not as an attribute: hast's `data` is for exactly
+               this and never reaches the HTML, so nothing about the rendered
+               page changes for the notes that don't move their table. (An
+               attribute would also have re-ordered `class` in every shelf
+               note's markup, which three tests noticed immediately.) It
+               survives because both plugins walk the SAME tree — rehype-raw,
+               the one step that re-parses and would drop it, has already
+               run. */
+            child.data = { ...child.data, facts: true };
+
             /* Everything below is the SHELF's plain-list treatment and stays
                opt-in — a People note keeps its card (DECISIONS #87). */
             if (!plain) {
@@ -1113,6 +1129,48 @@ function rehypeFactTables({
         }
         walk(child);
       }
+    };
+    walk(tree);
+  };
+}
+
+/**
+ * rehype step: take the fact table OUT of the body and hand it back on its
+ * own, so the page can place it somewhere the article isn't.
+ *
+ * Runs after `rehypeFactTables`, which is what tags the table — this step only
+ * moves what that one has already decided is a fact block, and only the FIRST
+ * one (a note with two tables keeps the rest where they were written).
+ *
+ * Why lifting rather than CSS: from 1400px a film or show note gathers its
+ * poster, its creator and its facts into one gutter column (DECISIONS #120),
+ * and those three live in three different parents. A wrapper can hold them
+ * only if the table is a sibling of the other two, which means moving it in
+ * the tree. Below that width the page renders it in exactly the position it
+ * came from, so nothing about the note's opening changes.
+ *
+ * The heading above it is deliberately NOT moved: "At a glance" is clipped but
+ * real (#87) — it holds the block's place in the outline, its anchor and the
+ * scroll-spy's measurements, all of which belong to the article.
+ */
+function rehypeLiftFacts(holder: { node?: any }) {
+  return (tree: any) => {
+    const walk = (node: any): boolean => {
+      if (!node.children) return false;
+      for (let i = 0; i < node.children.length; i++) {
+        const child = node.children[i];
+        const isFacts =
+          child?.type === "element" &&
+          child.tagName === "table" &&
+          child.data?.facts === true;
+        if (isFacts) {
+          holder.node = child;
+          node.children.splice(i, 1);
+          return true;
+        }
+        if (walk(child)) return true;
+      }
+      return false;
     };
     walk(tree);
   };
@@ -1563,6 +1621,12 @@ export interface RenderOptions {
    * had that problem, so its table keeps the card it has always had.
    */
   factTables?: boolean;
+  /**
+   * Pull the fact table out of the rendered body and return it separately, as
+   * `factsHtml`. Only meaningful alongside `factTables`, and only the entry
+   * page asks for it — see rehypeLiftFacts above and DECISIONS #120.
+   */
+  liftFacts?: boolean;
 }
 
 /**
@@ -1574,7 +1638,7 @@ export async function renderWithHeadings(
   sectionDir: string,
   sectionSlug: string,
   options: RenderOptions = {}
-): Promise<{ html: string; headings: Heading[] }> {
+): Promise<{ html: string; headings: Heading[]; factsHtml?: string }> {
   // idPrefix also namespaces spoiler checkbox ids — both languages ship in one
   // document, so an unprefixed id would toggle the other language's spoiler.
   const pre = preprocessObsidian(md, sectionDir, sectionSlug, options.idPrefix);
@@ -1611,9 +1675,19 @@ export async function renderWithHeadings(
     ratingLabel: options.ratingLabel,
   });
 
+  /* Last of all, so it sees the table `rehypeFactTables` has just tagged —
+     and the rating row it has just appended to it. */
+  const lifted: { node?: any } = {};
+  if (options.liftFacts) pipeline.use(rehypeLiftFacts, lifted);
+
   const file = await pipeline.process(pre);
+  const factsHtml = lifted.node
+    ? unified()
+        .use(rehypeStringify)
+        .stringify({ type: "root", children: [lifted.node] } as any)
+    : undefined;
   // Last step on purpose — see inlineDiagrams().
-  return { html: inlineDiagrams(String(file)), headings };
+  return { html: inlineDiagrams(String(file)), headings, factsHtml };
 }
 
 export async function renderMarkdown(

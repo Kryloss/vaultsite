@@ -1,10 +1,18 @@
-export type DevFieldKey = "title" | "title_uk" | "description" | "description_uk";
+export type DevFieldKey =
+  | "title"
+  | "title_uk"
+  | "description"
+  | "description_uk"
+  | "body"
+  | "body_uk";
 
 export interface DevFields {
   title: string;
   title_uk: string;
   description: string;
   description_uk: string;
+  body: string;
+  body_uk: string;
 }
 
 export interface DevEditorState {

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { renderMarkdown } from "./markdown";
+import { renderMarkdown, renderWithHeadings } from "./markdown";
 
 /*
  * The image-note tests below render against REAL vault assets, because
@@ -246,4 +246,65 @@ test("a heading over a REAL data table is left visible", async () => {
     "posts"
   );
   assert.doesNotMatch(html, /fact-heading/);
+});
+
+/*
+ * Lifting the fact list out of the body (DECISIONS #120). The page needs it as
+ * a sibling of the poster and the creator, and gets it back as its own string;
+ * what stays behind is the article WITHOUT it — heading and anchor included,
+ * since those belong to the outline.
+ */
+
+test("liftFacts hands the fact table back separately and takes it out of the body", async () => {
+  const { html, factsHtml } = await renderWithHeadings(
+    HEADED,
+    "Shelf/Books",
+    "shelf",
+    { factTables: true, liftFacts: true, rating: 5, ratingLabel: "Rating" }
+  );
+  assert.doesNotMatch(html, /fact-table/);
+  assert.doesNotMatch(html, /<td>Published<\/td>/);
+  assert.match(factsHtml ?? "", /^<table class="fact-table">/);
+  assert.match(factsHtml ?? "", /<td>Published<\/td>/);
+  // The rating row rides with it — it is appended before the lift runs.
+  assert.match(factsHtml ?? "", /Rating/);
+  // The heading stays in the article: it holds the ToC row and the anchor.
+  assert.match(html, /<h2[^>]*class="[^"]*fact-heading/);
+  assert.match(html, /id="at-a-glance"/);
+});
+
+test("without liftFacts the table stays in the body and nothing is returned", async () => {
+  const { html, factsHtml } = await renderWithHeadings(
+    HEADED,
+    "Shelf/Books",
+    "shelf",
+    { factTables: true }
+  );
+  assert.match(html, /<table class="fact-table">/);
+  assert.equal(factsHtml, undefined);
+});
+
+test("liftFacts leaves a real data table alone — there is nothing to lift", async () => {
+  const { html, factsHtml } = await renderWithHeadings(
+    `## Results\n\n| Syntax | Result |\n|---|---|\n| a | b |`,
+    "Shelf/Books",
+    "shelf",
+    { factTables: true, liftFacts: true }
+  );
+  assert.match(html, /<table>/);
+  assert.equal(factsHtml, undefined);
+});
+
+test("liftFacts works on a People note too — card kept, block still travels", async () => {
+  const { html, factsHtml } = await renderWithHeadings(HEADED, "People", "people", {
+    liftFacts: true,
+  });
+  // Not the shelf's plain list: no `fact-table` class, header row intact —
+  // the card is what a People note keeps (DECISIONS #87).
+  assert.doesNotMatch(factsHtml ?? "", /fact-table/);
+  assert.match(factsHtml ?? "", /<thead>/);
+  assert.match(factsHtml ?? "", /<td>Published<\/td>/);
+  // ...and it has left the body, heading and anchor behind.
+  assert.doesNotMatch(html, /<table/);
+  assert.match(html, /id="at-a-glance"/);
 });

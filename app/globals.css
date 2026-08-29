@@ -4484,6 +4484,7 @@ svg.diagram tspan {
 }
 
 .dev-tool-button {
+  position: relative;
   display: flex;
   width: 2rem;
   height: 2rem;
@@ -4517,6 +4518,16 @@ svg.diagram tspan {
   color: var(--text);
 }
 
+.dev-tool-dirty {
+  position: absolute;
+  top: 0.1875rem;
+  right: 0.1875rem;
+  width: 0.3125rem;
+  height: 0.3125rem;
+  border-radius: var(--r-full);
+  background: var(--text);
+}
+
 .dev-rating-editor {
   display: inline-flex;
   align-items: center;
@@ -4542,6 +4553,15 @@ svg.diagram tspan {
   padding: 0.875rem;
   border-radius: var(--r-xl);
   animation: item-in var(--dur) var(--ease) both;
+}
+
+.dev-editor-feedback {
+  width: min(23rem, calc(100vw - 1.5rem));
+}
+
+.dev-editor-feedback .dev-editor-note,
+.dev-editor-feedback .dev-editor-status {
+  margin-top: 0;
 }
 
 .dev-editor-heading {
@@ -4650,6 +4670,430 @@ html[data-dev-tools] [data-dev-field-en]:hover {
   box-shadow: 0 0 0 1px var(--text-tertiary);
 }
 
+html[data-dev-tools] [data-dev-inline-editable] {
+  outline: none;
+  caret-color: var(--text);
+}
+
+html[data-dev-tools] [data-dev-inline-editable]:empty::before {
+  content: attr(data-dev-inline-placeholder);
+  color: var(--text-tertiary);
+  opacity: 0.72;
+  pointer-events: none;
+}
+
+html[data-dev-tools] [data-dev-inline-editable]:focus {
+  box-shadow:
+    0 0 0 1px var(--text-tertiary),
+    0 0 0 3px color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+/* Rendered prose is a preview, not a lossless editing format. Selecting it
+   opens its exact Markdown source IN THE ARTICLE'S PLACE, so wiki links,
+   embeds, callouts, tables and whitespace survive a round trip. The outside
+   Apple/YouTube players remain ordinary controls until the prose is selected. */
+html[data-dev-tools] [data-dev-body-ready] {
+  border-radius: var(--r-sm);
+  cursor: text;
+}
+
+html[data-dev-tools] [data-dev-body-ready]:hover:not([data-dev-body-editing]),
+html[data-dev-tools] [data-dev-body-ready]:focus-visible:not([data-dev-body-editing]) {
+  outline: 1px solid var(--text-tertiary);
+  outline-offset: 0.375rem;
+}
+
+html[data-dev-tools] [data-dev-body-editing] {
+  min-height: max(12rem, var(--dev-body-min-h, 12rem));
+  outline: none;
+}
+
+html[data-dev-tools] [data-dev-body-editing] > :not(.dev-body-editor) {
+  display: none !important;
+}
+
+.dev-body-editor {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: max(12rem, var(--dev-body-min-h, 12rem));
+  overflow: hidden;
+  resize: none;
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 0.75rem 0.875rem;
+  outline: none;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  tab-size: 2;
+  color: var(--text);
+  caret-color: var(--text);
+}
+
+.dev-body-editor:focus {
+  border-color: var(--text-tertiary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+/* Contextual authoring lives on the page it changes. The wrapper is contents
+   until the dock opens, so the ordinary/public heading keeps its exact box. */
+.dev-page-title-row {
+  display: contents;
+}
+
+html[data-dev-tools] .dev-page-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.dev-page-add {
+  display: inline-flex;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: 0 0 1.75rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: var(--r-full);
+  color: var(--text-secondary);
+  font-size: 1.25rem;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.dev-page-add:hover {
+  border-color: var(--text-tertiary);
+  color: var(--text);
+}
+
+.dev-page-dialog {
+  width: min(36rem, calc(100vw - 1.5rem));
+  max-height: calc(100dvh - 2rem);
+  margin: auto;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 0;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.dev-page-dialog::backdrop {
+  background: color-mix(in srgb, var(--text) 14%, transparent);
+  backdrop-filter: blur(2px);
+}
+
+.dev-page-form {
+  padding: 1rem;
+}
+
+.dev-page-form-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.dev-page-form-heading h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.dev-page-form-heading p {
+  margin-top: 0.125rem;
+  font-size: 0.8125rem;
+  color: var(--text-tertiary);
+}
+
+.dev-page-form-close {
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: 0 0 1.75rem;
+  border-radius: var(--r-md);
+  color: var(--text-secondary);
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.dev-page-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.dev-page-form-grid label {
+  display: grid;
+  min-width: 0;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.dev-page-form-wide {
+  grid-column: 1 / -1;
+}
+
+.dev-page-form-grid input,
+.dev-page-form-grid select {
+  width: 100%;
+  height: 2.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 0 0.625rem;
+  outline: none;
+  background: var(--bg);
+  font: inherit;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  color: var(--text);
+}
+
+.dev-page-form-grid input:focus,
+.dev-page-form-grid select:focus {
+  border-color: var(--text-tertiary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.dev-page-form-grid input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.dev-page-form-grid small,
+.dev-entry-options-form small {
+  font-size: 0.6875rem;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--text-tertiary);
+}
+
+.dev-page-form-error {
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.dev-page-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.dev-page-form-actions button {
+  border-radius: var(--r-md);
+  padding: 0.4375rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.dev-page-form-actions .dev-page-primary {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.dev-page-form-actions button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.dev-entry-options {
+  width: min(100%, 36rem);
+  margin-top: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.dev-entry-options > summary {
+  width: max-content;
+  cursor: pointer;
+  list-style: none;
+  border-radius: var(--r-md);
+  padding: 0.25rem 0.4375rem;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.dev-entry-options > summary::-webkit-details-marker {
+  display: none;
+}
+
+.dev-entry-options > summary::before {
+  content: "+";
+  display: inline-block;
+  width: 0.875rem;
+}
+
+.dev-entry-options[open] > summary::before {
+  content: "−";
+}
+
+.dev-entry-options-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+  margin-top: 0.375rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 0.75rem;
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+}
+
+.dev-entry-options-form > label:not(.dev-entry-draft) {
+  display: grid;
+  min-width: 0;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.dev-entry-options-wide {
+  grid-column: 1 / -1;
+}
+
+.dev-entry-options-form input[type="text"],
+.dev-entry-options-form input:not([type]),
+.dev-entry-options-form input[type="number"] {
+  width: 100%;
+  height: 2.125rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 0 0.5625rem;
+  outline: none;
+  background: var(--bg);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--text);
+}
+
+.dev-entry-options-form input:focus {
+  border-color: var(--text-tertiary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.dev-entry-options-form input:disabled {
+  opacity: 0.45;
+}
+
+.dev-entry-draft {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.dev-entry-draft input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--text);
+}
+
+.dev-entry-options-actions {
+  display: flex;
+  grid-column: 1 / -1;
+  min-height: 2rem;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.dev-entry-options-actions span {
+  margin-right: auto;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.dev-entry-options-actions button {
+  border-radius: var(--r-md);
+  padding: 0.375rem 0.625rem;
+  background: var(--text);
+  font-size: 0.8125rem;
+  color: var(--bg);
+}
+
+.dev-entry-options-actions button:disabled {
+  opacity: 0.45;
+}
+
+.now-goal-card {
+  position: relative;
+}
+
+.now-goal-link {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  border-radius: inherit;
+}
+
+.now-goal-link::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  content: "";
+}
+
+.now-goal-link:focus-visible {
+  outline: none;
+}
+
+.now-goal-link:focus-visible::after {
+  outline: 2px solid var(--text-tertiary);
+  outline-offset: 2px;
+}
+
+.now-goal-check {
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.dev-now-goal-toggle {
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+.dev-now-goal-toggle:hover,
+.dev-now-goal-toggle:focus-visible {
+  outline: 2px solid var(--text-tertiary);
+  outline-offset: 2px;
+}
+
+.dev-now-goal-toggle[aria-busy="true"] {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+@media (max-width: 520px) {
+  .dev-page-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dev-page-form-wide {
+    grid-column: auto;
+  }
+
+  .dev-entry-options-form {
+    grid-template-columns: 1fr;
+  }
+
+  .dev-entry-options-form > label,
+  .dev-entry-options-actions {
+    grid-column: auto !important;
+  }
+}
+
 @media (max-width: 359px) {
   .dev-dock-bar {
     flex-wrap: wrap;
@@ -4670,6 +5114,14 @@ html[data-dev-tools] [data-dev-field-en]:hover {
 @media print {
   .dev-dock {
     display: none;
+  }
+
+  html[data-dev-tools] [data-dev-body-editing] > :not(.dev-body-editor) {
+    display: revert !important;
+  }
+
+  .dev-body-editor {
+    display: none !important;
   }
 }
 /* --- First-visit intro: home types itself in (components/Intro.tsx) --------
@@ -5052,6 +5504,23 @@ html[data-intro][data-intro-fast] .prose > .avatar {
   justify-content: flex-end;
 }
 
+/* The field and the language button beside it are ONE material: same padding,
+   same size, same line-height, same surface, same hairline, same pill. The
+   shared `line-height` is the part that is easy to miss — without it the two
+   agree on every other number and the button still lands a pixel short, since
+   an input's default leading and a button's are not the same. 1.1 is also what
+   the RU gradient is measured against, so it is stated rather than inherited. */
+.music-search,
+.music-lang-button {
+  padding: 0.3125rem 0.6875rem;
+  font-size: 0.8125rem;
+  line-height: 1.1;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-full);
+}
+
 .music-search {
   flex: 1 1 auto;
   /* A floor where it is still a field rather than a stub. Below this the
@@ -5059,12 +5528,6 @@ html[data-intro][data-intro-fast] .prose > .avatar {
      the input does not. */
   min-width: 4.5rem;
   max-width: 13rem;
-  padding: 0.3125rem 0.6875rem;
-  font-size: 0.8125rem;
-  color: var(--text);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-full);
   outline: none;
 }
 
@@ -5096,14 +5559,7 @@ html[data-intro][data-intro-fast] .prose > .avatar {
   flex: none;
   /* A fixed floor so the row does not twitch as the label steps between
      "All", "ENG", "UA" and "RU" — four different widths on one control. */
-  min-width: 3.25rem;
-  border: 1px solid var(--border);
-  border-radius: var(--r-full);
-  padding: 0.25rem 0.625rem;
-  font-size: 0.75rem;
-  line-height: 1.1;
-  color: var(--text-secondary);
-  background: transparent;
+  min-width: 3.5rem;
   cursor: pointer;
   white-space: nowrap;
 }
@@ -5113,14 +5569,17 @@ html[data-intro][data-intro-fast] .prose > .avatar {
    `transform` and would flatten the press (#55). */
 .music-lang-button:hover {
   border-color: var(--text-tertiary);
-  color: var(--text);
 }
 
-/* Anything but All is a filter that is ON, and the button is the only thing
-   saying so — there is no list behind it to check. */
+/* A selected language does NOT outline the button. The label is already the
+   whole signal — the control says "ENG" instead of "All", which is a change of
+   word rather than a change of state needing decoration on top of it. Ringing
+   it as well said the same thing twice, and made the button stop matching the
+   field it is paired with the moment anything was chosen.
+
+   The weight stays: it thickens the label that is already doing the work,
+   without drawing a second shape around it. */
 .music-lang-button[data-lang-code] {
-  border-color: var(--text);
-  color: var(--text);
   font-weight: 500;
 }
 
@@ -6658,12 +7117,13 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
    not play: the note is about a thing with a face, and a wide window has a
    column to its right that only the contents rail otherwise uses.
 
-   Hidden by default and shown only at the width where the gutter exists —
-   there is deliberately no inline fallback. A player drops into the writing
+   Hidden by default and shown only at the width where the gutter exists.
+   THIS element still has no inline fallback: a player drops into the writing
    at narrow widths because it is something you operate; a poster is something
    you look at, and the note's opening (creator block, facts, then the body —
    #86, #87) is a designed sequence that artwork should not be spliced into.
-   Every list that links here already leads with the cover. */
+   A phone shows the cover BESIDE the title instead, which is a different
+   element and a different arrangement — `.note-thumb`, DECISIONS #120. */
 .note-cover {
   display: none;
 }
@@ -6708,6 +7168,402 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   .page:has(.note-cover) .toc-rail {
     top: calc(5rem + var(--note-cover-h, 312px) + 2rem);
     max-height: calc(100vh - 8rem - var(--note-cover-h, 312px) - 2rem);
+  }
+}
+
+/* ── The note's header matter as one gutter column, and one phone thumbnail
+   (`.note-gutter`, `.note-thumb` — app/[section]/[slug]/page.tsx) ─────────
+   DECISIONS #120. Two halves of one idea: a shelf note should show the face
+   of the thing it is about, at BOTH ends of the range. #115 gave a film and a
+   show their poster in the gutter from 1400px and deliberately stopped there,
+   because splicing artwork into the note's opening (creator block, facts,
+   then the writing — #86, #87) is redesigning that page rather than enriching
+   a wide one. The redesign is what follows, and it is confined to a phone:
+
+   - below 640px the artwork is a small cover to the LEFT of the title, which
+     is beside the opening rather than spliced into it — the arrangement every
+     list that links here already uses;
+   - from 1400px the poster keeps the gutter and the creator block joins it
+     underneath, so the two things the page knows ABOUT THE WORK (its face and
+     its maker) are one object in one column, and the writing starts at the
+     top of the measure with nothing above it.
+
+   Between the two — a laptop — the note is exactly what it was: no thumbnail,
+   creator block in flow. That gap is deliberate; the ask was for a phone and
+   a wide window, and the middle is the width where neither the gutter nor a
+   header row has room to spare.
+
+   `.note-gutter` is `display: contents` by default, so the wrapper costs
+   nothing at any width where the column does not exist — the creator block
+   sits exactly where it always has. */
+.note-gutter {
+  display: contents;
+}
+
+/* ── The note's artwork beside its title ──────────────────────────────────
+   VISIBLE BY DEFAULT, and switched off only where the same artwork is
+   already showing in the gutter. It was the other way round for one pass —
+   phone only — and that left a hole: the gutter copy does not arrive until
+   1168px (a person, in the rail) or 1400px (a film's poster), and a BOOK
+   never gets one at all, so its cover disappeared at every width above 640px.
+   A note about a thing with a face should show that face at every width; the
+   only question is which of the two places it appears in.
+
+   `--note-thumb-w` and `--note-thumb-gap` are read by `.copy-md` below to put
+   itself back where it sits on every other note, so the two can't disagree. */
+.note-header {
+  --note-thumb-w: 3rem;
+  --note-thumb-gap: 1rem;
+  display: flex;
+  /* The cover's top edge against the title's, not its middle: a long title
+     wraps to three or four lines on a phone and centring would leave the
+     artwork floating beside the second one. */
+  align-items: flex-start;
+  gap: var(--note-thumb-gap);
+}
+
+/* 3rem — the Top list's own 44px art, near enough, and for the same reason:
+   this is the label on the page, not the subject of it. The note's <h1> is.
+
+   It was 4.5rem for one pass and that was too tall rather than too wide: at
+   72px the artwork stands 108px against a one-line title and its meta line,
+   which are about 62px together, so every short-titled note opened with 45px
+   of empty column beside the poster. Sized so the block is driven by the
+   TYPE, a long title now grows past the cover instead of the cover reaching
+   past the type. ONE size at every width, deliberately: it is a label, and a
+   label that grows with the window is a picture. */
+.note-thumb {
+  display: block;
+  flex: none;
+  width: var(--note-thumb-w);
+  /* The artwork's OWN ratio, exactly as the gutter poster keeps it, so a
+     2:3 poster and a squarer card are both shown whole and `cover` has
+     nothing to crop. */
+  aspect-ratio: 1 / var(--cover-ar, 1.5);
+  object-fit: cover;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background-color: var(--surface);
+  background-size: cover;
+  background-position: center;
+}
+
+/* Or a long unbroken title pushes the flex row wider than the screen. */
+.note-header-text {
+  min-width: 0;
+}
+
+/* The copy-as-Markdown button hangs in the left margin of the TITLE, which
+   the artwork has just pushed right. Shifted back by exactly what was added,
+   so it lands where it does on every note that has no artwork — derived from
+   the two custom properties above rather than re-typed, or the day the
+   thumbnail changes size the button drifts onto it. Below 640px and on touch
+   it is `display: none` anyway (see `.copy-md`), so this is for the pointer
+   widths the thumbnail has just gained. */
+.note-header .copy-md {
+  left: calc(-2.25rem - var(--note-thumb-w) - var(--note-thumb-gap));
+}
+
+/* Between the phone breakpoint and 768px there is no longer margin enough to
+   hold it: the page's own gutter is about 38px there, and the button now
+   wants 100. It would be clipped by the window edge rather than overlapping
+   anything (nothing overflows to the LEFT of a scroll container), but a
+   control that reveals itself off-screen is worse than no control — and
+   Cmd+K's "copy page as Markdown" reaches the same clipboard. Only notes
+   with artwork are affected; every other note keeps it at every width. */
+@media (max-width: 767px) {
+  .note-header .copy-md {
+    display: none;
+  }
+}
+
+/* ── A People note's portrait, at the foot of the contents rail ───────────
+   DECISIONS #121. The same question #120 answered for a film — a note about
+   something with a face should show that face — with a different answer,
+   because a person is not a film: the poster of a film is one fact about it
+   among several, and the portrait of a person IS the note's subject. So it
+   does not compete for a column with anything; it goes where the reader's eye
+   already goes for orientation, under the outline in the rail.
+
+   IN the rail, not beneath it: the rail's height is however many headings the
+   note has, and a sibling positioned below it would have to be told that
+   number (the same problem the poster and the creator have, #120). A child
+   simply follows the list. It rides the rail's own scroll on a short window,
+   which is what everything else in that column does.
+
+   Indented to the rail's text column (`.toc-link` pads 0.75rem), so the
+   portrait's left edge lines up with the headings above it rather than with
+   the hairline. Full colour: `.person-photo`'s desaturation is a hover
+   exception on the GRID (#56), and a picture at rest here is the same case as
+   the shelf's creator portraits, which keep their colour (#86). */
+.toc-portrait {
+  display: block;
+  width: calc(100% - 0.75rem);
+  margin: 1.5rem 0 0 0.75rem;
+  /* The photograph's own ratio — square for a cropped portrait, taller for a
+     press photo — so nothing is cropped a second time. */
+  aspect-ratio: 1 / var(--cover-ar, 1);
+  object-fit: cover;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background-color: var(--surface);
+  background-size: cover;
+  background-position: center;
+}
+
+/* The "At a glance" block, under the portrait — the shelf's column (#120) on
+   the one page whose subject IS a person (#121).
+
+   Stated from nothing rather than by undoing `.prose`: a People note's table
+   keeps its CARD in the article (#87) and every rule that draws that card is
+   written against that ancestor, so this copy simply isn't inside one. At
+   195px there is no card to keep anyway — the pair stacks, label over value,
+   which is the same arrangement the shelf's gutter column argues for and for
+   the same reason: an 8rem label column would leave 80px for the answer.
+
+   The label is set like `.creator-role` and the rail's own rows, so the
+   column reads as one object down its whole length. */
+.toc-facts {
+  margin: 1.25rem 0 0 0.75rem;
+  padding-right: 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+.toc-facts table {
+  display: block;
+  width: 100%;
+  border: none;
+  border-collapse: collapse;
+}
+
+/* Obsidian's empty header row. `.prose` hides it for every other copy of this
+   table; out here there is no `.prose` to do it. */
+.toc-facts thead {
+  display: none;
+}
+
+.toc-facts tbody,
+.toc-facts tr,
+.toc-facts td {
+  display: block;
+}
+
+.toc-facts tr + tr {
+  margin-top: 0.625rem;
+}
+
+.toc-facts td {
+  padding: 0;
+}
+
+.toc-facts td:first-child {
+  font-size: 0.6875rem;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+}
+
+/* A fact can carry a wiki link. Underlined in the border's own grey so it
+   reads as a link without becoming the loudest thing in a quiet column. */
+.toc-facts a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 2px;
+}
+
+/* A People note SHORT enough to have no outline still has a person. Two
+   headings — an "At a glance" and a "Sources" — is an ordinary short note and
+   falls below MIN_TOC_HEADINGS, so the portrait takes the rail's own place:
+   its geometry, its breakpoint, nothing new invented. */
+.note-portrait {
+  display: none;
+}
+
+@media (min-width: 1168px) {
+  /* ONE COPY AT A TIME. The facts are in the page twice — here in the gutter,
+     and back in the article where they were written — and this is the half
+     that decides which. Below this width the gutter copy is gone with the
+     rail that holds it; from here up the article's copy stands down. Keyed on
+     `:has(.toc-facts)`, so a note with no gutter copy (no rail, no portrait)
+     keeps its own and nothing has to be told which case it is in. */
+  .page:has(.toc-facts) .note-facts {
+    display: none;
+  }
+
+  .note-portrait {
+    display: block;
+    position: fixed;
+    top: 9rem;
+    left: calc(50% + 22rem);
+    width: 13rem;
+  }
+
+  /* No rail to line up with out here. */
+  .note-portrait .toc-portrait {
+    width: 100%;
+    margin: 0;
+  }
+
+}
+
+/* HANDOVER. Each gutter takes the artwork over at ITS OWN breakpoint — the
+   person's portrait when the rail appears at 1168px, the film's poster when
+   the gutter column appears at 1400px — and the title's copy stands down.
+   Keyed on the gutter element being in the page rather than on the section,
+   so a book (no gutter copy anywhere) simply keeps its thumbnail at every
+   width, which is the hole this pair of rules was written to close. */
+@media (min-width: 1168px) {
+  .page:has(.toc-portrait) .note-thumb {
+    display: none;
+  }
+}
+
+@media (min-width: 1400px) {
+  .page:has(.note-cover) .note-thumb {
+    display: none;
+  }
+
+  /* THE COLUMN. Poster and creator stack in NORMAL FLOW inside one fixed
+     wrapper, which is the whole point of there being a wrapper: nothing has
+     to know how tall a bio runs, so no height is emitted, measured or
+     guessed. The geometry is the poster's own (#115), which is the album
+     player's (#98) — three things sharing one gutter, one set of numbers.
+
+     GUARDED AGAINST THE CONTENTS RAIL. The rail wants this column too, and it
+     starts below the poster by a height the page emits (`--note-cover-h`); it
+     cannot start below the creator, whose height is a paragraph of prose. So
+     a note with an outline keeps the arrangement #115 shipped — poster in the
+     gutter, creator in the writing, rail under the poster — and only a note
+     without one gets the column. Every film and show in the vault today has
+     exactly two headings, one short of MIN_TOC_HEADINGS, so this is the
+     branch that runs; the other is here so a third heading changes the
+     layout rather than overlapping it. */
+  .page:has(.note-cover):not(:has(.toc-rail)) .note-gutter {
+    display: block;
+    position: fixed;
+    top: 5rem;
+    left: calc(50% + 20.5rem);
+    width: 13rem;
+    /* A short window: the pair can run past the foot of the screen, and the
+       bio is text, so it scrolls rather than being clipped — the rail's own
+       answer to the same problem. */
+    max-height: calc(100vh - 7rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    z-index: 1;
+  }
+
+  /* The poster gives up its own fixed positioning to the wrapper — it is a
+     block in a column now, not a thing parked in the gutter by itself. */
+  .page:has(.note-cover):not(:has(.toc-rail)) .note-cover {
+    position: static;
+    width: auto;
+  }
+
+  /* The creator block, restated for a 13rem column. It is a caption to the
+     poster here, where in the measure it is the first thing you meet (#86) —
+     so it is quieter, not just narrower, and everything steps down one size.
+
+     THE ROLE AND THE NAME STAY BESIDE THE FACE. Stacking all four parts under
+     each other was the first version and it was wrong for the reason the
+     phone layout already records at 480px: the role and the name are short,
+     and they are what the picture is captioning — the portrait with its two
+     lines against it reads as one object, where a face with a caption
+     underneath reads as two. Only the bio, which is a sentence and wants a
+     measure, drops full-width below the pair. Same grid, same `display:
+     contents` on `.creator-text`, same reset of the flex `gap` into a zero
+     row gap. */
+  .page:has(.note-cover):not(:has(.toc-rail)) .creator {
+    --creator-size: 3.25rem;
+    display: grid;
+    grid-template-columns: var(--creator-size) 1fr;
+    column-gap: 0.75rem;
+    row-gap: 0;
+    align-items: center;
+    margin-top: 1.25rem;
+  }
+
+  .page:has(.note-cover):not(:has(.toc-rail)) .creator-text {
+    display: contents;
+  }
+
+  .page:has(.note-cover):not(:has(.toc-rail)) .creator-photo {
+    grid-row: 1 / 3;
+  }
+
+  .page:has(.note-cover):not(:has(.toc-rail)) .creator-role {
+    grid-column: 2;
+    align-self: end;
+    font-size: 0.6875rem;
+  }
+
+  .page:has(.note-cover):not(:has(.toc-rail)) .creator-name {
+    grid-column: 2;
+    align-self: start;
+    min-width: 0;
+    font-size: 0.9375rem;
+  }
+
+  .page:has(.note-cover):not(:has(.toc-rail)) .creator-bio {
+    grid-column: 1 / -1;
+    min-width: 0;
+    margin-top: 0.6rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--text-tertiary);
+  }
+
+  /* THE FACTS, third in the column. A 208px column cannot hold a two-column
+     table — the 8rem label alone would leave 80px for the value — so the pair
+     stacks, label over value, which is the one arrangement that stays legible
+     at this width. The label is set like `.creator-role` directly above it
+     (all-small-caps, tracked, tertiary) so the whole column reads as one
+     object rather than three treatments stacked.
+
+     The hairline goes with it. In the measure that line closes the note's
+     header matter and separates it from the writing (#86) — out here there is
+     no writing under it to separate, and a rule across the foot of a gutter
+     column is a line drawn for its own sake. */
+  .page:has(.note-cover):not(:has(.toc-rail)) .note-facts {
+    margin-top: 1.5rem;
+    font-size: 0.8125rem;
+  }
+
+  .page:has(.note-cover):not(:has(.toc-rail)) .note-facts table.fact-table {
+    display: block;
+    margin: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .page:has(.note-cover):not(:has(.toc-rail)) .note-facts .fact-table tbody,
+  .page:has(.note-cover):not(:has(.toc-rail)) .note-facts .fact-table tr {
+    display: block;
+  }
+
+  .page:has(.note-cover):not(:has(.toc-rail)) .note-facts .fact-table tr + tr {
+    margin-top: 0.75rem;
+  }
+
+  .page:has(.note-cover):not(:has(.toc-rail)) .note-facts .fact-table td {
+    display: block;
+    width: auto;
+    padding: 0;
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    color: var(--text-secondary);
+  }
+
+  .page:has(.note-cover):not(:has(.toc-rail)) .note-facts .fact-table td:first-child {
+    width: auto;
+    padding: 0;
+    font-size: 0.6875rem;
+    font-variant-caps: all-small-caps;
+    letter-spacing: 0.06em;
+    color: var(--text-tertiary);
   }
 }
 

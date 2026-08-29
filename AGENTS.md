@@ -57,8 +57,15 @@ Kyrylo's personal portfolio, published directly from an Obsidian vault. The
 - Git is the source of truth: Obsidian Git → GitHub → Vercel.
 - The deployed site is fully static. Content is read only at build time.
 - `npm run dev` additionally starts the localhost-only authoring sidecar
-  documented in `CLAUDE.md` and DECISIONS #118; it is never part of a build or
-  production server.
+  documented in `CLAUDE.md` and DECISIONS #118/#122; it is never part of a build or
+  production server. Its in-page editor owns only the current source's
+  title/description and exact EN/UK Markdown bodies; generated/external text is
+  read-only. While its dock is open, contextual page controls can create
+  bilingual Draft entries, edit Draft/category/Post-series metadata, and toggle
+  paired Now goals. Production webpack aliases must replace both the dock and
+  those contextual server slots; a development branch around a dynamic import
+  does not by itself keep the client island out of public bundles. Attachments
+  remain an Obsidian operation.
 
 The owner is a high-school student rather than a professional developer. Prefer
 simple, documented, low-maintenance solutions over clever abstractions.
@@ -126,7 +133,17 @@ Routes:
   dragged rows persist consecutive `top_order:` values; those manual positions
   take precedence over the derived rating/IMDb/date fallback. A movie/show ENTRY
   page also parks its poster in the right gutter from 1400px, reusing the
-  music player's geometry (`components/NoteCover.tsx`, DECISIONS #115).
+  music player's geometry (`components/NoteCover.tsx`, DECISIONS #115), and
+  the creator block and the fact list join it under the poster there — one
+  fixed `.note-gutter` column, unless the note has a contents rail, which wants
+  the same column. The fact table is LIFTED out of the article to get there
+  (`liftFacts` in lib/markdown.ts) and renders in the same place as before at
+  every narrower width. On
+  a PHONE any shelf note with a cover (a book too, never a video) shows it
+  small to the LEFT of its title instead (DECISIONS #120). A PEOPLE note shows
+  its portrait AND its "At a glance" block at the foot of the contents rail
+  (`Toc`'s `below` slot, rail only; the block is rendered twice and CSS shows
+  one) and gets the same phone thumbnail (DECISIONS #121).
   The books row SCALES TO FIT its column rather than scrolling, so spine
   height is derived via `aspect-ratio` (DECISIONS #112). A note with `spine:` shows a
   photograph of the real spine at its true thickness, with a

@@ -20,6 +20,10 @@ async function fixture(t) {
   const file = path.join(root, SOURCE);
   await fs.promises.mkdir(path.dirname(file), { recursive: true });
   await fs.promises.writeFile(file, ORIGINAL);
+  await fs.promises.writeFile(
+    path.join(root, "vault", "Posts", "main.md"),
+    "---\ntitle: Posts\ntype: posts\n---\n"
+  );
 
   const server = createDevEditorServer({ repoRoot: root });
   await new Promise((resolve, reject) => {
@@ -35,7 +39,7 @@ async function fixture(t) {
     );
     await fs.promises.rm(root, { recursive: true, force: true });
   });
-  return { base: `http://127.0.0.1:${address.port}`, file };
+  return { base: `http://127.0.0.1:${address.port}`, file, root };
 }
 
 async function payload(response) {
@@ -231,6 +235,101 @@ test("reads, saves, and reports a stale revision conflict over HTTP", async (t) 
   assert.equal(conflictResponse.status, 409);
   assert.equal((await payload(conflictResponse)).code, "revision_conflict");
   assert.match(await fs.promises.readFile(file, "utf8"), /description: Saved through HTTP\./);
+});
+
+test("reads and saves in-page Markdown through the dedicated page endpoints", async (t) => {
+  const { base, file } = await fixture(t);
+  const sourceUk = SOURCE.replace(/\.md$/, ".uk.md");
+  const fileUk = file.replace(/\.md$/, ".uk.md");
+  await fs.promises.writeFile(fileUk, "Українське тіло.\n");
+  const { token } = await session(base);
+
+  const openedResponse = await fetch(`${base}/page-document`, {
+    method: "POST",
+    headers: editorHeaders(token),
+    body: JSON.stringify({ source: SOURCE, sourceUk }),
+  });
+  assert.equal(openedResponse.status, 200);
+  const opened = await payload(openedResponse);
+  assert.equal(opened.fields.body, "Body.\n");
+  assert.equal(opened.fields.body_uk, "Українське тіло.\n");
+
+  const savedResponse = await fetch(`${base}/save-page`, {
+    method: "POST",
+    headers: editorHeaders(token),
+    body: JSON.stringify({
+      source: SOURCE,
+      sourceUk,
+      revision: opened.revision,
+      revisionUk: opened.revisionUk,
+      changes: {
+        description: "Edited on the page.",
+        body: "# Inline source\n\nA [[wiki link]].\n",
+        body_uk: "# Джерело на сторінці\n",
+      },
+    }),
+  });
+  assert.equal(savedResponse.status, 200);
+  const saved = await payload(savedResponse);
+  assert.equal(saved.fields.description, "Edited on the page.");
+  assert.equal(saved.fields.body, "# Inline source\n\nA [[wiki link]].\n");
+  assert.match(await fs.promises.readFile(file, "utf8"), /# Inline source\n\nA \[\[wiki link\]\]\.\n$/);
+  assert.equal(await fs.promises.readFile(fileUk, "utf8"), "# Джерело на сторінці\n");
+});
+
+test("creates section-specific drafts and toggles Now goals over HTTP", async (t) => {
+  const { base, root } = await fixture(t);
+  const { token } = await session(base);
+
+  const createResponse = await fetch(`${base}/create-entry`, {
+    method: "POST",
+    headers: editorHeaders(token),
+    body: JSON.stringify({
+      sectionSource: "vault/Posts/main.md",
+      title: "Created Here",
+      titleUk: "Створено тут",
+      description: "A new post scaffold.",
+      descriptionUk: "Шаблон нового допису.",
+      categories: "Meta, New Type",
+    }),
+  });
+  assert.equal(createResponse.status, 201);
+  const created = await payload(createResponse);
+  assert.equal(created.pathname, "/posts/created-here");
+  assert.equal(created.fields.title_uk, "Створено тут");
+  assert.equal(
+    fs.existsSync(path.join(root, "vault", "Posts", "Created Here.uk.md")),
+    true
+  );
+
+  const nowDir = path.join(root, "vault", "Now");
+  await fs.promises.mkdir(nowDir);
+  await fs.promises.writeFile(
+    path.join(nowDir, "main.md"),
+    "---\ntitle: Now\ntype: now\n---\n## Goals\n\n- [ ] Ship this\n"
+  );
+  await fs.promises.writeFile(
+    path.join(nowDir, "main.uk.md"),
+    "## Цілі\n\n- [ ] Завершити це\n"
+  );
+  const toggleResponse = await fetch(`${base}/toggle-now-goal`, {
+    method: "POST",
+    headers: editorHeaders(token),
+    body: JSON.stringify({
+      source: "vault/Now/main.md",
+      sourceUk: "vault/Now/main.uk.md",
+      index: 0,
+      done: true,
+      expectedLabel: "Ship this",
+    }),
+  });
+  assert.equal(toggleResponse.status, 200);
+  const toggled = await payload(toggleResponse);
+  assert.match(toggled.fields.body, /- \[x\] Ship this/);
+  assert.match(
+    await fs.promises.readFile(path.join(nowDir, "main.uk.md"), "utf8"),
+    /- \[x\] Завершити це/
+  );
 });
 
 test("rejects unsupported methods and never opts into CORS", async (t) => {

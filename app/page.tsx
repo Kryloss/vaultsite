@@ -73,16 +73,22 @@ export default async function HomePage() {
         <>
           <article
             className="prose lang-en"
+            data-dev-body-field="body"
             dangerouslySetInnerHTML={{ __html: html }}
           />
           <article
             className="prose lang-uk"
             lang="uk"
+            data-dev-body-field="body_uk"
             dangerouslySetInnerHTML={{ __html: htmlUk }}
           />
         </>
       ) : (
-        <article className="prose" dangerouslySetInnerHTML={{ __html: html }} />
+        <article
+          className="prose"
+          data-dev-body-field="body"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
       )}
 
       <SocialLinks className="mt-8" />

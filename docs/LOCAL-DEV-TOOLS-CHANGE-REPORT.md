@@ -1,7 +1,7 @@
 # Local Dev-Tools Change Report
 
 Audience: Claude Code / the next agent working on Vaultsite
-Date: 2026-08-28
+Date: 2026-08-29
 Scope: localhost-only authoring controls for the static Obsidian-backed site
 
 ## Executive summary
@@ -19,15 +19,20 @@ the normal site chrome are unchanged while it is collapsed. Expanding it shows:
 - a link to the configured public equivalent of the current route;
 - an Open this file in Obsidian link for the active language;
 - English/Ukrainian language switching;
-- title and description fields;
+- direct title and description editing where those strings render;
+- an in-place Markdown source editor when the current page's prose is selected;
 - a draggable/keyboard-editable rating control on movie/show Top-list rows;
+- a contextual `+` on Posts, Music, People, Shelf and Projects section pages;
+- Draft/category/Post-series options beneath entry headers;
+- direct EN/UK goal checkboxes on the Now page;
 - Undo, Redo, Cancel, Save, and reload/retry actions;
-- direct focus from the rendered title or description when the dock is open.
+- one shared draft/history across page metadata and both language bodies.
 
-The first writable surface is deliberately limited to frontmatter metadata. It
-edits the real Markdown source in vault/, while preserving the rest of the
-file byte-for-byte wherever possible. Body editing and attachments remain in
-Obsidian until source mapping and asset-transaction behavior are designed.
+The editor writes the real Markdown sources in `vault/`. Frontmatter edits
+preserve unrelated bytes, while prose is edited as exact Markdown rather than
+as lossy rendered HTML. The primary and Ukrainian body files are revision-
+checked and staged together. Attachments remain in Obsidian until their
+asset-copy/manifest/rollback transaction is designed.
 
 ## User-facing behavior
 
@@ -42,16 +47,27 @@ but individual icons do not gain a colored background on hover.
 
 ### Expanded state
 
-The dock expands horizontally into the tool bar and vertically into the editor
-panel. The panel is right-aligned and capped for narrow/mobile viewports, with
-dvh/safe-area handling and internal scrolling.
+The dock expands horizontally into the tool bar. It no longer duplicates the
+page's title and description inside a form panel. Instead, the visible title
+and description become plain-text edit targets. A small feedback card appears
+only for loading, save confirmation, errors, retry, or revision reload.
 
-The editor displays the source path, dirty state, and four text fields:
+The shared draft contains:
 
     title
     title_uk
     description
     description_uk
+    body
+    body_uk
+
+Clicking the page-owned prose swaps that `<article>` for a Markdown textarea in
+the same location and with the article's previous minimum height. This is a
+source editor by design: reverse-converting edited HTML would damage wiki
+links, embeds, callouts, tables, footnotes, and Obsidian syntax. External Apple
+Music/YouTube controls, generated dates/counts/navigation, and lists projected
+from other notes remain read-only. The dock's icon buttons remain transparent;
+only the shared bar has a surface.
 
 The Top-list editor adds the numeric rating field separately:
 
@@ -65,7 +81,33 @@ source before replacement, and restores backups if a filesystem error interrupts
 the final pass.
 
 An absent Ukrainian metadata value remains absent until the user enters one;
-the English value is shown as a placeholder rather than silently copied.
+the English value is shown as an inline placeholder rather than silently
+copied into the source.
+
+### Contextual creation and structured options
+
+The expanded dock also sets `data-dev-tools` on `<html>`. Development-only
+page islands observe that state and render beside the thing they own:
+
+- Posts, Music, People, Shelf and Projects show a small `+` beside the section
+  title. It opens a bilingual, type-specific Draft form on the page itself.
+- Every new pair starts with `draft: true`; its English primary holds
+  frontmatter/body and its `.uk.md` sibling holds the Ukrainian body.
+- Shelf chooses Book/Movie/Show/Video and writes into the matching filing
+  folder. Music also captures artist, format, ENG/UA/RU shelf, optional Apple
+  genres and an optional Apple Music URL. Video scaffolds accept YouTube URLs.
+- Entry pages expose Draft state and, where the section supports them,
+  existing/new `#` categories. Posts additionally expose a vault-wide series,
+  the one shared Ukrainian series name, and an optional part number.
+- A new category needs no code to be valid, but its display label falls back
+  to English in Ukrainian until `lib/categories.ts` gains a translation.
+- Now goal boxes become real checkbox controls while expanded. They update the
+  matching task marker in English and Ukrainian together without rewriting the
+  task text.
+
+The `+`, options and checkbox semantics disappear again when the pencil is
+closed. All contextual actions refuse to run while the main title/body editor
+has an unsaved draft or a save in flight.
 
 The public link uses lib/site-config.ts's canonical siteUrl (https://kryloss.com),
 preserves the current pathname/query/hash, and normalizes the lang query for
@@ -89,8 +131,9 @@ after movement crosses its threshold, so a normal click keeps opening the note.
 
 ### Main components and helpers
 
-- components/DevTools.tsx — thin client component for browser state, controls,
-  route detection, loading, save actions, draft retention, and keyboard behavior.
+- components/DevTools.tsx — client controller for the dock, direct
+  contenteditable metadata targets, the in-article Markdown portal, route
+  detection, loading/saving, draft retention, and keyboard behavior.
 - components/DevToolsSlot.tsx — development-only server slot; dynamically
   imports the client dock only in development.
 - components/DevToolsDisabled.tsx — production null replacement.
@@ -102,6 +145,18 @@ after movement crosses its threshold, so a normal click keeps opening the note.
 - components/DevTopReorderSlot.tsx — development import/production null slot.
 - components/DevTopReorderDisabled.tsx — production null replacement for the
   reorder controller import.
+- components/DevCreateEntry.tsx / DevCreateEntrySlot.tsx — page-level new-entry
+  dialog and development-only server slot.
+- components/DevEntryOptions.tsx / DevEntryOptionsSlot.tsx — Draft,
+  category and Post-series frontmatter controls.
+- components/DevNowGoalToggle.tsx / DevNowGoalToggleSlot.tsx — localhost Now
+  checkbox and production/static fallback.
+- components/DevNowGoalToggleSlotDisabled.tsx — production static goal marker;
+  it preserves the ordinary checked state without importing editor code.
+- components/useDevToolsExpanded.ts — observes the dock's HTML state for
+  contextual islands.
+- lib/dev-editor-client.ts — shared loopback session/request client for those
+  islands.
 - lib/dev-tools.ts — pure availability, URL, language-source, reducer, dirty,
   and change-set helpers.
 - lib/dev-tools.test.ts — helper/reducer/URL tests.
@@ -118,18 +173,23 @@ attributes. They are present on:
 - normal section pages;
 - shelf medium/category pages (which point to the section main.md);
 - entry pages;
-- the rendered title/description fields used for direct click-to-focus.
+- the rendered title/description fields used as direct editing targets;
+- each English/Ukrainian page-owned prose article through
+  `data-dev-body-field="body|body_uk"`.
 
 The existing data-vault-source marker used by the public GitHub/open-note action
 remains separate. The writer never derives a file path from the URL.
 
 ### Draft and navigation behavior
 
-- Edits are grouped for practical Undo/Redo steps.
+- Metadata keystrokes and Markdown input are grouped for practical Undo/Redo
+  steps in the same history.
 - Undo/Redo/Cancel only change browser state.
 - Save after an Undo is still required before a reversal reaches disk.
 - Dirty drafts are retained in a module-level map by source across soft
-  navigation and restored when the source is revisited.
+  navigation and restored when the source is revisited. The retained snapshot
+  includes both the primary and Ukrainian revisions, so an old translation
+  cannot be saved against a newly loaded sibling revision.
 - Hard reloads use beforeunload protection.
 - Ordinary same-origin anchor navigation prompts before discarding a dirty draft;
   modifier/new-tab/download/external links are not intercepted.
@@ -138,6 +198,8 @@ remains separate. The writer never derives a file path from the URL.
 - Route changes clear the writable model immediately, then read the newly
   committed source marker on the next animation frame.
 - Initial connection failures provide Retry; revision conflicts provide Reload.
+- Closing the dock restores the saved baseline to the visible page while
+  retaining an unsaved draft in memory; reopening reveals the draft again.
 - Cmd/Ctrl+S uses the repository's shortcutKey() helper, so it works under a
   Ukrainian keyboard layout as well as Latin layouts.
 
@@ -161,7 +223,9 @@ invoked with NODE_ENV=production.
 The sidecar is a separate Node process and does not hot-reload when its script
 changes. After adding or changing an editor endpoint, restart the complete
 preview with `npm run dev`; an old process will otherwise return 404 for the
-new endpoint and the browser will restore the pre-drag order after refresh.
+new endpoint. Direct page editing uses `/page-document` and `/save-page`;
+contextual authoring adds `/create-entry` and `/toggle-now-goal`; structured
+entry options continue through revision-checked `/document` and `/save`.
 
 ### HTTP protections
 
@@ -191,15 +255,31 @@ scripts/dev-editor-core.mjs:
 - verifies the final file remains inside vault/;
 - reads the exact source and calculates a SHA-256 revision;
 - patches only the supported top-level frontmatter keys;
+- reads the primary Markdown body after its closing frontmatter fence and the
+  Ukrainian sibling as a body-only file;
+- accepts bounded, NUL-free Markdown bodies and preserves each file's newline
+  convention;
 - accepts the validated numeric rating field (0–5, half-star increments) and
   non-negative `top_order` positions for Top-list reordering;
+- validates Draft/published, singular/multiple category, Post-series and part
+  fields without reserialising unrelated YAML;
+- creates only under a real supported top-level section, rejects unsafe file
+  names plus filename/route-slug collisions, and creates the EN/UK pair with
+  exclusive destinations and rollback;
+- toggles only a top-level task under the Now Goals heading, checks the rendered
+  label for stale order/text, and saves both languages atomically;
 - rejects duplicate editable keys, invalid YAML, empty English titles,
   multiline/overlong titles, and overlong descriptions;
-- preserves unrelated YAML keys, comments, ordering, line endings, BOMs, and
-  Markdown body text;
+- preserves unrelated YAML keys, comments, ordering, line endings, and BOMs;
 - writes through uniquely named siblings, fsyncs, rechecks revisions, and
-  atomically renames metadata replacements into place; the multi-file reorder
-  stages backups so an interrupted rename pass can be restored.
+  atomically renames replacements into place; page saves and multi-file
+  reorders stage backups so an interrupted rename pass can be restored.
+
+For a page save, both the primary revision and the optional Ukrainian revision
+must match. Metadata and the English body are composed into one primary-file
+replacement; the Ukrainian body is a second staged replacement. The complete
+snapshot is rechecked before either rename and the backup pass makes the save
+all-or-nothing across the pair.
 
 If the file changed in Obsidian after the browser loaded it, the sidecar returns
 a revision conflict. The browser keeps the draft and requires an explicit
@@ -210,14 +290,17 @@ reload, so it never silently overwrites the newer source.
 next.config.ts contains three independent production safeguards:
 
 1. the development rewrite is omitted outside development;
-2. the production webpack configuration aliases DevTools to the null component;
-3. DevToolsSlot returns null outside development.
+2. the production webpack configuration aliases the main editor and contextual
+   server slots to null/static replacements;
+3. the slots retain their own development checks as a runtime fallback.
 
 The production build was inspected after generation. It contained no editor
-rewrite, editor App Router route, editor token header, editor endpoint string,
-or editor UI code in the generated JavaScript/server artifacts. The dormant
-development CSS selectors remain harmlessly in the global stylesheet because
-they have no mounted component in production.
+rewrite, editor App Router route, editor token header, editor endpoint/UI string,
+or contextual editor client implementation in generated JavaScript. Static HTML
+contained no `+`, Page options, or checkbox controls. The build trace still names
+the source-side slot modules as inputs, but not their client implementations.
+The dormant development CSS selectors remain harmlessly in the global stylesheet
+because they have no mounted component in production.
 
 The site remains static in production: no runtime filesystem reads, server
 actions, database, or deployed write endpoint were added.
@@ -225,57 +308,70 @@ actions, database, or deployed write endpoint were added.
 ## Documentation updated
 
 - AGENTS.md — local npm run dev sidecar exception and decision reference.
-- CLAUDE.md — local authoring dock inventory, source-marker rule, and deferred
-  body/attachment scope.
+- CLAUDE.md — local authoring dock inventory, direct-edit source boundary, and
+  deferred attachment scope.
 - docs/ARCHITECTURE.md — static-site exception for the loopback writer.
-- docs/DECISIONS.md — decisions #118–119, including the security model, narrow
-  metadata/rating scope, revision handling, and Obsidian handoff.
+- docs/DECISIONS.md — decisions #118–119 and #122, including the security model,
+  in-place Markdown source boundary, revision handling, rating/reordering, and
+  contextual creation/options/Now editing.
 
 ## Verification
 
-Final checks performed in the active checkout:
+Checks performed after the contextual-authoring extension:
 
-- npm test — 218 passed, 0 failed;
-- npx tsc --noEmit — passed;
-- git diff --check — passed.
+- `npm test` — 242 passed, 0 failed;
+- focused editor core/server tests — 27 passed, 0 failed;
+- `npx tsc --noEmit` — passed;
+- an isolated `NEXT_TELEMETRY_DISABLED=1 npm run build` — passed, generating
+  240 static pages without replacing the owner's running development build;
+- production bundle/manifest/HTML audit — no editor rewrite, endpoint strings,
+  contextual client implementation, or mounted authoring controls;
+- `git diff --check` — passed.
 
-The isolated feature worktree also completed:
+The focused coverage includes safe bilingual creation templates, filename and
+route-slug collision rejection, raw-YAML frontmatter normalization, paired Now
+task toggles and rollback/stale-label guards, plus their protected HTTP
+endpoints. The complete suite also retains body/frontmatter byte separation,
+CRLF preservation, body-size/NUL validation, two-language save, stale revision,
+and shared Undo/Redo coverage.
 
-- npm test — 194 passed, 0 failed at that worktree's final feature state;
-- NEXT_TELEMETRY_DISABLED=1 npm run build — production build passed,
-  generating 204 static pages;
-- production artifact scan — no editor endpoint/token/UI code in generated
-  JavaScript/server artifacts and no production rewrite.
-
-Browser verification covered exact localhost, rejection of 127.0.0.1, the
-collapsed/expanded states, route-preserving public links, active-language
-Obsidian links, direct title focus, Undo/Redo/Cancel, dark mode, and narrow
-mobile widths. The local drag interaction was exercised with the writer
-intentionally unavailable and correctly restored its order after the failed
-request; no owner vault file was modified during visual verification. The live
-writer was then checked after restart: `/__vault-editor/reorder` returned its
-expected validation response instead of 404. Light-mode emulation was not
-available in that browser session; CSS uses the existing light/dark tokens.
+Browser inspection confirmed that Posts has no `+` while collapsed and gains its
+type-specific dialog beside the title when expanded; entry Page options expose
+Draft, category, and Post-series fields; Now gains three semantic checkbox
+controls only while expanded and keeps linked goals as sibling links. Music and
+Shelf showed their specialized fields, selecting Video revealed its YouTube URL,
+and the Shelf dialog remained usable at 390×844. The inspected dark-scheme views
+had no browser console errors or warnings. A light-scheme visual pass was not
+available without changing the owner's system setting; these controls use the
+existing scheme tokens. No form was submitted and no vault content file was
+modified. Restart `npm run dev` once before using the new write actions because
+the already-running sidecar predates their endpoints and does not hot-reload.
 
 ## Known limits and follow-up
 
-1. Body editing is not implemented. Rendered HTML has no faithful source map;
-   editing it directly would risk destroying Markdown structure, wiki links,
-   embeds, callouts, tables, and bilingual pairing.
-2. Attachments are not implemented. A safe attachment flow needs coordinated
+1. “All text” means text owned by the current page source. Generated list rows,
+   dates, counts, navigation, creator/fact labels, and third-party widget UI are
+   deliberately read-only. Editing those projections would require opening
+   other documents or changing code/data rather than editing this page.
+2. Markdown prose edits in source mode rather than WYSIWYG. That is the
+   fidelity contract that preserves Obsidian syntax; rendered HTML has no
+   faithful inverse mapping.
+3. Attachments are not implemented. A safe attachment flow needs coordinated
    asset copy, Markdown update, image-manifest regeneration, cache invalidation,
    collision handling, and rollback.
-3. The Obsidian button is the intended handoff for body and attachment work.
-4. Always use npm run dev, not bare next dev, or the sidecar/rewrite will not
+4. The Obsidian button remains the intended handoff for attachments, structured
+   frontmatter outside the supported fields, and multi-note generated content.
+5. Always use npm run dev, not bare next dev, or the sidecar/rewrite will not
    be available.
-5. The checkout may contain unrelated in-progress edits. At handoff, preserve
-   these files and do not reset or restore them: lib/previews.ts, lib/vault.ts,
-   and the untracked lib/vault.test.ts.
+6. The checkout also contains separate note-cover/header/gutter work in
+   progress. It is not part of this editor extension; preserve and review it as
+   its own change rather than resetting shared route or CSS files wholesale.
 
 ## Handoff recommendation
 
-Treat docs/DECISIONS.md #118 and this report as the implementation contract.
+Treat docs/DECISIONS.md #118–119/#122 and this report as the implementation contract.
 If extending the dock, keep the exact-hostname gate, sidecar separation,
 source-marker boundary, revision check, atomic write, bilingual UI, and
-production webpack replacement intact. Revisit body editing or attachments only
-after their source-map/transaction designs are written down and tested.
+production webpack replacement intact. Keep the Markdown source-in-place
+boundary if editing expands, and revisit attachments only after their
+asset/manifest transaction is written down and tested.

@@ -16,6 +16,8 @@ const fields: DevFields = {
   title_uk: "Головна",
   description: "English description",
   description_uk: "Український опис",
+  body: "English **Markdown** body.",
+  body_uk: "Українське **Markdown** тіло.",
 };
 
 test("developer tools require development and the exact localhost hostname", () => {
@@ -81,6 +83,23 @@ test("draft edit, undo, redo and cancel never write the baseline", () => {
   assert.equal(state.draft.description, "Changed");
   state = devEditorReducer(state, { type: "cancel" });
   assert.equal(devEditorDirty(state), false);
+});
+
+test("Markdown body edits share the same draft, history and change set", () => {
+  let state = createDevEditorState(fields, "rev-1");
+  state = devEditorReducer(state, {
+    type: "edit",
+    key: "body",
+    value: "Changed body with [[a wiki link]].",
+    record: true,
+  });
+  assert.deepEqual(devEditorChanges(state), {
+    body: "Changed body with [[a wiki link]].",
+  });
+  state = devEditorReducer(state, { type: "undo" });
+  assert.equal(state.draft.body, fields.body);
+  state = devEditorReducer(state, { type: "redo" });
+  assert.equal(state.draft.body, "Changed body with [[a wiki link]].");
 });
 
 test("a new edit clears redo and a saved edit can be prepared for reversal", () => {

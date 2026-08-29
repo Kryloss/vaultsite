@@ -18,7 +18,7 @@ import { firstAlbumUrl } from "@/lib/apple-music";
 import { pageMeta } from "@/lib/metadata";
 import { previewsInHtml } from "@/lib/previews";
 import { getSiblings } from "@/lib/siblings";
-import { getSeries } from "@/lib/series";
+import { getSeries, getSeriesOptions } from "@/lib/series";
 import {
   categoryLabel,
   categorySlug,
@@ -45,6 +45,7 @@ import JsonLd from "@/components/JsonLd";
 import { breadcrumbJsonLd, entryJsonLd } from "@/lib/jsonld";
 import { maturityOf } from "@/lib/maturity";
 import Page from "@/components/Page";
+import DevEntryOptionsSlot from "@/components/DevEntryOptionsSlot";
 
 /** Below this many h2/h3 an outline is noise, not navigation. */
 const MIN_TOC_HEADINGS = 3;
@@ -89,6 +90,11 @@ export default async function EntryPage({ params }: Props) {
   // in the pipeline because it answers a problem only these pages have: the
   // creator block above it is already a block, and two of them stack badly.
   const factTables = opensWithHeaderBlock(section);
+  /* People notes keep the CARD their table has always had (#87) — `factTables`
+     stays off for them — but their facts still travel, up into the rail under
+     the portrait. Detection of what a fact block IS lives in one place either
+     way; see rehypeFactTables. */
+  const liftFacts = factTables || section.type === "people";
   /* The rating rides into the fact list as a row rather than sitting on the
      metadata line — see DECISIONS #88. Per-language, because the label is. */
   const rating =
@@ -98,6 +104,11 @@ export default async function EntryPage({ params }: Props) {
   const en = await renderWithHeadings(entry.content, entry.sectionDir, sectionSlug, {
     anchorLabel: ui.headingAnchor.en,
     factTables,
+    /* The fact list comes back on its own so it can be placed somewhere the
+       article isn't: the shelf's gutter column (#120), or the foot of a
+       People note's contents rail (#121). Wherever it can't go, the page
+       renders it back exactly where it came from. */
+    liftFacts,
     rating,
     ratingLabel: ui.ratingRow.en,
   });
@@ -106,12 +117,18 @@ export default async function EntryPage({ params }: Props) {
         idPrefix: "uk-",
         anchorLabel: ui.headingAnchor.uk,
         factTables,
+        liftFacts,
         rating,
         ratingLabel: ui.ratingRow.uk,
       })
     : null;
   const stats = section.type === "posts" ? readingStats(entry.content) : null;
   const categories = parseCategories(entry.meta);
+  const categoryOptions = [
+    ...new Set(getEntries(section).flatMap((candidate) => parseCategories(candidate.meta))),
+  ].sort((a, b) => a.localeCompare(b));
+  const seriesOptions =
+    process.env.NODE_ENV === "development" ? getSeriesOptions() : [];
   const { prev, next } = getSiblings(section.slug, entry.slug);
   // Null unless `series:` names an arc with a second published part.
   const series = getSeries(section.slug, entry.slug);
@@ -137,10 +154,86 @@ export default async function EntryPage({ params }: Props) {
      shows its album (#115). Reuses `toShelfItem` rather than resolving the
      cover again here, so the note and every card that links to it are looking
      at the same resolved artwork, blur placeholder and srcset. */
-  const gutterCover =
-    isShelfSection(section) && (medium === "movie" || medium === "show")
+  /* Resolved ONCE for both places a shelf note can show its own artwork: the
+     poster in the desktop gutter, and the thumbnail beside the title on a
+     phone. `toShelfItem` rather than a second `resolveCoverUrl` here, so the
+     note and every card that links to it look at the same resolved artwork,
+     blur placeholder and srcset.
+
+     A video is excluded from both: its cover is a YouTube thumbnail derived
+     from the link, and the note embeds that video a few lines below — the
+     poster would be the still of the thing already playing under it. */
+  const art =
+    isShelfSection(section) || section.type === "people"
       ? toShelfItem(entry)
       : undefined;
+  const noteArt = art?.coverUrl && !art.isVideo ? art : undefined;
+  const gutterCover =
+    noteArt && (medium === "movie" || medium === "show") ? noteArt : undefined;
+  /* A People note's own column: the portrait, and under it the "At a glance"
+     block lifted out of the article — the shelf's arrangement (#120) applied
+     to the one page whose subject IS a person (#121).
+
+     It is parked at the FOOT OF THE CONTENTS RAIL rather than in a gutter of
+     its own, because the person is what the whole page is about and there is
+     nothing out there for it to compete with. In the rail rather than under
+     it: the rail's height is however many headings the note has, and a child
+     follows a list that a sibling would have to be told the length of.
+
+     The facts are rendered TWICE — here, and back in the article by the
+     `.note-gutter` wrapper below. Only one is ever displayed (the rail is
+     `display: none` below 1168px, and the inline copy is hidden above it when
+     this one exists), so a screen reader meets exactly one at any width. It is
+     the same trade the outline itself makes between the rail and the phone
+     sheet: two copies of one short block beats moving it between two parents,
+     which CSS cannot do.
+
+     The picture is decorative, hence `alt=""` — the note's <h1> is the
+     person's name, on the same screen. */
+  const personBlock =
+    section.type === "people" && (noteArt?.coverUrl || en.factsHtml) ? (
+      <>
+        {noteArt?.coverUrl && (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            className="toc-portrait"
+            src={noteArt.coverUrl}
+            srcSet={noteArt.coverSrcSet}
+            /* 13rem minus the rail's own indent. */
+            sizes="196px"
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            style={
+              {
+                "--cover-ar": noteArt.coverAr ?? 1,
+                ...(noteArt.coverBlur
+                  ? { backgroundImage: `url("${noteArt.coverBlur}")` }
+                  : null),
+              } as CSSProperties
+            }
+          />
+        )}
+        {/* No `.prose` on this copy, deliberately: the card treatment a People
+            note's table keeps in the article (#87) is written against that
+            ancestor, and at 195px there is no card to keep — the pair stacks,
+            label over value. Styling it from nothing is shorter than undoing
+            the card. */}
+        {en.factsHtml && (
+          <div
+            className={`toc-facts${uk ? " lang-en" : ""}`}
+            dangerouslySetInnerHTML={{ __html: en.factsHtml }}
+          />
+        )}
+        {uk?.factsHtml && (
+          <div
+            className="toc-facts lang-uk"
+            lang="uk"
+            dangerouslySetInnerHTML={{ __html: uk.factsHtml }}
+          />
+        )}
+      </>
+    ) : null;
   const noteWash =
     section.type === "music"
       ? resolveCoverUrl(entry.sectionDir, entry.meta.cover)
@@ -278,15 +371,6 @@ export default async function EntryPage({ params }: Props) {
           : undefined
       }
     >
-      {gutterCover?.coverUrl && (
-        <NoteCover
-          src={gutterCover.coverUrl}
-          srcSet={gutterCover.coverSrcSet}
-          blur={gutterCover.coverBlur}
-          ar={gutterCover.coverAr}
-        />
-      )}
-
       {noteWash && (
         /* The note's own artwork, blurred past recognition, dissolving behind
            its opening. A WASH, not a card: `.creator` is deliberately a row
@@ -307,65 +391,162 @@ export default async function EntryPage({ params }: Props) {
       {albumUrl && <MusicSheet url={albumUrl} cover={noteWash} />}
       {/* Hover cards for the internal links in THIS note only — see
           previewsInHtml() in lib/previews.ts. */}
-      <LinkPreview previews={previewsInHtml(en.html, uk?.html)} />
+      <LinkPreview previews={previewsInHtml(en.html + (en.factsHtml ?? ""), uk && uk.html + (uk.factsHtml ?? ""))} />
 
-      <header>
-        <h1 className="page-title text-2xl font-semibold tracking-tight text-[var(--text)]">
-          {/* Raw vault source, in whichever language is showing. Sits to the
-              left of the title and stays hidden until the heading is
-              hovered/focused — same reveal-on-hover treatment as the ToC pill. */}
-          <CopyMarkdown en={entry.content} uk={entry.contentUk} />
-          <CopyMarkdownTitle
-            en={entry.content}
-            uk={entry.contentUk}
-            devFieldEn="title"
-            devFieldUk="title_uk"
-          >
-            <T en={entry.title} uk={entry.titleUk} />
-          </CopyMarkdownTitle>
-          {entry.draft && (
-            <span className="draft-chip draft-chip-title">
-              <T {...ui.draft} />
-            </span>
-          )}
-        </h1>
-        {/* Date · reading stats · maturity · series · #tags. */}
-        {metaLine}
-
+      {/* On a PHONE the note's own artwork sits to the left of the title, and
+          nowhere else: `.note-thumb` is `display: none` from 640px up, where
+          a film or show hands the job to the gutter poster instead. The
+          wrapper div is only rendered when there is artwork, so every other
+          note's header keeps the shape it has always had. */}
+      <header className={noteArt ? "note-header" : undefined}>
+        {noteArt && (
+          /* Decorative, hence `alt=""` — the <h1> beside it names the work on
+             the same line, so announcing the cover would be the title twice.
+             `loading="lazy"` is load-bearing rather than an optimisation: on a
+             wide window this image is `display: none`, and a lazy image that
+             is never displayed is never FETCHED (#95), so a desktop reader
+             does not pay for the phone's copy of the artwork. */
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            className="note-thumb"
+            src={noteArt.coverUrl}
+            srcSet={noteArt.coverSrcSet}
+            /* Painted at 5rem, so a 2x phone wants the 256w variant. */
+            sizes="80px"
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            style={
+              {
+                "--cover-ar": noteArt.coverAr ?? 1.5,
+                ...(noteArt.coverBlur
+                  ? { backgroundImage: `url("${noteArt.coverBlur}")` }
+                  : null),
+              } as CSSProperties
+            }
+          />
+        )}
+        <div className="note-header-text">
+          <h1 className="page-title text-2xl font-semibold tracking-tight text-[var(--text)]">
+            {/* Raw vault source, in whichever language is showing. Sits to the
+                left of the title and stays hidden until the heading is
+                hovered/focused — same reveal-on-hover treatment as the ToC pill. */}
+            <CopyMarkdown en={entry.content} uk={entry.contentUk} />
+            <CopyMarkdownTitle
+              en={entry.content}
+              uk={entry.contentUk}
+              devFieldEn="title"
+              devFieldUk="title_uk"
+            >
+              <T en={entry.title} uk={entry.titleUk} />
+            </CopyMarkdownTitle>
+            {entry.draft && (
+              <span className="draft-chip draft-chip-title">
+                <T {...ui.draft} />
+              </span>
+            )}
+          </h1>
+          {/* Date · reading stats · maturity · series · #tags. */}
+          {metaLine}
+        </div>
       </header>
 
-      {/* Above the article, so it comes before the note's "At a glance"
-          table — see components/Creator.tsx. */}
-      {creator && <Creator creator={creator} />}
+      <DevEntryOptionsSlot
+        source={`vault/${entry.sectionDir}/${entry.fileName}.md`}
+        sectionType={section.type}
+        draft={entry.draft}
+        categories={categories}
+        series={typeof entry.meta.series === "string" ? entry.meta.series : undefined}
+        seriesUk={typeof entry.meta.series_uk === "string" ? entry.meta.series_uk : undefined}
+        part={typeof entry.meta.part === "number" ? entry.meta.part : undefined}
+        categoryOptions={categoryOptions}
+        seriesOptions={seriesOptions}
+      />
+
+      {/* The note's header matter that is ABOUT THE WORK rather than part of
+          the writing: the poster, and the person who made it.
+
+          One wrapper, because on a wide window the two become a single column
+          in the right gutter — poster on top, creator beneath it (#115). They
+          stack in normal flow inside it, so nothing has to know how tall a
+          bio runs. `display: contents` everywhere else, so at every other
+          width the creator block is exactly where it has always been, above
+          the note's "At a glance" table — see components/Creator.tsx. */}
+      {(gutterCover?.coverUrl || creator || en.factsHtml) && (
+        <div className="note-gutter">
+          {gutterCover?.coverUrl && (
+            <NoteCover
+              src={gutterCover.coverUrl}
+              srcSet={gutterCover.coverSrcSet}
+              blur={gutterCover.coverBlur}
+              ar={gutterCover.coverAr}
+            />
+          )}
+          {creator && <Creator creator={creator} />}
+          {/* The note's own fact list, lifted out of the article by
+              `liftFacts` so it can be a SIBLING of the poster and the creator
+              rather than the first thing inside the writing. It keeps `.prose`
+              because every rule that styles it is written against that
+              ancestor, and `mt-8` because that is the margin the article used
+              to give it — below 1400px this renders in exactly the place, and
+              with exactly the spacing, it had before. */}
+          {en.factsHtml && (
+            <div
+              className={`prose note-facts mt-8${uk ? " lang-en" : ""}`}
+              dangerouslySetInnerHTML={{ __html: en.factsHtml }}
+            />
+          )}
+          {uk?.factsHtml && (
+            <div
+              className="prose note-facts mt-8 lang-uk"
+              lang="uk"
+              dangerouslySetInnerHTML={{ __html: uk.factsHtml }}
+            />
+          )}
+        </div>
+      )}
 
       {uk ? (
         <>
           <article
             className="prose mt-8 lang-en"
+            data-dev-body-field="body"
             dangerouslySetInnerHTML={{ __html: en.html }}
           />
           <article
             className="prose mt-8 lang-uk"
             lang="uk"
+            data-dev-body-field="body_uk"
             dangerouslySetInnerHTML={{ __html: uk.html }}
           />
         </>
       ) : (
         <article
           className="prose mt-8"
+          data-dev-body-field="body"
           dangerouslySetInnerHTML={{ __html: en.html }}
         />
       )}
 
       <EntryFooter prev={prev} next={next} />
 
-      {showToc && (
+      {showToc ? (
         <Toc
           title={entry.title}
           titleUk={entry.titleUk}
           en={en.headings}
           uk={uk?.headings}
+          below={personBlock}
         />
+      ) : (
+        /* No outline, so no rail to hang it under — the portrait takes the
+           rail's own place instead. A People note with two headings (an "At a
+           glance" and a "Sources", which is a perfectly ordinary short one)
+           falls below MIN_TOC_HEADINGS, so this is a real path, not a
+           theoretical one. */
+        personBlock && (
+          <aside className="note-portrait">{personBlock}</aside>
+        )
       )}
     </Page>
   );

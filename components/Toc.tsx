@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import T from "@/components/T";
 import { useLang } from "@/components/useLang";
 import { MenuIcon } from "@/components/icons";
@@ -51,12 +51,25 @@ export default function Toc({
   titleUk,
   en,
   uk,
+  below,
 }: {
   /** The note's own title — the first row, and the jump-to-top target. */
   title: string;
   titleUk?: string;
   en: Heading[];
   uk?: Heading[];
+  /**
+   * Anything the page wants to park at the FOOT OF THE RAIL, under the
+   * outline — today a People note's portrait (DECISIONS #121). It goes in the
+   * rail's own flow rather than being positioned beneath it, because the
+   * rail's height is however many headings the note has: a sibling would have
+   * to be told that number, and a child simply follows.
+   *
+   * Rail only, never the phone sheet. The sheet is a popover you open to jump
+   * somewhere and dismiss; a picture in it is in the way of that. A phone
+   * shows the same artwork beside the title instead (#120).
+   */
+  below?: ReactNode;
 }) {
   const { lang } = useLang();
   const [active, setActive] = useState("");
@@ -321,6 +334,7 @@ export default function Toc({
             page as its own result. */}
         {topLink()}
         {outline}
+        {below}
       </nav>
 
       {/* Narrow screens: the same outline behind the three-line icon, in the

@@ -58,6 +58,10 @@ export default function NoteCover({
            `sizes` the browser assumes 100vw and fetches the original. */
         sizes="208px"
         alt=""
+        /* Never fetched on a phone, where this element is `display: none` —
+           a lazy image that is never displayed is never requested (#95). At
+           1400px it is at the top of the window, so it loads at once. */
+        loading="lazy"
         style={blur ? { backgroundImage: `url("${blur}")` } : undefined}
       />
     </aside>
