@@ -7215,10 +7215,20 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   --note-thumb-w: 3rem;
   --note-thumb-gap: 1rem;
   display: flex;
-  /* The cover's top edge against the title's, not its middle: a long title
-     wraps to three or four lines on a phone and centring would leave the
-     artwork floating beside the second one. */
-  align-items: flex-start;
+  /* STRETCH, and this is the whole trick. The artwork's own proportions used
+     to decide the height of the block: a 2:3 poster stood 1.5 times its width
+     and reached the metadata line, while a SQUARE portrait was only as tall as
+     it was wide and left a stripe of empty column under it. Letting the FLEX
+     LINE set the height fixes every ratio at once — the box is as tall as the
+     title and its metadata line, whatever shape the picture is, and
+     `object-fit: cover` fills it.
+
+     Sizing by height instead (width from the aspect ratio) was tried first and
+     is the wrong end of the problem: a wider box takes the room the title
+     wraps in, so the text got TALLER as the picture grew and the gap opened up
+     again — a square portrait went from 48px against 67px of text to 69px
+     against 102px. The width has to stay put; only the height can give. */
+  align-items: stretch;
   gap: var(--note-thumb-gap);
 }
 
@@ -7236,10 +7246,18 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   display: block;
   flex: none;
   width: var(--note-thumb-w);
-  /* The artwork's OWN ratio, exactly as the gutter poster keeps it, so a
-     2:3 poster and a squarer card are both shown whole and `cover` has
-     nothing to crop. */
-  aspect-ratio: 1 / var(--cover-ar, 1.5);
+  /* `auto` is what lets `align-items: stretch` above take over: the box ends
+     up exactly as tall as the header's text, and the picture fills it. This
+     is the one place on the site where artwork IS cropped to a frame — every
+     other cover, spine and poster keeps its own ratio (#110, #115). The
+     trade is deliberate and small: at 48px this is a label, not the artwork,
+     and a portrait cropped by a few pixels top and bottom still reads as the
+     person while a stripe of empty column reads as a bug. */
+  height: auto;
+  /* A three-line title would otherwise stretch it into a sliver. Past twice
+     its width the picture stops growing and the space goes back to being
+     space — beside a block that tall, nobody is looking for it. */
+  max-height: calc(2 * var(--note-thumb-w));
   object-fit: cover;
   border-radius: var(--r-md);
   border: 1px solid var(--border);

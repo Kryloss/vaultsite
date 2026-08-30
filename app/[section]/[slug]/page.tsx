@@ -417,12 +417,9 @@ export default async function EntryPage({ params }: Props) {
             aria-hidden="true"
             loading="lazy"
             style={
-              {
-                "--cover-ar": noteArt.coverAr ?? 1.5,
-                ...(noteArt.coverBlur
-                  ? { backgroundImage: `url("${noteArt.coverBlur}")` }
-                  : null),
-              } as CSSProperties
+              noteArt.coverBlur
+                ? { backgroundImage: `url("${noteArt.coverBlur}")` }
+                : undefined
             }
           />
         )}
