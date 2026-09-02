@@ -5739,8 +5739,15 @@ html[data-intro][data-intro-fast] .prose > .avatar {
   transition: background var(--dur-fast) var(--ease);
 }
 
+/* `data-cf-hover` is the same state, written by `Coverflow` for the engine
+   that will not resolve `:hover` here. WebKit does not hit-test a cover
+   `paint()` has pushed behind the stage's plane, so in Safari every card but
+   the centred one is inert to the pointer — no veil, and the card's own
+   `cursor: pointer` never applies either (the frame takes an inline one
+   instead). See `lib/coverflow.ts` and DECISIONS #123. */
 @media (hover: hover) and (pointer: fine) {
-  .cf-card:hover::after {
+  .cf-card:hover::after,
+  .cf-card[data-cf-hover]::after {
     background: color-mix(in srgb, var(--text) 12%, transparent);
   }
 }
