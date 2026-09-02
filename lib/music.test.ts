@@ -14,6 +14,7 @@ import {
   buildPersonIndex,
   entryFormat,
   filterGroups,
+  flattenGroups,
   noteGenres,
   noteLangs,
 } from "./music.ts";
@@ -358,4 +359,61 @@ test("query and language compose", () => {
   const hit = filt(groups, { query: "open", lang: "ru" });
   assert.equal(hit[0].notes.length, 1);
   assert.equal(hit[0].notes[0].slug, "keep");
+});
+
+/* ---------- The cover deck (flattenGroups) ----------
+   The page is grouped by artist and DRAWN as one flat run of covers, so the
+   thing worth pinning down is that flattening changes nothing but the shape:
+   the order the grouping decided has to survive it, or an artist's two
+   records end up either side of somebody else's. */
+
+test("flattening keeps group order and each group's own order", () => {
+  const groups = [
+    group("noize mc", [note({ slug: "open-air" }), note({ slug: "vykhod" })], "Noize MC"),
+    group("top", [note({ slug: "clancy" })], "Twenty One Pilots"),
+  ];
+  assert.deepEqual(
+    flattenGroups(groups).map((s) => s.key),
+    ["open-air", "vykhod", "clancy"]
+  );
+});
+
+test("every card carries the artist of the group it came from", () => {
+  const groups = [
+    group("a", [note({ slug: "x" }), note({ slug: "y" })], "A"),
+    group("b", [note({ slug: "z" })], "B"),
+  ];
+  const deck = flattenGroups(groups);
+  assert.deepEqual(
+    deck.map((s) => s.artist?.name),
+    ["A", "A", "B"]
+  );
+});
+
+test("a note with no artist is still a card", () => {
+  /* The unattributed group has no card head on the old page and no artist
+     block in the caption — but it is still the section's writing, and a
+     record vanishing because a frontmatter key is missing is not a filter. */
+  const deck = flattenGroups([group("x", [note({ slug: "orphan" })])]);
+  assert.equal(deck.length, 1);
+  assert.equal(deck[0].artist, undefined);
+  assert.equal(deck[0].key, "orphan");
+});
+
+test("an empty list of groups is an empty deck", () => {
+  assert.deepEqual(flattenGroups([]), []);
+});
+
+test("filtering then flattening gives the deck the filter asked for", () => {
+  /* How the page actually builds it: filterGroups narrows, flattenGroups
+     unrolls. A group whose every note was filtered out contributes nothing,
+     rather than an artist with no records under them. */
+  const groups = [
+    group("a", [note({ slug: "uk1", langs: ["uk"] }), note({ slug: "ru1", langs: ["ru"] })], "A"),
+    group("b", [note({ slug: "ru2", langs: ["ru"] })], "B"),
+  ];
+  assert.deepEqual(
+    flattenGroups(filterGroups(groups, { lang: "uk" }).groups).map((s) => s.key),
+    ["uk1"]
+  );
 });

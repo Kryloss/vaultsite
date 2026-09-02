@@ -5349,120 +5349,48 @@ html[data-intro][data-intro-fast] .prose > .avatar {
 }
 
 /* ============================================================
-   Music page — the Apple Music treatment. See docs/DECISIONS.md #90.
+   Music page — the cover deck. See docs/DECISIONS.md #90, #103, #123.
 
-   Two ideas, both borrowed from Apple Music and both re-cut to fit a
-   monochrome serif page: a track list whose divider starts at the TEXT
-   column rather than the artwork's edge, and a wash of the newest note's
-   album art behind the page header.
+   The section page was twenty-six stacked artist cards, each with a
+   portrait, a biography and — for all but three artists — one 44px track
+   row: seven thousand pixels to say "twenty-nine records", with the
+   artwork, the one thing a music page has that a post list does not,
+   reduced to a thumbnail. The deck turns that over. The covers ARE the
+   page, raked away from a centred card the way Apple's own Cover Flow did
+   it, and everything the cards used to carry is printed under whichever
+   one is centred.
 
-   Nothing here declares a `transition` shorthand. The rows carry `.press`,
-   whose transition sits ~1100 lines above; a shorthand written down here
-   would reset its transform and silently delete the pressed state
-   (docs/DECISIONS.md #52).
+   The blurred-cover WASH went with them. It existed to give a card its
+   colour when the artwork inside it was thumbnail-sized; a deck of
+   full-size covers is already the colour, and a tint behind it would be
+   the same picture twice. The note page keeps its own wash (#91) — that
+   page has no artwork on it at all, which is the case the wash is for.
+
+   Nothing here declares a `transition` shorthand. The cards and the
+   artist portrait carry `.press`, whose transition sits ~1100 lines above;
+   a shorthand written down here would reset its transform and silently
+   delete the pressed state (docs/DECISIONS.md #52).
    ============================================================ */
 
-/* The track list is a card, and the newest cover — blurred past recognition
-   and clipped to it — is what colours it. The wash was full-bleed behind the
-   page header first; contained, it stops being an exception to the site's
-   monochrome (#64), because the artwork is inside a frame again like every
-   other picture here. Card, border and radius match the embed above it. */
-/* One card PER ARTIST now, so they stack. The gap is larger than it looks like
-   it needs to be because the portrait rises 1.5rem through the card's top edge:
-   at the old 1rem it landed on the card above, and at the heading it landed on
-   "Notes on what I'm hearing". */
-.music-card + .music-card {
-  margin-top: 2.5rem;
-}
+/* How far the note wash's artwork hangs past its box on every side. It must
+   EXCEED the blur radius: `blur()` samples transparency beyond the image's
+   own edges, so the picture fades out at its rim, and if that rim is inside
+   the box you can see where it ended — a soft line across the wash. A fixed
+   bleed says the thing that actually matters in the same units as the blur
+   it has to clear.
 
-.music-card {
-  position: relative;
-  /* NOT `hidden`: the artist's portrait hangs off the left edge, and clipping
-     here would cut it in half. The wash clips itself instead — see the
-     `border-radius: inherit` on `.music-wash`, which is what keeps the tint
-     inside the card's rounded corners now that the card no longer does it. */
-  overflow: visible;
-  /* Clears the risen portrait under the section heading — see the note on
-     `.music-card + .music-card`. */
-  margin-top: 2.25rem;
-  padding: 0.25rem 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: var(--r-xl);
-  background: var(--surface);
-  /* Lives on the CARD, not on `.artist-head`, because the track rows below
-     need it too: their covers are indented to sit centred under the portrait,
-     and that indent is the difference between the two sizes. */
-  --artist-photo: 5rem;
-  /* A little lift. Two shadows, not one: a tight dark edge so the card has a
-     bottom, and a wide soft one so it sits ABOVE the page rather than being
-     drawn on it. */
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.05),
-    0 10px 24px -12px rgb(0 0 0 / 0.18);
-}
-
-@media (prefers-color-scheme: dark) {
-  .music-card {
-    box-shadow:
-      0 1px 2px rgb(0 0 0 / 0.4),
-      0 12px 28px -12px rgb(0 0 0 / 0.55);
-  }
-}
-
-.music-wash {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  /* The card stopped clipping (see `.music-card`), so the tint has to round
-     its own corners or it paints square ones over the card's radius. */
-  border-radius: inherit;
-  pointer-events: none;
-  /* How far the artwork hangs past the box on every side. It must EXCEED the
-     blur radius: `blur()` samples transparency beyond the image's own edges,
-     so the picture fades out at its rim, and if that rim is inside the box
-     you can see where it ended — a soft horizontal line across the card. A
-     `transform: scale()` was doing this job and was set to 1.2, which on a
-     190px row pushes the rim out 19px against a 48px blur: not nearly enough.
-     A fixed bleed says the thing that actually matters in the same units as
-     the blur it has to clear. */
-  --wash-bleed: 120px;
-  /* The mask lives on the BOX, not the artwork, so its geometry stays tied to
-     what you can see rather than to an image that now hangs 120px past it. */
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgb(0 0 0 / 0.35) 100%);
-  mask-image: linear-gradient(to bottom, #000 0%, rgb(0 0 0 / 0.35) 100%);
-}
-
-.music-wash img {
-  /* Blurred past recognition — this is a colour, not a picture. */
-  filter: blur(48px) saturate(1.3);
-  opacity: 0.3;
-}
-
-@media (prefers-color-scheme: dark) {
-  .music-wash img {
-    /* A dark card needs more of it to register at all, and slightly less
-       saturation or a bright cover glows rather than tints. */
-    opacity: 0.36;
-    filter: blur(48px) saturate(1.2) brightness(0.95);
-  }
-}
-
-/* The bleed itself, shared by both washes — see `--wash-bleed` above. */
-.music-wash img,
+   `max-width: none` is load-bearing, not tidying: the reset caps every image
+   at `max-width: 100%`, which silently ate the horizontal half of the bleed
+   while the explicit height sailed through — so the left and right rims kept
+   showing after the top and bottom stopped. */
 .note-wash img {
   display: block;
   width: calc(100% + var(--wash-bleed) * 2);
-  /* `max-width: none` is load-bearing, not tidying: the reset caps every image
-     at `max-width: 100%`, which silently ate the horizontal half of the bleed
-     while the explicit height sailed through — so the left and right rims kept
-     showing after the top and bottom stopped. */
   max-width: none;
   height: calc(100% + var(--wash-bleed) * 2);
   margin: calc(var(--wash-bleed) * -1);
   object-fit: cover;
 }
-
-/* ---- the track list ---- */
 /* ---------- The /music toolbar: search + language button ----------
    components/lists/MusicNotes.tsx.
 
@@ -5472,36 +5400,50 @@ html[data-intro][data-intro-fast] .prose > .avatar {
    wraps its own text inside its cell. Four chips in a row could not hold this
    — a single button that names its own state is a quarter of the width, which
    is most of why it is one button now. */
+/* THREE COLUMNS AT EVERY WIDTH: something on the left, the centred record's
+   artist in the middle, something on the right. Two equal `1fr` cheeks are
+   what put the portrait on the row's TRUE midpoint — in a flex row it would
+   only ever sit wherever its neighbour happened to end, which moves with the
+   language and with every artist.
+
+   What fills the cheeks changes with the width, and only that: the heading and
+   the pair of controls on a wide window, the search alone and the language
+   button alone on a phone, where the heading is not drawn at all. */
 .music-toolbar {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: baseline;
+  display: grid;
+  /* `minmax(0, 1fr)`, not `1fr`: a bare `1fr` floors at its content, so a
+     cheek that outgrew the other would shove the portrait off the midpoint —
+     the one thing this layout exists to prevent. */
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
   gap: 1rem;
   margin-top: 3rem;
 }
 
 /* The `mt-12 text-lg font-semibold` this replaced, written out: the heading is
-   a flex child now, so its margin belongs to the row. */
+   a grid child now, so its margin belongs to the row. */
 .music-toolbar-title {
   margin: 0;
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  min-width: 0;
   font-size: 1.125rem;
   line-height: 1.75rem;
   font-weight: 600;
   letter-spacing: -0.015em;
   color: var(--text);
-  /* Shrinks and wraps rather than pushing the controls off the line. */
-  flex: 1 1 auto;
-  min-width: 0;
 }
 
 .music-controls {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  flex: 0 1 auto;
-  min-width: 0;
-  margin-left: auto;
   justify-content: flex-end;
+  gap: 0.5rem;
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  min-width: 0;
 }
 
 /* The field and the language button beside it are ONE material: same padding,
@@ -5527,7 +5469,11 @@ html[data-intro][data-intro-fast] .prose > .avatar {
      heading wraps another line instead — the heading has somewhere to go and
      the input does not. */
   min-width: 4.5rem;
-  max-width: 13rem;
+  /* Shorter than it was (13rem), to pay for the portrait beside it: at 13 the
+     pair of controls is wider than its own column and the middle one stops
+     being the middle. Lifted again on a phone, where the field has a whole
+     cheek to itself. */
+  max-width: 10rem;
   outline: none;
 }
 
@@ -5628,246 +5574,501 @@ html[data-intro][data-intro-fast] .prose > .avatar {
   color: var(--text-tertiary);
 }
 
-.music-tracks {
-  /* The row's own left inset. It is not a chosen number: it is whatever puts a
-     44px cover centred under the portrait above it, which is half the
-     difference between the two. Both sizes are variables, so the alignment
-     survives either of them changing — and it is the reason `--artist-photo`
-     is declared on the card rather than on the head. */
-  --music-row-pad: calc((var(--artist-photo) - var(--music-art)) / 2);
-  /* How far the hover box holds off the card's right padding. On the LEFT it
-     holds off by the row's whole inset instead: the highlight starts AT the
-     cover (see `.music-tracks a`). */
-  --music-row-gutter: 0.4375rem;
-  /* Above the wash. `position` alone is enough — the wash is an earlier
-     sibling, so no z-index (and no `isolation`, #81) is needed to order them. */
-  position: relative;
-  /* Defined on the list, not the row: the divider is drawn on the `li` and a
-     custom property only inherits downward, so a value set on the `<a>` is
-     invisible to the pseudo that has to line up with it. */
-  --music-art: 44px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
+/* ---------- The cover deck ----------
+   components/Coverflow.tsx, fed by components/lists/MusicNotes.tsx.
+
+   The deck is the ONE thing on this site that is allowed to be wider than
+   the page's measure, and it is derived rather than chosen: `--measure` is
+   39rem because that is a comfortable line of prose, and nothing here is a
+   line of prose. Covers at 39rem would be barely larger than the 44px
+   thumbnails this replaced, which is the whole reason it exists.
+
+   `--cf-width` never exceeds the window minus its gutters, so it cannot
+   produce a horizontal scrollbar; `100vw` counts the vertical scrollbar in
+   Chromium, which only makes the number safer, not wider. The negative
+   margin is measured against `100%` — the page's own content box — so the
+   deck stays centred on the column at every width. */
+.coverflow {
+  --cf-width: min(72rem, 100vw - var(--gutter) * 2);
+  /* The card, and therefore everything: pitch, recession and the viewer's
+     distance are all multiples of it (see components/Coverflow.tsx). */
+  --cf-card: clamp(8.5rem, 22vw, 14rem);
+  /* The artist slot needs no reserved height: `.artist-bio-slot` stacks every
+     bio in the section into one grid cell, so it is already exactly as tall as
+     the longest of them at this width and in this language. See ArtistHead in
+     components/lists/MusicNotes.tsx. */
+  /* The caption slot, derived the same way as the header. Its three parts are
+     each pinned to a line count of their own, so this is their sum — but it
+     is stated here as well, because a note is allowed to have no description
+     and no fact table at all, and then those elements are not rendered and
+     their own floors cannot hold anything up.
+
+       title      one line     1.25rem   × 1.3
+       desc       two lines    0.9375rem × 1.45, after 0.4375rem of margin
+       facts      three rows   0.8125rem × 1.4 + 0.5625rem, after 1.25rem
+
+     Comes to 178px at the default type scale, which is what the vault
+     measures. Re-derive it, don't nudge it. */
+  --cf-caption-h: calc(
+    1.25rem * 1.3 + 0.4375rem + 2 * 0.9375rem * 1.45 + 1.25rem + 3 *
+      (2 * 0.28125rem + 0.8125rem * 1.4)
+  );
+  width: var(--cf-width);
+  margin-inline: calc((100% - var(--cf-width)) / 2);
+  margin-top: 1rem;
 }
 
-/* The row's spacing lives HERE, not on the link, because the hover box must
-   be exactly as tall as the cover it starts at — any vertical padding on the
-   link would make the highlight taller than the artwork. Outside the link, the
-   same air separates the rows and leaves the divider centred between them. */
-.music-tracks li {
-  position: relative;
-  /* The gap between two rows is TWICE this. Raised from 0.3125rem, which put
-     adjacent covers 10px apart and read as one block of artwork rather than a
-     list of records — the divider was doing all the separating on its own. */
-  padding: 0.5625rem 0;
+.cf-frame {
+  /* Vertical padding keeps the card shadows clear of the overflow clip. */
+  padding-block: 2.5rem;
+  overflow: hidden;
 }
 
-/* The divider starts at the TEXT column, not at the row's edge. It's the most
-   recognisable thing about an Apple Music list and it costs one pseudo —
-   drawn on the row rather than as a border so the artwork column stays clear
-   and the hover wash can still round its own corners underneath it. */
-.music-tracks li + li::before {
+/* NO `cursor: grab` at rest. It used to sit on the whole frame, which is a
+   much bigger target than the covers — the padding above and below them, and
+   the widening gaps between the receded ones — so the deck told everyone its
+   only gesture was dragging, over an area where most of what you actually
+   want to do is press a cover. Reported as "I can't click on cover because
+   it's grab-pointer", which is the cursor doing the misleading rather than
+   the click being broken.
+
+   The covers say `pointer` (see `.cf-card`); the grab hand now appears only
+   once a drag is genuinely under way. */
+.cf-frame:active {
+  cursor: grabbing;
+}
+
+/* No focus ring of its own: `:focus-visible` at the top of this file already
+   draws the site's, and the frame is a real tab stop because the arrow keys
+   are what drive the deck. */
+
+/* THE STAGE IS NOT A TARGET, and that is load-bearing rather than tidy.
+
+   Under `transform-style: preserve-3d` this element's own box stays in the
+   same 3D space as its children, sitting at z = 0 — and every card except the
+   centred one is pushed BEHIND that plane by `paint()`'s negative
+   `translateZ`. So the stage was in front of all of them for hit-testing, and
+   swallowed every press aimed at an off-centre cover: `elementFromPoint` over
+   any receded card returned `.cf-stage`, never the card.
+
+   That is why pressing a cover to bring it to the middle did nothing. The
+   deck's `pointerdown` reads which cover was pressed off `data-cf-index`, and
+   for an off-centre card there was no card in the event's path to read — so
+   the press was indistinguishable from one on empty deck. It also took the
+   hover veil on `.cf-card::after` with it, which is why nothing said a cover
+   could be pressed either. One cause, both symptoms.
+
+   `pointer-events: none` here takes the stage out of hit-testing entirely and
+   the cards opt back in below; a press on empty deck now lands on `.cf-frame`,
+   which is what runs the drag anyway. */
+.cf-stage {
+  position: relative;
+  height: var(--cf-card);
+  transform-style: preserve-3d;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Every card is a LINK to its note, so all twenty-nine are in the static
+   HTML with their titles. What `paint()` writes on them is `transform`,
+   `opacity` and `z-index`; everything else is here. */
+.cf-card {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  display: block;
+  width: var(--cf-card);
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--r-lg);
+  /* THE PAGE'S OWN COLOUR, and that is what makes the deck opaque.
+
+     A receding cover used to be dimmed with `opacity` on the card, which made
+     the whole object translucent: where two covers met you saw the darker one
+     behind straight through the artwork of the one in front, along with its
+     shadow. `paint()` writes the recession to `--cf-fade` instead and the
+     artwork fades against THIS ground, so a distant cover still blends into
+     the page by exactly as much as before — but it is now a solid thing the
+     colour of the page rather than a hole in one, and it hides what is
+     behind it. `--surface` would show as a card-shaped plate on a dark page
+     once the artwork faded off it. */
+  background: var(--bg);
+  will-change: transform;
+  /* Back into hit-testing, against the stage's `none` above. `paint()` writes
+     `pointerEvents` inline on a card faded past 6% and clears it again — an
+     empty inline value falls back to this, so the two never fight. */
+  pointer-events: auto;
+  /* Not the frame's `grab`: a cover is a target. See `.cf-card::after`. */
+  cursor: pointer;
+  /* Album art is a physical object in Apple's layout; two shadows, a tight
+     edge and a wide soft one, are what keep a white cover from dissolving
+     into a white page and keep the card above the page rather than drawn
+     on it. */
+  /* Scaled by `--cf-fade` for the same reason the artwork is: the shadow is
+     the card's, so it has to recede with it. It used to come along for free,
+     back when the whole element carried the `opacity`. */
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / calc(0.08 * var(--cf-fade, 1))),
+    0 14px 34px -14px rgb(0 0 0 / calc(0.35 * var(--cf-fade, 1)));
+}
+
+@media (prefers-color-scheme: dark) {
+  .cf-card {
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / calc(0.5 * var(--cf-fade, 1))),
+      0 16px 38px -14px rgb(0 0 0 / calc(0.7 * var(--cf-fade, 1)));
+  }
+}
+
+/* The pointer's answer to a cover, and the reason the deck reads as
+   clickable at all: pressing an off-centre card brings it to the centre and
+   pressing the centred one opens its note, but every card inherited the
+   frame's `grab` and had no hover state, so neither was discoverable.
+
+   A VEIL, not a transform. `paint()` owns `transform` on this element and
+   rewrites it every frame, so a CSS hover transform would be overwritten
+   mid-drag. The colour is the `color-mix` the old track rows used, so the
+   response is the site's own and works on either theme without a second
+   token. On a pseudo-element, so it is clipped by the card's own radius. */
+.cf-card::after {
   content: "";
   position: absolute;
-  top: 0;
-  /* Starts at the TEXT column: the row's inset, the cover, and the gap. */
-  left: calc(var(--music-row-pad) + var(--music-art) + 0.75rem);
-  right: var(--music-row-gutter);
-  height: 1px;
-  background: var(--border);
+  inset: 0;
+  background: transparent;
+  pointer-events: none;
+  transition: background var(--dur-fast) var(--ease);
 }
 
-.music-tracks a {
-  display: grid;
-  grid-template-columns: var(--music-art) minmax(0, 1fr) auto;
-  /* The date sits on the title's line and the description spans the whole
-     text column under it — Apple's two-line row. Placing by AREA rather than
-     by source order is what lets the description have the width the date
-     would otherwise take, which on a phone is most of the row. */
-  grid-template-areas:
-    "art head meta"
-    "art desc desc";
-  align-items: center;
-  column-gap: 0.75rem;
-  /* The link IS the hover box, so it is inset to exactly what the highlight
-     should cover: it begins at the cover's own left edge (the row inset is a
-     margin, not padding) and carries no vertical padding, so it is the cover's
-     height. What it wraps is the artwork and the text beside it — nothing
-     else. The radius matches the cover's so the highlight follows those
-     corners instead of drawing a second, rounder pair around them. */
-  margin: 0 var(--music-row-gutter) 0 var(--music-row-pad);
-  padding: 0 0.4375rem 0 0;
-  border-radius: var(--r-sm);
-}
-
-
-/* Translucent, not `--bg-hover`: an opaque wash would blank the card's tint
-   for the length of the row being pointed at. Built from `--text`, so it
-   darkens on a light card and lightens on a dark one with no second token. */
-.music-tracks a:hover {
-  background: color-mix(in srgb, var(--text) 7%, transparent);
-}
-
-.music-art {
-  width: var(--music-art);
-  height: var(--music-art);
-  border-radius: var(--r-sm);
-  background-color: var(--surface);
-  object-fit: cover;
-  display: block;
-  grid-area: art;
-  /* Album art is a physical object in Apple's layout; a hairline of shadow is
-     what keeps a white cover from dissolving into a white page. */
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
-  transition: transform var(--dur-fast) var(--ease);
-}
-
-/* The cover lifts a little under the pointer — the row's own answer, and the
-   only thing in it that is an object rather than text. Small on purpose: the
-   highlight behind it is exactly the cover's height, so a larger scale would
-   have the artwork breaking out of the box that is meant to hold it. */
-.music-tracks a:hover .music-art {
-  transform: scale(1.06);
+@media (hover: hover) and (pointer: fine) {
+  .cf-card:hover::after {
+    background: color-mix(in srgb, var(--text) 12%, transparent);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .music-art {
+  .cf-card::after {
     transition: none;
   }
-
-  .music-tracks a:hover .music-art {
-    transform: none;
-  }
 }
 
-/* One line each, ellipsised. A note's description is a sentence, and two of
-   them wrapping turns a track list back into the rows this replaced. */
-.music-title,
-.music-desc {
+/* PINNED TO THE CARD, not merely sized to it.
+
+   `width/height: 100%` leaves the artwork depending on the card's own box
+   resolving to exactly the square `aspect-ratio` asks for, and at some browser
+   zoom levels it does not — the card came out a few percent taller than the
+   image and its `--surface` background showed underneath as a grey band across
+   the foot of every cover. Absolute against the card's padding box, the
+   artwork cannot be shorter than the thing it is filling whatever the box
+   rounds to, so there is nothing left to show through. */
+.cf-card img,
+.cf-blank {
+  position: absolute;
+  inset: 0;
   display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* The recession, written per card by `paint()`. On the artwork rather than
+     on the card, so the card stays opaque — see the background above. The
+     fallback is what the pre-hydration grid and a no-JS reader get. */
+  opacity: var(--cf-fade, 1);
 }
 
-/* The pair. `min-width: 0` is what lets the title inside it shrink at all —
-   without it a flex item refuses to go below its content width and the label
-   is pushed out of the row instead. */
-.music-head {
-  grid-area: head;
+.cf-blank {
+  background: var(--surface);
+}
+
+/* ---- before hydration, and forever with JS off ----
+   The rake is written straight to `style.transform`, so without it every
+   card would stack on one spot at `left: 50%`. Until `Coverflow` sets
+   `data-ready` in a layout effect — before the browser's first paint, so
+   nobody with JS sees this — the deck is a plain wrapped row of covers.
+   That is the version a crawler, a Reader mode and a JS-off reader get, and
+   it is a complete one: every cover, every link, every title. */
+.cf-frame:not([data-ready]) {
+  cursor: default;
+}
+
+.cf-frame:not([data-ready]) .cf-stage {
   display: flex;
-  align-items: baseline;
-  min-width: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  height: auto;
 }
 
-.music-title {
-  min-width: 0;
+/* `relative`, not `static`: back in normal flow for the fallback grid, but
+   still the containing block for the artwork pinned inside it. */
+.cf-frame:not([data-ready]) .cf-card {
+  position: relative;
+}
+
+/* ---- the artist beside the heading ----
+   On a window wide enough to carry it, the centred record's portrait LEADS the
+   toolbar line: `( ◯ ) Notes on what I'm hearing — [search] [All]`. The name
+   and description stay centred under the toolbar, so the block below loses a
+   row and the covers come up by the height of a portrait.
+
+   Hidden by default and shown from 640px, which is the same query the toolbar
+   uses to hold its heading to one line — below it the row has no width to
+   spare and the portrait goes back to leading the block instead. `display:
+   none` rather than `visibility`, so the copy that is not showing is never
+   fetched (#95); the two share a URL, so changing width costs one request. */
+.music-artist {
+  display: none;
+  flex: none;
+  /* The row is baseline-aligned for the heading and its controls; a portrait
+     has no baseline worth sharing, so it centres on the line instead — on the
+     baseline it sat 10px high of the heading's middle. */
+  align-self: center;
+}
+
+/* The portrait is the middle column at every width; only its size changes. */
+.music-artist {
+  grid-column: 2;
+  /* Every item names its ROW as well as its column. The portrait comes before
+     the controls in the markup but sits in the middle column, so sparse
+     auto-placement had already stepped past column 1 by the time it reached
+     the search field and dropped it onto a second row — an 86px toolbar with
+     the portrait alone above the two controls. */
+  grid-row: 1;
+  justify-self: center;
+  /* Its own size, so a note naming an artist main.md has never heard of leaves
+     an empty box rather than collapsing the middle column. */
+  width: 3rem;
+  height: 3rem;
+  /* The row is the only place it appears — the artist block below carries the
+     name and the description and no picture. */
+  display: block;
+}
+
+/* ---- whose record this is ----
+   The artist block sits ABOVE the covers, following whichever one is centred.
+   That puts a variable-height thing on top of the deck, and a bio that is two
+   lines for one band and four for the next would move every cover on the page
+   as you stepped between them. It does not, because `.artist-bio-slot` holds
+   every bio in the section in one grid cell — the slot is the height of the
+   LONGEST, always, and the live one simply sits in it.
+
+   Held to the PAGE COLUMN — 36rem, which is `--measure` (39rem) less its two
+   gutters, so the artist reads inside the same borders as every other piece
+   of writing on the site. The COVERS are the one thing allowed past that
+   (they are artwork, not prose); a portrait and a paragraph are prose and
+   were overhanging the column by 160px at 46rem.
+
+   The bio wraps to whatever that column gives it and the slot follows, so
+   nothing here has to be re-tuned when the width changes.
+
+   Always rendered, even for a note naming an artist main.md has never heard
+   of: an empty slot holds the deck still, a missing one drops it. */
+.cf-header {
+  display: flex;
+  justify-content: center;
+  max-width: 36rem;
+  margin-inline: auto;
+}
+
+/* ---- what the centred cover is ----
+   The reference design's caption shape — title, a grey line, a narrow
+   label/value list — with the artist block added underneath, because the
+   biographies had to go somewhere when the artist cards went.
+
+   Every part of it is pinned to a line count, so the whole slot is the same
+   height on every card in both languages: the description is exactly two
+   lines, the fact list exactly three rows, and the title one line at any
+   width where one line is enough (measured: the longest, `Найгірша пісня про
+   любов · Track`, is 383px against the caption's 480px — it only wraps below
+   a 480px window, which is where the phone block reserves a second line).
+
+   That is the whole point of it. The page must not move under a reader who
+   is stepping through the deck or switching the language filter, and the
+   caption was 61px of that movement. It still sits BELOW the dots, so any
+   slack lands at the foot of the page where nothing has to be looked at. */
+.cf-caption {
+  max-width: 30rem;
+  min-height: var(--cf-caption-h);
+  /* Directly under the deck now that the dots are gone. */
+  margin: 0.75rem auto 0;
+  text-align: center;
+}
+
+.cf-title {
+  margin: 0;
+  font-size: 1.25rem;
   font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
   color: var(--text);
-  line-height: 1.35;
-}
-
-.music-desc {
-  grid-area: desc;
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  line-height: 1.4;
 }
 
 /* What the note is about, after its title and never inside it. Grey, because
-   it is a fact about the row rather than part of what the row is called — the
-   same demotion `.entry-meta` gets. */
-.music-format {
-  /* Never shrinks, never truncates: that is the whole point of the pair. */
-  flex: none;
-  display: flex;
+   it is a fact about the record rather than part of what the record is
+   called — the same demotion `.entry-meta` gets, and the same `Clancy ·
+   Album` pairing the track rows used. */
+.cf-format {
+  display: inline-flex;
   gap: 0.3125rem;
-  padding-left: 0.3125rem;
-  white-space: nowrap;
-  font-size: 0.8125rem;
+  padding-left: 0.375rem;
+  font-size: 0.9375rem;
   font-weight: 400;
+  white-space: nowrap;
   color: var(--text-tertiary);
 }
 
-/* ---- who the card is about ----
-
-   The shelf creator block's shape, at a smaller size: this one heads a list
-   rather than an article, so it sits closer to the rows under it. No rule
-   beneath it — the space does that job, exactly as `.creator` decided (#86).
-   Above the wash, like the rows. */
-.artist-head {
-  /* How far the portrait rises through the card's TOP edge. It broke the LEFT
-     edge first; through the top it reads as a badge pinned to the card rather
-     than as artwork sliding out of it, and it costs no horizontal room, which
-     is what let the portrait grow. The card's own 0.25rem of padding is spent
-     first, so the visible rise is this minus that. */
-  --artist-rise: 1.75rem;
-  position: relative;
-  /* Room for a portrait that is no longer in the flow — see below. The
-     top padding is deliberately small: the card is a list with a header, not a
-     panel, and the risen portrait already gives the top plenty of weight. The
-     BOTTOM is larger on purpose — it is the only thing separating the artist's
-     description from the notes, which are a different kind of text and need to
-     start somewhere the eye can find. */
-  padding: 0.625rem 0.5rem 1rem 6.125rem;
+/* The note's own one-line hook — what the WRITING is about, which the cover
+   never says. EXACTLY two lines: clamped so it cannot grow past a caption
+   into an article, floored so a one-line hook and a two-line one leave the
+   page the same height. */
+.cf-desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: calc(2 * 0.9375rem * 1.45);
+  max-width: 26rem;
+  margin: 0.4375rem auto 0;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
 }
 
-/* ABSOLUTE, not a flex item. As a flex child a negative margin would drag the
-   name and bio with it, and every attempt to push the text back moved the
-   portrait back by the same amount — the two cannot be separated while they
-   share a flow. Out of flow, the overhang and the text column are independent. */
+/* The record's own "At a glance" rows — Released, Album or Label, Length —
+   lifted out of the note's markdown rather than invented from frontmatter,
+   because `date:` is when the NOTE was written and not when the record came
+   out (lib/music-facts.ts). Label left, value right, in a column narrow
+   enough that the two stay a pair rather than becoming two lists. */
+/* Held at THREE ROWS, which is also what `MAX_FACTS` caps the parser at, so
+   the block is the same height on every note: the vault writes two rows or
+   three, and 27px of the page moving under the reader as they step between
+   them is exactly the jump this is here to stop. The two numbers are one
+   decision — change `MAX_FACTS` and this reservation together. */
+.cf-facts {
+  width: 100%;
+  min-height: calc(3 * (2 * 0.28125rem + 0.8125rem * 1.4));
+  max-width: 17rem;
+  margin: 1.25rem auto 0;
+  font-size: 0.8125rem;
+  text-align: left;
+}
+
+.cf-facts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  /* Stated, not inherited: the row height is half of the reservation above
+     and a leading it picks up from elsewhere would silently break it. */
+  line-height: 1.4;
+  padding: 0.28125rem 0;
+}
+
+/* ONE LINE EACH, ellipsised — the site's own answer to an overlong row, the
+   same one `.toc-link` gives, with the full string in a `title` tooltip and
+   the whole table on the note page a click away.
+
+   It is what makes the three-row reservation above actually hold: a value
+   free to wrap is a value free to add a line, and `Album · Таємний код.
+   Рубікон. Частина 1 (2019)` did exactly that — 18px of the page moving
+   under the reader on one card out of twenty-nine. A caption cannot promise
+   a fixed height and also print an arbitrarily long album title. */
+.cf-facts dt,
+.cf-facts dd {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.cf-facts dt {
+  flex: none;
+  color: var(--text-tertiary);
+}
+
+.cf-facts dd {
+  margin: 0;
+  min-width: 0;
+  font-weight: 500;
+  text-align: right;
+  color: var(--text);
+}
+
+/* ---- who the record is by ----
+   The shelf creator block's shape, so an artist here and an author there
+   read as the same kind of thing. It used to head a card of that artist's
+   rows and hang through its top edge; it now heads the DECK, in normal flow,
+   which is why `.artist-photo` is no longer positioned and the rise is gone.
+
+   A CENTRED COLUMN — portrait, then name, then the description under both,
+   all centred like the record's caption below the deck. It was a left-aligned
+   row for one pass and that put two different alignments on one page: the
+   caption centred, the artist ragged against it. The portrait leads, which in
+   a column means above the name.
+
+   No rule under it: the space does that job, exactly as `.creator` decided
+   (#86). */
+.artist-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  text-align: center;
+}
+
+/* Size comes from the component (`ArtistPhoto`), because the same portrait is
+   drawn at two sizes in two places — 2rem leading the toolbar's heading line
+   on a wide window, 3.5rem inside the artist block on a narrow one. */
 .artist-photo {
-  position: absolute;
-  top: calc(var(--artist-rise) * -1);
-  /* Flush with the card's own padding; the covers below are centred under it
-     by `--music-row-pad`, so the two stay one column. */
-  left: 0;
+  flex: none;
   display: grid;
   place-items: center;
-  width: var(--artist-photo);
-  height: var(--artist-photo);
   overflow: hidden;
   border-radius: var(--r-full);
   background: var(--surface);
-  /* It reads as sitting ON the card rather than in it. A shadow rather than a
-     ring: a ring would have to be the page's colour to look right off the card
-     and the card's to look right on it, and half of it is over each. */
+  /* It reads as sitting ON the page rather than in it. A shadow rather than
+     a ring, which would have to be two different colours to look right. */
   box-shadow:
     0 2px 6px rgb(0 0 0 / 0.18),
     0 8px 20px -8px rgb(0 0 0 / 0.28);
 }
 
 .artist-photo img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
 }
 
 .artist-initials {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--text-tertiary);
   letter-spacing: 0.02em;
+  color: var(--text-tertiary);
 }
 
 .artist-text {
+  /* The full column, so the description wraps at the page's measure rather
+     than at its own content width. */
+  width: 100%;
   min-width: 0;
 }
 
+/* One line, always — it is a name, and a name that wraps has taken a line
+   off the bio under it. Ellipsised rather than shrunk; the full string is on
+   the card's own accessible name either way. */
 .artist-name {
   margin: 0;
-  font-size: 1.0625rem;
+  overflow: hidden;
+  font-size: 0.9375rem;
   font-weight: 600;
   letter-spacing: -0.01em;
-  color: var(--text);
   line-height: 1.3;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--text);
 }
 
 /* The name opens the artist's People note when there is one. No underline at
-   rest — it sits in a card of its own and the portrait beside it is the same
-   target — but it answers the pointer like every other action here. */
+   rest — the portrait above it is the same target — but it answers the
+   pointer like every other action here. */
 .artist-link {
   color: inherit;
   text-decoration: none;
@@ -5879,129 +6080,141 @@ html[data-intro][data-intro-fast] .prose > .avatar {
   text-decoration-thickness: 1px;
 }
 
+/* ---- the bio, shown in FULL, in a slot as tall as the longest one ----
+
+   Not clamped. Every bio in the section is rendered into this one grid cell,
+   all but the live one hidden, so the cell measures the tallest of them — at
+   whatever width the window happens to be and in whichever language is
+   showing. Nothing here is a number, which is the point: clamping to N lines
+   and flooring at N was the first version and N depends on the width, the
+   language and whatever paragraph the owner writes next.
+
+   `visibility: hidden` rather than `display: none`, because a hidden ghost
+   still has to take up its space to be measured. They carry no portrait, so
+   the ghosts cost text and no image requests. */
+.artist-bio-slot {
+  display: grid;
+  margin-top: 0.125rem;
+}
+
+.artist-bio-slot > * {
+  grid-area: 1 / 1;
+}
+
+.artist-bio-ghost {
+  visibility: hidden;
+}
+
 .artist-bio {
-  margin: 0.1rem 0 0;
-  font-size: 0.875rem;
-  line-height: 1.45;
-  color: var(--text-secondary);
-}
-
-/* The date cell holds the New mark as well, to the LEFT of the date. It marks
-   the note's arrival, which is a fact about when — so it belongs with the other
-   one rather than trailing the title. */
-.music-meta {
-  grid-area: meta;
-  justify-self: end;
-  display: flex;
-  align-items: baseline;
-  gap: 0.375rem;
-  padding-left: 0.75rem;
-}
-
-/* The separator between the mark and the date, as a pseudo on the DATE rather
-   than an element between them. `NewBadge` renders nothing at all when a note
-   isn't new, so a middot written into the markup would strand itself in front
-   of every older row; `span + .music-date` can only match when the badge is
-   really there, including after it mounts on the client. */
-.music-meta > span + .music-date::before {
-  content: "·";
-  margin-right: 0.375rem;
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
   color: var(--text-tertiary);
 }
 
-/* The New mark, undressed.
-
-   `NewBadge` ships as a bordered chip, which is right where it follows a title
-   in a row of text and wrong here: beside the date it is a second boxed thing
-   in a corner that already has artwork, a format label and a card edge. Sitting
-   WITH the date, it should read as part of the same quiet line — so the border,
-   the fill and the padding go, and it takes the date's own colour and size.
-   What still marks it is the word.
-
-   Overridden here rather than in the component: the chip is correct on posts,
-   projects, music rows elsewhere and home, and this is the one place it sits
-   beside a date. A bare class beats the Tailwind utilities it is undoing —
-   `.music-meta > span` is (0,1,1) against `.ml-2`'s (0,1,0). */
-.music-meta > span {
-  margin-left: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: none;
-  font-size: 0.875rem;
-  font-weight: 400;
-  color: var(--text-tertiary);
-}
-
-.music-date {
-  font-size: 0.875rem;
-  color: var(--text-tertiary);
-  font-variant-numeric: tabular-nums;
-}
-
-/* Phones: the artwork comes down a step and the date loses the year, so the
-   text column keeps enough room to say something. */
 @media (max-width: 479px) {
-  .music-tracks {
-    --music-art: 38px;
-  }
-
-  .music-card {
-    --artist-photo: 4rem;
+  /* The covers come up close to the artist on a phone. The padding is only
+     here to keep the card shadows clear of the overflow clip, and those fall
+     DOWNWARD (`0 14px 34px -14px`), so the top needs almost none of it —
+     where on a 375px screen 28px of empty column is worth more than it costs
+     anywhere else. */
+  .cf-frame {
+    padding-top: 0.5rem;
+    padding-bottom: 1.5rem;
   }
 
   .artist-head {
-    --artist-rise: 1.5rem;
-    padding: 0.5rem 0.5rem 0.875rem 4.875rem;
+    gap: 0.375rem;
   }
 
-  .music-tracks a {
-    column-gap: 0.625rem;
+  /* Under a 480px window the caption is narrower than the 432px the longest
+     title needs, so two of them wrap. Reserved here rather than everywhere:
+     on a wider window that second line is 26px of air under every title for
+     a case that cannot happen. */
+  .cf-title {
+    min-height: calc(2 * 1.25rem * 1.3);
   }
 
-  .music-date {
-    font-size: 0.8125rem;
+  .cf-caption {
+    min-height: calc(var(--cf-caption-h) + 1.25rem * 1.3);
   }
 
-  /* The column gap already separates the date from the title; the extra inset
-     is 12px the title needs more. */
-  .music-meta {
-    padding-left: 0;
-  }
 
-  /* Track beats New on a narrow row. The date and the format label both say
-     something the row cannot say twice — the label is the only place the note's
-     kind appears, and the date is the only place its age does. "New" repeats
-     the date's job for a reader who can already see it, so it is the part that
-     goes when the row runs out of width. At 375px it and its separator are
-     ~46px of a 301px row, which is the difference between a whole title and a
-     truncated one. */
-  .music-meta > span,
-  .music-meta > span + .music-date::before {
-    display: none;
-  }
 }
+/* ---------- The toolbar on a phone ----------
+   `[ Search… ]  ( ◯ )  [ All ]` — and NO HEADING.
 
-/* A music note tints its own opening with its own cover — the same idea as
-   the section's track-list card, so a note and the list it came from read as
-   one place (DECISIONS #91).
+   "Notes on what I'm hearing" is 218px of an 18px sentence in a 327px row that
+   also has to carry a field, a portrait and a button; it wrapped to two lines,
+   and every way of making it fit was a compromise on something (15px type, a
+   56px search box too narrow to show its own placeholder, an ellipsis). Off
+   the phone entirely it is not missed: the page is titled Music, the covers
+   are plainly the subject, and the writing under them says the rest.
 
-   A WASH, NOT A CARD. `.creator` is deliberately a row with no border, fill
-   or radius, because two framed blocks stacked at the top of an article read
-   as a dashboard rather than the opening of something you're about to read
-   (#86) — so this dissolves on every side instead of ending at a rim, and
-   adds no height at all. The section page frames its wash; a note lets it
-   fade out. Neither is an accent (#64): both are artwork out of focus. */
-/* Anchored to `main`, not to `.page`: the page column is 39rem and the colour
-   is meant to be the room the note is in, not a panel behind it. `main` is
-   already full width, so `left: 0; right: 0` needs no `100vw` and can't
-   produce a horizontal scrollbar. `:has()` keeps the containing block on the
-   one route that has a wash, and `z-index: 0` holds the negative layer below
-   INSIDE main rather than letting it escape to the root — `position:
-   relative` alone would not. */
-main:has(.note-wash) {
-  position: relative;
-  z-index: 0;
+   It is still IN THE DOCUMENT, screen-reader only — the outline, the Cmd+K
+   heading index and the `#` anchor all read it, and none of that should
+   depend on how wide the window is. `display: none` would have taken it out
+   of all three.
+
+   The controls become `display: contents` so the field and the button are grid
+   items in their own right, one in each cheek, rather than a pair huddled in
+   the third column. */
+@media (max-width: 639px) {
+  .music-toolbar {
+    gap: 0.75rem;
+  }
+
+  .music-toolbar-title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .music-controls {
+    display: contents;
+  }
+
+  /* ONE SIZE FOR BOTH PILLS. They are already the same material — same
+     padding, same leading, same surface, same hairline — and on a phone they
+     are also the same shape, one at each end of the row with the portrait on
+     the midpoint between them. The field used to take its whole cheek, which
+     made it two and a third times the language button and left the row
+     lopsided around a portrait that is supposed to be its centre.
+
+     5.5rem is measured, not picked: 88px less 22px of padding and 2px of
+     hairline is 64px of content, which holds "Search…" (52.8px) and "Пошук…"
+     (55.5px) as well as every step the language label takes — "All", "ENG",
+     "UA", "RU". It also clears the row at 320px, the narrowest window worth
+     drawing for: 88 + 12 + 48 + 12 + 88 is 248px inside 272px of toolbar. */
+  .music-search,
+  .music-lang-button {
+    width: 5.5rem;
+    /* The floor and the ceiling the wide layout gives the field are both
+       wrong here — the width above is the whole answer. */
+    min-width: 0;
+    max-width: none;
+  }
+
+  .music-search {
+    grid-column: 1;
+    grid-row: 1;
+    /* Hard against the outside edges, so the gap either side of the portrait
+       is the same. Centring them in their cheeks would work too and reads as
+       two pills adrift rather than as the ends of a row. */
+    justify-self: start;
+  }
+
+  .music-lang-button {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+  }
 }
 
 .note-wash {
@@ -6038,7 +6251,7 @@ main:has(.note-wash) {
   }
 }
 
-/* Both washes arrive rather than appearing. A field of colour that cuts in at
+/* The wash arrives rather than appearing. A field of colour that cuts in at
    full strength is the one thing on the page that doesn't move like the rest
    of it — `.page-in` is already fading the article in around it.
 
@@ -6052,8 +6265,7 @@ main:has(.note-wash) {
   }
 }
 
-.note-wash img,
-.music-wash img {
+.note-wash img {
   /* --dur-slow, not a fourth duration typed in at the call site (#58). It is
      the step meant for things that travel far, and nothing on the page covers
      more ground than this does. */
@@ -6063,8 +6275,7 @@ main:has(.note-wash) {
 /* No entrance for a reader who asked for less motion, and none in print —
    in both cases the wash is simply already there at its full value. */
 @media (prefers-reduced-motion: reduce), print {
-  .note-wash img,
-  .music-wash img {
+  .note-wash img {
     animation: none;
   }
 }

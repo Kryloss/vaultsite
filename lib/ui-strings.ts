@@ -66,9 +66,14 @@ export const ui = {
      in both languages — a code is a label for the language itself, so
      translating "UA" into Ukrainian would be translating the thing being
      named. Only "All" and the prose below get a pair. */
-  /* Short enough to survive the field at its narrowest — the full sentence is
-     on the aria-label, which is where a screen reader looks anyway. */
-  musicSearch: { en: "Search artists, tracks…", uk: "Пошук виконавців…" },
+  /* ONE WORD, because the field is 5.5rem on a phone and it has to survive
+     there — the toolbar's two pills are the same size and that is the size.
+     Measured at the field's own 13px: "Search…" is 52.8px and "Пошук…" 55.5
+     against 64px of content box, so both fit with room to spare. The longer
+     sentence this used to be needed 164px of field and was clipped mid-word
+     at EVERY width, the 10rem desktop one included. The full sentence is on
+     the aria-label, which is where a screen reader looks anyway. */
+  musicSearch: { en: "Search…", uk: "Пошук…" },
   musicSearchLabel: {
     en: "Search artists, tracks, EPs and albums",
     uk: "Пошук виконавців, треків, EP та альбомів",
@@ -81,6 +86,10 @@ export const ui = {
   musicLangEn: { en: "English", uk: "Англійська" },
   musicLangUk: { en: "Ukrainian", uk: "Українська" },
   musicLangRu: { en: "Russian", uk: "Російська" },
+  /* Names the cover deck for assistive tech. Not a heading — the section
+     already has one ("Notes on what I'm hearing") and the deck is what sits
+     under it. */
+  musicDeck: { en: "Album covers", uk: "Обкладинки альбомів" },
   musicNoMatches: {
     en: "Nothing matches that. Try another word, or a different language.",
     uk: "Нічого не знайдено. Спробуйте інше слово або іншу мову.",

@@ -242,18 +242,72 @@ Important conventions:
   ending in the channel's own YouTube avatar for video notes — do not stop at
   one failed lookup. Detail in `CLAUDE.md` and `docs/CONTENT-WORKFLOW.md`;
   reasons in `docs/DECISIONS.md` #86.
-- The `music` section type groups its notes BY ARTIST — one card each, newest
-  artist first, tinted by that artist's newest cover, with an Apple-Music-style
-  track list inside. An artist's general description lives in the section's
-  `main.md` (`artists:`); a note's `artist_bio:` is about that record. The two
-  are different texts on purpose. A music NOTE opens like a shelf
-  note — an artist block from `artist:` plus a plain fact list — and tints its
-  own opening with its own cover, window-wide and dissolving rather than
-  framed. The Apple Music embeds carry no footer link of ours (#92). The tint is artwork in a frame, not
-  an accent — nothing reads from it, and the row hover is deliberately
-  translucent so it doesn't blank it. Detail in `CLAUDE.md`; reasons in
-  `docs/DECISIONS.md` #90.
-- The `/music` list is FILTERABLE: a search box plus ONE language button that
+- The `music` section page is a COVER DECK, not a list of artists: the notes'
+  album art raked away from a centred card (`components/Coverflow.tsx`). The
+  ARTIST — portrait, name, two lines of bio — heads the deck ABOVE the covers,
+  following whichever one is centred; the record's title, description and its
+  own "At a glance" rows print below it. It replaced twenty-six stacked
+  artist cards and a 7,137px page. Notes are still GROUPED BY ARTIST —
+  `groupByArtist()` sets the order and `flattenGroups()` only unrolls it, so an
+  artist's records stay adjacent; never re-sort the deck by date. The caption's
+  fact rows are lifted from the note's own markdown table
+  (`lib/music-facts.ts`) and merged EN/UK BY POSITION, because `date:` is when
+  the note was written and not when the record came out. Cards are real links
+  and fall back to a plain wrapped grid before hydration and with no JS; an
+  off-centre card centres rather than opens (`cursor: pointer` plus a veil on
+  `.cf-card::after` is what makes that discoverable — never a transform, and
+  never `.press`, since `paint()` owns the cards' `transform`).
+  There are NO pagination dots. **`.cf-stage` must keep `pointer-events: none`
+  and `.cf-card` `pointer-events: auto`**: under `preserve-3d` the stage's own
+  box sits at z = 0 in the children's 3D space, and every card but the centred
+  one is pushed behind it, so without this the stage swallows every press aimed
+  at an off-centre cover and click-to-centre cannot fire at all. That was the
+  actual cause of the bug below, and it also kept the hover veil from appearing.
+  Click-to-centre is otherwise decided on `pointerup`, in
+  the frame, from `data-cf-index` in the DOM — never in the click handler,
+  which is only a gate. Three rounds of fixes failed before that; don't move
+  the decision back. The five JS traps, all still real: a mouse press focuses
+  the link first, so
+  focus must centre only on `:focus-visible`; `endDrag` must not settle on a
+  press that never moved; the centre must be read from `centredRef`, never
+  `selected` or `targetRef`; `onPointerMove` must ignore movement under
+  `DRAG_SLOP`; and the tap-vs-drag test is on the OUTCOME (`TAP_TRAVEL`, a
+  fifth of a card of actual deck travel), never on how far the hand moved.
+  Card artwork is `position: absolute; inset: 0` so no card background can show
+  under it at fractional zoom. **The recession is painted on the ARTWORK, never
+  on the card**: `paint()` writes it to `--cf-fade`, which `.cf-card img` takes
+  as its `opacity` and which scales the box-shadow, over an opaque `--bg`
+  ground. Putting it on the card's own `opacity` made every cover a
+  translucent sheet you could see the next one through. Element `opacity` is
+  the teleport fade only. The toolbar's one-line rule is a 639px query
+  because the search field's intrinsic width, not the window, is what wrapped
+  the heading. **NOTHING ON THE PAGE MAY CHANGE HEIGHT**: the artist bio is
+  shown in full in a slot sized by hidden copies of every other bio
+  (`.artist-bio-slot`), the description is two lines, the fact list three rows
+  (so `MAX_FACTS` is 3 — that cap and the CSS reservation are one decision),
+  and fact values are one line ellipsised. The caption's floor is derived from
+  the type in `--cf-caption-h`; re-derive rather than nudge. The COVERS may
+  exceed `--measure`; the artist block may not — it is prose and sits in the
+  36rem page column. The artist's portrait sits in the MIDDLE of the TOOLBAR
+  row at every width (the block below has no picture), which is why that row is
+  a three-column grid and not a flex row; below 640px the heading is
+  screen-reader-only and the cheeks hold the search and the language button —
+  both at `width: 5.5rem`, one size, one at each end of the row. 88px less its
+  padding and hairline is 64px of content, which is why `ui.musicSearch` is
+  one word (`Search…` / `Пошук…`); the full sentence lives on the aria-label.
+  Every toolbar item must name its `grid-row` — auto-placement drops the search
+  to a second row otherwise (rendered twice, shown once, `display: none` on the
+  other so it is never fetched); `Coverflow`'s `onSelect` is what lets chrome
+  outside the deck follow the centred cover. An artist's general description
+  lives in the section's `main.md` (`artists:`); a note's `artist_bio:` is
+  about that record. The two are different texts on purpose. A music NOTE opens
+  like a shelf note — an artist block from `artist:` plus a plain fact list —
+  and tints its own opening with its own cover, window-wide and dissolving
+  rather than framed; the SECTION page has no wash any more, since a deck of
+  full-size covers is already the colour. The Apple Music embeds carry no
+  footer link of ours (#92). Detail in `CLAUDE.md`; reasons in
+  `docs/DECISIONS.md` #90, #103 and #123.
+- The `/music` deck is FILTERABLE: a search box plus ONE language button that
   CYCLES All → ENG → UA → RU on press, showing the current step — both on the
   heading's line, at every width, with the heading wrapping instead. Notes carry
   `lang:` (`en`/`uk`/`ru`, or a list), which is the SHELF a record belongs on
@@ -263,7 +317,8 @@ Important conventions:
   not filters and not chips, and each artist is auto-tagged at build time with
   the union of their notes' genres so "rap" returns rap artists. Search is the
   Cmd+K palette's two passes — literal word-prefix, then a labelled trigram
-  fallback. The list half is a client
+  fallback; the controls narrow the deck, and a new set of cards opens on its
+  own first card. The list half is a client
   component (`components/lists/MusicNotes.tsx`), so the pure shapes and the
   filter live in `lib/music-filter.ts`, which must never import `fs` — the same
   split, for the same reason, as `lib/dates.ts` against `lib/vault.ts`. The

@@ -105,6 +105,20 @@ export interface MusicArtist {
   photoSrcSet?: string;
 }
 
+/**
+ * One row of a note's "At a glance" table, in both languages.
+ *
+ * Extracted from the note's own markdown at build time (lib/music-facts.ts)
+ * rather than written in frontmatter: the release year, the album a track sits
+ * on and its running time are already authored there, on every note and in
+ * both languages. The shape lives here with the others because the cover
+ * deck's caption renders it in the browser.
+ */
+export interface MusicFact {
+  label: Str;
+  value: Str;
+}
+
 export interface MusicNote {
   slug: string;
   title: string;
@@ -121,6 +135,8 @@ export interface MusicNote {
   cover?: string;
   coverBlur?: string;
   coverSrcSet?: string;
+  /** The note's own fact rows — Released, Album/Label, Length. May be empty. */
+  facts?: MusicFact[];
 }
 
 export interface ArtistGroup {
@@ -290,4 +306,32 @@ export function artistInitials(name: string): string {
   const first = words[0][0] ?? "";
   const last = words.length > 1 ? (words[words.length - 1][0] ?? "") : "";
   return (first + last).toUpperCase();
+}
+
+/**
+ * One card in the cover deck: a note, and whoever made it.
+ *
+ * The page is still GROUPED by artist — `groupByArtist()` decides the order
+ * and nothing here re-sorts it — but the deck is a flat run of covers, so an
+ * artist's records simply sit next to each other in it. Flattening rather than
+ * re-sorting by date is what keeps that adjacency: two Noize MC records stay
+ * together instead of being separated by whatever was written between them.
+ */
+export interface MusicSlide {
+  /** The note's slug — unique within the section, so it is the React key. */
+  key: string;
+  note: MusicNote;
+  /** Undefined for a note that names no artist. The card still shows. */
+  artist?: MusicArtist;
+}
+
+/** Groups → the deck, in group order, each group's notes newest-first. */
+export function flattenGroups(groups: ArtistGroup[]): MusicSlide[] {
+  const out: MusicSlide[] = [];
+  for (const group of groups) {
+    for (const note of group.notes) {
+      out.push({ key: note.slug, note, artist: group.artist });
+    }
+  }
+  return out;
 }

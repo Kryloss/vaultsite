@@ -40,7 +40,7 @@ import type { ShelfItem } from "@/lib/shelf";
  *   one is a lie about a real object.
  *
  * The furniture supplies nothing: one `--border` hairline is the whole shelf,
- * no wood and no shadow under a plank. Same discipline as `.music-wash`.
+ * no wood and no shadow under a plank. Same discipline as `.note-wash`.
  *
  * Real text, top-to-bottom (`writing-mode: vertical-rl`, no transform — the
  * North American convention and the one with no rotation to get wrong), so a

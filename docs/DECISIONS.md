@@ -2311,3 +2311,377 @@ audit must find no editor endpoints or client copy in JavaScript and no editor
 controls in static HTML; dormant global CSS is harmless without a mounted
 component. Attachments remain outside this contract for the transaction reasons
 in #118.
+
+## 123. /music is a cover deck, not a list of artists (2026-09-02)
+
+**The section page was twenty-six stacked artist cards and it was 7,137px
+tall.** One card per artist, each with a risen portrait, a biography and — for
+all but three of the twenty-six — a single 44px track row underneath. The
+grouping itself was right and stays (#103): what a music page is asked is
+"what is he listening to", and that question is about artists. What was wrong
+was the ratio. Twenty-nine records took seven screens to list, and the
+ARTWORK, the one thing a music page has that the posts list does not, was a
+thumbnail inside a card whose main visual event was a blurred copy of that
+same thumbnail.
+
+**The covers are the page now.** `components/Coverflow.tsx` rakes them away
+from a centred card in 3D — Apple's own Cover Flow, adapted from ruixen.ui's
+implementation — and everything the cards used to carry is printed under
+whichever cover is centred. The page is 1,713px.
+
+**It is still grouped by artist.** `groupByArtist()` decides the order and
+`flattenGroups()` only unrolls it, so an artist's records sit next to each
+other in the deck exactly as they sat under one heading. Nothing re-sorts by
+date; that would scatter the pairs.
+
+**Whose record, above; what the record is, below.** The ARTIST — portrait,
+then name, then their description — heads the deck, following whichever cover
+is centred. A CENTRED COLUMN, matching the record's caption below the covers:
+it was a left-aligned row for one pass and that put two alignments on one page,
+the caption centred and the artist ragged against it. The portrait leads, which
+in a column means above the name. The caption under it is about the RECORD: title and `· Album` (the
+section's established pairing), the note's `description`, then the record's
+own **"At a glance" rows** — Released, Album or Label, Length.
+
+The artist went on top rather than under the caption because that is what the
+block is: the artist cards it replaced were headings with records under them,
+and the grouping is still the page's spine. One artist at a time instead of
+twenty-six at once.
+
+The fact rows are LIFTED FROM THE NOTE'S MARKDOWN (`lib/music-facts.ts`),
+not built from frontmatter, and that is the one non-obvious choice here.
+`date:` is the day the NOTE was written, not the day the record came out, so a
+caption row labelled "Released" cannot be built from it honestly. The rows
+already exist on all twenty-nine notes and in both languages, so this needed
+nothing authored. They are merged EN/UK **by position**, the convention
+`lib/now-content.ts` already uses — and a table whose two languages have a
+different number of rows falls back to English throughout rather than merging
+what it can, because sliding values up by one prints "Тривалість 2024", a
+wrong fact, which is worse than an untranslated right one.
+
+`genres:` is deliberately NOT a caption row. #117 says genres are search
+terms and are never rendered, and that still holds — the deck's search still
+matches on them.
+
+**The blurred `.music-wash` went with the cards.** It existed to give a card
+its colour when the artwork inside it was thumbnail-sized. A deck of full-size
+covers is already the colour, and a tint behind it would be the same picture
+twice. The NOTE page keeps its own wash (#91): that page has no artwork on it
+at all, which is the case the wash is for.
+
+**Three adaptations of the reference worth keeping straight.**
+
+The cards are REAL LINKS, not divs. All twenty-nine are `<a href>` in the
+static HTML, and until the component sets `data-ready` in a layout effect the
+deck lays out as a plain wrapped grid of covers. The rake is written straight
+to `style.transform`, so without that fallback every card would stack on one
+spot — a crawler, a Reader mode and a JS-off reader would see one cover. This
+site has no backend and every list it draws has to survive with no JS.
+
+**THE CARDS ARE OPAQUE OBJECTS, and the recession is painted on the ARTWORK
+rather than on the card.** It shipped the obvious way — `paint()` wrote the
+distance fade to the card's own `style.opacity` — and that made every cover
+but the centred one a translucent sheet. Reported as "when covers overlap you
+can see through them", and that is exactly what it was: wherever two covers
+met, the darker one behind came through the face of the one in front, and its
+shadow came with it. A record is a physical object in this layout, and a stack
+of album sleeves is not something you can see into.
+
+So `paint()` writes the fade to a `--cf-fade` custom property, `.cf-card img`
+carries it as its own `opacity`, and the card keeps an OPAQUE ground the
+colour of the page (`background: var(--bg)`, not `--surface`, which would show
+as a card-shaped plate once the artwork faded off it). Against the page the
+result is identical to what it was — a cover blended into the background by
+exactly the same amount — but a card now HIDES what is behind it, because it
+is a solid thing the colour of the page rather than a hole in one. The
+box-shadow is scaled by the same property, since it used to recede for free
+while the whole element carried the opacity.
+
+Element `opacity` is left to one job: the teleport fade at half a turn out,
+where a card genuinely has to stop existing, ground and all. It is 1 for every
+card a reader can see. The `pointer-events`/`tabIndex` cutoff still tests the
+PRODUCT of the two, so nothing about which cards are reachable changed.
+
+**The general shape of this mistake:** `opacity` on an element is not "make
+this dimmer", it is "make this see-through", and the two are only the same
+thing when nothing is behind it. On anything that overlaps a sibling, fade the
+contents against an opaque ground instead.
+
+Clicking an OFF-CENTRE card centres it instead of opening it. That is the
+original Cover Flow behaviour and it is also the honest one: a card turned 60°
+away and half faded is not something you can read well enough to choose. A
+card faded past 6% is additionally given `pointer-events: none` and
+`tabIndex -1`, so an invisible cover can neither swallow a click meant for the
+one behind it nor take a Tab stop.
+
+That behaviour shipped invisible and had to be given an affordance: every card
+inherited the frame's `cursor: grab` and had no hover state, so nothing said a
+cover could be pressed at all. It is `cursor: pointer` now, with a `color-mix`
+veil on `.cf-card::after` — the same formula the old track rows hovered with.
+**`cursor: grab` is gone from the frame entirely**: the frame is a much bigger
+target than the covers — the padding above and below them, and the widening
+gaps between the receded ones — so it was telling everyone the deck's only
+gesture was dragging, over an area where mostly you want to press a cover. The
+grab hand appears only once a drag is genuinely under way.
+
+**AND IT DID NOT WORK — through three rounds of fixes, and then a fourth that
+found the real cause somewhere else entirely.** Worth writing down in full,
+because every round found a genuine bug, fixed it, and still left pressing a
+cover doing nothing. The reason it took three is that each test written to
+prove the fix dispatched a bare `click`, or a click without focus, or one
+without a plausible amount of hand movement — and a mouse produces all three
+together. The reason none of them helped is item 6: an off-centre cover was
+never receiving the press in the first place, so no amount of reasoning about
+what to do with it could show up.
+
+**The resolution was structural, not another patch: the decision moved to
+`pointerup`.** The frame records which cover the press landed on (from
+`data-cf-index` in the DOM, not from React) and how far the pointer then
+travelled; on release it settles a drag, or sends an off-centre cover to the
+middle, or — for a press on the centred cover — does nothing and lets the link
+open the note. The per-card `onClick` is now a gate that carries out that
+decision and nothing else. By release the gesture is over, so nothing depends
+on focus order, on React being a render behind, or on where the click happens
+to land.
+
+The individual bugs, all real and all fixed on the way:
+
+1. **A mouse press focuses the link.** `onFocus` centred the card, so by the
+   time the `click` arrived the card WAS the centred one and the handler let it
+   through to the note. Focus now only centres when
+   `matches(":focus-visible")` — the browser's own answer to "did this come
+   from the keyboard", which is exactly the question being asked.
+2. **`endDrag` settled on every release.** A press that never moved is not a
+   drag, and settling there told the deck to stay put — the answer arrived
+   before the click that asked it to travel. It now returns early unless the
+   gesture actually passed the threshold.
+3. **The comparison was against a moving target.** `onClick` asked "is this
+   card already the centred one", and neither React's `selected` (a render
+   behind) nor `targetRef` (overwritten with the live position by every
+   `pointerdown`) could answer it. There is a `centredRef` now, written only by
+   `settle` and by a real drag.
+
+4. **`onPointerMove` ran from the first pixel**, so two pixels of hand-wobble
+   rewrote the centre to whatever card was nearest the deck's current position,
+   and the click compared itself against that. Under `DRAG_SLOP` nothing
+   happens at all now — no movement, no repaint, no centre change — and
+   crossing the threshold rebases the gesture so the deck starts from rest
+   instead of jumping the slop's width.
+5. **`DRAG_SLOP` was 6px, and that is inside the noise of a real click.** A
+   press off a trackpad routinely drifts a few pixels, which read as a drag:
+   the deck moved imperceptibly, the click was swallowed to stop a drag opening
+   a note, and pressing a cover did nothing at all. It is 10px now, which is
+   roughly where browsers put their own drag threshold and for the same
+   reason.
+6. **AND THE ACTUAL CAUSE WAS IN THE CSS, not in any of that.** Every fix
+   above is real and every one of them was necessary, but none of them could
+   ever have worked, because **an off-centre cover was not hit-testable at
+   all.** `.cf-stage` carries `transform-style: preserve-3d`, which keeps its
+   own box in the same 3D space as its children, at z = 0 — and `paint()`
+   pushes every card except the centred one BEHIND that plane with a negative
+   `translateZ`. So the stage sat in front of all of them: `elementFromPoint`
+   over the middle of any receded cover returned `.cf-stage`, never the card.
+   The centred card is the only one coplanar with the stage, and being a later
+   sibling it wins — which is exactly the one card whose press is supposed to
+   open its note, so the deck looked like it was ignoring only the presses that
+   were meant to travel.
+
+   `.cf-stage` takes `pointer-events: none` now and `.cf-card` opts back in
+   with `pointer-events: auto`. A press on empty deck falls through to
+   `.cf-frame`, which is what runs the drag anyway, so dragging is unchanged.
+   Two symptoms, one cause: the hover veil on `.cf-card::after` never fired on
+   an off-centre cover either, which is why the affordance work above kept
+   reading as ineffective. The tell was that the centred cover always
+   worked and no other cover ever did — a JS decision that got it wrong would
+   not sort so cleanly by depth.
+
+   **The lesson to carry:** under `preserve-3d` the parent is not a container,
+   it is a sibling plane. Anything a child is pushed behind will swallow its
+   pointer events. Before debugging a press that never arrives, ask
+   `elementFromPoint` what is actually there — three rounds of this were spent
+   fixing the code that runs after the event, on an event that was never
+   dispatched.
+A VEIL rather than a transform, because `paint()` owns `transform` on that
+element and rewrites it every frame; a CSS hover transform would be
+overwritten mid-drag. For the same family of reasons the cards must never take
+`.press`.
+
+Pointer capture waits for real movement rather than starting on `pointerdown`.
+The cards are links, and a captured pointer retargets the compatibility mouse
+events — the `click` among them — at the capturing element, which browsers do
+not agree on the timing of. Capturing only past the drag threshold means a
+plain click never enters capture at all.
+
+**There are no pagination dots.** The reference has them and they shipped
+first, as one per record with the note's own title as its label. Twenty-nine
+of them under the covers read as a progress bar for something that is not a
+sequence, and the deck already has three ways to move: press a cover, drag,
+or the arrow keys. Removed at the owner's request; nothing replaced them.
+
+**Nothing on this page may change height.** That is a requirement, not a
+polish pass: a reader stepping through the deck or pressing the language
+button was watching the page grow and shrink under them by up to 150px. Every
+variable block is now pinned to a line count, and the numbers are DERIVED from
+the type rather than measured, written out term by term in `--cf-header-h` and
+`--cf-caption-h` so re-deriving them is one line of arithmetic:
+
+- the artist's bio is shown IN FULL, in a slot as tall as the longest bio the
+  section holds. `.artist-bio-slot` is one grid cell containing the live bio
+  and a hidden copy of every other one, so the cell measures the tallest of
+  them at whatever width the window is and in whichever language is showing.
+  Clamping to N lines and flooring at N was the first version and it truncated
+  bios; N also depends on the width, the language, and whatever paragraph gets
+  written next, so it is three numbers that go stale silently. The ghosts cost
+  about 13KB of text and no image requests — only the live block has a
+  portrait — and they are right without being told anything.
+- the description is exactly two lines, the fact list exactly three rows.
+  `MAX_FACTS` is 3 for this reason and the two are ONE decision — a fourth row
+  rendering would defeat the reservation.
+- a fact's value is one line, ellipsised, with the full string in its
+  `title` — the answer `.toc-link` already gives. `Album · Таємний код.
+  Рубікон. Частина 1 (2019)` wrapped and moved the page 18px on one card in
+  twenty-nine. A caption cannot promise a fixed height and also print an
+  arbitrarily long album title.
+- the dots NEVER wrap. The count changes with the filter — twenty-nine covers
+  become four — and a row that wrapped at twenty-nine and not at four would
+  move everything under it. `nowrap` plus shrinkable dots and a fluid gap.
+- `.cf-caption` carries the sum as its own floor as well, because a note is
+  allowed to have no description and no fact table, and then those elements
+  are not rendered at all and their own floors hold nothing up.
+
+The title is the one thing left natural, because it is one line at any width
+where one line is enough: the longest, `Найгірша пісня про любов · Track`, is
+383px against the caption's 480px. Below a 480px WINDOW the caption is
+narrower than the 432px it needs, so the phone block reserves a second line
+there and only there — 26px of air under every title on a desktop would be
+paying everywhere for a case that cannot happen.
+
+Measured after the fact, at 1280px and at 375px, in both languages, across all
+twenty-nine cards and all four filter steps: page height, deck position,
+header height and caption height are each a single value. Slack lands at the
+foot of the caption, where nothing has to be looked at.
+
+**The COVERS are the one thing allowed past `--measure`**, and that is derived
+rather than taken: 39rem is a comfortable line of PROSE, and a cover is not
+prose. The artist block above them is — a portrait and a paragraph — so it is
+held to the page column (36rem, `--measure` less its two gutters) and reads
+inside the same borders as everything else on the site. It was 46rem for one
+pass, chosen to fit the longest bio in three lines, and overhung the column by
+160px. `--cf-width` is `min(72rem, 100vw - var(--gutter) * 2)`, so it
+can never produce a horizontal scrollbar, and it is centred on the column by a
+negative margin measured against `100%`. At 60rem only two cards a side
+cleared the frame, which is not a fan.
+
+**What was kept exactly as it was:** the search box and the cycling language
+button, including the flag-coloured RU (#117) — they now narrow the deck
+instead of the list, and a new set of cards starts at its own first card.
+
+`j`/`k` no longer walk this page: they find rows through `.stagger` and a deck
+is not a list. The arrow keys drive it instead, and #65 already covers a page
+with no list without swallowing the key.
+
+**Phones get their own three adjustments**, all of them the same problem —
+327px of column and three things that each want more of it than they can have.
+The covers come up close under the artist (`.cf-frame` keeps 0.5rem of top
+padding, since the card shadows fall downward and only the bottom needs
+clearing) — 28px of empty column is worth more on a phone than anywhere else.
+The toolbar heading is held to ONE LINE: "Notes on what I'm hearing" needs
+218px at its 18px and the row could spare 144, so the gap drops to 0.5rem, the
+search's floor to 3.5rem and the heading to 15px, which needs 187 of the 199
+that leaves. What actually squeezed it was not flex sizing but the field's
+INTRINSIC contribution — an input reports a content width of about 170px, the
+controls asked for that, and the shrink came off the sentence — so the field
+declares its `width` as well as a zero basis, and grows into whatever the
+heading leaves rather than taking it first.
+
+**The tap-vs-drag test is on the OUTCOME, not the intent** — and that is what
+finally fixed pressing a cover. Thresholding the pointer's movement kept
+failing the same way ("when I click it starts dragging instead of scrolling to
+the cover"), because any hand can travel further than a threshold while plainly
+meaning to press something, and past it the deck would shuffle a few pixels,
+snap back to the card it was already on, and swallow the click that would have
+travelled. `DRAG_SLOP` (10px) now only decides when the deck starts *following*
+the pointer; `TAP_TRAVEL` decides what the gesture *was*. If the deck ends up
+within a fifth of a card of where the press started it, that is a press on
+whichever cover it began on, however far the hand wandered getting there — a
+drag that goes nowhere and a click are the same request. Verified with a
+gesture that travels 25px out and back: it centres the cover it started on.
+
+**The artwork is pinned to the card, not sized to it.** `width/height: 100%`
+left it depending on the card's box resolving to exactly the square
+`aspect-ratio` asks for, and at some browser zoom levels it did not — the card
+came out slightly taller and its `--surface` background showed as a grey band
+across the foot of every cover. `position: absolute; inset: 0` cannot be
+shorter than what it fills, whatever the box rounds to, so there is nothing
+left to show through. The fallback card is `position: relative` rather than
+`static` so it stays the containing block for it.
+
+**The toolbar's one-line rule is a 639px query, not 479.** The search FIELD was
+what wrapped the heading, not the window: an input reports an intrinsic content
+width of about 170px and `flex-basis: auto` let it ask the row for all of it,
+so the shrink came off the sentence — the heading was already losing at 540px,
+well above any phone. The field takes the leftovers instead (`flex-basis: 0`
+plus a declared `width`, since it is the intrinsic contribution that does the
+damage), and only below 480px does the heading itself step down to 15px.
+Measured at 375/430/500/560/1280: one line, untruncated, in both languages.
+
+**The toolbar is a three-column grid at EVERY width, with the artist's
+portrait in the middle column.** What fills the two cheeks is the only thing
+that changes:
+
+    ≥640px    Notes on what I'm hearing  —  ( ◯ )  —  [ Search… ] [ All ]
+    <640px    [ Search…             ]    —  ( ◯ )  —             [ All ]
+
+**On a phone the heading is not drawn.** "Notes on what I'm hearing" is 218px
+of an 18px sentence in a 327px row that also has to carry a field, a portrait
+and a button; it wrapped to two lines, and every way of making it fit was a
+compromise on something else — 15px type, a 56px search box too narrow to show
+its own placeholder, an ellipsis. Off the phone entirely it is not missed: the
+page is titled Music, the covers are plainly the subject, and the writing under
+them says the rest. It stays IN THE DOCUMENT, screen-reader only, because the
+outline, the Cmd+K heading index and its `#` anchor all read it and none of
+that should depend on how wide the window is — `display: none` would have taken
+it out of all three. The controls become `display: contents` there so the field
+and the button are grid items in their own right, one in each cheek, rather
+than a pair huddled in the third column.
+
+**Every item names its ROW as well as its column**, which is not decoration:
+the portrait comes before the controls in the markup but sits in the middle
+column, so sparse auto-placement had already stepped past column 1 by the time
+it reached the search field and dropped it onto a second row — an 86px toolbar
+with the portrait alone above the two controls.
+
+**The portrait is now the only one on the page.** It briefly existed twice, in
+the toolbar and in the artist block, shown one at a time by width; the block
+below carries the name and the description and no picture.
+
+Original note, from when this was a wide-window-only arrangement: from 640px
+the artist's portrait sits in the middle of the toolbar line —
+`Notes on what I'm hearing — ( ◯ ) — [search] [All]` — at 3rem, with their name
+and description staying centred under it.
+
+The toolbar is a THREE-COLUMN GRID there (`1fr auto 1fr`), not the flex row it
+is on a phone, and that is what the centring costs: in a flex row the portrait
+would only ever sit wherever the heading happened to end, which moves with the
+language and with nothing else changing. Two equal cheeks put the middle column
+on the row's true midpoint whatever they hold — measured at 0px off centre in
+both languages, where the heading is 211px in English and 172 in Ukrainian. The
+search field gives up 3rem of its width (13rem to 10rem) to pay for the
+portrait, which is what leaves each cheek 248px against a heading needing 218
+and controls needing 224. The block below loses a row and the
+covers come up by the height of a portrait (the header went 164px to 100px).
+Below 640px the row has no width to spare and the portrait goes back to
+leading the block, which is the same query that holds the heading to one line.
+
+Two consequences worth knowing. The portrait is rendered TWICE and shown once,
+because the two sit in different parents and CSS cannot move a node between
+them; whichever is not showing is `display: none`, so it is never fetched
+(#95), and they share a URL, so changing width costs one request at most. And
+the deck now has to tell the page which cover is centred — `Coverflow` takes an
+`onSelect`, held in a ref and called imperatively, so a fresh closure every
+render costs nothing and cannot loop an effect. The toolbar copy is inside an
+`aria-hidden` box and is deliberately NOT a link: a focusable control inside
+hidden content is a trap for anyone tabbing, and the artist's People note is
+still one press away from their name below. It also carries its own width, so
+a note naming an artist `main.md` has never heard of leaves an empty box
+rather than collapsing the row and sliding the heading left.
