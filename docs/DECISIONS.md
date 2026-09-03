@@ -2416,8 +2416,22 @@ one behind it nor take a Tab stop.
 
 That behaviour shipped invisible and had to be given an affordance: every card
 inherited the frame's `cursor: grab` and had no hover state, so nothing said a
-cover could be pressed at all. It is `cursor: pointer` now, with a `color-mix`
-veil on `.cf-card::after` — the same formula the old track rows hovered with.
+cover could be pressed at all. It is `cursor: pointer` now.
+
+It was `cursor: pointer` AND a `color-mix` veil on `.cf-card::after` — the same
+formula the old track rows hovered with — and **the veil has since been removed
+at the owner's request**: "don't make covers grey on hover". The artwork is the
+whole point of this page and a tint over a record sleeve dulls the one thing
+the deck exists to show. The pseudo-element went with it, since the veil is the
+only thing it was ever for, and so did the `data-cf-hover` attribute WebKit
+needed for it — `markHover()` now writes only the frame's inline cursor.
+
+That makes **the cursor load-bearing rather than decorative**: it is the sole
+remaining signal that a cover is a target, in both the engines that can hover a
+raked card and the one that cannot. Don't remove it, and if a response ever has
+to come back, it must not be a tint and it must not be a `transform` — `paint()`
+owns `transform` on the card and rewrites it every frame, which is the same
+reason a card must never take `.press`.
 **`cursor: grab` is gone from the frame entirely**: the frame is a much bigger
 target than the covers — the padding above and below them, and the widening
 gaps between the receded ones — so it was telling everyone the deck's only

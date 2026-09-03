@@ -250,27 +250,29 @@ export default function Coverflow({
     return cardAtPoint(boxes, x, y);
   }, []);
 
-  /** The cover currently wearing the fallback hover veil, if any. */
+  /** The cover the pointer is over, if any. */
   const hoverRef = useRef<number | null>(null);
 
   /**
    * The pointer's answer to a cover, for the engine that cannot give one.
    *
-   * `.cf-card:hover::after` and the card's `cursor: pointer` are resolved by
-   * the same hit test that WebKit refuses the raked cards, so in Safari a
-   * cover off the centre says nothing at all when the pointer is over it —
-   * the affordance and the press were one bug the first time round
-   * (DECISIONS #123) and they are one bug here too. Where the browser has
-   * hit-tested the card itself there is nothing to do: its own `:hover` is
-   * already drawing this, and we leave the frame's cursor alone.
+   * The card's `cursor: pointer` is resolved by the same hit test WebKit
+   * refuses the raked cards, so in Safari a cover off the centre says nothing
+   * at all when the pointer is over it — the affordance and the press were one
+   * bug the first time round (DECISIONS #123) and they are one bug here too.
+   * The frame takes an inline cursor instead. Where the browser has hit-tested
+   * the card itself there is nothing to do: its own `cursor` already says it,
+   * and we leave the frame's alone.
+   *
+   * The CURSOR IS ALL THIS DOES now. It used to also mark the card with
+   * `data-cf-hover` for a `color-mix` veil, and that veil was removed at the
+   * owner's request — a tint over a record sleeve dulls the artwork the page
+   * exists to show. Which makes this the only thing telling a Safari reader a
+   * cover is a target, so it is load-bearing rather than a nicety.
    */
   const markHover = useCallback((index: number | null) => {
     if (hoverRef.current === index) return;
-    const previous =
-      hoverRef.current === null ? null : cardRefs.current[hoverRef.current];
-    previous?.removeAttribute("data-cf-hover");
     hoverRef.current = index;
-    if (index !== null) cardRefs.current[index]?.setAttribute("data-cf-hover", "");
     const frame = frameRef.current;
     if (frame) frame.style.cursor = index === null ? "" : "pointer";
   }, []);

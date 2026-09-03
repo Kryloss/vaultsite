@@ -5674,8 +5674,10 @@ html[data-intro][data-intro-fast] .prose > .avatar {
    deck's `pointerdown` reads which cover was pressed off `data-cf-index`, and
    for an off-centre card there was no card in the event's path to read — so
    the press was indistinguishable from one on empty deck. It also took the
-   hover veil on `.cf-card::after` with it, which is why nothing said a cover
-   could be pressed either. One cause, both symptoms.
+   hover veil `.cf-card::after` carried at the time with it, which is why
+   nothing said a cover could be pressed either. One cause, both symptoms.
+   (That veil is gone now for an unrelated reason — see the note further
+   down; the cursor is the affordance.)
 
    `pointer-events: none` here takes the stage out of hit-testing entirely and
    the cards opt back in below; a press on empty deck now lands on `.cf-frame`,
@@ -5719,7 +5721,8 @@ html[data-intro][data-intro-fast] .prose > .avatar {
      `pointerEvents` inline on a card faded past 6% and clears it again — an
      empty inline value falls back to this, so the two never fight. */
   pointer-events: auto;
-  /* Not the frame's `grab`: a cover is a target. See `.cf-card::after`. */
+  /* Not the frame's `grab`: a cover is a target. Since the hover veil was
+     removed this is the ONLY thing that says so — see the note below. */
   cursor: pointer;
   /* Album art is a physical object in Apple's layout; two shadows, a tight
      edge and a wide soft one, are what keep a white cover from dissolving
@@ -5741,43 +5744,24 @@ html[data-intro][data-intro-fast] .prose > .avatar {
   }
 }
 
-/* The pointer's answer to a cover, and the reason the deck reads as
-   clickable at all: pressing an off-centre card brings it to the centre and
-   pressing the centred one opens its note, but every card inherited the
-   frame's `grab` and had no hover state, so neither was discoverable.
+/* NO HOVER VEIL ON A COVER, and nothing else may be tempted back in either.
 
-   A VEIL, not a transform. `paint()` owns `transform` on this element and
-   rewrites it every frame, so a CSS hover transform would be overwritten
-   mid-drag. The colour is the `color-mix` the old track rows used, so the
-   response is the site's own and works on either theme without a second
-   token. On a pseudo-element, so it is clipped by the card's own radius. */
-.cf-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: transparent;
-  pointer-events: none;
-  transition: background var(--dur-fast) var(--ease);
-}
+   A `color-mix` scrim on `.cf-card::after` used to wash the cover under the
+   pointer, as the affordance saying a cover could be pressed. It was removed
+   at the owner's request: the artwork is the whole point of this page, and a
+   tint over a record sleeve dulls the one thing the deck exists to show. The
+   pseudo-element went with it, because the veil is the only thing it was ever
+   for.
 
-/* `data-cf-hover` is the same state, written by `Coverflow` for the engine
-   that will not resolve `:hover` here. WebKit does not hit-test a cover
-   `paint()` has pushed behind the stage's plane, so in Safari every card but
-   the centred one is inert to the pointer — no veil, and the card's own
-   `cursor: pointer` never applies either (the frame takes an inline one
-   instead). See `lib/coverflow.ts` and DECISIONS #123. */
-@media (hover: hover) and (pointer: fine) {
-  .cf-card:hover::after,
-  .cf-card[data-cf-hover]::after {
-    background: color-mix(in srgb, var(--text) 12%, transparent);
-  }
-}
+   THE AFFORDANCE IS NOW THE CURSOR ALONE — `cursor: pointer` on the card, and
+   the inline one `markHover()` puts on the frame for WebKit, which cannot
+   resolve `:hover` on a raked card at all. That makes the cursor load-bearing
+   rather than decorative: it is the only thing left that says a cover is a
+   target, so do not remove it too.
 
-@media (prefers-reduced-motion: reduce) {
-  .cf-card::after {
-    transition: none;
-  }
-}
+   If a response ever has to come back, it must not be a tint and it must not
+   be a `transform` — `paint()` owns `transform` on this element and rewrites
+   it every frame, which is also why a card must never take `.press`. */
 
 /* PINNED TO THE CARD, not merely sized to it.
 

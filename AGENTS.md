@@ -254,9 +254,12 @@ Important conventions:
   (`lib/music-facts.ts`) and merged EN/UK BY POSITION, because `date:` is when
   the note was written and not when the record came out. Cards are real links
   and fall back to a plain wrapped grid before hydration and with no JS; an
-  off-centre card centres rather than opens (`cursor: pointer` plus a veil on
-  `.cf-card::after` is what makes that discoverable — never a transform, and
-  never `.press`, since `paint()` owns the cards' `transform`).
+  off-centre card centres rather than opens. **`cursor: pointer` is the ONLY
+  affordance** — the `color-mix` veil that used to sit on `.cf-card::after` was
+  removed at the owner's request (a tint dulls the artwork), and the
+  pseudo-element with it. Don't restore the veil and don't drop the cursor. If
+  a response ever returns it must not be a transform and never `.press`, since
+  `paint()` owns the cards' `transform`.
   There are NO pagination dots. **`.cf-stage` must keep `pointer-events: none`
   and `.cf-card` `pointer-events: auto`**: under `preserve-3d` the stage's own
   box sits at z = 0 in the children's 3D space, and every card but the centred
@@ -267,7 +270,9 @@ Important conventions:
   centred one — so the press is resolved from the cards' own boxes instead
   (`cardAtPoint()` in `lib/coverflow.ts` answers first; `closest()` is only
   the fallback for the sub-pixel seam between two boxes), and the hover veil
-  is marked with `data-cf-hover` for the same reason. Verify anything touching this in WebKit, not only in Chromium.
+  is answered by an inline cursor `markHover()` puts on the frame for the same
+  reason (it marked `data-cf-hover` for a veil until that veil was removed).
+  Verify anything touching this in WebKit, not only in Chromium.
   For the same reason `user-select: none` sits on `.cf-frame`, not `.cf-stage`:
   the frame takes the press now, and a press on empty deck was anchoring a text
   selection that the drag swept into the artist block and caption. It inherits,
