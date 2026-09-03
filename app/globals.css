@@ -5622,6 +5622,25 @@ html[data-intro][data-intro-fast] .prose > .avatar {
   /* Vertical padding keeps the card shadows clear of the overflow clip. */
   padding-block: 2.5rem;
   overflow: hidden;
+  /* NOTHING IN THE DECK IS SELECTABLE, and it is declared HERE rather than on
+     the stage because the frame is the DRAG SURFACE. A press that lands on
+     empty deck — the padding above and below the covers, and the widening gaps
+     between the receded ones — anchors a text selection if the element under
+     it is selectable, and dragging the deck then sweeps that selection up into
+     the artist block and down into the caption, greying both. Reported as
+     "when I am scrolling it accidentally selects texts and covers".
+
+     It became reachable when `.cf-stage` took `pointer-events: none` to make
+     the covers hit-testable: before that, a press on empty deck landed on the
+     stage, which carried this rule. The stage no longer takes the press, so
+     the rule belongs on the thing that does.
+
+     One declaration, not three: `user-select` INHERITS, so this is also what
+     keeps the stage and the covers unselectable. There is no visible text
+     inside the frame, so nothing is lost — the caption and the artist bio sit
+     outside it and stay selectable, which is what the site's copy-link-to-
+     selection pill is for. */
+  user-select: none;
 }
 
 /* NO `cursor: grab` at rest. It used to sit on the whole frame, which is a
@@ -5665,7 +5684,9 @@ html[data-intro][data-intro-fast] .prose > .avatar {
   position: relative;
   height: var(--cf-card);
   transform-style: preserve-3d;
-  user-select: none;
+  /* `user-select: none` is inherited from `.cf-frame` — see the note there.
+     It is declared on the drag surface because that is where a stray
+     selection starts, and stating it twice is how the two would drift. */
   pointer-events: none;
 }
 

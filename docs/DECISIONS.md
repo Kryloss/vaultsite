@@ -2489,6 +2489,19 @@ The individual bugs, all real and all fixed on the way:
    `.cf-stage` takes `pointer-events: none` now and `.cf-card` opts back in
    with `pointer-events: auto`. A press on empty deck falls through to
    `.cf-frame`, which is what runs the drag anyway, so dragging is unchanged.
+
+   **It moved `user-select: none` as well, and that had to follow it.** The
+   rule sat on `.cf-stage`, which used to take every press on empty deck; once
+   the stage stopped taking them, a press on the padding above or below the
+   covers landed on a selectable `.cf-frame` and anchored a text selection,
+   and dragging the deck then swept it up into the artist block and down into
+   the caption — both went grey, portrait included. Reported as "when I am
+   scrolling it accidentally selects texts and covers". The rule belongs on
+   whatever takes the press, so it is on `.cf-frame` now, declared ONCE:
+   `user-select` inherits, so that is also what keeps the stage and the covers
+   unselectable. The caption and the artist bio sit outside the frame and stay
+   selectable, which is right — they are content, and the site's
+   copy-link-to-selection pill is for exactly that.
    Two symptoms, one cause: the hover veil on `.cf-card::after` never fired on
    an off-centre cover either, which is why the affordance work above kept
    reading as ineffective. The tell was that the centred cover always
