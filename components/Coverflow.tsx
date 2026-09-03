@@ -10,6 +10,8 @@ import {
   type ReactNode,
 } from "react";
 
+import { cardAtPoint, type CardBox } from "@/lib/coverflow";
+
 /**
  * A Cover Flow deck: square artwork raked away from a centred card in 3D.
  *
@@ -212,6 +214,67 @@ export default function Coverflow({
     [count]
   );
 
+  /**
+   * Which cover is under a point, asked of the cards' own boxes.
+   *
+   * Used whenever the browser's own hit test comes back with no card, which on
+   * WEBKIT IS EVERY OFF-CENTRE COVER: Safari will not hit-test a card that
+   * `paint()` has pushed behind `.cf-stage`'s plane, on the phone or on the
+   * desktop, and returns `.cf-frame` instead. The press then arrived with
+   * nothing to travel to and the deck sat still — which is `.cf-stage`'s
+   * `pointer-events: none` fix (DECISIONS #123) working in Chromium and
+   * Firefox and doing nothing at all in the engine most phones run.
+   *
+   * The boxes are right everywhere — WebKit's `getBoundingClientRect()` for
+   * the raked cards matches Chromium's to the pixel — so where the engine will
+   * not answer, the geometry does. Read fresh on each press: it is twenty-nine
+   * rect reads once per gesture, never per frame.
+   *
+   * A card `paint()` has faded out of hit-testing is skipped, so this cannot
+   * hand back a cover the reader can neither see nor click.
+   */
+  const cardAt = useCallback((x: number, y: number) => {
+    const boxes: CardBox[] = [];
+    cardRefs.current.forEach((card, index) => {
+      if (!card || card.style.pointerEvents === "none") return;
+      const rect = card.getBoundingClientRect();
+      boxes.push({
+        index,
+        z: Number(card.style.zIndex) || 0,
+        left: rect.left,
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+      });
+    });
+    return cardAtPoint(boxes, x, y);
+  }, []);
+
+  /** The cover currently wearing the fallback hover veil, if any. */
+  const hoverRef = useRef<number | null>(null);
+
+  /**
+   * The pointer's answer to a cover, for the engine that cannot give one.
+   *
+   * `.cf-card:hover::after` and the card's `cursor: pointer` are resolved by
+   * the same hit test that WebKit refuses the raked cards, so in Safari a
+   * cover off the centre says nothing at all when the pointer is over it —
+   * the affordance and the press were one bug the first time round
+   * (DECISIONS #123) and they are one bug here too. Where the browser has
+   * hit-tested the card itself there is nothing to do: its own `:hover` is
+   * already drawing this, and we leave the frame's cursor alone.
+   */
+  const markHover = useCallback((index: number | null) => {
+    if (hoverRef.current === index) return;
+    const previous =
+      hoverRef.current === null ? null : cardRefs.current[hoverRef.current];
+    previous?.removeAttribute("data-cf-hover");
+    hoverRef.current = index;
+    if (index !== null) cardRefs.current[index]?.setAttribute("data-cf-hover", "");
+    const frame = frameRef.current;
+    if (frame) frame.style.cursor = index === null ? "" : "pointer";
+  }, []);
+
   const paint = useCallback(() => {
     const width = widthRef.current;
     if (!width || !count) return;
@@ -361,12 +424,26 @@ export default function Coverflow({
     suppressClickRef.current = false;
     targetRef.current = posRef.current;
 
-    /* Which cover was pressed, taken from the DOM rather than from a per-card
-       handler. The frame sees every press, so one place knows both what was
-       pressed and how far it then travelled — which is what deciding this on
-       release requires. */
+    /* Which cover was pressed, taken from the frame rather than from a
+       per-card handler. The frame sees every press, so one place knows both
+       what was pressed and how far it then travelled — which is what deciding
+       this on release requires.
+
+       THE GEOMETRY ANSWERS FIRST, and the browser's own hit test is the
+       fallback rather than the other way round. Engines disagree about which
+       card is under a point once `paint()` has raked it into 3D — WebKit
+       reaches none of them but the centred one, and where it does answer it
+       is sometimes a card out — while they agree to the pixel about where the
+       boxes ARE. Measuring is therefore the one answer that is the same
+       everywhere, which for a press is worth more than exactness in the
+       engine that happens to be in front of you. `closest()` covers what
+       geometry cannot: the sub-pixel seam between two boxes, where the
+       browser knows a card is under the point and the rectangles say nothing
+       is. See `cardAt`. */
     const hit = (event.target as Element | null)?.closest?.("[data-cf-index]");
-    const card = hit ? Number((hit as HTMLElement).dataset.cfIndex) : null;
+    const card =
+      cardAt(event.clientX, event.clientY) ??
+      (hit ? Number((hit as HTMLElement).dataset.cfIndex) : null);
 
     dragRef.current = {
       id: event.pointerId,
@@ -382,7 +459,17 @@ export default function Coverflow({
 
   const onPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
     const drag = dragRef.current;
-    if (!drag || drag.id !== event.pointerId) return;
+    if (!drag || drag.id !== event.pointerId) {
+      /* Not a gesture — just the pointer crossing the deck. A finger has no
+         hover, and a card the browser hit-tested itself already has one. */
+      if (ready && event.pointerType !== "touch") {
+        const over = (event.target as Element | null)?.closest?.(
+          "[data-cf-index]"
+        );
+        markHover(over ? null : cardAt(event.clientX, event.clientY));
+      }
+      return;
+    }
 
     const pitch = widthRef.current * (1 + gap);
     if (!pitch) return;
@@ -407,6 +494,9 @@ export default function Coverflow({
          `click` among them — at the capturing element, which browsers do not
          agree on the timing of. A plain click never enters capture at all. */
       event.currentTarget.setPointerCapture(event.pointerId);
+      /* The deck is moving now, so the frame's own `grabbing` should show
+         rather than the inline `pointer` a hovered cover left behind. */
+      markHover(null);
       drag.captured = true;
       drag.x = event.clientX;
       drag.pos = posRef.current;
@@ -533,6 +623,7 @@ export default function Coverflow({
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
+        onPointerLeave={() => markHover(null)}
         onKeyDown={(event) => {
           if (event.key === "ArrowLeft") {
             event.preventDefault();

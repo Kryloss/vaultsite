@@ -2514,6 +2514,59 @@ The individual bugs, all real and all fixed on the way:
    `elementFromPoint` what is actually there — three rounds of this were spent
    fixing the code that runs after the event, on an event that was never
    dispatched.
+7. **And in WebKit that fix does nothing, because Safari will not hit-test the
+   raked cards at all.** Reported after (6) shipped, as covers on the left and
+   right doing nothing on the phone AND on the desktop — which is the tell:
+   that is not two platforms, it is one engine, since every iPhone browser is
+   WebKit and so is Safari on the Mac.
+
+   Measured rather than guessed, by running the page in WebKit and asking it
+   the same question (6) was found with. `document.elementFromPoint()` over
+   the middle of every off-centre cover returns `.cf-frame` — past the card,
+   past the stage, straight to the bottom of the deck. Only the centred cover,
+   the one card `paint()` leaves coplanar with the stage at z = 0, is ever
+   hit-testable. So `.cf-stage { pointer-events: none }` is doing exactly what
+   it was written to do (the stage no longer swallows anything) and Safari
+   still hands the press to the frame with no card in its path, which leaves
+   `endDrag` nothing to send to the middle. Chromium answers 287 of 288
+   sample points across the deck correctly; WebKit answers 67.
+
+   **So the deck stops asking the browser and measures instead.**
+   `cardAtPoint()` in `lib/coverflow.ts` takes the cards' own boxes and
+   returns the frontmost one containing the press — `getBoundingClientRect()`
+   is right in every engine, and WebKit's boxes for these cards match
+   Chromium's to the pixel. Twenty-nine rect reads, once per press, never per
+   frame.
+
+   **The geometry answers first and the browser's hit test is the fallback**,
+   not the other way round. That ordering was the second version and it is the
+   right one: engines disagree about which card is under a point (WebKit
+   reaches only the centred one, and in the band where it does answer it is
+   sometimes a card out) while agreeing to the pixel about where the boxes
+   are, so measuring is the one answer that is the same everywhere — which for
+   a press is worth more than being exactly right in whichever engine happens
+   to be in front of you. `closest()` still covers the case geometry cannot:
+   the sub-pixel seam between two boxes, where the browser knows a card is
+   under the point and the rectangles say nothing is.
+
+   Chromium's own hit test is what the rule was tuned against — frontmost-box
+   agrees with it at 287 of 288 sample points, the miss being exactly that
+   1px seam; nearest-centre, the other candidate rule, is wrong at three
+   points. The boxes barely overlap in practice, which is why so simple a rule
+   is exact.
+
+   **The affordance is the same bug again**, as it was in (6): `:hover` and
+   `cursor: pointer` are resolved by the hit test WebKit is refusing, so in
+   Safari an off-centre cover said nothing when the pointer was over it.
+   `Coverflow` marks the geometric answer with `data-cf-hover`, which wears
+   the same veil, and sets the frame's cursor — both only when the browser's
+   own answer came back empty, so Chromium and Firefox keep using `:hover`.
+
+   **The lesson on top of (6)'s:** a hit-testing fix verified in one engine is
+   verified in one engine. Anything that depends on hit-testing a 3D-
+   transformed element has to be run in WebKit before it is believed, because
+   this is precisely where the engines disagree — and the geometry, which they
+   agree on, is available to ask instead.
 A VEIL rather than a transform, because `paint()` owns `transform` on that
 element and rewrites it every frame; a CSS hover transform would be
 overwritten mid-drag. For the same family of reasons the cards must never take

@@ -263,6 +263,11 @@ Important conventions:
   one is pushed behind it, so without this the stage swallows every press aimed
   at an off-centre cover and click-to-centre cannot fire at all. That was the
   actual cause of the bug below, and it also kept the hover veil from appearing.
+  **WEBKIT ignores that fix and hit-tests none of the raked cards** — only the
+  centred one — so the press is resolved from the cards' own boxes instead
+  (`cardAtPoint()` in `lib/coverflow.ts` answers first; `closest()` is only
+  the fallback for the sub-pixel seam between two boxes), and the hover veil
+  is marked with `data-cf-hover` for the same reason. Verify anything touching this in WebKit, not only in Chromium.
   For the same reason `user-select: none` sits on `.cf-frame`, not `.cf-stage`:
   the frame takes the press now, and a press on empty deck was anchoring a text
   selection that the drag swept into the artist block and caption. It inherits,
