@@ -429,14 +429,21 @@ export default function Coverflow({
        what was pressed and how far it then travelled — which is what deciding
        this on release requires.
 
-       The DOM's own answer first, and the cards' boxes when it has none:
-       WebKit hands back the frame for every off-centre cover rather than the
-       card, and without the fallback there is nothing for the release to send
-       to the middle. See `cardAt`. */
+       THE GEOMETRY ANSWERS FIRST, and the browser's own hit test is the
+       fallback rather than the other way round. Engines disagree about which
+       card is under a point once `paint()` has raked it into 3D — WebKit
+       reaches none of them but the centred one, and where it does answer it
+       is sometimes a card out — while they agree to the pixel about where the
+       boxes ARE. Measuring is therefore the one answer that is the same
+       everywhere, which for a press is worth more than exactness in the
+       engine that happens to be in front of you. `closest()` covers what
+       geometry cannot: the sub-pixel seam between two boxes, where the
+       browser knows a card is under the point and the rectangles say nothing
+       is. See `cardAt`. */
     const hit = (event.target as Element | null)?.closest?.("[data-cf-index]");
-    const card = hit
-      ? Number((hit as HTMLElement).dataset.cfIndex)
-      : cardAt(event.clientX, event.clientY);
+    const card =
+      cardAt(event.clientX, event.clientY) ??
+      (hit ? Number((hit as HTMLElement).dataset.cfIndex) : null);
 
     dragRef.current = {
       id: event.pointerId,

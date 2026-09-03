@@ -265,9 +265,9 @@ Important conventions:
   actual cause of the bug below, and it also kept the hover veil from appearing.
   **WEBKIT ignores that fix and hit-tests none of the raked cards** — only the
   centred one — so the press is resolved from the cards' own boxes instead
-  (`cardAtPoint()` in `lib/coverflow.ts`, used only when the browser names no
-  card), and the hover veil is marked with `data-cf-hover` for the same
-  reason. Verify anything touching this in WebKit, not only in Chromium.
+  (`cardAtPoint()` in `lib/coverflow.ts` answers first; `closest()` is only
+  the fallback for the sub-pixel seam between two boxes), and the hover veil
+  is marked with `data-cf-hover` for the same reason. Verify anything touching this in WebKit, not only in Chromium.
   Click-to-centre is otherwise decided on `pointerup`, in
   the frame, from `data-cf-index` in the DOM — never in the click handler,
   which is only a gate. Three rounds of fixes failed before that; don't move

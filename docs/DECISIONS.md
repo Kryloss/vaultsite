@@ -2522,16 +2522,25 @@ The individual bugs, all real and all fixed on the way:
    `cardAtPoint()` in `lib/coverflow.ts` takes the cards' own boxes and
    returns the frontmost one containing the press — `getBoundingClientRect()`
    is right in every engine, and WebKit's boxes for these cards match
-   Chromium's to the pixel. It is a FALLBACK, not a replacement: where the
-   browser names a card, that answer is used, so nothing changes in the
-   engines that were already right. Twenty-nine rect reads, once per press,
-   never per frame.
+   Chromium's to the pixel. Twenty-nine rect reads, once per press, never per
+   frame.
+
+   **The geometry answers first and the browser's hit test is the fallback**,
+   not the other way round. That ordering was the second version and it is the
+   right one: engines disagree about which card is under a point (WebKit
+   reaches only the centred one, and in the band where it does answer it is
+   sometimes a card out) while agreeing to the pixel about where the boxes
+   are, so measuring is the one answer that is the same everywhere — which for
+   a press is worth more than being exactly right in whichever engine happens
+   to be in front of you. `closest()` still covers the case geometry cannot:
+   the sub-pixel seam between two boxes, where the browser knows a card is
+   under the point and the rectangles say nothing is.
 
    Chromium's own hit test is what the rule was tuned against — frontmost-box
-   agrees with it everywhere except one pixel of rounding between two cards,
-   where nearest-centre (the other candidate rule) is wrong at three points.
-   The boxes barely overlap in practice, which is why so simple a rule is
-   exact.
+   agrees with it at 287 of 288 sample points, the miss being exactly that
+   1px seam; nearest-centre, the other candidate rule, is wrong at three
+   points. The boxes barely overlap in practice, which is why so simple a rule
+   is exact.
 
    **The affordance is the same bug again**, as it was in (6): `:hover` and
    `cursor: pointer` are resolved by the hit test WebKit is refusing, so in
