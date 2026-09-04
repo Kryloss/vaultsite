@@ -5,6 +5,7 @@
  * (dates for posts, titles elsewhere), so there's nothing extra to maintain
  * in Obsidian.
  */
+import { entryMedium, isShelfSection } from "./shelf";
 import { getEntries, getSectionBySlug, type Entry, type Section } from "./vault";
 
 export interface EntryRef {
@@ -22,6 +23,31 @@ function toRef(section: Section, entry: Entry): EntryRef {
 }
 
 /**
+ * The run of entries this note's arrows walk — the whole section, except on
+ * the SHELF, where it is the note's own MEDIUM.
+ *
+ * The shelf keeps books, movies, shows and videos in one date-ordered list, so
+ * a book's plain neighbours were whatever happened to be shelved either side
+ * of it: Fight Club's "previous" was Death Note, and 11/22/63's "next" was
+ * Arcane. Nothing on the site reads the shelf that way — the section page is
+ * one row per medium and every medium has its own page — so the arrows walk
+ * the row you are actually in.
+ *
+ * Notes with NO medium (the section root, which the section page shows as its
+ * own unsorted row) are each other's neighbours, for the same reason: the pool
+ * is the row, whichever row that is.
+ */
+export function siblingPool(
+  section: Section,
+  entries: Entry[],
+  entry: Entry
+): Entry[] {
+  if (!isShelfSection(section)) return entries;
+  const medium = entryMedium(entry);
+  return entries.filter((e) => entryMedium(e) === medium);
+}
+
+/**
  * The entries before and after this one, in the section's own order.
  *
  * "Previous" means previous *in the list* — for posts, which sort newest
@@ -35,7 +61,10 @@ export function getSiblings(
   const section = getSectionBySlug(sectionSlug);
   if (!section) return {};
 
-  const entries = getEntries(section);
+  const entry = getEntries(section).find((e) => e.slug === entrySlug);
+  if (!entry) return {};
+
+  const entries = siblingPool(section, getEntries(section), entry);
   const i = entries.findIndex((e) => e.slug === entrySlug);
   if (i === -1) return {};
 

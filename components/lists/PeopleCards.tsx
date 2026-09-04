@@ -25,8 +25,9 @@ export interface PersonRow {
  * Presentational half of the people list: category chips + one card per
  * person. From 640px that is the portrait beside a panel laid over its inner
  * edge carrying the name and the note's one-line description — two cards to a
- * row, scaled to fit the page column rather than widening it. Below 640px it
- * is one full-width portrait with a small name card in its top-right corner.
+ * row, scaled to fit the page column rather than widening it. Below 640px the
+ * card becomes the portrait alone with a small name card in its top-right
+ * corner — still two to a row.
  * See DECISIONS #125.
  *
  * No hooks, so it renders the same on the server (as the Suspense fallback in
@@ -90,9 +91,9 @@ export default function PeopleCards({
                   <img
                     src={row.cover}
                     srcSet={row.coverSrcSet}
-                    /* The column on a phone; a little under half of half of
-                       it in the two-up grid above 640px. */
-                    sizes="(max-width: 640px) 90vw, 140px"
+                    /* Two to a row at every width: half the phone column on a
+                       phone, half of half the page column above 640px. */
+                    sizes="(max-width: 640px) 45vw, 140px"
                     alt={row.title}
                     /* Full colour at rest. These used to carry
                        `.person-photo`, which held them at `grayscale(0.3)`

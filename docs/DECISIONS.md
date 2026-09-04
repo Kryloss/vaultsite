@@ -2934,71 +2934,119 @@ faces and the writing lived one click away — but the section is small, each
 note is a considered piece about one person, and a 200px thumbnail with a
 clipped subtitle said nothing about any of them.
 
-**What shipped: the square portrait with a small card in its top-right corner
-carrying the name. Two to a row from 640px, one below it.**
+**What shipped is two compositions, one each side of 640px.**
 
-It took three passes to get there, and the two shapes it left behind are worth
-not rebuilding.
+**From 640px, the row card, two to a row:** the square portrait beside a
+`--surface` panel laid over its inner edge, carrying the name and the note's
+one-line description. The overlap is the whole idea — two rectangles that
+overlap read as one object with a front and a back, where two side by side
+read as a table.
 
-**The wide row-card.** The first version, and the arrangement the owner asked
-for from a reference image: the portrait beside a `--surface` panel laid over
-its inner edge, carrying the name, the description and the opening of the
-note. Two rectangles that overlap read as one object with a front and a back,
-where two side by side read as a table — that part was right, and it is why
-the corner card still overlaps the artwork rather than sitting under it.
+**Below 640px, the portrait alone with a small name card in its top-right
+corner.** The row card has nowhere to go there: a phone column is 327px, so a
+card is about 157px and the panel beside the portrait would be the width of a
+word. So the portrait takes the whole card and the panel becomes the same
+front plate, small enough to sit on the artwork — type a step down, insets and
+radius halved, or a 15px name in a 12px box covers the top third of a face.
+The description is hidden rather than dropped — over a photograph it is a
+caption competing with the picture it captions, and it is one tap away on the
+note. Hidden by CSS, because one markup has to serve both compositions on a
+static site: the same arrangement the two languages and the two footnote
+treatments use, with `display` set on the wrapper and never on the `.lang-*`
+spans inside it.
 
-**Widening the page to fit two of them.** Two row-cards do not fit in a 39rem
-prose column — 288px each holds neither a portrait nor a paragraph — so the
-list was briefly allowed past `--measure`, the way the cover deck is (#123).
-Reverted. The deck earns that because a wall of album art is not prose and has
-nothing else on the page to line up with; this list sits directly under its
-own title and description, and breaking the page's left edge for it made the
-section look like a different site. **Two fit by scaling the card instead**,
-which is the whole of the fix: at 280px the portrait is still a face, and a
-panel beside it would be a panel the width of a word — so the text moved onto
-the artwork.
+**Two to a row at every width, phones included.** The grid is the one thing
+that does not change across the breakpoint — only what sits inside a cell
+does. A one-up phone list was tried and it made the section a page you scroll
+through a screen at a time to read one name; at 158px a square portrait is
+still a face, which is the thing you are scanning for.
 
-**And the card says the name, nothing else.** The description and the note's
-opening went with the panel. At 280px they are three or four lines of type
-over a photograph, which is a caption competing with the picture it captions;
-both are one tap away on the note, and the description still drives the hover
-preview (#85) and the OG card. On phones this was the owner's instruction
-outright — "only display name" — and once the desktop card is the same size as
-the phone card there is no second answer to give.
+**Two fit by scaling the card, never by widening the page.** Two row cards at
+their original size do not fit in a 39rem prose column, so the list was
+briefly allowed past `--measure`, the way the cover deck is (#123). Reverted.
+The deck earns that because a wall of album art is not prose and has nothing
+else on the page to line up with; this list sits directly under its own title
+and description, and breaking the page's left edge for it made the section
+look like a different site. The card is 280px instead, and everything in it is
+smaller: portrait at 50% (140px), name 0.9375rem, description 0.8125rem.
 
-`lib/people.ts` was deleted with them rather than left behind. `personBlurb()`
-walked past a note's `## At a glance` table to its first real paragraph,
-because the generic excerpt in `lib/previews.ts` flattens whatever comes first
-and printed `At a glance Born January 21, 1991 — Vasylivka…` on the card. It
-was correct, it was tested, and it now has no caller: `git log` has it if the
-card ever grows back, and until then it is not a parser sitting in `lib/` with
-nothing to parse.
+**And the panel says the name and the description, nothing more.** It carried
+the opening of the note as well for one pass — lifted out of the markdown by
+`personBlurb()` in `lib/people.ts`, a parser that walked past the
+`## At a glance` fact table because the generic excerpt in `lib/previews.ts`
+flattens whatever comes first and printed `At a glance Born January 21, 1991 —
+Vasylivka…` on the card. It worked, and at 144px of text it was three clipped
+lines of 12px type: a card apologising for not being the note. The description
+is one written sentence that fits whole (three lines at this width, printed
+entire), and the writing belongs on the note. That file and its test are
+deleted rather than left as dead code; `git log` has both if the card ever
+grows back.
+
+The description is line-clamped at four as a safety valve only, so a long one
+can't stand the panel taller than the portrait — the panel is the thing in
+front, and it should not be the taller of the two (measured 102 against 140).
+The clamp is safe here in a way it is not on the link-preview card (#85),
+because nothing in this box floats.
 
 **Details worth keeping.** The corner card is opaque `--surface`, not the
 shelf badge's dark scrim (#84): a scrim is for a mark small enough to read as
 part of the artwork, and this is a card sitting on top of it. It takes a
 `max-width`, not a width, so it is as wide as the name in whichever language
 is showing and a long one wraps inside the corner instead of reaching across
-the face. The New mark is the `chip` shape rather than `cover` — the card's
-own corner is exactly where a cover badge would go, and inside the card the
-mark really does follow a title in a row of text, which is what that shape is
-for.
+the face. The New mark is the `chip` shape rather than `cover` — on a phone
+the card takes exactly the corner a cover badge would use, and inside the
+panel the mark really does follow a title in a row of text, which is what that
+shape is for.
 
-One trap from the wide version, kept because it will come back the moment
-anything here is stacked again: a panel that is a *later sibling* than the
-portrait still paints behind it, because an `<img>` paints in a later layer
-than a sibling's background. It needs `position: relative` and a z-index of
-its own.
+One trap: the panel is a *later sibling* than the portrait and still paints
+behind it without help, because an `<img>` paints in a later layer than a
+sibling's background. It needs `position: relative` and a z-index of its own;
+nothing else in the card is positioned.
 
 **The photographs are full colour at rest, and `.person-photo` is deleted.**
 Portraits in this list sat at `grayscale(0.3) contrast(1.04)` and returned to
 full colour on hover — one of the two hover-only colour exceptions in #56, and
 the older half of it. It is gone at the owner's request, and the card is why
 it was right to go: a person on a page about that person should look like
-themselves at rest, and at this size the desaturation read as a filter applied
-to the photograph rather than as restraint. The class had no other user — it
-was people-list-only — so nothing else moved, but two comments elsewhere
-described it as "the greyscale exception on the grid" and are corrected in the
-same change; the hover scale's easing moved to `.person-card-art img`, since a
+themselves at rest, and the desaturation read as a filter applied to the
+photograph rather than as restraint. The class had no other user — it was
+people-list-only — so nothing else moved, but two comments elsewhere described
+it as "the greyscale exception on the grid" and are corrected in the same
+change; the hover scale's easing moved to `.person-card-art img`, since a
 Tailwind `group-hover:` utility declares no transition of its own. **#56 is
 now the social icons alone**, and #64 has one fewer thing standing beside it.
+
+## 126. A shelf note's arrows walk its own medium (2026-09-04)
+
+The entry footer's `‹ prev / next ›` links have always been the section's own
+list, one step either way. That is right everywhere except the shelf, which is
+the one section holding four different kinds of thing in a single
+date-ordered list: books, movies, shows and videos, sorted by the day the note
+was written. So the arrows under *Fight Club* offered *Death Note*, and the
+arrow under *11/22/63* offered *Arcane* — a book handing you a cartoon because
+they were shelved in the same week.
+
+`siblingPool()` in `lib/siblings.ts` narrows the run to `entryMedium()` on a
+shelf section and returns the whole list everywhere else. Nothing else about
+the footer moved.
+
+**Why the medium and not the section.** Nothing on the site reads the shelf as
+one list. The section page is one row per medium (#54, #110), each medium has
+its own page, and the movie and show pages open on their own Top list (#113) —
+by the time a reader is inside a note they have already chosen books, or
+movies, so the arrows should walk the row they chose. This is the same reason
+the breadcrumb names the section and not the medium (#65): the medium is where
+you are, not a place you passed through.
+
+**Notes with no medium are each other's neighbours.** A note at the section
+root gets `undefined` from `entryMedium()`, and the filter groups those
+together rather than special-casing them — which is exactly the "unsorted" row
+the section page already draws. The pool is the row, whichever row that is.
+
+Cost: eight shelf notes now show one arrow instead of two, because four rows
+have two ends each rather than one list having two. That is the honest shape.
+
+`lib/siblings.test.ts` covers the three cases — a medium, the unsorted row,
+and every other section walking its whole list — because the vault exercises
+only the first and a green build would say nothing if the arrows started
+crossing mediums again.

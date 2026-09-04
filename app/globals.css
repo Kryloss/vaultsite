@@ -3760,8 +3760,8 @@ a.series-link:hover {
 /* ---------- People cards (components/lists/PeopleCards.tsx) ---------- */
 
 /* From 640px: the portrait beside a panel laid over its inner edge, carrying
-   the name, the description and the opening of the note — two cards to a row.
-   Below 640px: one full-width portrait with a small name card in its top-right
+   the name and the note's one-line description — two cards to a row. Below
+   640px: one full-width portrait with a small name card in its top-right
    corner instead.
 
    THE OVERLAP IS THE WHOLE IDEA. Two rectangles that overlap read as one
@@ -3777,10 +3777,15 @@ a.series-link:hover {
    has nothing else on the page to line up with, whereas this list sits
    directly under its own title and description, and breaking the page's left
    edge for it made the section look like a different site. So the card is 280px
-   and everything in it is smaller — the portrait, the name, the type. The two
-   text blocks are line-clamped rather than shortened at the source, since the
-   number of lines that fits is a property of the card and the string is a
-   property of the note.
+   and everything in it is smaller — the portrait, the name, the type.
+
+   AND THE PANEL SAYS THE NAME AND THE DESCRIPTION, NOTHING MORE. It carried
+   the opening of the note as well for one pass, lifted out of the markdown by
+   a parser that walked past the `## At a glance` table (`lib/people.ts`, now
+   deleted — `git log` has it). At 144px of text a paragraph is three clipped
+   lines of 12px type, which is a card apologising for not being the note; the
+   description is one written sentence that fits whole. The note is one tap
+   away, and it is where the writing belongs.
 
    No accent anywhere in here (#64), and the photographs are full colour at
    rest — `.person-photo`'s desaturation was the older half of #56 and is gone,
@@ -3854,36 +3859,21 @@ a.series-link:hover {
   color: var(--text);
 }
 
+/* Clamped at four lines as a safety valve, not as the normal case: the
+   vault's descriptions run to three at this width and are printed whole. It
+   exists so a long one can't stand the panel taller than the portrait — the
+   panel is the thing in front, so it should not be the taller of the two.
+   Safe here in a way it is not on the link-preview card (#85), because nothing
+   in this box floats. */
 .person-card-role {
-  margin-top: 0.25rem;
-  font-size: 0.75rem;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+  margin-top: 0.3125rem;
+  font-size: 0.8125rem;
   line-height: 1.4;
   color: var(--text-tertiary);
-}
-
-.person-card-blurb {
-  margin-top: 0.5rem;
-  font-size: 0.75rem;
-  line-height: 1.5;
-  color: var(--text-secondary);
-}
-
-/* Clamped so the panel stays about as tall as the portrait beside it — the
-   panel is the thing in front, so it should not be the taller of the two.
-   Safe here: nothing in this box floats, which is what made the same clamp
-   unusable on the link-preview card (#85). */
-.person-card-role {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-}
-
-.person-card-blurb {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  overflow: hidden;
 }
 
 /* Under the pointer the hairline lifts and the portrait leans in a little
@@ -3893,19 +3883,18 @@ a.series-link:hover {
   border-color: var(--text-tertiary);
 }
 
-/* On a phone the row card has nowhere to go: half a phone column is a
-   thumbnail, and a full-width card with the panel beside it leaves the panel
-   the width of a word. So one per row, the portrait at full width, and the
-   panel becomes a SMALL NAME CARD in its top-right corner — the same front
-   plate, small enough to sit on the artwork.
+/* On a phone the row card has nowhere to go: at 157px the panel beside the
+   portrait would be the width of a word. So the portrait takes the whole card
+   and the panel becomes a SMALL NAME CARD in its top-right corner — the same
+   front plate, small enough to sit on the artwork. Two to a row here as well:
+   the grid never changes, only what is inside a cell.
 
-   The description and the note's opening are hidden rather than dropped: at
-   327px they would be four lines of type over a photograph, a caption
-   competing with the picture it captions, and both are one tap away on the
-   note. Hidden by CSS because one markup has to serve every width on a static
-   site — the same arrangement the two languages and the two footnote
-   treatments use — and `display` is set on the WRAPPERS, never on the
-   `.lang-en`/`.lang-uk` spans inside them, which the language toggle owns.
+   The description is hidden rather than dropped: over a photograph it is a
+   caption competing with the picture it captions, and it is one tap away on
+   the note. Hidden by CSS because one markup has to serve both compositions on
+   a static site — the same arrangement the two languages and the two footnote
+   treatments use — and `display` is set on the WRAPPER, never on the
+   `.lang-en`/`.lang-uk` spans inside it, which the language toggle owns.
 
    Opaque `--surface`, not the shelf badge's dark scrim (#84): a scrim is for a
    mark small enough to read as part of the artwork, and this is a card sitting
@@ -3913,9 +3902,13 @@ a.series-link:hover {
    name in whichever language is showing and a long one wraps inside the corner
    instead of reaching across the face. */
 @media (max-width: 639px) {
+  /* Still two to a row — the grid is the same at every width, only the card
+     inside it changes. A phone column is 327px, so the cards are ~157px and
+     the corner card has to come down with them: type a step smaller, and the
+     insets and the radius halved, or a 15px name in a 12px box would cover
+     the top third of a face. */
   .person-cards {
-    grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 1.25rem 0.75rem;
   }
 
   .person-card {
@@ -3924,22 +3917,26 @@ a.series-link:hover {
 
   .person-card-art {
     width: 100%;
-    border-radius: var(--r-xl);
+    border-radius: var(--r-lg);
   }
 
   .person-card-panel {
     position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
+    top: 0.375rem;
+    right: 0.375rem;
     display: block;
-    max-width: calc(100% - 1rem);
+    max-width: calc(100% - 0.75rem);
     margin: 0;
-    padding: 0.4375rem 0.6875rem;
-    border-radius: var(--r-md);
+    padding: 0.25rem 0.4375rem;
+    border-radius: var(--r-sm);
   }
 
-  .person-card-role,
-  .person-card-blurb {
+  .person-card-name {
+    font-size: 0.8125rem;
+    line-height: 1.3;
+  }
+
+  .person-card-role {
     display: none;
   }
 }
