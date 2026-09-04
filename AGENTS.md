@@ -353,6 +353,13 @@ Important conventions:
   from a note. People notes keep the card and only lose the painted heading.
   See `docs/DECISIONS.md` #87. Extend the existing build-time pipeline rather
   than adding client-side Markdown/highlighting work.
+- The entry footer's `‹ prev / next ›` arrows walk the section's own
+  ordered list — EXCEPT on the shelf, where `siblingPool()` in
+  `lib/siblings.ts` narrows the run to the note's own `entryMedium()`, so a
+  book's neighbours are books and not whatever was shelved that week
+  (`docs/DECISIONS.md` #126). Notes with no medium are each other's
+  neighbours, which is the section page's own unsorted row. `[` / `]` read
+  these links out of the DOM, so they follow for free.
 - English and Ukrainian share routes. The selected language is client-persisted
   and restored before paint; translated bodies render as paired language blocks.
 - Search is a static `/search-index.json` fetched on first palette open. Heading
