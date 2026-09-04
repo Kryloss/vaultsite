@@ -2919,3 +2919,62 @@ One trap worth keeping: the UA stylesheet's `[hidden] { display: none }` is an
 element-level declaration, and *any* author rule beats it — so
 `.nav-tree { display: block }` painted every closed folder open until
 `.nav-tree[hidden]` re-stated the disclosure.
+
+## 125. A person gets a card, not a thumbnail (2026-09-04)
+
+The People section was a three-up grid of square covers with a truncated line
+of text under each one. It was the right shape when the page was a wall of
+faces and the writing lived one click away — but the section is small, each
+note is a considered piece about one person, and a 200px thumbnail with a
+clipped subtitle said nothing about any of them. The grid was also the only
+list on the site where the artwork was the entire content of a row.
+
+**One wide card per person, at every width.** The square portrait at a size
+worth looking at, and a `--surface` panel laid *over* its inner edge carrying
+the name, the `description:` line and the opening of the note.
+
+**The overlap is the whole idea.** Two rectangles that overlap read as one
+object with a front and a back; two sitting side by side read as a table. It
+is the same offset plate the OG cards use (#57) and the same real elevation
+the dark theme is built on — `--surface` over `--bg`, a hairline, one shadow.
+No accent anywhere in it (#64): the photograph is the only colour on the card,
+and `.person-photo`'s hover desaturation (#56) is untouched.
+
+**Below 640px the offset comes off entirely, and the card is the portrait
+plus the name.** Stacking the two rectangles and pulling the panel up over the
+portrait's foot was the first version — it kept the card's character, and it
+was wrong for the size: at 327px the plate covered a third of the face, and
+one person ran past 1000px of page, so the section became something you scroll
+a screen at a time to read six words about each. A phone list of people wants
+the face and the name; everything else is on the note, one tap away. The
+description and the blurb stay in the HTML and are hidden by CSS — the same
+arrangement the two languages and the two footnote treatments use, because one
+markup has to serve both widths on a static site. The panel keeps no plate
+there either: with one line on it, a bordered box is a frame around a caption.
+
+Never a second card beside it, at any width: the card is a paragraph wide, and
+at 327px a two-up row would be back to thumbnails. One per row above 640px for
+the same reason — the site's column is 39rem, and two of these in it is 300px
+each, which is not enough for a portrait *and* a paragraph.
+
+**One trap, and it cost a confusing minute.** The panel is a later sibling
+than the portrait, so it ought to paint over it — but an `<img>` paints in a
+later layer than a sibling's *background*, so the photograph sat in front of
+the panel with the type showing through it. The panel takes `position:
+relative` and a `z-index` of its own; nothing else in the card is positioned.
+
+**The paragraph is `personBlurb()` in `lib/people.ts`, not the excerpt in
+`lib/previews.ts`.** Every People note opens with an `## At a glance` fact
+table, and the generic excerpt — which flattens whatever comes first — printed
+`At a glance Born January 21, 1991 — Vasylivka…` on the card: a card about a
+person led by the contents of a table. `personBlurb()` walks past headings and
+table rows to the first real paragraph, which on these notes is the opening of
+"Why him" — the one part of the note that is Kyrylo talking about the person
+rather than about the facts. Capped at 190 characters on a word boundary, so
+the panel stays about as tall as the portrait beside it, and bilingual from
+the note's own `.uk.md`.
+
+It is covered by `lib/people.test.ts` rather than by the vault. The vault
+holds exactly one person today, and every note in it is written to the same
+shape, so the one case the parser has to get right is the only case there is —
+a second person written any other way would break the card silently.

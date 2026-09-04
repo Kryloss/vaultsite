@@ -3744,43 +3744,156 @@ a.series-link:hover {
   }
 }
 
-/* ---------- People photos ---------- */
+/* --- People photos — REMOVED ---------------------------------------------
+   `.person-photo` held every portrait at `grayscale(0.3) contrast(1.04)` and
+   returned it to full colour on hover: one of the two hover-only colour
+   exceptions in #56. It is gone at the owner's request. A person on a page
+   about that person should look like themselves at rest, and the card the
+   grid became (below) is large enough that the desaturation read as a filter
+   applied to the photograph rather than as restraint.
 
-/* Partly desaturated at rest, full colour under the pointer.
+   #56 is now the social icons alone. There is no other user of the class —
+   it was people-list-only — so nothing else changed; the note in `.note-cover`
+   further down that referred to it as "a hover exception on the grid" has been
+   updated. */
 
-   Not all the way to grey: a portrait at `grayscale(1)` next to monochrome
-   type reads as an archive photograph, which says something about the person
-   that isn't ours to say. At ~0.6 the skin tones survive, the picture sits
-   quietly in a page that has no other colour in it, and there is somewhere for
-   the hover to go. The slight contrast lift compensates for the flattening
-   that pulling saturation out always causes.
+/* ---------- People cards (components/lists/PeopleCards.tsx) ---------- */
 
-   The transform transition comes from the utility class on the element (the
-   cover also scales on hover); this adds the filter to it rather than
-   replacing it, which is why it's `transition-property` and not a shorthand. */
-.person-photo {
-  filter: grayscale(0.3) contrast(1.04);
-  transition-property: filter, transform;
-  transition-duration: var(--dur-slow);
+/* One person per row: the portrait at a size worth looking at, and a panel
+   carrying the name, the description and the note's opening sentence laid
+   OVER its inner edge. The offset is the whole idea — two rectangles that
+   overlap read as one object with a front and a back, where two sitting side
+   by side read as a table. It replaced a three-up grid of thumbnails whose
+   only text was a truncated line under each square; the section is small
+   enough that a card can afford to say something. DECISIONS #125.
+
+   No `--accent` anywhere in here (#64): the panel is `--surface` over `--bg`,
+   the same real elevation the dark theme is built on, and the person's
+   photograph is the only colour on the card. */
+.person-cards {
+  display: grid;
+  gap: 2.5rem;
+}
+
+.person-card {
+  display: flex;
+  align-items: center;
+}
+
+/* Square, because a person is not a book jacket — the shapes note further up
+   this file is the reasoning, and it still holds at this size. The panel is a
+   later sibling, but an <img> paints above a sibling's BACKGROUND, so the
+   panel needs a stacking context of its own to sit in front of the portrait
+   rather than behind it. */
+.person-card-art {
+  position: relative;
+  flex: 0 0 46%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--r-xl);
+  background: var(--surface);
+}
+
+.person-card-panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  /* The overlap. Deep enough to read as deliberate, shallow enough that the
+     portrait still has a face on both sides of it. */
+  margin-left: -3rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  background: var(--surface);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.08);
+  /* `.press` is on the link, not on this box, so the hairline needs its own
+     transition — and a longhand, or it would reset the transform half of the
+     press when the two ever meet. */
+  transition-property: border-color;
+  transition-duration: var(--dur);
   transition-timing-function: var(--ease);
 }
 
-.group:hover .person-photo,
-.group:focus-visible .person-photo {
-  filter: grayscale(0) contrast(1);
-}
-
-/* A touch screen has no hover, so the effect there is not "grey until you
-   ask" — it's just grey. Show the photographs. */
-@media (hover: none) {
-  .person-photo {
-    filter: none;
+@media (prefers-color-scheme: dark) {
+  .person-card-panel {
+    box-shadow: 0 6px 20px rgb(0 0 0 / 0.4);
   }
 }
 
-@media print {
-  .person-photo {
-    filter: none;
+.person-card-name {
+  font-size: 1.375rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.person-card-role {
+  margin-top: 0.35rem;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  color: var(--text-tertiary);
+}
+
+.person-card-blurb {
+  margin-top: 0.9rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+/* The hairline is the only thing that answers the pointer — the photograph
+   already has its own response (`.person-photo` returns to full colour) and
+   two reactions to one hover is one too many. */
+.person-card:hover .person-card-panel,
+.person-card:focus-visible .person-card-panel {
+  border-color: var(--text-tertiary);
+}
+
+/* On a phone the offset comes OFF. Stacking the two rectangles and pulling
+   the panel up over the portrait's foot was the first version: it kept the
+   card's character, but at 327px the plate covered a third of the face and
+   the whole card ran past 1000px tall for one person — a page you scroll
+   through a screen at a time to read six words about each.
+
+   So the phone gets the portrait and THE NAME, nothing else. The description
+   and the note's opening are still in the HTML — hidden by CSS the way the
+   two languages and the two footnote treatments are — because the same markup
+   has to serve both widths on a static site, and the name is what a list of
+   people is for. The panel keeps no plate of its own here: with one line on
+   it, a bordered box is a frame around a caption. */
+@media (max-width: 639px) {
+  .person-cards {
+    gap: 2rem;
+  }
+
+  .person-card {
+    display: block;
+  }
+
+  .person-card-art {
+    width: 100%;
+  }
+
+  .person-card-panel {
+    display: block;
+    width: auto;
+    margin: 0;
+    padding: 0.75rem 0.125rem 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  .person-card-role,
+  .person-card-blurb {
+    display: none;
+  }
+
+  .person-card-name {
+    font-size: 1.125rem;
   }
 }
 

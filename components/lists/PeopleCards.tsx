@@ -10,6 +10,9 @@ export interface PersonRow {
   titleUk?: string;
   description?: string;
   descriptionUk?: string;
+  /** Opening of the note's first prose paragraph — see lib/people.ts. */
+  blurb?: string;
+  blurbUk?: string;
   cover?: string;
   /** Base64 blur-up placeholder for `cover` — see lib/blur.ts. */
   coverBlur?: string;
@@ -22,7 +25,12 @@ export interface PersonRow {
 }
 
 /**
- * Presentational half of the people list: category chips + the cover grid.
+ * Presentational half of the people list: category chips + one wide card per
+ * person — the portrait at full size with a panel offset over its inner edge,
+ * carrying the name, the one-line description and the opening of the note.
+ * One card per row at every width; below 640px the panel drops under the
+ * portrait and the offset goes with it. See DECISIONS #125.
+ *
  * No hooks, so it renders the same on the server (as the Suspense fallback in
  * PeopleGrid) and inside the client component that reads the active category
  * from the URL. Mirrors PostRows.
@@ -71,21 +79,22 @@ export default function PeopleCards({
         </div>
       )}
 
-      <ul className="stagger mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3">
+      <ul className="stagger person-cards mt-8">
         {filtered.map((row) => (
           <li key={row.slug}>
             <Link
               href={`/${sectionSlug}/${row.slug}`}
-              className="group press press-soft block"
+              className="group press press-soft person-card"
             >
-              <div className="people-cover relative aspect-square overflow-hidden rounded-2xl bg-[var(--surface)]">
+              <div className="people-cover person-card-art">
                 {row.cover ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={row.cover}
                     srcSet={row.coverSrcSet}
-                    /* Two per row on a phone, three in the grid above it. */
-                    sizes="(max-width: 640px) 50vw, 220px"
+                    /* Full width of the column on a phone, a little under half
+                       of it in the card's row above 640px. */
+                    sizes="(max-width: 640px) 82vw, 300px"
                     alt={row.title}
                     /* `person-photo` (globals.css) holds the photographs at
                        partial saturation and returns them to full colour on
@@ -120,14 +129,22 @@ export default function PeopleCards({
                 {/* Client-only — see components/NewBadge.tsx. */}
                 <NewBadge date={row.date} variant="cover" />
               </div>
-              <span className="mt-2.5 block truncate font-medium leading-snug text-[var(--text)]">
-                <T en={row.title} uk={row.titleUk} />
-              </span>
-              {row.description && (
-                <span className="mt-0.5 block truncate text-sm leading-snug text-[var(--text-secondary)]">
-                  <T en={row.description} uk={row.descriptionUk} />
+
+              <div className="person-card-panel">
+                <span className="person-card-name">
+                  <T en={row.title} uk={row.titleUk} />
                 </span>
-              )}
+                {row.description && (
+                  <span className="person-card-role">
+                    <T en={row.description} uk={row.descriptionUk} />
+                  </span>
+                )}
+                {row.blurb && (
+                  <span className="person-card-blurb">
+                    <T en={row.blurb} uk={row.blurbUk} />
+                  </span>
+                )}
+              </div>
             </Link>
           </li>
         ))}

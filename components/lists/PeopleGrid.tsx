@@ -3,14 +3,15 @@ import type { ListProps } from "@/lib/section-types";
 import { resolveCoverUrl } from "@/lib/markdown";
 import { blurFor, srcSetFor } from "@/lib/blur";
 import { parseCategories } from "@/lib/vault";
+import { personBlurb } from "@/lib/people";
 import PeopleCards, { type PersonRow } from "@/components/lists/PeopleCards";
 import PeopleGridClient from "@/components/lists/PeopleGridClient";
 import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
 
 /**
- * "people" section type (server side) — app-dissection-style grid of square
- * cover cards, with category filter chips.
+ * "people" section type (server side) — one wide card per person, portrait
+ * plus an offset panel, with category filter chips. See DECISIONS #125.
  *
  * Each entry note can set:
  *   cover: fedorov.jpg      (a file inside the same section folder — preferred)
@@ -38,6 +39,11 @@ export default function PeopleGrid({ section, entries }: ListProps) {
     titleUk: entry.titleUk,
     description: entry.description,
     descriptionUk: entry.descriptionUk,
+    // The card's paragraph: the opening of the note itself, not the
+    // description above it — the fact table has to be walked past to find it,
+    // which is why this isn't the generic excerpt in lib/previews.ts.
+    blurb: personBlurb(entry.content) || undefined,
+    blurbUk: entry.contentUk ? personBlurb(entry.contentUk) || undefined : undefined,
     cover: resolveCoverUrl(entry.sectionDir, entry.meta.cover),
     coverBlur: blurFor(resolveCoverUrl(entry.sectionDir, entry.meta.cover)),
     coverSrcSet: srcSetFor(resolveCoverUrl(entry.sectionDir, entry.meta.cover)),
