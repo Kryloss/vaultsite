@@ -190,6 +190,19 @@ export function ClockIcon({ className }: IconProps) {
   );
 }
 
+/**
+ * The sidebar tree's disclosure twisty. Points right when shut and is turned
+ * a quarter by CSS when open, so the two states are one glyph and one
+ * transition rather than two icons that could drift apart.
+ */
+export function ChevronIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
+      <path d="m9 5 7 7-7 7" />
+    </svg>
+  );
+}
+
 /** Sidebar-panel icon (brianlovin-style menu affordance). */
 export function PanelIcon({ className }: IconProps) {
   return (

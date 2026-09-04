@@ -124,6 +124,9 @@ export const ui = {
   words: { en: "words", uk: "слів" },
   /** First link on every page, visible only when focused. */
   skipToContent: { en: "Skip to content", uk: "Перейти до вмісту" },
+  /** Sidebar tree disclosure — prefixed to the folder's own name. */
+  expandFolder: { en: "Expand", uk: "Розгорнути" },
+  collapseFolder: { en: "Collapse", uk: "Згорнути" },
   previousEntry: { en: "Previous", uk: "Попереднє" },
   nextEntry: { en: "Next", uk: "Наступне" },
   /** Accessible name of the "#" link beside a heading (see lib/toc.ts). */

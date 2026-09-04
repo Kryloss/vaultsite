@@ -2765,3 +2765,148 @@ hidden content is a trap for anyone tabbing, and the artist's People note is
 still one press away from their name below. It also carries its own width, so
 a note naming an artist `main.md` has never heard of leaves an empty box
 rather than collapsing the row and sliding the heading left.
+
+## 124. The sidebar shows the vault's own folders, one level down (2026-09-04)
+
+The drawer listed seven sections and stopped there. Inside Shelf that meant
+the sidebar could take you to `/shelf` and no further, while the page you
+landed on already knew about Videos, Movies, Shows and Books — so the
+navigation was a level shallower than the thing it navigated.
+
+**It is Obsidian's tree, not a new one.** The rule is the one the site is
+already built on: a top-level folder is a section, and what is inside it is
+what the sidebar shows. `vault/Shelf/` has four folders in it, so the Shelf
+row opens onto four folders, each of which is also a real page
+(`/shelf/type/books`). `vault/Music/`, `vault/Posts/`, `vault/People/` and
+`vault/Projects/` have no subfolders at all — `covers/` and `attachments/` are
+filing, and a subfolder never becomes a page — so those rows open straight
+onto their notes. Now is the only section left out, and not by taste: it is a
+single page with no entries, so there is nothing to hang there.
+
+**Nothing invents a grouping the vault hasn't got**, and that is the decision
+rather than a shortcut. An artist tier under Music and a category tier under
+Posts were both considered and both refused: `groupByArtist()` and the posts
+category chips are real groupings, but neither is a folder and neither has a
+page to tap through to, so a reader would meet a row that behaves like a
+folder in one section and like a label in another. Now is the only section
+left out, and not by taste: it is a single page with no entries at all, so
+there is nothing to hang under it.
+
+**Built for every section, drawn for one.** `app/layout.tsx` has no pathname
+(layouts don't get one), so which subtree to draw is a question only
+`components/Chrome.tsx` can answer. The whole tree therefore crosses into the
+payload and only the section you are standing in reaches the DOM — about a
+hundred titles, which is the same order the constellation already ships on
+every page (#80).
+
+**Two controls on a folder row, because there are two answers.** The twisty
+opens the folder in place; the NAME goes to the folder's own page. A button
+cannot live inside a link, so they are siblings sharing one row rather than
+one control guessing which you meant.
+
+**Open state is a render-time reset, not an effect, and it is keyed on a
+COUNT OF ARRIVALS rather than on the section's name.** Keying it on the slug
+meant Shelf → Posts → Shelf matched the old key again and handed back the
+folder you had open two pages ago: the mask hid it while you were on Posts, it
+never threw it away. A counter gives every visit its own key, so leaving
+forgets — while navigating WITHIN a section is not an arrival, so opening a
+folder and then reading three notes out of it keeps it open. It stays a
+render-time reset because an effect would cost a second render and a visible
+frame of the last visit's tree. Anything the reader hasn't touched answers
+from the pathname instead, which is what makes arriving at `/shelf/type/books`
+— or at a book — find that folder already open.
+
+**NOTHING IN THE TREE OPENS ITSELF.** A section row shows its subtree because
+you are standing in that section; a folder shows its notes because you pressed
+its twisty, or because the pathname names it (`openByPath`). Both halves of
+this were built on a hover dwell and both came back out, and it is worth
+writing down why so they are not rebuilt: a row that opens under the pointer
+moves everything below it while you are still aiming, so the drawer rearranges
+itself in the middle of a gesture you had already begun. The machinery that
+went with it was correct as far as it went — a 450ms dwell so that only a stop
+counted, and a coordinate check so that a row sliding under a stationary
+cursor was not mistaken for the cursor arriving — but it made a behaviour
+nobody wanted behave well. Three shapes are gone with it and should stay gone:
+hover-revealed section subtrees, hover-expanded folders, and "close only the
+folders BELOW", which bought a stable list by giving up the guarantee that
+every sibling folder stays on screen.
+
+**A folder unfolds rather than appearing.** The reveal runs on `max-height`,
+so the rows below slide down instead of teleporting, with a fade and a
+quarter-rem rise over it; the keyframe names only `from`, which with `both`
+leaves the end state as the element's own cap (the `wash-in` trick, #92) — a
+`to:` there would freeze one list's cap into the other's. The notes need no
+marker of their own: they are `hidden` when the folder is shut, and an element
+coming back from `display: none` restarts its animations. The SECTION subtree
+is deliberately not animated — it arrives with the panel's own slide, and it
+is the one thing in the tree that appears without being asked for.
+
+**Navigation PINS a deliberately-opened panel instead of closing it.** The
+drawer used to shut on every navigation, which was right when it held seven
+section rows: you opened it to go somewhere and you had gone. With the vault's
+folders in it the drawer is something you browse, and shutting it after each
+note meant re-opening it and re-finding your place to read two notes in a row.
+It demotes to a third state rather than staying modal, because "don't close"
+and "keep the page dimmed and the keyboard trapped" are different things —
+once you have arrived, the backdrop is over the page you asked for. `pinned`
+is open and plain: no backdrop, no focus trap, not `aria-modal`. The focus
+trap's cleanup had to learn the difference: it restores focus to the menu
+button when the panel goes away, and demoting tears the trap down while the
+drawer is still on screen — so it now reads the live state through a ref and
+leaves the keyboard where it is.
+
+**A pinned panel is a peek you arrived at by clicking**, and it goes away the
+same two ways: the pointer leaving it, and a press anywhere on the page. Only
+a MODAL panel stays put until it is dismissed. The press is a document
+LISTENER and never a backdrop element — a pinned panel deliberately doesn't
+dim or block the page, so the press that dismisses it has to reach whatever it
+landed on; a transparent overlay would swallow the first click on every page.
+The menu button is exempt, because `pointerdown` runs before `click`: without
+that, pressing the icon to close a pinned panel would close it here and then
+have `toggleMenu` re-open it as modal.
+
+The pointer-leave path forced a real fix to `unpeek`. It kept a panel open
+whenever focus was inside it — right for "someone tabbed in and can't see
+where focus went", wrong here, because a MOUSE click on a nav link focuses
+that link too, so a pinned panel could never close by the pointer leaving. The
+guard now asks `:focus-visible`, which is exactly the distinction between the
+two cases.
+
+**The tree only exists in a panel you meant to open.** A peek is a glance held
+by the pointer at the left edge — you are looking for Posts, not reading a
+file tree, and unfolding twenty-nine notes under something you brushed past is
+the drawer answering a question nobody asked. `pinned` keeps it, because a
+pinned panel IS a button-opened one: it is what a deliberate open becomes
+after you follow a link out of it, and browsing on is the whole reason it
+stays. Nothing is left pending or hovered in a panel that has gone away.
+
+**Desktop only, at 640px.** On a phone the drawer *is* the screen, the twisty
+is a 20px target beside a link, and you arrived by tapping the section anyway.
+`display: none` rather than a JS width check, so the server and the client
+cannot disagree about the first paint.
+
+**The section list outranks the subtree**, exactly as it outranks an open week
+in the footer (#80). Music has twenty-nine notes and no folders to put them
+in, and an uncapped tree pushed Shelf off the bottom of the drawer — getting
+to Shelf is what the drawer is *for*. The outer list is capped at
+`min(38vh, 17rem)` and scrolls. Because the row you are on is then regularly
+below that fold, opening the panel scrolls it into view — by writing
+`scrollTop` on the boxes that actually overflow, never with `scrollIntoView`,
+which walks every scrollable ancestor up to the document and would scroll the
+page sideways to reach a panel parked off the left of the window.
+
+**And a folder must not swallow its siblings**, which is one decision written
+in two files. Movies holds eighteen notes: opened inside that cap it pushed
+Shows and Books out of sight, so expanding a folder cost you the list you were
+choosing from. A folder's notes therefore have their own cap
+(`min(26vh, 10rem)`, about seven rows) and scroll inside it, and **only one
+folder is open at a time per section**. That is arithmetic, not a taste for
+accordions: four folder rows plus ONE open list is 15.6rem and fits inside the
+outer cap with room over, so every sibling folder is on screen whatever is
+expanded; a second open list does not fit, and the bottom ones scroll away —
+which is exactly the list you needed to see while choosing between them.
+
+One trap worth keeping: the UA stylesheet's `[hidden] { display: none }` is an
+element-level declaration, and *any* author rule beats it — so
+`.nav-tree { display: block }` painted every closed folder open until
+`.nav-tree[hidden]` re-stated the disclosure.

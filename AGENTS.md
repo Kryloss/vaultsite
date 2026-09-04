@@ -101,6 +101,7 @@ simple, documented, low-maintenance solutions over clever abstractions.
 | `components/Page.tsx` | The only page shell; owns measure, gutters, and rhythm |
 | `components/Chrome.tsx` | Drawer, breadcrumb, global chrome, and page wrapper |
 | `components/lists/` | Section-specific list renderers |
+| `lib/nav-tree.ts` | The sidebar's second level — the vault's own folders under a section row |
 | `lib/vault.ts` | Section/entry discovery, slugs, frontmatter, sorting, indexes |
 | `lib/markdown.ts` | Obsidian preprocessing and Markdown-to-HTML pipeline |
 | `lib/section-types.tsx` | Section `type` → list component registry (+ `listRendersBody`, which types place `main.md`'s prose themselves) |
@@ -404,6 +405,31 @@ Important conventions:
   pure functions with `npm test` coverage, not inline in the component — see
   `lib/reading-progress.ts`, `lib/toc-spy.ts`, `lib/intro.ts`,
   `lib/constellation.ts`, `docs/DECISIONS.md` #76.
+- The sidebar shows the vault's OWN folders one level down, and invents none
+  (`lib/nav-tree.ts`, `docs/DECISIONS.md` #124): Shelf opens onto Videos /
+  Movies / Shows / Books because those folders exist and are also pages, while
+  Music, Posts, People and Projects open straight onto their notes because
+  they have no subfolders. Now is the only section with no tree — it has no
+  entries. An artist tier under Music and a category tier under Posts
+  were both refused — real groupings, but neither is a folder and neither has
+  a page to tap through to. Built for every section in `app/layout.tsx` and
+  drawn only for the section you are in (a layout has no pathname, so `Chrome`
+  decides); a folder row is a twisty AND a link, two controls because there are
+  two answers; desktop only from 640px; the outer list is capped and scrolls,
+  because the section list outranks the subtree; and only ONE folder is open at
+  a time, because four folder rows plus one open list is the most that fits
+  inside that cap and every sibling folder has to stay on screen. NOTHING in
+  the tree opens on hover — subtrees and folders both did, both came back out,
+  and neither should be rebuilt. Open state is keyed on a count of ARRIVALS, so
+  leaving a section and coming back forgets which folder was open while moving
+  around inside it does not.
+- Navigating no longer closes a drawer that was opened deliberately: `openBy`
+  demotes `modal` to `pinned` — open, no backdrop, no focus trap — which then
+  leaves the same two ways a peek does, by the pointer leaving it or a press
+  anywhere on the page. Only a MODAL panel stays until dismissed. A subtree —
+  and a folder — waits out `HOVER_DELAY` and unfolds rather than appearing,
+  and NO subtree renders during an edge peek, which is a glance rather than a
+  request for a file tree. See `CLAUDE.md` and `docs/DECISIONS.md` #124.
 - The sidebar note strip buckets notes BY WEEK, deliberately: a day grid was
   built first and misrepresented a vault whose shelf notes were typed up in
   batches. Its bar width, gap and `WEEKS` must stay consistent with the 176px

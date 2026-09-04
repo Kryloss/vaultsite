@@ -13,6 +13,7 @@ import DevToolsSlot from "@/components/DevToolsSlot";
 import { Analytics } from "@vercel/analytics/next";
 import { siteJsonLd } from "@/lib/jsonld";
 import { getSections, getEntries } from "@/lib/vault";
+import { navChildren } from "@/lib/nav-tree";
 import { resistanceDay } from "@/lib/resistance";
 import { observance } from "@/lib/observances";
 import { siteName, siteNameUk, siteUrl, siteDescription } from "@/lib/site-config";
@@ -87,6 +88,10 @@ export default function RootLayout({
     title: section.title,
     titleUk: section.titleUk,
     icon: section.icon,
+    // The vault's own folders, one level down — see lib/nav-tree.ts. Built for
+    // every section and drawn for the one you're in: a layout has no pathname,
+    // so only the client half of the chrome can make that choice.
+    tree: navChildren(section),
   }));
 
   /**

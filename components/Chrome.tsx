@@ -14,10 +14,12 @@ import {
 import {
   PanelIcon,
   SearchIcon,
+  ChevronIcon,
   resolveIcon,
   CanadaFlag,
   UkraineFlag,
 } from "@/components/icons";
+import type { NavChildren, NavNote } from "@/lib/nav-tree";
 import CommandPalette from "@/components/CommandPalette";
 import SocialLinks from "@/components/SocialLinks";
 import { TIME_LEFT_EVENT } from "@/components/ReadingProgress";
@@ -54,6 +56,12 @@ export interface NavItem {
   title: string;
   titleUk?: string;
   icon?: string;
+  /**
+   * The vault folder's contents, one level down — Obsidian's tree, built by
+   * lib/nav-tree.ts. Present for every section that has one; drawn only for
+   * the section you're currently in, and only from 640px up.
+   */
+  tree?: NavChildren;
 }
 
 /**
@@ -104,9 +112,17 @@ export default function Chrome({
    * Named for the kind rather than the input, because more than one input
    * arrives at each: a click and a keypress both mean "modal".
    */
-  const [openBy, setOpenBy] = useState<"modal" | "peek" | null>(null);
+  const [openBy, setOpenBy] = useState<"modal" | "pinned" | "peek" | null>(null);
   const open = openBy !== null;
   const modal = openBy === "modal";
+  /**
+   * Read by the focus trap's cleanup, which runs on the way to `pinned` as
+   * well as on the way to closed and can't tell those apart from `modal`
+   * alone. Written during render on purpose: an effect would update it after
+   * the cleanup has already asked.
+   */
+  const openByRef = useRef(openBy);
+  openByRef.current = openBy;
   const [searchOpen, setSearchOpen] = useState(false);
   const drawerRef = useRef<HTMLElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -183,16 +199,34 @@ export default function Chrome({
     [cancelClose, searchOpen]
   );
 
+  /**
+   * The pointer left the panel, so the panel leaves — for a peek AND for a
+   * pinned panel, which is a peek you arrived at by clicking rather than by
+   * brushing the edge. Both are open only as long as you are looking at them;
+   * only a MODAL panel stays put until it's dismissed.
+   */
   const unpeek = useCallback(() => {
     cancelClose();
     closeTimer.current = window.setTimeout(() => {
       closeTimer.current = 0;
       setOpenBy((v) => {
-        if (v !== "peek") return v;
+        if (v !== "peek" && v !== "pinned") return v;
         // The pointer left, but the keyboard is still inside: someone tabbed
         // into the panel while it was open. Closing would leave focus on a
         // link nobody can see.
-        if (drawerRef.current?.contains(document.activeElement)) return v;
+        //
+        // `:focus-visible` is what separates that from the ordinary case,
+        // which is a MOUSE click on a nav link — that focuses the link too,
+        // and guarding on focus alone would mean a pinned panel could never
+        // close by the pointer leaving, since the link you just clicked is
+        // always inside it.
+        const held = document.activeElement;
+        if (
+          held instanceof HTMLElement &&
+          drawerRef.current?.contains(held) &&
+          held.matches(":focus-visible")
+        )
+          return v;
         return null;
       });
     }, 180);
@@ -221,7 +255,7 @@ export default function Chrome({
     // way. Left pending, it would fire 90ms after a click that CLOSED the
     // panel and open it again as a peek.
     cancelOpen();
-    setOpenBy((v) => (v === "modal" ? null : "modal"));
+    setOpenBy((v) => (v === "modal" || v === "pinned" ? null : "modal"));
   }, [cancelClose, cancelOpen]);
 
   /**
@@ -327,14 +361,63 @@ export default function Chrome({
     document.addEventListener("keydown", onKey);
     return () => {
       document.removeEventListener("keydown", onKey);
+      // …but only if the panel is actually going away. Navigating demotes a
+      // modal panel to `pinned`, which tears this trap down while the drawer
+      // stays on screen — restoring focus there would throw the keyboard out
+      // of a sidebar the reader is still using.
+      if (openByRef.current !== null) return;
       if (drawer.contains(document.activeElement)) {
         (previous ?? menuButtonRef.current)?.focus();
       }
     };
   }, [modal]);
 
-  // Close the drawer on navigation; Escape closes it; Cmd/Ctrl+K opens search.
-  useEffect(() => setOpenBy(null), [pathname]);
+  /**
+   * Navigation PINS a deliberately-opened panel instead of closing it.
+   *
+   * The drawer used to shut on every navigation, which was right when it was
+   * only ever a list of seven sections — you opened it to go somewhere and
+   * you had gone. With the vault's folders in it (lib/nav-tree.ts) it is
+   * something you browse, and shutting it after each note meant re-opening it
+   * and re-finding your place to read two notes in a row.
+   *
+   * It demotes rather than staying modal, because "don't close" and "keep the
+   * page dimmed and the keyboard trapped" are different things: once you have
+   * arrived, the backdrop is over the page you asked for. Pinned is open,
+   * plain — no backdrop, no focus trap, not `aria-modal` — and it stays until
+   * the panel icon, `m`, or Escape puts it away.
+   *
+   * A PEEK still closes. It is a glance held by the pointer, and the pointer
+   * is on the page now.
+   */
+  useEffect(
+    () => setOpenBy((v) => (v === "modal" || v === "pinned" ? "pinned" : null)),
+    [pathname]
+  );
+
+  /**
+   * A press anywhere on the page puts a pinned panel away.
+   *
+   * A LISTENER, not a backdrop element: a pinned panel deliberately doesn't
+   * dim or block the page, so the press that dismisses it must also reach
+   * whatever it landed on — a link, a cover, a word being selected. A
+   * transparent overlay would swallow the first click on every page.
+   *
+   * The menu button is exempt because `pointerdown` runs before `click`:
+   * without this, pressing the icon to CLOSE a pinned panel would close it
+   * here and then have `toggleMenu` re-open it as modal.
+   */
+  useEffect(() => {
+    if (openBy !== "pinned") return;
+    const onDown = (e: PointerEvent) => {
+      const target = e.target as Node;
+      if (drawerRef.current?.contains(target)) return;
+      if (menuButtonRef.current?.contains(target)) return;
+      setOpenBy(null);
+    };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, [openBy]);
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       // `cancelOpen` too: dismissing with the pointer still resting in the
@@ -388,6 +471,159 @@ export default function Chrome({
   const segments = pathname.split("/").filter(Boolean);
   const [sectionSlug] = segments;
   const section = sectionSlug ? nav.find((i) => i.slug === sectionSlug) : undefined;
+
+  /**
+   * THE SUBTREE — the vault's folders under the section row you're standing
+   * in. Only that section's, and only while you're in it: the drawer is a
+   * short column and a tree for somewhere else is furniture. See
+   * lib/nav-tree.ts for what counts as a folder and why nothing invents one.
+   */
+  const tree = section?.tree;
+
+  /**
+   * Which folder the pathname itself is asking for.
+   *
+   * Two shapes reach the same answer: /shelf/type/books (and its category
+   * pages) names the medium outright, while /shelf/the-last-wish names a note
+   * — so the tree looks the note up among the folders' own children rather
+   * than trying to re-derive `medium:` in the browser, which would mean
+   * shipping lib/shelf.ts to it.
+   */
+  const openByPath =
+    segments[1] === "type"
+      ? segments[2]
+      : tree?.folders?.find((f) => f.notes.some((n) => n.href === pathname))?.slug;
+
+  /**
+   * Folders the READER has touched, and nothing else.
+   *
+   * Scoped to ONE VISIT to a section, not to the section's name — see
+   * `visit` below. Anything untouched answers from `openByPath`, which is
+   * what makes arriving at a medium page find that folder already open.
+   */
+  /**
+   * A COUNTER, not the section's slug.
+   *
+   * Keying the overrides on the slug meant Shelf → Posts → Shelf matched the
+   * old key again and handed back the folder you had open two pages ago. The
+   * mask hid it while you were on Posts; it never threw it away. Counting
+   * ARRIVALS gives every visit its own key, so leaving forgets — and it is
+   * still a render-time reset, where an effect would cost a second render and
+   * a frame of the last visit's tree.
+   *
+   * Navigating WITHIN a section doesn't count as an arrival, so opening a
+   * folder and then reading three notes out of it keeps it open.
+   */
+  const visitRef = useRef({ section: sectionSlug ?? "", n: 0 });
+  if (visitRef.current.section !== (sectionSlug ?? ""))
+    visitRef.current = { section: sectionSlug ?? "", n: visitRef.current.n + 1 };
+  const visit = visitRef.current.n;
+
+  /**
+   * WHICH FOLDER IS OPEN, per section — which folder, not which folders.
+   *
+   * Arithmetic, not a taste for accordions: four folder rows plus ONE open
+   * list of notes fits inside the subtree's cap (#124), so every sibling
+   * folder is on screen whatever is expanded. Two open lists don't fit, and
+   * the ones at the bottom scroll away — which is exactly the list you needed
+   * to see while choosing between them.
+   *
+   * It was briefly "close only the folders BELOW", to stop a collapse above
+   * the pointer from sliding the list out from under it. That was a symptom
+   * of folders opening on hover, which nothing does any more: a collapse now
+   * only ever follows a click, where a shift is expected because you asked
+   * for it.
+   *
+   * `undefined` means the reader hasn't touched this section's folders and
+   * the pathname answers instead; `null` means they closed the open one.
+   */
+  const [folderOpen, setFolderOpen] = useState<{
+    visit: number;
+    map: Record<string, string | null>;
+  }>({ visit: -1, map: {} });
+  const overrides = folderOpen.visit === visit ? folderOpen.map : {};
+  const openIn = (item: string) =>
+    overrides[item] !== undefined
+      ? overrides[item]
+      : item === sectionSlug
+        ? (openByPath ?? null)
+        : null;
+  const isFolderOpen = (item: string, folder: string) => openIn(item) === folder;
+  const write = (item: string, next: string | null) =>
+    setFolderOpen((prev) => ({
+      visit,
+      map: { ...(prev.visit === visit ? prev.map : {}), [item]: next },
+    }));
+  /**
+   * THE TWISTY IS THE ONLY THING THAT OPENS OR SHUTS A FOLDER.
+   *
+   * Folders unfolded on a hover dwell for a while, and so did the section
+   * subtrees above them; both were taken back out. A row opening itself under
+   * the pointer while you read the list is the drawer making decisions on
+   * your behalf, and it moves everything below it while you are trying to
+   * aim. Clicking is instant and reversible; the only automatic open left is
+   * the pathname's own (`openByPath`), which describes where you already are
+   * rather than guessing where you're headed.
+   */
+  const toggleFolder = (item: string, folder: string) =>
+    write(item, isFolderOpen(item, folder) ? null : folder);
+
+  /**
+   * THE TREE ONLY EXISTS IN A PANEL YOU MEANT TO OPEN.
+   *
+   * A peek is a glance held by the pointer at the left edge — you are looking
+   * for Posts, not reading a file tree, and unfolding twenty-nine notes under
+   * something you brushed past is the drawer answering a question nobody
+   * asked. `pinned` keeps it, because a pinned panel IS a button-opened one:
+   * it is what a deliberate open becomes after you follow a link out of it,
+   * and browsing on is the whole reason it stays.
+   */
+  const treeReady = openBy === "modal" || openBy === "pinned";
+
+  /**
+   * The row the reader is standing on, so opening the panel can scroll to it.
+   *
+   * The tree is capped (see `.nav-tree` in globals.css) and a folder can hold
+   * eighteen notes, so "you are here" is regularly below the fold of a box
+   * that is itself inside a scrolling nav — and a drawer that opens on the
+   * wrong part of the list answers the question you didn't ask.
+   */
+  const hereRef = useRef<HTMLAnchorElement | null>(null);
+
+  /**
+   * Bring it into view WITHOUT `scrollIntoView`, which walks every scrollable
+   * ancestor up to the document. While the panel is shut it sits a full panel
+   * width off the left of the window, so letting the browser "reveal" it can
+   * scroll the page sideways. This only ever writes `scrollTop` on boxes that
+   * actually overflow, and never touches the window.
+   */
+  useEffect(() => {
+    if (!open) return;
+    const el = hereRef.current;
+    if (!el) return;
+    for (let box = el.parentElement; box && box !== document.body; box = box.parentElement) {
+      if (box.scrollHeight <= box.clientHeight + 1) continue;
+      const row = el.getBoundingClientRect();
+      const frame = box.getBoundingClientRect();
+      if (row.top < frame.top) box.scrollTop -= frame.top - row.top + 8;
+      else if (row.bottom > frame.bottom) box.scrollTop += row.bottom - frame.bottom + 8;
+    }
+  }, [open, pathname]);
+
+  /** One note row. `title` carries the full string, since the row is one line. */
+  const leaf = (note: NavNote) => {
+    const here = pathname === note.href;
+    return (
+      <Link
+        href={note.href}
+        ref={here ? hereRef : undefined}
+        className={`nav-leaf press${here ? " is-here" : ""}`}
+        title={lang === "uk" && note.titleUk ? note.titleUk : note.title}
+      >
+        <T en={note.title} uk={note.titleUk} />
+      </Link>
+    );
+  };
 
   // Site name first, section after — "Kyrylo · Music" reads the way the
   // trail is walked (home, then in), rather than most-specific-first.
@@ -601,25 +837,91 @@ export default function Chrome({
         <nav className="flex flex-col gap-3 overflow-y-auto px-3">
           {nav.map((item) => {
             const Icon = resolveIcon(item.icon);
+            const active = isActive(item.href);
+            // The subtree belongs to the section you're IN, and only in a
+            // panel you meant to open. Everywhere else this row is exactly
+            // the row it has always been.
+            const sub = treeReady && active ? item.tree : undefined;
             return (
-              <Link
-                key={item.slug}
-                href={item.href}
-                className={`press flex items-center gap-3.5 rounded-lg px-3 py-2 text-lg ${
-                  isActive(item.href)
-                    ? "bg-[var(--bg-hover)] font-medium text-[var(--text)]"
-                    : "text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
-                }`}
-              >
-                {/* The emoji fallback matches the SVG box so both alignments
-                    share one column — see resolveIcon() in components/icons.tsx. */}
-                {Icon ? (
-                  <Icon className="h-6 w-6 shrink-0 opacity-75" />
-                ) : item.icon ? (
-                  <span className="w-6 shrink-0 text-center text-lg leading-none">{item.icon}</span>
+              <div key={item.slug} className="nav-item">
+                <Link
+                  href={item.href}
+                  className={`press flex items-center gap-3.5 rounded-lg px-3 py-2 text-lg ${
+                    active
+                      ? "bg-[var(--bg-hover)] font-medium text-[var(--text)]"
+                      : "text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
+                  }`}
+                >
+                  {/* The emoji fallback matches the SVG box so both alignments
+                      share one column — see resolveIcon() in components/icons.tsx. */}
+                  {Icon ? (
+                    <Icon className="h-6 w-6 shrink-0 opacity-75" />
+                  ) : item.icon ? (
+                    <span className="w-6 shrink-0 text-center text-lg leading-none">{item.icon}</span>
+                  ) : null}
+                  <span><T en={item.title} uk={item.titleUk} /></span>
+                </Link>
+
+                {sub ? (
+                  <ul className="nav-tree">
+                    {sub.folders?.map((folder) => {
+                      // Not `open` — that name is the DRAWER's, and shadowing
+                      // it here is how the two states start disagreeing.
+                      const expanded = isFolderOpen(item.slug, folder.slug);
+                      const word = expanded ? ui.collapseFolder : ui.expandFolder;
+                      // The medium page and its category pages are one page
+                      // with a different chip pressed (#65), so both light
+                      // the folder rather than only the bare medium URL.
+                      const folderHere =
+                        pathname === folder.href || pathname.startsWith(folder.href + "/");
+                      return (
+                        <li key={folder.slug}>
+                          {/* TWO CONTROLS, TWO ANSWERS, and that is the whole
+                              point: the twisty opens the folder in place, the
+                              NAME goes to the folder's own page. A button
+                              can't live inside a link, so they are siblings
+                              sharing one row rather than one control guessing
+                              which you meant. */}
+                          <div className="nav-branch">
+                            <button
+                              type="button"
+                              className="nav-twisty press"
+                              aria-expanded={expanded}
+                              aria-controls={`nav-folder-${folder.slug}`}
+                              aria-label={`${word[lang]} ${folder.label[lang]}`}
+                              onClick={() => toggleFolder(item.slug, folder.slug)}
+                            >
+                              <ChevronIcon className="h-3.5 w-3.5" />
+                            </button>
+                            <Link
+                              href={folder.href}
+                              ref={folderHere ? hereRef : undefined}
+                              className={`nav-child press${folderHere ? " is-here" : ""}`}
+                            >
+                              <T {...folder.label} />
+                            </Link>
+                          </div>
+                          <ul
+                            id={`nav-folder-${folder.slug}`}
+                            className="nav-tree nav-tree-deep"
+                            hidden={!expanded}
+                          >
+                            {folder.notes.map((note) => (
+                              <li key={note.href}>{leaf(note)}</li>
+                            ))}
+                          </ul>
+                        </li>
+                      );
+                    })}
+                    {/* A section with no folders of its own — Posts, Music,
+                        Projects — hangs its notes straight off the row, which
+                        is what the vault does too. */}
+                    {sub.notes?.map((note) => (
+                      <li key={note.href}>{leaf(note)}</li>
+                    ))}
+                  </ul>
                 ) : null}
-                <span><T en={item.title} uk={item.titleUk} /></span>
-              </Link>
+              </div>
             );
           })}
         </nav>

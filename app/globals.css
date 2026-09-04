@@ -4060,6 +4060,203 @@ svg.diagram tspan {
   outline: none;
 }
 
+/* --- The sidebar's second level (components/Chrome.tsx, lib/nav-tree.ts) ---
+   Obsidian's file tree, in the drawer: the section you're standing in opens
+   onto the vault folders inside it, and a folder opens onto its notes.
+
+   DESKTOP ONLY, and that is a decision rather than a leftover breakpoint. On
+   a phone the drawer IS the screen, the twisty is a 20px target sitting
+   beside a link, and the reader arrived here by tapping the section anyway —
+   the tree would spend a third of a touch surface on a gesture the pointer
+   makes better. `display: none` rather than a JS width check, so the server
+   and the client can't disagree about the first paint. */
+.nav-tree {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .nav-tree {
+    display: block;
+    /* A subtree belongs to the row above it, not to the gap between sections
+       — the nav's own `gap-3` is the distance between SECTIONS, and this sits
+       inside one `.nav-item` with it. */
+    margin: 0.375rem 0 0;
+    padding: 0 0 0 0.25rem;
+    list-style: none;
+  }
+
+  /* THE SECTION LIST OUTRANKS THE SUBTREE, exactly as it outranks an open
+     week in the footer (see .constellation-notes). Music has twenty-nine
+     notes and no folders to put them in, so an uncapped tree pushed Shelf off
+     the bottom of the drawer — and getting to Shelf is what the drawer is
+     FOR. Whatever row you're on is scrolled into view when the panel opens —
+     see components/Chrome.tsx. */
+  .nav-tree:not(.nav-tree-deep) {
+    max-height: min(38vh, 17rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  /* AND A FOLDER MUST NOT SWALLOW ITS SIBLINGS. Movies holds eighteen notes
+     and Shelf holds four folders: opened inside the cap above, one folder
+     pushed Shows and Books out of sight, so expanding a folder cost you the
+     list you were choosing from. Ten rems is about seven notes — the rest
+     scroll here rather than in the list around them, which is the same call
+     `.constellation-notes` makes for the same reason.
+
+     THIS NUMBER AND THE ACCORDION IN Chrome.tsx ARE ONE DECISION. Four folder
+     rows plus ONE open list is 15.6rem and fits the outer cap above, so every
+     sibling folder is on screen whatever is expanded; a second open list does
+     not fit, which is why only one folder is open at a time. Change either
+     and re-check both. */
+  .nav-tree-deep {
+    max-height: min(26vh, 10rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  /* THE UNFOLD. A folder wipes open and fades up. `max-height` is what the
+     wipe runs on, so the rows below slide down rather than teleporting — and
+     the keyframe names only `from`, which with `both` leaves the end state as
+     the element's OWN cap, exactly the trick `wash-in` uses (#92). Never add
+     a `to:` here: it would freeze one of the two caps into the other's
+     list. */
+  @keyframes nav-tree-in {
+    from {
+      max-height: 0;
+      opacity: 0;
+      transform: translateY(-0.25rem);
+    }
+  }
+
+  .nav-tree-deep {
+    animation: nav-tree-in var(--dur) var(--ease) both;
+  }
+
+  /* A folder's notes need no marker of their own: they are `hidden` when the
+     folder is shut, and an element coming back from `display: none` restarts
+     its animations, so the unfold plays whenever the twisty opens one. The
+     SECTION subtree isn't animated — it arrives with the panel's own slide,
+     and it is the only thing in the tree that appears without being asked
+     for. */
+
+  /* A closed folder. The UA's own `[hidden]` rule is an element-level
+     declaration in the user-agent sheet, and ANY author rule beats it — so
+     `.nav-tree { display: block }` above would have painted every closed
+     folder open. The disclosure has to be re-stated here. */
+  .nav-tree[hidden] {
+    display: none;
+  }
+
+  /* THE INDENTS ARE ALL ON THE CONTAINERS, never on the rows, so one number
+     moves a whole level and the staircase can't come apart: folder names at
+     1.75rem, notes at 2.5rem, both measured from the nav's own `px-3`. */
+  .nav-tree-deep {
+    margin-top: 0;
+    padding-left: 1.75rem;
+  }
+
+  /* A flat section — Posts, Music, Projects — has no folder row above its
+     notes, because the vault has no folder there either. Its leaves take the
+     folder-name column so the first level always starts in one place.
+
+     `:not(.nav-tree-deep)` because the inner list carries BOTH classes — a
+     bare `.nav-tree > li > .nav-leaf` matched the notes under a folder too
+     and indented them twice. */
+  .nav-tree:not(.nav-tree-deep) > li > .nav-leaf {
+    padding-left: 1.5rem;
+  }
+
+  /* The twisty and the name share a row and split the job between them: one
+     opens the folder in place, the other goes to the folder's page. */
+  .nav-branch {
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-twisty {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1.375rem;
+    border-radius: var(--r-xs);
+    color: var(--text-tertiary);
+  }
+
+  .nav-twisty:hover,
+  .nav-twisty:focus-visible {
+    color: var(--text);
+  }
+
+  /* ONE GLYPH, TURNED a quarter — not two icons that could drift apart. */
+  .nav-twisty svg {
+    transition: transform var(--dur-fast) var(--ease);
+  }
+
+  .nav-twisty[aria-expanded="true"] svg {
+    transform: rotate(90deg);
+  }
+
+  /* Folder and note rows are the section rows, smaller — the same reason the
+     constellation's week list is one size down (a section is a word, a note
+     title is a sentence). Same wash, same radius, same press, so the drawer
+     stays one object; the size is the only deliberate difference. Every row
+     is ONE line, ellipsised, with the full string in its `title`. */
+  .nav-child,
+  .nav-leaf {
+    display: block;
+    overflow: hidden;
+    border-radius: var(--r-md);
+    line-height: 1.35;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--text-secondary);
+  }
+
+  .nav-child {
+    flex: 1;
+    min-width: 0;
+    padding: 0.1875rem 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .nav-leaf {
+    padding: 0.125rem 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+  }
+
+  .nav-child:hover,
+  .nav-child:focus-visible,
+  .nav-leaf:hover,
+  .nav-leaf:focus-visible {
+    background: var(--bg-hover);
+    color: var(--text);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-tree-deep {
+      animation: none;
+    }
+
+    .nav-twisty svg {
+      transition: none;
+    }
+  }
+
+  /* WHERE YOU ARE — text colour, not a wash. The section row above is already
+     wearing the wash, and two filled rows in one column read as two
+     selections. On a page with no other colour, full text colour IS the
+     emphasis (DECISIONS #64). */
+  .nav-child.is-here,
+  .nav-leaf.is-here {
+    color: var(--text);
+    font-weight: 500;
+  }
+}
+
 /* --- The left edge opens the menu (components/Chrome.tsx) -----------------
    A strip along the left edge that slides the sidebar in when the pointer
    reaches it, and lets it go when the pointer leaves the panel. The panel
