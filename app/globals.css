@@ -3794,6 +3794,13 @@ a.series-link:hover {
   background: var(--surface);
 }
 
+/* The cover's hover scale used to be eased by `.person-photo`'s own
+   transition; that class is gone (see above), and a Tailwind `group-hover:`
+   utility declares no transition of its own, so the ease lives here now. */
+.person-card-art img {
+  transition: transform var(--dur-slow) var(--ease);
+}
+
 .person-card-panel {
   position: relative;
   z-index: 1;
@@ -3843,26 +3850,81 @@ a.series-link:hover {
   color: var(--text-secondary);
 }
 
-/* The hairline is the only thing that answers the pointer — the photograph
-   already has its own response (`.person-photo` returns to full colour) and
-   two reactions to one hover is one too many. */
+/* Under the pointer the hairline lifts and the portrait leans in a little
+   (`group-hover:scale-105` on the image). Nothing changes colour: the
+   photographs are at full colour at rest now, which is what took the site's
+   second hover-colour exception out of #56. */
 .person-card:hover .person-card-panel,
 .person-card:focus-visible .person-card-panel {
   border-color: var(--text-tertiary);
 }
 
-/* On a phone the offset comes OFF. Stacking the two rectangles and pulling
-   the panel up over the portrait's foot was the first version: it kept the
-   card's character, but at 327px the plate covered a third of the face and
-   the whole card ran past 1000px tall for one person — a page you scroll
-   through a screen at a time to read six words about each.
+/* Two per row once the window can hold two of them side by side, which the
+   39rem prose column cannot: two cards in 576px is 288px each, and a portrait
+   AND a paragraph do not fit in that. So the list is the second thing on the
+   site allowed past `--measure` — the cover deck being the first (#123), and
+   for the same reason: 39rem is a comfortable line of PROSE, and a card whose
+   left half is a photograph is not a line of prose. `--people-width` can
+   never exceed the window minus its gutters, so it cannot make a horizontal
+   scrollbar, and the negative margin is measured against `100%` — the page's
+   own content box — so the grid stays centred on the column, with the title
+   and the chips above it still set to the column.
 
-   So the phone gets the portrait and THE NAME, nothing else. The description
-   and the note's opening are still in the HTML — hidden by CSS the way the
-   two languages and the two footnote treatments are — because the same markup
-   has to serve both widths on a static site, and the name is what a list of
-   people is for. The panel keeps no plate of its own here: with one line on
-   it, a bordered box is a frame around a caption. */
+   1000px is derived, not chosen: two 436px cards plus the 1.5rem between them
+   is 888px, and 888 + two 1.5rem gutters is 936 — 1000px leaves the first row
+   of two comfortably clear of the fold-over point rather than landing on it.
+
+   The blurb is clamped to three lines out here. It is capped at 190 characters
+   in `lib/people.ts`, which is five lines in a 248px panel and would stand the
+   panel taller than the portrait beside it — the panel is the thing in front,
+   so it should be the smaller of the two. */
+@media (min-width: 1000px) {
+  .person-cards {
+    --people-width: min(58rem, 100vw - var(--gutter) * 2);
+    width: var(--people-width);
+    margin-inline: calc((100% - var(--people-width)) / 2);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1.5rem;
+    row-gap: 2.5rem;
+  }
+
+  .person-card-panel {
+    margin-left: -2.5rem;
+    padding: 1.125rem 1.25rem;
+  }
+
+  .person-card-name {
+    font-size: 1.25rem;
+  }
+
+  .person-card-role,
+  .person-card-blurb {
+    font-size: 0.875rem;
+  }
+
+  .person-card-blurb {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+  }
+}
+
+/* On a phone the offset comes off and the panel goes UNDER the portrait —
+   the same grey card, carrying the name alone.
+
+   Two earlier versions: the plate pulled up over the portrait's foot and hung
+   to the right (a third of the face covered, and one person ran past 1000px
+   of page), then no plate at all, the name set plain underneath. The card is
+   what the section looks like, so the name keeps it; what goes is the offset
+   and the two lines of text that need a screen of their own to be worth
+   reading.
+
+   The description and the blurb are still in the HTML and hidden by CSS — the
+   same arrangement the two languages and the two footnote treatments use,
+   because one markup has to serve every width on a static site. `display` is
+   set on the wrappers, NEVER on the `.lang-en`/`.lang-uk` spans inside them,
+   which the language toggle owns. */
 @media (max-width: 639px) {
   .person-cards {
     gap: 2rem;
@@ -3879,12 +3941,8 @@ a.series-link:hover {
   .person-card-panel {
     display: block;
     width: auto;
-    margin: 0;
-    padding: 0.75rem 0.125rem 0;
-    border: 0;
-    border-radius: 0;
-    background: none;
-    box-shadow: none;
+    margin: 0.75rem 0 0;
+    padding: 0.875rem 1.125rem;
   }
 
   .person-card-role,
@@ -7847,9 +7905,10 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
 
    Indented to the rail's text column (`.toc-link` pads 0.75rem), so the
    portrait's left edge lines up with the headings above it rather than with
-   the hairline. Full colour: `.person-photo`'s desaturation is a hover
-   exception on the GRID (#56), and a picture at rest here is the same case as
-   the shelf's creator portraits, which keep their colour (#86). */
+   the hairline. Full colour, like every portrait on the site now — the
+   People list's `.person-photo` desaturation was the one that made this worth
+   stating, and it is gone (#125); the shelf's creator portraits were always
+   this case (#86). */
 .toc-portrait {
   display: block;
   width: calc(100% - 0.75rem);

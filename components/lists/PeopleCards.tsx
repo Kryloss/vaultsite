@@ -96,16 +96,16 @@ export default function PeopleCards({
                        of it in the card's row above 640px. */
                     sizes="(max-width: 640px) 82vw, 300px"
                     alt={row.title}
-                    /* `person-photo` (globals.css) holds the photographs at
-                       partial saturation and returns them to full colour on
-                       hover — the one place on a monochrome site where colour
-                       is allowed, and only when it's asked for. It also owns
-                       the transition, so the utility class here doesn't
-                       declare one and overwrite the filter half of it. */
+                    /* Full colour at rest. These used to carry
+                       `.person-photo`, which held them at `grayscale(0.3)`
+                       until the pointer arrived — removed at the owner's
+                       request, and with it the people half of DECISIONS #56.
+                       The hover scale's easing moved to `.person-card-art img`
+                       in globals.css, since the class that carried it is gone. */
                     className={
                       row.contain
-                        ? "person-photo h-full w-full object-contain p-6"
-                        : "person-photo h-full w-full object-cover group-hover:scale-105"
+                        ? "h-full w-full object-contain p-6"
+                        : "h-full w-full object-cover group-hover:scale-105"
                     }
                     // Blur-up placeholder as the image's own background — see
                     // the matching note in ShelfCard.tsx and lib/blur.ts.

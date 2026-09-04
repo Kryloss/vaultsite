@@ -715,6 +715,12 @@ Every control on the site changed background on hover and did nothing at all on 
 
 ## 56. The two places colour is allowed (2026-07-31)
 
+> **Half of this was removed on 2026-09-04 (#125).** The people-photograph
+> desaturation is gone at the owner's request and `.person-photo` is deleted;
+> every portrait on the site is full colour at rest. What follows is kept as
+> the reasoning that was tried, and the social-icon half below still stands —
+> it is now the only place colour is allowed.
+
 The site is monochrome by rule. Two exceptions, both of which only exist under the pointer, so the page at a glance is unchanged.
 
 **People photographs sit at `grayscale(0.3)` and come back to full colour on hover.** Not all the way to grey: a portrait at `grayscale(1)` next to monochrome type reads as an archive photograph, which says something about the person that isn't ours to say. At 0.3 the skin tones survive, the picture stops competing with a page that has no other colour in it, and the hover still has somewhere to go. A small contrast lift compensates for the flattening that pulling saturation always causes.
@@ -2940,22 +2946,54 @@ the dark theme is built on — `--surface` over `--bg`, a hairline, one shadow.
 No accent anywhere in it (#64): the photograph is the only colour on the card,
 and `.person-photo`'s hover desaturation (#56) is untouched.
 
-**Below 640px the offset comes off entirely, and the card is the portrait
-plus the name.** Stacking the two rectangles and pulling the panel up over the
-portrait's foot was the first version — it kept the card's character, and it
-was wrong for the size: at 327px the plate covered a third of the face, and
-one person ran past 1000px of page, so the section became something you scroll
-a screen at a time to read six words about each. A phone list of people wants
-the face and the name; everything else is on the note, one tap away. The
-description and the blurb stay in the HTML and are hidden by CSS — the same
-arrangement the two languages and the two footnote treatments use, because one
-markup has to serve both widths on a static site. The panel keeps no plate
-there either: with one line on it, a bordered box is a frame around a caption.
+**Two per row from 1000px, which the prose column cannot hold — so the list
+is the second thing on the site allowed past `--measure`.** Two cards in the
+576px column is 288px each, which fits neither a portrait nor a paragraph, let
+alone both. The cover deck was the first to go wide (#123) and the reasoning
+is the same one: 39rem is a comfortable line of *prose*, and a card whose left
+half is a photograph is not a line of prose. `--people-width` is
+`min(58rem, 100vw - var(--gutter) * 2)`, so it can never produce a horizontal
+scrollbar, and the negative margin is measured against `100%` — the page's own
+content box — so the grid stays centred on the column with the title and the
+chips above it still set to the column.
 
-Never a second card beside it, at any width: the card is a paragraph wide, and
-at 327px a two-up row would be back to thumbnails. One per row above 640px for
-the same reason — the site's column is 39rem, and two of these in it is 300px
-each, which is not enough for a portrait *and* a paragraph.
+1000px is derived, not chosen: two 436px cards plus the 1.5rem between them is
+888px, and 888 plus two 1.5rem gutters is 936. Out there the blurb is clamped
+to three lines, because 190 characters is five lines in a 248px panel and
+would stand the panel taller than the portrait beside it — the panel is the
+thing in front, so it should be the smaller of the two. Between 640 and
+1000px it stays one row-card per row with the whole blurb showing.
+
+**Below 640px the offset comes off, and the card is the portrait with the name
+alone in the same grey panel underneath.** Two versions preceded it. The first
+stacked the two rectangles and pulled the plate up over the portrait's foot,
+keeping the diagonal: at 327px it covered a third of the face, and one person
+ran past 1000px of page, so the section became something you scroll a screen
+at a time to read six words about each. The second dropped the plate entirely
+and set the name plain underneath — which lost the thing the section now looks
+like. The card stays, the offset and the two lines of text go: a phone list of
+people wants the face and the name, and everything else is on the note, one
+tap away. The description and the blurb are still in the HTML and hidden by
+CSS — the same arrangement the two languages and the two footnote treatments
+use, because one markup has to serve every width on a static site, and
+`display` is set on the wrappers, never on the `.lang-*` spans inside them.
+
+Never three per row, at any width: the card is a paragraph wide, and at that
+size it would be back to being thumbnails.
+
+**The photographs are full colour at rest, and `.person-photo` is deleted.**
+Portraits in this list sat at `grayscale(0.3) contrast(1.04)` and returned to
+full colour on hover — one of the two hover-only colour exceptions in #56, and
+the older half of it. It is gone at the owner's request, and the reason it was
+right to go is the card: a person on a page about that person should look like
+themselves at rest, and at 208px rather than a thumbnail's 90px the
+desaturation read as a filter applied to the photograph rather than as
+restraint. The class had no other user — it was people-list-only — so nothing
+else moved, but two comments elsewhere described it as "the greyscale
+exception on the grid" and are corrected in the same change; the hover scale's
+easing moved to `.person-card-art img`, since a Tailwind `group-hover:`
+utility declares no transition of its own. **#56 is now the social icons
+alone**, and #64 has one fewer thing standing beside it.
 
 **One trap, and it cost a confusing minute.** The panel is a later sibling
 than the portrait, so it ought to paint over it — but an `<img>` paints in a
