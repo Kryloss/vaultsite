@@ -23,6 +23,7 @@
  */
 import { getEntries, type Section } from "./vault";
 import { isShelfSection, shelfGroups } from "./shelf";
+import { sidebarTree } from "./site-config";
 import type { Str } from "./ui-strings";
 
 /** A leaf: one note, one URL. */
@@ -76,6 +77,10 @@ function noteOf(sectionSlug: string, note: { slug: string; title: string; titleU
  * front page in the tree as a folder of its own notes.
  */
 export function navChildren(section: Section): NavChildren | undefined {
+  // THE ONE SWITCH. Off, this returns nothing for every section, so no
+  // subtree is built, none is serialized into any page's payload, and
+  // components/Chrome.tsx has nothing to draw — see lib/site-config.ts.
+  if (!sidebarTree) return undefined;
   if (section.slug === "home") return undefined;
 
   const entries = getEntries(section);

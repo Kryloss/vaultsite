@@ -2768,6 +2768,15 @@ rather than collapsing the row and sliding the heading left.
 
 ## 124. The sidebar shows the vault's own folders, one level down (2026-09-04)
 
+> **PARKED, BEHIND A FLAG.** `sidebarTree` in `lib/site-config.ts` is `false`,
+> so none of this is live: no subtree is built, so none is serialized into any
+> page, and the drawer closes on navigation the way it always did. Everything
+> below is still in the tree — `lib/nav-tree.ts`, the `.nav-tree` block in
+> `app/globals.css`, the tree half of `components/Chrome.tsx` — and flipping
+> the flag turns it all back on. The flag covers the pinned drawer as well as
+> the tree, because the pin exists only to make the tree browsable; the tree
+> on without it would shut the drawer every time you used it.
+
 The drawer listed seven sections and stopped there. Inside Shelf that meant
 the sidebar could take you to `/shelf` and no further, while the page you
 landed on already knew about Videos, Movies, Shows and Books — so the

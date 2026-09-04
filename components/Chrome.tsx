@@ -31,6 +31,7 @@ import T from "@/components/T";
 import { useLang } from "@/components/useLang";
 import { ui } from "@/lib/ui-strings";
 import { shortcutKey } from "@/lib/shortcut-key";
+import { sidebarTree } from "@/lib/site-config";
 
 /**
  * How long the pointer has to stay in the left edge strip before the panel
@@ -391,7 +392,12 @@ export default function Chrome({
    * is on the page now.
    */
   useEffect(
-    () => setOpenBy((v) => (v === "modal" || v === "pinned" ? "pinned" : null)),
+    () =>
+      setOpenBy((v) =>
+        // Off, this is the plain "close on navigation" the drawer has always
+        // had. The pin exists to serve the tree — see lib/site-config.ts.
+        sidebarTree && (v === "modal" || v === "pinned") ? "pinned" : null
+      ),
     [pathname]
   );
 

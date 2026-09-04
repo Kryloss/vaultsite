@@ -4061,6 +4061,9 @@ svg.diagram tspan {
 }
 
 /* --- The sidebar's second level (components/Chrome.tsx, lib/nav-tree.ts) ---
+   PARKED: nothing renders these while `sidebarTree` in lib/site-config.ts is
+   false. Kept whole, because the flag is meant to be flipped back.
+
    Obsidian's file tree, in the drawer: the section you're standing in opens
    onto the vault folders inside it, and a folder opens onto its notes.
 

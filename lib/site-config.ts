@@ -33,6 +33,29 @@ export const repoUrl = "https://github.com/Kryloss/vaultsite";
 /** Branch the site deploys from — the one a note's source should be read on. */
 export const repoBranch = "main";
 
+/**
+ * THE SIDEBAR'S SECOND LEVEL — the vault's own folders under a section row.
+ * Off. Flip this to `true` to turn the whole thing back on.
+ *
+ * Built and then parked: the code, the styles and the reasoning are all still
+ * here (lib/nav-tree.ts, `.nav-tree` in app/globals.css, the tree half of
+ * components/Chrome.tsx, docs/DECISIONS.md #124), and nothing about the
+ * sidebar's behaviour changes while this is false — no subtree is built, so
+ * none is serialized into any page, and the drawer closes on navigation the
+ * way it always did.
+ *
+ * What it turns on, together, because the second only exists to serve the
+ * first: (1) the section you are in opens onto the vault's folders, and a
+ * folder onto its notes; (2) a deliberately-opened drawer is PINNED by a
+ * navigation instead of closing, so you can read two notes without reopening
+ * it and re-finding your place. Turning the tree on without the pin would
+ * shut the drawer every time you used it.
+ *
+ * Nothing in the tree opens on hover, and #124 records why — read it before
+ * adding that back.
+ */
+export const sidebarTree = false;
+
 export const siteDescription =
   "Kyrylo's writing, projects, notes, and the occasional strong opinion.";
 

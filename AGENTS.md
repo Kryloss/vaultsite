@@ -405,8 +405,11 @@ Important conventions:
   pure functions with `npm test` coverage, not inline in the component — see
   `lib/reading-progress.ts`, `lib/toc-spy.ts`, `lib/intro.ts`,
   `lib/constellation.ts`, `docs/DECISIONS.md` #76.
-- The sidebar shows the vault's OWN folders one level down, and invents none
-  (`lib/nav-tree.ts`, `docs/DECISIONS.md` #124): Shelf opens onto Videos /
+- The sidebar's second level is PARKED behind `sidebarTree` in
+  `lib/site-config.ts` (currently `false`) — nothing below is live, and the
+  drawer behaves exactly as it did before it. The flag covers the pinned
+  drawer too. What it turns on: the sidebar shows the vault's OWN folders one
+  level down, and invents none (`lib/nav-tree.ts`, `docs/DECISIONS.md` #124): Shelf opens onto Videos /
   Movies / Shows / Books because those folders exist and are also pages, while
   Music, Posts, People and Projects open straight onto their notes because
   they have no subfolders. Now is the only section with no tree — it has no
@@ -423,8 +426,8 @@ Important conventions:
   and neither should be rebuilt. Open state is keyed on a count of ARRIVALS, so
   leaving a section and coming back forgets which folder was open while moving
   around inside it does not.
-- Navigating no longer closes a drawer that was opened deliberately: `openBy`
-  demotes `modal` to `pinned` — open, no backdrop, no focus trap — which then
+- With `sidebarTree` on, navigating no longer closes a drawer that was opened
+  deliberately: `openBy` demotes `modal` to `pinned` — open, no backdrop, no focus trap — which then
   leaves the same two ways a peek does, by the pointer leaving it or a press
   anywhere on the page. Only a MODAL panel stays until dismissed. A subtree —
   and a folder — waits out `HOVER_DELAY` and unfolds rather than appearing,
