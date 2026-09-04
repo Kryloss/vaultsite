@@ -2932,87 +2932,73 @@ The People section was a three-up grid of square covers with a truncated line
 of text under each one. It was the right shape when the page was a wall of
 faces and the writing lived one click away — but the section is small, each
 note is a considered piece about one person, and a 200px thumbnail with a
-clipped subtitle said nothing about any of them. The grid was also the only
-list on the site where the artwork was the entire content of a row.
+clipped subtitle said nothing about any of them.
 
-**One wide card per person, at every width.** The square portrait at a size
-worth looking at, and a `--surface` panel laid *over* its inner edge carrying
-the name, the `description:` line and the opening of the note.
+**What shipped: the square portrait with a small card in its top-right corner
+carrying the name. Two to a row from 640px, one below it.**
 
-**The overlap is the whole idea.** Two rectangles that overlap read as one
-object with a front and a back; two sitting side by side read as a table. It
-is the same offset plate the OG cards use (#57) and the same real elevation
-the dark theme is built on — `--surface` over `--bg`, a hairline, one shadow.
-No accent anywhere in it (#64): the photograph is the only colour on the card,
-and `.person-photo`'s hover desaturation (#56) is untouched.
+It took three passes to get there, and the two shapes it left behind are worth
+not rebuilding.
 
-**Two per row from 1000px, which the prose column cannot hold — so the list
-is the second thing on the site allowed past `--measure`.** Two cards in the
-576px column is 288px each, which fits neither a portrait nor a paragraph, let
-alone both. The cover deck was the first to go wide (#123) and the reasoning
-is the same one: 39rem is a comfortable line of *prose*, and a card whose left
-half is a photograph is not a line of prose. `--people-width` is
-`min(58rem, 100vw - var(--gutter) * 2)`, so it can never produce a horizontal
-scrollbar, and the negative margin is measured against `100%` — the page's own
-content box — so the grid stays centred on the column with the title and the
-chips above it still set to the column.
+**The wide row-card.** The first version, and the arrangement the owner asked
+for from a reference image: the portrait beside a `--surface` panel laid over
+its inner edge, carrying the name, the description and the opening of the
+note. Two rectangles that overlap read as one object with a front and a back,
+where two side by side read as a table — that part was right, and it is why
+the corner card still overlaps the artwork rather than sitting under it.
 
-1000px is derived, not chosen: two 436px cards plus the 1.5rem between them is
-888px, and 888 plus two 1.5rem gutters is 936. Out there the blurb is clamped
-to three lines, because 190 characters is five lines in a 248px panel and
-would stand the panel taller than the portrait beside it — the panel is the
-thing in front, so it should be the smaller of the two. Between 640 and
-1000px it stays one row-card per row with the whole blurb showing.
+**Widening the page to fit two of them.** Two row-cards do not fit in a 39rem
+prose column — 288px each holds neither a portrait nor a paragraph — so the
+list was briefly allowed past `--measure`, the way the cover deck is (#123).
+Reverted. The deck earns that because a wall of album art is not prose and has
+nothing else on the page to line up with; this list sits directly under its
+own title and description, and breaking the page's left edge for it made the
+section look like a different site. **Two fit by scaling the card instead**,
+which is the whole of the fix: at 280px the portrait is still a face, and a
+panel beside it would be a panel the width of a word — so the text moved onto
+the artwork.
 
-**Below 640px the offset comes off, and the card is the portrait with the name
-alone in the same grey panel underneath.** Two versions preceded it. The first
-stacked the two rectangles and pulled the plate up over the portrait's foot,
-keeping the diagonal: at 327px it covered a third of the face, and one person
-ran past 1000px of page, so the section became something you scroll a screen
-at a time to read six words about each. The second dropped the plate entirely
-and set the name plain underneath — which lost the thing the section now looks
-like. The card stays, the offset and the two lines of text go: a phone list of
-people wants the face and the name, and everything else is on the note, one
-tap away. The description and the blurb are still in the HTML and hidden by
-CSS — the same arrangement the two languages and the two footnote treatments
-use, because one markup has to serve every width on a static site, and
-`display` is set on the wrappers, never on the `.lang-*` spans inside them.
+**And the card says the name, nothing else.** The description and the note's
+opening went with the panel. At 280px they are three or four lines of type
+over a photograph, which is a caption competing with the picture it captions;
+both are one tap away on the note, and the description still drives the hover
+preview (#85) and the OG card. On phones this was the owner's instruction
+outright — "only display name" — and once the desktop card is the same size as
+the phone card there is no second answer to give.
 
-Never three per row, at any width: the card is a paragraph wide, and at that
-size it would be back to being thumbnails.
+`lib/people.ts` was deleted with them rather than left behind. `personBlurb()`
+walked past a note's `## At a glance` table to its first real paragraph,
+because the generic excerpt in `lib/previews.ts` flattens whatever comes first
+and printed `At a glance Born January 21, 1991 — Vasylivka…` on the card. It
+was correct, it was tested, and it now has no caller: `git log` has it if the
+card ever grows back, and until then it is not a parser sitting in `lib/` with
+nothing to parse.
+
+**Details worth keeping.** The corner card is opaque `--surface`, not the
+shelf badge's dark scrim (#84): a scrim is for a mark small enough to read as
+part of the artwork, and this is a card sitting on top of it. It takes a
+`max-width`, not a width, so it is as wide as the name in whichever language
+is showing and a long one wraps inside the corner instead of reaching across
+the face. The New mark is the `chip` shape rather than `cover` — the card's
+own corner is exactly where a cover badge would go, and inside the card the
+mark really does follow a title in a row of text, which is what that shape is
+for.
+
+One trap from the wide version, kept because it will come back the moment
+anything here is stacked again: a panel that is a *later sibling* than the
+portrait still paints behind it, because an `<img>` paints in a later layer
+than a sibling's background. It needs `position: relative` and a z-index of
+its own.
 
 **The photographs are full colour at rest, and `.person-photo` is deleted.**
 Portraits in this list sat at `grayscale(0.3) contrast(1.04)` and returned to
 full colour on hover — one of the two hover-only colour exceptions in #56, and
-the older half of it. It is gone at the owner's request, and the reason it was
-right to go is the card: a person on a page about that person should look like
-themselves at rest, and at 208px rather than a thumbnail's 90px the
-desaturation read as a filter applied to the photograph rather than as
-restraint. The class had no other user — it was people-list-only — so nothing
-else moved, but two comments elsewhere described it as "the greyscale
-exception on the grid" and are corrected in the same change; the hover scale's
-easing moved to `.person-card-art img`, since a Tailwind `group-hover:`
-utility declares no transition of its own. **#56 is now the social icons
-alone**, and #64 has one fewer thing standing beside it.
-
-**One trap, and it cost a confusing minute.** The panel is a later sibling
-than the portrait, so it ought to paint over it — but an `<img>` paints in a
-later layer than a sibling's *background*, so the photograph sat in front of
-the panel with the type showing through it. The panel takes `position:
-relative` and a `z-index` of its own; nothing else in the card is positioned.
-
-**The paragraph is `personBlurb()` in `lib/people.ts`, not the excerpt in
-`lib/previews.ts`.** Every People note opens with an `## At a glance` fact
-table, and the generic excerpt — which flattens whatever comes first — printed
-`At a glance Born January 21, 1991 — Vasylivka…` on the card: a card about a
-person led by the contents of a table. `personBlurb()` walks past headings and
-table rows to the first real paragraph, which on these notes is the opening of
-"Why him" — the one part of the note that is Kyrylo talking about the person
-rather than about the facts. Capped at 190 characters on a word boundary, so
-the panel stays about as tall as the portrait beside it, and bilingual from
-the note's own `.uk.md`.
-
-It is covered by `lib/people.test.ts` rather than by the vault. The vault
-holds exactly one person today, and every note in it is written to the same
-shape, so the one case the parser has to get right is the only case there is —
-a second person written any other way would break the card silently.
+the older half of it. It is gone at the owner's request, and the card is why
+it was right to go: a person on a page about that person should look like
+themselves at rest, and at this size the desaturation read as a filter applied
+to the photograph rather than as restraint. The class had no other user — it
+was people-list-only — so nothing else moved, but two comments elsewhere
+described it as "the greyscale exception on the grid" and are corrected in the
+same change; the hover scale's easing moved to `.person-card-art img`, since a
+Tailwind `group-hover:` utility declares no transition of its own. **#56 is
+now the social icons alone**, and #64 has one fewer thing standing beside it.

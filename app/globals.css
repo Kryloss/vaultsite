@@ -3759,48 +3759,66 @@ a.series-link:hover {
 
 /* ---------- People cards (components/lists/PeopleCards.tsx) ---------- */
 
-/* One person per row: the portrait at a size worth looking at, and a panel
-   carrying the name, the description and the note's opening sentence laid
-   OVER its inner edge. The offset is the whole idea — two rectangles that
-   overlap read as one object with a front and a back, where two sitting side
-   by side read as a table. It replaced a three-up grid of thumbnails whose
-   only text was a truncated line under each square; the section is small
-   enough that a card can afford to say something. DECISIONS #125.
+/* From 640px: the portrait beside a panel laid over its inner edge, carrying
+   the name, the description and the opening of the note — two cards to a row.
+   Below 640px: one full-width portrait with a small name card in its top-right
+   corner instead.
 
-   No `--accent` anywhere in here (#64): the panel is `--surface` over `--bg`,
-   the same real elevation the dark theme is built on, and the person's
-   photograph is the only colour on the card. */
+   THE OVERLAP IS THE WHOLE IDEA. Two rectangles that overlap read as one
+   object with a front and a back, where two side by side read as a table. It
+   replaced a three-up grid of thumbnails whose only text was a truncated line
+   under each square; the section is small, and each note is a considered piece
+   about one person.
+
+   TWO FIT BY SCALING THE CARD, NEVER BY WIDENING THE PAGE. Two of these at
+   their original size do not fit in a 39rem prose column, so the list was
+   briefly allowed past `--measure` the way the cover deck is (#123), and that
+   was reverted: the deck earns it because a wall of album art is not prose and
+   has nothing else on the page to line up with, whereas this list sits
+   directly under its own title and description, and breaking the page's left
+   edge for it made the section look like a different site. So the card is 280px
+   and everything in it is smaller — the portrait, the name, the type. The two
+   text blocks are line-clamped rather than shortened at the source, since the
+   number of lines that fits is a property of the card and the string is a
+   property of the note.
+
+   No accent anywhere in here (#64), and the photographs are full colour at
+   rest — `.person-photo`'s desaturation was the older half of #56 and is gone,
+   so the social icons are the only place colour is allowed now. */
 .person-cards {
   display: grid;
-  gap: 2.5rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.75rem 1rem;
 }
 
 .person-card {
+  position: relative;
   display: flex;
   align-items: center;
 }
 
 /* Square, because a person is not a book jacket — the shapes note further up
-   this file is the reasoning, and it still holds at this size. The panel is a
-   later sibling, but an <img> paints above a sibling's BACKGROUND, so the
-   panel needs a stacking context of its own to sit in front of the portrait
-   rather than behind it. */
+   this file is the reasoning, and it still holds at this size. */
 .person-card-art {
   position: relative;
-  flex: 0 0 46%;
+  flex: 0 0 50%;
   aspect-ratio: 1;
   overflow: hidden;
-  border-radius: var(--r-xl);
+  border-radius: var(--r-lg);
   background: var(--surface);
 }
 
 /* The cover's hover scale used to be eased by `.person-photo`'s own
-   transition; that class is gone (see above), and a Tailwind `group-hover:`
-   utility declares no transition of its own, so the ease lives here now. */
+   transition; that class is gone, and a Tailwind `group-hover:` utility
+   declares no transition of its own, so the ease lives here now. */
 .person-card-art img {
   transition: transform var(--dur-slow) var(--ease);
 }
 
+/* The panel is a LATER SIBLING than the portrait and still paints behind it
+   without this: an `<img>` paints in a later layer than a sibling's
+   background. `position: relative` + a z-index of its own is what puts it in
+   front. Nothing else in the card is positioned. */
 .person-card-panel {
   position: relative;
   z-index: 1;
@@ -3809,10 +3827,10 @@ a.series-link:hover {
   flex-direction: column;
   /* The overlap. Deep enough to read as deliberate, shallow enough that the
      portrait still has a face on both sides of it. */
-  margin-left: -3rem;
-  padding: 1.25rem 1.5rem;
+  margin-left: -1.75rem;
+  padding: 0.6875rem 0.75rem;
   border: 1px solid var(--border);
-  border-radius: var(--r-xl);
+  border-radius: var(--r-lg);
   background: var(--surface);
   box-shadow: 0 6px 20px rgb(0 0 0 / 0.08);
   /* `.press` is on the link, not on this box, so the hairline needs its own
@@ -3830,103 +3848,73 @@ a.series-link:hover {
 }
 
 .person-card-name {
-  font-size: 1.375rem;
+  font-size: 0.9375rem;
   font-weight: 600;
-  line-height: 1.2;
+  line-height: 1.25;
   color: var(--text);
 }
 
 .person-card-role {
-  margin-top: 0.35rem;
-  font-size: 0.9375rem;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
   line-height: 1.4;
   color: var(--text-tertiary);
 }
 
 .person-card-blurb {
-  margin-top: 0.9rem;
-  font-size: 0.9375rem;
-  line-height: 1.55;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
   color: var(--text-secondary);
 }
 
+/* Clamped so the panel stays about as tall as the portrait beside it — the
+   panel is the thing in front, so it should not be the taller of the two.
+   Safe here: nothing in this box floats, which is what made the same clamp
+   unusable on the link-preview card (#85). */
+.person-card-role {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.person-card-blurb {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
 /* Under the pointer the hairline lifts and the portrait leans in a little
-   (`group-hover:scale-105` on the image). Nothing changes colour: the
-   photographs are at full colour at rest now, which is what took the site's
-   second hover-colour exception out of #56. */
+   (`group-hover:scale-105` on the image). Nothing changes colour. */
 .person-card:hover .person-card-panel,
 .person-card:focus-visible .person-card-panel {
   border-color: var(--text-tertiary);
 }
 
-/* Two per row once the window can hold two of them side by side, which the
-   39rem prose column cannot: two cards in 576px is 288px each, and a portrait
-   AND a paragraph do not fit in that. So the list is the second thing on the
-   site allowed past `--measure` — the cover deck being the first (#123), and
-   for the same reason: 39rem is a comfortable line of PROSE, and a card whose
-   left half is a photograph is not a line of prose. `--people-width` can
-   never exceed the window minus its gutters, so it cannot make a horizontal
-   scrollbar, and the negative margin is measured against `100%` — the page's
-   own content box — so the grid stays centred on the column, with the title
-   and the chips above it still set to the column.
+/* On a phone the row card has nowhere to go: half a phone column is a
+   thumbnail, and a full-width card with the panel beside it leaves the panel
+   the width of a word. So one per row, the portrait at full width, and the
+   panel becomes a SMALL NAME CARD in its top-right corner — the same front
+   plate, small enough to sit on the artwork.
 
-   1000px is derived, not chosen: two 436px cards plus the 1.5rem between them
-   is 888px, and 888 + two 1.5rem gutters is 936 — 1000px leaves the first row
-   of two comfortably clear of the fold-over point rather than landing on it.
+   The description and the note's opening are hidden rather than dropped: at
+   327px they would be four lines of type over a photograph, a caption
+   competing with the picture it captions, and both are one tap away on the
+   note. Hidden by CSS because one markup has to serve every width on a static
+   site — the same arrangement the two languages and the two footnote
+   treatments use — and `display` is set on the WRAPPERS, never on the
+   `.lang-en`/`.lang-uk` spans inside them, which the language toggle owns.
 
-   The blurb is clamped to three lines out here. It is capped at 190 characters
-   in `lib/people.ts`, which is five lines in a 248px panel and would stand the
-   panel taller than the portrait beside it — the panel is the thing in front,
-   so it should be the smaller of the two. */
-@media (min-width: 1000px) {
-  .person-cards {
-    --people-width: min(58rem, 100vw - var(--gutter) * 2);
-    width: var(--people-width);
-    margin-inline: calc((100% - var(--people-width)) / 2);
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 1.5rem;
-    row-gap: 2.5rem;
-  }
-
-  .person-card-panel {
-    margin-left: -2.5rem;
-    padding: 1.125rem 1.25rem;
-  }
-
-  .person-card-name {
-    font-size: 1.25rem;
-  }
-
-  .person-card-role,
-  .person-card-blurb {
-    font-size: 0.875rem;
-  }
-
-  .person-card-blurb {
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
-    overflow: hidden;
-  }
-}
-
-/* On a phone the offset comes off and the panel goes UNDER the portrait —
-   the same grey card, carrying the name alone.
-
-   Two earlier versions: the plate pulled up over the portrait's foot and hung
-   to the right (a third of the face covered, and one person ran past 1000px
-   of page), then no plate at all, the name set plain underneath. The card is
-   what the section looks like, so the name keeps it; what goes is the offset
-   and the two lines of text that need a screen of their own to be worth
-   reading.
-
-   The description and the blurb are still in the HTML and hidden by CSS — the
-   same arrangement the two languages and the two footnote treatments use,
-   because one markup has to serve every width on a static site. `display` is
-   set on the wrappers, NEVER on the `.lang-en`/`.lang-uk` spans inside them,
-   which the language toggle owns. */
+   Opaque `--surface`, not the shelf badge's dark scrim (#84): a scrim is for a
+   mark small enough to read as part of the artwork, and this is a card sitting
+   on top of it. `max-width` rather than a width, so the box is as wide as the
+   name in whichever language is showing and a long one wraps inside the corner
+   instead of reaching across the face. */
 @media (max-width: 639px) {
   .person-cards {
+    grid-template-columns: 1fr;
     gap: 2rem;
   }
 
@@ -3936,22 +3924,23 @@ a.series-link:hover {
 
   .person-card-art {
     width: 100%;
+    border-radius: var(--r-xl);
   }
 
   .person-card-panel {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
     display: block;
-    width: auto;
-    margin: 0.75rem 0 0;
-    padding: 0.875rem 1.125rem;
+    max-width: calc(100% - 1rem);
+    margin: 0;
+    padding: 0.4375rem 0.6875rem;
+    border-radius: var(--r-md);
   }
 
   .person-card-role,
   .person-card-blurb {
     display: none;
-  }
-
-  .person-card-name {
-    font-size: 1.125rem;
   }
 }
 

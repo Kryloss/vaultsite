@@ -10,9 +10,6 @@ export interface PersonRow {
   titleUk?: string;
   description?: string;
   descriptionUk?: string;
-  /** Opening of the note's first prose paragraph — see lib/people.ts. */
-  blurb?: string;
-  blurbUk?: string;
   cover?: string;
   /** Base64 blur-up placeholder for `cover` — see lib/blur.ts. */
   coverBlur?: string;
@@ -25,11 +22,12 @@ export interface PersonRow {
 }
 
 /**
- * Presentational half of the people list: category chips + one wide card per
- * person — the portrait at full size with a panel offset over its inner edge,
- * carrying the name, the one-line description and the opening of the note.
- * One card per row at every width; below 640px the panel drops under the
- * portrait and the offset goes with it. See DECISIONS #125.
+ * Presentational half of the people list: category chips + one card per
+ * person. From 640px that is the portrait beside a panel laid over its inner
+ * edge carrying the name and the note's one-line description — two cards to a
+ * row, scaled to fit the page column rather than widening it. Below 640px it
+ * is one full-width portrait with a small name card in its top-right corner.
+ * See DECISIONS #125.
  *
  * No hooks, so it renders the same on the server (as the Suspense fallback in
  * PeopleGrid) and inside the client component that reads the active category
@@ -92,9 +90,9 @@ export default function PeopleCards({
                   <img
                     src={row.cover}
                     srcSet={row.coverSrcSet}
-                    /* Full width of the column on a phone, a little under half
-                       of it in the card's row above 640px. */
-                    sizes="(max-width: 640px) 82vw, 300px"
+                    /* The column on a phone; a little under half of half of
+                       it in the two-up grid above 640px. */
+                    sizes="(max-width: 640px) 90vw, 140px"
                     alt={row.title}
                     /* Full colour at rest. These used to carry
                        `.person-photo`, which held them at `grayscale(0.3)`
@@ -126,22 +124,21 @@ export default function PeopleCards({
                     {initials(row.title)}
                   </div>
                 )}
-                {/* Client-only — see components/NewBadge.tsx. */}
-                <NewBadge date={row.date} variant="cover" />
               </div>
 
               <div className="person-card-panel">
                 <span className="person-card-name">
                   <T en={row.title} uk={row.titleUk} />
-                </span>
+                </span>{" "}
+                {/* The `chip` shape, not `cover` (#84): on a phone the card
+                    takes the corner a cover badge would use, and inside the
+                    card the mark really does follow a title in a row of text,
+                    which is what that shape is for. Client-only — see
+                    NewBadge. */}
+                <NewBadge date={row.date} />
                 {row.description && (
                   <span className="person-card-role">
                     <T en={row.description} uk={row.descriptionUk} />
-                  </span>
-                )}
-                {row.blurb && (
-                  <span className="person-card-blurb">
-                    <T en={row.blurb} uk={row.blurbUk} />
                   </span>
                 )}
               </div>
