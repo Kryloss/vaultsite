@@ -26,7 +26,7 @@ description_uk: "Перший показ третього доповнення �
 
 | | |
 |---|---|
-| Topic | The third story expansion to The Witcher 3, first shown at gamescom |
+| Topic | The third story expansion to [[The Witcher 3 - Wild Hunt|The Witcher 3]], first shown at gamescom |
 | Studio | CD Projekt Red with Fool's Theory |
 | Language | Polish |
 | Released | 2026-08-25 |

@@ -12,6 +12,12 @@ import {
   shelfGroups,
 } from "@/lib/shelf";
 import { getBookQuotes } from "@/lib/quotes";
+import {
+  CREATORS_SLUG,
+  creatorGroupBySlug,
+  hasCreatorPages,
+  shelfCreatorGroups,
+} from "@/lib/shelf-creators";
 import ShelfTypeView from "@/components/lists/ShelfTypeView";
 import T from "@/components/T";
 import Page from "@/components/Page";
@@ -55,6 +61,29 @@ export function generateStaticParams() {
               category: QUOTES_SLUG,
             });
           }
+          /* One page per studio, plus the index they are chosen from — the
+             same segment as a category, because a studio IS a facet of the
+             same shelf (#139). `shelfCreatorGroups` has already dropped any
+             name whose slug collides with a category above. */
+          if (hasCreatorPages(group.medium)) {
+            const creators = shelfCreatorGroups(
+              getEntries(section),
+              group.medium
+            );
+            if (creators.length > 0) {
+              params.push({
+                section: section.slug,
+                medium: group.slug,
+                category: CREATORS_SLUG,
+              });
+              for (const creator of creators)
+                params.push({
+                  section: section.slug,
+                  medium: group.slug,
+                  category: creator.slug,
+                });
+            }
+          }
           return params;
         })
     );
@@ -64,9 +93,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { section: sectionSlug, medium, category } = await params;
   const section = getSectionBySlug(sectionSlug);
   if (!section) return {};
-  const group = shelfGroupBySlug(getEntries(section), medium);
-  const name = group ? categoryFromSlug(group, category) : undefined;
-  if (!group || !name) return {};
+  const entries = getEntries(section);
+  const group = shelfGroupBySlug(entries, medium);
+  if (!group) return {};
+  /* A studio page is a real page and needs its own metadata; the category
+     lookup would call it a 404. Quotes has always resolved this way too — the
+     title is the medium's either way, since what is filtered shows as the
+     active chip on the page rather than in the tab (#113). */
+  const known =
+    Boolean(categoryFromSlug(group, category)) ||
+    category === QUOTES_SLUG ||
+    category === CREATORS_SLUG ||
+    Boolean(creatorGroupBySlug(entries, group.medium, category));
+  if (!known) return {};
   // Same title as the unfiltered medium page — the category shows as the
   // active chip on the page, and repeating it in the tab was noise.
   return {
@@ -88,9 +127,24 @@ export default async function ShelfCategoryPage({ params }: Props) {
   const quotes = group.medium === "book" ? getBookQuotes(entries) : undefined;
   const showQuotes = category === QUOTES_SLUG && Boolean(quotes?.length);
 
-  // Quotes isn't a real category, so it won't resolve through the frontmatter.
-  const name = showQuotes ? undefined : categoryFromSlug(group, category);
-  if (!name && !showQuotes) notFound();
+  /* Studios, where the medium has them: the index under its own segment, and
+     one page per studio under the studio's slug (#139). */
+  const creators = hasCreatorPages(group.medium)
+    ? shelfCreatorGroups(entries, group.medium)
+    : undefined;
+  const showCreators =
+    category === CREATORS_SLUG && Boolean(creators && creators.length > 0);
+  const activeCreator = showCreators
+    ? undefined
+    : creatorGroupBySlug(entries, group.medium, category);
+
+  /* A category is the only one of the four that resolves through frontmatter;
+     the other three are segments this route reserves. */
+  const name =
+    showQuotes || showCreators || activeCreator
+      ? undefined
+      : categoryFromSlug(group, category);
+  if (!name && !showQuotes && !showCreators && !activeCreator) notFound();
 
   return (
     <Page
@@ -108,6 +162,9 @@ export default async function ShelfCategoryPage({ params }: Props) {
         activeCategory={name}
         quotes={quotes}
         showQuotes={showQuotes}
+        creators={creators}
+        showCreators={showCreators}
+        activeCreator={activeCreator}
       />
     </Page>
   );

@@ -51,7 +51,7 @@ export default function Toc({
   titleUk,
   en,
   uk,
-  below,
+  above,
 }: {
   /** The note's own title — the first row, and the jump-to-top target. */
   title: string;
@@ -59,17 +59,21 @@ export default function Toc({
   en: Heading[];
   uk?: Heading[];
   /**
-   * Anything the page wants to park at the FOOT OF THE RAIL, under the
-   * outline — today a People note's portrait (DECISIONS #121). It goes in the
-   * rail's own flow rather than being positioned beneath it, because the
-   * rail's height is however many headings the note has: a sibling would have
-   * to be told that number, and a child simply follows.
+   * Anything the page wants to park at the HEAD OF THE RAIL, above the
+   * outline — today a People note's portrait and its "At a glance" block
+   * (DECISIONS #121, #128). It goes in the rail's own flow rather than being
+   * positioned above it, because a sibling would have to be told how tall a
+   * portrait and a fact list run and a child simply follows.
+   *
+   * Above rather than below, so the column reads the way the shelf's does
+   * (#127): who it is, what they are, then where to jump. The outline is
+   * navigation for the page, and navigation comes after the page's subject.
    *
    * Rail only, never the phone sheet. The sheet is a popover you open to jump
    * somewhere and dismiss; a picture in it is in the way of that. A phone
    * shows the same artwork beside the title instead (#120).
    */
-  below?: ReactNode;
+  above?: ReactNode;
 }) {
   const { lang } = useLang();
   const [active, setActive] = useState("");
@@ -323,18 +327,30 @@ export default function Toc({
   return (
     <>
       <nav ref={railRef} className="toc-rail" aria-label="Table of contents">
-        {/* One marker that slides between rows, rather than a border switching
-            on and off per link. The rail is a fixed element, so this absolutely
-            positioned span is measured against it and scrolls with its content.
-            Hidden until it has been positioned once — see the effect below. */}
-        <span className="toc-marker" aria-hidden />
-        {/* The note's title as the first row of the outline — jumps to the top,
-            and highlights whenever you're above the first heading. Rendered
-            here only: it is NOT in the Cmd+K index, which already has this
-            page as its own result. */}
-        {topLink()}
-        {outline}
-        {below}
+        {above}
+        {/* THE HAIRLINE LIVES HERE, not on the rail (DECISIONS #128). It is
+            the outline's own left rule — the line the active marker slides
+            along and the one every row's transparent border overlaps — so it
+            has to start where the list starts. On the rail it ran the full
+            height of the column, which on a People note drew it down the side
+            of a portrait and a fact list that are not an outline and have no
+            rows for it to mark.
+
+            `position: relative` so this box is the offsetParent for both the
+            marker and the rows it measures — see the placing effect above. */}
+        <div className="toc-outline">
+          {/* One marker that slides between rows, rather than a border
+              switching on and off per link. Absolutely positioned, and
+              measured against the box above; hidden until it has been
+              positioned once — see the effect below. */}
+          <span className="toc-marker" aria-hidden />
+          {/* The note's title as the first row of the outline — jumps to the
+              top, and highlights whenever you're above the first heading.
+              Rendered here only: it is NOT in the Cmd+K index, which already
+              has this page as its own result. */}
+          {topLink()}
+          {outline}
+        </div>
       </nav>
 
       {/* Narrow screens: the same outline behind the three-line icon, in the

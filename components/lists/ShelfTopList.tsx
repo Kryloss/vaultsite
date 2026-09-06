@@ -8,10 +8,10 @@ import { ui } from "@/lib/ui-strings";
 import { sortForTop, type ShelfItem } from "@/lib/shelf";
 
 /**
- * Films and shows as a ranked list — the IMDb Top 250 grammar: position,
+ * Films, shows and games as a ranked list — the IMDb Top 250 grammar: position,
  * small cover, title, one line about it, rating.
  *
- * This is what the FIRST chip on a movie or show medium page opens, in place
+ * This is what the FIRST chip on a film, show or game medium page opens, in place
  * of the grid of every cover (DECISIONS #113). The category chips behind it
  * are untouched and still open the grid: choosing "Crime" is choosing a set
  * to look at, and covers are how you look at a set. Choosing "Top" is asking

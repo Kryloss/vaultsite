@@ -1,4 +1,9 @@
 import type { MetadataRoute } from "next";
+import {
+  CREATORS_SLUG,
+  hasCreatorPages,
+  shelfCreatorGroups,
+} from "@/lib/shelf-creators";
 import { getSections, getEntries } from "@/lib/vault";
 import {
   categorySlug,
@@ -65,6 +70,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
             changeFrequency: "weekly",
             priority: 0.5,
           });
+        }
+        /* The studio index and one page per studio (#139) — real addresses
+           with their own canonicals, so they belong here beside the
+           categories rather than being reachable only from a chip. */
+        if (hasCreatorPages(group.medium)) {
+          const creators = shelfCreatorGroups(entries, group.medium);
+          if (creators.length > 0) {
+            urls.push({
+              url: `${siteUrl}/${section.slug}/type/${group.slug}/${CREATORS_SLUG}`,
+              changeFrequency: "weekly",
+              priority: 0.5,
+            });
+            for (const creator of creators)
+              urls.push({
+                url: `${siteUrl}/${section.slug}/type/${group.slug}/${creator.slug}`,
+                changeFrequency: "weekly",
+                priority: 0.5,
+              });
+          }
         }
       }
     }

@@ -31,6 +31,7 @@ import {
 } from "@/lib/shelf";
 import { ui } from "@/lib/ui-strings";
 import Creator from "@/components/Creator";
+import { creatorHref } from "@/lib/shelf-creators";
 import T from "@/components/T";
 import Toc from "@/components/Toc";
 import EntryFooter from "@/components/EntryFooter";
@@ -39,11 +40,13 @@ import LinkPreview from "@/components/LinkPreview";
 import CopyMarkdown, { CopyMarkdownTitle } from "@/components/CopyMarkdown";
 import ReadingProgress from "@/components/ReadingProgress";
 import MusicSheet from "@/components/MusicSheet";
-import NoteCover, { GUTTER_COVER_W } from "@/components/NoteCover";
+import NoteCover from "@/components/NoteCover";
 import ReadingPosition from "@/components/ReadingPosition";
+import NoteThumbFit from "@/components/NoteThumbFit";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbJsonLd, entryJsonLd } from "@/lib/jsonld";
 import { maturityOf } from "@/lib/maturity";
+import { NOTE_THUMB_FIT_SCRIPT } from "@/lib/note-thumb";
 import Page from "@/components/Page";
 import DevEntryOptionsSlot from "@/components/DevEntryOptionsSlot";
 
@@ -124,8 +127,9 @@ export default async function EntryPage({ params }: Props) {
     : null;
   const stats = section.type === "posts" ? readingStats(entry.content) : null;
   const categories = parseCategories(entry.meta);
+  const sectionEntries = getEntries(section);
   const categoryOptions = [
-    ...new Set(getEntries(section).flatMap((candidate) => parseCategories(candidate.meta))),
+    ...new Set(sectionEntries.flatMap((candidate) => parseCategories(candidate.meta))),
   ].sort((a, b) => a.localeCompare(b));
   const seriesOptions =
     process.env.NODE_ENV === "development" ? getSeriesOptions() : [];
@@ -145,6 +149,13 @@ export default async function EntryPage({ params }: Props) {
      `entryCreator` picks that from the key itself, so nothing here has to
      know which section it is. */
   const creator = opensWithHeaderBlock(section) ? entryCreator(entry) : undefined;
+  /* Where the creator's name leads, on the mediums that group by maker — a
+     game's studio has a shelf of its own (#139). Undefined everywhere else,
+     and the block renders as the plain text it always was. */
+  const creatorLink =
+    creator && medium
+      ? creatorHref(sectionEntries, entry, section.slug, mediumSlug(medium))
+      : undefined;
   /* Music notes tint their opening with their own cover, the way the section's
      track list is tinted by the newest one — so a note and the list it came
      from read as the same place. Music only: a shelf note already opens with
@@ -162,23 +173,36 @@ export default async function EntryPage({ params }: Props) {
 
      A video is excluded from both: its cover is a YouTube thumbnail derived
      from the link, and the note embeds that video a few lines below — the
-     poster would be the still of the thing already playing under it. */
+     poster would be the still of the thing already playing under it. That is
+     the ONE medium the gutter shows no artwork for, and it is why `isVideo`
+     is tested here rather than in the two places that read this (#135). */
   const art =
     isShelfSection(section) || section.type === "people"
       ? toShelfItem(entry)
       : undefined;
   const noteArt = art?.coverUrl && !art.isVideo ? art : undefined;
-  const gutterCover =
-    noteArt && (medium === "movie" || medium === "show") ? noteArt : undefined;
+  /* EVERY SHELF MEDIUM, not just the two screen-shaped ones (#135). A book's
+     face was left out of the gutter by #115 on the grounds that it already
+     has a spines row and a medium page — but so does a film have a poster
+     grid, and what the gutter is actually for is the note in front of you.
+     People are the exception that stays: a person's portrait belongs at the
+     head of the contents rail (#121), not in a column of its own. */
+  const gutterCover = isShelfSection(section) ? noteArt : undefined;
   /* A People note's own column: the portrait, and under it the "At a glance"
      block lifted out of the article — the shelf's arrangement (#120) applied
      to the one page whose subject IS a person (#121).
 
-     It is parked at the FOOT OF THE CONTENTS RAIL rather than in a gutter of
+     It is parked at the HEAD OF THE CONTENTS RAIL rather than in a gutter of
      its own, because the person is what the whole page is about and there is
-     nothing out there for it to compete with. In the rail rather than under
-     it: the rail's height is however many headings the note has, and a child
-     follows a list that a sibling would have to be told the length of.
+     nothing out there for it to compete with. In the rail rather than above
+     it: a sibling would have to be told how tall a portrait and a fact list
+     run, and a child simply follows.
+
+     Above the outline rather than below it (#128), so the column reads the
+     way a shelf note's does (#127): the subject first, then the navigation.
+     The rail's hairline moved off the rail and onto `.toc-outline` in the
+     same change — it marks the rows of a list, and there are no rows beside
+     a photograph.
 
      The facts are rendered TWICE — here, and back in the article by the
      `.note-gutter` wrapper below. Only one is ever displayed (the rail is
@@ -243,6 +267,34 @@ export default async function EntryPage({ params }: Props) {
      bodies embed the same album, so one URL serves either. */
   const albumUrl =
     section.type === "music" ? firstAlbumUrl(entry.content) : undefined;
+
+  /* The wrapper below exists whenever the note has header matter of its own.
+     It is also where the contents rail goes when that matter takes the gutter
+     — see the comment on `.note-gutter` in the JSX. */
+  const hasGutter = Boolean(gutterCover?.coverUrl || creator || en.factsHtml);
+  /* WHAT MAKES THE WRAPPER A COLUMN, and it is a marker rather than the
+     poster's own presence (#135). Every shelf note's header matter goes to
+     the gutter at 1168px — including a VIDEO's, which has no artwork to put
+     above it — so the CSS can no longer ask `:has(.note-cover)` and get the
+     right answer. It has to be told, because the other two sections that
+     render this wrapper want something else out there: a music note has the
+     album player in that gutter (#98), and a People note has its portrait at
+     the head of the rail (#121). */
+  const gutterColumn = isShelfSection(section) && hasGutter;
+  /* A People note's facts keep the CARD every prose table has (#87) — shelf
+     and music notes get the plain list instead, via `factTables`. The card
+     needs its own colour and spacing here, so it is named rather than left to
+     be inferred from the absence of `.fact-table`. See `.person-facts`. */
+  const factsCard = section.type === "people" ? " person-facts" : "";
+  const toc = showToc ? (
+    <Toc
+      title={entry.title}
+      titleUk={entry.titleUk}
+      en={en.headings}
+      uk={uk?.headings}
+      above={personBlock}
+    />
+  ) : null;
 
   const categoryHref = (category: string) =>
     isShelfSection(section) && medium
@@ -345,19 +397,6 @@ export default async function EntryPage({ params }: Props) {
       /* Scopes the gutter player to music notes only — an album link pasted
          into a post keeps its place in the writing (#94). */
       className={section.type === "music" ? "music-note" : ""}
-      /* The poster's PAINTED height, so the contents rail starts exactly below
-         it rather than at a number guessed for the tallest poster. It lives on
-         `.page` because the rail is the aside's SIBLING — a custom property
-         set on `.note-cover` would never reach it. */
-      style={
-        gutterCover?.coverUrl
-          ? ({
-              "--note-cover-h": `${Math.round(
-                GUTTER_COVER_W * (gutterCover.coverAr ?? 1.5)
-              )}px`,
-            } as CSSProperties)
-          : undefined
-      }
       data-vault-source={`vault/${entry.sectionDir}/${entry.fileName}.md`}
       data-vault-source-uk={
         entry.contentUk
@@ -398,7 +437,14 @@ export default async function EntryPage({ params }: Props) {
           a film or show hands the job to the gutter poster instead. The
           wrapper div is only rendered when there is artwork, so every other
           note's header keeps the shape it has always had. */}
-      <header className={noteArt ? "note-header" : undefined}>
+      {/* suppressHydrationWarning: the inline script below writes the measured
+          `--note-thumb-fit` onto this element before React hydrates (#134), so
+          the server's HTML and the DOM differ here on purpose — the same
+          arrangement the language script has with <html data-lang>. */}
+      <header
+        className={noteArt ? "note-header" : undefined}
+        suppressHydrationWarning={Boolean(noteArt)}
+      >
         {noteArt && (
           /* Decorative, hence `alt=""` — the <h1> beside it names the work on
              the same line, so announcing the cover would be the title twice.
@@ -411,15 +457,30 @@ export default async function EntryPage({ params }: Props) {
             className="note-thumb"
             src={noteArt.coverUrl}
             srcSet={noteArt.coverSrcSet}
-            /* Painted at 5rem, so a 2x phone wants the 256w variant. */
-            sizes="80px"
+            /* Never painted wider than the 6rem reserve, so a 2x phone wants
+               the 256w variant. */
+            sizes="96px"
             alt=""
             aria-hidden="true"
             loading="lazy"
+            /* THE RATIO, AS ATTRIBUTES, and they are load-bearing (#133). The
+               thumbnail is sized `height: 100%; width: auto`, so its width is
+               the transfer through the artwork's own ratio — which a
+               not-yet-loaded image does not have, and `width: auto` then
+               resolves to 0. The attributes give the box that ratio before
+               the first byte arrives, so the picture is drawn at its size
+               rather than arriving at it. Only the RATIO is used (CSS sets
+               both axes), hence the round 1000; a cover with no measured
+               dimensions — an external `cover:` URL, which the image manifest
+               never sees — falls back to a square, as it always did. */
+            width={1000}
+            height={Math.round(1000 * (noteArt.coverAr ?? 1))}
             style={
-              noteArt.coverBlur
-                ? { backgroundImage: `url("${noteArt.coverBlur}")` }
-                : undefined
+              {
+                ...(noteArt.coverBlur
+                  ? { backgroundImage: `url("${noteArt.coverBlur}")` }
+                  : null),
+              } as CSSProperties
             }
           />
         )}
@@ -448,6 +509,25 @@ export default async function EntryPage({ params }: Props) {
         </div>
       </header>
 
+      {/* THE ARTWORK'S WIDTH, HANDED BACK TO THE TITLE (#134). CSS draws the
+          picture at the header's own height and the artwork's ratio, and then
+          has no way to tell the text how wide it came out — the offset decides
+          the wrap, the wrap decides the height, and the height is what the
+          width was derived from. So it is measured: once here, while the
+          parser is still working and before the page is first drawn, and again
+          at hydration and on every resize by the component beside it. Both
+          read lib/note-thumb.ts; neither is load-bearing, since the CSS on its
+          own is correct at the full 6rem reserve. */}
+      {noteArt && (
+        <>
+          <script
+            suppressHydrationWarning
+            dangerouslySetInnerHTML={{ __html: NOTE_THUMB_FIT_SCRIPT }}
+          />
+          <NoteThumbFit />
+        </>
+      )}
+
       <DevEntryOptionsSlot
         source={`vault/${entry.sectionDir}/${entry.fileName}.md`}
         sectionType={section.type}
@@ -463,14 +543,19 @@ export default async function EntryPage({ params }: Props) {
       {/* The note's header matter that is ABOUT THE WORK rather than part of
           the writing: the poster, and the person who made it.
 
-          One wrapper, because on a wide window the two become a single column
-          in the right gutter — poster on top, creator beneath it (#115). They
-          stack in normal flow inside it, so nothing has to know how tall a
-          bio runs. `display: contents` everywhere else, so at every other
-          width the creator block is exactly where it has always been, above
-          the note's "At a glance" table — see components/Creator.tsx. */}
-      {(gutterCover?.coverUrl || creator || en.factsHtml) && (
-        <div className="note-gutter">
+          One wrapper, because on a wide window these become a single column
+          in the right gutter — artwork on top, creator beneath it (#115),
+          then the facts and the outline (#127). They stack in normal flow
+          inside it, so nothing has to know how tall a bio runs. `display:
+          contents` everywhere else, so at every other width the creator block
+          is exactly where it has always been, above the note's "At a glance"
+          table — see components/Creator.tsx.
+
+          `data-column` is what turns it into that column, and a VIDEO note
+          takes it with no artwork at all: the player it would show a still of
+          is a few lines below (#135). */}
+      {hasGutter && (
+        <div className="note-gutter" data-column={gutterColumn ? "" : undefined}>
           {gutterCover?.coverUrl && (
             <NoteCover
               src={gutterCover.coverUrl}
@@ -479,27 +564,38 @@ export default async function EntryPage({ params }: Props) {
               ar={gutterCover.coverAr}
             />
           )}
-          {creator && <Creator creator={creator} />}
+          {creator && <Creator creator={creator} href={creatorLink} />}
           {/* The note's own fact list, lifted out of the article by
               `liftFacts` so it can be a SIBLING of the poster and the creator
               rather than the first thing inside the writing. It keeps `.prose`
               because every rule that styles it is written against that
               ancestor, and `mt-8` because that is the margin the article used
-              to give it — below 1400px this renders in exactly the place, and
+              to give it — below 1168px this renders in exactly the place, and
               with exactly the spacing, it had before. */}
           {en.factsHtml && (
             <div
-              className={`prose note-facts mt-8${uk ? " lang-en" : ""}`}
+              className={`prose note-facts${factsCard} mt-8${uk ? " lang-en" : ""}`}
               dangerouslySetInnerHTML={{ __html: en.factsHtml }}
             />
           )}
           {uk?.factsHtml && (
             <div
-              className="prose note-facts mt-8 lang-uk"
+              className={`prose note-facts${factsCard} mt-8 lang-uk`}
               lang="uk"
               dangerouslySetInnerHTML={{ __html: uk.factsHtml }}
             />
           )}
+          {/* LAST IN THE COLUMN, and a child rather than a sibling for the
+              same reason the People portrait is a child of the rail (#121):
+              what stands above it here is a poster, a bio and a fact list,
+              and only a child follows a stack whose height nobody can name.
+              A sibling would have to be told it, and a custom property can
+              measure a poster but not a paragraph of prose.
+
+              Everywhere the column does not exist the wrapper is `display:
+              contents` and the rail is the fixed element it has always been,
+              so this position in the markup costs nothing at those widths. */}
+          {toc}
         </div>
       )}
 
@@ -527,23 +623,15 @@ export default async function EntryPage({ params }: Props) {
 
       <EntryFooter prev={prev} next={next} />
 
-      {showToc ? (
-        <Toc
-          title={entry.title}
-          titleUk={entry.titleUk}
-          en={en.headings}
-          uk={uk?.headings}
-          below={personBlock}
-        />
-      ) : (
-        /* No outline, so no rail to hang it under — the portrait takes the
-           rail's own place instead. A People note with two headings (an "At a
-           glance" and a "Sources", which is a perfectly ordinary short one)
-           falls below MIN_TOC_HEADINGS, so this is a real path, not a
-           theoretical one. */
-        personBlock && (
-          <aside className="note-portrait">{personBlock}</aside>
-        )
+      {/* The rail, unless the gutter wrapper above is already holding it. */}
+      {!hasGutter && toc}
+      {/* No outline, so no rail to hang the portrait under — it takes the
+          rail's own place instead. A People note with two headings (an "At a
+          glance" and a "Sources", which is a perfectly ordinary short one)
+          falls below MIN_TOC_HEADINGS, so this is a real path, not a
+          theoretical one. */}
+      {!showToc && personBlock && (
+        <aside className="note-portrait">{personBlock}</aside>
       )}
     </Page>
   );

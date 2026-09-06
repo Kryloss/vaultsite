@@ -1518,6 +1518,43 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   }
 }
 
+/* ── A PERSON'S "At a glance" card (DECISIONS #129) ───────────────────────
+   A People note keeps the CARD its table has always had — the plain-list
+   treatment above is shelf and music only, because what it solves is the
+   creator block stacked above it (#87), and a People note has no creator
+   block. But the two halves of the row were still weighted the way a generic
+   key–value table weights them: `.prose td:first-child` paints the label
+   `--text` at 500 while the value beside it inherits `--text-secondary`, so
+   the label was the brighter of the two and the eye went to "Born" rather
+   than to the date.
+
+   That is the same complaint, and the same fix, the fact LIST already records
+   a few rules above: tertiary makes it a label and lets the eye go to the
+   answer. Here the value takes `--text` as well, because inside a card it has
+   a box's worth of quiet around it and can afford to be the loud half.
+
+   The rows also come in: 0.625rem of padding on five rows whose values wrap
+   to two lines is most of a phone screen before the writing starts, so the
+   vertical padding drops to 0.4375rem and the leading with it. Horizontal
+   padding is untouched — that is the card's inset, not its height.
+
+   Below `.prose td:first-child`, which it overrides, per the file's own
+   tie-break (#52) — though the extra class already wins on specificity. */
+.note-facts.person-facts td {
+  color: var(--text);
+}
+
+.note-facts.person-facts td:first-child {
+  color: var(--text-tertiary);
+  font-weight: 400;
+}
+
+.note-facts.person-facts th,
+.note-facts.person-facts td {
+  padding: 0.4375rem 1rem;
+  line-height: 1.5;
+}
+
 /* ---------- Footnotes & sidenotes (rehypeSidenotes in lib/markdown.ts) ----------
 
    A footnote is written `[^1]` in Obsidian and renders twice: as the list at
@@ -2095,9 +2132,27 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   max-height: calc(100vh - 12rem);
   overflow-y: auto;
   overscroll-behavior: contain;
-  border-left: 1px solid var(--border);
   font-size: 0.8125rem;
   line-height: 1.5;
+}
+
+/* THE OUTLINE'S OWN BOX, and the hairline with it (DECISIONS #128). The line
+   used to sit on `.toc-rail` and run the full height of the column, which was
+   right while the column WAS the outline. It is not any more: a People note
+   parks a portrait and an "At a glance" block above the list (#121, #127), and
+   the rule ran down the side of both — a vertical line beside a photograph,
+   marking rows that are not there.
+
+   So the line belongs to the list it marks. It is the rule the active
+   `.toc-marker` slides along and the one every row's transparent
+   `border-left` overlaps, and all three now start where the first row does.
+
+   `position: relative` makes this the offsetParent for the marker AND for the
+   rows Toc.tsx measures with `offsetTop` — one box for both, so the two can't
+   be measured against different origins. */
+.toc-outline {
+  position: relative;
+  border-left: 1px solid var(--border);
 }
 
 @media (min-width: 1168px) {
@@ -3682,6 +3737,195 @@ a.series-link:hover {
   line-height: 1.55;
   color: var(--text-secondary);
   text-wrap: pretty;
+}
+
+/* The medium page's filter chips — categories, or studios inside the studios
+   (#140). TWO ROWS THAT SCROLL SIDEWAYS (#141, #143): nineteen studios
+   wrapped to five rows on a wide window and eleven on a phone, which pushed
+   the shelf the chips are filtering off the bottom of the screen.
+
+   HORIZONTAL, not vertical. A 68px box that scrolled vertically sat inside a
+   page that also scrolls vertically, so a flick over the chips was a coin
+   toss between moving them and moving the article — `overscroll-behavior`
+   stops the chaining but cannot make the gesture unambiguous. Sideways is a
+   different axis from the page's, which is why every horizontal strip on this
+   site (the shelf rows, #38) reads as its own object.
+
+   TWO ROWS, not one: one row and a scrollbar is a carousel, and a carousel
+   hides that the set has a second dimension — you cannot tell from it whether
+   three more chips are hidden or thirty.
+
+   The halves are split in the COMPONENT (ceil(n / 2) on top), because CSS
+   cannot count children. That is what fills the top row left to right and the
+   bottom row with the rest, keeping an alphabetical set in reading order;
+   `grid-auto-flow: column` would need no number and would run the order
+   down-then-right, which zigzags. It is two flex rows rather than a grid
+   because a GRID ALIGNS ITS COLUMNS: with `max-content` columns each column
+   was as wide as the wider of its two chips, so a short chip was followed by
+   the leftover width of the long one below it — empty space at every column
+   in the row (#144). */
+.filter-chips {
+  /* Load-bearing for ChipRowScroll, not for the paint: `offsetLeft` is
+     measured against the nearest POSITIONED ancestor, so without this a
+     chip's offset is a page coordinate and the row scrolls to its own
+     maximum instead of to the chip. It looked correct on the one studio that
+     sorts last. Same trap as #128, where the rail had to be positioned for
+     the marker to measure against it. */
+  position: relative;
+  --chip-gap: 0.5rem;
+  overflow-x: auto;
+  /* The row is a small box inside a long page: without this, reaching its end
+     hands the rest of the gesture to whatever scrolls behind it. */
+  overscroll-behavior-x: contain;
+  /* Room for the focus ring and for an overlay scrollbar to sit under the
+     chips rather than across them. */
+  padding-bottom: 0.25rem;
+}
+
+/* The two rows. `max-content` on the STACK, not on the rows: it makes the
+   stack as wide as its widest row, which is what the container scrolls
+   through — without it each row shrinks to the visible box and the chips
+   inside it squeeze instead of overflowing. Each row is its own flex line
+   with nothing to align to, so a short chip is followed by the next chip and
+   not by the leftover width of somebody else's column (#144). */
+.filter-chip-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--chip-gap);
+  width: max-content;
+}
+
+.filter-chip-row {
+  display: flex;
+  gap: var(--chip-gap);
+}
+
+/* Pinned so both rows are exactly as tall as each other. Tailwind's `text-sm`
+   sets a line-height RATIO, so `.chip-quotes`'s 15px produced a 21.43px line
+   box against a plain chip's 20 — and a grid row is as tall as its tallest
+   item, so the two rows differed by 1.4px depending on where the italic door
+   chip landed.
+
+   This is a bare class beating a utility of equal specificity, which
+   `CLAUDE.md` warns about — deliberate here, and it works because the block
+   sits below Tailwind's output. */
+.filter-chip {
+  line-height: 1.25rem;
+  /* The row never wraps, so a two-word chip must not either — "Blizzard
+     Entertainment" would otherwise become two lines and stand its row up. */
+  white-space: nowrap;
+  flex: none;
+}
+
+/* ---------- Studio pages (DECISIONS #139) ---------- */
+
+/* The creator block's name is a link on the mediums that group by maker. It
+   inherits its own type entirely and is marked only by the underline arriving
+   on hover — the same restraint `.quote-source a` takes, and for the same
+   reason: this is a heading that happens to lead somewhere, not a link
+   dropped into a heading. */
+.creator-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.creator-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* The portrait's own copy of that link. It must FILL the circle rather than
+   shrink-wrap the image, or the anchor's inline box sits on the baseline and
+   leaves a sliver of `--surface` under the photo — `.creator-photo` is a grid
+   whose cell this now occupies instead of the image. */
+.creator-photo > a {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
+/* The index of studios. Rows rather than cards: what distinguishes one studio
+   from the next here is the sentence, and a grid of equal boxes would set the
+   longest bio's height as every row's. */
+.creator-index {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* The note's creator block one size down, and made pressable. The negative
+   inline margin pulls the hover wash out past the text so the row reads as a
+   band across the column rather than a rectangle drawn around a paragraph;
+   the padding puts the content back where it was. */
+.creator-index-row {
+  --creator-size: 3.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-inline: -0.75rem;
+  padding: 0.75rem;
+  border-radius: var(--r-lg);
+  color: inherit;
+  text-decoration: none;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+
+.creator-index-row:hover {
+  background: var(--bg-hover);
+}
+
+.creator-index-text {
+  min-width: 0;
+}
+
+/* Baseline-aligned rather than centred: the count is a different size from
+   the name, and centring two sizes on a shared middle leaves the smaller one
+   sitting visibly high — the same optical problem #116 solved on `.new-chip`,
+   avoided here by not asking for it. */
+.creator-index-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
+}
+
+.creator-index-count {
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: var(--text-tertiary);
+}
+
+.creator-index-bio {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+
+/* The portrait goes at 480px, not the bio. On the note page the bio drops
+   full-width because the block is the page's opening and the sentence is
+   what it is for; in a LIST the picture is what tells one row from the next
+   at a glance, so it is the sentence that gives up the room — clamped to
+   two lines, since a row is a door and not the page behind it. */
+@media (max-width: 480px) {
+  .creator-index-row {
+    --creator-size: 2.75rem;
+    gap: 0.75rem;
+  }
+
+  .creator-index-bio {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
 }
 
 /* A phone has no room for a 72px circle beside three lines of type — the bio
@@ -7591,6 +7835,30 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   display: block;
 }
 
+/* A studio's portrait in the rank list (#142). Round, and SQUARE in the
+   column a 2:3 cover otherwise fills — every picture of a maker on this site
+   is a circle (#86), and a circle cropped out of a 2:3 box would take a chin
+   off the top of the frame. It keeps the column's own width, so the text
+   column starts on the same line whichever list you are reading, and drops
+   its border: a hairline that follows a circle reads as a ring drawn around
+   somebody's face rather than as the edge of a card. */
+.top-art-round {
+  aspect-ratio: 1;
+  border-radius: var(--r-full);
+  border: 0;
+  display: grid;
+  place-items: center;
+}
+
+/* The figure the studio list is ranked on, in the column the games list gives
+   its rating. Quiet: it is a fact about the row rather than a verdict, and
+   the rank number to its left is already the loud part. */
+.top-count {
+  font-size: 0.8125rem;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
 .top-title {
   grid-area: title;
   min-width: 0;
@@ -7702,16 +7970,30 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
    at narrow widths because it is something you operate; a poster is something
    you look at, and the note's opening (creator block, facts, then the body —
    #86, #87) is a designed sequence that artwork should not be spliced into.
-   A phone shows the cover BESIDE the title instead, which is a different
-   element and a different arrangement — `.note-thumb`, DECISIONS #120. */
+   Below 1400px the cover sits BESIDE the title instead, which is a different
+   element and a different arrangement — `.note-thumb`, DECISIONS #120.
+
+   Every shelf medium but VIDEO has one (#135) — a video's artwork is the
+   still of the player embedded a few lines below it. */
 .note-cover {
   display: none;
 }
 
-/* 1400px, matching the album player exactly rather than the rail's 1168px.
-   Between the two the rail is already out in the gutter and a poster beside
-   it would be two objects fighting for one column. */
-@media (min-width: 1400px) {
+/* 1168px — the RAIL'S breakpoint, which is the page's own (#107, #136).
+   This was 1400px, the album player's, and the reason given was that between
+   the two the rail is already out in the gutter and a poster beside it would
+   be two objects fighting for one column. They are not beside each other any
+   more: since #127 the rail is the LAST CHILD of this column, so there is one
+   object out there and it arrives when the gutter does. What that left in the
+   meantime was a third layout — outline on the right, artwork and creator
+   still stacked above the writing — on every window between 1168 and 1400.
+   There are two now.
+
+   The PLAYER keeps 1400 and that is not the same question: it takes 21rem +
+   20rem of LAYOUT past centre because a transform shrinks paint, not layout
+   (#99). This column is 13rem wide, the rail's own width, so it fits wherever
+   the rail does. */
+@media (min-width: 1168px) {
   .note-cover {
     display: block;
     position: fixed;
@@ -7741,14 +8023,19 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
     background-position: center;
   }
 
-  /* Both want the same column, so the contents start below the poster instead
-     of behind it — the album player's arrangement. `--note-cover-h` is the
-     PAINTED height, emitted per note from the cover's own ratio, so the rail
-     starts under a tall poster and a short one alike. */
-  .page:has(.note-cover) .toc-rail {
-    top: calc(5rem + var(--note-cover-h, 312px) + 2rem);
-    max-height: calc(100vh - 8rem - var(--note-cover-h, 312px) - 2rem);
-  }
+  /* Both want the same column, so the outline goes UNDER the poster — and
+     under the creator block and the fact list with it, which is why the rail
+     is rendered as the last child of `.note-gutter` rather than positioned
+     below the poster by a measured height. That number was the poster's
+     PAINTED height and nothing else: it can start the rail under a tall
+     poster or a short one, but it cannot start it under a paragraph of bio.
+     A child needs no such number. See the `.note-gutter` block below.
+
+     `--note-cover-h` is GONE (#135). It was the poster's painted height,
+     emitted on `.page` so a sibling rail could start below it; once the rail
+     became a child nothing read it, and a custom property that no rule names
+     is a comment pretending to be code. `git log` has the arithmetic if a
+     sibling ever needs it again. */
 }
 
 /* ── The note's header matter as one gutter column, and one phone thumbnail
@@ -7789,55 +8076,119 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
    A note about a thing with a face should show that face at every width; the
    only question is which of the two places it appears in.
 
-   `--note-thumb-w` and `--note-thumb-gap` are read by `.copy-md` below to put
-   itself back where it sits on every other note, so the two can't disagree. */
+   `--note-thumb-w` is the RESERVE the artwork is drawn inside (#133), not the
+   width it is drawn at — the width follows the header's own height and the
+   artwork's shape, and only a long title's picture reaches the reserve. */
 .note-header {
-  --note-thumb-w: 3rem;
-  --note-thumb-gap: 1rem;
-  display: flex;
-  /* STRETCH, and this is the whole trick. The artwork's own proportions used
-     to decide the height of the block: a 2:3 poster stood 1.5 times its width
-     and reached the metadata line, while a SQUARE portrait was only as tall as
-     it was wide and left a stripe of empty column under it. Letting the FLEX
-     LINE set the height fixes every ratio at once — the box is as tall as the
-     title and its metadata line, whatever shape the picture is, and
-     `object-fit: cover` fills it.
+  /* The RESERVE the artwork sits in — its widest the picture is ever drawn,
+     and the offset the text is held at. 3rem through the cropped era, 6rem
+     since #131's sweep; it stays 6rem here because it is still the number
+     that decides how much a LONG title's artwork is cropped, and #131
+     measured that. What changed in #133 is that it is now a ceiling rather
+     than the size: a short-titled note draws its artwork narrower than this
+     and the reserve keeps the text where it is.
 
-     Sizing by height instead (width from the aspect ratio) was tried first and
-     is the wrong end of the problem: a wider box takes the room the title
-     wraps in, so the text got TALLER as the picture grew and the gap opened up
-     again — a square portrait went from 48px against 67px of text to 69px
-     against 102px. The width has to stay put; only the height can give. */
-  align-items: stretch;
-  gap: var(--note-thumb-gap);
+     `--note-thumb-reserve` is one property so the two places that hide the
+     thumbnail can collapse the offset with one line each, instead of each
+     restating the arithmetic.
+
+     `--note-thumb-fit` IS THE MEASURED WIDTH the artwork actually came out at
+     (#134, lib/note-thumb.ts), and 6rem is what stands in until something
+     measures it — the no-JS answer, and the answer for the frame before the
+     inline script runs. It is a fallback rather than an override so that the
+     page is never wrong, only wide: without it a short-titled note keeps up to
+     40px of slack between its narrow cover and its title, which is the one
+     thing CSS cannot take out on its own. */
+  --note-thumb-w: 6rem;
+  --note-thumb-gap: 1rem;
+  --note-thumb-reserve: calc(
+    var(--note-thumb-fit, var(--note-thumb-w)) + var(--note-thumb-gap)
+  );
+  /* THE ARTWORK IS OUT OF FLOW, so this is an ordinary block whose height is
+     the TYPE's and nothing else's (#133). The grid it used to be existed to
+     put the picture and the text on one row and let one of them size the
+     other; that is exactly the cyclic sizing #131 got wrong and #132 paid a
+     crop to avoid. Out of flow there is no cycle to resolve: the header is as
+     tall as the title and its metadata line, the picture is told to be that
+     tall, and nothing measures anything twice.
+
+     Containing block for BOTH absolutely positioned children — the artwork
+     (`left: 0`, so it starts on the page column's own left edge) and
+     `.copy-md` (`left: -2.25rem`, out in the margin). Because the offset on
+     the text is a MARGIN and not padding, this box's padding edge is still
+     the page column's edge, which is what keeps the button where it sits on a
+     note with no artwork at all. */
+  position: relative;
 }
 
-/* 3rem — the Top list's own 44px art, near enough, and for the same reason:
-   this is the label on the page, not the subject of it. The note's <h1> is.
+/* The text is held clear of the reserve by a margin. A margin rather than a
+   grid column so that hiding the artwork costs one custom property, and
+   rather than padding on the header so the header's own padding edge — which
+   is what `.copy-md` measures from — stays on the page column's left edge. */
+.note-header .note-header-text {
+  margin-left: var(--note-thumb-reserve);
+}
 
-   It was 4.5rem for one pass and that was too tall rather than too wide: at
-   72px the artwork stands 108px against a one-line title and its meta line,
-   which are about 62px together, so every short-titled note opened with 45px
-   of empty column beside the poster. Sized so the block is driven by the
-   TYPE, a long title now grows past the cover instead of the cover reaching
-   past the type. ONE size at every width, deliberately: it is a label, and a
-   label that grows with the window is a picture. */
+/* ── The artwork's size follows the DATE LINE (DECISIONS #133) ────────────
+   The picture is exactly as tall as the title-and-date block beside it, and
+   as wide as that height and the artwork's own shape make it. So there is no
+   hole under it when the title is one line, and no hole under the TEXT when
+   the title runs long — the two complaints #131 and #132 answered one at a
+   time, from opposite ends.
+
+   HOW, since #131 measured that CSS has no height→width transfer for a
+   STRETCHED box and that finding still stands: an ABSOLUTELY POSITIONED
+   replaced element with `height: 100%` has a definite height that owes
+   nothing to its own content, and `width: auto` on a replaced element with a
+   definite height IS the transfer — it is the ordinary intrinsic-ratio rule,
+   not the stretch alignment that has none. Out of flow, the picture also
+   stops contributing to the header's height, which is what makes the height
+   it is copying honest. Measured in the pane, container heights 82 and 240
+   against a 1.421 cover: 57.7 × 82 and 96 × 240.
+
+   `top` + `bottom` is NOT the same spelling and does not work — for a
+   replaced element the insets do not determine the size, so `width: auto`
+   falls back to the intrinsic width clamped by `max-width` and the ratio then
+   makes a height from THAT (measured 96 × 136.4 where 57.7 × 82 was wanted).
+   It is `height: 100%`.
+
+   `max-width` IS the reserve, and it is what a long title runs into: past it
+   the width clamps, the height stays (`height: 100%` is definite, so nothing
+   feeds back into it) and `object-fit: cover` trims the sides — #132's trade,
+   unchanged, on exactly the notes that were already taking it. Every note
+   whose text was already the taller of the two paints to the pixel as it did
+   before this change; only the ones with a hole moved.
+
+   WHAT IT COSTS, AND WHO PAYS IT: the reserve cannot follow the picture in
+   CSS. It is the text's offset, so a reserve that tracked the artwork would
+   put the title's width back inside the cycle this rule exists to leave
+   (#120's feedback: a wider cover narrows the title, a narrowed title wraps
+   one line further) — and CSS refuses cycles. Left alone that is up to 40px
+   of slack between a short-titled note's cover and its title, which the owner
+   reported as soon as the vertical hole was gone. `--note-thumb-fit` is that
+   number, measured once the browser has drawn the picture (#134,
+   lib/note-thumb.ts). This rule does not depend on it: the fallback is the
+   full reserve, so no-JS, a crawler and the frame before the script runs all
+   get a correct layout, just a roomier one. */
 .note-thumb {
   display: block;
-  flex: none;
-  width: var(--note-thumb-w);
-  /* `auto` is what lets `align-items: stretch` above take over: the box ends
-     up exactly as tall as the header's text, and the picture fills it. This
-     is the one place on the site where artwork IS cropped to a frame — every
-     other cover, spine and poster keeps its own ratio (#110, #115). The
-     trade is deliberate and small: at 48px this is a label, not the artwork,
-     and a portrait cropped by a few pixels top and bottom still reads as the
-     person while a stripe of empty column reads as a bug. */
-  height: auto;
-  /* A three-line title would otherwise stretch it into a sliver. Past twice
-     its width the picture stops growing and the space goes back to being
-     space — beside a block that tall, nobody is looking for it. */
-  max-height: calc(2 * var(--note-thumb-w));
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: auto;
+  max-width: var(--note-thumb-w);
+  /* The artwork's own ratio does the transfer once the file has loaded; the
+     `width`/`height` ATTRIBUTES on the element (app/[section]/[slug]/page.tsx)
+     are what supply it BEFORE that. Without them a not-yet-loaded image has no
+     intrinsic ratio and `width: auto` resolves to 0 — measured — so the
+     picture would arrive at its size instead of being drawn at it.
+
+     No `aspect-ratio` here, deliberately: a box with a definite height AND a
+     declared ratio is over-constrained the moment `max-width` clamps the
+     width, which is the contradiction #132 had to write its floor around.
+     The natural ratio of a replaced element is not a declaration and cannot
+     fight the definite height. */
   object-fit: cover;
   border-radius: var(--r-md);
   border: 1px solid var(--border);
@@ -7846,20 +8197,35 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   background-position: center;
 }
 
-/* Or a long unbroken title pushes the flex row wider than the screen. */
+
+/* Or a long unbroken title pushes the block wider than the screen. */
 .note-header-text {
   min-width: 0;
 }
 
-/* The copy-as-Markdown button hangs in the left margin of the TITLE, which
-   the artwork has just pushed right. Shifted back by exactly what was added,
-   so it lands where it does on every note that has no artwork — derived from
-   the two custom properties above rather than re-typed, or the day the
-   thumbnail changes size the button drifts onto it. Below 640px and on touch
-   it is `display: none` anyway (see `.copy-md`), so this is for the pointer
-   widths the thumbnail has just gained. */
+/* The copy-as-Markdown button hangs in the left margin of the TITLE, which the
+   artwork has just pushed right — so it has to be shifted back by exactly what
+   the artwork added, or it lands on the picture.
+
+   IT IS MEASURED FROM THE HEADER, NOT THE TITLE (#129, #130). It used to be
+   `calc(-2.25rem - var(--note-thumb-w) - var(--note-thumb-gap))`, which worked
+   while the thumbnail was a fixed 3rem wide and stopped working the moment the
+   width became whatever the title is tall and the artwork's shape: at 900px
+   the button sat on the portrait. The header's left edge IS the page column's
+   left edge, so anchoring there puts the button exactly where it sits on a
+   note with no artwork at all, with no measurement to keep in step. Moving the
+   containing block is the whole mechanism — `.page-title` gives up its
+   `position: relative` and `.note-header` takes one (above) — and `top` still
+   lands the same, since the two boxes start on the same line.
+
+   Below 640px and on touch the button is `display: none` anyway (see
+   `.copy-md`), so this is for the pointer widths the thumbnail has gained. */
+.note-header .page-title {
+  position: static;
+}
+
 .note-header .copy-md {
-  left: calc(-2.25rem - var(--note-thumb-w) - var(--note-thumb-gap));
+  left: -2.25rem;
 }
 
 /* Between the phone breakpoint and 768px there is no longer margin enough to
@@ -7898,7 +8264,10 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
 .toc-portrait {
   display: block;
   width: calc(100% - 0.75rem);
-  margin: 1.5rem 0 0 0.75rem;
+  /* FIRST in the column now (#128), so there is nothing above it to clear —
+     it starts at the rail's own top and the outline takes the separating
+     margin instead. It was `1.5rem 0 0` while it followed the list. */
+  margin: 0 0 0 0.75rem;
   /* The photograph's own ratio — square for a cropped portrait, taller for a
      press photo — so nothing is cropped a second time. */
   aspect-ratio: 1 / var(--cover-ar, 1);
@@ -7964,6 +8333,28 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   color: var(--text-tertiary);
 }
 
+/* The outline, set against whatever the page parked above it — a person and
+   their facts (#128). Stated as a sibling combinator rather than as margins on
+   `.toc-outline`, so a note with nothing above the list (every note that is
+   not a People note) keeps the outline flush with the rail's own top edge,
+   exactly where it has always started.
+
+   The LEFT margin is the alignment (#129): the portrait and the facts are
+   indented 0.75rem to sit on the rail's text column (`.toc-link`'s own
+   padding), so a hairline at the rail's edge stood 12px to their left — one
+   column of content with two left edges. Moving the line onto theirs makes
+   the block read as one object down its whole length, and the outline's rows
+   simply indent from the line as they always have.
+
+   Shelf notes are not affected and need no equivalent: there the column's
+   contents start at the rail's own edge, so the line is already flush with
+   them (#127). */
+.toc-portrait ~ .toc-outline,
+.toc-facts ~ .toc-outline {
+  margin-top: 1.75rem;
+  margin-left: 0.75rem;
+}
+
 /* A fact can carry a wiki link. Underlined in the border's own grey so it
    reads as a link without becoming the loudest thing in a quiet column. */
 .toc-facts a {
@@ -8018,11 +8409,30 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   .page:has(.toc-portrait) .note-thumb {
     display: none;
   }
+
+  /* And the offset it was holding open goes with it — `display: none` takes
+     the picture out (which is what keeps a hidden copy from being FETCHED,
+     #95) but says nothing about the margin on the text beside it. One
+     property, so the arithmetic is written once (#133). */
+  .page:has(.toc-portrait) .note-header {
+    --note-thumb-reserve: 0px;
+  }
 }
 
-@media (min-width: 1400px) {
+/* THE COLUMN, at the rail's 1168px rather than the player's 1400px (#136) —
+   see the note above `.note-cover`. Below this width there is no gutter at
+   all: the artwork sits beside the title, the creator block and the facts are
+   the note's opening, and the outline is the pill. Two layouts, one line
+   between them. */
+@media (min-width: 1168px) {
   .page:has(.note-cover) .note-thumb {
     display: none;
+  }
+
+  /* See the note at 1168px: the reserve is the text's offset and has to be
+     collapsed wherever the picture it was reserved for is gone. */
+  .page:has(.note-cover) .note-header {
+    --note-thumb-reserve: 0px;
   }
 
   /* THE COLUMN. Poster and creator stack in NORMAL FLOW inside one fixed
@@ -8031,16 +8441,33 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
      guessed. The geometry is the poster's own (#115), which is the album
      player's (#98) — three things sharing one gutter, one set of numbers.
 
-     GUARDED AGAINST THE CONTENTS RAIL. The rail wants this column too, and it
-     starts below the poster by a height the page emits (`--note-cover-h`); it
-     cannot start below the creator, whose height is a paragraph of prose. So
-     a note with an outline keeps the arrangement #115 shipped — poster in the
-     gutter, creator in the writing, rail under the poster — and only a note
-     without one gets the column. Every film and show in the vault today has
-     exactly two headings, one short of MIN_TOC_HEADINGS, so this is the
-     branch that runs; the other is here so a third heading changes the
-     layout rather than overlapping it. */
-  .page:has(.note-cover):not(:has(.toc-rail)) .note-gutter {
+     THE CONTENTS RAIL JOINS THE STACK. It wants this column too, and for one
+     pass it won it: a `:not(:has(.toc-rail))` guard here meant a note with an
+     outline kept #115's arrangement — poster in the gutter, rail under it,
+     creator and facts pushed back into the writing. That was written when
+     every film and show had two headings, one short of MIN_TOC_HEADINGS, so
+     the guard almost never ran; the first show with a real outline (Breaking
+     Bad, seven headings) showed what it actually did, which was take the
+     creator and the facts out of the gutter to make room for the outline.
+
+     The order the page wants is who made it, then what it is, then where to
+     jump — so the rail is now the LAST CHILD of this wrapper (see the JSX in
+     app/[section]/[slug]/page.tsx) instead of a sibling positioned under the
+     poster. That is the same move #121 made for the People portrait, for the
+     same reason: a custom property can tell a sibling how tall a poster is,
+     but nothing can tell it how tall a bio runs, and a child never has to
+     ask. The rail gives up its own fixed positioning below, exactly as the
+     poster does.
+
+     KEYED ON `data-column`, NOT ON `:has(.note-cover)` (#135). Every shelf
+     note takes this column now, and a VIDEO note takes it with no artwork at
+     all — the still would be the frame of the player a few lines below it —
+     so the poster's presence stopped being the right question. The two other
+     sections that render this wrapper want the gutter for something else: a
+     music note has the album player out there (#98), a People note has its
+     portrait at the head of the rail (#121). The page marks the wrapper; the
+     CSS does not guess. */
+  .page:has(.note-gutter[data-column]) .note-gutter {
     display: block;
     position: fixed;
     top: 5rem;
@@ -8057,9 +8484,37 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
 
   /* The poster gives up its own fixed positioning to the wrapper — it is a
      block in a column now, not a thing parked in the gutter by itself. */
-  .page:has(.note-cover):not(:has(.toc-rail)) .note-cover {
+  .page:has(.note-cover) .note-cover {
     position: static;
     width: auto;
+  }
+
+  /* THE OUTLINE, last in the column, and the rail gives up its fixed
+     positioning for the same reason the poster does: out here it is a block
+     that follows whatever is above it.
+
+     `position: static` is enough: the marker and the rows it is measured
+     against both hang off `.toc-outline`, which carries its own `position:
+     relative` (#128), so nothing here depends on the rail being an
+     offsetParent. `top`/`left` are reset with it so a stray offset from the
+     fixed case cannot follow the rail into the column.
+
+     `max-height`/`overflow` go because the WRAPPER is what scrolls now — the
+     whole column moves as one object rather than the outline scrolling
+     inside a still poster.
+
+     The hairline (on `.toc-outline`, not here) stays flush with the poster's
+     left edge, so the outline's 0.75rem text indent is what marks it as a
+     list. That is the same relationship `.toc-facts` has with the rail on a
+     People note (#121), read the other way round. */
+  .page:has(.note-gutter[data-column]) .toc-rail {
+    position: static;
+    top: auto;
+    left: auto;
+    width: auto;
+    max-height: none;
+    overflow: visible;
+    margin-top: 1.75rem;
   }
 
   /* The creator block, restated for a 13rem column. It is a caption to the
@@ -8075,7 +8530,17 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
      measure, drops full-width below the pair. Same grid, same `display:
      contents` on `.creator-text`, same reset of the flex `gap` into a zero
      row gap. */
-  .page:has(.note-cover):not(:has(.toc-rail)) .creator {
+  /* WHATEVER LEADS THE COLUMN STARTS AT ITS TOP (#135). The margins below
+     are separations from the artwork above — and a VIDEO note has no artwork,
+     because the player it would show a still of is a few lines down the page.
+     Written as `:first-child` rather than as a per-medium rule, so the column
+     opens flush whether it starts with a cover, a creator block or a fact
+     list, and nothing has to know which. */
+  .page:has(.note-gutter[data-column]) .note-gutter > :first-child {
+    margin-top: 0;
+  }
+
+  .page:has(.note-gutter[data-column]) .creator {
     --creator-size: 3.25rem;
     display: grid;
     grid-template-columns: var(--creator-size) 1fr;
@@ -8085,28 +8550,28 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
     margin-top: 1.25rem;
   }
 
-  .page:has(.note-cover):not(:has(.toc-rail)) .creator-text {
+  .page:has(.note-gutter[data-column]) .creator-text {
     display: contents;
   }
 
-  .page:has(.note-cover):not(:has(.toc-rail)) .creator-photo {
+  .page:has(.note-gutter[data-column]) .creator-photo {
     grid-row: 1 / 3;
   }
 
-  .page:has(.note-cover):not(:has(.toc-rail)) .creator-role {
+  .page:has(.note-gutter[data-column]) .creator-role {
     grid-column: 2;
     align-self: end;
     font-size: 0.6875rem;
   }
 
-  .page:has(.note-cover):not(:has(.toc-rail)) .creator-name {
+  .page:has(.note-gutter[data-column]) .creator-name {
     grid-column: 2;
     align-self: start;
     min-width: 0;
     font-size: 0.9375rem;
   }
 
-  .page:has(.note-cover):not(:has(.toc-rail)) .creator-bio {
+  .page:has(.note-gutter[data-column]) .creator-bio {
     grid-column: 1 / -1;
     min-width: 0;
     margin-top: 0.6rem;
@@ -8126,28 +8591,28 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
      header matter and separates it from the writing (#86) — out here there is
      no writing under it to separate, and a rule across the foot of a gutter
      column is a line drawn for its own sake. */
-  .page:has(.note-cover):not(:has(.toc-rail)) .note-facts {
+  .page:has(.note-gutter[data-column]) .note-facts {
     margin-top: 1.5rem;
     font-size: 0.8125rem;
   }
 
-  .page:has(.note-cover):not(:has(.toc-rail)) .note-facts table.fact-table {
+  .page:has(.note-gutter[data-column]) .note-facts table.fact-table {
     display: block;
     margin: 0;
     padding-bottom: 0;
     border-bottom: none;
   }
 
-  .page:has(.note-cover):not(:has(.toc-rail)) .note-facts .fact-table tbody,
-  .page:has(.note-cover):not(:has(.toc-rail)) .note-facts .fact-table tr {
+  .page:has(.note-gutter[data-column]) .note-facts .fact-table tbody,
+  .page:has(.note-gutter[data-column]) .note-facts .fact-table tr {
     display: block;
   }
 
-  .page:has(.note-cover):not(:has(.toc-rail)) .note-facts .fact-table tr + tr {
+  .page:has(.note-gutter[data-column]) .note-facts .fact-table tr + tr {
     margin-top: 0.75rem;
   }
 
-  .page:has(.note-cover):not(:has(.toc-rail)) .note-facts .fact-table td {
+  .page:has(.note-gutter[data-column]) .note-facts .fact-table td {
     display: block;
     width: auto;
     padding: 0;
@@ -8156,7 +8621,7 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
     color: var(--text-secondary);
   }
 
-  .page:has(.note-cover):not(:has(.toc-rail)) .note-facts .fact-table td:first-child {
+  .page:has(.note-gutter[data-column]) .note-facts .fact-table td:first-child {
     width: auto;
     padding: 0;
     font-size: 0.6875rem;

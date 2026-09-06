@@ -3,6 +3,9 @@ title: Arcane
 title_uk: Аркейн
 author: Christian Linke
 author_uk: Крістіан Лінке
+author_photo: christian-linke.jpg
+# author photo: IMDb publicity still (nm13105261), cropped square on the head.
+#               Non-free, used editorially — not a Commons image.
 author_bio: >-
   German writer and composer at Riot Games, where he created Arcane with Alex Yee and has
   led the studio's music output for years.

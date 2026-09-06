@@ -40,6 +40,15 @@ const CATEGORY_LABELS: Record<string, Str> = {
   biography: { en: "Biography", uk: "Біографія" },
   fantasy: { en: "Fantasy", uk: "Фентезі" },
   philosophy: { en: "Philosophy", uk: "Філософія" },
+  // game
+  rpg: { en: "RPG", uk: "RPG" },
+  strategy: { en: "Strategy", uk: "Стратегія" },
+  survival: { en: "Survival", uk: "Виживання" },
+  shooter: { en: "Shooter", uk: "Шутер" },
+  "post-apocalyptic": { en: "Post-apocalyptic", uk: "Постапокаліпсис" },
+  adventure: { en: "Adventure", uk: "Пригоди" },
+  "co-op": { en: "Co-op", uk: "Кооператив" },
+  horror: { en: "Horror", uk: "Жахи" },
   // posts
   cybersecurity: { en: "Cybersecurity", uk: "Кібербезпека" },
   meta: { en: "Meta", uk: "Про сайт" },

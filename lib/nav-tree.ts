@@ -3,7 +3,7 @@
  *
  * OBSIDIAN'S TREE, NOT A NEW ONE. The rule is the same one the site is built
  * on: a top-level folder is a section, and what's inside it is what the
- * sidebar shows. `vault/Shelf/` has Books, Movies, Shows and Videos in it, so
+ * sidebar shows. `vault/Shelf/` has Books, Movies, Shows, Videos and Games in it, so
  * the Shelf row opens onto four folders; `vault/Music/` has no subfolders at
  * all (`covers/` is filing, and DECISIONS says a subfolder is never a page),
  * so the Music row opens straight onto its notes. Nothing here invents a

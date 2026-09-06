@@ -162,6 +162,7 @@ export interface ShelfGroup {
 /** Bilingual labels for known mediums; anything else is shown capitalised. */
 const MEDIUM_LABELS: Record<string, Str> = {
   book: ui.mediumBooks,
+  game: ui.mediumGames,
   movie: ui.mediumMovies,
   show: ui.mediumShows,
   video: ui.mediumVideos,
@@ -173,7 +174,7 @@ const MEDIUM_LABELS: Record<string, Str> = {
  * alphabetically, so a new `medium:` value never disappears — it just lands
  * at the bottom until it's given a place here.
  */
-const MEDIUM_ORDER = ["video", "movie", "show", "book"];
+const MEDIUM_ORDER = ["video", "movie", "show", "book", "game"];
 
 /** Items with no `medium:` at all are grouped under this row. */
 const UNSORTED = "unsorted";
@@ -194,8 +195,25 @@ const IN_PROGRESS = new Set(["reading", "watching", "current", "in-progress"]);
 /** `status:` values that mean "haven't started — it's in the queue". */
 const QUEUED = new Set(["want", "queued", "queue", "to-read", "to-watch", "backlog", "planned"]);
 
-/** Mediums you watch rather than read — decides which verb the badge uses. */
-const WATCHED = new Set(["movie", "show", "video", "youtube"]);
+/**
+ * Which VERB a status badge uses. THREE, not two: a book is read, anything
+ * screen-shaped is watched, and a game is PLAYED — the one thing on the shelf
+ * you operate rather than sit in front of, so "Watching" would be wrong about
+ * it in a way no reader would have to think about to notice.
+ *
+ * A medium that isn't listed falls back to reading, which is what the shelf's
+ * default object is; that is also what a note with no `medium:` at all gets.
+ */
+const READ_VERBS = { progress: ui.currentlyReading, queued: ui.wantToRead };
+const WATCH_VERBS = { progress: ui.currentlyWatching, queued: ui.wantToWatch };
+const STATUS_VERBS: Record<string, typeof READ_VERBS> = {
+  book: READ_VERBS,
+  movie: WATCH_VERBS,
+  show: WATCH_VERBS,
+  video: WATCH_VERBS,
+  youtube: WATCH_VERBS,
+  game: { progress: ui.currentlyPlaying, queued: ui.wantToPlay },
+};
 
 /**
  * A note's medium: `medium:` frontmatter, or — when that's missing — the
@@ -228,6 +246,7 @@ const CREATOR_ROLES: Record<string, Str> = {
   show: ui.creatorShowCreator,
   video: ui.creatorChannel,
   youtube: ui.creatorChannel,
+  game: ui.creatorStudio,
 };
 
 /**
@@ -320,18 +339,11 @@ export function toShelfItem(entry: Entry): ShelfItem {
       : QUEUED.has(raw)
         ? "queued"
         : undefined;
-  // Books are read, everything screen-shaped is watched.
-  const watched = (medium && WATCHED.has(medium)) || Boolean(videoId);
-  const statusLabel =
-    status === "progress"
-      ? watched
-        ? ui.currentlyWatching
-        : ui.currentlyReading
-      : status === "queued"
-        ? watched
-          ? ui.wantToWatch
-          : ui.wantToRead
-        : undefined;
+  // A YouTube link is something you watch even when the note names no medium.
+  const verbs =
+    (medium ? STATUS_VERBS[medium] : undefined) ??
+    (videoId ? WATCH_VERBS : READ_VERBS);
+  const statusLabel = status ? verbs[status] : undefined;
 
   return {
     slug: entry.slug,
@@ -388,13 +400,22 @@ export function toShelfItem(entry: Entry): ShelfItem {
 
 /**
  * Mediums whose medium page leads with the ranked Top list instead of the
- * whole grid: films and shows, the two you actually rank against each other.
+ * whole grid: films, shows and games — the ones you actually rank against
+ * each other.
  *
  * Books are excluded because their medium page is the payoff for the section
  * page's spines — you came here to see the covers (DECISIONS #110) — and
  * videos because a channel upload is not something you place in a top ten.
+ *
+ * A game is the films-and-shows case, not the books one (DECISIONS #138): it
+ * is a work you finish and then rank, its medium page has no spine row
+ * standing behind it, and "which of these is best" is a question people
+ * actually ask about a shelf of games. The list carries no IMDb column for
+ * them — `imdb:` is a film and show key and is never guessed (#114) — so a
+ * game row is position, cover, title, its one line, and Kyrylo's stars where
+ * he has given any.
  */
-const TOP_MEDIUMS = new Set(["movie", "show"]);
+const TOP_MEDIUMS = new Set(["movie", "show", "game"]);
 
 /** Does this medium open on a Top list? See DECISIONS #113. */
 export function hasTopList(medium?: string): boolean {

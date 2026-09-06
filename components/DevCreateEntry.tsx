@@ -151,6 +151,7 @@ export default function DevCreateEntry({
                   <option value="movie">{devUi.devMovie[lang]}</option>
                   <option value="show">{devUi.devShow[lang]}</option>
                   <option value="video">{devUi.devVideo[lang]}</option>
+                  <option value="game">{devUi.devGame[lang]}</option>
                 </select>
               </label>
             )}

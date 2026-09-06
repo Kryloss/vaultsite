@@ -824,6 +824,7 @@ const SHELF_FOLDERS = {
   movie: "Movies",
   show: "Shows",
   video: "Videos",
+  game: "Games",
 };
 
 /** Keep the create response's pathname identical to lib/vault.ts::slugify(). */

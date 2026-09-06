@@ -5,6 +5,10 @@ import { getSections, getSectionBySlug, getEntries } from "@/lib/vault";
 import { isShelfSection, shelfGroupBySlug, shelfMediumSlugs } from "@/lib/shelf";
 import { pageMeta } from "@/lib/metadata";
 import { getBookQuotes } from "@/lib/quotes";
+import {
+  hasCreatorPages,
+  shelfCreatorGroups,
+} from "@/lib/shelf-creators";
 import ShelfTypeView from "@/components/lists/ShelfTypeView";
 import T from "@/components/T";
 import Page from "@/components/Page";
@@ -70,6 +74,13 @@ export default async function ShelfMediumPage({ params }: Props) {
         sectionSlug={section.slug}
         group={group}
         quotes={group.medium === "book" ? getBookQuotes(entries) : undefined}
+        /* Passed so the Studios chip shows here too — same reason as Quotes
+           above, and the page it leads to is /…/games/studios (#139). */
+        creators={
+          hasCreatorPages(group.medium)
+            ? shelfCreatorGroups(entries, group.medium)
+            : undefined
+        }
       />
     </Page>
   );

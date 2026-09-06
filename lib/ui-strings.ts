@@ -42,14 +42,15 @@ export const ui = {
 
   // filters
   filterAll: { en: "All", uk: "Усі" },
-  /* Films and shows lead with a ranked list rather than the whole grid,
-     so their first chip names the ordering instead of the absence of a
-     filter. Books and videos still say "All". See DECISIONS #113. */
+  /* Films, shows and games lead with a ranked list rather than the whole
+     grid, so their first chip names the ordering instead of the absence of a
+     filter. Books and videos still say "All". See DECISIONS #113, #138. */
   filterTop: { en: "Top", uk: "Топ" },
   /* Spoken after the number, for a reader who cannot see the label
      beside it — the stars are Kyrylo's, this one is IMDb's. */
   imdbRating: { en: "IMDb rating", uk: "Оцінка IMDb" },
   mediumBooks: { en: "Books", uk: "Книги" },
+  mediumGames: { en: "Games", uk: "Ігри" },
   mediumMovies: { en: "Movies", uk: "Фільми" },
   mediumShows: { en: "Shows", uk: "Серіали" },
   mediumVideos: { en: "Videos", uk: "Відео" },
@@ -195,7 +196,25 @@ export const ui = {
   currentlyWatching: { en: "Watching", uk: "Дивлюся" },
   wantToRead: { en: "To read", uk: "Прочитати" },
   wantToWatch: { en: "To watch", uk: "Подивитись" },
+  /* A third verb, not a synonym for watching: a game is the one thing on
+     the shelf you operate rather than sit in front of. */
+  currentlyPlaying: { en: "Playing", uk: "Граю" },
+  wantToPlay: { en: "To play", uk: "Зіграти" },
   quotesCategory: { en: "Quotes", uk: "Цитати" },
+  /* The studio index on the games page (#139). It says STUDIOS rather
+     than the generic "Creators" because the chip is games-only and a
+     game's `author:` is a studio — the word a reader would use. If the
+     feature ever reaches books, that medium needs its own noun, not a
+     word broad enough to cover both. */
+  studiosCategory: { en: "Studios", uk: "Студії" },
+  /* The same chip once you are inside the studios, where it is the way
+     back. It names WHERE IT GOES, not where you are — which is what
+     distinguishes it from every other chip in the row. */
+  categoriesFilter: { en: "Categories", uk: "Категорії" },
+  studiosLead: {
+    en: "Everyone who made something on this shelf.",
+    uk: "Усі, хто зробив щось із цієї полиці.",
+  },
 
   /* Shelf creator block (components/Creator.tsx). The role is chosen by the
      note's medium, so a name never appears without saying what it is TO the
@@ -207,6 +226,11 @@ export const ui = {
   creatorDirector: { en: "Director", uk: "Режисер" },
   creatorShowCreator: { en: "Creator", uk: "Автор серіалу" },
   creatorChannel: { en: "Channel", uk: "Канал" },
+  /* A game names its STUDIO, not a person: the credit that means the same
+     thing as "Director" here belongs to a team of hundreds, and picking one
+     name out of it would be inventing an auteur. Same shape as a video
+     note's Channel, which is also an organisation in the `author:` slot. */
+  creatorStudio: { en: "Studio", uk: "Студія" },
   creatorArtist: { en: "Artist", uk: "Виконавець" },
 
   /* What a music note is ABOUT, printed in grey after its title. Derived from
@@ -317,6 +341,7 @@ export const devUi = {
   devMovie: { en: "Movie", uk: "Фільм" },
   devShow: { en: "Show", uk: "Серіал" },
   devVideo: { en: "Video", uk: "Відео" },
+  devGame: { en: "Game", uk: "Гра" },
   devCreator: { en: "Author / director / creator", uk: "Автор / режисер / творець" },
   devCreatorUk: { en: "Creator name in Ukrainian (optional)", uk: "Ім’я творця українською (необов’язково)" },
   devArtist: { en: "Artist", uk: "Виконавець" },

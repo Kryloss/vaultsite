@@ -3,6 +3,13 @@ title: Death Note
 title_uk: Зошит смерті
 author: Tsugumi Ohba
 author_uk: Цуґумі Ооба
+author_photo: tsugumi-ohba.jpg
+# author photo: supplied by the owner, cropped square on the head.
+#               IDENTITY UNCONFIRMED — Tsugumi Ohba is a pen name and the
+#               person behind it has never been publicly identified. Photos
+#               circulated under the name are attribution, not record:
+#               ja.wikipedia's article carries no image at all, and
+#               MyAnimeList shows a drawing of Ryuk in the photo slot.
 author_bio: >-
   The pen name of the writer of Death Note; the person behind it has never been publicly
   identified.

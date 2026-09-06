@@ -48,3 +48,11 @@ export function noteCount(n: number): Str {
     uk: uk(n, "нотатка", "нотатки", "нотаток"),
   };
 }
+
+/** "3 games" / "3 гри", for the studio index (#139). */
+export function gameCount(n: number): Str {
+  return {
+    en: en(n, "game", "games"),
+    uk: uk(n, "гра", "гри", "ігор"),
+  };
+}

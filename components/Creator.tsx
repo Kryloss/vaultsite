@@ -1,3 +1,4 @@
+import Link from "next/link";
 import T from "@/components/T";
 import { creatorInitials, type ShelfCreator } from "@/lib/shelf";
 
@@ -22,20 +23,34 @@ import { creatorInitials, type ShelfCreator } from "@/lib/shelf";
  * path — a novelist usually has a freely licensed portrait on Wikimedia
  * Commons and a YouTube channel usually has none, so both shapes ship.
  *
+ * `href` makes the portrait and the NAME a link — the studio pages (#139),
+ * where the same block is the header of the page it leads to. The BIO never
+ * links: it is a sentence about them, not their name, and underlining a
+ * sentence to reach a shelf reads as a citation. The portrait's copy is
+ * `aria-hidden` with no tab stop, so a keyboard and a screen reader meet ONE
+ * link where a pointer has two targets. Omitted, everything renders exactly
+ * as it did before the studio pages existed, which is what a book, a film,
+ * a show, a video and a music note still get.
+ *
  * A plain <div>, not a <section>: a section is only worth having as a
  * landmark if it can be named, an `aria-label` takes one string, and this
  * site renders BOTH languages into every page (components/T.tsx) — so any
  * name I could give it would be English for a Ukrainian reader. The role and
  * the name are visible text and are read in order without it.
  */
-export default function Creator({ creator }: { creator: ShelfCreator }) {
+export default function Creator({
+  creator,
+  href,
+}: {
+  creator: ShelfCreator;
+  href?: string;
+}) {
   const { name, nameUk, role, photoUrl, photoBlur, photoSrcSet, bio, bioUk } =
     creator;
 
-  return (
-    <div className="creator">
-      <div className="creator-photo">
-        {photoUrl ? (
+  const portrait = (
+    <>
+      {photoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={photoUrl}
@@ -69,6 +84,19 @@ export default function Creator({ creator }: { creator: ShelfCreator }) {
             {creatorInitials(name)}
           </span>
         )}
+    </>
+  );
+
+  return (
+    <div className="creator">
+      <div className="creator-photo">
+        {href ? (
+          <Link href={href} tabIndex={-1} aria-hidden>
+            {portrait}
+          </Link>
+        ) : (
+          portrait
+        )}
       </div>
 
       <div className="creator-text">
@@ -76,7 +104,13 @@ export default function Creator({ creator }: { creator: ShelfCreator }) {
           <T {...role} />
         </p>
         <p className="creator-name">
-          <T en={name} uk={nameUk} />
+          {href ? (
+            <Link href={href} className="creator-link">
+              <T en={name} uk={nameUk} />
+            </Link>
+          ) : (
+            <T en={name} uk={nameUk} />
+          )}
         </p>
         {bio && (
           <p className="creator-bio">

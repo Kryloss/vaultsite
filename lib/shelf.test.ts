@@ -14,6 +14,7 @@ import {
   hasTopList,
   mediumSlug,
   sortForTop,
+  toShelfItem,
   type ShelfItem,
 } from "./shelf.ts";
 import { slugify } from "./vault.ts";
@@ -43,6 +44,23 @@ test("the subfolder decides when frontmatter doesn't", () => {
   assert.equal(entryMedium(entry({ folder: "Books" })), "book");
 });
 
+test("Games is a folder like any other medium's", () => {
+  assert.equal(entryMedium(entry({ folder: "Games" })), "game");
+  assert.equal(mediumSlug("game"), "games");
+});
+
+test("a game is PLAYED — not read, and not watched", () => {
+  const label = (meta: Record<string, unknown>) =>
+    toShelfItem(entry({ meta })).statusLabel?.en;
+  assert.equal(label({ medium: "game", status: "current" }), "Playing");
+  assert.equal(label({ medium: "game", status: "want" }), "To play");
+  // The other two verbs are unchanged by the third one arriving.
+  assert.equal(label({ medium: "book", status: "reading" }), "Reading");
+  assert.equal(label({ medium: "show", status: "watching" }), "Watching");
+  // No medium at all still reads as a book, the shelf's default object.
+  assert.equal(label({ status: "reading" }), "Reading");
+});
+
 test("frontmatter wins over the subfolder", () => {
   const note = entry({ folder: "Books", meta: { medium: "video" } });
   assert.equal(entryMedium(note), "video");
@@ -57,6 +75,7 @@ test("medium slugs are the plural URL segments", () => {
   assert.equal(mediumSlug("movie"), "movies");
   assert.equal(mediumSlug("show"), "shows");
   assert.equal(mediumSlug("video"), "videos");
+  assert.equal(mediumSlug("game"), "games");
 });
 
 test("category slugs survive spaces and case", () => {
@@ -163,9 +182,11 @@ test("sortForTop does not mutate its input", () => {
   );
 });
 
-test("hasTopList covers films and shows only", () => {
+test("hasTopList covers films, shows and games only", () => {
   assert.equal(hasTopList("movie"), true);
   assert.equal(hasTopList("show"), true);
+  // A game is ranked against other games, not looked at as a set (#138).
+  assert.equal(hasTopList("game"), true);
   // Books keep the cover grid their spines row points at (#110); a channel
   // upload is not something you place in a top ten.
   assert.equal(hasTopList("book"), false);
