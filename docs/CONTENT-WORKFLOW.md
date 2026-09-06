@@ -415,7 +415,7 @@ after one attempt is not.
 | Book covers | 1. Open Library by ISBN (`covers.openlibrary.org/b/isbn/<ISBN>-L.jpg`, keyless — try multiple editions' ISBNs) 2. Open Library search API → cover ID 3. publisher page |
 | Movie/show art | 1. en-Wikipedia REST summary (`/api/rest_v1/page/summary/<Title>`) 2. `action=query&prop=pageimages` 3. season/franchise pages 4. other-language Wikipedias (de, fr, uk — often expose the poster when en doesn't) 5. Wikidata claims P18 (image) / P154 (logo) 6. `page/media-list` → Commons-hosted logo, used with `coverFit: contain` 7. typographic fallback tile + tell him |
 | People photos | 1. Wikimedia Commons ONLY (verify license; note author + license as a comment in the note) 2. official government/company portrait pages. Never anything else |
-| Shelf creator portraits (`author_photo:`) | 1. Wikimedia Commons by name, in ANY language's Wikipedia 2. Commons file search 3. the creator's own official site / publisher / studio page 4. **for a `medium: video` note only:** the channel's own YouTube avatar. Never anything else — and no photo is still a fine answer |
+| Shelf creator portraits (`author_photo:`) | 1. Wikimedia Commons by name, in ANY language's Wikipedia 2. Commons file search 3. the creator's own official site / publisher / studio page — **for a STUDIO, its favicon is square by definition and is usually the mark** 4. **for a `medium: video` note or a game STUDIO:** the channel's own YouTube avatar, with the channel resolved by `channelId` (step 6 below), never by guessing a handle. Never anything else without the owner saying so — and no photo is still a fine answer. One file is a named exception: Christian Linke's is an IMDb still, non-free, at the owner's direction (DECISIONS #146) |
 | Music artwork (`cover:`) | 1. iTunes Search API, keyless: `https://itunes.apple.com/search?term=<artist+album>&entity=album&limit=1` → take `artworkUrl100` and swap `100x100bb` for `600x600bb` 2. the album's own Apple Music page 3. the label's press page. Save into `vault/Music/covers/`. The playlist EMBED still carries its own art — this is for the note's track row, and for the tint of the track-list card, which is the newest note's cover (DECISIONS #90) |
 | Inline figures | Wikimedia Commons, official docs/press kits, his own screenshots |
 
@@ -428,25 +428,19 @@ Mr. Robot used to be the example here and no longer is; a real poster replaced
 it, and nothing in the vault sets `coverFit` today. Exhaust the poster cascade
 above, and ask Kyrylo before settling for a logo — he may well have the art.
 
-**Work the cascade properly — three of the four "no portrait" cases were the
-first source giving up too early.** In order:
+**Work the cascade properly — most "no portrait" cases were the first source
+giving up too early.** In order:
 
-1. **English Wikipedia's `pageimages` is not the answer, it's the first
-   guess.** It returns whatever sits in the infobox, which for Richard Bach is
-   his *signature*. When that comes back looking wrong, try other languages:
-   `pl`, `nl`, `uk`, `de`, `fr`, `es` all have their own editorial choices, and
-   `pageimages` on each is one more keyless call.
-2. **Then search Commons directly** (`list=search&srnamespace=6`). A portrait
-   often exists under a name nobody links from the article — Bach's is filed
-   under the 1970 film shoot he was photographed at.
-3. **Confirm a suspicious file before using it.** That Bach photo is captioned
-   as two people. `prop=globalusage` settles it: the cropped version is the
-   infobox portrait on about twenty Wikipedias, which is twenty communities
-   agreeing it's him. Do this whenever a file could be someone else — a
+1. **English Wikipedia's `pageimages` is the first guess, not the answer.** It
+   returns whatever sits in the infobox (for Richard Bach, his signature). Try
+   other languages next — `pl`, `nl`, `uk`, `de`, `fr`, `es` — one keyless call each.
+2. **Then search Commons directly** (`list=search&srnamespace=6`); a portrait is
+   often filed under an event nobody links from the article.
+3. **Confirm a suspicious file before using it** with `prop=globalusage`: a file
+   that twenty Wikipedias use as the person's infobox portrait is that person. A
    misidentified face is worse than initials.
-4. **The creator's own official site.** Andrey Doronichev has no Commons photo
-   and a personal site with a portrait on it; that's the sanctioned
-   "official page" step, and the credit line says where it came from.
+4. **The creator's own official site** is the sanctioned next step; the credit
+   line says where it came from.
 5. **A YouTube channel: use the channel's own avatar.** Keyless, two requests,
    exact — no searching and no guessing at identity:
 
@@ -463,6 +457,44 @@ first source giving up too early.** In order:
    the channel's own identifying artwork, used to identify the channel, which
    is the same footing as a book cover or a poster. Credit it as
    `# author photo: the channel's own avatar, youtube.com/@handle`.
+6. **A GAME STUDIO: the same avatar, but you have to FIND the channel, and
+   that is where it goes wrong.** Step 5 is safe because the channel is
+   *derived* from a video URL — no searching, no guessing. A studio has no
+   video to derive from, so the handle has to be resolved, and guessing it
+   from the name is how a third of one batch ended up wrong (DECISIONS #145).
+   Two failures, both of which LOOK like success:
+
+   - **A squatted or unclaimed channel with the right name.** `@BendStudio`
+     answers, is titled "BendStudio", and serves YouTube's default avatar — a
+     white letter on flat colour. The real one is `@BendStudio_`. A file
+     exists, so nothing downstream complains.
+   - **A different channel with the same name.** `@GSCGameWorld` is a Call of
+     Duty 4 fan channel; the studio is `@GSCGameWorldOfficial`. `@AdHocStudio`
+     is "Ad Hoc Studio", a different company from AdHoc Studio.
+
+   So resolve the channel, don't guess it — YouTube's channel search carries
+   the id and the verified badge:
+
+   ```
+   GET https://www.youtube.com/results?search_query=<studio>&sp=EgIQAg%3D%3D
+   → ytInitialData → channelRenderer: title, channelId, ownerBadges
+   ```
+
+   Take the exact title match, preferring a verified one, and confirm the
+   handle you fetch resolves to that `channelId` (the page's
+   `<link rel=canonical>`). **Then LOOK at the file.** A YouTube default is
+   a uniform ground running to all four corners with one white glyph on it;
+   the grey silhouette means the channel has no picture at all. Either one is
+   a missing image that passes every existence check there is.
+
+   Two more judgement calls, both real: a studio whose avatar is **game art
+   with a face in it** (Sandfall Interactive, GSC Game World) puts a painted
+   character in a slot labelled "Studio" — acceptable because it is the mark
+   the studio chose for itself, but say so rather than deciding silently. And
+   a studio with **no channel at all** — Ensemble Studios closed in 2009 —
+   takes the initials fallback: its Wikipedia logo is a 3.7:1 wordmark, and a
+   wordmark in a round 96px portrait is illegible. No photo is still a fine
+   answer.
 
 **Creator portraits go in one shared folder, square-cropped on the way in.**
 Save to `vault/Shelf/creators/<name-slug>.jpg` — one folder for the whole

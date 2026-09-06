@@ -18,32 +18,9 @@
 Git is the single source of truth. The deployed site never reads the filesystem at runtime — `dynamicParams = false` on all dynamic routes, so the full site is static HTML on Vercel's CDN.
 
 `npm run dev` is the one deliberate exception: it supervises a loopback-only
-writer for the local authoring dock. The sidecar is bound to `127.0.0.1`, and
-Next's `/__vault-editor/*` rewrite exists only in development. Production
-builds replace the dock client with a null component, emit no rewrite or
-filesystem endpoint, and remain static.
-
-The dock edits only text owned by the current page source. Title and
-description are edited directly where they render; selecting the page's prose
-replaces that article with its exact Markdown in the same location. The source
-view is the fidelity boundary: rendered HTML cannot be converted back without
-losing Obsidian syntax. English frontmatter/body and the body-only Ukrainian
-sibling are revision-checked and staged as one save; a draft retained across
-soft navigation keeps both revisions from the snapshot it was opened against.
-Generated projections
-(lists, dates, counts and fixed UI) and external players are read-only.
-
-Contextual authoring is a separate layer mounted only while that dock is open.
-Supported section pages place a `+` beside their title; it creates a bilingual,
-type-specific Draft pair for Posts, Music, People, Shelf or Projects. Entry
-pages expose Draft, category and Post-series metadata beneath their own header,
-and the Now page turns its rendered goal boxes into atomic EN/UK task toggles.
-All three use the same loopback origin/session protection and refuse to overlap
-an unsaved main-editor draft. The public/static component tree has no matching
-controls or write endpoint. Production aliases replace the contextual server
-slots with null/static components as well as replacing the main dock; the
-aliases are required because a development branch around `import()` alone does
-not keep that client island out of webpack's public chunks. See DECISIONS #122.
+writer for the local authoring dock, bound to `127.0.0.1`, with a rewrite that
+exists only in development. Production builds replace the dock with null
+components and stay static. See `docs/LOCAL-AUTHORING.md`.
 
 ## Content model
 

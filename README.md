@@ -27,7 +27,7 @@ Entry frontmatter: `title`, `date` (YYYY-MM-DD), `description`, `draft`.
 
 **Diagrams:** embed Excalidraw drawings with `![[Name.excalidraw]]` (turn on the plugin's Auto-export SVG; light+dark exports become theme-aware). AI-made diagrams are self-theming `.svg` files embedded like images. A photographed handwritten note can become an **Image note**: a clean bilingual diagram with a one-click switch back to the original photo. See [docs/EXCALIDRAW.md](./docs/EXCALIDRAW.md).
 
-**Section types:** `posts` (year-grouped rows; entries can set `category:` for filter chips) · `music` (Apple Music playlist embeds via `playlists:` frontmatter + notes below) · `people` (square cover-image grid; entries set `cover: photo.jpg`) · `shelf` (Netflix-style: one horizontally-scrolling row per medium, each opening its own page; entries set `cover:`, `author:`, `medium: book|movie|show|video`, optional `rating:` and `status: reading`) · `projects` (full entries rendered inline, TIL-style) · `now` (a nownownow-style page: a goals checklist and a résumé, both written as markdown in `main.md`'s body). Any Apple Music or YouTube link pasted alone on a line in any note also becomes an embedded player.
+**Section types:** `posts` (year-grouped rows; entries can set `category:` for filter chips) · `music` (a cover-flow deck of the notes' album art, with an Apple Music playlist embed; `playlists:` and `artists:` in frontmatter) · `people` (two-up portrait cards with a name panel; entries set `cover: photo.jpg`) · `shelf` (Netflix-style: one horizontally-scrolling row per medium, each opening its own page; entries set `cover:`, `author:`, `medium: book|movie|show|video|game`, optional `rating:` and `status: reading`; books render as a shelf of spines, films/shows/games open on a ranked Top list) · `projects` (full entries rendered inline, TIL-style) · `now` (a nownownow-style page: a goals checklist and a résumé, both written as markdown in `main.md`'s body). Any Apple Music or YouTube link pasted alone on a line in any note also becomes an embedded player.
 
 ## Local development
 
@@ -35,7 +35,8 @@ Entry frontmatter: `title`, `date` (YYYY-MM-DD), `description`, `draft`.
 npm install
 npm run dev   # http://localhost:3000
 npm run build # must pass — it statically generates every page
-npm test      # unit tests for lib/ (Node's own runner, no framework)
+npm test      # unit tests for lib/ and scripts/ (Node's own runner, no framework)
+npm run check # typecheck + test + image-note validation — the pre-handoff gate
 ```
 
 ## Key files
@@ -55,4 +56,5 @@ npm test      # unit tests for lib/ (Node's own runner, no framework)
 - [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) — how everything fits together
 - [docs/ADDING-PAGE-TYPES.md](./docs/ADDING-PAGE-TYPES.md) — adding new page styles
 - [docs/DECISIONS.md](./docs/DECISIONS.md) — why things are the way they are
-- [CLAUDE.md](./CLAUDE.md) — context file for AI assistants working on this repo
+- [docs/VERIFY.md](./docs/VERIFY.md) — the checks to run before handing off
+- [CLAUDE.md](./CLAUDE.md) / [AGENTS.md](./AGENTS.md) — indexes for AI assistants; they route to the topic files in `docs/`

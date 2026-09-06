@@ -4,6 +4,9 @@
   "private": true,
   "scripts": {
     "validate:image-notes": "node scripts/validate-image-notes.mjs",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "check": "npm run typecheck && npm test && npm run validate:image-notes",
     "predev": "npm run validate:image-notes && node scripts/sync-assets.mjs",
     "dev": "node scripts/dev.mjs",
     "prebuild": "npm run validate:image-notes && node scripts/sync-assets.mjs",
@@ -32,6 +35,8 @@
     "@types/node": "^22.15.0",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.3.4",
     "sharp": "^0.34.5",
     "tailwindcss": "^4.1.0",
     "typescript": "^5.8.0"
