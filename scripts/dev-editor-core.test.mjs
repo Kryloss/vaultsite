@@ -13,6 +13,7 @@ import {
   patchFrontmatter,
   patchMarkdownBody,
   patchNowGoalBody,
+  previewMarkdown,
   readDocument,
   readPageDocument,
   reorderDocuments,
@@ -621,4 +622,33 @@ test("attaches an embed and a cover, names them uniquely, mirrors them, and roll
     attachAsset(root, { source: "vault/Shelf/Movies/Fight Club.uk.md", name: "x.png", data, purpose: "embed" }),
     { code: "unsupported_source" }
   );
+});
+
+test("previews a draft body with the site's own pipeline, per language", async (t) => {
+  const root = await fs.promises.mkdtemp(path.join(os.tmpdir(), "vault-editor-"));
+  t.after(() => fs.promises.rm(root, { recursive: true, force: true }));
+  const shows = path.join(root, "vault", "Shelf", "Shows");
+  await fs.promises.mkdir(shows, { recursive: true });
+  await fs.promises.writeFile(path.join(root, "vault", "Shelf", "main.md"), "---\ntitle: Shelf\ntype: shelf\n---\n");
+  const note = path.join(shows, "Arcane.md");
+  await fs.promises.writeFile(note, "---\ntitle: Arcane\nrating: 4\n---\n## Review\n\nOld.\n");
+  const source = "vault/Shelf/Shows/Arcane.md";
+
+  const en = await previewMarkdown(root, { source, body: "## Review\n\nA **bold** draft.\n", lang: "en" });
+  assert.match(en.html, /<h2 id="review"/);
+  assert.match(en.html, /<strong>bold<\/strong>/);
+  assert.equal(en.headings, 1);
+  const uk = await previewMarkdown(root, { source, body: "## Відгук\n\nЧернетка.\n", lang: "uk" });
+  assert.match(uk.html, /id="uk-/, "Ukrainian headings keep their namespace");
+  const facts = await previewMarkdown(root, {
+    source,
+    body: "## At a glance\n\n| | |\n|---|---|\n| Aired | 2021 |\n\n## Review\n\nText.\n",
+    lang: "en",
+  });
+  assert.ok(facts.factsHtml && /Aired/.test(facts.factsHtml), "a shelf fact table is lifted out, as on the page");
+  assert.doesNotMatch(facts.html, /Aired/);
+
+  await assert.rejects(previewMarkdown(root, { source, body: "x", lang: "fr" }), { code: "invalid_lang" });
+  await assert.rejects(previewMarkdown(root, { source, body: 42, lang: "en" }), { code: "invalid_body" });
+  assert.equal(await fs.promises.readFile(note, "utf8"), "---\ntitle: Arcane\nrating: 4\n---\n## Review\n\nOld.\n", "a preview never writes");
 });

@@ -5290,46 +5290,154 @@ html[data-dev-tools] [data-dev-inline-editable]:focus {
 }
 
 /* Rendered prose is a preview, not a lossless editing format. Selecting it
-   opens its exact Markdown source IN THE ARTICLE'S PLACE, so wiki links,
-   embeds, callouts, tables and whitespace survive a round trip. The outside
-   Apple/YouTube players remain ordinary controls until the prose is selected. */
+   opens its exact Markdown source in a drawer under the page; the article
+   stays exactly where and how it was and re-renders live as the source
+   changes, so wiki links, embeds, callouts, tables and whitespace survive
+   a round trip without the page ever looking different from the site. The
+   Apple/YouTube players remain ordinary controls. */
 html[data-dev-tools] [data-dev-body-ready] {
   border-radius: var(--r-sm);
   cursor: text;
 }
 
-html[data-dev-tools] [data-dev-body-ready]:hover:not([data-dev-body-editing]),
-html[data-dev-tools] [data-dev-body-ready]:focus-visible:not([data-dev-body-editing]) {
+html[data-dev-tools] [data-dev-body-ready]:hover:not([data-dev-body-live]),
+html[data-dev-tools] [data-dev-body-ready]:focus-visible:not([data-dev-body-live]) {
   outline: 1px solid var(--text-tertiary);
   outline-offset: 0.375rem;
 }
 
-/* The article steps aside and the editor mounts in a sibling inserted after
-   it, sized to the prose it replaces so the page does not jump. The article
-   cannot host the textarea itself: React refuses a portal into a node whose
-   children it also owns via dangerouslySetInnerHTML. */
-html[data-dev-tools] [data-dev-body-editing] {
-  display: none;
+/* The article being edited: a quiet, steady outline — the thing itself does
+   not change. */
+html[data-dev-tools] [data-dev-body-live] {
+  outline: 1px dashed var(--text-tertiary);
+  outline-offset: 0.375rem;
 }
 
-.dev-body-mount {
-  min-height: max(12rem, var(--dev-body-min-h, 12rem));
-  margin-top: 2rem;
+/* Room under the page for the drawer, and the dock rides up above it. */
+html[data-dev-editing] body {
+  padding-bottom: calc(var(--dev-drawer-h, 22.5rem) + 1rem);
+}
+
+html[data-dev-editing] .dev-dock {
+  bottom: calc(var(--dev-drawer-h, 22.5rem) + max(0.75rem, env(safe-area-inset-bottom)));
+}
+
+.dev-editor-drawer {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 29;
+  display: flex;
+  flex-direction: column;
+  min-height: 11.25rem;
+  max-height: 80vh;
+  background: var(--chrome-bg);
+  box-shadow:
+    0 -1px 0 var(--chrome-ring),
+    0 -12px 32px color-mix(in srgb, var(--text) 6%, transparent);
+  backdrop-filter: blur(14px);
+}
+
+.dev-editor-drawer-handle {
+  display: flex;
+  flex: 0 0 0.875rem;
+  align-items: center;
+  justify-content: center;
+  cursor: ns-resize;
+  touch-action: none;
+}
+
+.dev-editor-drawer-handle::after {
+  content: "";
+  width: 2.5rem;
+  height: 0.25rem;
+  border-radius: var(--r-full);
+  background: var(--border);
+}
+
+.dev-editor-drawer-handle:focus-visible {
+  outline: none;
+}
+
+.dev-editor-drawer-handle:focus-visible::after {
+  background: var(--text-tertiary);
+}
+
+.dev-editor-drawer-inner {
+  display: flex;
+  width: min(100%, 64rem);
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  margin: 0 auto;
+}
+
+.dev-editor-toolbar {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.125rem;
+  padding: 0 0.625rem 0.375rem;
+}
+
+.dev-editor-toolbar > button {
+  display: inline-flex;
+  height: 1.75rem;
+  min-width: 1.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-md);
+  padding: 0 0.4375rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.dev-editor-toolbar > button:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.dev-editor-toolbar > button:disabled {
+  opacity: 0.45;
+}
+
+.dev-editor-meta {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.375rem;
+  margin-left: auto;
+  padding: 0 0.375rem;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+.dev-editor-drawer-body {
+  position: relative;
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  border-top: 1px solid var(--border);
 }
 
 .dev-body-editor {
   display: block;
   box-sizing: border-box;
   width: 100%;
-  min-height: max(12rem, var(--dev-body-min-h, 12rem));
-  overflow: hidden;
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
   resize: none;
   margin: 0;
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  padding: 0.75rem 0.875rem;
+  border: 0;
+  border-radius: 0;
+  padding: 0.75rem 0.875rem 1.25rem;
   outline: none;
-  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  background: transparent;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.875rem;
   line-height: 1.6;
@@ -5338,9 +5446,10 @@ html[data-dev-tools] [data-dev-body-editing] {
   caret-color: var(--text);
 }
 
-.dev-body-editor:focus {
-  border-color: var(--text-tertiary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 8%, transparent);
+@media (max-width: 639px) {
+  .dev-editor-meta > :not(:last-child) {
+    display: none;
+  }
 }
 
 /* Contextual authoring lives on the page it changes. The wrapper is contents
@@ -5676,11 +5785,16 @@ html[data-dev-tools] .dev-page-title-row {
   white-space: nowrap;
 }
 
-/* `[[` suggestions under the body editor. In flow, not floated at the caret:
-   the list is short, the editor is the only thing on the page, and a box
-   under the text never covers the line being written. */
+/* `[[` suggestions, over the top of the source in the drawer. Not floated at
+   the caret: the list is short and a fixed spot is easier to read than one
+   that follows the typing. */
 .dev-link-menu {
-  margin: 0.375rem 0 0;
+  position: absolute;
+  top: 0.375rem;
+  right: 0.875rem;
+  left: 0.875rem;
+  z-index: 1;
+  margin: 0;
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
   padding: 0.25rem;

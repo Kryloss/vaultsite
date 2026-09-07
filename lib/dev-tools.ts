@@ -289,10 +289,15 @@ export function countWords(markdown: string) {
  */
 export function sourcePositionFor(markdown: string, renderedText: string) {
   const words = renderedText.trim().split(/\s+/).filter(Boolean).slice(0, 6);
-  if (words.length === 0) return -1;
-  const pattern = words
-    .map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
-    .join("[\\s\\S]{0,40}?");
-  const match = new RegExp(pattern).exec(markdown);
-  return match ? match.index : -1;
+  // Fewer words each time: a heading carries its anchor's "#", a list item
+  // its nested list, and the source has neither.
+  for (let count = words.length; count > 0; count -= 1) {
+    const pattern = words
+      .slice(0, count)
+      .map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+      .join("[\\s\\S]{0,40}?");
+    const match = new RegExp(pattern).exec(markdown);
+    if (match) return match.index;
+  }
+  return -1;
 }

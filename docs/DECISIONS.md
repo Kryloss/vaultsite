@@ -157,6 +157,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 147 | The entry files are indexes, and the log keeps its numbers |
 | 148 | An attached image is Obsidian's paste, and a translation starts as a copy |
 | 149 | The build does not run the advisory lint |
+| 150 | The page is the preview, and the source lives in a drawer |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -799,3 +800,7 @@ The dock's remaining gap was everything that left the browser for Obsidian: an i
 ## 149. The build does not run the advisory lint (2026-09-06)
 
 #147 added `eslint.config.mjs` and declared lint advisory, but `next build` runs ESLint by itself whenever a config file exists, so the very next push (`Version 2026-09-06 19:36:42`) failed on Vercel at "Linting and checking validity of types" with the 34 baseline errors, and production stopped updating. `eslint: { ignoreDuringBuilds: true }` in `next.config.ts` makes the build match the decision already taken: the gate is `npm run check` plus a build, and lint is run by hand until its baseline is clean. Verified with `node scripts/isolated-build.mjs`. When lint joins `check`, remove the option in the same change.
+
+## 150. The page is the preview, and the source lives in a drawer (2026-09-06)
+
+#118 swapped the article for a textarea, which was honest about Markdown having no lossless inverse and wrong about what the author needs to see: the moment prose was clicked the page stopped looking like the site. The owner asked for the text to stay as it is and the editing to get better, and both are the same design — the article never moves, the source opens in a drawer fixed under the page, and the article re-renders from the draft a beat after each keystroke. The rendering is the site's own: the sidecar imports `lib/markdown.ts` under the test loader's type stripping and `@/` resolver (`scripts/dev.mjs` passes the flags) and `/preview` calls `renderWithHeadings` with the page's options, so callouts, code, wiki links, lifted fact tables and the rating row preview exactly, and no client-side Markdown was added (the working agreement). Everything that used to be a way of losing work became a way of keeping it: drafts persist across a reload in `sessionStorage` and are restored only against matching revisions (dropped with a message otherwise), so the navigation and unload prompts went; Escape leaves the drawer, not the dock; a press on a paragraph jumps to its source line. Two things that had been failing quietly are now named: a sidecar older than the browser (a protocol number in `/session`, or a 404 from an unknown endpoint) reports "restart `npm run dev`" everywhere a request can fail, and a preview the process cannot render says so in the drawer's status line while the rest of the editor keeps working. The React error from portaling into a `dangerouslySetInnerHTML` node, and the textarea not taking focus, both predate this and are gone with the drawer (`autoFocus`, a `document.body` portal).

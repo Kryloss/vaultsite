@@ -245,6 +245,7 @@ test("word count ignores fences and punctuation; source position finds a block",
   const md = "## Review\n\nThe *second* season is [[Arcane|better]] than\nthe first.\n";
   assert.equal(sourcePositionFor(md, "The second season is better than the first."), 11);
   assert.equal(sourcePositionFor(md, "Review"), 3);
+  assert.equal(sourcePositionFor(md, "Review #"), 3, "a heading's anchor glyph is not in the source");
   assert.equal(sourcePositionFor(md, "not in the note"), -1);
   assert.equal(sourcePositionFor(md, "   "), -1);
 });

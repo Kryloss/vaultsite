@@ -19,7 +19,9 @@ import { useLang } from "@/components/useLang";
 import { useSearchIndex } from "@/components/useSearchIndex";
 import { fileToBase64 } from "@/lib/dev-editor-client";
 import {
+  EDITOR_PROTOCOL,
   completeWikiLink,
+  countWords,
   createDevEditorState,
   devEditorChanges,
   devEditorDirty,
@@ -28,13 +30,17 @@ import {
   insertText,
   isDevToolsAvailable,
   publicPageUrl,
+  sourcePositionFor,
+  toggleLinePrefix,
   wikiLinkMatches,
   wikiLinkQuery,
+  wrapSelection,
   type DevEditorAction,
   type DevEditorState,
   type DevFieldKey,
   type DevFields,
 } from "@/lib/dev-tools";
+import { wordCount } from "@/lib/plural";
 import { siteUrl } from "@/lib/site-config";
 import { devUi, ui } from "@/lib/ui-strings";
 import { shortcutKey } from "@/lib/shortcut-key";
@@ -58,12 +64,68 @@ type BodyFieldKey = "body" | "body_uk";
 interface ActiveBodyEditor {
   host: HTMLElement;
   key: BodyFieldKey;
-  /**
-   * Where the textarea renders: a sibling inserted after the article, never
-   * the article itself. The article's content is `dangerouslySetInnerHTML`,
-   * and React refuses a portal into a node whose children it also owns.
-   */
-  mount: HTMLElement;
+}
+
+type FormatKind = "bold" | "italic" | "link" | "heading" | "quote" | "list" | "callout" | "code";
+
+interface PreviewOriginal {
+  host: HTMLElement;
+  html: string;
+  facts?: HTMLElement;
+  factsHtml?: string;
+}
+
+interface StoredDraft {
+  baseline: DevFields;
+  draft: DevFields;
+  revision: string;
+  revisionUk?: string;
+}
+
+const DRAFT_STORAGE_PREFIX = "vault-dev-draft:";
+const DRAWER_HEIGHT_KEY = "vault-dev-drawer-height";
+const DRAWER_MIN = 180;
+const PREVIEW_DELAY = 250;
+const PREVIEW_KEYS: BodyFieldKey[] = ["body", "body_uk"];
+
+function readStoredDraft(source: string): StoredDraft | null {
+  try {
+    const raw = sessionStorage.getItem(DRAFT_STORAGE_PREFIX + source);
+    return raw ? (JSON.parse(raw) as StoredDraft) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredDraft(source: string, value: StoredDraft | null) {
+  try {
+    if (value) sessionStorage.setItem(DRAFT_STORAGE_PREFIX + source, JSON.stringify(value));
+    else sessionStorage.removeItem(DRAFT_STORAGE_PREFIX + source);
+  } catch {
+    /* private mode or a full store: the in-memory draft still stands */
+  }
+}
+
+function clampDrawerHeight(height: number) {
+  const max = typeof window === "undefined" ? 600 : Math.round(window.innerHeight * 0.8);
+  return Math.min(Math.max(Math.round(height), DRAWER_MIN), Math.max(DRAWER_MIN, max));
+}
+
+function initialDrawerHeight() {
+  if (typeof window === "undefined") return 360;
+  try {
+    const stored = Number(localStorage.getItem(DRAWER_HEIGHT_KEY));
+    return clampDrawerHeight(stored || 360);
+  } catch {
+    return 360;
+  }
+}
+
+/** Bring a source position into view; lines are estimated, wrapping ignored. */
+function scrollTextareaTo(textarea: HTMLTextAreaElement, position: number) {
+  const line = textarea.value.slice(0, position).split("\n").length;
+  const lineHeight = parseFloat(getComputedStyle(textarea).lineHeight) || 22;
+  textarea.scrollTop = Math.max(0, (line - 3) * lineHeight);
 }
 
 const SAVED_EVENT = "vault-dev-editor-saved";
@@ -77,7 +139,10 @@ type EditorMessage =
   | "uploaded"
   | "uploadFailed"
   | "translationCreated"
-  | "translationFailed";
+  | "translationFailed"
+  | "outdated"
+  | "draftRestored"
+  | "draftDropped";
 
 const editorMessages = {
   saved: devUi.devSaved,
@@ -89,6 +154,9 @@ const editorMessages = {
   uploadFailed: devUi.devUploadFailed,
   translationCreated: devUi.devTranslationCreated,
   translationFailed: devUi.devTranslationFailed,
+  outdated: devUi.devSidecarOutdated,
+  draftRestored: devUi.devDraftRestored,
+  draftDropped: devUi.devDraftDropped,
 } satisfies Record<EditorMessage, { en: string; uk: string }>;
 
 interface LinkMenu {
@@ -177,8 +245,17 @@ export default function DevTools() {
   const [linkMenu, setLinkMenu] = useState<LinkMenu | null>(null);
   const [uploading, setUploading] = useState(false);
   const [creatingTranslation, setCreatingTranslation] = useState(false);
+  const [previewUnavailable, setPreviewUnavailable] = useState(false);
+  const [drawerHeight, setDrawerHeight] = useState(initialDrawerHeight);
   const tokenRef = useRef<string | null>(null);
-  const pendingSelection = useRef<{ start: number; end: number } | null>(null);
+  const pendingSelection = useRef<{ start: number; end: number; menu?: boolean } | null>(null);
+  const pendingJump = useRef<string | null>(null);
+  const activeBodyRef = useRef<ActiveBodyEditor | null>(null);
+  const drawerHeightRef = useRef(drawerHeight);
+  const originalHtml = useRef(new Map<BodyFieldKey, PreviewOriginal>());
+  const previewTimers = useRef<Partial<Record<BodyFieldKey, number>>>({});
+  const previewSerial = useRef<Partial<Record<BodyFieldKey, number>>>({});
+  const storeTimer = useRef<number | undefined>(undefined);
   const imageInputRef = useRef<HTMLInputElement>(null);
   // The public search index doubles as the wiki-link target list: every page
   // that can be linked is in it, under both of its titles.
@@ -212,7 +289,9 @@ export default function DevTools() {
   }, []);
 
   // Clear the writable model immediately on navigation. Reading the new
-  // route's source marker waits one frame so its Page has committed first.
+  // route's source marker waits a tick so its Page has committed first — a
+  // timer, not an animation frame, because a background tab paints nothing
+  // and an editor opened there would sit at "no source" until it was looked at.
   useEffect(() => {
     pageGeneration.current += 1;
     loadRequest.current += 1;
@@ -224,10 +303,11 @@ export default function DevTools() {
     setActiveBody(null);
     setLoading(false);
     setSaving(false);
-    const frame = requestAnimationFrame(() => {
+    originalHtml.current.clear();
+    const timer = window.setTimeout(() => {
       setSource(pageSource());
-    });
-    return () => cancelAnimationFrame(frame);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [pathname]);
 
   const sessionToken = useCallback(async (fresh = false) => {
@@ -237,8 +317,13 @@ export default function DevTools() {
       credentials: "same-origin",
     });
     if (!response.ok) throw new EditorRequestError("Editor session unavailable");
-    const payload = (await response.json()) as { token?: string };
+    const payload = (await response.json()) as { token?: string; protocol?: number };
     if (!payload.token) throw new EditorRequestError("Editor session unavailable");
+    // An older sidecar is the one failure a restart always fixes; say so
+    // instead of letting every later request fail in its own words.
+    if (payload.protocol !== EDITOR_PROTOCOL) {
+      throw new EditorRequestError("The editor sidecar is out of date", "sidecar_outdated");
+    }
     tokenRef.current = payload.token;
     return payload.token;
   }, []);
@@ -264,6 +349,9 @@ export default function DevTools() {
           code?: string;
           message?: string;
         };
+        if (response.status === 404 && payload.code === "not_found") {
+          throw new EditorRequestError("The editor sidecar is out of date", "sidecar_outdated");
+        }
         if (!response.ok) {
           throw new EditorRequestError(payload.message ?? "Editor request failed", payload.code);
         }
@@ -288,6 +376,28 @@ export default function DevTools() {
       });
       if (generation !== pageGeneration.current || requestId !== loadRequest.current) return;
       const remembered = restoreDraft ? pageDrafts.get(payload.source) : undefined;
+      // A draft that outlived a reload comes back only against the exact
+      // files it was written over; if Obsidian changed either since, it is
+      // dropped and said so — a silent overwrite is the one thing this
+      // editor never does.
+      const stored = !remembered && restoreDraft ? readStoredDraft(payload.source) : null;
+      let restored: DevEditorState | null = null;
+      let storedMessage: EditorMessage | null = null;
+      if (stored) {
+        if (stored.revision === payload.revision && stored.revisionUk === payload.revisionUk) {
+          restored = {
+            baseline: stored.baseline,
+            draft: stored.draft,
+            past: [stored.baseline],
+            future: [],
+            revision: stored.revision,
+          };
+          storedMessage = "draftRestored";
+        } else {
+          writeStoredDraft(payload.source, null);
+          storedMessage = "draftDropped";
+        }
+      }
       // A remembered draft must retain the complete revision snapshot it was
       // based on. Using the freshly loaded UK revision here would let an old
       // translated draft overwrite a newer Obsidian edit when English stayed
@@ -298,12 +408,19 @@ export default function DevTools() {
       dispatch(
         remembered
           ? { type: "restored", state: remembered.editor }
-          : { type: "loaded", fields: payload.fields, revision: payload.revision }
+          : restored
+            ? { type: "restored", state: restored }
+            : { type: "loaded", fields: payload.fields, revision: payload.revision }
       );
-    } catch {
+      if (storedMessage) setMessage(storedMessage);
+    } catch (error) {
       if (generation !== pageGeneration.current || requestId !== loadRequest.current) return;
       setDocumentInfo(null);
-      setMessage("unavailable");
+      setMessage(
+        error instanceof EditorRequestError && error.code === "sidecar_outdated"
+          ? "outdated"
+          : "unavailable"
+      );
     } finally {
       if (generation === pageGeneration.current && requestId === loadRequest.current) {
         setLoading(false);
@@ -315,12 +432,27 @@ export default function DevTools() {
     if (expanded && source.source && !documentInfo && !loading && !message) void loadDocument();
   }, [documentInfo, expanded, loadDocument, loading, message, source.source]);
 
+  // Drafts live in two places: this module (with undo history, for soft
+  // navigation) and sessionStorage (without it, for a reload). The storage
+  // copy is written a beat after the last keystroke, since it carries the
+  // whole body.
   useEffect(() => {
     if (!source.source || !editor || !documentInfo) return;
+    const key = source.source;
+    window.clearTimeout(storeTimer.current);
     if (devEditorDirty(editor)) {
-      pageDrafts.set(source.source, { editor, revisionUk: documentInfo.revisionUk });
+      pageDrafts.set(key, { editor, revisionUk: documentInfo.revisionUk });
+      const snapshot: StoredDraft = {
+        baseline: editor.baseline,
+        draft: editor.draft,
+        revision: editor.revision,
+        revisionUk: documentInfo.revisionUk,
+      };
+      storeTimer.current = window.setTimeout(() => writeStoredDraft(key, snapshot), 400);
+    } else {
+      pageDrafts.delete(key);
+      writeStoredDraft(key, null);
     }
-    else pageDrafts.delete(source.source);
   }, [documentInfo, editor, source.source]);
 
   // The Top-list star editor can save the same document independently. Keep
@@ -474,22 +606,36 @@ export default function DevTools() {
     return () => cleanups.forEach((cleanup) => cleanup());
   }, [documentInfo?.source, edit, expanded, lang]);
 
-  // The body is Markdown, not rendered HTML. Clicking its prose swaps that
-  // article for a source textarea in the same place; this preserves wiki
-  // links, embeds, callouts and tables exactly instead of reverse-converting a
-  // mutated DOM. Third-party controls keep their ordinary interaction until
-  // the prose itself is selected.
+  // The body is Markdown, not rendered HTML. Clicking its prose opens the
+  // exact source in a drawer under the page while the article stays where it
+  // is and re-renders as you type (the sidecar runs the real pipeline). A
+  // press on a paragraph while the drawer is open jumps the caret to its
+  // source line. Third-party controls keep their ordinary interaction.
   useEffect(() => {
     if (!expanded || !editor || !documentInfo) return;
     const hosts = [...document.querySelectorAll<HTMLElement>("[data-dev-body-field]")];
-    const activate = (host: HTMLElement) => {
+    const blockText = (host: HTMLElement, target: Element) => {
+      const block = target.closest(
+        "p, li, h1, h2, h3, h4, h5, h6, blockquote, pre, td, th, figcaption, dt, dd"
+      );
+      return block && host.contains(block) ? (block.textContent ?? "") : "";
+    };
+    const activate = (host: HTMLElement, target?: Element) => {
       const key = host.dataset.devBodyField as BodyFieldKey | undefined;
       if (key !== bodyKey) return;
-      const mount = document.createElement("div");
-      mount.className = "dev-body-mount";
-      mount.style.setProperty("--dev-body-min-h", `${Math.ceil(host.getBoundingClientRect().height)}px`);
-      host.after(mount);
-      setActiveBody({ host, key, mount });
+      const text = target ? blockText(host, target) : "";
+      const textarea = bodyEditorRef.current;
+      if (activeBodyRef.current?.host === host && textarea) {
+        const position = sourcePositionFor(textarea.value, text);
+        textarea.focus();
+        if (position >= 0) {
+          textarea.setSelectionRange(position, position);
+          scrollTextareaTo(textarea, position);
+        }
+        return;
+      }
+      pendingJump.current = text;
+      setActiveBody({ host, key });
       setLinkMenu(null);
     };
 
@@ -503,7 +649,7 @@ export default function DevTools() {
       if (
         !target ||
         target.closest(
-          ".dev-body-editor, iframe, video, audio, button, input, select, label, .apple-music-block, .youtube-block"
+          ".dev-editor-drawer, iframe, video, audio, button, input, select, label, .apple-music-block, .youtube-block"
         )
       )
         return;
@@ -511,7 +657,7 @@ export default function DevTools() {
       if (!host) return;
       event.preventDefault();
       event.stopPropagation();
-      activate(host);
+      activate(host, target);
     };
     const keydown = (event: KeyboardEvent) => {
       if (event.key !== "Enter" || event.target instanceof HTMLTextAreaElement) return;
@@ -532,7 +678,7 @@ export default function DevTools() {
         host.removeAttribute("aria-label");
       }
     };
-  }, [bodyKey, documentInfo?.source, expanded, lang]);
+  }, [bodyKey, documentInfo?.source, expanded, lang, source.sourceUk]);
 
   useEffect(() => {
     if (expanded) return;
@@ -543,37 +689,38 @@ export default function DevTools() {
     setActiveBody(null);
   }, [lang, pathname]);
 
+  // The article being edited is marked (an outline, nothing more), the page
+  // gets room under it for the drawer, and the caret lands on the paragraph
+  // that was pressed. Focus is `autoFocus` on the textarea (applied by React
+  // at commit), not a focus() here: the press has already focused the
+  // article, and a frame later the browser keeps the article.
   useEffect(() => {
+    activeBodyRef.current = activeBody;
     if (!activeBody) return;
-    const { host, mount } = activeBody;
-    if (!host.isConnected) return;
-    host.dataset.devBodyEditing = "true";
-    // Focus is `autoFocus` on the textarea (applied by React at commit), not a
-    // focus() here: the press that opened the editor has already focused the
-    // article, and a frame later the browser keeps the article.
-    const frame = requestAnimationFrame(() => {
+    const { host } = activeBody;
+    host.dataset.devBodyLive = "true";
+    document.documentElement.setAttribute("data-dev-editing", "");
+    const jump = pendingJump.current;
+    pendingJump.current = null;
+    const timer = window.setTimeout(() => {
       const textarea = bodyEditorRef.current;
-      if (!textarea) return;
-      textarea.style.height = "auto";
-      textarea.style.height = `${textarea.scrollHeight}px`;
-    });
+      if (!textarea || !jump) return;
+      const position = sourcePositionFor(textarea.value, jump);
+      if (position < 0) return;
+      textarea.setSelectionRange(position, position);
+      scrollTextareaTo(textarea, position);
+    }, 0);
     return () => {
-      cancelAnimationFrame(frame);
-      delete host.dataset.devBodyEditing;
-      mount.remove();
+      window.clearTimeout(timer);
+      delete host.dataset.devBodyLive;
+      document.documentElement.removeAttribute("data-dev-editing");
     };
   }, [activeBody]);
 
   useEffect(() => {
-    if (activeBodyValue === undefined) return;
-    const frame = requestAnimationFrame(() => {
-      const textarea = bodyEditorRef.current;
-      if (!textarea) return;
-      textarea.style.height = "auto";
-      textarea.style.height = `${textarea.scrollHeight}px`;
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [activeBodyValue]);
+    drawerHeightRef.current = drawerHeight;
+    document.documentElement.style.setProperty("--dev-drawer-h", `${drawerHeight}px`);
+  }, [drawerHeight]);
 
   // A programmatic edit (Tab, a chosen link, an attached image) says where the
   // caret goes; React has replaced the value by the time this runs.
@@ -583,7 +730,74 @@ export default function DevTools() {
     if (!selection || !textarea) return;
     pendingSelection.current = null;
     textarea.setSelectionRange(selection.start, selection.end);
+    if (selection.menu) {
+      const query = wikiLinkQuery(textarea.value, textarea.selectionStart);
+      setLinkMenu(query ? { ...query, index: 0 } : null);
+    }
   }, [activeBodyValue]);
+
+  // Live preview. Each body's rendered article is replaced with the draft's
+  // rendering a beat after the last keystroke; when the draft equals the
+  // file, the article gets its original server HTML back byte for byte. A
+  // preview the sidecar cannot give (no TypeScript loader, an older process)
+  // is reported once in the drawer, and the article simply waits for Save.
+  useEffect(() => {
+    if (!documentInfo || !editor) return;
+    const timers = previewTimers.current;
+    for (const key of PREVIEW_KEYS) {
+      const host = document.querySelector<HTMLElement>(`[data-dev-body-field="${key}"]`);
+      if (!host) continue;
+      const value = expanded ? editor.draft[key] : editor.baseline[key];
+      const original = originalHtml.current.get(key);
+      window.clearTimeout(timers[key]);
+      if (value === editor.baseline[key]) {
+        // Also retire any preview still in flight, or its answer would paint
+        // the abandoned draft over the article a moment after Cancel.
+        previewSerial.current[key] = (previewSerial.current[key] ?? 0) + 1;
+        if (original && original.host === host) {
+          host.innerHTML = original.html;
+          if (original.facts) original.facts.innerHTML = original.factsHtml ?? "";
+        }
+        continue;
+      }
+      if (previewUnavailable) continue;
+      if (!original || original.host !== host) {
+        const facts =
+          document.querySelector<HTMLElement>(`[data-dev-facts-field="${key}"]`) ?? undefined;
+        originalHtml.current.set(key, { host, html: host.innerHTML, facts, factsHtml: facts?.innerHTML });
+      }
+      timers[key] = window.setTimeout(() => {
+        const serial = (previewSerial.current[key] ?? 0) + 1;
+        previewSerial.current[key] = serial;
+        const generation = pageGeneration.current;
+        request<{ html: string; factsHtml: string | null }>("preview", {
+          source: documentInfo.source,
+          body: value,
+          lang: key === "body_uk" ? "uk" : "en",
+        })
+          .then((rendered) => {
+            if (
+              serial !== previewSerial.current[key] ||
+              generation !== pageGeneration.current ||
+              !host.isConnected
+            )
+              return;
+            host.innerHTML = rendered.html;
+            const facts = originalHtml.current.get(key)?.facts;
+            if (facts) facts.innerHTML = rendered.factsHtml ?? "";
+          })
+          .catch((error) => {
+            if (generation !== pageGeneration.current) return;
+            if (
+              error instanceof EditorRequestError &&
+              (error.code === "preview_unavailable" || error.code === "sidecar_outdated")
+            ) {
+              setPreviewUnavailable(true);
+            }
+          });
+      }, PREVIEW_DELAY);
+    }
+  }, [documentInfo, editor, expanded, previewUnavailable, request]);
 
   useEffect(() => {
     if (!expanded || !documentInfo || !editor || !focusEditorOnLoad.current) return;
@@ -591,47 +805,6 @@ export default function DevTools() {
     document.querySelector<HTMLElement>("[data-dev-inline-editable]")?.focus();
   }, [documentInfo, editor, expanded]);
 
-  useEffect(() => {
-    if (!dirty && !saving) return;
-    const unload = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = "";
-    };
-    const navigate = (event: MouseEvent) => {
-      const anchor = (event.target as Element | null)?.closest<HTMLAnchorElement>("a[href]");
-      if (!anchor || anchor.closest(".dev-dock")) return;
-      if (
-        event.defaultPrevented ||
-        event.button !== 0 ||
-        event.metaKey ||
-        event.ctrlKey ||
-        event.shiftKey ||
-        event.altKey ||
-        anchor.download ||
-        (anchor.target && anchor.target !== "_self")
-      )
-        return;
-      const next = new URL(anchor.href, window.location.href);
-      if (next.origin !== window.location.origin || next.pathname === window.location.pathname) return;
-      if (saving) {
-        event.preventDefault();
-        event.stopPropagation();
-        return;
-      }
-      if (window.confirm(devUi.devDiscardNavigation[lang])) {
-        if (source.source) pageDrafts.delete(source.source);
-        return;
-      }
-      event.preventDefault();
-      event.stopPropagation();
-    };
-    window.addEventListener("beforeunload", unload);
-    document.addEventListener("click", navigate, true);
-    return () => {
-      window.removeEventListener("beforeunload", unload);
-      document.removeEventListener("click", navigate, true);
-    };
-  }, [dirty, lang, saving, source.source]);
 
   const applyBodyChange = useCallback(
     (key: BodyFieldKey, value: string, start: number, end: number) => {
@@ -695,8 +868,93 @@ export default function DevTools() {
     }
   };
 
+  const closeEditor = () => {
+    const host = activeBody?.host;
+    setActiveBody(null);
+    setLinkMenu(null);
+    requestAnimationFrame(() => host?.focus());
+  };
+
+  // Toolbar and shortcuts write Markdown the way Obsidian's do: wrap or
+  // unwrap the selection, prefix or unprefix the touched lines, and leave a
+  // selected placeholder where there was only a caret.
+  const format = (kind: FormatKind) => {
+    const textarea = bodyEditorRef.current;
+    if (!textarea || !activeBody) return;
+    const { value, selectionStart: start, selectionEnd: end } = textarea;
+    let next: { value: string; start: number; end: number };
+    let menu = false;
+    switch (kind) {
+      case "bold":
+        next = wrapSelection(value, start, end, "**", "**", devUi.devBold[lang].toLowerCase());
+        break;
+      case "italic":
+        next = wrapSelection(value, start, end, "*", "*", devUi.devItalic[lang].toLowerCase());
+        break;
+      case "link":
+        next = wrapSelection(value, start, end, "[[", "]]", "");
+        menu = true;
+        break;
+      case "heading":
+        next = toggleLinePrefix(value, start, end, "## ");
+        break;
+      case "quote":
+        next = toggleLinePrefix(value, start, end, "> ");
+        break;
+      case "list":
+        next = toggleLinePrefix(value, start, end, "- ");
+        break;
+      case "code":
+        next = wrapSelection(value, start, end, "```\n", "\n```", devUi.devCodeBlock[lang].toLowerCase());
+        break;
+      case "callout": {
+        const inner = value.slice(start, end);
+        const head = "> [!note] ";
+        const title = devUi.devCallout[lang];
+        const block = `${head}${title}\n> ${inner.split("\n").join("\n> ")}`;
+        next = {
+          value: value.slice(0, start) + block + value.slice(end),
+          start: start + head.length,
+          end: start + head.length + title.length,
+        };
+        break;
+      }
+    }
+    pendingSelection.current = { start: next.start, end: next.end, menu };
+    edit(activeBody.key, next.value);
+    textarea.focus();
+  };
+
+  const startResize = (event: React.PointerEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const move = (moveEvent: PointerEvent) => {
+      setDrawerHeight(clampDrawerHeight(window.innerHeight - moveEvent.clientY));
+    };
+    const up = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      try {
+        localStorage.setItem(DRAWER_HEIGHT_KEY, String(drawerHeightRef.current));
+      } catch {
+        /* a forgotten height is only a default next time */
+      }
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+  };
+
   const bodyKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     const textarea = event.currentTarget;
+    if ((event.metaKey || event.ctrlKey) && !event.altKey && !event.shiftKey) {
+      const key = shortcutKey(event);
+      const shortcut: FormatKind | undefined =
+        key === "b" ? "bold" : key === "i" ? "italic" : key === "k" ? "link" : undefined;
+      if (shortcut) {
+        event.preventDefault();
+        format(shortcut);
+        return;
+      }
+    }
     if (linkMenu && linkMatches.length > 0) {
       if (event.key === "ArrowDown" || event.key === "ArrowUp") {
         event.preventDefault();
@@ -715,6 +973,14 @@ export default function DevTools() {
         setLinkMenu(null);
         return;
       }
+    }
+    // Escape leaves the editor, not the dock: the draft stays, the page keeps
+    // showing it, and a second Escape closes the tools as before.
+    if (event.key === "Escape") {
+      event.preventDefault();
+      event.stopPropagation();
+      closeEditor();
+      return;
     }
     if (event.key === "Tab" && activeBody) {
       event.preventDefault();
@@ -753,10 +1019,11 @@ export default function DevTools() {
     }
   };
 
+  // Cancel resets the draft and leaves the drawer where it is: the author
+  // is still editing, just from the file's text again.
   const cancel = () => {
     dispatch({ type: "cancel" });
     editGroup.current = null;
-    setActiveBody(null);
     setLinkMenu(null);
     setMessage(null);
     setConflict(false);
@@ -781,10 +1048,13 @@ export default function DevTools() {
         changes: devEditorChanges(editor),
       });
       if (generation !== pageGeneration.current) return;
+      // The preview already shows the saved body; the refresh below swaps in
+      // the server's own HTML. Forget the pre-save originals so the "back to
+      // baseline" branch does not paint the old article in between.
+      originalHtml.current.clear();
       setDocumentInfo(payload);
       dispatch({ type: "saved", fields: payload.fields, revision: payload.revision });
       editGroup.current = null;
-      setActiveBody(null);
       setMessage("saved");
       router.refresh();
     } catch (error) {
@@ -822,79 +1092,154 @@ export default function DevTools() {
   const canSave = Boolean(editor && dirty && editor.draft.title.trim() && !saving);
   const feedbackVisible = expanded && (loading || Boolean(message) || !source.source);
   const linkMenuOpen = Boolean(linkMenu && linkMatches.length > 0);
+  const toolbar: Array<{ kind: FormatKind; label: string; glyph: React.ReactNode }> = [
+    { kind: "bold", label: devUi.devBold[lang], glyph: <b>B</b> },
+    { kind: "italic", label: devUi.devItalic[lang], glyph: <i>I</i> },
+    { kind: "link", label: devUi.devLink[lang], glyph: "[[ ]]" },
+    { kind: "heading", label: devUi.devHeading[lang], glyph: "H2" },
+    { kind: "quote", label: devUi.devQuote[lang], glyph: "”" },
+    { kind: "list", label: devUi.devListItem[lang], glyph: "•" },
+    { kind: "callout", label: devUi.devCallout[lang], glyph: "[!]" },
+    { kind: "code", label: devUi.devCodeBlock[lang], glyph: "</>" },
+  ];
   const bodyPortal =
-    activeBody && editor && activeBody.mount.isConnected
+    activeBody && editor && activeBody.host.isConnected
       ? createPortal(
-          <>
-            <textarea
-              ref={bodyEditorRef}
-              className="dev-body-editor"
-              value={editor.draft[activeBody.key]}
-              lang={activeBody.key === "body_uk" ? "uk" : undefined}
-              aria-label={devUi.devBody[lang]}
-              autoFocus
-              aria-autocomplete="list"
-              aria-controls={linkMenuOpen ? "dev-link-menu" : undefined}
-              spellCheck
-              onChange={(event) => {
-                edit(activeBody.key, event.target.value);
-                event.currentTarget.style.height = "auto";
-                event.currentTarget.style.height = `${event.currentTarget.scrollHeight}px`;
-                syncLinkMenu(event.currentTarget);
-              }}
-              onSelect={(event) => {
-                if (linkMenu) syncLinkMenu(event.currentTarget);
-              }}
-              onKeyDown={bodyKeyDown}
-              onPaste={(event) => {
-                const files = [...event.clipboardData.files];
-                if (!files.some(isImage)) return;
+          <section
+            className="dev-editor-drawer"
+            style={{ height: drawerHeight }}
+            role="region"
+            aria-label={devUi.devEditorDrawer[lang]}
+          >
+            <div
+              className="dev-editor-drawer-handle"
+              role="separator"
+              aria-orientation="horizontal"
+              aria-label={devUi.devResizeEditor[lang]}
+              tabIndex={0}
+              onPointerDown={startResize}
+              onKeyDown={(event) => {
+                if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
                 event.preventDefault();
-                void attachImages(files);
-              }}
-              onDragOver={(event) => {
-                if ([...event.dataTransfer.items].some((item) => item.kind === "file")) {
-                  event.preventDefault();
-                }
-              }}
-              onDrop={(event) => {
-                const files = [...event.dataTransfer.files];
-                if (!files.some(isImage)) return;
-                event.preventDefault();
-                void attachImages(files);
-              }}
-              onBlur={() => {
-                editGroup.current = null;
-                setLinkMenu(null);
+                const delta = event.key === "ArrowUp" ? 40 : -40;
+                setDrawerHeight((height) => clampDrawerHeight(height + delta));
               }}
             />
-            {linkMenuOpen && (
-              <ul
-                id="dev-link-menu"
-                className="dev-link-menu"
-                role="listbox"
-                aria-label={devUi.devLinkSuggestions[lang]}
-              >
-                {linkMatches.map((item, index) => (
-                  <li key={item.href} role="option" aria-selected={index === linkIndex}>
-                    <button
-                      type="button"
-                      className="press"
-                      tabIndex={-1}
-                      onMouseDown={(event) => event.preventDefault()}
-                      onClick={() => chooseLink(item.title)}
-                    >
-                      <span>{item.title}</span>
-                      {item.titleUk && item.titleUk !== item.title && (
-                        <span className="dev-link-menu-uk" lang="uk">{item.titleUk}</span>
-                      )}
-                    </button>
-                  </li>
+            <div className="dev-editor-drawer-inner">
+              <div className="dev-editor-toolbar" role="toolbar" aria-label={devUi.devEditorDrawer[lang]}>
+                {toolbar.map((item) => (
+                  <button
+                    key={item.kind}
+                    type="button"
+                    className="press"
+                    title={item.label}
+                    aria-label={item.label}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => format(item.kind)}
+                  >
+                    {item.glyph}
+                  </button>
                 ))}
-              </ul>
-            )}
-          </>,
-          activeBody.mount
+                <button
+                  type="button"
+                  className="press"
+                  disabled={uploading}
+                  title={devUi.devInsertImage[lang]}
+                  aria-label={devUi.devInsertImage[lang]}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => imageInputRef.current?.click()}
+                >
+                  <ImageIcon className="h-3.5 w-3.5" />
+                </button>
+                <span className="dev-editor-meta">
+                  <span>{activeBody.key === "body_uk" ? "UK" : "EN"}</span>
+                  <span aria-hidden>·</span>
+                  <span>{wordCount(countWords(editor.draft[activeBody.key]))[lang]}</span>
+                  <span aria-hidden>·</span>
+                  <span>
+                    {(previewUnavailable ? devUi.devPreviewUnavailable : devUi.devLivePreview)[lang]}
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  className="press dev-editor-close"
+                  title={devUi.devCloseEditor[lang]}
+                  aria-label={devUi.devCloseEditor[lang]}
+                  onClick={closeEditor}
+                >
+                  <CloseIcon className="h-3.5 w-3.5" />
+                </button>
+              </div>
+              <div className="dev-editor-drawer-body">
+                <textarea
+                  ref={bodyEditorRef}
+                  className="dev-body-editor"
+                  value={editor.draft[activeBody.key]}
+                  lang={activeBody.key === "body_uk" ? "uk" : undefined}
+                  aria-label={devUi.devBody[lang]}
+                  autoFocus
+                  aria-autocomplete="list"
+                  aria-controls={linkMenuOpen ? "dev-link-menu" : undefined}
+                  spellCheck
+                  onChange={(event) => {
+                    edit(activeBody.key, event.target.value);
+                    syncLinkMenu(event.currentTarget);
+                  }}
+                  onSelect={(event) => {
+                    if (linkMenu) syncLinkMenu(event.currentTarget);
+                  }}
+                  onKeyDown={bodyKeyDown}
+                  onPaste={(event) => {
+                    const files = [...event.clipboardData.files];
+                    if (!files.some(isImage)) return;
+                    event.preventDefault();
+                    void attachImages(files);
+                  }}
+                  onDragOver={(event) => {
+                    if ([...event.dataTransfer.items].some((item) => item.kind === "file")) {
+                      event.preventDefault();
+                    }
+                  }}
+                  onDrop={(event) => {
+                    const files = [...event.dataTransfer.files];
+                    if (!files.some(isImage)) return;
+                    event.preventDefault();
+                    void attachImages(files);
+                  }}
+                  onBlur={() => {
+                    editGroup.current = null;
+                    setLinkMenu(null);
+                  }}
+                />
+                {linkMenuOpen && (
+                  <ul
+                    id="dev-link-menu"
+                    className="dev-link-menu"
+                    role="listbox"
+                    aria-label={devUi.devLinkSuggestions[lang]}
+                  >
+                    {linkMatches.map((item, index) => (
+                      <li key={item.href} role="option" aria-selected={index === linkIndex}>
+                        <button
+                          type="button"
+                          className="press"
+                          tabIndex={-1}
+                          onMouseDown={(event) => event.preventDefault()}
+                          onClick={() => chooseLink(item.title)}
+                        >
+                          <span>{item.title}</span>
+                          {item.titleUk && item.titleUk !== item.title && (
+                            <span className="dev-link-menu-uk" lang="uk">{item.titleUk}</span>
+                          )}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          </section>,
+          document.body
         )
       : null;
 

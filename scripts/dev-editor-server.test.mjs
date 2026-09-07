@@ -4,6 +4,8 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { createDevEditorServer } from "./dev-editor-server.mjs";
+import { EDITOR_PROTOCOL as CORE_PROTOCOL } from "./dev-editor-core.mjs";
+import { EDITOR_PROTOCOL as CLIENT_PROTOCOL } from "../lib/dev-tools.ts";
 
 const SOURCE = "vault/Posts/Note.md";
 const ORIGINAL = `---
@@ -67,6 +69,8 @@ test("accepts exact localhost Origin and falls back to localhost Referer", async
   const byOrigin = await session(base, { Origin: "http://localhost:3000" });
   assert.equal(byOrigin.response.status, 200);
   assert.match(byOrigin.token, /^[A-Za-z0-9_-]{43}$/);
+  assert.equal(byOrigin.body.protocol, CORE_PROTOCOL, "the session names the sidecar protocol");
+  assert.equal(CORE_PROTOCOL, CLIENT_PROTOCOL, "browser and sidecar agree on the protocol number");
 
   const byReferer = await session(base, {
     Referer: "http://localhost:3000/music/voiny-sveta",
