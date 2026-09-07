@@ -9558,23 +9558,56 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
 
 /* The pool of light. `z-index: -1` is what keeps it BEHIND the number: a
    positioned pseudo-element paints after its non-positioned siblings
-   otherwise, and the glow would sit on top of the glyphs. Sized off the
-   measure rather than the number so it stays a wide soft ellipse at every
-   window width. */
+   otherwise, and the glow would sit on top of the glyphs.
+
+   TWO gradients in one background, not one: a single radial reads as a grey
+   disc with an edge you can find, however soft it is made. A tight core with
+   a wide halo around it is what light actually does — most of the brightness
+   in a small area, then a long fall-off with no visible boundary — and it is
+   the difference between a shape behind the number and the number sitting in
+   light. Both are `--text`, so it stays monochrome (#64).
+
+   Sized and placed off `--notfound-size`, so the pool grows with the digits
+   rather than staying put while they shrink, and centred on the upper half of
+   the number — where the mask leaves the most ink, and so where light would
+   be landing.
+
+   The two amounts are per-theme, which is not decoration: on black, ink at
+   17% is a glow; on white, the same mix is a smudge under the number, because
+   a dark wash on a light page reads as dirt rather than as light. Light mode
+   gets the same shape at less than half the strength. */
+.notfound-hero {
+  --glow-core: 7%;
+  --glow-halo: 4%;
+}
+
+@media (prefers-color-scheme: dark) {
+  .notfound-hero {
+    --glow-core: 17%;
+    --glow-halo: 9%;
+  }
+}
+
 .notfound-hero::before {
   content: "";
   position: absolute;
   z-index: -1;
   left: 50%;
-  top: 0;
-  width: min(30rem, 130%);
-  aspect-ratio: 2 / 1;
+  top: calc(var(--notfound-size) * -0.15);
+  width: min(42rem, 150%);
+  height: calc(var(--notfound-size) * 1.9);
   transform: translateX(-50%);
-  background: radial-gradient(
-    closest-side,
-    color-mix(in srgb, var(--text) 9%, transparent),
-    transparent
-  );
+  background:
+    radial-gradient(
+      42% 46% at 50% 42%,
+      color-mix(in srgb, var(--text) var(--glow-core), transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      closest-side,
+      color-mix(in srgb, var(--text) var(--glow-halo), transparent),
+      transparent
+    );
   pointer-events: none;
 }
 
@@ -9601,20 +9634,27 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
    fully transparent, which is what makes the overlap below legible.
 
    The prefixed line first — Safari read `-webkit-mask-image` alone until
-   15.4, and an unprefixed-only declaration there is no fade at all. Ending at
-   96% rather than 100%: the baseline sits at about 89% of a line box this
-   tight, so a mask finishing any earlier amputates the feet of the digits
-   instead of fading them. */
+   15.4, and an unprefixed-only declaration there is no fade at all.
+
+   The two stops are the whole difference between this reading as one mark and
+   reading as a collision. The fade has to be GONE by the feet of the digits,
+   a few percent above the baseline (which sits at about 89% of a line box
+   this tight), because that is where the sentence lands: a mask still a
+   quarter opaque there puts the stems of the 4s through the words. It cannot
+   start much before a quarter of the way down either, or the number loses the
+   solid top that makes it read as a number at all. */
 .notfound-code {
-  -webkit-mask-image: linear-gradient(to bottom, #000 22%, transparent 96%);
-  mask-image: linear-gradient(to bottom, #000 22%, transparent 96%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 28%, transparent 86%);
+  mask-image: linear-gradient(to bottom, #000 28%, transparent 86%);
 }
 
-/* Tucked INTO the number rather than set below it: the first line rides over
-   the tail of the glyphs, where the mask has already taken them most of the
-   way out, so the two read as one block instead of a heading with a caption
-   under it. The lift is a fraction of `--notfound-size`, so it holds from a
-   phone to a wide window — a fixed rem (the `-mt-8` this was adapted from)
+/* Tucked INTO the number rather than set below it: the first line sits in the
+   space the digits' feet have faded out of, so the two read as one mark
+   instead of a heading with a caption under it. It is a GRAZE, and that is
+   the whole tuning — 0.28 of the number's size put both lines of the sentence
+   across the middle of the digits, where the strokes are still solid, and it
+   read as a collision. The lift is a fraction of `--notfound-size` rather
+   than the fixed `-mt-8` this was adapted from: the number is fluid, so a rem
    clears the digits at one end of the clamp and crosses their middles at the
    other.
 
@@ -9623,7 +9663,7 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
    paints on top of the glyphs without a z-index anywhere. */
 .notfound-lede {
   position: relative;
-  margin: calc(var(--notfound-size) * -0.28) auto 0;
+  margin: calc(var(--notfound-size) * -0.15) auto 0;
   max-width: 26rem;
   color: var(--text-secondary);
   text-wrap: balance;

@@ -279,8 +279,8 @@ export const ui = {
 
   // 404
   notFoundBody: {
-    en: "This page doesn’t exist (or the note behind it was unpublished).",
-    uk: "Цієї сторінки не існує (або нотатку за нею знято з публікації).",
+    en: "This page doesn’t exist.",
+    uk: "Цієї сторінки не існує.",
   },
   backHome: { en: "Back home", uk: "На головну" },
   didYouMean: { en: "Did you mean…", uk: "Можливо, ви шукали…" },
