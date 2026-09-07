@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import path from "node:path";
 import process from "node:process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const editorPort = process.env.VAULT_EDITOR_PORT ?? "3211";
@@ -45,7 +45,17 @@ function start(label, command, args) {
   return child;
 }
 
-start("vault editor", process.execPath, [path.join(root, "scripts", "dev-editor.mjs")]);
+// The sidecar renders live previews with the site's own TypeScript Markdown
+// pipeline, so it runs with type stripping and the `@/` resolver the tests
+// use (scripts/test-hooks.mjs). Without these flags the preview endpoint
+// answers 501 and the rest of the editor works as before.
+start("vault editor", process.execPath, [
+  "--experimental-strip-types",
+  "--disable-warning=MODULE_TYPELESS_PACKAGE_JSON",
+  "--import",
+  pathToFileURL(path.join(root, "scripts", "test-hooks.mjs")).href,
+  path.join(root, "scripts", "dev-editor.mjs"),
+]);
 start("Next.js", process.execPath, [
   path.join(root, "node_modules", "next", "dist", "bin", "next"),
   "dev",

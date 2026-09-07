@@ -2,9 +2,11 @@ import { randomBytes, timingSafeEqual } from "node:crypto";
 import http from "node:http";
 import {
   DevEditorError,
+  EDITOR_PROTOCOL,
   attachAsset,
   createEntry,
   createTranslation,
+  previewMarkdown,
   readDocument,
   readPageDocument,
   reorderDocuments,
@@ -137,7 +139,7 @@ export function createDevEditorServer({
       }
 
       if (req.method === "GET" && url.pathname === "/session") {
-        send(res, 200, { token: sessionToken });
+        send(res, 200, { token: sessionToken, protocol: EDITOR_PROTOCOL });
         return;
       }
       if (req.method !== "POST") {
@@ -190,6 +192,10 @@ export function createDevEditorServer({
       }
       if (url.pathname === "/attach-asset") {
         send(res, 201, await attachAsset(repoRoot, body));
+        return;
+      }
+      if (url.pathname === "/preview") {
+        send(res, 200, await previewMarkdown(repoRoot, body));
         return;
       }
       throw new DevEditorError("Unknown vault editor endpoint.", 404, "not_found");

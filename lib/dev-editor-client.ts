@@ -1,5 +1,7 @@
 /** Browser client for the loopback-only vault editor. Imported by dev-only islands. */
 
+import { EDITOR_PROTOCOL } from "@/lib/dev-tools";
+
 let sessionToken: string | null = null;
 
 export class DevEditorRequestError extends Error {
@@ -12,6 +14,13 @@ export class DevEditorRequestError extends Error {
   }
 }
 
+/**
+ * An older sidecar answers with an older protocol number (or none), and an
+ * endpoint it never heard of with 404. Both are the same situation with the
+ * same fix, so both surface as one code the islands can name.
+ */
+export const SIDECAR_OUTDATED = "sidecar_outdated";
+
 async function token(fresh = false) {
   if (!fresh && sessionToken) return sessionToken;
   const response = await fetch("/__vault-editor/session", {
@@ -19,8 +28,11 @@ async function token(fresh = false) {
     credentials: "same-origin",
   });
   if (!response.ok) throw new DevEditorRequestError("Editor session unavailable");
-  const payload = (await response.json()) as { token?: string };
+  const payload = (await response.json()) as { token?: string; protocol?: number };
   if (!payload.token) throw new DevEditorRequestError("Editor session unavailable");
+  if (payload.protocol !== EDITOR_PROTOCOL) {
+    throw new DevEditorRequestError("The editor sidecar is out of date", SIDECAR_OUTDATED);
+  }
   sessionToken = payload.token;
   return sessionToken;
 }
@@ -45,6 +57,9 @@ export async function devEditorRequest<T>(endpoint: string, body: object): Promi
       code?: string;
       message?: string;
     };
+    if (response.status === 404 && payload.code === "not_found") {
+      throw new DevEditorRequestError("The editor sidecar is out of date", SIDECAR_OUTDATED);
+    }
     if (!response.ok) {
       throw new DevEditorRequestError(payload.message ?? "Editor request failed", payload.code);
     }

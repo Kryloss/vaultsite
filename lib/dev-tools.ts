@@ -33,6 +33,9 @@ export type DevEditorAction =
   | { type: "revision"; revision: string }
   | { type: "restored"; state: DevEditorState };
 
+/** Must equal `EDITOR_PROTOCOL` in scripts/dev-editor-core.mjs; the server test checks. */
+export const EDITOR_PROTOCOL = 2;
+
 export function isDevToolsAvailable(environment: string | undefined, hostname: string) {
   return environment === "development" && hostname === "localhost";
 }
@@ -217,4 +220,79 @@ export function wikiLinkMatches<T extends WikiLinkCandidate>(items: T[], query: 
     if (starts.length >= limit) break;
   }
   return [...starts, ...contains].slice(0, limit);
+}
+
+/**
+ * Wrap the selection in Markdown delimiters, or unwrap it when it already
+ * is; a collapsed caret gets the placeholder, selected so typing replaces it.
+ */
+export function wrapSelection(
+  value: string,
+  start: number,
+  end: number,
+  before: string,
+  after: string,
+  placeholder: string
+) {
+  if (
+    value.slice(Math.max(0, start - before.length), start) === before &&
+    value.slice(end, end + after.length) === after
+  ) {
+    return {
+      value: value.slice(0, start - before.length) + value.slice(start, end) + value.slice(end + after.length),
+      start: start - before.length,
+      end: end - before.length,
+    };
+  }
+  const inner = start === end ? placeholder : value.slice(start, end);
+  return {
+    value: value.slice(0, start) + before + inner + after + value.slice(end),
+    start: start + before.length,
+    end: start + before.length + inner.length,
+  };
+}
+
+/**
+ * Add a line prefix (`## `, `> `, `- `) to every line the selection touches,
+ * or remove it when every one of them already has it.
+ */
+export function toggleLinePrefix(value: string, start: number, end: number, prefix: string) {
+  const lineStart = value.lastIndexOf("\n", start - 1) + 1;
+  const lineEndIndex = value.indexOf("\n", end);
+  const lineEnd = lineEndIndex === -1 ? value.length : lineEndIndex;
+  const lines = value.slice(lineStart, lineEnd).split("\n");
+  const remove = lines.every((line) => line.startsWith(prefix));
+  const next = lines
+    .map((line) => (remove ? line.slice(prefix.length) : line.startsWith(prefix) ? line : prefix + line))
+    .join("\n");
+  const firstDelta = remove ? -prefix.length : lines[0].startsWith(prefix) ? 0 : prefix.length;
+  return {
+    value: value.slice(0, lineStart) + next + value.slice(lineEnd),
+    start: Math.max(lineStart, start + firstDelta),
+    end: Math.max(lineStart, end + next.length - (lineEnd - lineStart)),
+  };
+}
+
+/** Words in a Markdown body — the same count lib/vault.ts::readingStats() reports. */
+export function countWords(markdown: string) {
+  return markdown
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/[#>*_`|\[\]()!-]/g, " ")
+    .split(/\s+/)
+    .filter(Boolean).length;
+}
+
+/**
+ * Where a rendered block's text starts in the Markdown source, or -1. The
+ * first few words are matched with any whitespace between them, so a
+ * paragraph that Markdown wrapped, linked or emphasised still finds its line.
+ */
+export function sourcePositionFor(markdown: string, renderedText: string) {
+  const words = renderedText.trim().split(/\s+/).filter(Boolean).slice(0, 6);
+  if (words.length === 0) return -1;
+  const pattern = words
+    .map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+    .join("[\\s\\S]{0,40}?");
+  const match = new RegExp(pattern).exec(markdown);
+  return match ? match.index : -1;
 }

@@ -56,3 +56,11 @@ export function gameCount(n: number): Str {
     uk: uk(n, "гра", "гри", "ігор"),
   };
 }
+
+/** "312 words" / "312 слів", for the localhost editor's status line. */
+export function wordCount(n: number): Str {
+  return {
+    en: en(n, "word", "words"),
+    uk: uk(n, "слово", "слова", "слів"),
+  };
+}

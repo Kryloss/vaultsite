@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useLang } from "@/components/useLang";
 import { useDevToolsExpanded } from "@/components/useDevToolsExpanded";
-import { devEditorRequest, DevEditorRequestError } from "@/lib/dev-editor-client";
+import { devEditorRequest, DevEditorRequestError, SIDECAR_OUTDATED } from "@/lib/dev-editor-client";
 import { devUi } from "@/lib/ui-strings";
 
 interface CreatedEntry {
@@ -74,7 +74,9 @@ export default function DevCreateEntry({
     } catch (caught) {
       setError(
         caught instanceof DevEditorRequestError
-          ? caught.message
+          ? caught.code === SIDECAR_OUTDATED
+            ? devUi.devSidecarOutdated[lang]
+            : caught.message
           : devUi.devCreateFailed[lang]
       );
     } finally {

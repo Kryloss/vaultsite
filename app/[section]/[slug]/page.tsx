@@ -580,6 +580,7 @@ export default async function EntryPage({ params }: Props) {
           {en.factsHtml && (
             <div
               className={`prose note-facts${factsCard} mt-8${uk ? " lang-en" : ""}`}
+              data-dev-facts-field="body"
               dangerouslySetInnerHTML={{ __html: en.factsHtml }}
             />
           )}
@@ -587,6 +588,7 @@ export default async function EntryPage({ params }: Props) {
             <div
               className={`prose note-facts${factsCard} mt-8 lang-uk`}
               lang="uk"
+              data-dev-facts-field="body_uk"
               dangerouslySetInnerHTML={{ __html: uk.factsHtml }}
             />
           )}

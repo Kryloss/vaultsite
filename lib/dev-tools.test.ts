@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   completeWikiLink,
+  countWords,
   createDevEditorState,
   devEditorChanges,
   devEditorDirty,
@@ -10,8 +11,11 @@ import {
   isDevToolsAvailable,
   publicPageUrl,
   sourceForLanguage,
+  sourcePositionFor,
+  toggleLinePrefix,
   wikiLinkMatches,
   wikiLinkQuery,
+  wrapSelection,
   type DevFields,
 } from "./dev-tools.ts";
 
@@ -205,4 +209,42 @@ test("wiki-link suggestions match either title, prefixes first, pages only", () 
   assert.deepEqual(wikiLinkMatches(items, "арк").map((item) => item.title), ["Arcane"]);
   assert.equal(wikiLinkMatches(items, "").length, 3);
   assert.equal(wikiLinkMatches(items, "", 1).length, 1);
+});
+
+test("wrapping toggles delimiters and a caret gets a selected placeholder", () => {
+  assert.deepEqual(wrapSelection("say hi now", 4, 6, "**", "**", "bold"), {
+    value: "say **hi** now",
+    start: 6,
+    end: 8,
+  });
+  assert.deepEqual(wrapSelection("say **hi** now", 6, 8, "**", "**", "bold"), {
+    value: "say hi now",
+    start: 4,
+    end: 6,
+  });
+  assert.deepEqual(wrapSelection("say ", 4, 4, "*", "*", "italic"), {
+    value: "say *italic*",
+    start: 5,
+    end: 11,
+  });
+});
+
+test("a line prefix is added to every touched line and removed when all have it", () => {
+  const added = toggleLinePrefix("one\ntwo\nthree", 5, 9, "> ");
+  assert.equal(added.value, "one\n> two\n> three");
+  assert.deepEqual([added.start, added.end], [7, 13]);
+  const removed = toggleLinePrefix(added.value, added.start, added.end, "> ");
+  assert.equal(removed.value, "one\ntwo\nthree");
+  assert.deepEqual([removed.start, removed.end], [5, 9]);
+  assert.equal(toggleLinePrefix("## Title", 3, 3, "## ").value, "Title");
+  assert.equal(toggleLinePrefix("a\n> b", 0, 4, "> ").value, "> a\n> b");
+});
+
+test("word count ignores fences and punctuation; source position finds a block", () => {
+  assert.equal(countWords("# Hi\n\nOne **two** [[three]]\n\n```js\nlet a = 1;\n```\n"), 4);
+  const md = "## Review\n\nThe *second* season is [[Arcane|better]] than\nthe first.\n";
+  assert.equal(sourcePositionFor(md, "The second season is better than the first."), 11);
+  assert.equal(sourcePositionFor(md, "Review"), 3);
+  assert.equal(sourcePositionFor(md, "not in the note"), -1);
+  assert.equal(sourcePositionFor(md, "   "), -1);
 });

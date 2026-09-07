@@ -433,6 +433,34 @@ export const devUi = {
     en: "A rating is a half-star value from 0 to 5.",
     uk: "Оцінка — від 0 до 5 з кроком у пів зірки.",
   },
+  devSidecarOutdated: {
+    en: "The editor sidecar is out of date — restart npm run dev.",
+    uk: "Редактор застарів — перезапустіть npm run dev.",
+  },
+  devDraftRestored: {
+    en: "Restored your unsaved draft.",
+    uk: "Відновлено незбережену чернетку.",
+  },
+  devDraftDropped: {
+    en: "An unsaved draft was discarded because the file changed in Obsidian.",
+    uk: "Незбережену чернетку відкинуто, бо файл змінився в Obsidian.",
+  },
+  devPreviewUnavailable: {
+    en: "Live preview unavailable — the page updates after Save.",
+    uk: "Живий перегляд недоступний — сторінка оновиться після збереження.",
+  },
+  devLivePreview: { en: "Live preview", uk: "Живий перегляд" },
+  devEditorDrawer: { en: "Markdown editor", uk: "Редактор Markdown" },
+  devCloseEditor: { en: "Close the editor (Esc)", uk: "Закрити редактор (Esc)" },
+  devResizeEditor: { en: "Resize the editor", uk: "Змінити висоту редактора" },
+  devBold: { en: "Bold", uk: "Жирний" },
+  devItalic: { en: "Italic", uk: "Курсив" },
+  devLink: { en: "Link", uk: "Посилання" },
+  devHeading: { en: "Heading", uk: "Заголовок" },
+  devQuote: { en: "Quote", uk: "Цитата" },
+  devCallout: { en: "Callout", uk: "Виноска" },
+  devCodeBlock: { en: "Code", uk: "Код" },
+  devListItem: { en: "List", uk: "Список" },
 } satisfies Record<string, Str>;
 
 /**

@@ -4,7 +4,7 @@ import { useEffect, useId, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLang } from "@/components/useLang";
 import { useDevToolsExpanded } from "@/components/useDevToolsExpanded";
-import { devEditorRequest, DevEditorRequestError, fileToBase64 } from "@/lib/dev-editor-client";
+import { devEditorRequest, DevEditorRequestError, fileToBase64, SIDECAR_OUTDATED } from "@/lib/dev-editor-client";
 import { devUi } from "@/lib/ui-strings";
 
 const SAVED_EVENT = "vault-dev-editor-saved";
@@ -100,7 +100,7 @@ export default function DevEntryOptions({
   const [saving, setSaving] = useState(false);
   const [saveState, setStatusState] = useState<"idle" | "saved" | "conflict" | "failed">("idle");
   const [failure, setFailure] = useState<
-    "dirty" | "part" | "seriesUk" | "rating" | "cover" | null
+    "dirty" | "part" | "seriesUk" | "rating" | "cover" | "outdated" | null
   >(null);
 
   useEffect(() => {
@@ -227,7 +227,8 @@ export default function DevEntryOptions({
       setStatusState("saved");
       router.refresh();
     } catch (error) {
-      setFailure(null);
+      const outdated = error instanceof DevEditorRequestError && error.code === SIDECAR_OUTDATED;
+      setFailure(outdated ? "outdated" : null);
       setStatusState(
         error instanceof DevEditorRequestError && error.code === "revision_conflict"
           ? "conflict"
@@ -269,7 +270,8 @@ export default function DevEntryOptions({
       setStatusState("saved");
       router.refresh();
     } catch (error) {
-      setFailure("cover");
+      const outdated = error instanceof DevEditorRequestError && error.code === SIDECAR_OUTDATED;
+      setFailure(outdated ? "outdated" : "cover");
       setStatusState(
         error instanceof DevEditorRequestError && error.code === "revision_conflict"
           ? "conflict"
@@ -287,6 +289,7 @@ export default function DevEntryOptions({
   else if (saveState === "conflict") statusText = devUi.devConflict[lang];
   else if (saveState === "failed") {
     if (failure === "dirty") statusText = devUi.devFinishCurrentEdit[lang];
+    else if (failure === "outdated") statusText = devUi.devSidecarOutdated[lang];
     else if (failure === "part") statusText = devUi.devInvalidPart[lang];
     else if (failure === "seriesUk") statusText = devUi.devSeriesUkRequired[lang];
     else if (failure === "rating") statusText = devUi.devInvalidRating[lang];

@@ -32,6 +32,13 @@ export const EDITABLE_PAGE_KEYS = [
 ];
 
 const MAX_MARKDOWN_BODY = 512 * 1024;
+/**
+ * Bumped whenever the browser and the sidecar stop agreeing on endpoints or
+ * payloads. `/session` reports it and the dock refuses to talk to an older
+ * process with a message that names the fix (restart `npm run dev`) instead
+ * of a 404 dressed up as "could not save". Mirrored in lib/dev-tools.ts.
+ */
+export const EDITOR_PROTOCOL = 2;
 /** One pasted or dropped image. Obsidian pastes are rarely above 3 MiB. */
 const MAX_ASSET_BYTES = 10 * 1024 * 1024;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -1687,5 +1694,99 @@ export async function attachAsset(repoRoot, args) {
     url,
     embed: `![[${fileName}]]`,
     document,
+  };
+}
+
+let markdownPipeline;
+/**
+ * The site's own Markdown pipeline, loaded lazily from TypeScript. Only the
+ * process `npm run dev` starts can do this (scripts/dev.mjs passes the type
+ * stripping and `@/` resolver flags); anywhere else the preview says so and
+ * the editor carries on without it.
+ */
+async function loadMarkdownPipeline() {
+  if (markdownPipeline) return markdownPipeline;
+  try {
+    const [markdown, strings] = await Promise.all([
+      import("../lib/markdown.ts"),
+      import("../lib/ui-strings.ts"),
+    ]);
+    markdownPipeline = { renderWithHeadings: markdown.renderWithHeadings, ui: strings.ui };
+  } catch {
+    throw new DevEditorError(
+      "The live preview needs the sidecar started by `npm run dev`.",
+      501,
+      "preview_unavailable"
+    );
+  }
+  return markdownPipeline;
+}
+
+/** Where a note renders from: its folder inside vault/ and its section's URL slug and type. */
+function renderContext(repoRoot, file) {
+  const realRoot = fs.realpathSync(repoRoot);
+  const vaultRoot = fs.realpathSync(path.join(realRoot, "vault"));
+  const relativeDir = path.relative(vaultRoot, path.dirname(file)).split(path.sep);
+  const sectionFolder = relativeDir[0];
+  let data = {};
+  try {
+    data = matter(fs.readFileSync(path.join(vaultRoot, sectionFolder, "main.md"), "utf8")).data;
+  } catch {
+    /* a folder without main.md renders as a plain posts section */
+  }
+  return {
+    sectionDir: relativeDir.join("/"),
+    sectionSlug: createdEntrySlug(data.slug ?? sectionFolder) || sectionFolder.toLowerCase(),
+    sectionType: typeof data.type === "string" ? data.type : "posts",
+    isSectionPage: path.basename(file).toLowerCase() === "main.md",
+  };
+}
+
+/**
+ * Render a draft body exactly as the page will: same pipeline, same options
+ * app/[section]/[slug]/page.tsx passes, so what the author sees while typing
+ * is what Save produces. Read-only; nothing here touches the vault.
+ */
+export async function previewMarkdown(repoRoot, args) {
+  if (!args || typeof args !== "object" || Array.isArray(args)) {
+    throw new DevEditorError("A preview request must be an object.");
+  }
+  const { source, body, lang } = args;
+  if (lang !== "en" && lang !== "uk") {
+    throw new DevEditorError("A preview is English or Ukrainian.", 400, "invalid_lang");
+  }
+  const markdown = validateMarkdownBody(body);
+  const file = resolveVaultMarkdown(repoRoot, source);
+  if (/(?:\.uk|\.excalidraw)\.md$/i.test(file)) {
+    throw new DevEditorError(
+      "Preview from the note's primary Markdown document.",
+      400,
+      "unsupported_source"
+    );
+  }
+  const { renderWithHeadings, ui } = await loadMarkdownPipeline();
+  const context = renderContext(repoRoot, file);
+  const factTables = context.sectionType === "shelf" || context.sectionType === "music";
+  let rating;
+  if (factTables && !context.isSectionPage) {
+    try {
+      const value = matter(fs.readFileSync(file, "utf8")).data.rating;
+      if (typeof value === "number") rating = value;
+    } catch {
+      /* an unreadable frontmatter simply previews without the rating row */
+    }
+  }
+  const rendered = await renderWithHeadings(markdown, context.sectionDir, context.sectionSlug, {
+    idPrefix: lang === "uk" ? "uk-" : undefined,
+    anchorLabel: ui.headingAnchor[lang],
+    factTables,
+    liftFacts: factTables || context.sectionType === "people",
+    rating,
+    ratingLabel: ui.ratingRow[lang],
+  });
+  return {
+    html: rendered.html,
+    factsHtml: rendered.factsHtml ?? null,
+    headings: rendered.headings.length,
   };
 }
