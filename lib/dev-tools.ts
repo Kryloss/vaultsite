@@ -1,19 +1,30 @@
-export type DevFieldKey =
-  | "title"
-  | "title_uk"
-  | "description"
-  | "description_uk"
-  | "body"
-  | "body_uk";
+/**
+ * Everything a page save can carry: the header, both bodies, and the creator
+ * block (`author*` on the shelf, `artist*` on music — a note writes one
+ * family; the other stays empty and is never written).
+ */
+export const DEV_FIELD_KEYS = [
+  "title",
+  "title_uk",
+  "description",
+  "description_uk",
+  "body",
+  "body_uk",
+  "author",
+  "author_uk",
+  "author_bio",
+  "author_bio_uk",
+  "artist",
+  "artist_uk",
+  "artist_bio",
+  "artist_bio_uk",
+] as const;
+export type DevFieldKey = (typeof DEV_FIELD_KEYS)[number];
+export type DevFields = Record<DevFieldKey, string>;
 
-export interface DevFields {
-  title: string;
-  title_uk: string;
-  description: string;
-  description_uk: string;
-  body: string;
-  body_uk: string;
-}
+export const EMPTY_DEV_FIELDS: DevFields = Object.fromEntries(
+  DEV_FIELD_KEYS.map((key) => [key, ""])
+) as DevFields;
 
 export interface DevEditorState {
   baseline: DevFields;
@@ -33,8 +44,31 @@ export type DevEditorAction =
   | { type: "revision"; revision: string }
   | { type: "restored"; state: DevEditorState };
 
+/** The "More fields" keys, per section type; the sidecar validates each (scripts/dev-editor-core.mjs). */
+export const DEV_EXTRA_FIELDS = [
+  "aliases",
+  "slug",
+  "maturity",
+  "medium",
+  "author",
+  "author_uk",
+  "author_bio",
+  "author_bio_uk",
+  "imdb_id",
+  "video",
+  "uploaded",
+  "artist",
+  "artist_uk",
+  "artist_bio",
+  "artist_bio_uk",
+  "format",
+  "lang",
+  "genres",
+] as const;
+export type DevExtraField = (typeof DEV_EXTRA_FIELDS)[number];
+
 /** Must equal `EDITOR_PROTOCOL` in scripts/dev-editor-core.mjs; the server test checks. */
-export const EDITOR_PROTOCOL = 3;
+export const EDITOR_PROTOCOL = 4;
 
 export function isDevToolsAvailable(environment: string | undefined, hostname: string) {
   return environment === "development" && hostname === "localhost";
@@ -376,4 +410,79 @@ export function appendParagraphRange(body: string) {
   const trimmed = body.replace(/\s+$/, "");
   const prefix = trimmed.length ? `${trimmed}\n\n` : "";
   return { body: `${prefix}\n`, start: prefix.length, end: prefix.length };
+}
+
+/**
+ * A fact table row in a Markdown body — `| Label | Value |` — found by its
+ * rendered label. `plain` says the value carries no Markdown of its own
+ * (links, emphasis, code), so its rendered text IS its source and can be
+ * edited as plain text; anything else should be edited as source.
+ */
+export function findFactRow(body: string, label: string) {
+  const wanted = label.trim().replace(/\s+/g, " ").toLowerCase();
+  if (!wanted) return null;
+  let offset = 0;
+  for (const line of body.split("\n")) {
+    const match = /^(\s*\|\s*)([^|]*?)(\s*\|\s*)(.*?)(\s*\|\s*)$/.exec(line);
+    if (match && match[2].trim().replace(/\s+/g, " ").toLowerCase() === wanted) {
+      const start = offset + match[1].length + match[2].length + match[3].length;
+      const value = match[4];
+      return {
+        start,
+        end: start + value.length,
+        value,
+        plain: !/[\[\]*_`<>\\]|!\[/.test(value),
+      };
+    }
+    offset += line.length + 1;
+  }
+  return null;
+}
+
+/** Write a new plain value into a fact row; `|` in the text is escaped. */
+export function replaceFactValue(body: string, label: string, value: string) {
+  const row = findFactRow(body, label);
+  if (!row) return null;
+  const text = value.replace(/\s*\n+\s*/g, " ").replace(/\|/g, "\\|").trim();
+  return body.slice(0, row.start) + text + body.slice(row.end);
+}
+
+export type RichShape =
+  | { kind: "paragraph"; body: string }
+  | { kind: "line"; prefix: string; body: string }
+  | { kind: "quote"; header: string | null; body: string };
+
+/**
+ * Split a block's source into the part that is written INTO it (the text
+ * the rendered element shows) and the syntax around it: a heading's `## `,
+ * a list item's `- ` or `1. ` or `- [ ] `, a quote's `> ` on every line and,
+ * for a callout, its `> [!kind] Title` header. `joinRichShape` is the exact
+ * inverse; a block is edited in place only when rendering-then-serialising
+ * gives back the body byte for byte.
+ */
+export function splitRichShape(kind: BlockKind, source: string): RichShape | null {
+  // A paragraph's continuation lines may be indented in the source; the
+  // parser drops that indent, so the render cannot give it back. It means
+  // nothing to Markdown, so the comparison and the write-back go without it.
+  if (kind === "paragraph") return { kind: "paragraph", body: source.replace(/\n[ \t]+/g, "\n") };
+  if (kind === "line") {
+    const match = /^(\s*(?:#{1,6}\s+|(?:[-*+]|\d+[.)])\s+(?:\[[ xX]\]\s+)?))(.*)$/s.exec(source);
+    return match ? { kind: "line", prefix: match[1], body: match[2] } : null;
+  }
+  if (kind === "quote") {
+    const lines = source.split("\n");
+    if (!lines.every((line) => /^\s*>/.test(line))) return null;
+    const stripped = lines.map((line) => line.replace(/^\s*> ?/, ""));
+    const header = /^\[!\w[\w-]*\]/.test(stripped[0]) ? stripped[0] : null;
+    const body = (header === null ? stripped : stripped.slice(1)).join("\n");
+    return { kind: "quote", header, body };
+  }
+  return null;
+}
+
+export function joinRichShape(shape: RichShape, body: string) {
+  if (shape.kind === "paragraph") return body;
+  if (shape.kind === "line") return shape.prefix + body;
+  const lines = [...(shape.header === null ? [] : [shape.header]), ...body.split("\n")];
+  return lines.map((line) => (line === "" ? ">" : `> ${line}`)).join("\n");
 }

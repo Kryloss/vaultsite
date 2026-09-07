@@ -39,6 +39,27 @@
   --border: #ededf0;
   --code-bg: #f4f4f5;
 
+  /* ---- The mascot's three tones (components/Mascot.tsx, #158) ----
+     NOTHING RENDERS THE MASCOT TODAY — the character is built and parked, and
+     these are kept with it so the next thing that uses it needs no new tokens.
+     Greys, all of them, so #64 stands — there is no colour here.
+
+     Only these two are derived, and deliberately: `--mascot-mid` is the ink
+     mixed toward the page, which is why ONE formula covers both themes. It
+     lightens near-black ink on the white page and darkens near-white ink on
+     the dark one, so the mouth is a grey against the body either way and the
+     dark block below needs no copy of it. It is built from `--mascot-ink`
+     rather than from `--text` so that a control which quietens the character
+     — the resume-reading chip does — takes the mouth down with it.
+
+     `--mascot-line` is #ffffff in BOTH themes at the owner's request. What it
+     has to separate is the mouth from the face, and white does that on either
+     page; on the light page the ring drawn in it is invisible against `--bg`,
+     which is the accepted cost. Change it here, not in the component. */
+  --mascot-ink: var(--text);
+  --mascot-mid: color-mix(in srgb, var(--mascot-ink) 76%, var(--bg));
+  --mascot-line: #ffffff;
+
   /* ---- The flag, and the only colour on the page that isn't a callout ----
      Used by ONE line, on eight days a year (`.observance` at the foot of this
      file, components/ResistanceDay.tsx). It is not an accent token and must
@@ -4064,6 +4085,28 @@ a.series-link:hover {
   transition: transform var(--dur-slow) var(--ease);
 }
 
+/* The "New" mark rides the PORTRAIT here, not the name (components/NewBadge.tsx,
+   variant="cover"). It keeps the shelf badge's scrim material — set far above
+   with `.shelf-status` — and only moves corner: that rule pins the mark
+   top-right, and this is BELOW it, which is how an override wins in a file
+   with no `@layer`.
+
+   Bottom-left is the one corner free in both compositions. Above 640px the
+   name panel overlaps the portrait's right edge; below it, the panel becomes a
+   small name card in the portrait's TOP-RIGHT. A top-right mark would sit
+   under one or collide with the other, and the mark is the smaller thing, so
+   the mark moves. `.person-card-art` is already `position: relative`, so this
+   needs no new positioning context.
+
+   `top`/`right` are reset rather than left to cascade: the shared rule sets
+   both, and an absolute box given all four edges would stretch, not move. */
+.person-card-art .cover-new {
+  top: auto;
+  right: auto;
+  bottom: 0.5rem;
+  left: 0.5rem;
+}
+
 /* The panel is a LATER SIBLING than the portrait and still paints behind it
    without this: an `<img>` paints in a later layer than a sibling's
    background. `position: relative` + a z-index of its own is what puts it in
@@ -5061,23 +5104,43 @@ svg.diagram tspan {
   gap: 0.5rem;
 }
 
-.dev-dock-bar,
 .dev-editor-panel {
   background: var(--chrome-bg);
   box-shadow: inset 0 0 0 1px var(--chrome-ring);
   backdrop-filter: blur(14px);
 }
 
+/* The corner pencil and the reading pill take turns in the same corner, so
+   they are one object at a glance: the same box and the same ring. The height
+   is `.time-left`'s, spelled as the arithmetic that makes it — its 0.8125rem
+   text at 1.5 plus its 0.4375rem padding, top and bottom — so the two cannot
+   drift apart silently, and the fill, ring and blur are that pill's own. This
+   is chrome material on a small round control, which is not the same thing as
+   the grey plate the tools bar used to lie under. */
+:root {
+  --corner-pill-h: calc(0.8125rem * 1.5 + 0.875rem);
+}
+
 .dev-dock-bar {
   display: flex;
   width: max-content;
-  max-width: 2.75rem;
+  max-width: var(--corner-pill-h);
   align-items: center;
   gap: 0.125rem;
   overflow: hidden;
-  padding: 0.25rem 0.375rem;
+  padding: 0;
   border-radius: var(--r-full);
+  background: var(--chrome-bg);
+  box-shadow: inset 0 0 0 1px var(--chrome-ring);
+  backdrop-filter: blur(12px);
   transition: max-width var(--dur-slow) var(--ease);
+}
+
+/* The button fills the ring, so the whole pill is the target. */
+.dev-dock .dev-tool-button {
+  width: var(--corner-pill-h);
+  height: var(--corner-pill-h);
+  flex-basis: var(--corner-pill-h);
 }
 
 .dev-dock[data-expanded] .dev-dock-bar {
@@ -5257,7 +5320,7 @@ svg.diagram tspan {
   border-radius: var(--r-md);
   padding: 0.25rem 0.4375rem;
   color: var(--text);
-  background: var(--bg-hover);
+  box-shadow: inset 0 0 0 1px var(--border);
 }
 
 /* Editability is revealed only while the dock is open. It costs no layout and
@@ -5265,10 +5328,6 @@ svg.diagram tspan {
 html[data-dev-tools] [data-dev-field-en] {
   border-radius: var(--r-xs);
   cursor: text;
-}
-
-html[data-dev-tools] [data-dev-field-en]:hover {
-  box-shadow: 0 0 0 1px var(--text-tertiary);
 }
 
 html[data-dev-tools] [data-dev-inline-editable] {
@@ -5284,9 +5343,7 @@ html[data-dev-tools] [data-dev-inline-editable]:empty::before {
 }
 
 html[data-dev-tools] [data-dev-inline-editable]:focus {
-  box-shadow:
-    0 0 0 1px var(--text-tertiary),
-    0 0 0 3px color-mix(in srgb, var(--text) 8%, transparent);
+  box-shadow: none;
 }
 
 /* Rendered prose is a preview, not a lossless editing format. Selecting it
@@ -5300,28 +5357,94 @@ html[data-dev-tools] [data-dev-body-ready] {
   cursor: text;
 }
 
-html[data-dev-tools] [data-dev-body-ready]:hover:not([data-dev-body-live]),
-html[data-dev-tools] [data-dev-body-ready]:focus-visible:not([data-dev-body-live]) {
-  outline: 1px solid var(--text-tertiary);
-  outline-offset: 0.375rem;
+html[data-dev-tools] [data-dev-body-ready]:focus-visible {
+  outline: none;
 }
 
-/* The article being edited: a quiet, steady outline — the thing itself does
-   not change. */
-html[data-dev-tools] [data-dev-body-live] {
-  outline: 1px dashed var(--text-tertiary);
-  outline-offset: 0.375rem;
+/* The article being edited carries `data-dev-body-live` for the hover rule
+   above to stand down; it draws nothing of its own — the text is the view. */
+
+/* A block being edited in place: its Markdown in a textarea standing where
+   the block was, in the prose's own type, the block itself hidden. */
+[data-dev-block-hidden] {
+  display: none !important;
 }
 
-/* Room under the page for the drawer, and the dock rides up above it. */
-html[data-dev-editing] body {
-  padding-bottom: calc(var(--dev-drawer-h, 22.5rem) + 1rem);
+.dev-block-mount {
+  position: relative;
+  margin: 1.25em 0;
 }
 
-html[data-dev-editing] .dev-dock {
-  bottom: calc(var(--dev-drawer-h, 22.5rem) + max(0.75rem, env(safe-area-inset-bottom)));
+/* The source field for a block that cannot be edited as itself: no frame,
+   only the monospace type says it is source. */
+.dev-block-editor {
+  display: block;
+  box-sizing: border-box;
+  width: calc(100% + 1.25rem);
+  min-height: 2.5em;
+  overflow: hidden;
+  resize: none;
+  margin: 0 -0.625rem;
+  border: 0;
+  border-radius: var(--r-md);
+  padding: 0.375rem 0.625rem;
+  outline: none;
+  background: color-mix(in srgb, var(--surface) 60%, transparent);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.875em;
+  line-height: inherit;
+  color: inherit;
+  caret-color: var(--text);
 }
 
+.dev-block-editor::placeholder {
+  color: var(--text-tertiary);
+}
+
+/* A block edited in its own place looks exactly as it did: the caret is the
+   only sign. The hover ring is the article's, not the block's. */
+html[data-dev-tools] [data-dev-rich] {
+  outline: none;
+  caret-color: var(--text);
+}
+
+html[data-dev-tools] [data-dev-rich] [contenteditable="false"] {
+  user-select: none;
+}
+
+.dev-block-mount .dev-link-menu {
+  top: 100%;
+  right: 0;
+  left: 0;
+  margin-top: 0.375rem;
+}
+
+/* Room under the page for the bar, whatever its height (measured into
+   `--dev-bar-h`: the toolbar wraps on a phone, and source mode is taller),
+   and the dock rides up above it. */
+html[data-dev-bar] body {
+  padding-bottom: calc(var(--dev-bar-h, 4rem) + 1rem);
+}
+
+html[data-dev-bar] .dev-dock {
+  bottom: calc(var(--dev-bar-h, 4rem) + max(0.75rem, env(safe-area-inset-bottom)));
+}
+
+/* A fact value being edited where it renders: the cell is the field. */
+html[data-dev-tools] [data-dev-fact] {
+  border-radius: var(--r-xs);
+  cursor: text;
+}
+
+html[data-dev-tools] [data-dev-fact]:focus {
+  outline: none;
+  caret-color: var(--text);
+}
+
+/* The bar is the reading pill's material too — same fill, same 12px blur,
+   and the top hairline standing in for the pill's ring, since a full inset
+   ring on something pinned to three window edges would just draw lines along
+   them. The dock is one set of chrome, not three. */
 .dev-editor-drawer {
   position: fixed;
   right: 0;
@@ -5330,13 +5453,10 @@ html[data-dev-editing] .dev-dock {
   z-index: 29;
   display: flex;
   flex-direction: column;
-  min-height: 11.25rem;
   max-height: 80vh;
   background: var(--chrome-bg);
-  box-shadow:
-    0 -1px 0 var(--chrome-ring),
-    0 -12px 32px color-mix(in srgb, var(--text) 6%, transparent);
-  backdrop-filter: blur(14px);
+  box-shadow: 0 -1px 0 var(--chrome-ring);
+  backdrop-filter: blur(12px);
 }
 
 .dev-editor-drawer-handle {
@@ -5366,11 +5486,255 @@ html[data-dev-editing] .dev-dock {
 
 .dev-editor-drawer-inner {
   display: flex;
-  width: min(100%, 64rem);
+  width: 100%;
   min-height: 0;
   flex: 1;
   flex-direction: column;
+}
+
+.dev-editor-drawer[data-mode="source"] {
+  min-height: 11.25rem;
+}
+
+/* The page row: what the floating dock used to hold — open/close, the
+   public link, Obsidian, translation, undo/redo, language, cancel, save —
+   plus the Page options toggle and the status line. */
+.dev-bar-row {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.125rem;
+  padding: 0.375rem 0.625rem 0.25rem;
+}
+
+/* One row, the full width of the window: tools, then the page's controls,
+   the close pencil last. It never wraps; a window too narrow for it scrolls
+   the row sideways, and the status line gives way first. */
+.dev-bar-row {
+  flex-wrap: nowrap;
+  justify-content: center;
+  padding: 0.375rem 0.5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.dev-bar-row::-webkit-scrollbar {
+  display: none;
+}
+
+.dev-bar-row > * {
+  flex-shrink: 0;
+}
+
+.dev-bar-row > .dev-bar-status {
+  flex: 0 0 auto;
+  margin-left: 0;
+}
+
+/* A message: bottom right, just above the bar, until dismissed. Its hover
+   text says what to do about it. */
+.dev-toast {
+  position: fixed;
+  right: max(0.75rem, env(safe-area-inset-right));
+  bottom: calc(var(--dev-bar-h, 4rem) + max(0.75rem, env(safe-area-inset-bottom)));
+  z-index: 31;
+  display: flex;
+  max-width: min(24rem, calc(100vw - 1.5rem));
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: var(--r-lg);
+  padding: 0.5rem 0.5rem 0.5rem 0.75rem;
+  background: var(--chrome-bg);
+  box-shadow: inset 0 0 0 1px var(--chrome-ring);
+  backdrop-filter: blur(14px);
+  font-size: 0.8125rem;
+  color: var(--text);
+  animation: item-in 0.28s var(--ease) both;
+}
+
+.dev-toast-text {
+  min-width: 0;
+}
+
+.dev-toast-close {
+  display: inline-flex;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex: 0 0 1.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-md);
+  color: var(--text-tertiary);
+}
+
+.dev-toast-close:hover {
+  color: var(--text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dev-toast {
+    animation: none;
+  }
+}
+
+.dev-bar-row > .dev-tool-button {
+  width: 1.75rem;
+  height: 1.75rem;
+  flex-basis: 1.75rem;
+}
+
+.dev-bar-help {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--r-md);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.dev-bar-help:hover {
+  color: var(--text);
+}
+
+/* The corner pencil sits where a post's time-left pill sits. While the
+   collapsed pencil is there (development only) the pill steps one pencil to
+   the left of it; while the bar is open the pill rides above the bar. */
+body:has(.dev-dock) .time-left {
+  right: calc(max(0.75rem, env(safe-area-inset-right)) + var(--corner-pill-h) + 0.75rem);
+}
+
+html[data-dev-bar] .time-left {
+  bottom: calc(var(--dev-bar-h, 4rem) + max(0.75rem, env(safe-area-inset-bottom)));
+}
+
+.dev-bar-options {
+  height: 1.75rem;
+  border-radius: var(--r-md);
+  padding: 0 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.dev-bar-options:hover {
+  color: var(--text);
+}
+
+.dev-bar-options[aria-expanded="true"] {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+
+.dev-bar-status {
+  display: inline-flex;
+  min-width: 0;
+  flex: 1 1 4rem;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.375rem;
+  margin-left: auto;
+  padding: 0 0.375rem;
+  overflow: hidden;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.dev-bar-status:empty {
+  display: none;
+}
+
+/* Page options, above the rows, as tall as the form up to most of the
+   screen, then scrolling. */
+.dev-bar-panel {
+  max-height: min(60vh, 32rem);
+  overflow-y: auto;
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 0.625rem;
+}
+
+.dev-bar-panel[hidden] {
+  display: none;
+}
+
+.dev-bar-panel {
+  padding: 0.5rem 0.625rem;
+}
+
+.dev-bar-panel .dev-entry-options-form {
+  max-width: 56rem;
   margin: 0 auto;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  gap: 0.375rem 0.5rem;
+}
+
+/* Compact: three columns of short fields from 40rem, small type, low
+   boxes; only the wide fields (descriptions, categories) span. */
+@media (min-width: 40rem) {
+  .dev-bar-panel .dev-entry-options-form {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.dev-bar-panel .dev-entry-options-form > label:not(.dev-entry-draft) {
+  gap: 0.125rem;
+  font-size: 0.6875rem;
+}
+
+.dev-bar-panel .dev-entry-options-form input[type="text"],
+.dev-bar-panel .dev-entry-options-form input:not([type]),
+.dev-bar-panel .dev-entry-options-form input[type="number"],
+.dev-bar-panel .dev-entry-options-form input[type="date"],
+.dev-bar-panel .dev-entry-options-form select {
+  height: 1.75rem;
+  padding: 0 0.4375rem;
+  font-size: 0.8125rem;
+}
+
+.dev-bar-panel .dev-entry-options-form > label > textarea,
+.dev-bar-panel .dev-entry-more-grid textarea {
+  min-height: 2.125rem;
+  padding: 0.25rem 0.4375rem;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+}
+
+.dev-bar-panel .dev-entry-options-form small {
+  display: none;
+}
+
+.dev-bar-panel .dev-entry-draft {
+  font-size: 0.75rem;
+}
+
+.dev-bar-panel .dev-entry-more-grid {
+  gap: 0.375rem 0.5rem;
+  margin-top: 0.25rem;
+}
+
+@media (min-width: 40rem) {
+  .dev-bar-panel .dev-entry-more-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.dev-bar-panel .dev-entry-more-grid > label {
+  gap: 0.125rem;
+  font-size: 0.6875rem;
+}
+
+.dev-bar-panel .dev-entry-options-actions {
+  min-height: 1.75rem;
+}
+
+.dev-bar-panel .dev-entry-options-actions button {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
 }
 
 .dev-editor-toolbar {
@@ -5379,7 +5743,214 @@ html[data-dev-editing] .dev-dock {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.125rem;
-  padding: 0 0.625rem 0.375rem;
+  padding: 0.375rem 0.625rem;
+}
+
+.dev-editor-drawer[data-mode="source"] .dev-editor-toolbar {
+  padding-top: 0;
+}
+
+.dev-editor-toolbar > button[aria-pressed="true"] {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+
+.dev-editor-hint {
+  white-space: normal;
+}
+
+/* The callout picker: a select dressed as one of the tool buttons. */
+.dev-callout-menu {
+  display: inline-flex;
+}
+
+.dev-callout-menu select {
+  height: 1.75rem;
+  border: 0;
+  border-radius: var(--r-md);
+  padding: 0 0.4375rem;
+  background: transparent;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  appearance: none;
+}
+
+.dev-callout-menu select:hover:not(:disabled) {
+  color: var(--text);
+}
+
+.dev-callout-menu select:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* Textareas in the options form (descriptions) share the inputs' box. */
+.dev-entry-options-form > label > textarea {
+  width: 100%;
+  min-height: 3.25rem;
+  resize: vertical;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 0.375rem 0.5625rem;
+  outline: none;
+  background: var(--bg);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.dev-entry-options-form > label > textarea:focus {
+  border-color: var(--text-tertiary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+/* Hover descriptions for the tools. A pseudo-element, not a title: it shows
+   at once, reads in the site's type, and works on focus for the keyboard. */
+[data-tip] {
+  position: relative;
+}
+
+[data-tip]:hover::after,
+[data-tip]:focus-visible::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 0.5rem);
+  left: 0;
+  z-index: 2;
+  width: max-content;
+  max-width: 18rem;
+  border-radius: var(--r-md);
+  padding: 0.375rem 0.5rem;
+  background: var(--text);
+  font-family: var(--font-sans, inherit);
+  font-size: 0.75rem;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.35;
+  text-align: left;
+  white-space: normal;
+  color: var(--bg);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--text) 12%, transparent);
+  pointer-events: none;
+}
+
+[data-tip][data-tip-align="end"]:hover::after,
+[data-tip][data-tip-align="end"]:focus-visible::after {
+  right: 0;
+  left: auto;
+}
+
+/* ...but never inside the bar. A plate appearing under the pointer is the
+   grey wash this dock is built without, and `.dev-bar-row` clips its own
+   overflow, so a tool on the top row swallowed its box while one on a wrapped
+   second row painted it over the row above — the same control answering a
+   hover two different ways. `aria-label` names every tool either way, and the
+   toast keeps its help text because it floats clear of the bar. */
+.dev-editor-drawer [data-tip]:hover::after,
+.dev-editor-drawer [data-tip]:focus-visible::after {
+  content: none;
+}
+
+.dev-entry-delete {
+  margin-right: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 0.375rem 0.625rem;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.dev-entry-delete:hover:not(:disabled) {
+  border-color: var(--text-tertiary);
+  color: var(--text);
+}
+
+.dev-entry-options-actions .dev-entry-delete {
+  background: transparent;
+}
+
+.dev-entry-options-actions .dev-entry-delete:hover:not(:disabled) {
+  background: transparent;
+}
+
+.dev-entry-more {
+  grid-column: 1 / -1;
+}
+
+.dev-entry-more > summary {
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.dev-entry-more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.dev-entry-more > summary::before {
+  content: "+";
+  display: inline-block;
+  width: 0.875rem;
+}
+
+.dev-entry-more[open] > summary::before {
+  content: "−";
+}
+
+.dev-entry-more-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.625rem;
+  margin-top: 0.5rem;
+}
+
+/* One column on a phone: two 160px fields with a date picker and a Today
+   button between them were not fields any more. */
+@media (max-width: 479px) {
+  .dev-entry-options-form,
+  .dev-entry-more-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dev-entry-options-form > label:not(.dev-entry-draft),
+  .dev-entry-more-grid > label {
+    grid-column: 1 / -1;
+  }
+}
+
+.dev-entry-more-grid > label {
+  display: grid;
+  min-width: 0;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.dev-entry-more-grid textarea {
+  width: 100%;
+  min-height: 3.25rem;
+  resize: vertical;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 0.375rem 0.5625rem;
+  outline: none;
+  background: var(--bg);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.dev-entry-more-grid textarea:focus {
+  border-color: var(--text-tertiary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--text) 8%, transparent);
 }
 
 .dev-editor-toolbar > button {
@@ -5395,8 +5966,8 @@ html[data-dev-editing] .dev-dock {
   color: var(--text-secondary);
 }
 
+/* Hover and pressed states are a change of ink, never a grey wash. */
 .dev-editor-toolbar > button:hover:not(:disabled) {
-  background: var(--bg-hover);
   color: var(--text);
 }
 

@@ -1,13 +1,29 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { useLang } from "@/components/useLang";
 import { useDevToolsExpanded } from "@/components/useDevToolsExpanded";
 import { devEditorRequest, DevEditorRequestError, fileToBase64, SIDECAR_OUTDATED } from "@/lib/dev-editor-client";
 import { devUi } from "@/lib/ui-strings";
+import { DEV_EXTRA_FIELDS, type DevExtraField } from "@/lib/dev-tools";
 
 const SAVED_EVENT = "vault-dev-editor-saved";
+const LIST_FIELDS = new Set<DevExtraField>(["aliases", "genres", "lang"]);
+
+interface DeletedEntry {
+  pathname: string;
+}
+
+function listValue(value: string) {
+  const out: string[] = [];
+  for (const item of value.split(",")) {
+    const trimmed = item.trim();
+    if (trimmed && !out.includes(trimmed)) out.push(trimmed);
+  }
+  return out;
+}
 
 /**
  * The words lib/shelf.ts reads for each state, chosen by the medium's verb:
@@ -56,12 +72,17 @@ function categoryList(value: string) {
 export default function DevEntryOptions({
   source,
   sectionType,
+  title: initialTitle,
+  titleUk: initialTitleUk,
+  description: initialDescription,
+  descriptionUk: initialDescriptionUk,
   medium,
   draft: initialDraft,
   date: initialDate,
   status: initialStatus,
   rating: initialRating,
   cover: initialCover,
+  fields: initialFields,
   categories: initialCategories,
   series: initialSeries,
   seriesUk: initialSeriesUk,
@@ -71,12 +92,17 @@ export default function DevEntryOptions({
 }: {
   source: string;
   sectionType: string;
+  title: string;
+  titleUk?: string;
+  description?: string;
+  descriptionUk?: string;
   medium?: string;
   draft: boolean;
   date?: string;
   status?: string;
   rating?: number;
   cover?: string;
+  fields: Record<string, string>;
   categories: string[];
   series?: string;
   seriesUk?: string;
@@ -89,10 +115,32 @@ export default function DevEntryOptions({
   const expanded = useDevToolsExpanded();
   const id = useId().replace(/:/g, "");
   const [draft, setDraft] = useState(initialDraft);
+  const [title, setTitle] = useState(initialTitle);
+  const [titleUk, setTitleUk] = useState(initialTitleUk ?? "");
+  const [description, setDescription] = useState(initialDescription ?? "");
+  const [descriptionUk, setDescriptionUk] = useState(initialDescriptionUk ?? "");
   const [date, setDate] = useState(initialDate ?? "");
   const [status, setStatus] = useState(initialStatus ?? "");
   const [rating, setRating] = useState(initialRating == null ? "" : String(initialRating));
   const [coverBusy, setCoverBusy] = useState(false);
+  const [fields, setFields] = useState<Record<string, string>>(initialFields);
+  const [mount, setMount] = useState<HTMLElement | null>(null);
+
+  // The form renders inside the dock's bottom bar, through a mount the bar
+  // provides while it is open; found by watching for it, since the bar is a
+  // sibling island that mounts on its own schedule.
+  useEffect(() => {
+    if (!expanded) return;
+    const find = () => {
+      const next = document.querySelector<HTMLElement>("[data-dev-options-mount]");
+      setMount((current) => (current === next ? current : next));
+    };
+    find();
+    const observer = new MutationObserver(find);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [expanded]);
+  const [deleting, setDeleting] = useState(false);
   const [categories, setCategories] = useState(initialCategories.join(", "));
   const [series, setSeries] = useState(initialSeries ?? "");
   const [seriesUk, setSeriesUk] = useState(initialSeriesUk ?? "");
@@ -100,15 +148,21 @@ export default function DevEntryOptions({
   const [saving, setSaving] = useState(false);
   const [saveState, setStatusState] = useState<"idle" | "saved" | "conflict" | "failed">("idle");
   const [failure, setFailure] = useState<
-    "dirty" | "part" | "seriesUk" | "rating" | "cover" | "outdated" | null
+    "dirty" | "part" | "seriesUk" | "rating" | "cover" | "outdated" | "delete" | "title" | null
   >(null);
+  const [failureText, setFailureText] = useState<string | null>(null);
 
   useEffect(() => {
     if (saving) return;
     setDraft(initialDraft);
+    setTitle(initialTitle);
+    setTitleUk(initialTitleUk ?? "");
+    setDescription(initialDescription ?? "");
+    setDescriptionUk(initialDescriptionUk ?? "");
     setDate(initialDate ?? "");
     setStatus(initialStatus ?? "");
     setRating(initialRating == null ? "" : String(initialRating));
+    setFields(initialFields);
     setCategories(initialCategories.join(", "));
     setSeries(initialSeries ?? "");
     setSeriesUk(initialSeriesUk ?? "");
@@ -116,7 +170,12 @@ export default function DevEntryOptions({
   }, [
     initialCategories,
     initialDate,
+    initialDescription,
+    initialDescriptionUk,
     initialDraft,
+    initialFields,
+    initialTitle,
+    initialTitleUk,
     initialPart,
     initialRating,
     initialSeries,
@@ -125,7 +184,7 @@ export default function DevEntryOptions({
     saving,
   ]);
 
-  if (!expanded) return null;
+  if (!expanded || !mount) return null;
 
   const supportsCategories = ["posts", "people", "shelf"].includes(sectionType);
   const supportsSeries = sectionType === "posts";
@@ -135,6 +194,7 @@ export default function DevEntryOptions({
   const knownStatus = ["", words.progress, words.queued].includes(status);
   const touch = () => {
     setFailure(null);
+    setFailureText(null);
     setStatusState("idle");
   };
   const existingSeries = seriesOptions.find(
@@ -170,6 +230,11 @@ export default function DevEntryOptions({
       setStatusState("failed");
       return;
     }
+    if (!title.trim()) {
+      setFailure("title");
+      setStatusState("failed");
+      return;
+    }
     const ratingNumber = rating.trim() ? Number(rating) : null;
     if (
       supportsShelf &&
@@ -193,9 +258,31 @@ export default function DevEntryOptions({
         published: null,
         date: date.trim() || null,
       };
+      // The header fields are also the dock's inline fields; changed here,
+      // the dock is told to re-read the page (`reload`) once the save lands.
+      const headerChanged =
+        title !== initialTitle ||
+        titleUk !== (initialTitleUk ?? "") ||
+        description !== (initialDescription ?? "") ||
+        descriptionUk !== (initialDescriptionUk ?? "");
+      if (headerChanged) {
+        changes.title = title.trim();
+        changes.title_uk = titleUk.trim() || null;
+        changes.description = description.trim() || null;
+        changes.description_uk = descriptionUk.trim() || null;
+      }
       if (supportsShelf) {
         changes.status = status.trim() || null;
         changes.rating = ratingNumber;
+      }
+      for (const key of DEV_EXTRA_FIELDS) {
+        if (!(key in fields) || fields[key] === initialFields[key]) continue;
+        const value = fields[key].trim();
+        changes[key] = LIST_FIELDS.has(key)
+          ? listValue(value).length
+            ? listValue(value)
+            : null
+          : value || null;
       }
       if (supportsSeries) {
         changes.series = series.trim() || null;
@@ -222,13 +309,22 @@ export default function DevEntryOptions({
         changes,
       });
       window.dispatchEvent(
-        new CustomEvent(SAVED_EVENT, { detail: { source, revision: saved.revision } })
+        new CustomEvent(SAVED_EVENT, {
+          detail: { source, revision: saved.revision, reload: headerChanged },
+        })
       );
       setStatusState("saved");
       router.refresh();
     } catch (error) {
       const outdated = error instanceof DevEditorRequestError && error.code === SIDECAR_OUTDATED;
       setFailure(outdated ? "outdated" : null);
+      // The sidecar's own words for a field it refused ("A slug is
+      // lowercase…"), since the form cannot know every rule.
+      setFailureText(
+        error instanceof DevEditorRequestError && error.code?.startsWith("invalid_")
+          ? error.message
+          : null
+      );
       setStatusState(
         error instanceof DevEditorRequestError && error.code === "revision_conflict"
           ? "conflict"
@@ -282,6 +378,46 @@ export default function DevEntryOptions({
     }
   };
 
+  const remove = async () => {
+    if (deleting) return;
+    if (document.documentElement.hasAttribute("data-dev-dirty")) {
+      setFailure("dirty");
+      setStatusState("failed");
+      return;
+    }
+    if (!window.confirm(devUi.devDeleteConfirm[lang])) return;
+    setDeleting(true);
+    setFailure(null);
+    setFailureText(null);
+    setStatusState("idle");
+    try {
+      const opened = await devEditorRequest<DocumentPayload>("document", { source });
+      const deleted = await devEditorRequest<DeletedEntry>("delete-entry", {
+        source,
+        revision: opened.revision,
+      });
+      // The route is gone; a full navigation lets Next forget it.
+      window.location.assign(deleted.pathname);
+    } catch (error) {
+      const outdated = error instanceof DevEditorRequestError && error.code === SIDECAR_OUTDATED;
+      setFailure(outdated ? "outdated" : "delete");
+      setStatusState("failed");
+      setDeleting(false);
+    }
+  };
+
+  const field = (key: DevExtraField) => ({
+    value: fields[key] ?? "",
+    onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+      const value = event.target.value;
+      setFields((current) => ({ ...current, [key]: value }));
+      touch();
+    },
+  });
+  const isVideo = medium === "video";
+  const isScreen = medium === "movie" || medium === "show";
+  const supportsMusic = sectionType === "music";
+
   let statusText: string | null = null;
   if (saveState === "saved") {
     statusText = (failure === "cover" ? devUi.devCoverSaved : devUi.devOptionsSaved)[lang];
@@ -289,18 +425,34 @@ export default function DevEntryOptions({
   else if (saveState === "conflict") statusText = devUi.devConflict[lang];
   else if (saveState === "failed") {
     if (failure === "dirty") statusText = devUi.devFinishCurrentEdit[lang];
+    else if (failure === "title") statusText = devUi.devTitleRequired[lang];
     else if (failure === "outdated") statusText = devUi.devSidecarOutdated[lang];
     else if (failure === "part") statusText = devUi.devInvalidPart[lang];
     else if (failure === "seriesUk") statusText = devUi.devSeriesUkRequired[lang];
     else if (failure === "rating") statusText = devUi.devInvalidRating[lang];
     else if (failure === "cover") statusText = devUi.devCoverFailed[lang];
-    else statusText = devUi.devOptionsFailed[lang];
+    else if (failure === "delete") statusText = devUi.devDeleteFailed[lang];
+    else statusText = failureText ?? devUi.devOptionsFailed[lang];
   }
 
-  return (
-    <details className="dev-entry-options">
-      <summary className="press">{devUi.devPageOptions[lang]}</summary>
+  return createPortal(
       <form className="dev-entry-options-form" onSubmit={save}>
+        <label>
+          <span>{devUi.devTitleEn[lang]}</span>
+          <input value={title} maxLength={300} onChange={(event) => { setTitle(event.target.value); touch(); }} />
+        </label>
+        <label>
+          <span>{devUi.devTitleUk[lang]}</span>
+          <input value={titleUk} maxLength={300} lang="uk" onChange={(event) => { setTitleUk(event.target.value); touch(); }} />
+        </label>
+        <label className="dev-entry-options-wide">
+          <span>{devUi.devDescriptionEn[lang]}</span>
+          <textarea value={description} rows={2} maxLength={4000} onChange={(event) => { setDescription(event.target.value); touch(); }} />
+        </label>
+        <label className="dev-entry-options-wide">
+          <span>{devUi.devDescriptionUk[lang]}</span>
+          <textarea value={descriptionUk} rows={2} maxLength={4000} lang="uk" onChange={(event) => { setDescriptionUk(event.target.value); touch(); }} />
+        </label>
         <label className="dev-entry-draft">
           <input
             type="checkbox"
@@ -476,13 +628,135 @@ export default function DevEntryOptions({
           </>
         )}
 
+        <details className="dev-entry-more dev-entry-options-wide">
+          <summary className="press">{devUi.devMoreFields[lang]}</summary>
+          <div className="dev-entry-more-grid">
+            <label className="dev-entry-options-wide">
+              <span>{devUi.devAliases[lang]}</span>
+              <input {...field("aliases")} placeholder={devUi.devAliasesHint[lang]} maxLength={2000} />
+            </label>
+            <label>
+              <span>{devUi.devSlug[lang]}</span>
+              <input {...field("slug")} maxLength={120} spellCheck={false} />
+              <small>{devUi.devSlugHint[lang]}</small>
+            </label>
+            {sectionType === "posts" && (
+              <label>
+                <span>{devUi.devMaturity[lang]}</span>
+                <select {...field("maturity")}>
+                  <option value="">{devUi.devAutomatic[lang]}</option>
+                  <option value="seedling">seedling</option>
+                  <option value="budding">budding</option>
+                  <option value="evergreen">evergreen</option>
+                </select>
+              </label>
+            )}
+            {supportsShelf && (
+              <>
+                <label>
+                  <span>{devUi.devMediumField[lang]}</span>
+                  <select {...field("medium")}>
+                    <option value="">{devUi.devAutomatic[lang]}</option>
+                    <option value="book">{devUi.devBook[lang]}</option>
+                    <option value="movie">{devUi.devMovie[lang]}</option>
+                    <option value="show">{devUi.devShow[lang]}</option>
+                    <option value="video">{devUi.devVideo[lang]}</option>
+                    <option value="game">{devUi.devGame[lang]}</option>
+                  </select>
+                </label>
+                <label>
+                  <span>{devUi.devCreator[lang]}</span>
+                  <input {...field("author")} maxLength={200} />
+                </label>
+                <label>
+                  <span>{devUi.devCreatorUk[lang]}</span>
+                  <input {...field("author_uk")} maxLength={200} lang="uk" />
+                </label>
+                <label className="dev-entry-options-wide">
+                  <span>{devUi.devCreatorBio[lang]}</span>
+                  <textarea {...field("author_bio")} rows={2} maxLength={4000} />
+                </label>
+                <label className="dev-entry-options-wide">
+                  <span>{devUi.devCreatorBioUk[lang]}</span>
+                  <textarea {...field("author_bio_uk")} rows={2} maxLength={4000} lang="uk" />
+                </label>
+                {isScreen && (
+                  <label>
+                    <span>{devUi.devImdbId[lang]}</span>
+                    <input {...field("imdb_id")} maxLength={20} placeholder="tt0137523" spellCheck={false} />
+                    <small>{devUi.devImdbIdHint[lang]}</small>
+                  </label>
+                )}
+                {isVideo && (
+                  <>
+                    <label className="dev-entry-options-wide">
+                      <span>{devUi.devVideoUrl[lang]}</span>
+                      <input {...field("video")} type="url" inputMode="url" maxLength={400} placeholder="https://…" />
+                    </label>
+                    <label>
+                      <span>{devUi.devUploaded[lang]}</span>
+                      <input {...field("uploaded")} type="date" />
+                    </label>
+                  </>
+                )}
+              </>
+            )}
+            {supportsMusic && (
+              <>
+                <label>
+                  <span>{devUi.devArtist[lang]}</span>
+                  <input {...field("artist")} maxLength={200} />
+                </label>
+                <label>
+                  <span>{devUi.devArtistUk[lang]}</span>
+                  <input {...field("artist_uk")} maxLength={200} lang="uk" />
+                </label>
+                <label className="dev-entry-options-wide">
+                  <span>{devUi.devArtistBio[lang]}</span>
+                  <textarea {...field("artist_bio")} rows={2} maxLength={4000} />
+                </label>
+                <label className="dev-entry-options-wide">
+                  <span>{devUi.devArtistBioUk[lang]}</span>
+                  <textarea {...field("artist_bio_uk")} rows={2} maxLength={4000} lang="uk" />
+                </label>
+                <label>
+                  <span>{devUi.devFormat[lang]}</span>
+                  <select {...field("format")}>
+                    <option value="">{devUi.devAutomatic[lang]}</option>
+                    {["album", "track", "single", "ep", "mixtape", "live", "compilation"].map((value) => (
+                      <option key={value} value={value}>{value}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  <span>{devUi.devMusicLanguage[lang]}</span>
+                  <input {...field("lang")} maxLength={20} placeholder="en, uk" spellCheck={false} />
+                </label>
+                <label className="dev-entry-options-wide">
+                  <span>{devUi.devGenres[lang]}</span>
+                  <input {...field("genres")} maxLength={400} placeholder={devUi.devGenresHint[lang]} />
+                </label>
+              </>
+            )}
+          </div>
+        </details>
+
         <div className="dev-entry-options-actions">
+          <button
+            type="button"
+            className="press dev-entry-delete"
+            data-tip={devUi.devTipDelete[lang]}
+            disabled={deleting || saving}
+            onClick={() => void remove()}
+          >
+            {deleting ? devUi.devDeleting[lang] : devUi.devDeleteNote[lang]}
+          </button>
           {statusText && <span role={saveState === "failed" ? "alert" : "status"}>{statusText}</span>}
           <button type="submit" className="press" disabled={saving}>
             {saving ? devUi.devSaving[lang] : devUi.devSaveOptions[lang]}
           </button>
         </div>
-      </form>
-    </details>
+      </form>,
+    mount
   );
 }

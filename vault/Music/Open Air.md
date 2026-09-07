@@ -34,7 +34,7 @@ genres: [Rap]
 | Type | Standalone single |
 | Length | 4:09 |
 
-*Open Air* came out on 23 February 2024, on the eve of the second anniversary. By then Noize MC had been out of Russia for two years and on its register of "foreign agents" for fifteen months, and was playing to rooms full of people in the same position.
+*Open Air* came out on 23 February 2024, on the eve of the second anniversary. By then [[Noize MC]] had been out of Russia for two years and on its register of "foreign agents" for fifteen months, and was playing to rooms full of people in the same position.
 
 It is a long way from [[Выход в город]], which he released two months before any of that started.
 

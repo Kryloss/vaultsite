@@ -41,9 +41,18 @@ import { creatorInitials, type ShelfCreator } from "@/lib/shelf";
 export default function Creator({
   creator,
   href,
+  devKey,
 }: {
   creator: ShelfCreator;
   href?: string;
+  /**
+   * The frontmatter family the name and bio come from (`author` or
+   * `artist`), passed ONLY by a note's own page: it marks the name and the
+   * bio as fields the localhost dock edits in place. A studio page renders
+   * this block from a section document that has no such keys, and must not
+   * mark them, or the dock would sync empty strings into the header.
+   */
+  devKey?: "author" | "artist";
 }) {
   const { name, nameUk, role, photoUrl, photoBlur, photoSrcSet, bio, bioUk } =
     creator;
@@ -106,15 +115,30 @@ export default function Creator({
         <p className="creator-name">
           {href ? (
             <Link href={href} className="creator-link">
-              <T en={name} uk={nameUk} />
+              <span
+                data-dev-field-en={devKey}
+                data-dev-field-uk={devKey ? `${devKey}_uk` : undefined}
+              >
+                <T en={name} uk={nameUk} />
+              </span>
             </Link>
           ) : (
-            <T en={name} uk={nameUk} />
+            <span
+              data-dev-field-en={devKey}
+              data-dev-field-uk={devKey ? `${devKey}_uk` : undefined}
+            >
+              <T en={name} uk={nameUk} />
+            </span>
           )}
         </p>
-        {bio && (
+        {(bio || devKey) && (
           <p className="creator-bio">
-            <T en={bio} uk={bioUk} />
+            <span
+              data-dev-field-en={devKey ? `${devKey}_bio` : undefined}
+              data-dev-field-uk={devKey ? `${devKey}_bio_uk` : undefined}
+            >
+              <T en={bio ?? ""} uk={bioUk} />
+            </span>
           </p>
         )}
       </div>

@@ -12,6 +12,7 @@ import LinkPreview from "@/components/LinkPreview";
 import { breadcrumbJsonLd } from "@/lib/jsonld";
 import Page from "@/components/Page";
 import DevCreateEntrySlot from "@/components/DevCreateEntrySlot";
+import DevSectionOptionsSlot, { type DevArtistOption } from "@/components/DevSectionOptionsSlot";
 
 interface Props {
   params: Promise<{ section: string }>;
@@ -36,6 +37,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /** Section page — vault/<Folder>/main.md plus its entry list. */
+/** `playlists:` as the localhost options edit it: one Apple Music link per line. */
+function devPlaylists(meta: Record<string, unknown>) {
+  const raw = meta.playlists ?? meta.playlist;
+  return (Array.isArray(raw) ? raw : raw ? [raw] : []).map(String);
+}
+
+/** The `artists:` list's editable texts, by name. */
+function devArtists(meta: Record<string, unknown>): DevArtistOption[] {
+  if (!Array.isArray(meta.artists)) return [];
+  const text = (value: unknown) => (typeof value === "string" ? value : undefined);
+  return meta.artists
+    .filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === "object")
+    .map((item) => ({
+      name: text(item.name) ?? "",
+      nameUk: text(item.name_uk),
+      bio: text(item.bio),
+      bioUk: text(item.bio_uk),
+    }))
+    .filter((item) => item.name);
+}
+
 export default async function SectionPage({ params }: Props) {
   const { section: slug } = await params;
   if (slug === "home") redirect("/");
@@ -129,6 +151,14 @@ export default async function SectionPage({ params }: Props) {
           </p>
         )}
       </header>
+
+      {section.type === "music" && (
+        <DevSectionOptionsSlot
+          sectionSource={`vault/${section.dirName}/main.md`}
+          playlists={devPlaylists(section.meta)}
+          artists={devArtists(section.meta)}
+        />
+      )}
 
       {!ownBody && body}
 

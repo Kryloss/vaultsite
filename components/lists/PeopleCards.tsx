@@ -125,18 +125,27 @@ export default function PeopleCards({
                     {initials(row.title)}
                   </div>
                 )}
+                {/* The `cover` shape, ON the portrait rather than the `chip`
+                    that used to follow the name (#84). In the panel the chip
+                    was a COLUMN flex item, so it was blockified out of its
+                    `inline-block` and spent a whole row of the card's height
+                    on one 12px word. Here it is a mark on the artwork, in the
+                    scrim material that stays legible over any photograph.
+
+                    BOTTOM-LEFT, not the variant's default top-right: the
+                    phone composition parks the name card in the top-right
+                    corner of the same portrait, and the panel overlaps the
+                    portrait's right edge above 640px — the bottom-left is the
+                    one corner free in both. Placed in globals.css.
+
+                    Client-only — see NewBadge. */}
+                <NewBadge date={row.date} variant="cover" />
               </div>
 
               <div className="person-card-panel">
                 <span className="person-card-name">
                   <T en={row.title} uk={row.titleUk} />
-                </span>{" "}
-                {/* The `chip` shape, not `cover` (#84): on a phone the card
-                    takes the corner a cover badge would use, and inside the
-                    card the mark really does follow a title in a row of text,
-                    which is what that shape is for. Client-only — see
-                    NewBadge. */}
-                <NewBadge date={row.date} />
+                </span>
                 {row.description && (
                   <span className="person-card-role">
                     <T en={row.description} uk={row.descriptionUk} />

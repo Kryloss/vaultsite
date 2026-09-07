@@ -6,7 +6,7 @@ order: 3
 type: music
 description: What I'm listening to, and thoughts on tracks and artists.
 description_uk: Що я слухаю, і думки про треки та виконавців.
-playlists: https://music.apple.com/ca/playlist/vol%D1%8F/pl.u-qxylEeDu3pKyqrR
+playlists: ["https://music.apple.com/ca/playlist/vol%D1%8F/pl.u-qxylEeDu3pKyqrR"]
 # One card per artist on the section page, ordered by whichever has the newest
 # note. These bios are about the ARTIST — a note's own `artist_bio:` is about
 # that record, and the two are meant to be different texts.

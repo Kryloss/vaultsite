@@ -59,6 +59,8 @@ const nextConfig: NextConfig = {
         [path.resolve(process.cwd(), "components/DevCreateEntrySlot.tsx")]: disabled,
         "@/components/DevEntryOptionsSlot$": disabled,
         [path.resolve(process.cwd(), "components/DevEntryOptionsSlot.tsx")]: disabled,
+        "@/components/DevSectionOptionsSlot$": disabled,
+        [path.resolve(process.cwd(), "components/DevSectionOptionsSlot.tsx")]: disabled,
         "@/components/DevNowGoalToggleSlot$": nowGoalDisabled,
         [path.resolve(process.cwd(), "components/DevNowGoalToggleSlot.tsx")]: nowGoalDisabled,
         "@/components/DevRatingEditor$": path.resolve(

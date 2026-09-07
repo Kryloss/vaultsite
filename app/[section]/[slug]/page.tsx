@@ -49,6 +49,7 @@ import { maturityOf } from "@/lib/maturity";
 import { NOTE_THUMB_FIT_SCRIPT } from "@/lib/note-thumb";
 import Page from "@/components/Page";
 import DevEntryOptionsSlot from "@/components/DevEntryOptionsSlot";
+import { DEV_EXTRA_FIELDS } from "@/lib/dev-tools";
 
 /** Below this many h2/h3 an outline is noise, not navigation. */
 const MIN_TOC_HEADINGS = 3;
@@ -80,6 +81,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 /** Entry page — an individual .md file, e.g. /posts/how-was-my-day. */
+/** The "More fields" values, as text: lists joined, dates trimmed to a day. */
+function devFieldValues(meta: Record<string, unknown>) {
+  const out: Record<string, string> = {};
+  for (const key of DEV_EXTRA_FIELDS) {
+    const value = meta[key];
+    if (value == null) out[key] = "";
+    else if (Array.isArray(value)) out[key] = value.map((item) => String(item).trim()).filter(Boolean).join(", ");
+    else if (value instanceof Date) out[key] = value.toISOString().slice(0, 10);
+    else out[key] = String(value);
+  }
+  return out;
+}
+
 export default async function EntryPage({ params }: Props) {
   const { section: sectionSlug, slug } = await params;
   const section = getSectionBySlug(sectionSlug);
@@ -531,12 +545,17 @@ export default async function EntryPage({ params }: Props) {
       <DevEntryOptionsSlot
         source={`vault/${entry.sectionDir}/${entry.fileName}.md`}
         sectionType={section.type}
+        title={entry.title}
+        titleUk={entry.titleUk}
+        description={entry.description}
+        descriptionUk={entry.descriptionUk}
         medium={medium}
         draft={entry.draft}
         date={entry.date}
         status={typeof entry.meta.status === "string" ? entry.meta.status : undefined}
         rating={typeof entry.meta.rating === "number" ? entry.meta.rating : undefined}
         cover={typeof entry.meta.cover === "string" ? entry.meta.cover : undefined}
+        fields={devFieldValues(entry.meta)}
         categories={categories}
         series={typeof entry.meta.series === "string" ? entry.meta.series : undefined}
         seriesUk={typeof entry.meta.series_uk === "string" ? entry.meta.series_uk : undefined}
@@ -569,7 +588,19 @@ export default async function EntryPage({ params }: Props) {
               ar={gutterCover.coverAr}
             />
           )}
-          {creator && <Creator creator={creator} href={creatorLink} />}
+          {creator && (
+            <Creator
+              creator={creator}
+              href={creatorLink}
+              devKey={
+                process.env.NODE_ENV === "development"
+                  ? typeof entry.meta.artist === "string" && entry.meta.artist.trim()
+                    ? "artist"
+                    : "author"
+                  : undefined
+              }
+            />
+          )}
           {/* The note's own fact list, lifted out of the article by
               `liftFacts` so it can be a SIBLING of the poster and the creator
               rather than the first thing inside the writing. It keeps `.prose`

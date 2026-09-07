@@ -22,7 +22,9 @@ The useful constraint is that it's for one person. No paid Apple Developer membe
 
 The core rule: a write never waits on the network. Typing a task saves to SwiftData on the device immediately, and syncing to Supabase happens afterwards, out of the way.
 
-That sounds obvious until you build the alternative by accident. If the cloud is the source of truth, every airplane, elevator and dead Wi-Fi network becomes a bug report. So realtime updates are treated as a *hint to refresh*, not as the mechanism data recovery depends on — if the socket never fires, the app still catches up on its own.
+ That sounds obvious until you build the alternative by accident. If the cloud is the source of truth, every airplane, elevator and dead Wi-Fi network becomes a bug report. So realtime updates are treated as a *hint to refresh*, not as the mechanism data recovery depends on — if the socket never fires, the app still catches up on its own. 
+
+
 
 ![[dispatch-architecture.svg|How a change travels through Dispatch :: Як зміна проходить через Dispatch]]
 

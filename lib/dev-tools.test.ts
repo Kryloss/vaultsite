@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  EMPTY_DEV_FIELDS,
   appendParagraphRange,
   blockSourceRange,
   completeWikiLink,
@@ -11,7 +12,11 @@ import {
   devEditorReducer,
   indentLines,
   isDevToolsAvailable,
+  joinRichShape,
+  splitRichShape,
   publicPageUrl,
+  findFactRow,
+  replaceFactValue,
   sourceForLanguage,
   sourcePositionFor,
   spliceBlock,
@@ -23,6 +28,7 @@ import {
 } from "./dev-tools.ts";
 
 const fields: DevFields = {
+  ...EMPTY_DEV_FIELDS,
   title: "Home",
   title_uk: "Головна",
   description: "English description",
@@ -291,4 +297,40 @@ test("a rendered block maps back to its source lines by kind", () => {
   assert.equal(edited.body.slice(12, edited.end), "Replaced.");
   assert.deepEqual(appendParagraphRange("Text.\n"), { body: "Text.\n\n\n", start: 7, end: 7 });
   assert.deepEqual(appendParagraphRange(""), { body: "\n", start: 0, end: 0 });
+});
+
+test("a fact row is found by its label and its plain value can be replaced", () => {
+  const body = "## At a glance\n\n| | |\n|---|---|\n| Aired | 2021–2024 |\n| One-liner | Two sisters, [[Arcane\\|one]] war |\n| Studio | Fortiche |\n\nText.\n";
+  const studio = findFactRow(body, "Studio");
+  assert.ok(studio && studio.plain);
+  assert.equal(body.slice(studio!.start, studio!.end), "Fortiche");
+  assert.equal(findFactRow(body, "one-liner")?.plain, false, "a value with a link is not plain");
+  assert.equal(findFactRow(body, "Rating"), null);
+  const next = replaceFactValue(body, "Aired ", "2021 | 2024\nthree seasons");
+  assert.match(next!, /^\| Aired \| 2021 \\\| 2024 three seasons \|$/m);
+  assert.equal(replaceFactValue(body, "Nope", "x"), null);
+});
+
+test("a block's syntax splits off its text and joins back exactly", () => {
+  const cases: Array<[Parameters<typeof splitRichShape>[0], string]> = [
+    ["line", "## A heading"],
+    ["line", "- an item"],
+    ["line", "3. numbered"],
+    ["line", "- [x] done task"],
+    ["line", "  - nested item"],
+    ["paragraph", "Plain **text**\nover two lines."],
+    ["quote", "> quoted\n> lines"],
+    ["quote", "> [!tip] Title\n> body **x**\n>\n> second"],
+  ];
+  for (const [kind, source] of cases) {
+    const shape = splitRichShape(kind, source);
+    assert.ok(shape, source);
+    assert.equal(joinRichShape(shape!, shape!.body), source, source);
+  }
+  assert.deepEqual(splitRichShape("quote", "> [!note] T\n> b"), { kind: "quote", header: "[!note] T", body: "b" });
+  assert.deepEqual(splitRichShape("paragraph", "one\n  two\n\tthree"), { kind: "paragraph", body: "one\ntwo\nthree" });
+  assert.deepEqual(splitRichShape("line", "- [ ] task"), { kind: "line", prefix: "- [ ] ", body: "task" });
+  assert.equal(splitRichShape("line", "no marker"), null);
+  assert.equal(splitRichShape("quote", "not > quoted"), null);
+  assert.equal(splitRichShape("fence", "```\nx\n```"), null);
 });

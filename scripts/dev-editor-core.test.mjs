@@ -14,8 +14,10 @@ import {
   documentPayload,
   patchFrontmatter,
   patchMarkdownBody,
+  patchArtistItem,
   patchNowGoalBody,
   previewMarkdown,
+  saveMusicSection,
   readDocument,
   readPageDocument,
   reorderDocuments,
@@ -89,7 +91,7 @@ test("preserves multiline text exactly and can remove optional fields", () => {
 
 test("rejects unsupported fields and an empty English title", () => {
   assert.throws(
-    () => patchFrontmatter(sample, { slug: "changed" }),
+    () => patchFrontmatter(sample, { tags: "changed" }),
     (error) => error instanceof DevEditorError && error.code === "unsupported_field"
   );
   assert.throws(
@@ -295,7 +297,7 @@ test("a semantic no-op preserves bytes and opens an existing Ukrainian sibling",
     saveDocument(root, {
       source,
       revision: saved.revision,
-      changes: { slug: "not-allowed" },
+      changes: { tags: "not-allowed" },
     }),
     (error) => error instanceof DevEditorError && error.code === "unsupported_field"
   );
@@ -531,7 +533,7 @@ test("patches date, status and cover as the vault spells them", () => {
   assert.throws(() => patchFrontmatter(sample, { date: "2026-02-30" }), { code: "invalid_date" });
   assert.throws(() => patchFrontmatter(sample, { date: "yesterday" }), { code: "invalid_date" });
   assert.throws(() => patchFrontmatter(sample, { cover: "../x.jpg" }), { code: "invalid_cover" });
-  assert.throws(() => patchFrontmatter(sample, { status: "a\nb" }), { code: "invalid_status" });
+  assert.throws(() => patchFrontmatter(sample, { status: "a\nb" }), { code: "invalid_field" });
 });
 
 test("creates a Ukrainian body file from the English body, once", async (t) => {
@@ -706,4 +708,97 @@ test("deletes a note pair into vault/.trash, revision-checked, and answers with 
   assert.equal(result.pathname, "/posts");
   assert.ok(!fs.existsSync(path.join(dir, "Gone.md")) && !fs.existsSync(path.join(dir, "Gone.uk.md")));
   assert.equal(await fs.promises.readFile(path.join(root, "vault", ".trash", "Gone.md"), "utf8"), "---\ntitle: Gone\n---\nBody.\n");
+});
+
+test("a page save carries the creator block's text with the rest of the page", async (t) => {
+  const root = await fs.promises.mkdtemp(path.join(os.tmpdir(), "vault-editor-"));
+  t.after(() => fs.promises.rm(root, { recursive: true, force: true }));
+  const dir = path.join(root, "vault", "Shelf", "Books");
+  await fs.promises.mkdir(dir, { recursive: true });
+  const file = path.join(dir, "Book.md");
+  await fs.promises.writeFile(file, "---\ntitle: Book\nauthor: Old Name\nauthor_bio: >-\n  Old bio.\n---\nBody.\n");
+  const opened = await readPageDocument(root, "vault/Shelf/Books/Book.md");
+  assert.equal(opened.fields.author, "Old Name");
+  assert.equal(opened.fields.author_bio, "Old bio.");
+  assert.equal(opened.fields.artist, "");
+  const saved = await savePageDocument(root, {
+    source: "vault/Shelf/Books/Book.md",
+    revision: opened.revision,
+    changes: { author: "New Name", author_bio: "A new sentence.", author_bio_uk: "Нове речення." },
+  });
+  assert.equal(saved.fields.author, "New Name");
+  const raw = await fs.promises.readFile(file, "utf8");
+  assert.match(raw, /^author: New Name$/m);
+  assert.match(raw, /^author_bio: A new sentence\.$/m);
+  assert.match(raw, /^author_bio_uk: Нове речення\.$/m);
+  assert.match(raw, /^Body\.$/m);
+});
+
+const MUSIC_MAIN = `---
+title: Music
+type: music
+playlists: https://music.apple.com/ca/playlist/one/pl.1
+# bios are about the ARTIST
+artists:
+  - name: Twenty One Pilots
+    photo: top.jpg
+    bio: >-
+      Ohio duo — two
+      lines folded.
+    bio_uk: >-
+      Дует з Огайо.
+  - name: Нервы
+    name_uk: Нерви
+    # keep this comment
+    photo: nervy.jpg
+    bio: One line.
+---
+Body.
+`;
+
+test("patches one artist's texts inside the artists block and nothing else", () => {
+  const next = patchArtistItem(MUSIC_MAIN, "Twenty One Pilots", { bio: "New bio\nwith a break.", bio_uk: null });
+  assert.match(next, /^    bio: "New bio\\nwith a break\."$/m);
+  assert.doesNotMatch(next, /Дует з Огайо/);
+  assert.match(next, /  - name: Нервы\n    name_uk: Нерви\n    # keep this comment\n    photo: nervy\.jpg\n    bio: One line\./);
+  assert.match(next, /^# bios are about the ARTIST$/m);
+  const data = matter(next).data;
+  assert.equal(data.artists[0].bio, "New bio\nwith a break.");
+  assert.equal(data.artists[0].bio_uk, undefined);
+  assert.equal(data.artists[0].photo, "top.jpg");
+  const added = patchArtistItem(MUSIC_MAIN, "Нервы", { name_uk: "Нерви!", bio_uk: "Український текст." });
+  assert.equal(matter(added).data.artists[1].name_uk, "Нерви!");
+  assert.equal(matter(added).data.artists[1].bio_uk, "Український текст.");
+  assert.throws(() => patchArtistItem(MUSIC_MAIN, "Nobody", { bio: "x" }), { code: "no_artist" });
+});
+
+test("saves a music section's playlists and artists together, revision-checked", async (t) => {
+  const root = await fs.promises.mkdtemp(path.join(os.tmpdir(), "vault-editor-"));
+  t.after(() => fs.promises.rm(root, { recursive: true, force: true }));
+  const dir = path.join(root, "vault", "Music");
+  await fs.promises.mkdir(dir, { recursive: true });
+  const file = path.join(dir, "main.md");
+  await fs.promises.writeFile(file, MUSIC_MAIN);
+  const opened = readDocument(root, "vault/Music/main.md");
+  await assert.rejects(
+    saveMusicSection(root, { source: "vault/Music/main.md", revision: "stale", playlists: [] }),
+    { code: "revision_conflict" }
+  );
+  await assert.rejects(
+    saveMusicSection(root, { source: "vault/Music/main.md", revision: opened.revision, playlists: ["https://example.com/x"] }),
+    { code: "invalid_playlists" }
+  );
+  const saved = await saveMusicSection(root, {
+    source: "vault/Music/main.md",
+    revision: opened.revision,
+    playlists: ["https://music.apple.com/ca/playlist/one/pl.1", "https://music.apple.com/ca/playlist/two/pl.2"],
+    artists: [{ name: "Нервы", bio: "Changed." }],
+  });
+  const raw = await fs.promises.readFile(file, "utf8");
+  const data = matter(raw).data;
+  assert.deepEqual(data.playlists, ["https://music.apple.com/ca/playlist/one/pl.1", "https://music.apple.com/ca/playlist/two/pl.2"]);
+  assert.equal(data.artists[1].bio, "Changed.");
+  assert.equal(data.artists[0].bio, "Ohio duo — two lines folded.");
+  assert.match(raw, /^Body\.$/m);
+  assert.notEqual(saved.revision, opened.revision);
 });

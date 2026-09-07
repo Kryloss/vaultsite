@@ -38,10 +38,11 @@ export const EDITABLE_FRONTMATTER_KEYS = [
   "format",
   "lang",
   "genres",
+  "playlists",
 ];
 
 /** Keys whose YAML value is a list of short strings (a comma list in the UI). */
-const LIST_KEYS = new Set(["categories", "aliases", "genres", "lang"]);
+const LIST_KEYS = new Set(["categories", "aliases", "genres", "lang", "playlists"]);
 /** Single-line text keys and their length caps. */
 const LINE_KEYS = {
   category: 200,
@@ -67,6 +68,17 @@ const MEDIUMS = new Set(["book", "movie", "show", "video", "game"]);
 const FORMATS = new Set(["album", "track", "single", "ep", "mixtape", "live", "compilation"]);
 const SHELF_LANGS = new Set(["en", "uk", "ru"]);
 
+/** Page-owned text: the header fields, the creator block, and both bodies. */
+export const CREATOR_PAGE_KEYS = [
+  "author",
+  "author_uk",
+  "author_bio",
+  "author_bio_uk",
+  "artist",
+  "artist_uk",
+  "artist_bio",
+  "artist_bio_uk",
+];
 export const EDITABLE_PAGE_KEYS = [
   "title",
   "title_uk",
@@ -74,6 +86,7 @@ export const EDITABLE_PAGE_KEYS = [
   "description_uk",
   "body",
   "body_uk",
+  ...CREATOR_PAGE_KEYS,
 ];
 
 const MAX_MARKDOWN_BODY = 512 * 1024;
@@ -83,7 +96,7 @@ const MAX_MARKDOWN_BODY = 512 * 1024;
  * process with a message that names the fix (restart `npm run dev`) instead
  * of a 404 dressed up as "could not save". Mirrored in lib/dev-tools.ts.
  */
-export const EDITOR_PROTOCOL = 3;
+export const EDITOR_PROTOCOL = 4;
 /** One pasted or dropped image. Obsidian pastes are rarely above 3 MiB. */
 const MAX_ASSET_BYTES = 10 * 1024 * 1024;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -457,12 +470,6 @@ export function patchFrontmatter(source, changes) {
   if (typeof changes.date === "string" && !validIsoDate(changes.date.trim())) {
     throw new DevEditorError("A date must be a real YYYY-MM-DD day.", 422, "invalid_date");
   }
-  if (
-    typeof changes.status === "string" &&
-    (/[\r\n\0]/.test(changes.status) || changes.status.trim().length > 40)
-  ) {
-    throw new DevEditorError("A status is one short word.", 422, "invalid_status");
-  }
   if (typeof changes.cover === "string" && !validAssetName(changes.cover.trim())) {
     throw new DevEditorError(
       "A cover is the file name of an image in the vault.",
@@ -708,6 +715,7 @@ function pageDocumentPayload({ source, sourceUk, file, fileUk, raw, rawUk }) {
       description_uk: document.fields.description_uk,
       body: markdownBody(raw),
       body_uk: rawUk === undefined ? "" : editorNewlines(rawUk),
+      ...Object.fromEntries(CREATOR_PAGE_KEYS.map((key) => [key, document.fields[key] ?? ""])),
     },
     obsidian: {
       en: obsidianUri(file),
@@ -1930,4 +1938,148 @@ export async function deleteEntry(repoRoot, args) {
     trashed: moves.map((move) => `vault/${path.relative(vaultRoot, move.to).split(path.sep).join("/")}`),
     pathname: context.sectionSlug === "home" ? "/" : `/${context.sectionSlug}`,
   };
+}
+
+const ARTIST_FIELDS = ["name_uk", "bio", "bio_uk"];
+
+/**
+ * Patch one artist's fields inside a section's `artists:` block sequence,
+ * touching nothing else in the block: other artists, their comments, their
+ * `photo:` lines. The item is found by its `name:`; a field is replaced on
+ * its own line(s) — a `>-` block scalar included — or added after `name:`.
+ * Multi-line text is written as one JSON string, as `serializeField` does.
+ */
+export function patchArtistItem(raw, name, changes) {
+  const parts = frontmatterParts(raw);
+  const lines = parts.block.split(/\r?\n/);
+  const listStart = lines.findIndex((line) => /^artists:\s*$/.test(line));
+  if (listStart === -1) {
+    throw new DevEditorError("This section has no artists list.", 422, "no_artists");
+  }
+  // The block sequence: every line until the next top-level key.
+  let listEnd = lines.length;
+  for (let i = listStart + 1; i < lines.length; i += 1) {
+    if (/^\S/.test(lines[i]) && !/^\s*#/.test(lines[i])) {
+      listEnd = i;
+      break;
+    }
+  }
+  const items = [];
+  for (let i = listStart + 1; i < listEnd; i += 1) {
+    if (/^\s*-\s/.test(lines[i])) items.push({ start: i, end: listEnd });
+    if (items.length > 1) items[items.length - 2].end = i;
+  }
+  const item = items.find((candidate) => {
+    const first = /^\s*-\s+name:\s*(.*?)\s*$/.exec(lines[candidate.start]);
+    const value = first ? first[1].replace(/^(['"])(.*)\1$/, "$2") : "";
+    return value === name;
+  });
+  if (!item) {
+    throw new DevEditorError(`No artist named '${name}' in this section.`, 404, "no_artist");
+  }
+  const indent = (/^(\s*)-/.exec(lines[item.start])?.[1] ?? "") + "  ";
+  let itemLines = lines.slice(item.start, item.end);
+  for (const key of ARTIST_FIELDS) {
+    if (!Object.hasOwn(changes, key)) continue;
+    const value = changes[key];
+    if (value !== null && typeof value !== "string") {
+      throw new DevEditorError(`Artist field '${key}' must be text.`, 400, "invalid_field");
+    }
+    const text = value === null ? "" : value.trim();
+    if (text.length > 4000 || text.includes("\0")) {
+      throw new DevEditorError(`Artist field '${key}' is too long.`, 422, "too_long");
+    }
+    // The field's own lines: its key line plus any deeper-indented continuation.
+    const keyIndex = itemLines.findIndex((line, i) => (i === 0 ? false : new RegExp(`^${indent}${key}:`).test(line)));
+    let removeCount = 0;
+    if (keyIndex !== -1) {
+      removeCount = 1;
+      while (
+        keyIndex + removeCount < itemLines.length &&
+        (itemLines[keyIndex + removeCount].trim() === "" ||
+          new RegExp(`^${indent}\\s+\\S`).test(itemLines[keyIndex + removeCount])) &&
+        !/^\s*-\s/.test(itemLines[keyIndex + removeCount])
+      ) {
+        removeCount += 1;
+      }
+      // Keep trailing blank lines with the item, not the field.
+      while (removeCount > 1 && itemLines[keyIndex + removeCount - 1].trim() === "") removeCount -= 1;
+    }
+    const serialized = text ? [`${indent}${key}: ${plainYamlSafe(text) && !text.includes("\n") ? text : JSON.stringify(text)}`] : [];
+    if (keyIndex !== -1) {
+      itemLines.splice(keyIndex, removeCount, ...serialized);
+    } else if (serialized.length) {
+      // After `name_uk:` if present, else right after `name:`.
+      const after = key === "name_uk" ? 0 : Math.max(0, itemLines.findIndex((line) => new RegExp(`^${indent}(name_uk|photo):`).test(line)));
+      itemLines.splice(after + 1, 0, ...serialized);
+    }
+  }
+  const nextLines = [...lines.slice(0, item.start), ...itemLines, ...lines.slice(item.end)];
+  const next = `${parts.before}${nextLines.join(parts.newline)}${parts.after}`;
+  try {
+    matter(next);
+  } catch {
+    throw new DevEditorError("The edit would produce invalid YAML.", 422, "invalid_frontmatter");
+  }
+  return next;
+}
+
+/** Save a music section's playlists and one or more artists' texts as one revision-checked write. */
+export async function saveMusicSection(repoRoot, args) {
+  if (!args || typeof args !== "object" || Array.isArray(args)) {
+    throw new DevEditorError("A music section save must be an object.");
+  }
+  const { source, revision, playlists, artists } = args;
+  const file = resolveVaultMarkdown(repoRoot, source);
+  if (path.basename(file).toLowerCase() !== "main.md") {
+    throw new DevEditorError("Playlists and artists live on the section page.", 400, "unsupported_source");
+  }
+  const raw = await fs.promises.readFile(file, "utf8");
+  if (typeof revision !== "string" || revisionFor(raw) !== revision) {
+    throw new DevEditorError("This file changed in Obsidian after the editor opened.", 409, "revision_conflict");
+  }
+  let next = raw;
+  if (playlists !== undefined) {
+    if (!Array.isArray(playlists) || playlists.some((url) => typeof url !== "string")) {
+      throw new DevEditorError("Playlists must be a list of links.", 400, "invalid_playlists");
+    }
+    const urls = playlists.map((url) => url.trim()).filter(Boolean);
+    for (const url of urls) {
+      if (!/^https:\/\/(?:music|embed\.music)\.apple\.com\/\S+$/.test(url)) {
+        throw new DevEditorError("A playlist is an Apple Music link.", 422, "invalid_playlists");
+      }
+    }
+    next = patchFrontmatter(next, { playlists: urls.length ? urls : null });
+  }
+  if (artists !== undefined) {
+    if (!Array.isArray(artists)) throw new DevEditorError("Artists must be a list.", 400, "invalid_artists");
+    for (const entry of artists) {
+      if (!entry || typeof entry !== "object" || typeof entry.name !== "string") {
+        throw new DevEditorError("Each artist change names the artist.", 400, "invalid_artists");
+      }
+      const { name, ...changes } = entry;
+      next = patchArtistItem(next, name, changes);
+    }
+  }
+  if (next === raw) return withOpenTargets(documentPayload(source, raw), file);
+  const stat = await fs.promises.stat(file);
+  const temp = path.join(path.dirname(file), `.${path.basename(file)}.${process.pid}.${randomBytes(6).toString("hex")}.tmp`);
+  try {
+    const handle = await fs.promises.open(temp, "wx", stat.mode);
+    try {
+      await handle.writeFile(next, "utf8");
+      await handle.sync();
+    } finally {
+      await handle.close();
+    }
+    const beforeRename = await fs.promises.readFile(file, "utf8");
+    if (revisionFor(beforeRename) !== revision) {
+      throw new DevEditorError("This file changed in Obsidian while the edit was being saved.", 409, "revision_conflict");
+    }
+    await fs.promises.rename(temp, file);
+  } catch (error) {
+    await fs.promises.unlink(temp).catch(() => {});
+    throw error;
+  }
+  return withOpenTargets(documentPayload(source, next), file);
 }

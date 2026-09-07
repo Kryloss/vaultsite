@@ -8,6 +8,7 @@ import {
   createTranslation,
   deleteEntry,
   previewMarkdown,
+  saveMusicSection,
   readDocument,
   readPageDocument,
   reorderDocuments,
@@ -201,6 +202,10 @@ export function createDevEditorServer({
       }
       if (url.pathname === "/delete-entry") {
         send(res, 200, await deleteEntry(repoRoot, body));
+        return;
+      }
+      if (url.pathname === "/save-music-section") {
+        send(res, 200, await saveMusicSection(repoRoot, body));
         return;
       }
       throw new DevEditorError("Unknown vault editor endpoint.", 404, "not_found");

@@ -35,7 +35,7 @@ genres: [Alternative]
 
 *Clancy* (2024) wraps up the storyline the band started with *Blurryface* back in 2015 — a whole fictional universe about the city of Dema, its escapee Clancy, and the Bishops chasing him. Knowing the lore isn't required, but it rewards people who've been paying attention for ten years, which is a rare thing in pop music.
 
-What I like most is how it sounds like a summary of everything they've tried: the heavy synth stuff, the rap verses, Josh Dun's drums pushed way up front. It debuted top-three in the US and hit number one in a few countries, so clearly the long-game storytelling worked.
+What I like most is how it sounds like a summary of everything they've tried: the heavy synth stuff, the rap verses, [[Twenty One Pilots|Josh Dun]]'s drums pushed way up front. It debuted top-three in the US and hit number one in a few countries, so clearly the long-game storytelling worked.
 
 https://music.apple.com/ca/album/lavish/1733370881?i=1733371051
 
