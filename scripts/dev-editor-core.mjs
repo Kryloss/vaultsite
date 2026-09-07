@@ -20,7 +20,52 @@ export const EDITABLE_FRONTMATTER_KEYS = [
   "date",
   "status",
   "cover",
+  "aliases",
+  "slug",
+  "maturity",
+  "medium",
+  "author",
+  "author_uk",
+  "author_bio",
+  "author_bio_uk",
+  "imdb_id",
+  "video",
+  "uploaded",
+  "artist",
+  "artist_uk",
+  "artist_bio",
+  "artist_bio_uk",
+  "format",
+  "lang",
+  "genres",
 ];
+
+/** Keys whose YAML value is a list of short strings (a comma list in the UI). */
+const LIST_KEYS = new Set(["categories", "aliases", "genres", "lang"]);
+/** Single-line text keys and their length caps. */
+const LINE_KEYS = {
+  category: 200,
+  series: 200,
+  series_uk: 200,
+  status: 40,
+  cover: 200,
+  slug: 120,
+  maturity: 20,
+  medium: 20,
+  author: 200,
+  author_uk: 200,
+  imdb_id: 20,
+  video: 400,
+  artist: 200,
+  artist_uk: 200,
+  format: 20,
+};
+/** Paragraph keys — newlines allowed, written as one JSON string. */
+const TEXT_KEYS = { author_bio: 4000, author_bio_uk: 4000, artist_bio: 4000, artist_bio_uk: 4000 };
+const MATURITIES = new Set(["seedling", "budding", "evergreen"]);
+const MEDIUMS = new Set(["book", "movie", "show", "video", "game"]);
+const FORMATS = new Set(["album", "track", "single", "ep", "mixtape", "live", "compilation"]);
+const SHELF_LANGS = new Set(["en", "uk", "ru"]);
 
 export const EDITABLE_PAGE_KEYS = [
   "title",
@@ -38,7 +83,7 @@ const MAX_MARKDOWN_BODY = 512 * 1024;
  * process with a message that names the fix (restart `npm run dev`) instead
  * of a 404 dressed up as "could not save". Mirrored in lib/dev-tools.ts.
  */
-export const EDITOR_PROTOCOL = 2;
+export const EDITOR_PROTOCOL = 3;
 /** One pasted or dropped image. Obsidian pastes are rarely above 3 MiB. */
 const MAX_ASSET_BYTES = 10 * 1024 * 1024;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -248,7 +293,7 @@ function serializeField(key, value, newline, comment = "") {
   // `date: 2026-09-06` is the vault's own spelling; quoting it would turn the
   // YAML date every other note has into a string on this one.
   const scalar =
-    plainYamlSafe(value) || (key === "date" && ISO_DATE.test(value))
+    plainYamlSafe(value) || ((key === "date" || key === "uploaded") && ISO_DATE.test(value))
       ? value
       : JSON.stringify(value);
   return `${key}: ${scalar}${suffix}${newline}`;
@@ -291,7 +336,7 @@ export function patchFrontmatter(source, changes) {
         ? typeof value === "number"
         : ["draft", "published"].includes(key)
           ? typeof value === "boolean"
-          : key === "categories"
+          : LIST_KEYS.has(key)
             ? Array.isArray(value) && value.every((item) => typeof item === "string")
             : typeof value === "string");
     if (!valid) {
@@ -318,7 +363,7 @@ export function patchFrontmatter(source, changes) {
       throw new DevEditorError("A description is too long.", 422, "too_long");
     }
   }
-  for (const key of ["category", "series", "series_uk"]) {
+  for (const [key, max] of Object.entries(LINE_KEYS)) {
     if (typeof changes[key] === "string" && /[\r\n\0]/.test(changes[key])) {
       throw new DevEditorError(
         `Frontmatter key '${key}' must stay on one line.`,
@@ -326,7 +371,7 @@ export function patchFrontmatter(source, changes) {
         "invalid_field"
       );
     }
-    if (typeof changes[key] === "string" && changes[key].length > 200) {
+    if (typeof changes[key] === "string" && changes[key].length > max) {
       throw new DevEditorError(
         `Frontmatter key '${key}' is too long.`,
         422,
@@ -334,20 +379,48 @@ export function patchFrontmatter(source, changes) {
       );
     }
   }
-  if (Array.isArray(changes.categories)) {
+  for (const [key, max] of Object.entries(TEXT_KEYS)) {
+    if (typeof changes[key] === "string" && (changes[key].includes("\0") || changes[key].length > max)) {
+      throw new DevEditorError(`Frontmatter key '${key}' is too long.`, 422, "too_long");
+    }
+  }
+  for (const key of LIST_KEYS) {
+    if (!Array.isArray(changes[key])) continue;
     if (
-      changes.categories.length > 20 ||
-      changes.categories.some(
-        (category) =>
-          !category.trim() || category.length > 80 || /[\r\n\0]/.test(category)
+      changes[key].length > 50 ||
+      changes[key].some(
+        (item) => !item.trim() || item.length > 120 || /[\r\n\0]/.test(item)
       )
     ) {
       throw new DevEditorError(
-        "Categories must be 1–80 character single-line names (20 maximum).",
+        `Frontmatter key '${key}' must be 1–120 character single-line names (50 maximum).`,
         422,
-        "invalid_categories"
+        "invalid_list"
       );
     }
+  }
+  const oneOf = (key, allowed, label) => {
+    if (typeof changes[key] === "string" && changes[key].trim() && !allowed.has(changes[key].trim())) {
+      throw new DevEditorError(`${label} must be one of: ${[...allowed].join(", ")}.`, 422, `invalid_${key}`);
+    }
+  };
+  oneOf("maturity", MATURITIES, "Maturity");
+  oneOf("medium", MEDIUMS, "Medium");
+  oneOf("format", FORMATS, "Format");
+  if (Array.isArray(changes.lang) && changes.lang.some((item) => !SHELF_LANGS.has(item.trim()))) {
+    throw new DevEditorError("A music shelf language is en, uk or ru.", 422, "invalid_lang");
+  }
+  if (typeof changes.slug === "string" && changes.slug.trim() && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(changes.slug.trim())) {
+    throw new DevEditorError("A slug is lowercase letters, digits and single hyphens.", 422, "invalid_slug");
+  }
+  if (typeof changes.imdb_id === "string" && changes.imdb_id.trim() && !/^tt\d{5,10}$/.test(changes.imdb_id.trim())) {
+    throw new DevEditorError("An IMDb id looks like tt0137523.", 422, "invalid_imdb_id");
+  }
+  if (typeof changes.video === "string" && changes.video.trim() && !/^https:\/\/\S+$/.test(changes.video.trim())) {
+    throw new DevEditorError("A video is an https:// link.", 422, "invalid_video");
+  }
+  if (typeof changes.uploaded === "string" && changes.uploaded.trim() && !validIsoDate(changes.uploaded.trim())) {
+    throw new DevEditorError("An upload date must be a real YYYY-MM-DD day.", 422, "invalid_date");
   }
   if (Object.hasOwn(changes, "rating") && changes.rating !== null) {
     if (
@@ -561,8 +634,26 @@ export function documentPayload(sourcePath, raw) {
       date: fieldDate(data),
       status: fieldText(data, "status"),
       cover: fieldText(data, "cover"),
+      ...extraFields(data),
     },
   };
+}
+
+/** The rest of the editable keys, as text (lists joined) — shown in "More fields". */
+function extraFields(data) {
+  const out = {};
+  for (const key of EDITABLE_FRONTMATTER_KEYS) {
+    if (Object.hasOwn(out, key)) continue;
+    if (["title", "title_uk", "description", "description_uk", "draft", "published", "category", "categories", "series", "series_uk", "part", "rating", "top_order", "date", "status", "cover"].includes(key)) continue;
+    const value = data[key];
+    if (value == null) out[key] = "";
+    else if (key === "uploaded") out[key] = fieldDate({ date: value });
+    else if (Array.isArray(value)) out[key] = value.map((item) => String(item).trim()).filter(Boolean).join(", ");
+    else if (typeof value === "string") out[key] = value;
+    else if (typeof value === "number" || typeof value === "boolean") out[key] = String(value);
+    else out[key] = "";
+  }
+  return out;
 }
 
 export function readDocument(repoRoot, source) {
@@ -1788,5 +1879,55 @@ export async function previewMarkdown(repoRoot, args) {
     html: rendered.html,
     factsHtml: rendered.factsHtml ?? null,
     headings: rendered.headings.length,
+  };
+}
+
+/**
+ * Delete a note the way Obsidian does: move it (and its Ukrainian sibling)
+ * into `vault/.trash/`, which the site, the asset sync and git all ignore.
+ * Nothing is unlinked; a wrong press is undone by moving the files back.
+ * Revision-checked, all-or-nothing across the pair. Answers with the section
+ * page to go to.
+ */
+export async function deleteEntry(repoRoot, args) {
+  if (!args || typeof args !== "object" || Array.isArray(args)) {
+    throw new DevEditorError("A delete request must be an object.");
+  }
+  const { source, revision } = args;
+  const file = resolveVaultMarkdown(repoRoot, source);
+  if (/(?:\.uk|\.excalidraw)\.md$/i.test(file) || path.basename(file).toLowerCase() === "main.md") {
+    throw new DevEditorError("Only a note can be deleted, from its primary Markdown document.", 400, "unsupported_source");
+  }
+  const raw = await fs.promises.readFile(file, "utf8");
+  if (typeof revision !== "string" || revisionFor(raw) !== revision) {
+    throw new DevEditorError("This file changed in Obsidian after the editor opened.", 409, "revision_conflict");
+  }
+  const realRoot = fs.realpathSync(repoRoot);
+  const vaultRoot = fs.realpathSync(path.join(realRoot, "vault"));
+  const trash = path.join(vaultRoot, ".trash");
+  await fs.promises.mkdir(trash, { recursive: true });
+  const sibling = file.replace(/\.md$/i, ".uk.md");
+  const files = [file, ...(fs.existsSync(sibling) ? [sibling] : [])];
+  const suffix = `${Date.now().toString(36)}`;
+  const moves = files.map((from) => {
+    const base = path.basename(from);
+    let to = path.join(trash, base);
+    if (fs.existsSync(to)) to = path.join(trash, base.replace(/(\.uk)?\.md$/i, `-${suffix}$1.md`));
+    return { from, to };
+  });
+  const done = [];
+  try {
+    for (const move of moves) {
+      await fs.promises.rename(move.from, move.to);
+      done.push(move);
+    }
+  } catch (error) {
+    for (const move of done.reverse()) await fs.promises.rename(move.to, move.from).catch(() => {});
+    throw error;
+  }
+  const context = renderContext(repoRoot, file);
+  return {
+    trashed: moves.map((move) => `vault/${path.relative(vaultRoot, move.to).split(path.sep).join("/")}`),
+    pathname: context.sectionSlug === "home" ? "/" : `/${context.sectionSlug}`,
   };
 }

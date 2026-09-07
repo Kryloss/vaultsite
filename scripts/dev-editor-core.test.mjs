@@ -9,7 +9,9 @@ import {
   createEntry,
   createTranslation,
   createdEntrySlug,
+  deleteEntry,
   DevEditorError,
+  documentPayload,
   patchFrontmatter,
   patchMarkdownBody,
   patchNowGoalBody,
@@ -24,6 +26,10 @@ import {
   savePageDocument,
   toggleNowGoal,
 } from "./dev-editor-core.mjs";
+
+function documentPayloadFor(raw) {
+  return documentPayload("vault/Posts/X.md", raw);
+}
 
 const sample = `---
 title: Original
@@ -651,4 +657,53 @@ test("previews a draft body with the site's own pipeline, per language", async (
   await assert.rejects(previewMarkdown(root, { source, body: "x", lang: "fr" }), { code: "invalid_lang" });
   await assert.rejects(previewMarkdown(root, { source, body: 42, lang: "en" }), { code: "invalid_body" });
   assert.equal(await fs.promises.readFile(note, "utf8"), "---\ntitle: Arcane\nrating: 4\n---\n## Review\n\nOld.\n", "a preview never writes");
+});
+
+test("patches the wider field set: lists, choices, ids and dates", () => {
+  const next = patchFrontmatter(sample, {
+    aliases: ["Sec+", "Security+"],
+    maturity: "budding",
+    author: "Someone",
+    author_bio: "Two\nlines.",
+    imdb_id: "tt0137523",
+    uploaded: "2026-08-25",
+    lang: ["uk"],
+    slug: "custom-url",
+  });
+  assert.match(next, /^aliases: \["Sec\+","Security\+"\]$/m);
+  assert.match(next, /^maturity: budding$/m);
+  assert.match(next, /^author_bio: "Two\\nlines\."$/m);
+  assert.match(next, /^uploaded: 2026-08-25$/m);
+  assert.match(next, /^lang: \["uk"\]$/m);
+  assert.equal(matter(next).data.author_bio, "Two\nlines.");
+  assert.throws(() => patchFrontmatter(sample, { maturity: "ancient" }), { code: "invalid_maturity" });
+  assert.throws(() => patchFrontmatter(sample, { medium: "podcast" }), { code: "invalid_medium" });
+  assert.throws(() => patchFrontmatter(sample, { imdb_id: "137523" }), { code: "invalid_imdb_id" });
+  assert.throws(() => patchFrontmatter(sample, { slug: "Not A Slug" }), { code: "invalid_slug" });
+  assert.throws(() => patchFrontmatter(sample, { video: "ftp://x" }), { code: "invalid_video" });
+  assert.throws(() => patchFrontmatter(sample, { lang: ["fr"] }), { code: "invalid_lang" });
+  const doc = documentPayloadFor("---\ntitle: T\naliases:\n  - A\n  - B\nlang: [en, uk]\nuploaded: 2026-01-02\nformat: single\n---\n");
+  assert.equal(doc.fields.aliases, "A, B");
+  assert.equal(doc.fields.lang, "en, uk");
+  assert.equal(doc.fields.uploaded, "2026-01-02");
+  assert.equal(doc.fields.format, "single");
+  assert.equal(doc.fields.author, "");
+});
+
+test("deletes a note pair into vault/.trash, revision-checked, and answers with the section", async (t) => {
+  const root = await fs.promises.mkdtemp(path.join(os.tmpdir(), "vault-editor-"));
+  t.after(() => fs.promises.rm(root, { recursive: true, force: true }));
+  const dir = path.join(root, "vault", "Posts");
+  await fs.promises.mkdir(dir, { recursive: true });
+  await fs.promises.writeFile(path.join(dir, "main.md"), "---\ntitle: Posts\ntype: posts\n---\n");
+  await fs.promises.writeFile(path.join(dir, "Gone.md"), "---\ntitle: Gone\n---\nBody.\n");
+  await fs.promises.writeFile(path.join(dir, "Gone.uk.md"), "Тіло.\n");
+  const opened = readDocument(root, "vault/Posts/Gone.md");
+  await assert.rejects(deleteEntry(root, { source: "vault/Posts/Gone.md", revision: "stale" }), { code: "revision_conflict" });
+  await assert.rejects(deleteEntry(root, { source: "vault/Posts/main.md", revision: opened.revision }), { code: "unsupported_source" });
+  const result = await deleteEntry(root, { source: "vault/Posts/Gone.md", revision: opened.revision });
+  assert.deepEqual(result.trashed, ["vault/.trash/Gone.md", "vault/.trash/Gone.uk.md"]);
+  assert.equal(result.pathname, "/posts");
+  assert.ok(!fs.existsSync(path.join(dir, "Gone.md")) && !fs.existsSync(path.join(dir, "Gone.uk.md")));
+  assert.equal(await fs.promises.readFile(path.join(root, "vault", ".trash", "Gone.md"), "utf8"), "---\ntitle: Gone\n---\nBody.\n");
 });

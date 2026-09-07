@@ -6,6 +6,7 @@ import {
   attachAsset,
   createEntry,
   createTranslation,
+  deleteEntry,
   previewMarkdown,
   readDocument,
   readPageDocument,
@@ -196,6 +197,10 @@ export function createDevEditorServer({
       }
       if (url.pathname === "/preview") {
         send(res, 200, await previewMarkdown(repoRoot, body));
+        return;
+      }
+      if (url.pathname === "/delete-entry") {
+        send(res, 200, await deleteEntry(repoRoot, body));
         return;
       }
       throw new DevEditorError("Unknown vault editor endpoint.", 404, "not_found");

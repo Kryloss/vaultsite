@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  appendParagraphRange,
+  blockSourceRange,
   completeWikiLink,
   countWords,
   createDevEditorState,
@@ -12,6 +14,7 @@ import {
   publicPageUrl,
   sourceForLanguage,
   sourcePositionFor,
+  spliceBlock,
   toggleLinePrefix,
   wikiLinkMatches,
   wikiLinkQuery,
@@ -246,6 +249,46 @@ test("word count ignores fences and punctuation; source position finds a block",
   assert.equal(sourcePositionFor(md, "The second season is better than the first."), 11);
   assert.equal(sourcePositionFor(md, "Review"), 3);
   assert.equal(sourcePositionFor(md, "Review #"), 3, "a heading's anchor glyph is not in the source");
+  const shelf = "See [[Attack on Titan]] and a pasted thing.\n\n## At a glance\n\nRow.\n";
+  assert.equal(sourcePositionFor(shelf, "At a glance#"), 48, "whole words: 'At' is not 'Attack'");
+  assert.equal(sourcePositionFor("## Відгук\n\nЧернетка тут.", "Чернетка тут."), 11);
   assert.equal(sourcePositionFor(md, "not in the note"), -1);
   assert.equal(sourcePositionFor(md, "   "), -1);
+});
+
+test("a rendered block maps back to its source lines by kind", () => {
+  const body = [
+    "## Review",
+    "",
+    "First para line one",
+    "continues here.",
+    "",
+    "- item one",
+    "- item two",
+    "",
+    "> [!note] Title",
+    "> quoted line",
+    "",
+    "```js",
+    "let a = 1;",
+    "```",
+    "",
+    "| Key | Value |",
+    "|---|---|",
+    "| Aired | 2021 |",
+    "",
+  ].join("\n");
+  const slice = (range: { start: number; end: number } | null) =>
+    range ? body.slice(range.start, range.end) : null;
+  assert.equal(slice(blockSourceRange(body, "line", "Review #")), "## Review");
+  assert.equal(slice(blockSourceRange(body, "paragraph", "First para line one continues here.")), "First para line one\ncontinues here.");
+  assert.equal(slice(blockSourceRange(body, "line", "item two")), "- item two");
+  assert.equal(slice(blockSourceRange(body, "quote", "Title quoted line")), "> [!note] Title\n> quoted line");
+  assert.equal(slice(blockSourceRange(body, "fence", "let a = 1;")), "```js\nlet a = 1;\n```");
+  assert.equal(slice(blockSourceRange(body, "table", "Key Value Aired 2021")), "| Key | Value |\n|---|---|\n| Aired | 2021 |");
+  assert.equal(blockSourceRange(body, "paragraph", "nowhere at all"), null);
+  const edited = spliceBlock(body, 12, 47, "Replaced.");
+  assert.equal(edited.body.slice(12, edited.end), "Replaced.");
+  assert.deepEqual(appendParagraphRange("Text.\n"), { body: "Text.\n\n\n", start: 7, end: 7 });
+  assert.deepEqual(appendParagraphRange(""), { body: "\n", start: 0, end: 0 });
 });

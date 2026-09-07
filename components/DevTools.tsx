@@ -613,7 +613,17 @@ export default function DevTools() {
   // source line. Third-party controls keep their ordinary interaction.
   useEffect(() => {
     if (!expanded || !editor || !documentInfo) return;
-    const hosts = [...document.querySelectorAll<HTMLElement>("[data-dev-body-field]")];
+    // Marked on arrival, not once: a Ukrainian article that appears after
+    // `router.refresh()` (a translation just created) is editable at once.
+    const mark = () => {
+      for (const host of document.querySelectorAll<HTMLElement>(
+        "[data-dev-body-field]:not([data-dev-body-ready])"
+      )) {
+        host.dataset.devBodyReady = "true";
+        host.tabIndex = 0;
+        host.setAttribute("aria-label", devUi.devBody[lang]);
+      }
+    };
     const blockText = (host: HTMLElement, target: Element) => {
       const block = target.closest(
         "p, li, h1, h2, h3, h4, h5, h6, blockquote, pre, td, th, figcaption, dt, dd"
@@ -639,11 +649,9 @@ export default function DevTools() {
       setLinkMenu(null);
     };
 
-    for (const host of hosts) {
-      host.dataset.devBodyReady = "true";
-      host.tabIndex = 0;
-      host.setAttribute("aria-label", devUi.devBody[lang]);
-    }
+    mark();
+    const observer = new MutationObserver(mark);
+    observer.observe(document.body, { childList: true, subtree: true });
     const click = (event: MouseEvent) => {
       const target = event.target instanceof Element ? event.target : null;
       if (
@@ -670,15 +678,16 @@ export default function DevTools() {
     document.addEventListener("click", click, true);
     document.addEventListener("keydown", keydown, true);
     return () => {
+      observer.disconnect();
       document.removeEventListener("click", click, true);
       document.removeEventListener("keydown", keydown, true);
-      for (const host of hosts) {
+      for (const host of document.querySelectorAll<HTMLElement>("[data-dev-body-ready]")) {
         delete host.dataset.devBodyReady;
         host.removeAttribute("tabindex");
         host.removeAttribute("aria-label");
       }
     };
-  }, [bodyKey, documentInfo?.source, expanded, lang, source.sourceUk]);
+  }, [bodyKey, documentInfo?.source, expanded, lang]);
 
   useEffect(() => {
     if (expanded) return;

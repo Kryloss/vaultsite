@@ -34,7 +34,7 @@ export type DevEditorAction =
   | { type: "restored"; state: DevEditorState };
 
 /** Must equal `EDITOR_PROTOCOL` in scripts/dev-editor-core.mjs; the server test checks. */
-export const EDITOR_PROTOCOL = 2;
+export const EDITOR_PROTOCOL = 3;
 
 export function isDevToolsAvailable(environment: string | undefined, hostname: string) {
   return environment === "development" && hostname === "localhost";
@@ -291,13 +291,89 @@ export function sourcePositionFor(markdown: string, renderedText: string) {
   const words = renderedText.trim().split(/\s+/).filter(Boolean).slice(0, 6);
   // Fewer words each time: a heading carries its anchor's "#", a list item
   // its nested list, and the source has neither.
+  // Whole words only, in any script: "At" must not settle for "Attack".
+  const edge = (word: string, after: boolean) =>
+    (after ? /[\p{L}\p{N}]$/u : /^[\p{L}\p{N}]/u).test(word)
+      ? after
+        ? "(?![\\p{L}\\p{N}])"
+        : "(?<![\\p{L}\\p{N}])"
+      : "";
+  // Plain whitespace between the words first (the common case, and the one
+  // that cannot skip into a neighbouring block), then room for Markdown
+  // marks and link syntax between them.
   for (let count = words.length; count > 0; count -= 1) {
-    const pattern = words
-      .slice(0, count)
-      .map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
-      .join("[\\s\\S]{0,40}?");
-    const match = new RegExp(pattern).exec(markdown);
-    if (match) return match.index;
+    for (const gap of ["\\s+", "[\\s\\S]{0,40}?"]) {
+      const pattern = words
+        .slice(0, count)
+        .map(
+          (word) =>
+            edge(word, false) + word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + edge(word, true)
+        )
+        .join(gap);
+      const match = new RegExp(pattern, "u").exec(markdown);
+      if (match) return match.index;
+    }
   }
   return -1;
+}
+
+export type BlockKind = "line" | "paragraph" | "fence" | "table" | "quote";
+
+/**
+ * The source lines a rendered block came from: `[start, end)` offsets into
+ * the body, or null when the block cannot be found. `text` is the block's
+ * rendered text (its first words locate the block); `kind` says how far the
+ * block reaches from that line — one line (a heading, a list item), a
+ * paragraph (to the next blank line), a fenced code block (to the closing
+ * fence), a table (contiguous `|` lines) or a quote (contiguous `>` lines).
+ */
+export function blockSourceRange(body: string, kind: BlockKind, text: string) {
+  const position = sourcePositionFor(body, text);
+  if (position < 0) return null;
+  const lineStart = body.lastIndexOf("\n", position - 1) + 1;
+  const lines = body.split("\n");
+  let lineIndex = 0;
+  let offset = 0;
+  while (offset + lines[lineIndex].length + 1 <= lineStart && lineIndex < lines.length - 1) {
+    offset += lines[lineIndex].length + 1;
+    lineIndex += 1;
+  }
+  // The match may sit inside a fence or quote whose first line is above it.
+  let first = lineIndex;
+  let last = lineIndex;
+  const isFence = (line: string) => /^\s{0,3}(`{3,}|~{3,})/.test(line);
+  if (kind === "fence") {
+    while (first > 0 && !isFence(lines[first])) first -= 1;
+    last = first + 1;
+    while (last < lines.length && !isFence(lines[last])) last += 1;
+    if (last >= lines.length) last = lines.length - 1;
+  } else if (kind === "table") {
+    while (first > 0 && lines[first - 1].includes("|")) first -= 1;
+    while (last < lines.length - 1 && lines[last + 1].includes("|")) last += 1;
+  } else if (kind === "quote") {
+    while (first > 0 && /^\s*>/.test(lines[first - 1])) first -= 1;
+    while (last < lines.length - 1 && /^\s*>/.test(lines[last + 1])) last += 1;
+  } else if (kind === "paragraph") {
+    while (last < lines.length - 1 && lines[last + 1].trim() !== "" && !/^\s*(#{1,6}\s|```|~~~|>|[-*+]\s|\d+[.)]\s|\|)/.test(lines[last + 1])) {
+      last += 1;
+    }
+  }
+  const start = lines.slice(0, first).reduce((sum, line) => sum + line.length + 1, 0);
+  const end = lines.slice(0, last + 1).reduce((sum, line) => sum + line.length + 1, 0) - 1;
+  return { start, end: Math.min(end, body.length) };
+}
+
+/** Put `text` in `[start, end)` of `body`; the block's new end follows. */
+export function spliceBlock(body: string, start: number, end: number, text: string) {
+  return { body: body.slice(0, start) + text + body.slice(end), end: start + text.length };
+}
+
+/**
+ * Where a new paragraph goes at the end of a body: after a blank line, with
+ * the trailing newline the file already had kept for after it.
+ */
+export function appendParagraphRange(body: string) {
+  const trimmed = body.replace(/\s+$/, "");
+  const prefix = trimmed.length ? `${trimmed}\n\n` : "";
+  return { body: `${prefix}\n`, start: prefix.length, end: prefix.length };
 }
