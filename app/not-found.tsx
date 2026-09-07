@@ -8,10 +8,10 @@ import { getSectionBySlug } from "@/lib/vault";
 /**
  * 404 — the one page with nothing to read on it.
  *
- * So the number is the page: set at title scale and above, centred, fading
- * down its own height, with a pool of light behind it (`.notfound-code`,
- * globals.css). Everything under it is the way out — a sentence, two ways to
- * leave, and the guess at what was actually meant.
+ * So the number is the page: set at title scale and above, centred in the
+ * window, masked out down its own height with the sentence lying across its
+ * tail (`.notfound-page`, globals.css). Everything under it is the way out —
+ * a sentence, two ways to leave, and the guess at what was actually meant.
  *
  * The second way out is checked against the vault rather than hard-coded:
  * a 404 that links to a section nobody published is a 404 pointing at a 404.
@@ -20,7 +20,7 @@ export default function NotFound() {
   const posts = getSectionBySlug("posts");
 
   return (
-    <Page>
+    <Page className="notfound-page">
       <div className="notfound-hero stagger">
         <h1 className="notfound-code">404</h1>
         <p className="notfound-lede">

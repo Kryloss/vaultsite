@@ -9521,18 +9521,39 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
    a 24px "404", a line of grey, a link — which is the layout of a page that
    has something to say, applied to a page that hasn't.
 
-   So the number IS the page: bigger than any title on the site, centred,
-   fading out down its own height over a soft pool of light. Everything under
-   it is the way out. Monochrome throughout (#64) — the fade is `--text` at
-   falling opacity, so it goes dark-to-pale on white and bright-to-dim on
-   black without a second set of values.
+   So the number IS the page: bigger than any title on the site, centred in
+   the window, fading out down its own height over a soft pool of light, with
+   the sentence riding on its tail. Everything under it is the way out.
+   Monochrome throughout (#64) — the fade is a MASK, so it takes the number
+   out towards whatever the page is behind it and needs no second set of
+   values for dark mode.
 
    `.stagger` on the wrapper: the number, the sentence and the buttons arrive
    30ms apart, and reduced motion is already handled there. */
+/* The one route that fills the window. Every other page starts at the top and
+   runs down; this one has no length to speak of, and left at the top it reads
+   as a page that failed to load the rest of itself. `.page` keeps its measure
+   and gutters — only the vertical behaviour changes here.
+
+   `svh`, not `vh`: on a phone the small viewport is the one that doesn't move
+   when the address bar collapses, so the block doesn't drift as you scroll.
+   The border box already includes `--page-y`, so this is the window's height
+   exactly, and a page with enough suggestions to outgrow it simply grows. */
+.notfound-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
 .notfound-hero {
+  /* Held here, not on `.notfound-code`, because the sentence below is
+     positioned as a fraction of it — the two move together or the overlap
+     comes apart at one window width. */
+  --notfound-size: clamp(5.5rem, 3rem + 16vw, 10rem);
   position: relative;
   text-align: center;
-  padding-top: clamp(0.5rem, 7vh, 4rem);
 }
 
 /* The pool of light. `z-index: -1` is what keeps it BEHIND the number: a
@@ -9561,43 +9582,48 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   font-family: var(--font-prose);
   /* Roughly twice `.page-title` at every size — a title is the biggest thing
      on a page that has content; this is the page. */
-  font-size: clamp(5.5rem, 3rem + 16vw, 10rem);
+  font-size: var(--notfound-size);
   font-weight: 600;
   line-height: 0.9;
   letter-spacing: -0.045em;
   color: var(--text);
 }
 
-/* The fade is a gradient painted INTO the glyphs, so it needs the support
-   query: without `background-clip: text` the transparent fill would leave the
-   number invisible rather than un-faded. Both fill properties are set —
-   WebKit reads `-webkit-text-fill-color` in preference to `color`. */
-@supports ((-webkit-background-clip: text) or (background-clip: text)) {
-  .notfound-code {
-    background-image: linear-gradient(
-      to bottom,
-      var(--text) 22%,
-      color-mix(in srgb, var(--text) 30%, transparent) 100%
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    -webkit-text-fill-color: transparent;
-  }
+/* The fade is a MASK over ordinary `--text` glyphs, and that choice carries
+   the page. A gradient painted into the letters with `background-clip: text`
+   was the first version: it needs a transparent fill, so a browser without it
+   renders an INVISIBLE number rather than an unfaded one, it needs an
+   `@supports` around it and a `forced-colors` escape inside that, and because
+   it fades to ink rather than to nothing, the sentence lying across it needed
+   a third gradient stop to stop the strokes smudging the words. A mask has
+   none of those problems: unsupported, it simply doesn't fade; the fill stays
+   `--text`, so selection and forced colours are already right; and it goes to
+   fully transparent, which is what makes the overlap below legible.
 
-  /* Forced colours throw the gradient away and would keep the transparent
-     fill, which is a blank page for the reader who needs contrast most. */
-  @media (forced-colors: active) {
-    .notfound-code {
-      background-image: none;
-      color: CanvasText;
-      -webkit-text-fill-color: CanvasText;
-    }
-  }
+   The prefixed line first — Safari read `-webkit-mask-image` alone until
+   15.4, and an unprefixed-only declaration there is no fade at all. Ending at
+   96% rather than 100%: the baseline sits at about 89% of a line box this
+   tight, so a mask finishing any earlier amputates the feet of the digits
+   instead of fading them. */
+.notfound-code {
+  -webkit-mask-image: linear-gradient(to bottom, #000 22%, transparent 96%);
+  mask-image: linear-gradient(to bottom, #000 22%, transparent 96%);
 }
 
+/* Tucked INTO the number rather than set below it: the first line rides over
+   the tail of the glyphs, where the mask has already taken them most of the
+   way out, so the two read as one block instead of a heading with a caption
+   under it. The lift is a fraction of `--notfound-size`, so it holds from a
+   phone to a wide window — a fixed rem (the `-mt-8` this was adapted from)
+   clears the digits at one end of the clamp and crosses their middles at the
+   other.
+
+   Order matters twice over: the sentence comes AFTER the number in the DOM,
+   and `.stagger > *` gives every child its own stacking context, so the text
+   paints on top of the glyphs without a z-index anywhere. */
 .notfound-lede {
-  margin: 1.25rem auto 0;
+  position: relative;
+  margin: calc(var(--notfound-size) * -0.28) auto 0;
   max-width: 26rem;
   color: var(--text-secondary);
   text-wrap: balance;
