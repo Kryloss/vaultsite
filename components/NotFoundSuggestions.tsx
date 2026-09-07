@@ -64,7 +64,10 @@ export default function NotFoundSuggestions() {
   if (matches.length === 0) return null;
 
   return (
-    <div className="mt-8">
+    /* Named so globals.css can rule a line above it and centre its label —
+       the divider has to live INSIDE the component, since a wrapper in the
+       page would draw one on every 404 that has nothing to suggest. */
+    <div className="notfound-suggestions">
       <p className="text-sm text-[var(--text-tertiary)]">
         <T {...ui.didYouMean} />
       </p>

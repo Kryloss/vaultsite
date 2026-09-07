@@ -168,6 +168,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 158 | Krapka, the mascot: a full stop with a face — built, parked |
 | 159 | The greeting's full stop as the mascot — built, taken out |
 | 160 | One preview cut for both languages, decided on the English body |
+| 161 | The 404 is the number: a page with nothing to read is designed as one |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -894,3 +895,15 @@ The projects feed truncates a long entry at the last block that fits in 1000 mar
 **The one guard.** If a translation's structure genuinely differs — paragraphs merged — the shared cut can cover the whole of it, and a long body would then land on the list page entire. That case falls back to the translation cutting itself, which is the old behaviour, now reached only when the structures disagree.
 
 The maths moved to `lib/til-preview.ts` with `lib/til-preview.test.ts` around it: the vault exercises the happy path on every build but not two bodies drifting apart at the cut, and nothing about a green build would have said the Ukrainian preview had started stopping a block early.
+
+## 161. The 404 is the number: a page with nothing to read is designed as one (2026-09-07)
+
+The 404 opened like every other page — a 24px "404", a line of grey under it, a text link — which is the layout of a page that has something to say applied to the one page that has nothing. It now leads with the number at roughly twice `.page-title`, centred, fading out down its own height over a soft pool of light, with two ways out under it and the "did you mean" guess below a rule.
+
+**The fade is `--text` at falling opacity, not two sets of values.** A gradient painted into the glyphs with `background-clip: text`, from full `--text` to `color-mix(… 30%, transparent)` — so it runs dark-to-pale on white and bright-to-dim on black with one declaration, and nothing about it is a colour (#64). It sits inside `@supports` because the fill has to be transparent for the gradient to show: a browser without `background-clip: text` would render an invisible number rather than an unfaded one, which is the failure mode worth the extra three lines. `forced-colors` gets the same treatment for the same reason — the gradient is dropped there and the fill goes back to `CanvasText`.
+
+**The pool of light needs `z-index: -1`, and that is the whole trick.** A positioned pseudo-element paints AFTER its non-positioned siblings, so the glow drawn on `.notfound-hero::before` lands on top of the number unless it is pushed behind. It is on the wrapper rather than on the number itself: a negative-z child of the number would paint over the number's own clipped-text background instead of behind it, which is the same bug one element further in.
+
+**Two buttons, no icons.** Home takes the inverted fill the active nav row and the selected chip already use; the second is a quiet surface beside it. The arrows are the site's own `.arrow-glyph`, which throws them on the press — icons stay in the sidebar (#64), so the reference this was adapted from loses its house and compass and keeps its shape. The second button's destination is read from the vault (`getSectionBySlug("posts")`) rather than hard-coded, because a 404 linking to a section nobody published is a 404 pointing at a 404.
+
+**The rule above "did you mean" lives in `NotFoundSuggestions`, not on the page.** The component returns `null` when it has nothing to suggest, and a divider drawn by a wrapper in `not-found.tsx` would then hang under the buttons on every 404 that matched nothing. Its label centres and its rows do not: the label reads as the hero's last line, the list keeps the alignment every other list on the site has.

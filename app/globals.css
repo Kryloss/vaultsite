@@ -4471,13 +4471,6 @@ svg.diagram tspan {
   background: var(--text);
 }
 
-.notfound-home {
-  color: var(--text);
-  text-decoration: underline;
-  text-decoration-color: var(--text-tertiary);
-  text-underline-offset: 4px;
-}
-
 /* --- Grouping, continued ------------------------------------------------
    A heading two lines below the paragraph it interrupts belongs to that
    paragraph. Pushing the space above it well past the space below makes the
@@ -9521,4 +9514,150 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   vertical-align: middle;
   position: relative;
   top: -3px;
+}
+
+/* ---------- 404 (app/not-found.tsx) --------------------------------------
+   The one page with nothing on it to read. It used to open like any other —
+   a 24px "404", a line of grey, a link — which is the layout of a page that
+   has something to say, applied to a page that hasn't.
+
+   So the number IS the page: bigger than any title on the site, centred,
+   fading out down its own height over a soft pool of light. Everything under
+   it is the way out. Monochrome throughout (#64) — the fade is `--text` at
+   falling opacity, so it goes dark-to-pale on white and bright-to-dim on
+   black without a second set of values.
+
+   `.stagger` on the wrapper: the number, the sentence and the buttons arrive
+   30ms apart, and reduced motion is already handled there. */
+.notfound-hero {
+  position: relative;
+  text-align: center;
+  padding-top: clamp(0.5rem, 7vh, 4rem);
+}
+
+/* The pool of light. `z-index: -1` is what keeps it BEHIND the number: a
+   positioned pseudo-element paints after its non-positioned siblings
+   otherwise, and the glow would sit on top of the glyphs. Sized off the
+   measure rather than the number so it stays a wide soft ellipse at every
+   window width. */
+.notfound-hero::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  top: 0;
+  width: min(30rem, 130%);
+  aspect-ratio: 2 / 1;
+  transform: translateX(-50%);
+  background: radial-gradient(
+    closest-side,
+    color-mix(in srgb, var(--text) 9%, transparent),
+    transparent
+  );
+  pointer-events: none;
+}
+
+.notfound-code {
+  font-family: var(--font-prose);
+  /* Roughly twice `.page-title` at every size — a title is the biggest thing
+     on a page that has content; this is the page. */
+  font-size: clamp(5.5rem, 3rem + 16vw, 10rem);
+  font-weight: 600;
+  line-height: 0.9;
+  letter-spacing: -0.045em;
+  color: var(--text);
+}
+
+/* The fade is a gradient painted INTO the glyphs, so it needs the support
+   query: without `background-clip: text` the transparent fill would leave the
+   number invisible rather than un-faded. Both fill properties are set —
+   WebKit reads `-webkit-text-fill-color` in preference to `color`. */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .notfound-code {
+    background-image: linear-gradient(
+      to bottom,
+      var(--text) 22%,
+      color-mix(in srgb, var(--text) 30%, transparent) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Forced colours throw the gradient away and would keep the transparent
+     fill, which is a blank page for the reader who needs contrast most. */
+  @media (forced-colors: active) {
+    .notfound-code {
+      background-image: none;
+      color: CanvasText;
+      -webkit-text-fill-color: CanvasText;
+    }
+  }
+}
+
+.notfound-lede {
+  margin: 1.25rem auto 0;
+  max-width: 26rem;
+  color: var(--text-secondary);
+  text-wrap: balance;
+}
+
+.notfound-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.625rem;
+  margin-top: 2rem;
+}
+
+/* Two ways out, weighted: home is the answer most of the time, so it takes
+   the inverted fill the active nav row and the selected chip already use, and
+   the other stays a quiet surface beside it. No icons — those are the
+   sidebar's (#64); the arrows are the site's own `.arrow-glyph`, which throws
+   them on the press. */
+.notfound-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: var(--r-lg);
+  padding: 0.5625rem 1.125rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.notfound-btn-primary {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.notfound-btn-primary:hover {
+  background: var(--text-secondary);
+}
+
+.notfound-btn-quiet {
+  border-color: var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.notfound-btn-quiet:hover {
+  background: var(--bg-hover);
+}
+
+/* "Did you mean…" — the useful half of the page, and the only part of it that
+   knows what was actually typed. Ruled off rather than merely spaced: under a
+   centred hero, a left-aligned list needs a line to belong to the page rather
+   than look stranded. The rows keep their own alignment; only the label
+   centres, so it reads as the hero's last line rather than the list's first. */
+.notfound-suggestions {
+  margin-top: 2.75rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.notfound-suggestions > p {
+  text-align: center;
 }
