@@ -2,6 +2,12 @@ import type { NextConfig } from "next";
 import path from "node:path";
 
 const nextConfig: NextConfig = {
+  // Lint is advisory (`npm run lint`, docs/VERIFY.md), not a build gate. Once
+  // eslint.config.mjs existed, `next build` started running it and failing on
+  // the 34-error baseline — which broke every Vercel deploy from that commit
+  // on (DECISIONS #149). Drop this the day `npm run lint` joins `check`.
+  eslint: { ignoreDuringBuilds: true },
+
   // The local authoring pencil owns the one viable corner in development.
   // Keep Next's own floating badge from sitting invisibly above it; compile
   // errors still use the ordinary development overlay.

@@ -1,13 +1,17 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  completeWikiLink,
   createDevEditorState,
   devEditorChanges,
   devEditorDirty,
   devEditorReducer,
+  indentLines,
   isDevToolsAvailable,
   publicPageUrl,
   sourceForLanguage,
+  wikiLinkMatches,
+  wikiLinkQuery,
   type DevFields,
 } from "./dev-tools.ts";
 
@@ -156,4 +160,49 @@ test("an external rating save updates the revision without losing a draft", () =
   assert.equal(state.revision, "rev-2");
   assert.equal(state.draft.title, "Draft title");
   assert.equal(devEditorDirty(state), true);
+});
+
+test("Tab inserts two spaces at a caret and indents or outdents selected lines", () => {
+  assert.deepEqual(indentLines("ab", 1, 1, false), { value: "a  b", start: 3, end: 3 });
+  const indented = indentLines("one\ntwo\nthree", 1, 6, false);
+  assert.equal(indented.value, "  one\n  two\nthree");
+  assert.deepEqual([indented.start, indented.end], [3, 10]);
+  const outdented = indentLines(indented.value, indented.start, indented.end, true);
+  assert.equal(outdented.value, "one\ntwo\nthree");
+  assert.deepEqual([outdented.start, outdented.end], [1, 6]);
+  // Outdenting an unindented line changes nothing and never moves before it.
+  assert.deepEqual(indentLines("x", 0, 0, true), { value: "x", start: 0, end: 0 });
+});
+
+test("a wiki-link query is the open [[ the caret is inside", () => {
+  assert.deepEqual(wikiLinkQuery("see [[Sec", 9), { start: 4, query: "Sec" });
+  assert.deepEqual(wikiLinkQuery("see [[", 6), { start: 4, query: "" });
+  assert.equal(wikiLinkQuery("see [[Done]] and", 16), null);
+  assert.equal(wikiLinkQuery("see [[Target|lab", 16), null);
+  assert.equal(wikiLinkQuery("see [[a\nb", 9), null);
+  assert.equal(wikiLinkQuery("plain", 5), null);
+  assert.deepEqual(completeWikiLink("see [[Sec here", 4, 9, "Security+"), {
+    value: "see [[Security+]] here",
+    caret: 17,
+  });
+  assert.deepEqual(completeWikiLink("see [[Sec]] here", 4, 9, "Security+"), {
+    value: "see [[Security+]] here",
+    caret: 17,
+  });
+});
+
+test("wiki-link suggestions match either title, prefixes first, pages only", () => {
+  const items = [
+    { title: "Arcane", titleUk: "Аркейн" },
+    { title: "Security+ journey", titleUk: "Шлях Security+" },
+    { title: "Heading about Arcane", lang: "en" as const },
+    { title: "My arcane hobby" },
+  ];
+  assert.deepEqual(wikiLinkMatches(items, "arc").map((item) => item.title), [
+    "Arcane",
+    "My arcane hobby",
+  ]);
+  assert.deepEqual(wikiLinkMatches(items, "арк").map((item) => item.title), ["Arcane"]);
+  assert.equal(wikiLinkMatches(items, "").length, 3);
+  assert.equal(wikiLinkMatches(items, "", 1).length, 1);
 });

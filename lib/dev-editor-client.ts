@@ -52,3 +52,16 @@ export async function devEditorRequest<T>(endpoint: string, body: object): Promi
   }
   throw new DevEditorRequestError("Editor session unavailable");
 }
+
+/** A pasted or dropped file as the base64 payload `/attach-asset` takes. */
+export function fileToBase64(file: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(reader.error ?? new Error("Could not read the file"));
+    reader.onload = () => {
+      const result = typeof reader.result === "string" ? reader.result : "";
+      resolve(result.slice(result.indexOf(",") + 1));
+    };
+    reader.readAsDataURL(file);
+  });
+}

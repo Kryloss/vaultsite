@@ -130,3 +130,91 @@ export function devEditorChanges(state: DevEditorState): Partial<DevFields> {
   }
   return changes;
 }
+
+/** Replace the selection with `text`; the caret lands after it. */
+export function insertText(value: string, start: number, end: number, text: string) {
+  return { value: value.slice(0, start) + text + value.slice(end), caret: start + text.length };
+}
+
+/**
+ * Tab in the body editor. A collapsed caret gets two spaces; a selection
+ * indents (or, with Shift, outdents) every line it touches, and the selection
+ * grows or shrinks with the text so a second Tab does the same lines again.
+ */
+export function indentLines(value: string, start: number, end: number, outdent: boolean) {
+  if (start === end && !outdent) {
+    const inserted = insertText(value, start, end, "  ");
+    return { value: inserted.value, start: inserted.caret, end: inserted.caret };
+  }
+  const lineStart = value.lastIndexOf("\n", start - 1) + 1;
+  const lineEndIndex = value.indexOf("\n", end);
+  const lineEnd = lineEndIndex === -1 ? value.length : lineEndIndex;
+  const block = value.slice(lineStart, lineEnd);
+  let firstDelta = 0;
+  const next = block
+    .split("\n")
+    .map((line, index) => {
+      if (outdent) {
+        const removed = /^ {1,2}/.exec(line)?.[0].length ?? 0;
+        if (index === 0) firstDelta = -removed;
+        return line.slice(removed);
+      }
+      if (index === 0) firstDelta = 2;
+      return `  ${line}`;
+    })
+    .join("\n");
+  return {
+    value: value.slice(0, lineStart) + next + value.slice(lineEnd),
+    start: Math.max(lineStart, start + firstDelta),
+    end: Math.max(lineStart, end + next.length - block.length),
+  };
+}
+
+/**
+ * The open `[[` the caret is inside, if any: nothing typed since it closes,
+ * breaks the line, or names a display label (`[[Target|label`), so the
+ * suggestion list shows only while the TARGET is being written.
+ */
+export function wikiLinkQuery(value: string, caret: number) {
+  const before = value.slice(0, caret);
+  const open = before.lastIndexOf("[[");
+  if (open === -1) return null;
+  const query = before.slice(open + 2);
+  if (/[\n[\]|]/.test(query)) return null;
+  return { start: open, query };
+}
+
+/** Finish `[[query` as `[[Title]]`, absorbing a `]]` already typed after the caret. */
+export function completeWikiLink(value: string, start: number, caret: number, title: string) {
+  const text = `[[${title}]]`;
+  const after = value.slice(caret);
+  const rest = after.startsWith("]]") ? after.slice(2) : after;
+  return { value: value.slice(0, start) + text + rest, caret: start + text.length };
+}
+
+export interface WikiLinkCandidate {
+  title: string;
+  titleUk?: string;
+  lang?: "en" | "uk";
+}
+
+/**
+ * Pages whose title (either language) matches; prefix matches first, then
+ * the rest, in the index's own order. Heading results carry `lang` and are
+ * skipped: a wiki link targets a note, not an anchor.
+ */
+export function wikiLinkMatches<T extends WikiLinkCandidate>(items: T[], query: string, limit = 8) {
+  const needle = query.trim().toLowerCase();
+  const pages = items.filter((item) => !item.lang);
+  if (!needle) return pages.slice(0, limit);
+  const starts: T[] = [];
+  const contains: T[] = [];
+  for (const item of pages) {
+    const en = item.title.toLowerCase();
+    const uk = item.titleUk?.toLowerCase() ?? "";
+    if (en.startsWith(needle) || uk.startsWith(needle)) starts.push(item);
+    else if (en.includes(needle) || uk.includes(needle)) contains.push(item);
+    if (starts.length >= limit) break;
+  }
+  return [...starts, ...contains].slice(0, limit);
+}

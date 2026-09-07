@@ -5,7 +5,9 @@ import path from "node:path";
 import test from "node:test";
 import matter from "gray-matter";
 import {
+  attachAsset,
   createEntry,
+  createTranslation,
   createdEntrySlug,
   DevEditorError,
   patchFrontmatter,
@@ -15,7 +17,9 @@ import {
   readPageDocument,
   reorderDocuments,
   resolveVaultMarkdown,
+  revisionFor,
   saveDocument,
+  sniffImage,
   savePageDocument,
   toggleNowGoal,
 } from "./dev-editor-core.mjs";
@@ -504,5 +508,117 @@ test("toggles one Now goal in both languages and rejects a stale rendered label"
   await assert.rejects(
     toggleNowGoal(root, { source, sourceUk, index: 0, done: true }),
     (error) => error instanceof DevEditorError && error.code === "invalid_goal"
+  );
+});
+
+test("patches date, status and cover as the vault spells them", () => {
+  const next = patchFrontmatter(sample, { date: "2026-09-06", status: "reading", cover: "note.jpg" });
+  assert.match(next, /^date: 2026-09-06$/m);
+  assert.match(next, /^status: reading$/m);
+  assert.match(next, /^cover: note\.jpg$/m);
+  assert.equal(typeof matter(next).data.date, "object", "an unquoted date stays a YAML date");
+  const cleared = patchFrontmatter(next, { status: null, cover: null });
+  assert.doesNotMatch(cleared, /^status:/m);
+  assert.doesNotMatch(cleared, /^cover:/m);
+
+  assert.throws(() => patchFrontmatter(sample, { date: "2026-02-30" }), { code: "invalid_date" });
+  assert.throws(() => patchFrontmatter(sample, { date: "yesterday" }), { code: "invalid_date" });
+  assert.throws(() => patchFrontmatter(sample, { cover: "../x.jpg" }), { code: "invalid_cover" });
+  assert.throws(() => patchFrontmatter(sample, { status: "a\nb" }), { code: "invalid_status" });
+});
+
+test("creates a Ukrainian body file from the English body, once", async (t) => {
+  const root = await fs.promises.mkdtemp(path.join(os.tmpdir(), "vault-editor-"));
+  t.after(() => fs.promises.rm(root, { recursive: true, force: true }));
+  const dir = path.join(root, "vault", "Posts");
+  await fs.promises.mkdir(dir, { recursive: true });
+  const file = path.join(dir, "Note.md");
+  await fs.promises.writeFile(file, "---\r\ntitle: Note\r\n---\r\n## Heading\r\n\r\nBody.\r\n");
+
+  const created = await createTranslation(root, { source: "vault/Posts/Note.md" });
+  assert.equal(created.sourceUk, "vault/Posts/Note.uk.md");
+  const sibling = await fs.promises.readFile(path.join(dir, "Note.uk.md"), "utf8");
+  assert.equal(sibling, "## Heading\r\n\r\nBody.\r\n", "body only, in the note's own newlines");
+  assert.equal(created.fields.body_uk, "## Heading\n\nBody.\n");
+  assert.equal(created.revisionUk, revisionFor(sibling));
+
+  await assert.rejects(createTranslation(root, { source: "vault/Posts/Note.md" }), {
+    code: "translation_exists",
+  });
+  await assert.rejects(createTranslation(root, { source: "vault/Posts/Note.uk.md" }), {
+    code: "unsupported_source",
+  });
+});
+
+const PNG_1PX = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+  "base64"
+);
+
+test("sniffs image formats from bytes", () => {
+  assert.equal(sniffImage(PNG_1PX), "png");
+  assert.equal(sniffImage(Buffer.from([0xff, 0xd8, 0xff, 0xe0])), "jpg");
+  assert.equal(sniffImage(Buffer.from("GIF89a")), "gif");
+  assert.equal(sniffImage(Buffer.from("RIFF\0\0\0\0WEBPVP8 ")), "webp");
+  assert.equal(sniffImage(Buffer.from("\0\0\0\x1cftypavif")), "avif");
+  assert.equal(sniffImage(Buffer.from("<svg xmlns=")), undefined);
+  assert.equal(sniffImage(Buffer.alloc(0)), undefined);
+});
+
+test("attaches an embed and a cover, names them uniquely, mirrors them, and rolls back", async (t) => {
+  const root = await fs.promises.mkdtemp(path.join(os.tmpdir(), "vault-editor-"));
+  t.after(() => fs.promises.rm(root, { recursive: true, force: true }));
+  const movies = path.join(root, "vault", "Shelf", "Movies");
+  await fs.promises.mkdir(path.join(movies, "covers"), { recursive: true });
+  await fs.promises.mkdir(path.join(root, "vault", "Posts"), { recursive: true });
+  const note = path.join(movies, "Fight Club.md");
+  await fs.promises.writeFile(note, "---\ntitle: Fight Club\n# keep\nrating: 4\n---\nBody.\n");
+  // An existing file elsewhere in the vault already owns the natural name.
+  await fs.promises.writeFile(path.join(root, "vault", "Posts", "fight-club.png"), PNG_1PX);
+  const data = PNG_1PX.toString("base64");
+  const source = "vault/Shelf/Movies/Fight Club.md";
+
+  const embed = await attachAsset(root, { source, name: "Pasted Image 1.PNG", data, purpose: "embed" });
+  assert.equal(embed.name, "pasted-image-1.png");
+  assert.equal(embed.path, "vault/Shelf/attachments/pasted-image-1.png");
+  assert.equal(embed.url, "/vault-assets/Shelf/attachments/pasted-image-1.png");
+  assert.equal(embed.embed, "![[pasted-image-1.png]]");
+  assert.ok(fs.existsSync(path.join(root, embed.path)));
+  assert.ok(fs.existsSync(path.join(root, "public", "vault-assets", "Shelf", "attachments", "pasted-image-1.png")));
+
+  const again = await attachAsset(root, { source, name: "pasted image 1.png", data, purpose: "embed" });
+  assert.equal(again.name, "pasted-image-1-2.png");
+
+  const opened = readDocument(root, source);
+  const cover = await attachAsset(root, { source, name: "poster.jpg", data, purpose: "cover", revision: opened.revision });
+  assert.equal(cover.name, "fight-club-2.png", "the cover is named after the note, past the taken name, in its real format");
+  assert.equal(cover.path, "vault/Shelf/Movies/covers/fight-club-2.png");
+  const raw = await fs.promises.readFile(note, "utf8");
+  assert.match(raw, /^cover: fight-club-2\.png$/m);
+  assert.match(raw, /# keep\nrating: 4/);
+  assert.equal(cover.document.fields.cover, "fight-club-2.png");
+
+  // A stale revision refuses the cover AND removes the image it had written.
+  await assert.rejects(
+    attachAsset(root, { source, name: "p.png", data, purpose: "cover", revision: opened.revision }),
+    { code: "revision_conflict" }
+  );
+  assert.ok(!fs.existsSync(path.join(movies, "covers", "fight-club-3.png")));
+  assert.ok(!fs.existsSync(path.join(root, "public", "vault-assets", "Shelf", "Movies", "covers", "fight-club-3.png")));
+
+  await assert.rejects(
+    attachAsset(root, { source, name: "x.png", data: Buffer.from("<svg/>").toString("base64"), purpose: "embed" }),
+    { code: "unsupported_asset" }
+  );
+  await assert.rejects(attachAsset(root, { source, name: "x.png", data, purpose: "banner" }), {
+    code: "invalid_purpose",
+  });
+  await assert.rejects(attachAsset(root, { source, name: "x.png", data: "not base64!", purpose: "embed" }), {
+    code: "too_large",
+  });
+  await fs.promises.writeFile(path.join(movies, "Fight Club.uk.md"), "Тіло.\n");
+  await assert.rejects(
+    attachAsset(root, { source: "vault/Shelf/Movies/Fight Club.uk.md", name: "x.png", data, purpose: "embed" }),
+    { code: "unsupported_source" }
   );
 });

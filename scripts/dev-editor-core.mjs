@@ -17,6 +17,9 @@ export const EDITABLE_FRONTMATTER_KEYS = [
   "part",
   "rating",
   "top_order",
+  "date",
+  "status",
+  "cover",
 ];
 
 export const EDITABLE_PAGE_KEYS = [
@@ -29,6 +32,9 @@ export const EDITABLE_PAGE_KEYS = [
 ];
 
 const MAX_MARKDOWN_BODY = 512 * 1024;
+/** One pasted or dropped image. Obsidian pastes are rarely above 3 MiB. */
+const MAX_ASSET_BYTES = 10 * 1024 * 1024;
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 export class DevEditorError extends Error {
   constructor(message, status = 400, code = "invalid_request") {
@@ -232,7 +238,12 @@ function serializeField(key, value, newline, comment = "") {
     // (`>`) scalar would silently turn those newlines into spaces.
     return `${key}: ${JSON.stringify(value)}${suffix}${newline}`;
   }
-  const scalar = plainYamlSafe(value) ? value : JSON.stringify(value);
+  // `date: 2026-09-06` is the vault's own spelling; quoting it would turn the
+  // YAML date every other note has into a string on this one.
+  const scalar =
+    plainYamlSafe(value) || (key === "date" && ISO_DATE.test(value))
+      ? value
+      : JSON.stringify(value);
   return `${key}: ${scalar}${suffix}${newline}`;
 }
 
@@ -363,6 +374,22 @@ export function patchFrontmatter(source, changes) {
       );
     }
   }
+  if (typeof changes.date === "string" && !validIsoDate(changes.date.trim())) {
+    throw new DevEditorError("A date must be a real YYYY-MM-DD day.", 422, "invalid_date");
+  }
+  if (
+    typeof changes.status === "string" &&
+    (/[\r\n\0]/.test(changes.status) || changes.status.trim().length > 40)
+  ) {
+    throw new DevEditorError("A status is one short word.", 422, "invalid_status");
+  }
+  if (typeof changes.cover === "string" && !validAssetName(changes.cover.trim())) {
+    throw new DevEditorError(
+      "A cover is the file name of an image in the vault.",
+      422,
+      "invalid_cover"
+    );
+  }
 
   const parts = frontmatterParts(source);
   let block = parts.block;
@@ -395,6 +422,36 @@ export function patchFrontmatter(source, changes) {
     throw new DevEditorError("The edited file must keep an English title.", 422, "empty_title");
   }
   return next;
+}
+
+function validIsoDate(value) {
+  if (!ISO_DATE.test(value)) return false;
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  );
+}
+
+/** A vault asset is named by its basename alone: `cover:` resolves vault-wide. */
+function validAssetName(value) {
+  return (
+    value.length > 0 &&
+    value.length <= 200 &&
+    !value.startsWith(".") &&
+    !/[<>:"/\\|?*\0\r\n]/.test(value)
+  );
+}
+
+function fieldDate(data) {
+  const value = data.date;
+  if (value == null) return "";
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.toISOString().slice(0, 10);
+  }
+  return String(value).slice(0, 10);
 }
 
 function fieldText(data, key) {
@@ -494,6 +551,9 @@ export function documentPayload(sourcePath, raw) {
       part: fieldPart(data),
       rating: fieldRating(data),
       top_order: fieldTopOrder(data),
+      date: fieldDate(data),
+      status: fieldText(data, "status"),
+      cover: fieldText(data, "cover"),
     },
   };
 }
@@ -1397,5 +1457,235 @@ export async function reorderDocuments(repoRoot, args) {
     documents: opened.map((entry) =>
       withOpenTargets(documentPayload(entry.source, entry.next), entry.file)
     ),
+  };
+}
+
+/**
+ * Start a note's Ukrainian body from its English one.
+ *
+ * The sibling is body only (no frontmatter), which is what lib/vault.ts reads.
+ * It opens as a copy of the English Markdown so the author translates in
+ * place and every heading, embed and wiki-link target is already there; an
+ * empty file would render an empty Ukrainian page, which is worse than the
+ * English fallback the site shows while the sibling is missing.
+ */
+export async function createTranslation(repoRoot, args) {
+  if (!args || typeof args !== "object" || Array.isArray(args)) {
+    throw new DevEditorError("A translation request must be an object.");
+  }
+  const sources = resolvePageSources(repoRoot, args.source, undefined);
+  const sibling = sources.file.replace(/\.md$/i, ".uk.md");
+  if (fs.existsSync(sibling)) {
+    throw new DevEditorError(
+      "This note already has a Ukrainian body file.",
+      409,
+      "translation_exists"
+    );
+  }
+  const raw = await fs.promises.readFile(sources.file, "utf8");
+  const content = fileNewlines(markdownBody(raw), frontmatterParts(raw).newline);
+  await createFilePair([{ file: sibling, content }]);
+  return pageDocumentPayload({
+    ...sources,
+    sourceUk: translatedSource(sources.source),
+    fileUk: sibling,
+    raw,
+    rawUk: content,
+  });
+}
+
+/** Format from the bytes, never from the name the browser supplied. */
+export function sniffImage(buffer) {
+  if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+    return "jpg";
+  }
+  if (
+    buffer.length >= 8 &&
+    buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))
+  ) {
+    return "png";
+  }
+  if (buffer.length >= 6 && /^GIF8[79]a$/.test(buffer.subarray(0, 6).toString("latin1"))) {
+    return "gif";
+  }
+  if (
+    buffer.length >= 12 &&
+    buffer.subarray(0, 4).toString("latin1") === "RIFF" &&
+    buffer.subarray(8, 12).toString("latin1") === "WEBP"
+  ) {
+    return "webp";
+  }
+  if (
+    buffer.length >= 12 &&
+    buffer.subarray(4, 8).toString("latin1") === "ftyp" &&
+    /^avi[fs]$/.test(buffer.subarray(8, 12).toString("latin1"))
+  ) {
+    return "avif";
+  }
+  return undefined;
+}
+
+/** Every non-Markdown basename in the vault, lowercase: `cover:` and embeds resolve by name alone. */
+function vaultAssetNames(vaultRoot) {
+  const names = new Set();
+  const walk = (dir) => {
+    for (const item of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (item.name.startsWith(".")) continue;
+      const full = path.join(dir, item.name);
+      if (item.isDirectory()) walk(full);
+      else if (!item.name.toLowerCase().endsWith(".md")) names.add(item.name.toLowerCase());
+    }
+  };
+  walk(vaultRoot);
+  return names;
+}
+
+function uniqueAssetName(base, ext, taken) {
+  const stem = createdEntrySlug(base) || "image";
+  for (let attempt = 1; attempt < 100; attempt += 1) {
+    const candidate = attempt === 1 ? `${stem}.${ext}` : `${stem}-${attempt}.${ext}`;
+    if (!taken.has(candidate.toLowerCase())) return candidate;
+  }
+  throw new DevEditorError("Too many files already share this name.", 409, "asset_exists");
+}
+
+async function writeNewFile(file, buffer) {
+  const temp = path.join(
+    path.dirname(file),
+    `.${path.basename(file)}.${process.pid}.${randomBytes(6).toString("hex")}.tmp`
+  );
+  try {
+    const handle = await fs.promises.open(temp, "wx", 0o644);
+    try {
+      await handle.writeFile(buffer);
+      await handle.sync();
+    } finally {
+      await handle.close();
+    }
+    await fs.promises.link(temp, file);
+  } catch (error) {
+    if (error?.code === "EEXIST") {
+      throw new DevEditorError("A file with this name already exists.", 409, "asset_exists");
+    }
+    throw error;
+  } finally {
+    await fs.promises.unlink(temp).catch(() => {});
+  }
+}
+
+/**
+ * Put one image into the vault beside the note that uses it, and mirror it to
+ * public/vault-assets/ so the running dev server can show it at once.
+ *
+ * Pasting into Obsidian is what this replaces, so the rules are Obsidian's:
+ * an embed is `![[name]]` and a cover is `cover: name`, both resolved by
+ * basename anywhere in the vault — so the name is made vault-unique here. The
+ * format comes from the bytes; a `.png` that is not a PNG is refused. A cover
+ * also patches the note's frontmatter under the caller's revision, and every
+ * step past the first undoes the earlier ones on failure: the vault never
+ * keeps an image the site cannot see, or a `cover:` that names nothing.
+ *
+ * The image manifest (blur, size, srcset) is NOT updated: lib/blur.ts reads
+ * it once per process, and `npm run dev` regenerates it. Until then the new
+ * file renders without a placeholder, as any image did before the manifest.
+ */
+export async function attachAsset(repoRoot, args) {
+  if (!args || typeof args !== "object" || Array.isArray(args)) {
+    throw new DevEditorError("An attachment must be an object.");
+  }
+  const { source, name, data, purpose, revision } = args;
+  if (purpose !== "embed" && purpose !== "cover") {
+    throw new DevEditorError("An attachment is an embed or a cover.", 400, "invalid_purpose");
+  }
+  if (typeof name !== "string" || name.length > 255 || /[\r\n\0]/.test(name)) {
+    throw new DevEditorError("The attachment needs a file name.", 400, "invalid_asset");
+  }
+  if (
+    typeof data !== "string" ||
+    data.length > Math.ceil(MAX_ASSET_BYTES / 3) * 4 ||
+    !/^[A-Za-z0-9+/]*={0,2}$/.test(data)
+  ) {
+    throw new DevEditorError(
+      "The attachment must be base64 image data of at most 10 MiB.",
+      413,
+      "too_large"
+    );
+  }
+  const buffer = Buffer.from(data, "base64");
+  if (buffer.length === 0 || buffer.length > MAX_ASSET_BYTES) {
+    throw new DevEditorError("The attachment is empty or too large.", 413, "too_large");
+  }
+  const ext = sniffImage(buffer);
+  if (!ext) {
+    throw new DevEditorError(
+      "Only JPEG, PNG, GIF, WebP and AVIF images can be attached.",
+      415,
+      "unsupported_asset"
+    );
+  }
+
+  const file = resolveVaultMarkdown(repoRoot, source);
+  if (/(?:\.uk|\.excalidraw)\.md$/i.test(file)) {
+    throw new DevEditorError(
+      "Attach images from the note's primary Markdown document.",
+      400,
+      "unsupported_source"
+    );
+  }
+  const realRoot = fs.realpathSync(repoRoot);
+  const vaultRoot = fs.realpathSync(path.join(realRoot, "vault"));
+  const noteDir = path.dirname(file);
+  const sectionRoot = path.join(vaultRoot, path.relative(vaultRoot, noteDir).split(path.sep)[0]);
+
+  let dir;
+  if (purpose === "cover") {
+    // Shelf mediums and Music keep a covers/ folder; People keep the portrait
+    // beside the note. Follow whatever the folder already does.
+    const covers = path.join(noteDir, "covers");
+    dir = fs.existsSync(covers) && fs.statSync(covers).isDirectory() ? covers : noteDir;
+  } else {
+    dir = path.join(sectionRoot, "attachments");
+    await fs.promises.mkdir(dir, { recursive: true });
+  }
+
+  const taken = vaultAssetNames(vaultRoot);
+  const stem =
+    purpose === "cover"
+      ? path.basename(file, path.extname(file))
+      : path.basename(name, path.extname(name));
+  const fileName = uniqueAssetName(stem, ext, taken);
+  const target = path.join(dir, fileName);
+  const relative = path.relative(vaultRoot, target);
+  const mirror = path.join(realRoot, "public", "vault-assets", relative);
+  const url = "/vault-assets/" + relative.split(path.sep).map(encodeURIComponent).join("/");
+
+  await writeNewFile(target, buffer);
+  const undo = async () => {
+    await fs.promises.unlink(target).catch(() => {});
+    await fs.promises.unlink(mirror).catch(() => {});
+  };
+  try {
+    await fs.promises.mkdir(path.dirname(mirror), { recursive: true });
+    await fs.promises.copyFile(target, mirror, fs.constants.COPYFILE_EXCL);
+  } catch (error) {
+    await undo();
+    throw error;
+  }
+
+  let document;
+  if (purpose === "cover") {
+    try {
+      document = await saveDocument(repoRoot, { source, revision, changes: { cover: fileName } });
+    } catch (error) {
+      await undo();
+      throw error;
+    }
+  }
+  return {
+    name: fileName,
+    path: `vault/${relative.split(path.sep).join("/")}`,
+    url,
+    embed: `![[${fileName}]]`,
+    document,
   };
 }

@@ -6,21 +6,30 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   CloseIcon,
   ExternalLinkIcon,
+  ImageIcon,
   ObsidianIcon,
   PenIcon,
   RedoIcon,
   ReloadIcon,
   SaveIcon,
+  TranslateIcon,
   UndoIcon,
 } from "@/components/icons";
 import { useLang } from "@/components/useLang";
+import { useSearchIndex } from "@/components/useSearchIndex";
+import { fileToBase64 } from "@/lib/dev-editor-client";
 import {
+  completeWikiLink,
   createDevEditorState,
   devEditorChanges,
   devEditorDirty,
   devEditorReducer,
+  indentLines,
+  insertText,
   isDevToolsAvailable,
   publicPageUrl,
+  wikiLinkMatches,
+  wikiLinkQuery,
   type DevEditorAction,
   type DevEditorState,
   type DevFieldKey,
@@ -49,18 +58,52 @@ type BodyFieldKey = "body" | "body_uk";
 interface ActiveBodyEditor {
   host: HTMLElement;
   key: BodyFieldKey;
+  /**
+   * Where the textarea renders: a sibling inserted after the article, never
+   * the article itself. The article's content is `dangerouslySetInnerHTML`,
+   * and React refuses a portal into a node whose children it also owns.
+   */
+  mount: HTMLElement;
 }
 
 const SAVED_EVENT = "vault-dev-editor-saved";
 
-type EditorMessage = "saved" | "conflict" | "unavailable" | "saveFailed";
+type EditorMessage =
+  | "saved"
+  | "conflict"
+  | "unavailable"
+  | "saveFailed"
+  | "uploading"
+  | "uploaded"
+  | "uploadFailed"
+  | "translationCreated"
+  | "translationFailed";
 
 const editorMessages = {
   saved: devUi.devSaved,
   conflict: devUi.devConflict,
   unavailable: devUi.devUnavailable,
   saveFailed: devUi.devSaveFailed,
+  uploading: devUi.devUploading,
+  uploaded: devUi.devUploaded,
+  uploadFailed: devUi.devUploadFailed,
+  translationCreated: devUi.devTranslationCreated,
+  translationFailed: devUi.devTranslationFailed,
 } satisfies Record<EditorMessage, { en: string; uk: string }>;
+
+interface LinkMenu {
+  start: number;
+  query: string;
+  index: number;
+}
+
+interface AttachedAsset {
+  embed: string;
+}
+
+function isImage(file: File) {
+  return file.type.startsWith("image/");
+}
 
 // A soft Next.js navigation keeps this module alive. Preserve a draft by its
 // source file so opening search, following a shortcut, and coming back cannot
@@ -131,7 +174,15 @@ export default function DevTools() {
   const [message, setMessage] = useState<EditorMessage | null>(null);
   const [conflict, setConflict] = useState(false);
   const [activeBody, setActiveBody] = useState<ActiveBodyEditor | null>(null);
+  const [linkMenu, setLinkMenu] = useState<LinkMenu | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [creatingTranslation, setCreatingTranslation] = useState(false);
   const tokenRef = useRef<string | null>(null);
+  const pendingSelection = useRef<{ start: number; end: number } | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  // The public search index doubles as the wiki-link target list: every page
+  // that can be linked is in it, under both of its titles.
+  const searchItems = useSearchIndex(Boolean(activeBody));
   const pageGeneration = useRef(0);
   const loadRequest = useRef(0);
   const editGroup = useRef<{ key: DevFieldKey; at: number } | null>(null);
@@ -143,6 +194,8 @@ export default function DevTools() {
   const bodyKey: BodyFieldKey = lang === "uk" && source.sourceUk ? "body_uk" : "body";
   const messageText = message ? editorMessages[message][lang] : null;
   const activeBodyValue = activeBody && editor ? editor.draft[activeBody.key] : undefined;
+  const linkMatches = linkMenu ? wikiLinkMatches(searchItems, linkMenu.query) : [];
+  const linkIndex = linkMenu ? Math.min(linkMenu.index, Math.max(0, linkMatches.length - 1)) : 0;
 
   const edit = useCallback((key: DevFieldKey, value: string) => {
     const now = performance.now();
@@ -432,8 +485,12 @@ export default function DevTools() {
     const activate = (host: HTMLElement) => {
       const key = host.dataset.devBodyField as BodyFieldKey | undefined;
       if (key !== bodyKey) return;
-      host.style.setProperty("--dev-body-min-h", `${Math.ceil(host.getBoundingClientRect().height)}px`);
-      setActiveBody({ host, key });
+      const mount = document.createElement("div");
+      mount.className = "dev-body-mount";
+      mount.style.setProperty("--dev-body-min-h", `${Math.ceil(host.getBoundingClientRect().height)}px`);
+      host.after(mount);
+      setActiveBody({ host, key, mount });
+      setLinkMenu(null);
     };
 
     for (const host of hosts) {
@@ -487,20 +544,23 @@ export default function DevTools() {
   }, [lang, pathname]);
 
   useEffect(() => {
-    const host = activeBody?.host;
-    if (!host || !host.isConnected) return;
+    if (!activeBody) return;
+    const { host, mount } = activeBody;
+    if (!host.isConnected) return;
     host.dataset.devBodyEditing = "true";
+    // Focus is `autoFocus` on the textarea (applied by React at commit), not a
+    // focus() here: the press that opened the editor has already focused the
+    // article, and a frame later the browser keeps the article.
     const frame = requestAnimationFrame(() => {
       const textarea = bodyEditorRef.current;
       if (!textarea) return;
       textarea.style.height = "auto";
       textarea.style.height = `${textarea.scrollHeight}px`;
-      textarea.focus();
     });
     return () => {
       cancelAnimationFrame(frame);
       delete host.dataset.devBodyEditing;
-      host.style.removeProperty("--dev-body-min-h");
+      mount.remove();
     };
   }, [activeBody]);
 
@@ -513,6 +573,16 @@ export default function DevTools() {
       textarea.style.height = `${textarea.scrollHeight}px`;
     });
     return () => cancelAnimationFrame(frame);
+  }, [activeBodyValue]);
+
+  // A programmatic edit (Tab, a chosen link, an attached image) says where the
+  // caret goes; React has replaced the value by the time this runs.
+  useEffect(() => {
+    const selection = pendingSelection.current;
+    const textarea = bodyEditorRef.current;
+    if (!selection || !textarea) return;
+    pendingSelection.current = null;
+    textarea.setSelectionRange(selection.start, selection.end);
   }, [activeBodyValue]);
 
   useEffect(() => {
@@ -563,10 +633,131 @@ export default function DevTools() {
     };
   }, [dirty, lang, saving, source.source]);
 
+  const applyBodyChange = useCallback(
+    (key: BodyFieldKey, value: string, start: number, end: number) => {
+      pendingSelection.current = { start, end };
+      edit(key, value);
+    },
+    [edit]
+  );
+
+  const syncLinkMenu = (textarea: HTMLTextAreaElement) => {
+    const query = wikiLinkQuery(textarea.value, textarea.selectionStart);
+    setLinkMenu((current) =>
+      query ? { ...query, index: current?.start === query.start ? current.index : 0 } : null
+    );
+  };
+
+  const chooseLink = (title: string) => {
+    const textarea = bodyEditorRef.current;
+    if (!textarea || !linkMenu || !activeBody) return;
+    const next = completeWikiLink(textarea.value, linkMenu.start, textarea.selectionStart, title);
+    applyBodyChange(activeBody.key, next.value, next.caret, next.caret);
+    setLinkMenu(null);
+    textarea.focus();
+  };
+
+  // Pasting or dropping an image does what pasting into Obsidian does: the
+  // file lands in the vault (and the dev server's mirror) and its `![[…]]`
+  // embed lands at the caret. Files upload one by one; the text is inserted
+  // once, after the last one, so a failure inserts nothing.
+  const attachImages = async (files: File[]) => {
+    const textarea = bodyEditorRef.current;
+    const images = files.filter(isImage);
+    if (!textarea || !activeBody || !documentInfo || uploading || images.length === 0) return;
+    const key = activeBody.key;
+    const generation = pageGeneration.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    setUploading(true);
+    setMessage("uploading");
+    try {
+      const embeds: string[] = [];
+      for (const file of images) {
+        const attached = await request<AttachedAsset>("attach-asset", {
+          source: documentInfo.source,
+          name: file.name || "pasted-image.png",
+          data: await fileToBase64(file),
+          purpose: "embed",
+        });
+        embeds.push(attached.embed);
+      }
+      if (generation !== pageGeneration.current) return;
+      const current = bodyEditorRef.current;
+      if (!current) return;
+      const inserted = insertText(current.value, start, end, embeds.join("\n"));
+      applyBodyChange(key, inserted.value, inserted.caret, inserted.caret);
+      setMessage("uploaded");
+    } catch {
+      if (generation === pageGeneration.current) setMessage("uploadFailed");
+    } finally {
+      if (generation === pageGeneration.current) setUploading(false);
+    }
+  };
+
+  const bodyKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const textarea = event.currentTarget;
+    if (linkMenu && linkMatches.length > 0) {
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        const step = event.key === "ArrowDown" ? 1 : linkMatches.length - 1;
+        setLinkMenu({ ...linkMenu, index: (linkIndex + step) % linkMatches.length });
+        return;
+      }
+      if (event.key === "Enter" || event.key === "Tab") {
+        event.preventDefault();
+        chooseLink(linkMatches[linkIndex].title);
+        return;
+      }
+      if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        setLinkMenu(null);
+        return;
+      }
+    }
+    if (event.key === "Tab" && activeBody) {
+      event.preventDefault();
+      const next = indentLines(
+        textarea.value,
+        textarea.selectionStart,
+        textarea.selectionEnd,
+        event.shiftKey
+      );
+      applyBodyChange(activeBody.key, next.value, next.start, next.end);
+    }
+  };
+
+  // A note without its Ukrainian body is unfinished. Starting one here copies
+  // the English Markdown so the translation is written in place, in the
+  // same editor, with every heading and embed already where it belongs.
+  const createTranslation = async () => {
+    if (!documentInfo || documentInfo.sourceUk || dirty || saving || creatingTranslation) return;
+    const generation = pageGeneration.current;
+    setCreatingTranslation(true);
+    setMessage(null);
+    try {
+      const payload = await request<EditorDocument>("create-translation", {
+        source: documentInfo.source,
+      });
+      if (generation !== pageGeneration.current) return;
+      setSource({ source: payload.source, sourceUk: payload.sourceUk });
+      setDocumentInfo(payload);
+      dispatch({ type: "loaded", fields: payload.fields, revision: payload.revision });
+      setMessage("translationCreated");
+      router.refresh();
+    } catch {
+      if (generation === pageGeneration.current) setMessage("translationFailed");
+    } finally {
+      if (generation === pageGeneration.current) setCreatingTranslation(false);
+    }
+  };
+
   const cancel = () => {
     dispatch({ type: "cancel" });
     editGroup.current = null;
     setActiveBody(null);
+    setLinkMenu(null);
     setMessage(null);
     setConflict(false);
   };
@@ -630,26 +821,80 @@ export default function DevTools() {
   const obsidianHref = documentInfo?.obsidian[lang];
   const canSave = Boolean(editor && dirty && editor.draft.title.trim() && !saving);
   const feedbackVisible = expanded && (loading || Boolean(message) || !source.source);
+  const linkMenuOpen = Boolean(linkMenu && linkMatches.length > 0);
   const bodyPortal =
-    activeBody && editor && activeBody.host.isConnected
+    activeBody && editor && activeBody.mount.isConnected
       ? createPortal(
-          <textarea
-            ref={bodyEditorRef}
-            className="dev-body-editor"
-            value={editor.draft[activeBody.key]}
-            lang={activeBody.key === "body_uk" ? "uk" : undefined}
-            aria-label={devUi.devBody[lang]}
-            spellCheck
-            onChange={(event) => {
-              edit(activeBody.key, event.target.value);
-              event.currentTarget.style.height = "auto";
-              event.currentTarget.style.height = `${event.currentTarget.scrollHeight}px`;
-            }}
-            onBlur={() => {
-              editGroup.current = null;
-            }}
-          />,
-          activeBody.host
+          <>
+            <textarea
+              ref={bodyEditorRef}
+              className="dev-body-editor"
+              value={editor.draft[activeBody.key]}
+              lang={activeBody.key === "body_uk" ? "uk" : undefined}
+              aria-label={devUi.devBody[lang]}
+              autoFocus
+              aria-autocomplete="list"
+              aria-controls={linkMenuOpen ? "dev-link-menu" : undefined}
+              spellCheck
+              onChange={(event) => {
+                edit(activeBody.key, event.target.value);
+                event.currentTarget.style.height = "auto";
+                event.currentTarget.style.height = `${event.currentTarget.scrollHeight}px`;
+                syncLinkMenu(event.currentTarget);
+              }}
+              onSelect={(event) => {
+                if (linkMenu) syncLinkMenu(event.currentTarget);
+              }}
+              onKeyDown={bodyKeyDown}
+              onPaste={(event) => {
+                const files = [...event.clipboardData.files];
+                if (!files.some(isImage)) return;
+                event.preventDefault();
+                void attachImages(files);
+              }}
+              onDragOver={(event) => {
+                if ([...event.dataTransfer.items].some((item) => item.kind === "file")) {
+                  event.preventDefault();
+                }
+              }}
+              onDrop={(event) => {
+                const files = [...event.dataTransfer.files];
+                if (!files.some(isImage)) return;
+                event.preventDefault();
+                void attachImages(files);
+              }}
+              onBlur={() => {
+                editGroup.current = null;
+                setLinkMenu(null);
+              }}
+            />
+            {linkMenuOpen && (
+              <ul
+                id="dev-link-menu"
+                className="dev-link-menu"
+                role="listbox"
+                aria-label={devUi.devLinkSuggestions[lang]}
+              >
+                {linkMatches.map((item, index) => (
+                  <li key={item.href} role="option" aria-selected={index === linkIndex}>
+                    <button
+                      type="button"
+                      className="press"
+                      tabIndex={-1}
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => chooseLink(item.title)}
+                    >
+                      <span>{item.title}</span>
+                      {item.titleUk && item.titleUk !== item.title && (
+                        <span className="dev-link-menu-uk" lang="uk">{item.titleUk}</span>
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>,
+          activeBody.mount
         )
       : null;
 
@@ -752,6 +997,44 @@ export default function DevTools() {
               >
                 <ObsidianIcon className="h-[17px] w-[17px]" />
               </button>
+            )}
+            {documentInfo && !documentInfo.sourceUk && (
+              <button
+                type="button"
+                disabled={dirty || saving || creatingTranslation}
+                aria-label={devUi.devCreateTranslation[lang]}
+                title={devUi.devCreateTranslation[lang]}
+                onClick={() => void createTranslation()}
+                className="press dev-tool-button"
+              >
+                <TranslateIcon className="h-4 w-4" />
+              </button>
+            )}
+            {activeBody && (
+              <>
+                <button
+                  type="button"
+                  disabled={uploading}
+                  aria-label={devUi.devInsertImage[lang]}
+                  title={devUi.devInsertImage[lang]}
+                  onClick={() => imageInputRef.current?.click()}
+                  className="press dev-tool-button"
+                >
+                  <ImageIcon className="h-4 w-4" />
+                </button>
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  hidden
+                  onChange={(event) => {
+                    const files = [...(event.target.files ?? [])];
+                    event.target.value = "";
+                    void attachImages(files);
+                  }}
+                />
+              </>
             )}
             <span className="dev-tool-divider" aria-hidden />
             <button

@@ -373,8 +373,22 @@ export function getWikiIndex(): Map<string, string> {
  * First match wins on duplicate names.
  */
 let _assetIndex: Map<string, string> | null = null;
+let _assetIndexAt = 0;
+/**
+ * How long a walk stays good in development. A build walks once; the dev
+ * server lives for hours while the localhost dock attaches images, and a
+ * cover it wrote a second ago must resolve on the very next render. Short
+ * enough to be fresh for that, long enough that one render (a shelf page
+ * asks for hundreds of covers) shares a single walk.
+ */
+const ASSET_INDEX_TTL_MS = 2000;
 export function getAssetIndex(): Map<string, string> {
-  if (_assetIndex) return _assetIndex;
+  if (
+    _assetIndex &&
+    (process.env.NODE_ENV !== "development" || Date.now() - _assetIndexAt < ASSET_INDEX_TTL_MS)
+  ) {
+    return _assetIndex;
+  }
   const map = new Map<string, string>();
   const walk = (dir: string) => {
     if (!fs.existsSync(dir)) return;
@@ -394,6 +408,7 @@ export function getAssetIndex(): Map<string, string> {
   };
   walk(VAULT_DIR);
   _assetIndex = map;
+  _assetIndexAt = Date.now();
   return map;
 }
 

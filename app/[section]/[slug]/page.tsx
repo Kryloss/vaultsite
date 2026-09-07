@@ -531,7 +531,12 @@ export default async function EntryPage({ params }: Props) {
       <DevEntryOptionsSlot
         source={`vault/${entry.sectionDir}/${entry.fileName}.md`}
         sectionType={section.type}
+        medium={medium}
         draft={entry.draft}
+        date={entry.date}
+        status={typeof entry.meta.status === "string" ? entry.meta.status : undefined}
+        rating={typeof entry.meta.rating === "number" ? entry.meta.rating : undefined}
+        cover={typeof entry.meta.cover === "string" ? entry.meta.cover : undefined}
         categories={categories}
         series={typeof entry.meta.series === "string" ? entry.meta.series : undefined}
         seriesUk={typeof entry.meta.series_uk === "string" ? entry.meta.series_uk : undefined}

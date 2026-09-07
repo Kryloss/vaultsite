@@ -7,7 +7,12 @@ interface SeriesOption {
 export default async function DevEntryOptionsSlot(props: {
   source: string;
   sectionType: string;
+  medium?: string;
   draft: boolean;
+  date?: string;
+  status?: string;
+  rating?: number;
+  cover?: string;
   categories: string[];
   series?: string;
   seriesUk?: string;

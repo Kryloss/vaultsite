@@ -400,6 +400,39 @@ export const devUi = {
     en: "Discard unsaved developer-tool changes and leave this page?",
     uk: "Відкинути незбережені зміни в інструментах розробника й залишити сторінку?",
   },
+  devCreateTranslation: {
+    en: "Create the Ukrainian body from the English one",
+    uk: "Створити українську версію з англійської",
+  },
+  devTranslationCreated: {
+    en: "Ukrainian body created as a copy of the English one — translate it in place.",
+    uk: "Українську версію створено як копію англійської — перекладіть її на місці.",
+  },
+  devTranslationFailed: {
+    en: "Could not create the Ukrainian body.",
+    uk: "Не вдалося створити українську версію.",
+  },
+  devInsertImage: { en: "Insert an image", uk: "Вставити зображення" },
+  devUploading: { en: "Attaching image…", uk: "Додавання зображення…" },
+  devUploadFailed: { en: "Could not attach the image.", uk: "Не вдалося додати зображення." },
+  devUploaded: { en: "Image attached.", uk: "Зображення додано." },
+  devLinkSuggestions: { en: "Note suggestions", uk: "Підказки нотаток" },
+  devDate: { en: "Date", uk: "Дата" },
+  devToday: { en: "Today", uk: "Сьогодні" },
+  devStatus: { en: "Status", uk: "Статус" },
+  devStatusFinished: { en: "Finished", uk: "Завершено" },
+  devStatusProgress: { en: "In progress", uk: "У процесі" },
+  devStatusQueued: { en: "Queued", uk: "У черзі" },
+  devRating: { en: "Rating", uk: "Оцінка" },
+  devCover: { en: "Cover", uk: "Обкладинка" },
+  devChooseImage: { en: "Choose an image…", uk: "Обрати зображення…" },
+  devNoCover: { en: "None", uk: "Немає" },
+  devCoverSaved: { en: "Cover saved.", uk: "Обкладинку збережено." },
+  devCoverFailed: { en: "Could not save the cover.", uk: "Не вдалося зберегти обкладинку." },
+  devInvalidRating: {
+    en: "A rating is a half-star value from 0 to 5.",
+    uk: "Оцінка — від 0 до 5 з кроком у пів зірки.",
+  },
 } satisfies Record<string, Str>;
 
 /**

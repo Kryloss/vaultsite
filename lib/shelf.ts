@@ -190,10 +190,10 @@ export function mediumSlug(medium: string): string {
 }
 
 /** `status:` values that mean "part-way through". */
-const IN_PROGRESS = new Set(["reading", "watching", "current", "in-progress"]);
+const IN_PROGRESS = new Set(["reading", "watching", "playing", "current", "in-progress"]);
 
 /** `status:` values that mean "haven't started — it's in the queue". */
-const QUEUED = new Set(["want", "queued", "queue", "to-read", "to-watch", "backlog", "planned"]);
+const QUEUED = new Set(["want", "queued", "queue", "to-read", "to-watch", "to-play", "backlog", "planned"]);
 
 /**
  * Which VERB a status badge uses. THREE, not two: a book is read, anything

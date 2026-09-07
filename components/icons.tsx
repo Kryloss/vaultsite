@@ -144,6 +144,26 @@ export function ReloadIcon({ className }: IconProps) {
   );
 }
 
+export function TranslateIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
+      <path d="M3 5h9M7.5 3v2M10.5 5c-.7 3.6-3 6.6-6.5 8.5" />
+      <path d="M5 8.5c1 2.2 2.8 4 5 5.2" />
+      <path d="M12.5 21l4.2-10 4.3 10M14 17.5h5.4" />
+    </svg>
+  );
+}
+
+export function ImageIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
+      <rect x="3.5" y="4.5" width="17" height="15" rx="2" />
+      <circle cx="9" cy="10" r="1.6" />
+      <path d="M20.5 15.5 15.5 11l-7 7" />
+    </svg>
+  );
+}
+
 export function CoffeeIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>

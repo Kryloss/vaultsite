@@ -363,3 +363,25 @@ test("rejects unsupported methods and never opts into CORS", async (t) => {
   assert.equal(foreign.status, 403);
   assert.equal(foreign.headers.get("access-control-allow-origin"), null);
 });
+
+test("creates a Ukrainian sibling and attaches an image through the sidecar", async (t) => {
+  const { base, root } = await fixture(t);
+  const { token } = await session(base);
+  const post = (endpoint, body) =>
+    fetch(`${base}/${endpoint}`, { method: "POST", headers: editorHeaders(token), body: JSON.stringify(body) });
+
+  const translated = await post("create-translation", { source: SOURCE });
+  assert.equal(translated.status, 201);
+  assert.equal((await payload(translated)).sourceUk, "vault/Posts/Note.uk.md");
+  assert.equal(await fs.promises.readFile(path.join(root, "vault/Posts/Note.uk.md"), "utf8"), "Body.\n");
+
+  const png = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
+  const attached = await post("attach-asset", { source: SOURCE, name: "shot.png", data: png, purpose: "embed" });
+  assert.equal(attached.status, 201);
+  const body = await payload(attached);
+  assert.equal(body.embed, "![[shot.png]]");
+  assert.ok(fs.existsSync(path.join(root, "public/vault-assets/Posts/attachments/shot.png")));
+
+  const refused = await post("attach-asset", { source: SOURCE, name: "x.svg", data: Buffer.from("<svg/>").toString("base64"), purpose: "embed" });
+  assert.equal(refused.status, 415);
+});

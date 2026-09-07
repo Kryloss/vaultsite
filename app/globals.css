@@ -5304,13 +5304,17 @@ html[data-dev-tools] [data-dev-body-ready]:focus-visible:not([data-dev-body-edit
   outline-offset: 0.375rem;
 }
 
+/* The article steps aside and the editor mounts in a sibling inserted after
+   it, sized to the prose it replaces so the page does not jump. The article
+   cannot host the textarea itself: React refuses a portal into a node whose
+   children it also owns via dangerouslySetInnerHTML. */
 html[data-dev-tools] [data-dev-body-editing] {
-  min-height: max(12rem, var(--dev-body-min-h, 12rem));
-  outline: none;
+  display: none;
 }
 
-html[data-dev-tools] [data-dev-body-editing] > :not(.dev-body-editor) {
-  display: none !important;
+.dev-body-mount {
+  min-height: max(12rem, var(--dev-body-min-h, 12rem));
+  margin-top: 2rem;
 }
 
 .dev-body-editor {
@@ -5597,6 +5601,120 @@ html[data-dev-tools] .dev-page-title-row {
   width: 1rem;
   height: 1rem;
   accent-color: var(--text);
+}
+
+/* Date, status and rating share the text inputs' box; the date field cannot
+   be `type="text"`, so its rule is restated rather than inherited. */
+.dev-entry-options-form select,
+.dev-entry-options-form input[type="date"] {
+  width: 100%;
+  min-width: 0;
+  height: 2.125rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 0 0.5625rem;
+  outline: none;
+  background: var(--bg);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--text);
+}
+
+.dev-entry-options-form select:focus,
+.dev-entry-options-form input[type="date"]:focus {
+  border-color: var(--text-tertiary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.dev-entry-options-inline {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.dev-entry-options-inline > input,
+.dev-entry-options-inline > code {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+/* A quiet secondary action beside a field: Today, Choose an image. */
+.dev-entry-options-minor {
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 0.3125rem 0.5625rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.dev-entry-options-minor:hover {
+  color: var(--text);
+}
+
+/* The file input is the sr-only control; the label is the visible button,
+   so a focus on the input must show on the label. */
+.dev-entry-options-inline > input:focus-visible + .dev-entry-options-minor {
+  border-color: var(--text-tertiary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.dev-entry-options-inline > input:disabled + .dev-entry-options-minor {
+  opacity: 0.45;
+}
+
+.dev-entry-cover-name {
+  overflow: hidden;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* `[[` suggestions under the body editor. In flow, not floated at the caret:
+   the list is short, the editor is the only thing on the page, and a box
+   under the text never covers the line being written. */
+.dev-link-menu {
+  margin: 0.375rem 0 0;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 0.25rem;
+  background: var(--chrome-bg);
+  box-shadow: inset 0 0 0 1px var(--chrome-ring);
+  backdrop-filter: blur(14px);
+  list-style: none;
+  max-height: 14rem;
+  overflow-y: auto;
+}
+
+.dev-link-menu button {
+  display: flex;
+  width: 100%;
+  align-items: baseline;
+  gap: 0.5rem;
+  border-radius: var(--r-md);
+  padding: 0.375rem 0.5rem;
+  font-size: 0.8125rem;
+  text-align: left;
+  color: var(--text);
+}
+
+.dev-link-menu [aria-selected="true"] button,
+.dev-link-menu button:hover {
+  background: var(--bg-hover);
+}
+
+.dev-link-menu-uk {
+  overflow: hidden;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .dev-entry-options-actions {

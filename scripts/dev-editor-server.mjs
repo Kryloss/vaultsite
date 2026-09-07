@@ -2,7 +2,9 @@ import { randomBytes, timingSafeEqual } from "node:crypto";
 import http from "node:http";
 import {
   DevEditorError,
+  attachAsset,
   createEntry,
+  createTranslation,
   readDocument,
   readPageDocument,
   reorderDocuments,
@@ -11,9 +13,10 @@ import {
   toggleNowGoal,
 } from "./dev-editor-core.mjs";
 
-// A page save may carry both language bodies. Each one is capped separately
-// at 512 KiB by the core, with room here for JSON escaping and metadata.
-const DEFAULT_MAX_BODY = 2 * 1024 * 1024;
+// A page save may carry both language bodies (512 KiB each, capped by the
+// core) and an attachment carries one base64 image (10 MiB decoded, also
+// capped by the core); this is that plus JSON escaping and metadata.
+const DEFAULT_MAX_BODY = 14 * 1024 * 1024;
 
 function expectedLocalUrl(value, expectedOrigin) {
   if (!value) return false;
@@ -179,6 +182,14 @@ export function createDevEditorServer({
       }
       if (url.pathname === "/reorder") {
         send(res, 200, await reorderDocuments(repoRoot, body));
+        return;
+      }
+      if (url.pathname === "/create-translation") {
+        send(res, 201, await createTranslation(repoRoot, body));
+        return;
+      }
+      if (url.pathname === "/attach-asset") {
+        send(res, 201, await attachAsset(repoRoot, body));
         return;
       }
       throw new DevEditorError("Unknown vault editor endpoint.", 404, "not_found");

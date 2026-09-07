@@ -13,7 +13,7 @@ Section type `shelf`: `vault/Shelf/` with `Books/`, `Movies/`, `Shows/`, `Videos
 | `rating:` | 0–5, halves. His verdict, never invented. Rendered as the last fact row and as stars in Top lists. |
 | `imdb_id:` / `imdb:` | Movies and shows only. The id is written by hand from Wikidata P345 — never guessed. `node scripts/imdb-ratings.mjs` refreshes `imdb:` (`--check` to dry-run). |
 | `top_order:` | Manual Top-list position, written by the localhost drag editor. Authoritative over the derived order. Never renumber in content work. |
-| `status:` | `reading`/`watching`/`current`/`in-progress` → a badge with the medium's verb (`STATUS_VERBS`); anything else means finished. |
+| `status:` | `reading`/`watching`/`playing`/`current`/`in-progress` → a badge with the medium's verb (`STATUS_VERBS`); `want`/`queued`/`to-read`/`to-watch`/`to-play`/`backlog`/`planned` → the queued badge; anything else means finished. The localhost Page options write the medium's own verb. |
 | `categories:` | Multi-valued; chips on the medium page and `#tags` at the end of the entry's metadata line. |
 | `spine:` | A photographed book spine (`vault/Shelf/Books/spines/`, vault-unique basename). A `<name>.uk.<ext>` sibling swaps with the language. |
 | `coverFit: contain` | Letterbox wide art. Last resort; unused today. |
