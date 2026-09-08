@@ -11,6 +11,8 @@ import { similarity, fold } from "@/lib/fuzzy";
 import { copyText } from "@/lib/clipboard";
 import { shortcutKey } from "@/lib/shortcut-key";
 import { ui, type Str } from "@/lib/ui-strings";
+/* TEMPORARY — colour-theme previews; see app/themes.css for what to delete. */
+import { themes, themeActionLabel, applyTheme } from "@/lib/themes";
 
 /**
  * Cmd/Ctrl+K palette over the static, build-time index of every page.
@@ -260,6 +262,24 @@ export default function CommandPalette({
           go(pages[Math.floor(Math.random() * pages.length)].href);
         },
       },
+      /* TEMPORARY — one row per palette in app/themes.css, so a theme can be
+         tried on the page you are actually looking at. They sit at the END of
+         the list: the palette's own sort already puts every action below every
+         page, and these belong below the permanent actions in turn.
+
+         Sorted last within the group and typed to reach: "theme" matches all
+         seven at once, which is the point — this is a comparison tool, not a
+         setting. It writes to <html> and localStorage and closes; nothing
+         re-renders, because every colour on the site is a token read from the
+         root element. Delete this block with lib/themes.ts. */
+      ...themes.map((theme) => ({
+        id: `theme:${theme.id ?? "default"}`,
+        label: themeActionLabel(theme),
+        run: () => {
+          applyTheme(theme.id);
+          onClose();
+        },
+      })),
     ],
     [items, lang, toggleLang, onClose, go]
   );

@@ -1,0 +1,193 @@
+/* ────────────────────────────────────────────────────────────────────────
+   TEMPORARY — colour-theme previews.
+
+   Six alternate palettes so the look of the site can be judged as a whole
+   rather than argued about a token at a time. Picked from the ⌘K palette
+   ("Theme: …"), stored in localStorage under `theme-preview`, applied as
+   `data-theme` on <html> before first paint (app/layout.tsx).
+
+   THIS IS SCAFFOLDING. Nothing in the site depends on it: with no
+   `data-theme` set, every token below is inert and app/globals.css owns the
+   design exactly as before. When a direction is chosen, fold the winning
+   values into the `:root` blocks in globals.css and delete this file, its
+   import in app/layout.tsx, lib/themes.ts and the theme actions in
+   components/CommandPalette.tsx.
+
+   ---- Two rules for editing this file ----
+
+   1. Every theme MUST define the FULL set in BOTH blocks. `:root[data-theme]`
+      is specificity (0,2,0) and the dark block in globals.css is `:root`
+      (0,1,0) — so a token set only in the light half here BEATS globals'
+      dark value and leaks a white page into dark mode. There is no partial
+      theme.
+
+   2. Set only the nine base tokens. `--chrome-bg` and `--chrome-ring` are
+      `color-mix()` of `--bg`/`--surface`/`--text` and follow on their own,
+      which is the whole point of them being derived. The flag colours
+      (`--ua-blue`/`--ua-yellow`) and the callout hues are meaning, not
+      style — they do not move with a theme.
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* ---- Paper — warm cream and brown-black ink. The bookish end. ---- */
+:root[data-theme="paper"] {
+  --bg: #faf6ec;
+  --bg-sidebar: #f4efe1;
+  --bg-hover: #e9e1cd;
+  --surface: #f1ead9;
+  --text: #211c15;
+  --text-secondary: #57493a;
+  --text-tertiary: #a99a83;
+  --border: #e3d9c4;
+  --code-bg: #efe7d5;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="paper"] {
+    --bg: #100e0c;
+    --bg-sidebar: #14110f;
+    --bg-hover: #26221d;
+    --surface: #1b1815;
+    --text: #f5f0e8;
+    --text-secondary: #ada598;
+    --text-tertiary: #746c60;
+    --border: #2c2721;
+    --code-bg: #17140f;
+  }
+}
+
+/* ---- Slate — cool blue-grey. Closest to the current design; the
+       difference is that the greys stop being neutral. ---- */
+:root[data-theme="slate"] {
+  --bg: #f7f9fc;
+  --bg-sidebar: #eef2f8;
+  --bg-hover: #dfe7f1;
+  --surface: #e9eff7;
+  --text: #0d1424;
+  --text-secondary: #3b4a63;
+  --text-tertiary: #93a1b8;
+  --border: #d8e1ee;
+  --code-bg: #e8eef6;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="slate"] {
+    --bg: #070a10;
+    --bg-sidebar: #0b0f16;
+    --bg-hover: #1c2431;
+    --surface: #121821;
+    --text: #eef2f8;
+    --text-secondary: #9aa8bd;
+    --text-tertiary: #66748a;
+    --border: #232c3a;
+    --code-bg: #10151d;
+  }
+}
+
+/* ---- Moss — green-tinted greys. Quiet; reads as daylight rather than
+       as a colour scheme. ---- */
+:root[data-theme="moss"] {
+  --bg: #f7fbf5;
+  --bg-sidebar: #eef5ea;
+  --bg-hover: #dfebd9;
+  --surface: #e8f1e2;
+  --text: #10180f;
+  --text-secondary: #3b4a3a;
+  --text-tertiary: #93a591;
+  --border: #d8e5d1;
+  --code-bg: #e6efe0;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="moss"] {
+    --bg: #070b08;
+    --bg-sidebar: #0a100c;
+    --bg-hover: #1c261f;
+    --surface: #121a15;
+    --text: #eef4ee;
+    --text-secondary: #9ab0a0;
+    --text-tertiary: #64786a;
+    --border: #212c24;
+    --code-bg: #0f150f;
+  }
+}
+
+/* ---- Terminal — phosphor. The most opinionated of the six and the one
+       to judge on a long note rather than on the home page: green text at
+       17px over a whole essay is a different experience from green text
+       in a screenshot. ---- */
+:root[data-theme="terminal"] {
+  --bg: #f2f7f0;
+  --bg-sidebar: #e9f0e6;
+  --bg-hover: #d6e4d2;
+  --surface: #e3ecdf;
+  --text: #0a2e16;
+  --text-secondary: #1f5c37;
+  --text-tertiary: #7d9c86;
+  --border: #cfdfca;
+  --code-bg: #e0ebdc;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="terminal"] {
+    --bg: #050706;
+    --bg-sidebar: #070a08;
+    --bg-hover: #16241a;
+    --surface: #0c120e;
+    --text: #d8ffe4;
+    --text-secondary: #86c79a;
+    --text-tertiary: #4d7a5c;
+    --border: #1b2a20;
+    --code-bg: #080e0a;
+  }
+}
+
+/* ---- Ink — deep indigo. Keeps the near-black feel of the current dark
+       mode but gives it a hue, which is what most "dark blue" sites are
+       actually doing. ---- */
+:root[data-theme="ink"] {
+  --bg: #fafaff;
+  --bg-sidebar: #f2f2fb;
+  --bg-hover: #e3e3f5;
+  --surface: #ecebf8;
+  --text: #0d0d28;
+  --text-secondary: #383865;
+  --text-tertiary: #9797bd;
+  --border: #dedcf0;
+  --code-bg: #ebeaf8;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="ink"] {
+    --bg: #06070f;
+    --bg-sidebar: #090b15;
+    --bg-hover: #1e2138;
+    --surface: #121527;
+    --text: #eceefb;
+    --text-secondary: #a0a4c4;
+    --text-tertiary: #686d90;
+    --border: #23273f;
+    --code-bg: #0f1120;
+  }
+}
+
+/* ---- Clay — terracotta. Warmer than Paper and less yellow; the tint is
+       in the surfaces rather than in the page. ---- */
+:root[data-theme="clay"] {
+  --bg: #fdf8f5;
+  --bg-sidebar: #f9f0eb;
+  --bg-hover: #f0e0d8;
+  --surface: #f6ebe4;
+  --text: #241614;
+  --text-secondary: #5b433c;
+  --text-tertiary: #b39a91;
+  --border: #ecdad0;
+  --code-bg: #f3e6de;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="clay"] {
+    --bg: #100b0a;
+    --bg-sidebar: #150e0d;
+    --bg-hover: #2a1e1b;
+    --surface: #1c1412;
+    --text: #f7eeeb;
+    --text-secondary: #b5a09b;
+    --text-tertiary: #7b6763;
+    --border: #302320;
+    --code-bg: #17100e;
+  }
+}
