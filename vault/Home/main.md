@@ -3,6 +3,11 @@ title: Home
 title_uk: Головна
 icon: 🏠
 order: 0
+vibe_title: Jumpsuit
+vibe_artist: twenty one pilots
+vibe_date: "2026-09-08"
+vibe_url: https://music.apple.com/us/album/jumpsuit/1422828208?i=1422828209
+vibe_artwork: https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/a3/c0/2b/a3c02b76-baa1-e575-dcba-247509200424/075679864789.jpg/100x100bb.jpg
 description: Student in Ontario heading into cybersecurity — notes, projects, and what I'm reading.
 description_uk: Студент з Онтаріо на шляху в кібербезпеку — нотатки, проєкти та що я читаю.
 ---
