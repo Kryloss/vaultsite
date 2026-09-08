@@ -1,419 +1,246 @@
 /* ────────────────────────────────────────────────────────────────────────
-   TEMPORARY — colour and typeface previews.
+   TEMPORARY — high-contrast palette previews.
 
-   Ten alternate palettes and eight alternate typefaces, so a direction can
-   be judged on the real site rather than argued about a token at a time.
-   Both are picked from the ⌘K palette ("Theme: …" / "Font: …"), stored in
-   localStorage, and applied to <html> as `data-theme` / `data-font` before
-   first paint (app/layout.tsx).
+   Six palettes, picked from the ⌘K palette ("Theme: …"), stored in
+   localStorage, and applied to <html> as `data-theme` before first paint
+   (app/layout.tsx).
 
-   THE TWO AXES ARE INDEPENDENT. Any font can be tried against any palette;
-   Terminal + JetBrains Mono is a different proposal from Terminal + Literata
-   and both are one keystroke away.
+   ---- What "higher contrast" actually meant here ----
 
-   THIS IS SCAFFOLDING. With neither attribute set, everything below is inert
-   and app/globals.css owns the design exactly as before. When a direction is
+   Measured against the current design first, because the obvious answer was
+   wrong. Body text is ALREADY at 19.9:1 on the light page and 18.4:1 on the
+   dark one — within a whisker of the 21:1 ceiling. There is no headroom
+   there, and darkening the ink would have achieved nothing.
+
+   The site's contrast deficit is entirely in the QUIET tokens (WCAG 2.1
+   ratios against `--bg`, light / dark):
+
+     --text-tertiary   2.22 / 4.03   ← dates, meta, captions. FAILS AA (4.5:1)
+     --border          1.17 / 1.33   ← hairlines, barely present
+     --surface         1.08 / 1.09   ← cards almost invisible against the page
+
+   That is deliberate in globals.css — "the borders retreat far enough to stop
+   competing with the text" — and it is the exact thing these six argue with.
+   Every palette below raises all three, and every one of them clears AA on
+   tertiary text. The numbers on each block are measured, not estimated.
+
+   THIS IS SCAFFOLDING. With no `data-theme` set, everything here is inert and
+   app/globals.css owns the design exactly as before. When a direction is
    chosen, fold the winning values into the `:root` blocks in globals.css and
-   delete this file, its import in app/layout.tsx, the preview fonts in that
-   same file, lib/themes.ts, and the two action blocks in
-   components/CommandPalette.tsx.
+   delete this file, its import in app/layout.tsx, lib/themes.ts and the theme
+   actions in components/CommandPalette.tsx.
 
-   ---- Three rules for editing this file ----
+   ---- Two rules for editing this file ----
 
    1. Every theme MUST define the FULL set in BOTH blocks. `:root[data-theme]`
       is specificity (0,2,0) and the dark block in globals.css is `:root`
-      (0,1,0) — so a token set only in the light half here BEATS globals'
-      dark value and leaks a white page into dark mode. There is no partial
-      theme.
+      (0,1,0) — so a token set only in the light half here BEATS globals' dark
+      value and leaks a white page into dark mode. There is no partial theme.
 
    2. Set only the nine base tokens. `--chrome-bg` and `--chrome-ring` are
       `color-mix()` of `--bg`/`--surface`/`--text` and follow on their own,
       which is the whole point of them being derived. The flag colours
-      (`--ua-blue`/`--ua-yellow`) and the callout hues are meaning, not
-      style — they do not move with a theme.
-
-   3. A font block sets all THREE family tokens. `--font-prose` is what
-      `body` reads; `--font-sans` and `--font-serif` are Tailwind's, pointed
-      at the same place by globals.css so the two can't disagree. Miss one
-      and half the site keeps the old face.
+      (`--ua-blue`/`--ua-yellow`) and the callout hues are meaning, not style —
+      they do not move with a theme.
    ──────────────────────────────────────────────────────────────────────── */
 
-/* ════════════════════════════════════════════════════════════════════════
-   PALETTES
-   ════════════════════════════════════════════════════════════════════════ */
+/* ---- Legible — the current design with the FLOOR raised and nothing else
+       touched. Pure #000 on #fff at both ends, tertiary text lifted out of
+       failure and into AA, borders and cards made visible. The conservative
+       option: it changes no hue and no idea, only the quiet end of the range.
 
-/* ---- Paper — warm cream and brown-black ink. The gentlest of the ten and
-       the only one that could ship without anyone calling it a redesign. -- */
-:root[data-theme="paper"] {
-  --bg: #faf6ec;
-  --bg-sidebar: #f4efe1;
-  --bg-hover: #e9e1cd;
-  --surface: #f1ead9;
-  --text: #211c15;
-  --text-secondary: #57493a;
-  --text-tertiary: #a99a83;
-  --border: #e3d9c4;
-  --code-bg: #efe7d5;
-}
-@media (prefers-color-scheme: dark) {
-  :root[data-theme="paper"] {
-    --bg: #100e0c;
-    --bg-sidebar: #14110f;
-    --bg-hover: #26221d;
-    --surface: #1b1815;
-    --text: #f5f0e8;
-    --text-secondary: #ada598;
-    --text-tertiary: #746c60;
-    --border: #2c2721;
-    --code-bg: #17140f;
-  }
-}
-
-/* ---- Solar — Solarized, the 2011 palette that half of programming still
-       runs on. Its whole idea is that light and dark are the SAME hues at
-       different lightness, which is a different proposition from every other
-       theme here: the dark page is teal, not black. ---- */
-:root[data-theme="solar"] {
-  --bg: #fdf6e3;
-  --bg-sidebar: #f5eed9;
-  --bg-hover: #eee3c6;
-  --surface: #f3ead2;
-  --text: #073642;
-  --text-secondary: #4a6570;
-  --text-tertiary: #93a1a1;
-  --border: #e4dbbf;
-  --code-bg: #f0e7cf;
-}
-@media (prefers-color-scheme: dark) {
-  :root[data-theme="solar"] {
-    --bg: #002b36;
-    --bg-sidebar: #01313d;
-    --bg-hover: #0a4553;
-    --surface: #073642;
-    --text: #eee8d5;
-    --text-secondary: #93a1a1;
-    --text-tertiary: #6b8189;
-    --border: #0d4a58;
-    --code-bg: #032f3a;
-  }
-}
-
-/* ---- Ember — retro amber, in the Gruvbox family. Warmer and much more
-       saturated than Paper: the light page is properly yellow rather than
-       off-white, which is either the most characterful thing here or too
-       much on a long note. Worth reading a full post in before deciding. -- */
-:root[data-theme="ember"] {
-  --bg: #fbf1c7;
-  --bg-sidebar: #f5e9b8;
-  --bg-hover: #ecdca7;
-  --surface: #f2e5b3;
-  --text: #282320;
-  --text-secondary: #665c54;
-  --text-tertiary: #a89984;
-  --border: #e6d7a8;
-  --code-bg: #f0e3b0;
-}
-@media (prefers-color-scheme: dark) {
-  :root[data-theme="ember"] {
-    --bg: #1d1b18;
-    --bg-sidebar: #232019;
-    --bg-hover: #3c3630;
-    --surface: #282420;
-    --text: #ebdbb2;
-    --text-secondary: #bdae93;
-    --text-tertiary: #7c6f64;
-    --border: #3c3630;
-    --code-bg: #221f1a;
-  }
-}
-
-/* ---- Frost — Nord. Cold blue-grey with a NARROW tonal range, which is the
-       interesting part: it deliberately does the opposite of what globals.css
-       does (docs/DESIGN-SYSTEM.md → "A wide tonal range is the whole
-       design"). Softer, calmer, and less emphatic by construction. ---- */
-:root[data-theme="frost"] {
-  --bg: #eceff4;
-  --bg-sidebar: #e5e9f0;
-  --bg-hover: #d8dee9;
-  --surface: #e5e9f0;
-  --text: #2e3440;
-  --text-secondary: #4c566a;
-  --text-tertiary: #8a94a6;
-  --border: #d5dbe6;
-  --code-bg: #e2e7ef;
-}
-@media (prefers-color-scheme: dark) {
-  :root[data-theme="frost"] {
-    --bg: #242933;
-    --bg-sidebar: #2b313d;
-    --bg-hover: #434c5e;
-    --surface: #2e3440;
-    --text: #eceff4;
-    --text-secondary: #c6cedd;
-    --text-tertiary: #7b88a1;
-    --border: #3b4252;
-    --code-bg: #2b3140;
-  }
-}
-
-/* ---- Rosé — muted mauve and rose, in the Rosé Pine family. The only theme
-       here whose INK is coloured rather than near-black: body text is a deep
-       violet-grey, which changes the feel of a page far more than a tinted
-       background does. ---- */
-:root[data-theme="rose"] {
-  --bg: #faf4ed;
-  --bg-sidebar: #f5ece3;
-  --bg-hover: #ebdfd5;
-  --surface: #f2e9e1;
-  --text: #3f3a5a;
-  --text-secondary: #6b6489;
-  --text-tertiary: #a9a0b5;
-  --border: #e8dcd2;
-  --code-bg: #f0e6dd;
-}
-@media (prefers-color-scheme: dark) {
-  :root[data-theme="rose"] {
-    --bg: #191724;
-    --bg-sidebar: #1f1d2e;
-    --bg-hover: #2f2b45;
-    --surface: #232032;
-    --text: #e0def4;
-    --text-secondary: #a9a2c9;
-    --text-tertiary: #6e6a86;
-    --border: #2a2740;
-    --code-bg: #1c1a29;
-  }
-}
-
-/* ---- Neon — deep violet with near-white ink. The loudest thing in the
-       list, and the one most likely to fight the callouts, which keep their
-       own four hues on top of it. If it survives the formatting playground
-       it survives anything. ---- */
-:root[data-theme="neon"] {
-  --bg: #fbf7ff;
-  --bg-sidebar: #f4ecff;
-  --bg-hover: #e6d7ff;
-  --surface: #f0e6ff;
-  --text: #21063d;
-  --text-secondary: #542a7d;
-  --text-tertiary: #9b82b8;
-  --border: #e3d5f5;
-  --code-bg: #efe6fc;
-}
-@media (prefers-color-scheme: dark) {
-  :root[data-theme="neon"] {
-    --bg: #0b0416;
-    --bg-sidebar: #12071f;
-    --bg-hover: #2a1147;
-    --surface: #180a29;
-    --text: #f2e6ff;
-    --text-secondary: #c39cf0;
-    --text-tertiary: #7d5aa6;
-    --border: #33184f;
-    --code-bg: #140823;
-  }
-}
-
-/* ---- Forest — deep green, both ways round. The dark half is the argument:
-       a near-black that is unmistakably green rather than neutral. ---- */
-:root[data-theme="forest"] {
-  --bg: #f0f4ec;
-  --bg-sidebar: #e7eee1;
-  --bg-hover: #d7e2ce;
-  --surface: #e3ebdc;
-  --text: #16261a;
-  --text-secondary: #35533b;
-  --text-tertiary: #85977f;
-  --border: #d2ddc8;
-  --code-bg: #e0e9d8;
-}
-@media (prefers-color-scheme: dark) {
-  :root[data-theme="forest"] {
-    --bg: #0b140e;
-    --bg-sidebar: #101b13;
-    --bg-hover: #1e3324;
-    --surface: #14231a;
-    --text: #dfeadd;
-    --text-secondary: #9db99f;
-    --text-tertiary: #63805f;
-    --border: #1e3324;
-    --code-bg: #101c14;
-  }
-}
-
-/* ---- Blueprint — drafting paper and deep navy. The most "technical" of the
-       ten without going to a terminal; a plausible home for a security
-       notebook that doesn't want to cosplay a shell. ---- */
-:root[data-theme="blueprint"] {
-  --bg: #eef4fb;
-  --bg-sidebar: #e4edf8;
-  --bg-hover: #d2e2f4;
-  --surface: #e0eaf6;
-  --text: #0b2545;
-  --text-secondary: #1d4e89;
-  --text-tertiary: #7d9dc4;
-  --border: #cfdff2;
-  --code-bg: #dde8f5;
-}
-@media (prefers-color-scheme: dark) {
-  :root[data-theme="blueprint"] {
-    --bg: #04182e;
-    --bg-sidebar: #06213c;
-    --bg-hover: #0d3357;
-    --surface: #082a49;
-    --text: #d7e9ff;
-    --text-secondary: #8dbaea;
-    --text-tertiary: #557fae;
-    --border: #0d3357;
-    --code-bg: #051f38;
-  }
-}
-
-/* ---- Newsprint — maximum contrast and HARD RULES. `--border` is near-black
-       on the light page and near-white on the dark one, so every hairline on
-       the site — table rules, callout edges, card outlines, the sidebar seam
-       — becomes a drawn line instead of a suggestion.
-
-       This one is deliberately extreme. It is not a tweak of the current
-       design, it is the opposite argument: that the borders should compete
-       with the text rather than retreat from it. Look at a table and the
-       shelf before judging it on a paragraph. ---- */
-:root[data-theme="newsprint"] {
-  --bg: #fffdf8;
-  --bg-sidebar: #f7f4ec;
-  --bg-hover: #e8e4d9;
-  --surface: #f4f1e9;
+       text 21.00 · 2nd 12.56 · 3rd 5.28 · border 1.65 · surface 1.16
+       dark: 21.00 · 11.86 · 7.00 · 2.39 · 1.24                      ---- */
+:root[data-theme="legible"] {
+  --bg: #ffffff;
+  --bg-sidebar: #fafafb;
+  --bg-hover: #e2e2e8;
+  --surface: #eeeef1;
   --text: #000000;
-  --text-secondary: #2b2b2b;
-  --text-tertiary: #6b6b6b;
-  --border: #111111;
-  --code-bg: #f0ede4;
+  --text-secondary: #333338;
+  --text-tertiary: #6b6b74;
+  --border: #c9c9d0;
+  --code-bg: #ebebef;
 }
 @media (prefers-color-scheme: dark) {
-  :root[data-theme="newsprint"] {
+  :root[data-theme="legible"] {
     --bg: #000000;
-    --bg-sidebar: #0a0a0a;
-    --bg-hover: #1f1f1f;
-    --surface: #101010;
+    --bg-sidebar: #0a0a0c;
+    --bg-hover: #2a2a31;
+    --surface: #1c1c20;
     --text: #ffffff;
-    --text-secondary: #d4d4d4;
-    --text-tertiary: #8f8f8f;
-    --border: #e8e8e8;
-    --code-bg: #0c0c0c;
+    --text-secondary: #c2c2ca;
+    --text-tertiary: #94949f;
+    --border: #4a4a52;
+    --code-bg: #17171a;
   }
 }
 
-/* ---- Terminal — phosphor. Judge it on a long note rather than on the home
-       page: green text at 17px over a whole essay is a different experience
-       from green text in a screenshot. Pairs obviously with JetBrains Mono
-       and more interestingly with a serif. ---- */
-:root[data-theme="terminal"] {
-  --bg: #f2f7f0;
-  --bg-sidebar: #e9f0e6;
-  --bg-hover: #d6e4d2;
-  --surface: #e3ecdf;
-  --text: #0a2e16;
-  --text-secondary: #1f5c37;
-  --text-tertiary: #7d9c86;
-  --border: #cfdfca;
-  --code-bg: #e0ebdc;
+/* ---- Maximum — every token pushed as far as its role allows. Secondary text
+       is nearly the ink itself, tertiary sits at 8–10:1 where the current site
+       has 2.2, and the borders are grey you can actually point at. The most
+       emphatic thing here that is still a grey scale.
+
+       Worth checking on a LIST page rather than a note: this is where the
+       "everything shouts" risk shows up, on a screen with forty dates on it.
+
+       text 21.00 · 2nd 17.40 · 3rd 8.37 · border 3.42 · surface 1.24
+       dark: 21.00 · 15.95 · 9.75 · 4.16 · 1.16                      ---- */
+:root[data-theme="maximum"] {
+  --bg: #ffffff;
+  --bg-sidebar: #f7f7f9;
+  --bg-hover: #d6d6dd;
+  --surface: #e6e6ea;
+  --text: #000000;
+  --text-secondary: #1a1a1a;
+  --text-tertiary: #4d4d55;
+  --border: #8a8a94;
+  --code-bg: #e2e2e7;
 }
 @media (prefers-color-scheme: dark) {
-  :root[data-theme="terminal"] {
-    --bg: #050706;
-    --bg-sidebar: #070a08;
-    --bg-hover: #16241a;
-    --surface: #0c120e;
-    --text: #d8ffe4;
-    --text-secondary: #86c79a;
-    --text-tertiary: #4d7a5c;
-    --border: #1b2a20;
-    --code-bg: #080e0a;
+  :root[data-theme="maximum"] {
+    --bg: #000000;
+    --bg-sidebar: #08080a;
+    --bg-hover: #26262c;
+    --surface: #16161a;
+    --text: #ffffff;
+    --text-secondary: #e0e0e4;
+    --text-tertiary: #b0b0b8;
+    --border: #6e6e78;
+    --code-bg: #131317;
   }
 }
 
-/* ════════════════════════════════════════════════════════════════════════
-   TYPEFACES
+/* ---- Ruled — the contrast moved into the STRUCTURE instead of the type.
+       `--border` is near-ink in both modes (18.3:1 light, 14.8:1 dark), so
+       every hairline on the site — table rules, callout edges, card outlines,
+       the sidebar seam — becomes a drawn line rather than a suggestion. The
+       text scale stays close to Legible.
 
-   Every face below carries `cyrillic` AND `cyrillic-ext` — the second one is
-   not optional and is the reason this list is shorter than it looks. Ukrainian
-   needs і ї є (U+0454–0457, in `cyrillic`) and Ґ ґ (U+0490/0491, which live in
-   `cyrillic-ext`). A face with only `cyrillic` renders ґанок with the ґ in a
-   fallback font — the same failure that dropped Newsreader when the typeface
-   was chosen (docs/DECISIONS.md #59). Playfair Display was cut from this list
-   for exactly that: `cyrillic`, no `cyrillic-ext`.
+       This is the opposite argument to globals.css, not a tuning of it. Judge
+       it on a table and on the shelf, not on a paragraph.
 
-   The families are loaded in app/layout.tsx with `preload: false`, so a
-   visitor downloads a face only if something on the page is actually set in
-   it — i.e. only the one being previewed.
-   ════════════════════════════════════════════════════════════════════════ */
-
-/* Literata — Google's own reading face, drawn for long text on screen and,
-   like Source Serif, carrying a real optical-size axis. The closest
-   like-for-like alternative here: same job, warmer and a little wider. */
-:root[data-font="literata"] {
-  --font-prose: var(--font-p-literata), Georgia, serif;
-  --font-sans: var(--font-p-literata), Georgia, serif;
-  --font-serif: var(--font-p-literata), Georgia, serif;
+       text 20.81 · 2nd 15.38 · 3rd 7.16 · border 18.26 · surface 1.15
+       dark: 19.41 · 13.94 · 7.20 · 14.78 · 1.11                     ---- */
+:root[data-theme="ruled"] {
+  --bg: #fefefd;
+  --bg-sidebar: #f7f6f2;
+  --bg-hover: #e0ded6;
+  --surface: #efeee9;
+  --text: #000000;
+  --text-secondary: #242424;
+  --text-tertiary: #575757;
+  --border: #141414;
+  --code-bg: #ebeae4;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="ruled"] {
+    --bg: #060606;
+    --bg-sidebar: #0d0d0d;
+    --bg-hover: #262626;
+    --surface: #151515;
+    --text: #fafafa;
+    --text-secondary: #d6d6d6;
+    --text-tertiary: #9a9a9a;
+    --border: #dcdcdc;
+    --code-bg: #111111;
+  }
 }
 
-/* EB Garamond — old-style, and the lightest colour on the page of anything
-   here. A page set in it looks calmer and older; headings lose some of their
-   authority, which is either restraint or weakness depending on the note. */
-:root[data-font="garamond"] {
-  --font-prose: var(--font-p-garamond), Georgia, serif;
-  --font-sans: var(--font-p-garamond), Georgia, serif;
-  --font-serif: var(--font-p-garamond), Georgia, serif;
+/* ---- Bone — high contrast that isn't clinical. A warm cream page with true
+       black ink: the ratio beats the current white page (20.16 vs 19.90)
+       while the surface reads as paper rather than as a screen. Borders go
+       warm mid-brown, which is what makes the cards sit ON the page instead
+       of dissolving into it.
+
+       text 20.16 · 2nd 14.47 · 3rd 6.09 · border 2.35 · surface 1.18
+       dark: 18.87 · 11.44 · 6.27 · 1.99 · 1.10                      ---- */
+:root[data-theme="bone"] {
+  --bg: #fdfaf4;
+  --bg-sidebar: #f7f1e4;
+  --bg-hover: #e2d5b6;
+  --surface: #f0e7d1;
+  --text: #000000;
+  --text-secondary: #2e2517;
+  --text-tertiary: #6b5e44;
+  --border: #b5a47e;
+  --code-bg: #ede2c9;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="bone"] {
+    --bg: #0a0805;
+    --bg-sidebar: #0f0c08;
+    --bg-hover: #2b2417;
+    --surface: #191509;
+    --text: #fdf8ec;
+    --text-secondary: #cfc3a6;
+    --text-tertiary: #9c8f72;
+    --border: #4a412f;
+    --code-bg: #151107;
+  }
 }
 
-/* Cormorant Garamond — display-weight contrast at text size. Beautiful in the
-   `.page-title` and genuinely thin in a paragraph; the most likely of these
-   to be right for headings and wrong for the body. */
-:root[data-font="cormorant"] {
-  --font-prose: var(--font-p-cormorant), Georgia, serif;
-  --font-sans: var(--font-p-cormorant), Georgia, serif;
-  --font-serif: var(--font-p-cormorant), Georgia, serif;
+/* ---- Steel — the cool counterpart to Bone. Blue-white page, near-black navy
+       ink, and borders at a real blue-grey rather than a tint of nothing. The
+       hue is faint on purpose: this is a contrast proposal wearing a
+       temperature, not a colour scheme.
+
+       text 20.09 · 2nd 14.64 · 3rd 5.61 · border 2.07 · surface 1.16
+       dark: 18.73 · 11.81 · 6.78 · 2.52 · 1.13                      ---- */
+:root[data-theme="steel"] {
+  --bg: #fafcfe;
+  --bg-sidebar: #f0f4f9;
+  --bg-hover: #d4dee9;
+  --surface: #e6ecf4;
+  --text: #000308;
+  --text-secondary: #19273b;
+  --text-tertiary: #57677d;
+  --border: #a4b3c6;
+  --code-bg: #e2e9f2;
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="steel"] {
+    --bg: #01040a;
+    --bg-sidebar: #060b13;
+    --bg-hover: #1e2735;
+    --surface: #10161f;
+    --text: #f0f5fb;
+    --text-secondary: #b7c6d8;
+    --text-tertiary: #8496ab;
+    --border: #40506a;
+    --code-bg: #0c121b;
+  }
 }
 
-/* Spectral — a screen-first serif with more personality than Source Serif and
-   a noticeably darker page colour. Its Cyrillic is drawn, not adapted. */
-:root[data-font="spectral"] {
-  --font-prose: var(--font-p-spectral), Georgia, serif;
-  --font-sans: var(--font-p-spectral), Georgia, serif;
-  --font-serif: var(--font-p-spectral), Georgia, serif;
-}
+/* ---- Phosphor — the one coloured ink in the set, and the highest tertiary
+       contrast of the six in dark mode (8.93:1, against the site's 4.03).
+       Pure black page, bright green text; the light half is a white page with
+       near-black green ink, so it stays a green idea in both modes rather
+       than being a dark-mode costume with a white fallback.
 
-/* IBM Plex Serif — a technical slab. Reads as documentation rather than as an
-   essay, which for a note about Security+ may be exactly right. */
-:root[data-font="plex-serif"] {
-  --font-prose: var(--font-p-plex-serif), Georgia, serif;
-  --font-sans: var(--font-p-plex-serif), Georgia, serif;
-  --font-serif: var(--font-p-plex-serif), Georgia, serif;
+       text 20.09 · 2nd 12.84 · 3rd 5.50 · border 2.31 · surface 1.18
+       dark: 19.51 · 14.79 · 8.93 · 4.18 · 1.17                      ---- */
+:root[data-theme="phosphor"] {
+  --bg: #ffffff;
+  --bg-sidebar: #f2f9f5;
+  --bg-hover: #c9e2d3;
+  --surface: #e2f0e8;
+  --text: #000a04;
+  --text-secondary: #0a3a1c;
+  --text-tertiary: #3d7452;
+  --border: #87b598;
+  --code-bg: #dcece3;
 }
-
-/* Arsenal — a Ukrainian face (The Temporary State, Kyiv), drawn Cyrillic-first
-   with the Latin fitted to it rather than the other way round. The only one in
-   this list where the Ukrainian pages are the ones it was designed for. */
-:root[data-font="arsenal"] {
-  --font-prose: var(--font-p-arsenal), "Helvetica Neue", sans-serif;
-  --font-sans: var(--font-p-arsenal), "Helvetica Neue", sans-serif;
-  --font-serif: var(--font-p-arsenal), "Helvetica Neue", sans-serif;
-}
-
-/* Inter — the neutral sans, and the site's own past: it was here before the
-   serif took `body` and left it with nothing to set. Included as the control,
-   so "the serif was the right call" can be checked rather than assumed. */
-:root[data-font="inter"] {
-  --font-prose: var(--font-p-inter), "Helvetica Neue", sans-serif;
-  --font-sans: var(--font-p-inter), "Helvetica Neue", sans-serif;
-  --font-serif: var(--font-p-inter), "Helvetica Neue", sans-serif;
-}
-
-/* JetBrains Mono — the whole site monospaced, prose included. An extreme
-   position rather than a typeface choice, and the one that either makes
-   Terminal into a coherent idea or exposes it as a costume. */
-:root[data-font="mono"] {
-  --font-prose: var(--font-p-mono), ui-monospace, monospace;
-  --font-sans: var(--font-p-mono), ui-monospace, monospace;
-  --font-serif: var(--font-p-mono), ui-monospace, monospace;
+@media (prefers-color-scheme: dark) {
+  :root[data-theme="phosphor"] {
+    --bg: #000000;
+    --bg-sidebar: #050d07;
+    --bg-hover: #14301d;
+    --surface: #0a1a0f;
+    --text: #dcffe8;
+    --text-secondary: #9aeab3;
+    --text-tertiary: #61bb80;
+    --border: #347d4c;
+    --code-bg: #08150c;
+  }
 }

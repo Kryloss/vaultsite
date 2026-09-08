@@ -12,16 +12,7 @@ import { copyText } from "@/lib/clipboard";
 import { shortcutKey } from "@/lib/shortcut-key";
 import { ui, type Str } from "@/lib/ui-strings";
 /* TEMPORARY — colour and typeface previews; app/themes.css says what to delete. */
-import {
-  themes,
-  fonts,
-  themePrefix,
-  fontPrefix,
-  previewLabel,
-  applyPreview,
-  THEME_KEY,
-  FONT_KEY,
-} from "@/lib/themes";
+import { themes, themeActionLabel, applyTheme } from "@/lib/themes";
 
 /**
  * Cmd/Ctrl+K palette over the static, build-time index of every page.
@@ -271,36 +262,25 @@ export default function CommandPalette({
           go(pages[Math.floor(Math.random() * pages.length)].href);
         },
       },
-      /* TEMPORARY — one row per palette and one per typeface (app/themes.css),
-         so either can be tried on the page you are actually looking at. They
-         sit at the END of the list: the palette's own sort already puts every
-         action below every page, and these belong below the permanent actions
-         in turn.
+      /* TEMPORARY — one row per palette in app/themes.css, so a theme can be
+         tried on the page you are actually looking at. They sit at the END of
+         the list: the palette's own sort already puts every action below every
+         page, and these belong below the permanent actions in turn.
 
-         Typed to reach as a group — "theme" brings up all eleven palettes,
-         "font" all nine faces — because this is a comparison tool, not a
-         setting: the useful gesture is stepping through them with ↓ and ↵,
-         not finding one. The two axes are independent, so a palette pick
-         leaves the face alone and vice versa.
+         Typed to reach as a GROUP — "theme" brings up all seven at once —
+         because this is a comparison tool, not a setting: the useful gesture
+         is stepping through them with ↓ and ↵, not finding one.
 
          Each writes to <html> and localStorage and closes. Nothing re-renders
-         and nothing here is React state: every colour and every family on the
-         site is a token read from the root element, which is exactly why a
-         one-attribute switch can restyle the whole page. Delete this block
-         with lib/themes.ts. */
+         and nothing here is React state: every colour on the site is a token
+         read from the root element, which is exactly why a one-attribute
+         switch can restyle the whole page. Delete this block with
+         lib/themes.ts. */
       ...themes.map((theme) => ({
         id: `theme:${theme.id ?? "default"}`,
-        label: previewLabel(themePrefix, theme),
+        label: themeActionLabel(theme),
         run: () => {
-          applyPreview("theme", THEME_KEY, theme.id);
-          onClose();
-        },
-      })),
-      ...fonts.map((font) => ({
-        id: `font:${font.id ?? "default"}`,
-        label: previewLabel(fontPrefix, font),
-        run: () => {
-          applyPreview("font", FONT_KEY, font.id);
+          applyTheme(theme.id);
           onClose();
         },
       })),
