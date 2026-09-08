@@ -24,6 +24,7 @@ import CommandPalette from "@/components/CommandPalette";
 import SocialLinks from "@/components/SocialLinks";
 import { TIME_LEFT_EVENT } from "@/components/ReadingProgress";
 import { warmSearchIndex } from "@/components/useSearchIndex";
+import { OPEN_SEARCH_EVENT } from "@/components/NotFoundSearch";
 import Shortcuts from "@/components/Shortcuts";
 import ResistanceDay from "@/components/ResistanceDay";
 import type { ObservanceId } from "@/lib/observances";
@@ -444,6 +445,16 @@ export default function Chrome({
   }, [cancelOpen]);
 
   const openSearch = useCallback(() => setSearchOpen(true), []);
+
+  /* The 404's search bar lives in `main`, outside this component's subtree, so
+     it asks by event rather than by prop — the same reasoning as the palette
+     asking `Shortcuts` for the shortcut sheet (components/Shortcuts.tsx):
+     this component owns the palette's open state, and threading a callback
+     down through the page tree would be a second copy of it. */
+  useEffect(() => {
+    window.addEventListener(OPEN_SEARCH_EVENT, openSearch);
+    return () => window.removeEventListener(OPEN_SEARCH_EVENT, openSearch);
+  }, [openSearch]);
 
   /**
    * Whether the chip should swap its label at all.

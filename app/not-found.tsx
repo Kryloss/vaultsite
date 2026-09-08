@@ -3,7 +3,7 @@ import T from "@/components/T";
 import NotFoundSuggestions from "@/components/NotFoundSuggestions";
 import { ui } from "@/lib/ui-strings";
 import Page from "@/components/Page";
-import { getSectionBySlug } from "@/lib/vault";
+import NotFoundSearch from "@/components/NotFoundSearch";
 
 /**
  * 404 — the one page with nothing to read on it.
@@ -13,12 +13,11 @@ import { getSectionBySlug } from "@/lib/vault";
  * tail (`.notfound-page`, globals.css). Everything under it is the way out —
  * a sentence, two ways to leave, and the guess at what was actually meant.
  *
- * The second way out is checked against the vault rather than hard-coded:
- * a 404 that links to a section nobody published is a 404 pointing at a 404.
+ * The second way out is search rather than a link: on the page you land on
+ * when the URL was wrong, the useful thing is the box that finds the right
+ * one, not another list to browse.
  */
 export default function NotFound() {
-  const posts = getSectionBySlug("posts");
-
   return (
     <Page className="notfound-page">
       <div className="notfound-hero stagger">
@@ -40,17 +39,7 @@ export default function NotFound() {
             <T {...ui.backHome} />
           </Link>
 
-          {posts && (
-            <Link
-              href={`/${posts.slug}`}
-              className="notfound-btn notfound-btn-quiet action-link press"
-            >
-              <T {...ui.allPosts} />
-              <span className="arrow-glyph" aria-hidden>
-                →
-              </span>
-            </Link>
-          )}
+          <NotFoundSearch />
         </div>
       </div>
 
