@@ -2,9 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import T from "@/components/T";
 import { useLang } from "@/components/useLang";
-import { ui } from "@/lib/ui-strings";
 import { similarity } from "@/lib/fuzzy";
 import { useSearchIndex } from "@/components/useSearchIndex";
 import type { SearchItem } from "@/lib/vault";
@@ -64,14 +62,12 @@ export default function NotFoundSuggestions() {
   if (matches.length === 0) return null;
 
   return (
-    /* Named so globals.css can rule a line above it and centre its label —
-       the divider has to live INSIDE the component, since a wrapper in the
-       page would draw one on every 404 that has nothing to suggest. */
+    /* Named so globals.css can rule a line above it. The divider has to live
+       INSIDE the component: a wrapper in the page would draw one on every 404
+       that has nothing to suggest. There is no heading over the list — the
+       rule and the rows say enough on a page this short. */
     <div className="notfound-suggestions">
-      <p className="text-sm text-[var(--text-tertiary)]">
-        <T {...ui.didYouMean} />
-      </p>
-      <ul className="mt-3 flex flex-col gap-0.5">
+      <ul className="flex flex-col gap-0.5">
         {matches.map((m) => (
           <li key={m.href}>
             <Link href={m.href} className="backlink-ish">

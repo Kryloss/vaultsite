@@ -9521,10 +9521,11 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
    a 24px "404", a line of grey, a link — which is the layout of a page that
    has something to say, applied to a page that hasn't.
 
-   So the number IS the page: bigger than any title on the site, centred in
-   the window, fading out down its own height, with the sentence riding on its
-   tail. Everything under it is the way out. Monochrome throughout (#64) — the
-   fade is a MASK, so it takes the number out towards whatever the page is
+   So the number IS the page, and by now it is nearly all of it: bigger than
+   any title on the site, centred in the window, fading out down its own
+   height. The sentence under it went too — "404" over a breadcrumb that
+   already names where you are needs no gloss. Monochrome throughout (#64) —
+   the fade is a MASK, so it takes the number out towards whatever the page is
    behind it and needs no second set of values for dark mode. Nothing else is
    lighting it: the gradient IS the effect.
 
@@ -9548,10 +9549,6 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
 }
 
 .notfound-hero {
-  /* Held here, not on `.notfound-code`, because the sentence below is
-     positioned as a fraction of it — the two move together or the overlap
-     comes apart at one window width. */
-  --notfound-size: clamp(4.5rem, 2.75rem + 11vw, 7.5rem);
   text-align: center;
 }
 
@@ -9559,7 +9556,7 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   font-family: var(--font-prose);
   /* Roughly twice `.page-title` at every size — a title is the biggest thing
      on a page that has content; this is the page. */
-  font-size: var(--notfound-size);
+  font-size: clamp(4.5rem, 2.75rem + 11vw, 7.5rem);
   font-weight: 600;
   line-height: 0.9;
   letter-spacing: -0.045em;
@@ -9586,36 +9583,15 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
    has to carry the mark on its own. A short ramp with a long solid top reads
    as a number that has been cut off; a long one reads as a number going out.
 
-   The bottom stop is not a taste decision. The fade has to be GONE by the
-   feet of the digits, a few percent above the baseline (which sits at about
-   89% of a line box this tight), because that is where the sentence lands: a
-   mask still a quarter opaque there puts the stems of the 4s through the
-   words. */
+   The bottom stop was tuned when a sentence lay across the digits' feet and
+   the fade had to be GONE by then (the baseline sits at about 89% of a line
+   box this tight; a mask still a quarter opaque there put the stems of the 4s
+   through the words). The sentence is gone and the stop stays: what it buys
+   now is that the number ends in air rather than at an edge, and the buttons
+   below it are spaced against that. */
 .notfound-code {
   -webkit-mask-image: linear-gradient(to bottom, #000 8%, transparent 86%);
   mask-image: linear-gradient(to bottom, #000 8%, transparent 86%);
-}
-
-/* Tucked INTO the number rather than set below it: the first line sits in the
-   space the digits' feet have faded out of, so the two read as one mark
-   instead of a heading with a caption under it. It is a GRAZE, and that is
-   the whole tuning — 0.28 of the number's size put both lines of the sentence
-   across the middle of the digits, where the strokes are still solid, and it
-   read as a collision. The lift is a fraction of `--notfound-size` rather
-   than the fixed `-mt-8` this was adapted from: the number is fluid, so a rem
-   clears the digits at one end of the clamp and crosses their middles at the
-   other.
-
-   Order matters twice over: the sentence comes AFTER the number in the DOM,
-   and `.stagger > *` gives every child its own stacking context, so the text
-   paints on top of the glyphs without a z-index anywhere. */
-.notfound-lede {
-  position: relative;
-  margin: calc(var(--notfound-size) * -0.15) auto 0;
-  font-size: 0.9375rem;
-  max-width: 26rem;
-  color: var(--text-secondary);
-  text-wrap: balance;
 }
 
 .notfound-actions {
@@ -9623,73 +9599,69 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   flex-wrap: wrap;
   justify-content: center;
   gap: 0.5rem;
-  margin-top: 1.5rem;
+  /* Measured from the number's LINE BOX, and the last sixth of that box is
+     empty — the mask takes the digits out at 86%, and `line-height: 0.9`
+     leaves nothing below the baseline. So this number is smaller than the gap
+     it produces: 0.75rem here reads as about 1.75rem of air. */
+  margin-top: 0.75rem;
 }
 
-/* Two ways out, weighted: home is the answer most of the time, so it takes
-   the inverted fill the active nav row and the selected chip already use, and
-   the other stays a quiet surface beside it. No icons — those are the
-   sidebar's (#64); the arrows are the site's own `.arrow-glyph`, which throws
-   them on the press. */
+/* Two ways out, and neither is louder than the other. Home used to take the
+   inverted fill the active nav row and the selected chip use, which made it
+   the brightest thing on a page that is already a very large number — two
+   quiet surfaces read as a pair of doors rather than an instruction. Both
+   carry a min-width so they match each other instead of being sized by the
+   length of their own word. No icons — those are the sidebar's (#64); the
+   arrow is the site's own `.arrow-glyph`, which throws it on the press. */
 .notfound-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border: 1px solid transparent;
   border-radius: var(--r-md);
-  padding: 0.4375rem 0.9375rem;
+  min-width: 8rem;
+  padding: 0.4375rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;
   text-decoration: none;
 }
 
-.notfound-btn-primary {
-  background: var(--text);
-  color: var(--bg);
+/* Search is Home's twin, not a form: same box, quiet fill against Home's
+   inverted one. A field was tried here — a button dressed as the search box
+   it opens, placeholder colour and all — and it was one element too many on a
+   page whose whole content is a number and a sentence. Two words in two
+   boxes. */
+/* Sized against the 14px label rather than the sidebar's 17px: an icon in a
+   line of text wants to sit at about the cap height, and the sidebar's is
+   scaled to a 32px hit target with no words next to it. The margin matches
+   `.arrow-glyph`'s, so the mark sits off its label by the same air the arrow
+   does on the button beside it. */
+.notfound-btn-glyph {
+  width: 0.9375rem;
+  height: 0.9375rem;
+  margin-right: 0.4em;
+  opacity: 0.75;
 }
 
-.notfound-btn-primary:hover {
-  background: var(--text-secondary);
-}
-
-/* The search field (components/NotFoundSearch.tsx). A button, dressed as the
-   box it opens: the placeholder colour and the left-aligned label say "type
-   here", which is what pressing it lets you do. Sized to the button beside it
-   — same height, same radius, same border — so the row reads as two controls
-   rather than a control and a form. It takes the leftover width up to a cap
-   and drops to the full column on a phone, where the two stack. */
-.notfound-search {
-  flex: 1 1 11rem;
-  max-width: 14rem;
-  min-width: 0;
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
+.notfound-btn-quiet {
+  border-color: var(--border);
   background: var(--surface);
-  padding: 0.4375rem 0.9375rem;
-  font-size: 0.875rem;
-  text-align: left;
-  color: var(--text-tertiary);
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  color: var(--text);
 }
 
-.notfound-search:hover {
+.notfound-btn-quiet:hover {
   background: var(--bg-hover);
-  color: var(--text-secondary);
 }
 
-/* "Did you mean…" — the useful half of the page, and the only part of it that
+/* The suggestions — the useful half of the page, and the only part of it that
    knows what was actually typed. Ruled off rather than merely spaced: under a
    centred hero, a left-aligned list needs a line to belong to the page rather
-   than look stranded. The rows keep their own alignment; only the label
-   centres, so it reads as the hero's last line rather than the list's first. */
+   than look stranded. It carries no heading; "Did you mean…" was one label too
+   many under two buttons, and a short list under a rule is legible without
+   being told what it is. */
 .notfound-suggestions {
-  margin-top: 2.25rem;
-  padding-top: 1.5rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
   border-top: 1px solid var(--border);
 }
 
-.notfound-suggestions > p {
-  text-align: center;
-}

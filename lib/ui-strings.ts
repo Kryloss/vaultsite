@@ -278,11 +278,10 @@ export const ui = {
   resumeCurrent: { en: "Current", uk: "Зараз" },
 
   // 404
-  notFoundBody: {
-    en: "This page doesn’t exist.",
-    uk: "Цієї сторінки не існує.",
-  },
-  backHome: { en: "Back home", uk: "На головну" },
+  home: { en: "Home", uk: "Головна" },
+  search: { en: "Search", uk: "Пошук" },
+  /* Also the command palette's no-exact-match heading — the 404's list lost
+     its label, this key did not lose its other caller. */
   didYouMean: { en: "Did you mean…", uk: "Можливо, ви шукали…" },
 } satisfies Record<string, Str>;
 

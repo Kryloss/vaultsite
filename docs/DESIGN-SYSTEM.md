@@ -12,7 +12,7 @@ that are not visible from the tokens themselves. Reasons: `docs/DECISIONS.md`
 - **Any new UI must work in both languages, light and dark, and under `prefers-reduced-motion`.** Using the tokens is what makes that nearly free. Check the result in both languages, light and dark, before calling it done.
 - Give clickable things `press` (`press press-soft` for cards), and don't add `transition-colors` beside `.press` — it declares its own.
 - Dark mode is `prefers-color-scheme` only — no manual toggle.
-- Icons (`components/icons.tsx`) are **rendered in the sidebar only** — no icons on page content (#64). `resolveIcon()` maps vault frontmatter emoji/names → SVGs; unknown emoji render as text.
+- Icons (`components/icons.tsx`) are **rendered in the sidebar only** — no icons on page content (#64), with ONE exception, added at the owner's request: `SearchIcon` on the 404's Search button (`components/NotFoundSearch.tsx`, #161), where two identical grey buttons sit side by side and the mark is what tells them apart before the words are read. It is the counterpart of the arrow on Home. A second exception would end the rule rather than bend it — see #104's wording for the same situation on colour. `resolveIcon()` maps vault frontmatter emoji/names → SVGs; unknown emoji render as text.
 
 ## Editing `globals.css`
 
