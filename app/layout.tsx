@@ -1,5 +1,15 @@
 import type { Metadata } from "next";
-import { Source_Serif_4 } from "next/font/google";
+import {
+  Source_Serif_4,
+  Literata,
+  EB_Garamond,
+  Cormorant_Garamond,
+  Spectral,
+  IBM_Plex_Serif,
+  Arsenal,
+  Inter,
+  JetBrains_Mono,
+} from "next/font/google";
 import "./globals.css";
 /* TEMPORARY — colour-theme previews (⌘K → "Theme: …"). Delete this line
    together with app/themes.css; see that file's header. */
@@ -58,6 +68,100 @@ const sourceSerif = Source_Serif_4({
   display: "swap",
   variable: "--font-source-serif",
 });
+
+/* ───────────────── TEMPORARY — preview typefaces (app/themes.css) ─────────
+   Eight alternatives to Source Serif 4, switched from ⌘K ("Font: …"). Every
+   one carries `cyrillic` AND `cyrillic-ext`: Ukrainian needs і ї є from the
+   first and Ґ ґ from the second, and a face with only `cyrillic` drops the ґ
+   into a fallback mid-word. That filter is what cut Playfair Display, and it
+   is the same one that cut Newsreader when the real typeface was chosen
+   (docs/DECISIONS.md #59).
+
+   `preload: false` on all eight is what makes this affordable: next/font
+   emits the @font-face rules for every family, but the browser fetches a face
+   only when something on the page is actually set in it — so a visitor who
+   never touches ⌘K downloads exactly the same bytes as before, plus a few KB
+   of CSS. Do NOT copy `preload: false` onto the winner when this is folded
+   in; the real face wants preloading.
+
+   Static families (Arsenal, Spectral, IBM Plex Serif) need their weights
+   named — the site uses 400/500/600/700 between body, `.entry-meta` and
+   headings. The variable ones cover the range on their own. Delete this whole
+   block with app/themes.css. */
+const pLiterata = Literata({
+  subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
+  display: "swap",
+  preload: false,
+  style: ["normal", "italic"],
+  variable: "--font-p-literata",
+});
+const pGaramond = EB_Garamond({
+  subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
+  display: "swap",
+  preload: false,
+  style: ["normal", "italic"],
+  variable: "--font-p-garamond",
+});
+const pCormorant = Cormorant_Garamond({
+  subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
+  display: "swap",
+  preload: false,
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-p-cormorant",
+});
+const pSpectral = Spectral({
+  subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
+  display: "swap",
+  preload: false,
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-p-spectral",
+});
+const pPlexSerif = IBM_Plex_Serif({
+  subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
+  display: "swap",
+  preload: false,
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-p-plex-serif",
+});
+const pArsenal = Arsenal({
+  subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
+  display: "swap",
+  preload: false,
+  weight: ["400", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-p-arsenal",
+});
+const pInter = Inter({
+  subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
+  display: "swap",
+  preload: false,
+  style: ["normal", "italic"],
+  variable: "--font-p-inter",
+});
+const pMono = JetBrains_Mono({
+  subsets: ["latin", "latin-ext", "cyrillic", "cyrillic-ext"],
+  display: "swap",
+  preload: false,
+  style: ["normal", "italic"],
+  variable: "--font-p-mono",
+});
+/** Every preview family's variable, for the <html> class list. */
+const previewFontVars = [
+  pLiterata,
+  pGaramond,
+  pCormorant,
+  pSpectral,
+  pPlexSerif,
+  pArsenal,
+  pInter,
+  pMono,
+]
+  .map((f) => f.variable)
+  .join(" ");
+/* ──────────────────────── end preview typefaces ───────────────────────── */
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -127,7 +231,7 @@ export default function RootLayout({
     // runtime), so the server HTML intentionally differs — suppress the warning.
     <html
       lang="en"
-      className={sourceSerif.variable}
+      className={`${sourceSerif.variable} ${previewFontVars}`}
       suppressHydrationWarning
     >
       <head>
@@ -146,7 +250,8 @@ export default function RootLayout({
               "try{var q=new URLSearchParams(location.search).get('lang');var l=q||localStorage.getItem('lang');if(l==='uk')document.documentElement.dataset.lang='uk';}catch(e){}",
           }}
         />
-        {/* TEMPORARY — restore the previewed colour theme before first paint,
+        {/* TEMPORARY — restore the previewed colour theme and typeface before
+            first paint,
             for the same reason the language script above exists: a theme
             applied at hydration means a flash of the default palette first.
             No stored choice, no attribute, and app/globals.css is untouched.
@@ -155,7 +260,7 @@ export default function RootLayout({
           suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html:
-              "try{var t=localStorage.getItem('theme-preview');if(t)document.documentElement.dataset.theme=t;}catch(e){}",
+              "try{var r=document.documentElement;var t=localStorage.getItem('theme-preview');if(t)r.dataset.theme=t;var f=localStorage.getItem('font-preview');if(f)r.dataset.font=f;}catch(e){}",
           }}
         />
         {/* First-visit intro gate — see components/Intro.tsx.
