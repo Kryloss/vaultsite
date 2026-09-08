@@ -9551,7 +9551,7 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   /* Held here, not on `.notfound-code`, because the sentence below is
      positioned as a fraction of it — the two move together or the overlap
      comes apart at one window width. */
-  --notfound-size: clamp(5.5rem, 3rem + 16vw, 10rem);
+  --notfound-size: clamp(4.5rem, 2.75rem + 11vw, 7.5rem);
   text-align: center;
 }
 
@@ -9612,6 +9612,7 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
 .notfound-lede {
   position: relative;
   margin: calc(var(--notfound-size) * -0.15) auto 0;
+  font-size: 0.9375rem;
   max-width: 26rem;
   color: var(--text-secondary);
   text-wrap: balance;
@@ -9621,8 +9622,8 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.625rem;
-  margin-top: 2rem;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
 }
 
 /* Two ways out, weighted: home is the answer most of the time, so it takes
@@ -9635,9 +9636,9 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   align-items: center;
   justify-content: center;
   border: 1px solid transparent;
-  border-radius: var(--r-lg);
-  padding: 0.5625rem 1.125rem;
-  font-size: 0.9375rem;
+  border-radius: var(--r-md);
+  padding: 0.4375rem 0.9375rem;
+  font-size: 0.875rem;
   font-weight: 500;
   text-decoration: none;
 }
@@ -9658,14 +9659,14 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
    rather than a control and a form. It takes the leftover width up to a cap
    and drops to the full column on a phone, where the two stack. */
 .notfound-search {
-  flex: 1 1 14rem;
-  max-width: 18rem;
+  flex: 1 1 11rem;
+  max-width: 14rem;
   min-width: 0;
   border: 1px solid var(--border);
-  border-radius: var(--r-lg);
+  border-radius: var(--r-md);
   background: var(--surface);
-  padding: 0.5625rem 1.125rem;
-  font-size: 0.9375rem;
+  padding: 0.4375rem 0.9375rem;
+  font-size: 0.875rem;
   text-align: left;
   color: var(--text-tertiary);
   overflow: hidden;
@@ -9684,8 +9685,8 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
    than look stranded. The rows keep their own alignment; only the label
    centres, so it reads as the hero's last line rather than the list's first. */
 .notfound-suggestions {
-  margin-top: 2.75rem;
-  padding-top: 1.75rem;
+  margin-top: 2.25rem;
+  padding-top: 1.5rem;
   border-top: 1px solid var(--border);
 }
 
