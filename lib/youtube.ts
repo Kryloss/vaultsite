@@ -29,6 +29,18 @@ export function youtubeThumbnail(id: string): string {
   return `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
 }
 
+/**
+ * Square-croppable cover for a video ID. `mqdefault` rather than the
+ * `youtubeThumbnail` above: hqdefault is 4:3 with black bars baked into the
+ * top and bottom, so `object-fit: cover` in a square box shows the bars and
+ * shrinks the picture. mqdefault is a true 16:9 320x180 frame with nothing to
+ * crop away but the sides. Callers should still handle a failed load — see the
+ * capsule in `components/TodaysVibe.tsx`, which falls back to its note icon.
+ */
+export function youtubeCover(id: string): string {
+  return `https://i.ytimg.com/vi/${id}/mqdefault.jpg`;
+}
+
 /** Canonical watch URL, for "open on YouTube" links. */
 export function youtubeWatchUrl(id: string): string {
   return `https://www.youtube.com/watch?v=${id}`;

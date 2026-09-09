@@ -1,5 +1,7 @@
 "use client";
 
+import TodaysVibe, { TodaysVibeRestore } from "@/components/TodaysVibe";
+import type { TodaysVibe as Vibe } from "@/lib/todays-vibe";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -79,9 +81,11 @@ export default function Chrome({
   resistanceDay,
   observance,
   constellation,
+  vibe,
   children,
 }: {
   items: NavItem[];
+  vibe?: Vibe | null;
   siteName: string;
   /** Ukrainian form of `siteName`, for the breadcrumb only — see lib/site-config.ts. */
   siteNameUk: string;
@@ -670,6 +674,7 @@ export default function Chrome({
         <T {...ui.skipToContent} />
       </a>
 
+      <div className="chrome-cluster">
       {/* Floating top-left: panel icon + clickable location path */}
       {/* `data-compact` drives the swap between the breadcrumb and the time
           remaining; both live here so the bar never changes width abruptly.
@@ -691,7 +696,7 @@ export default function Chrome({
            is a 44×40 pill rather than a circle, and the button doesn't move.
            (Squaring it the other way — growing the height to 44 — is worse
            still: this bar and `.toc-bar` are built to the same 2.5rem, #51.) */
-        className="chrome-bar fixed left-3 top-3 z-30 flex items-center gap-1 rounded-full px-1.5 py-1"
+        className="chrome-bar relative z-30 flex items-center gap-1 rounded-full px-1.5 py-1"
         data-compact={swap}
       >
         <button
@@ -713,6 +718,10 @@ export default function Chrome({
         >
           <PanelIcon className="h-[18px] w-[18px]" />
         </button>
+        {/* Hidden music waits here, between the menu button and the crumbs,
+            rather than as a chip of its own beside them: it is a control of
+            this bar while there is no capsule to be. */}
+        {vibe && <TodaysVibeRestore track={vibe} />}
         {/* The breadcrumb and the time remaining occupy the SAME cell, one
             above the other, and slide vertically past each other on a phone.
             Stacked rather than side by side so the chip's width is the wider
@@ -758,6 +767,9 @@ export default function Chrome({
             </span>
           </span>
         )}
+      </div>
+
+      {vibe && <TodaysVibe track={vibe} />}
       </div>
 
       {/* The left edge, live to the pointer. A strip this narrow is under the

@@ -169,6 +169,12 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 159 | The greeting's full stop as the mascot — built, taken out |
 | 160 | One preview cut for both languages, decided on the English body |
 | 161 | The 404 is the number: a page with nothing to read is designed as one |
+| 162 | Today’s vibe: Home metadata, opt-in global capsule, morning question |
+| 163 | Native MP3 capsule, flat colour and phone sidebar restoration |
+| 164 | Today’s vibe plays from a hidden YouTube frame, not an MP3 |
+| 165 | The vibe capsule joins the chrome: cover art, no colour, no label |
+| 166 | Phones show the vibe player, because iOS will not play a hidden one |
+| 167 | Today’s vibe is a desktop control; #166's phone player is withdrawn |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -915,3 +921,164 @@ The 404 opened like every other page — a 24px "404", a line of grey under it, 
 **Search is a BUTTON, and it says one word.** There is one search on this site — the ⌘K palette, with its index, its keyboard model and its results list — and a real `<input>` here would be either a second, worse one or a box that throws away what you typed the moment the palette opened over it. Pressing it opens the palette, which is where the cursor lands anyway. A middle version was tried and dropped: a button dressed as the search box it opens, placeholder colour and left-aligned label included. It was one element too many on a page whose entire content is a number and a sentence, so Search is now Home's twin — same box, same fill, same width, one word each. The palette's open state belongs to `Chrome`, which is not an ancestor of page content, so the request travels as an `opensearch` window event — the same shape as the palette asking `Shortcuts` for the shortcut sheet, and as `TIME_LEFT_EVENT`. It still warms the index on pointer-enter, which matters precisely on the 404s that suggest nothing: those are the ones where someone reaches for search.
 
 **The rule above the suggestions lives in `NotFoundSuggestions`, not on the page.** The component returns `null` when it has nothing to suggest, and a divider drawn by a wrapper in `not-found.tsx` would then hang under the buttons on every 404 that matched nothing. The list carries no heading — "Did you mean…" was a third label under two buttons, and a short ruled-off list is legible without being told what it is. The string stays in `ui`: the command palette uses it too.
+
+## 162. Today’s vibe lives in Home metadata and the shared chrome (2026-09-08)
+
+The owner requested a daily chosen track beside the breadcrumb, with opt-in
+playback and a morning question. Five flat `vibe_` properties on Home keep the
+choice editable in Obsidian without creating a public music review or a new
+route. The root layout validates and passes a serializable track; the site
+remains static and a new committed selection deploys through the existing flow.
+The daily question is a Codex heartbeat attached to the task, not a production
+cron or runtime endpoint. The owner explicitly authorized automatic track
+commits after replying; unrelated edits must never enter those commits.
+
+Apple's player cannot shrink into a 40px capsule without clipping its controls.
+The capsule therefore opens a full, unscaled 150px song player. There is no iframe
+or playback until requested; closing/hiding removes it. The shared layout keeps
+an open player alive across internal navigation. A persistent hide choice leaves
+a small restore control. The label changes to “Latest vibe” if the selection is
+from another Toronto date, so a missed morning never invents a new pick.
+
+## 163. Native MP3 capsule, flat colour and phone sidebar restoration (2026-09-08)
+
+The owner replaced #162's Apple preview player with full MP3 playback and asked
+for less space, a note icon, colour and no grey glow. A native `audio` element
+with `preload="none"` now powers explicit play/pause and seeking. There is no
+iframe, streaming-service preview or popup. An unavailable source is labelled
+honestly and cannot start playback. Existing files and direct HTTPS MP3s work
+through the same `vibe_audio` property; local files follow normal asset mirroring.
+
+The capsule is now 32px, with a flat marigold fill, dark ink and a musical note.
+These component-scoped colours are an explicit owner-requested exception to #64;
+they do not create a general accent token. Desktop restores hidden music with a
+note button; phones remove it from the top row entirely and expose a labelled
+sidebar row instead. Hiding pauses audio, restoring only focuses its control.
+
+## 164. Today’s vibe plays from a hidden YouTube frame (2026-09-08)
+
+The owner asked for a YouTube embed with YouTube’s own interface hidden. #163’s
+`vibe_audio` is replaced by `vibe_youtube`, which takes any YouTube link or a
+bare video ID. Sourcing a full, legitimate MP3 every morning was the standing
+cost of #163 and it kept the capsule silent; a link is something the owner
+already has by the time the track is chosen.
+
+The capsule stays exactly as #163 designed it and remains the only interface.
+The player is a `youtube-nocookie` frame built with `controls=0`, `disablekb=1`,
+`fs=0`, `rel=0`, `iv_load_policy=3` and `playsinline=1`, parked off-view under
+`opacity: 0` and `clip-path`, `inert`, and out of the tab order. It is not
+`display: none` and not zero-sized: browsers suspend playback in a frame hidden
+that way. Nothing of YouTube’s is requested until the first press — the frame
+and the API script are both built inside that click, which is also what lets the
+player inherit the user gesture the `autoplay` parameter needs.
+
+Playback state comes from the IFrame API rather than a postMessage protocol, and
+the position is polled while playing because the API has no time event. A press
+that never becomes sound is timed out after eight seconds: the API's error event
+fires once, often before the script that would hear it has loaded, and YouTube
+reports an ordinary “cued” for an upload it will never play. Every failure
+offers the track on YouTube, because an upload that refuses embedding cannot be
+fixed by retrying.
+
+Note that hiding the player is at odds with YouTube's embedded-player terms,
+which expect the player to be visible. It is what the owner asked for on a
+personal site; a visible player is the change to make if that ever matters.
+
+## 165. The vibe capsule joins the chrome (2026-09-08)
+
+The owner asked for the player to fit the site, for the “Today’s vibe” label to
+go, for the cover instead of a note, for the whole title, and for the close
+button only on hover. Taken together that ends #163's colour exception: the
+capsule now wears `.chrome-bar`'s own fill, hairline and blur at the breadcrumb
+chip's 40px height, and **the site has no palette exception left**
+(`docs/DESIGN-SYSTEM.md`). Playing is marked by the title coming up to `--text`,
+which is how this bar marks “current” everywhere else.
+
+The label moves into the accessible name and the tooltip rather than
+disappearing: a pick from an older Toronto date still has to read “Latest vibe”,
+and that distinction is the whole point of #162.
+
+The cover is the video's `mqdefault` thumbnail. hqdefault, which `lib/youtube.ts`
+otherwise prefers as the one size every upload has, is 4:3 with black bars baked
+in and cannot be cropped square. A cover that fails to load falls back to the
+note icon, so the capsule is never a gap. This does mean `i.ytimg.com` is now
+contacted on every page view: #164's “nothing of YouTube's until you press play”
+still holds for the player and its script, but no longer for the thumbnail.
+
+Two layout rules worth keeping. The seek owns a band along the pill's lower edge
+that the content leaves free — a 24px trigger inside a 40px pill — because a
+centred seek and centred content shared a line and the track ran through the
+title's descenders. And the close button animates `flex-basis`, not `width`:
+`flex: 0 0 1.25rem` sets a basis, a basis beats width in a flex row, and
+animating width alone left an invisible 20px hole on the end of the pill. It
+opens rightward so nothing under the pointer moves. Without hover there is no
+way to summon it, so phones keep it up permanently.
+
+On phones the hidden capsule is restored from a note in the drawer's HEADER,
+left of the language flag, rather than the full-width row #163 put below the
+navigation — it is a control of the same kind as the flag and the search button.
+It stays mounted and animates its width, so its neighbours slide over; the
+collapsed one is `inert`, not `hidden`, because `display: none` has no
+transition to play.
+
+## 166. Phones show the vibe player (2026-09-08)
+
+Playing on an iPhone failed, every time, with the watchdog's “Couldn't play”.
+The video was not the problem — it reports `playableInEmbed: true` and the embed
+page serves fine to an iOS user agent. **iOS starts audio for a tap on the
+player itself and for nothing else**: not `playVideo()`, not `autoplay` in a
+frame built inside a tap elsewhere on the page. #164's hidden player therefore
+cannot ever make sound on an iPhone, and no parameter fixes that.
+
+Below 640px the same frame — moved by CSS, never re-mounted, since a re-mounted
+iframe reloads and loses its position — becomes a 16:9 panel under the chrome
+bar, with `autoplay: false`, `inert` off and in the tab order. The visitor taps
+the video; from then on the frame has been interacted with and the capsule's own
+controls work. The first press only reveals the panel, so the watchdog does not
+arm on it. The seek moves under the video at full width, because 32px of track
+in the capsule is not scrubbable with a thumb. Which mode applies is decided
+once, at the press that builds the frame, so a rotation cannot move a playing
+player.
+
+The cost is that YouTube's poster shows its title bar and a “Watch on YouTube”
+button. `modestbranding` was retired and there is no parameter left for it. It
+is the pre-play state only — once playing, `controls=0` leaves a bare video,
+verified — and that poster is the tap target iOS demands, so covering it would
+break the thing it is there for. Cropping it the way the Apple Music embeds are
+cropped is possible and was NOT done: this player is meant to be tapped, and the
+regions worth cropping are the ones a mis-tap would otherwise send to YouTube.
+
+Hiding on a phone now animates into the drawer it moves to: the pill shrinks
+onto the menu button while the row closes behind it. The capsule takes `inert`
+rather than `hidden` so there is something to animate — `display: none` has no
+transition — and `.vibe[data-hidden]` takes its display on desktop, where the
+control simply swaps for a restore note in place.
+
+## 167. Today’s vibe is a desktop control (2026-09-08)
+
+#166's phone panel worked and the owner did not want it — a 16:9 video under the
+chrome bar is a lot of screen for one track. **The feature is now `display: none`
+below 640px** and the phone machinery is gone with it: the panel CSS, the
+`autoplay: false` path, the drawer-header note, and the shrink-into-the-sidebar
+exit #166 added. The breadcrumb chip's phone `max-width: calc(100vw - 12rem)`
+goes too — it only ever existed to reserve room for the capsule.
+
+#166's finding stands and is why this is a removal rather than a fix: iOS starts
+audio for a tap on the player itself and for nothing else, so **a capsule
+without a visible player cannot make sound on an iPhone**. Anyone re-adding a
+phone capsule has to bring a visible player with it, or ship a control that
+looks broken instead of one that is absent.
+
+Separately, the capsule's `z-index` moves from 0 to 30, matching the breadcrumb
+chip's. Both carry `.chrome-bar`'s identical `inset 0 0 0 1px var(--chrome-ring)`,
+but at different stacking levels that ring composites differently over the blur
+pseudo-elements: the capsule's read as a bright white outline beside the chip's
+soft grey hairline. A non-auto z-index is required regardless, to keep those
+`z-index: -1` pseudo-elements inside the box — it simply has to be the same one.
+`.vibe-restore` was `position: static`, which sized its blur layers to `.vibe`
+rather than to the chip — and it has since stopped needing either, because the
+restore note moved INSIDE the breadcrumb chip, between the menu button and the
+crumbs. With no capsule to be, it is a control of that bar rather than a second
+chip parked beside it, so it wears that bar's button classes and hovers by
+colour alone. It is mounted by `Chrome.tsx` as its own export and returns focus
+to the capsule over a `vibeopen` event, the two being in different trees.

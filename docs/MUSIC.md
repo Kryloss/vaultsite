@@ -40,3 +40,104 @@ Opens like a shelf note: artist block, plain fact list with `rating:` as the las
 - **Cropping Apple's chrome**: `--am-crop-top` 24px song / 34px album, `--am-crop-bottom` 16px song / 18px album, negative margins under `overflow: hidden` on `.am-crop`/`.apple-music-block` at all three mounts. The bottom values are the top of `a.legal-link` measured in Apple's DOM with Play pressed; "View in Apple Music" shares its band with the transport controls and cannot be cropped. Press Play before changing a crop value. Set both to 0 to restore the untouched player.
 - No footer link of ours under embeds (`ui.openInAppleMusic` is parked); no wrapper card around the playlist; artwork inside a player cannot be hidden.
 - Below 640px the album embed is hidden and a 2.25rem pill wearing the album cover in the top-right opens a frameless sheet with the full player (`components/MusicSheet.tsx`); `.page:has(.toc-bar)` steps it left.
+
+## Today’s vibe — global capsule
+
+The Home frontmatter holds `vibe_title`, `vibe_artist`, `vibe_date` (quoted
+`YYYY-MM-DD` in America/Toronto), and `vibe_youtube`. The last takes any YouTube
+link — `watch?v=`, `youtu.be`, Shorts, `/live/` — or the bare 11-character video
+ID. Anything else, a playlist URL included, leaves the real pick visible with
+“Audio coming soon”; it never substitutes a preview or pretends to play. The
+former `vibe_audio` MP3 field and the Apple Music `vibe_url` / `vibe_artwork`
+before it are no longer used (#164, #163).
+Proper names stay original in both languages; shared metadata needs no new
+Ukrainian prose or public music note.
+
+The root layout validates the metadata and passes it to `Chrome`; nothing reads
+the vault at runtime. The capsule is a 40px pill beside the breadcrumb chip,
+wearing that chip's own `.chrome-bar` material — fill, hairline ring and blur —
+at its height (#165). It is monochrome: playing is marked by the title coming up
+to `--text`, not by colour. #163's marigold is gone, and with it the site's last
+palette exception.
+
+Inside it, left to right: **the track's cover**, a 24px rounded crop of the
+video's `mqdefault` thumbnail (`youtubeCover` — hqdefault has black bars baked
+in and cannot be square-cropped), with play/pause drawn over a scrim on hover
+and whenever it is playing; **the full title**, never width-capped, so the pill
+grows to fit and `.chrome-cluster`'s max-width is what finally stops it; and
+**the close button, shown only while the capsule is hovered or focused**. That
+last one animates `flex-basis`, not `width` — the shorthand sets a basis and in
+a flex row the basis is what decides the box, so animating width alone leaves an
+invisible hole on the end of the pill. It opens to the RIGHT of the trigger so
+the cover and title never move under the pointer. It is behind `(hover: hover)`,
+which now only ever matches, since phones don't get the capsule at all.
+
+The seek runs along the pill's lower edge, inset past the corner radius, in a
+band the content leaves free — the trigger is 24px inside a 40px pill for
+exactly that reason. Centred content and a centred seek shared a line once and
+the track ran through the title's descenders. The played part is painted from a
+`--vibe-progress` custom property set per render, because a range input has no
+progress of its own.
+
+Note the cover is fetched from `i.ytimg.com` on every page view, so the "nothing
+of YouTube's until you press play" rule below now covers the player and its
+script, not the thumbnail.
+
+`TodaysVibe` plays a `youtube-nocookie` frame with YouTube's own interface
+switched off — `controls=0`, `disablekb=1`, `fs=0`, `rel=0`, `iv_load_policy=3`,
+`playsinline=1` — and the capsule is the only control. **The frame is parked
+off-view with `opacity: 0` and `clip-path`, never `display: none` and never
+sized to nothing: a frame hidden either of those ways has its playback
+suspended.** It is `inert` and `tabIndex={-1}`, so it stays out of the tab order
+and the accessibility tree.
+
+**Nothing of YouTube's is requested until the first press.** That press is what
+builds the frame and loads the API script, and building the frame inside the
+click is also what lets `autoplay` inherit the user gesture — calling
+`playVideo()` a tick later is what browsers block. Afterwards play, pause and
+seek go through the IFrame API; the position is polled every 500ms while
+playing, because that API has no time event of its own.
+
+### Not on phones (#167)
+
+**Below 640px `.vibe` is `display: none` and the feature simply isn't there.**
+The reason is worth keeping, because it looks like a bug otherwise: iOS starts
+audio for a tap on the player itself and for nothing else — not `playVideo()`,
+not `autoplay` in a frame built inside a tap elsewhere — so a hidden player on
+an iPhone is a silent one, reporting only the watchdog's “Couldn't play”. The
+fix would have to be a visible, tappable player, and #166 built one: a 16:9
+panel under the chrome bar. The owner didn't want the screen it took. **So don't
+re-add a phone capsule without a visible player** — a capsule alone cannot make
+sound on an iPhone, and it will look broken rather than absent.
+
+The breadcrumb chip's phone `max-width: calc(100vw - 12rem)` went with it; it
+existed only to reserve room for the capsule.
+
+A seek slider appears on desktop once duration is known. Keyboard arrows can
+seek. Loading motion respects reduced motion. The player survives internal
+navigation. Hiding pauses it and stores the choice, and a note takes over
+**inside the breadcrumb chip, between the menu button and the crumbs** (#167) —
+not as a chip of its own beside them: with no capsule to be, it is a control of
+that bar. It is therefore a separate export mounted by `Chrome.tsx`, wearing the
+menu button's classes rather than the capsule's, and it hands focus back to the
+capsule over a `vibeopen` event because the two live in different trees. Missing
+storage still remembers the choice during the visit. Stored state renders after
+hydration, initially hidden.
+
+Toronto date is checked every minute and on visibility changes; an older pick
+reads “Latest vibe”. A missed morning does not change the selection date.
+
+### Daily update workflow
+
+A Codex heartbeat asks for a track at 07:00 America/Toronto in the owner's task.
+After the answer, verify the exact title/artist, then find the video and confirm
+it is the track before saving it — `https://www.youtube.com/oembed?url=<url>&format=json`
+returns the real title and channel in one request, which is enough to catch a
+wrong ID. Prefer the artist's or label's own upload. Update only the four `vibe_`
+properties. No code edits, no assets and no new review are needed.
+
+Run `npm run check` and a production build (`node scripts/isolated-build.mjs` if
+dev is running), then commit only the completed track update; these commits are
+authorized. Exclude unrelated worktree/index edits. Only use a path-specific
+commit when the entire file diff is the intended change. Leave pushing to the
+existing Obsidian Git workflow. Report the selected track and commit or blocker.

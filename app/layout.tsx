@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Source_Serif_4 } from "next/font/google";
 import "./globals.css";
-/* TEMPORARY — colour-theme previews (⌘K → "Theme: …"). Delete this line
-   together with app/themes.css; see that file's header. */
-import "./themes.css";
+import { parseTodaysVibe } from "@/lib/todays-vibe";
 import Chrome from "@/components/Chrome";
 import Constellation from "@/components/Constellation";
 import Lightbox from "@/components/Lightbox";
@@ -146,18 +144,6 @@ export default function RootLayout({
               "try{var q=new URLSearchParams(location.search).get('lang');var l=q||localStorage.getItem('lang');if(l==='uk')document.documentElement.dataset.lang='uk';}catch(e){}",
           }}
         />
-        {/* TEMPORARY — restore the previewed colour theme before first paint,
-            for the same reason the language script above exists: a theme
-            applied at hydration means a flash of the default palette first.
-            No stored choice, no attribute, and app/globals.css is untouched.
-            Delete with app/themes.css and lib/themes.ts. */}
-        <script
-          suppressHydrationWarning
-          dangerouslySetInnerHTML={{
-            __html:
-              "try{var t=localStorage.getItem('theme-preview');if(t)document.documentElement.dataset.theme=t;}catch(e){}",
-          }}
-        />
         {/* First-visit intro gate — see components/Intro.tsx.
             Home opens by typing the greeting on an otherwise empty page, and
             everything else has to be hidden BEFORE the first paint or the
@@ -225,6 +211,7 @@ export default function RootLayout({
             is now <SocialLinks />, which reads lib/site-config itself. */}
         <Chrome
           items={items}
+          vibe={parseTodaysVibe(sections.find(section => section.slug === "home")?.meta ?? {})}
           siteName={siteName}
           siteNameUk={siteNameUk}
           resistanceDay={resistanceDay()}

@@ -17,7 +17,7 @@ Owner: Kyrylo, high-school student in Ontario, heading into cybersecurity. Not a
 3. **Keep `vault/` conventions stable** (top-level folder + `main.md` = section; other `.md` = entries, at any depth inside it). Do not change `slugify()` semantics casually — existing URLs depend on them.
 4. **Update `docs/DECISIONS.md`** when you make a non-obvious architectural choice. Append at the bottom; never renumber.
 5. Assets: never reference vault files directly from components — they're mirrored to `public/vault-assets/` by `scripts/sync-assets.mjs` (runs via predev/prebuild).
-6. Any new UI must work in English and Ukrainian, light and dark, and under `prefers-reduced-motion`. Do not add a manual theme switch, an accent colour, or a second typeface.
+6. Any new UI must work in English and Ukrainian, light and dark, and under `prefers-reduced-motion`. Do not add a manual theme switch, a general accent colour, or a second typeface. Today’s vibe has an owner-requested component colour exception (`docs/DESIGN-SYSTEM.md`).
 7. Do not build items under "Planned / future" (`docs/SECTIONS.md`) unless the user asks.
 8. Do not commit, push, deploy, or add dependencies unless the user requests that action or it is clearly part of their stated task.
 9. **Code and `docs/DECISIONS.md` are the source of truth.** Where prose disagrees with the code, the code wins — flag it, don't "fix" the code to match a stale sentence.
@@ -62,7 +62,7 @@ npm run check
 | Any CSS or new UI; monochrome rule; breakpoints; `globals.css` traps | `docs/DESIGN-SYSTEM.md` |
 | Vault model, frontmatter, posts / projects / people / now / home | `docs/SECTIONS.md` |
 | The shelf: mediums, games, spines, Top lists, studios, creator block, fact tables, note gutter column, thumbnail, IMDb | `docs/SHELF.md` |
-| Music: cover deck, filter and `lang:`, Apple Music players and crops, music note | `docs/MUSIC.md` |
+| Music: cover deck, filter and `lang:`, Apple Music players and crops, music note, Today’s vibe and daily track updates | `docs/MUSIC.md` |
 | Sidebar drawer and its parked tree, constellation, national days line, breadcrumb, intro, shortcuts, Cmd+K, motion | `docs/CHROME.md` |
 | Reading bar, read notes, reading position, New badge, series, contents rail and scroll-spy, sidenotes, previews, lightbox | `docs/READING.md` |
 | Markdown pipeline, callouts, code blocks, wiki links, images, language toggle, counted nouns | `docs/MARKDOWN.md` |

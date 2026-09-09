@@ -17,7 +17,7 @@ that are not visible from the tokens themselves. Reasons: `docs/DECISIONS.md`
 ## Editing `globals.css`
 
 - It has no `@layer`, so position is the tie-breaker — an override belongs BELOW what it overrides. This has caused four separate bugs (#51, #52, #55, #81), the subtlest being a `transition:` shorthand hundreds of lines above silently resetting a later `transform`.
-- **A bare class selector here also beats a Tailwind utility of the same specificity**, so never set `position`, `display` or `width` on a class whose element carries a utility for it — `.chrome-bar { position: relative }` overrode `fixed` and dropped the floating breadcrumb into the page flow at full width (#81).
+- **A bare class selector here also beats a Tailwind utility of the same specificity**, so never set `position`, `display` or `width` on a class whose element carries a utility for it — `.chrome-bar { position: relative }` once overrode `fixed` and dropped the floating breadcrumb into the page flow at full width (#81). The fixed position now belongs to `.chrome-cluster`; each capsule owns its relative containing block (#162).
 - The element carrying `.lang-en`/`.lang-uk` must NEVER be given a `display` — the language toggle hides the inactive one with `display: none`, and a bare rule at the foot of the file wins on position and paints both languages at once (it did, on the book spines — #110). Put the `display` on an inner element.
 - **The design itself** lives in one block at the FOOT of `globals.css` (#59): Source Serif 4 for everything except code (sidebar and `svg.diagram text` included), big fluid `.page-title`, wide tonal range, dark mode with real elevation (`--surface` above `--bg`), demoted `.entry-meta`/`.entry-tags`, generous space above `h2`. It shipped as one of two switchable themes while the choice was being made; the switch and the losing design are deleted.
 - **`.press`** (#55) dips a control to 97% while held; `.press-soft` (99%) for cards. Opt-in — a scaled inline prose link reads as a rendering fault. Named components join by selector at the very END of `globals.css`; don't move that block up. `.press:active` declares `transform` OUTRIGHT, so a component that composes its own transform (`.lightbox-arrow`, `.selection-pill`, `.book-spine`) has to restate the whole transform rather than set a variable.
@@ -55,3 +55,18 @@ The exceptions, all of them named:
 - **Verifying a Tailwind class actually shipped**: grep the built CSS for the ESCAPED form (`.w-\[calc\(…\)\]`), or read the element's computed style. A plain grep finds nothing whether or not the rule exists, and "nothing" looks exactly like "never emitted" (#54).
 - Under `preserve-3d` a parent is a sibling plane, not a container — ask `elementFromPoint` what is really under the cursor before debugging the code that runs after the event. **A hit-testing fix verified in one engine is verified in one engine**: run anything that depends on hit-testing a 3D-transformed element in WebKit before believing it (#123).
 - When an image looks broken, check the server and the lazy state before the markup (#104).
+
+- **Two things wearing `.chrome-bar` must sit at the same `z-index`, or they
+  will not look the same.** The vibe capsule at `z-index: 0` and the breadcrumb
+  chip at `z-30` carry an identical `inset 0 0 0 1px var(--chrome-ring)`, and
+  the capsule's came out a bright white outline next to the chip's soft grey
+  hairline — the inset ring composites differently over the blur pseudo-elements
+  depending on the stacking level. A non-auto z-index is needed at all so those
+  `z-index: -1` pseudo-elements stay inside the box; it has to be *the same*
+  non-auto value to match (#167).
+- **The Today’s vibe exception is gone (#165).** #163's capsule wore
+  component-scoped marigold paper/dark ink; the owner asked for it to fit the
+  site instead, so it now wears `.chrome-bar`'s own material at the breadcrumb
+  chip's height and carries emphasis in weight and `--text` alone. Nothing in
+  the chrome is coloured any more — the one colour left in the capsule is the
+  track's cover art, which is a photograph, not a token.

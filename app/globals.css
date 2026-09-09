@@ -2307,11 +2307,9 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
 
    Without blur support the fill alone carries it: `--chrome-bg` is opaque
    enough to read against.
-   NO `position` HERE. The bar is `fixed` from a utility class in Chrome.tsx,
-   and a `position: relative` in this file lands later in the stylesheet at the
-   same specificity, so it wins — the bar drops into normal flow, stretches to
-   the full width of its parent and scrolls away with the page. `fixed` already
-   makes it a containing block for the layers below; it needed nothing here. */
+   NO `position` HERE: each capsule owns its containing block, while
+   `.chrome-cluster` owns the fixed position of the row (DECISIONS #162).
+   A shared position rule would override those per-capsule choices. */
 .chrome-bar {
   background: var(--chrome-bg);
   box-shadow: inset 0 0 0 1px var(--chrome-ring);
@@ -6542,6 +6540,7 @@ html[data-dev-tools] .dev-page-title-row {
    the way out. Anything that manages its own visibility must be left to it;
    this list is the chrome that is actually on screen. */
 html[data-intro] .skip-link,
+html[data-intro] .chrome-cluster,
 html[data-intro] .chrome-bar,
 html[data-intro] .edge-zone,
 html[data-intro] .dev-dock {
@@ -6685,6 +6684,7 @@ html[data-intro="body"] .page > *:not(.prose) {
 /* The chrome doesn't wipe. It isn't a line of text — it's the room the page is
    in, and it should just be there again. */
 html[data-intro="body"] .skip-link,
+html[data-intro="body"] .chrome-cluster,
 html[data-intro="body"] .chrome-bar,
 html[data-intro="body"] .edge-zone,
 html[data-intro="body"] .dev-dock {
@@ -6707,6 +6707,7 @@ html[data-intro="body"] .dev-dock {
 html[data-intro][data-intro-fast] .prose > *:not(h1):not(.avatar),
 html[data-intro][data-intro-fast] .page > *:not(.prose),
 html[data-intro][data-intro-fast] .skip-link,
+html[data-intro][data-intro-fast] .chrome-cluster,
 html[data-intro][data-intro-fast] .chrome-bar,
 html[data-intro][data-intro-fast] .edge-zone,
 html[data-intro][data-intro-fast] .dev-dock {
@@ -6724,7 +6725,8 @@ html[data-intro][data-intro-fast] .prose > .avatar {
    attribute must never be the reason a page is blank. */
 @media (prefers-reduced-motion: reduce), print {
   html[data-intro] .skip-link,
-  html[data-intro] .chrome-bar,
+  html[data-intro] .chrome-cluster,
+html[data-intro] .chrome-bar,
   html[data-intro] .edge-zone,
   html[data-intro] .dev-dock,
   html[data-intro] .page > *:not(.prose),
@@ -9665,3 +9667,203 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   border-top: 1px solid var(--border);
 }
 
+
+/* The owner requested colour for this one music control (DECISIONS #163).
+   Flat marigold ink/paper; no glow, blur or grey hover veil. */
+.chrome-cluster {
+  position: fixed;
+  top: max(.75rem, env(safe-area-inset-top));
+  left: max(.75rem, env(safe-area-inset-left));
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: .375rem;
+  max-width: calc(100% - 7rem);
+}
+.chrome-cluster > .chrome-bar { flex-shrink: 0; height: 2.5rem; }
+/* --- Today's vibe ---------------------------------------------------------
+   The capsule is a sibling of the breadcrumb chip and wears the SAME material
+   (`.chrome-bar`: fill, hairline ring and the two blur layers) at the same
+   2.5rem height. It was built as a 2rem marigold pill (#163); the owner asked
+   for it to sit inside the site's own palette, so nothing here is coloured any
+   more and the monochrome rule has no exception left (#165).
+
+   Emphasis is carried by weight and by `--text` vs `--text-secondary`, the way
+   the breadcrumb carries it. Buttons ON the capsule hover by colour and never
+   by a filled background — a solid square inside a translucent pill is two
+   stacked surfaces where the reader should see one (same reasoning as the menu
+   button in `.chrome-bar`). Inside the drawer the wash is correct, and the
+   note button there takes it. */
+.vibe { position: relative; min-width: 0; }
+.vibe[data-ready="false"] { visibility: hidden; }
+/* The YouTube player parks here: present and painting, because a frame that
+   is display:none or sized to nothing gets its playback suspended. Clipped
+   out of sight and inert instead — the capsule is the whole interface. `.vibe`
+   is the positioned ancestor, so the frame costs the top bar no space. */
+.vibe-frame {
+  position: absolute; bottom: 0; left: 0; width: 200px; height: 150px;
+  border: 0; opacity: 0; pointer-events: none; clip-path: inset(50%);
+}
+/* `position` + `z-index` make a stacking context, so `.chrome-bar`'s blur
+   pseudo-elements at `z-index: -1` stay inside this box instead of falling
+   through to the cluster. **The value has to be the bar's own 30, not just any
+   non-auto value.** At `z-index: 0` the inset ring composited over those blur
+   layers differently and came out a bright white outline, next to a breadcrumb
+   chip whose identical ring reads as a soft grey hairline. Same level, same
+   result — which is the only way two things wearing one material stay looking
+   like one material. */
+.vibe-capsule {
+  position: relative;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  height: 2.5rem;
+  padding: .25rem .375rem;
+  border-radius: var(--r-full);
+}
+.vibe-trigger {
+  display: flex;
+  align-items: center;
+  gap: .375rem;
+  min-width: 0;
+  /* Shorter than the row it sits in, which leaves the pill's lower edge free
+     for the seek. Centred content and a centred seek shared a line once and
+     the track ran through the title's descenders. Nothing moves when playback
+     starts, because this height does not depend on the seek being there. */
+  height: 1.5rem;
+  padding: 0 .125rem 0 0;
+  border-radius: var(--r-full);
+  color: var(--text-secondary);
+  text-align: left;
+  transition: color var(--dur-fast) var(--ease);
+}
+.vibe-trigger:not(:disabled):hover { color: var(--text); }
+.vibe-trigger:disabled { cursor: default; color: var(--text-tertiary); }
+/* Playing is the one state worth emphasising, and full `--text` is how this
+   bar says "current" everywhere else. */
+.vibe[data-playing="true"] .vibe-trigger { color: var(--text); }
+.vibe-symbol {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 1.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.vibe-cover { width: 100%; height: 100%; object-fit: cover; }
+/* Over the artwork, so the capsule still says what pressing it does. Always up
+   while playing — that is the only way to reach pause — and on hover or keyboard
+   focus otherwise. White on its own scrim: it sits on a photograph, not on the
+   page, so it does not follow the theme. */
+.vibe-glyph {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgb(0 0 0 / .45);
+  color: #fff;
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease);
+}
+.vibe-glyph > svg { width: .875rem; height: .875rem; }
+.vibe-trigger:not(:disabled):hover .vibe-glyph,
+.vibe-trigger:focus-visible .vibe-glyph,
+.vibe[data-playing="true"] .vibe-glyph { opacity: 1; }
+/* No cover to sit on: the note keeps the old treatment and needs no scrim. */
+.vibe-note { width: 1.125rem; height: 1.125rem; flex-shrink: 0; transition: transform var(--dur) var(--ease); }
+.vibe-symbol:has(.vibe-note) .vibe-glyph { display: none; }
+.vibe-trigger:not(:disabled):hover .vibe-note { transform: translateY(-1px) rotate(-8deg); }
+.vibe-symbol[data-loading="true"] { animation: vibe-loading 1s var(--ease) infinite alternate; }
+/* Matched to `.crumbs` — this is the same kind of label in the same row. There
+   is no width cap: the owner asked for the whole title, and `.chrome-cluster`'s
+   own max-width is what stops a long one from running off the bar. The ellipsis
+   is only the last resort at that limit. */
+.vibe-title {
+  display: block;
+  padding-left: .375rem;
+  font-size: .875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.vibe-hide {
+  display: grid;
+  place-items: center;
+  flex: 0 0 1.25rem;
+  width: 1.25rem;
+  height: 1.5rem;
+  border-radius: var(--r-full);
+  color: var(--text-tertiary);
+  font-size: 1rem;
+  line-height: 1;
+  transition: color var(--dur-fast) var(--ease);
+}
+.vibe-hide:hover { color: var(--text); }
+/* Out of the way until asked for. It opens to the RIGHT of the trigger, so the
+   cover and title the pointer is aiming at never move — only the pill's far
+   edge does. Pointer devices only: without hover there is no way to summon it,
+   so a phone keeps it up permanently. */
+@media (hover: hover) {
+  /* `flex-basis`, not `width` — the shorthand above sets a basis, and in a flex
+     row that is what decides the box. Setting width alone left an invisible
+     20px hole on the end of the pill. */
+  .vibe-hide {
+    flex-basis: 0;
+    width: 0;
+    opacity: 0;
+    transition: flex-basis var(--dur-fast) var(--ease), width var(--dur-fast) var(--ease), opacity var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+  }
+  .vibe-capsule:hover .vibe-hide, .vibe-capsule:focus-within .vibe-hide { flex-basis: 1.25rem; width: 1.25rem; opacity: 1; }
+}
+/* The restore note sits in the breadcrumb chip and wears that bar's button
+   classes (Chrome.tsx); all it needs here is the colour transition. */
+.vibe-restore { transition: color var(--dur-fast) var(--ease); }
+/* Seated inside the pill's bottom edge, clear of its rounded corners. */
+.vibe-seek {
+  position: absolute;
+  /* Along the pill's lower edge, inset past the corner radius. */
+  left: .75rem;
+  right: .75rem;
+  bottom: .125rem;
+  width: auto;
+  height: .5rem;
+  cursor: pointer;
+  appearance: none;
+  background: transparent;
+  color: var(--text);
+}
+/* Played, then unplayed, from one hard colour stop at `--vibe-progress`
+   (set per render in TodaysVibe.tsx). `--border` alone was invisible against
+   the capsule's fill, which left the thumb reading as a stray dot. */
+.vibe-seek { --vibe-track: linear-gradient(to right, currentColor 0 var(--vibe-progress, 0%), color-mix(in srgb, currentColor 22%, transparent) var(--vibe-progress, 0%) 100%); }
+.vibe-seek::-webkit-slider-runnable-track { height: 2px; border-radius: var(--r-full); background: var(--vibe-track); }
+.vibe-seek::-webkit-slider-thumb { appearance: none; width: 6px; height: 6px; margin-top: -2px; border-radius: var(--r-full); background: currentColor; }
+.vibe-seek::-moz-range-track { height: 2px; border-radius: var(--r-full); background: var(--vibe-track); }
+.vibe-seek::-moz-range-thumb { width: 6px; height: 6px; border: 0; border-radius: var(--r-full); background: currentColor; }
+.vibe-error { position: absolute; top: 3rem; left: 0; width: 12rem; padding: .5rem .75rem; background: var(--surface); color: var(--text-secondary); border: 1px solid var(--border); border-radius: var(--r-md); font-size: .75rem; }
+.vibe-error a { color: var(--text); text-decoration: underline; text-underline-offset: 2px; }
+.vibe button:focus-visible, .vibe input:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
+.vibe-capsule[hidden] { display: none; }
+@keyframes vibe-loading { from { opacity: .45; } to { opacity: 1; } }
+@media (max-width: 639px) {
+  .chrome-cluster .bar-swap { min-width: 0; }
+  .chrome-cluster .crumbs { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* Today's vibe is a desktop control (#167). iOS starts audio for a tap on the
+     player itself and for nothing else, so a hidden player on a phone is a
+     silent one — and the visible panel that would have fixed it (#166) was not
+     worth the screen it took. The whole feature leaves rather than ship a
+     control that cannot make sound. The breadcrumb gets its width back with it:
+     the chip's `max-width: calc(100vw - 12rem)` here existed only to reserve
+     room for the capsule. */
+  .vibe { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vibe-symbol[data-loading="true"] { animation: none; }
+  .vibe-note, .vibe-glyph, .vibe-hide { transition: none; }
+  .vibe-trigger:not(:disabled):hover .vibe-note { transform: none; }
+}
+@media print { .chrome-cluster { display: none; } }

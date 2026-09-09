@@ -16,6 +16,17 @@ export interface Str {
 }
 
 export const ui = {
+  todaysVibe: { en: "Today’s vibe", uk: "Настрій дня" },
+  latestVibe: { en: "Latest vibe", uk: "Останній настрій" },
+  listenVibe: { en: "Listen to the track", uk: "Слухати трек" },
+  hideVibe: { en: "Hide music", uk: "Сховати музику" },
+  showVibe: { en: "Show music", uk: "Показати музику" },
+  pauseVibe: { en: "Pause track", uk: "Призупинити трек" },
+  seekVibe: { en: "Track position", uk: "Позиція у треку" },
+  vibeUnavailable: { en: "Audio coming soon", uk: "Аудіо незабаром" },
+  vibeFailed: { en: "Couldn’t play. Tap to retry.", uk: "Не вдалося відтворити. Спробуйте ще раз." },
+  vibeBlocked: { en: "This one can’t play here.", uk: "Цей трек не можна відтворити тут." },
+  vibeOnYouTube: { en: "Open on YouTube", uk: "Відкрити на YouTube" },
   // chrome / sidebar
   publishedFrom: { en: "Published from Obsidian", uk: "Опубліковано з Obsidian" },
   /** {n} is replaced with the day number — see components/ResistanceDay.tsx */

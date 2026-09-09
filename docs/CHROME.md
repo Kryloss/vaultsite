@@ -39,3 +39,12 @@
 ## Motion
 
 `.stagger` (nth-child delays capped at 12, `animation: none` under reduced motion and print). `.page-in` fades navigations; the View Transitions API is used only by the lightbox. Grain: a fixed `feTurbulence` tile on `body::after`. Arrows lead on hover and stay thrown on press (`ArrowThrow.tsx` adds `.is-thrown`; `[`/`]` do the same); arrows are spans, never in a translated string. Checkmarks draw (`stroke-dasharray`, short arm first). Prose links sweep their underline with two gradients, scoped to `p/li/blockquote/td`. Pressed state: `docs/DESIGN-SYSTEM.md`. Removed and not to be rebuilt: drop cap, heading hairline, shelf parallax, page view-transitions, shelf edge fade and arrows.
+
+## Global music capsule
+
+`.chrome-cluster` owns the fixed top-left position of the breadcrumb and the
+adjacent Today’s vibe capsule. Hidden music moves into the sidebar on phones. The music capsule is 2rem tall beside the 2.5rem breadcrumb; the breadcrumb is
+now `relative`, keeping its layered blur intact. The cluster participates in
+the intro gate and print hiding. On phones it reserves room for the two
+right-hand page controls and condenses the music control. See
+`docs/MUSIC.md → Today’s vibe` for content, playback, hiding and daily updates.
