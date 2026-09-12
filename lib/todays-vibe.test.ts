@@ -24,6 +24,7 @@ test("the player URL is the nocookie host with YouTube's own interface off", () 
     assert.equal(url.searchParams.get(key), value, key);
   }
   assert.equal(new URL(vibeEmbedUrl("UOUBW8bkjQ4")).searchParams.get("origin"), null);
+  assert.equal(new URL(vibeEmbedUrl("UOUBW8bkjQ4", undefined, false)).searchParams.get("autoplay"), "0");
 });
 test("a missing video keeps the real pick without pretending to offer sound", () => {
   assert.equal(parseTodaysVibe(meta)?.video, undefined);

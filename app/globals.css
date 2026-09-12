@@ -9861,13 +9861,21 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
 .vibe { position: relative; min-width: 0; }
 .vibe[data-ready="false"] { visibility: hidden; }
 /* The YouTube player parks here: present and painting, because a frame that
-   is display:none or sized to nothing gets its playback suspended. Clipped
-   out of sight and inert instead — the capsule is the whole interface. `.vibe`
+   is display:none or sized to nothing gets its playback suspended. Transparent
+   and inert instead — the capsule is the whole interface. `.vibe`
    is the positioned ancestor, so the frame costs the top bar no space. */
 .vibe-frame {
-  position: absolute; bottom: 0; left: 0; width: 200px; height: 150px;
-  border: 0; opacity: 0; pointer-events: none; clip-path: inset(50%);
+  position: absolute;
+  z-index: 31;
+  top: .5rem;
+  left: .375rem;
+  width: 200px;
+  height: 200px;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
 }
+.vibe-frame iframe { width: 100%; height: 100%; border: 0; }
 /* `position` + `z-index` make a stacking context, so `.chrome-bar`'s blur
    pseudo-elements at `z-index: -1` stay inside this box instead of falling
    through to the cluster. **The value has to be the bar's own 30, not just any

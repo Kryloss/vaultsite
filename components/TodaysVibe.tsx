@@ -10,6 +10,7 @@ import { youtubeCover, youtubeWatchUrl } from "@/lib/youtube";
 const STORAGE_KEY = "todays-vibe-hidden";
 const CHANGE = "vibevisibility";
 const OPEN = "vibeopen";
+const DESKTOP = "(min-width: 640px)";
 let memoryHidden: boolean | null = null;
 function snapshot() {
   let hidden = false;
@@ -35,6 +36,12 @@ function setHidden(hidden: boolean) {
   try { localStorage.setItem(STORAGE_KEY, hidden ? "1" : "0"); } catch { /* Remember for this visit. */ }
   window.dispatchEvent(new Event(CHANGE));
 }
+function desktopSnapshot() { return matchMedia(DESKTOP).matches; }
+function subscribeDesktop(callback: () => void) {
+  const media = matchMedia(DESKTOP);
+  media.addEventListener("change", callback);
+  return () => media.removeEventListener("change", callback);
+}
 
 /**
  * The slice of YouTube's IFrame Player API the capsule uses. Typed here rather
@@ -42,6 +49,7 @@ function setHidden(hidden: boolean) {
  * https://developers.google.com/youtube/iframe_api_reference
  */
 interface YouTubePlayer {
+  destroy(): void;
   playVideo(): void;
   pauseVideo(): void;
   seekTo(seconds: number, allowSeekAhead: boolean): void;
@@ -50,7 +58,11 @@ interface YouTubePlayer {
   getPlayerState(): number;
 }
 interface YouTubeApi {
-  Player: new (frame: HTMLIFrameElement, options: {
+  Player: new (host: HTMLElement, options: {
+    videoId: string;
+    width: string;
+    height: string;
+    playerVars: Record<string, string>;
     events: {
       onReady?: () => void;
       onAutoplayBlocked?: () => void;
@@ -72,8 +84,8 @@ const NOT_EMBEDDABLE = new Set([101, 150]);
 
 let apiPromise: Promise<YouTubeApi> | null = null;
 /**
- * Fetch YouTube's player script once, on the first press. Nothing of YouTube's
- * is requested before that — the same bargain the nocookie host is here for.
+ * Fetch YouTube's player script once when the visible capsule mounts, so its
+ * first press can call a ready player while the gesture is still active.
  */
 function loadPlayerApi(): Promise<YouTubeApi> {
   if (window.YT?.Player) return Promise.resolve(window.YT);
@@ -138,9 +150,9 @@ export default function TodaysVibe({ track }: { track: Vibe }) {
   const { lang } = useLang();
   const saved = useSyncExternalStore(subscribe, snapshot, serverSnapshot);
   const hidden = saved.startsWith("hidden:");
-  /** Empty until the first press: the player is what the press builds. */
-  const [source, setSource] = useState("");
+  const desktop = useSyncExternalStore(subscribeDesktop, desktopSnapshot, () => false);
   const [attempt, setAttempt] = useState(0);
+  const [prepared, setPrepared] = useState(false);
   const [playing, setPlaying] = useState(false);
   /** A press is waiting to become sound; cleared only when it does. */
   const [awaiting, setAwaiting] = useState(false);
@@ -150,20 +162,21 @@ export default function TodaysVibe({ track }: { track: Vibe }) {
   const [duration, setDuration] = useState(0);
   /** A cover that 404s or is blocked falls back to the note, never a gap. */
   const [coverFailed, setCoverFailed] = useState(false);
-  const frame = useRef<HTMLIFrameElement>(null);
+  const frameHost = useRef<HTMLDivElement>(null);
   const player = useRef<YouTubePlayer | null>(null);
   /** Commands are safe only after YouTube signals readiness. */
   const ready = useRef(false);
   const wantsPlayback = useRef(false);
   const trigger = useRef<HTMLButtonElement>(null);
   const label = saved && saved.split(":")[1] !== track.date ? ui.latestVibe : ui.todaysVibe;
-  const loading = awaiting || buffering;
+  const loading = awaiting || buffering || (!prepared && !failed && Boolean(track.video));
 
   function togglePlayback() {
-    if (!track.video) return;
+    if (!track.video || (!prepared && !failed)) return;
     wantsPlayback.current = !playing;
-    if (!source || (failed && failed !== "autoplay")) {
+    if (failed && failed !== "autoplay") {
       ready.current = false;
+      setPrepared(false);
       player.current = null;
       setPlaying(false);
       setElapsed(0);
@@ -171,7 +184,6 @@ export default function TodaysVibe({ track }: { track: Vibe }) {
       setBuffering(false);
       setFailed(null);
       setAttempt(value => value + 1);
-      setSource(vibeEmbedUrl(track.video, location.origin));
       setAwaiting(true);
       return;
     }
@@ -195,12 +207,14 @@ export default function TodaysVibe({ track }: { track: Vibe }) {
       : trigger.current?.focus());
   }
 
-  // A retry mounts a fresh iframe. React owns its removal; callbacks from an
-  // old attempt are ignored, including a late ready event after hiding.
+  // The API creates the iframe itself. It can then install its ready listener
+  // before the document loads instead of trying to bind an iframe afterwards.
   useEffect(() => {
-    const element = frame.current;
-    if (!source || !element) return;
+    const element = frameHost.current;
+    const video = track.video;
+    if (!desktop || !video || !element) return;
     let live = true;
+    let created: YouTubePlayer | null = null;
     const stateChanged = (state: number) => {
       if (!live) return;
       setBuffering(state === BUFFERING);
@@ -214,11 +228,17 @@ export default function TodaysVibe({ track }: { track: Vibe }) {
     };
     loadPlayerApi().then(api => {
       if (!live) return;
-      player.current = new api.Player(element, {
+      const params = new URL(vibeEmbedUrl(video, location.origin, false));
+      created = new api.Player(element, {
+        videoId: video,
+        width: "100%",
+        height: "100%",
+        playerVars: Object.fromEntries(params.searchParams),
         events: {
           onReady: () => {
             if (!live) return;
             ready.current = true;
+            setPrepared(true);
             const active = player.current!;
             // Autoplay can precede API attachment: reconcile instead of
             // incorrectly reporting a timeout for an already playing track.
@@ -236,15 +256,23 @@ export default function TodaysVibe({ track }: { track: Vibe }) {
           onError: event => {
             if (!live) return;
             setPlaying(false);
+            setPrepared(false);
             setBuffering(false);
             setAwaiting(false);
             setFailed(NOT_EMBEDDABLE.has(event.data) ? "blocked" : "retry");
           },
         },
       });
+      player.current = created;
     }).catch(() => { if (live) { setAwaiting(false); setFailed("retry"); } });
-    return () => { live = false; };
-  }, [source, attempt]);
+    return () => {
+      live = false;
+      created?.destroy();
+      if (player.current === created) player.current = null;
+      ready.current = false;
+      setPrepared(false);
+    };
+  }, [desktop, track.video, attempt]);
 
   useEffect(() => {
     if (!awaiting || hidden) return;
@@ -289,12 +317,12 @@ export default function TodaysVibe({ track }: { track: Vibe }) {
           sight rather than removed, hidden or shrunk to nothing: a display:none
           or zero-sized player gets its playback suspended. `inert` keeps it off
           the tab order and out of the accessibility tree. */}
-      {source && <iframe key={attempt} ref={frame} className="vibe-frame" src={source} inert tabIndex={-1}
-        title={`${track.title} — ${track.artist}`} allow="autoplay; encrypted-media"
-        referrerPolicy="strict-origin-when-cross-origin" />}
+      {desktop && track.video && <div className="vibe-frame" inert aria-hidden="true">
+        <div key={attempt} ref={frameHost} />
+      </div>}
       <div className="vibe-capsule chrome-bar" hidden={hidden}>
         <button ref={trigger} type="button" className="vibe-trigger press"
-          onClick={togglePlayback} disabled={!track.video}
+          onClick={togglePlayback} disabled={!track.video || (!prepared && !failed)}
           /* “Today’s vibe” left the capsule — the owner asked for the track
              alone. The label still has to be said somewhere, because a pick
              from an older Toronto date reads “Latest vibe” and that is the

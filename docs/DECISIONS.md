@@ -177,6 +177,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 167 | Today’s vibe is a desktop control; #166's phone player is withdrawn |
 | 168 | YouTube readiness, bounded waits, and fresh retry attempts |
 | 169 | Today’s vibe rests as cover art and expands on intent |
+| 170 | Prime the YouTube player before its first press |
 | 170 | /music's search label is spans that rise and fall, not a placeholder |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
@@ -1106,6 +1107,16 @@ place to reveal the title, play/pause mark, seek line, and close button. The
 cover remains under the pointer throughout the transition, and focus receives
 the same controls as hover. Playback may continue while collapsed; returning
 to the cover reveals pause without making the player visually persistent.
+
+## 170. Prime the YouTube player before its first press (2026-09-12)
+
+Creating the iframe on the first press left the API unready until after that
+gesture ended. Some browsers rejected the delayed play and showed an error,
+while the second press worked because the player was ready by then. The visible
+desktop capsule now mounts a non-autoplaying, transparent 200px square player and
+loads the API ahead of interaction. The first press can therefore call
+`playVideo()` synchronously on a ready player. This trades one early YouTube
+request for reliable opt-in playback; sound still never starts without a press.
 
 ## 170. /music's search label is spans that rise and fall, not a placeholder (2026-09-12)
 

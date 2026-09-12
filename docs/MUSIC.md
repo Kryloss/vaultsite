@@ -89,17 +89,18 @@ script, not the thumbnail.
 
 `TodaysVibe` plays a `youtube-nocookie` frame with YouTube's own interface
 switched off — `controls=0`, `disablekb=1`, `fs=0`, `rel=0`, `iv_load_policy=3`,
-`playsinline=1` — and the capsule is the only control. **The frame is parked
-off-view with `opacity: 0` and `clip-path`, never `display: none` and never
-sized to nothing: a frame hidden either of those ways has its playback
-suspended.** It is `inert` and `tabIndex={-1}`, so it stays out of the tab order
-and the accessibility tree.
+`playsinline=1` — and the capsule is the only control. **The API-created frame
+stays at a 200px square with `opacity: 0`, never `display: none`, clipped, or
+sized to nothing: browsers may suspend a frame hidden in those ways before it
+reports ready.** Its wrapper is `inert` and `aria-hidden`, so it stays out of
+the tab order and the accessibility tree.
 
-**The player and API script load only on the first press** (the cover loads
-earlier). The iframe requests autoplay, subject to the browser's sound policy.
-API commands wait for readiness; see Playback recovery below. Afterwards play,
-pause and seek go through the IFrame API; the position is polled every 500ms
-while playing, because that API has no time event of its own.
+**The visible desktop capsule primes its player and API script without autoplay
+when it mounts** (the cover also loads immediately). This lets the first play
+press call an already-ready player while its user gesture is still active. API
+commands still wait for readiness; see Playback recovery below. Afterwards
+play, pause and seek go through the IFrame API; the position is polled every
+500ms while playing, because that API has no time event of its own.
 
 ### Not on phones (#167)
 

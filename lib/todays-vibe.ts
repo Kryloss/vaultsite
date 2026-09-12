@@ -28,15 +28,14 @@ export function vibeVideoId(value: string): string | undefined {
  * grid (`rel`), no annotations (`iv_load_policy`), and inline playback on
  * phones (`playsinline`) so iOS doesn't take over the screen.
  *
- * `autoplay` belongs in the src because the frame is only ever created inside
- * the click that asks for sound — that user gesture is what browsers let the
- * player inherit, and it is far more reliable than calling play() a tick later.
- * `enablejsapi` is what lets play, pause and seek reach it afterwards.
+ * The global capsule primes its frame with autoplay off so the API is ready
+ * before the visitor presses its own play button. `enablejsapi` is what lets
+ * play, pause and seek reach it.
  */
-export function vibeEmbedUrl(id: string, origin?: string): string {
+export function vibeEmbedUrl(id: string, origin?: string, autoplay = true): string {
   const params = new URLSearchParams({
     enablejsapi: "1",
-    autoplay: "1",
+    autoplay: autoplay ? "1" : "0",
     controls: "0",
     disablekb: "1",
     fs: "0",
