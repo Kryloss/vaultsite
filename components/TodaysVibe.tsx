@@ -271,6 +271,9 @@ export default function TodaysVibe({ track }: { track: Vibe }) {
       if (player.current === created) player.current = null;
       ready.current = false;
       setPrepared(false);
+      setPlaying(false);
+      setAwaiting(false);
+      setBuffering(false);
     };
   }, [desktop, track.video, attempt]);
 
