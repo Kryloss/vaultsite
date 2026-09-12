@@ -9724,7 +9724,7 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
 .vibe-trigger {
   display: flex;
   align-items: center;
-  gap: .375rem;
+  gap: 0;
   min-width: 0;
   /* Shorter than the row it sits in, which leaves the pill's lower edge free
      for the seek. Centred content and a centred seek shared a line once and
@@ -9735,8 +9735,10 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   border-radius: var(--r-full);
   color: var(--text-secondary);
   text-align: left;
-  transition: color var(--dur-fast) var(--ease);
+  transition: color var(--dur-fast) var(--ease), gap var(--dur-fast) var(--ease);
 }
+.vibe-capsule:hover .vibe-trigger,
+.vibe-capsule:focus-within .vibe-trigger { gap: .375rem; }
 .vibe-trigger:not(:disabled):hover { color: var(--text); }
 .vibe-trigger:disabled { cursor: default; color: var(--text-tertiary); }
 /* Playing is the one state worth emphasising, and full `--text` is how this
@@ -9769,8 +9771,7 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
 }
 .vibe-glyph > svg { width: .875rem; height: .875rem; }
 .vibe-trigger:not(:disabled):hover .vibe-glyph,
-.vibe-trigger:focus-visible .vibe-glyph,
-.vibe[data-playing="true"] .vibe-glyph { opacity: 1; }
+.vibe-trigger:focus-visible .vibe-glyph { opacity: 1; }
 /* No cover to sit on: the note keeps the old treatment and needs no scrim. */
 .vibe-note { width: 1.125rem; height: 1.125rem; flex-shrink: 0; transition: transform var(--dur) var(--ease); }
 .vibe-symbol:has(.vibe-note) .vibe-glyph { display: none; }
@@ -9782,13 +9783,20 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
    is only the last resort at that limit. */
 .vibe-title {
   display: block;
-  padding-left: .375rem;
+  max-width: 0;
+  opacity: 0;
   font-size: .875rem;
   font-weight: 500;
   line-height: 1.25rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: max-width var(--dur) var(--ease), opacity var(--dur-fast) var(--ease);
+}
+.vibe-capsule:hover .vibe-title,
+.vibe-capsule:focus-within .vibe-title {
+  max-width: 30rem;
+  opacity: 1;
 }
 .vibe-hide {
   display: grid;
@@ -9835,6 +9843,14 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   appearance: none;
   background: transparent;
   color: var(--text);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-fast) var(--ease);
+}
+.vibe-capsule:hover .vibe-seek,
+.vibe-capsule:focus-within .vibe-seek {
+  opacity: 1;
+  pointer-events: auto;
 }
 /* Played, then unplayed, from one hard colour stop at `--vibe-progress`
    (set per render in TodaysVibe.tsx). `--border` alone was invisible against

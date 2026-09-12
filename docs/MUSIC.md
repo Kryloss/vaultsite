@@ -60,17 +60,15 @@ at its height (#165). It is monochrome: playing is marked by the title coming up
 to `--text`, not by colour. #163's marigold is gone, and with it the site's last
 palette exception.
 
-Inside it, left to right: **the track's cover**, a 24px rounded crop of the
+At rest the capsule shows only **the track's cover**, a 24px rounded crop of the
 video's `mqdefault` thumbnail (`youtubeCover` — hqdefault has black bars baked
-in and cannot be square-cropped), with play/pause drawn over a scrim on hover
-and whenever it is playing; **the full title**, never width-capped, so the pill
-grows to fit and `.chrome-cluster`'s max-width is what finally stops it; and
-**the close button, shown only while the capsule is hovered or focused**. That
-last one animates `flex-basis`, not `width` — the shorthand sets a basis and in
-a flex row the basis is what decides the box, so animating width alone leaves an
-invisible hole on the end of the pill. It opens to the RIGHT of the trigger so
-the cover and title never move under the pointer. It is behind `(hover: hover)`,
-which now only ever matches, since phones don't get the capsule at all.
+in and cannot be square-cropped). Hover or keyboard focus reveals the
+play/pause mark over its scrim, the full title, seek line, and close button.
+The title opens with `max-width` so the cover stays under the pointer. The close
+button animates `flex-basis`, not `width` — the shorthand sets a basis and in a
+flex row the basis is what decides the box, so animating width alone leaves an
+invisible hole on the end of the pill. It is behind `(hover: hover)`, which now
+only ever matches, since phones don't get the capsule at all.
 
 The seek runs along the pill's lower edge, inset past the corner radius, in a
 band the content leaves free — the trigger is 24px inside a 40px pill for
@@ -91,12 +89,11 @@ sized to nothing: a frame hidden either of those ways has its playback
 suspended.** It is `inert` and `tabIndex={-1}`, so it stays out of the tab order
 and the accessibility tree.
 
-**Nothing of YouTube's is requested until the first press.** That press is what
-builds the frame and loads the API script, and building the frame inside the
-click is also what lets `autoplay` inherit the user gesture — calling
-`playVideo()` a tick later is what browsers block. Afterwards play, pause and
-seek go through the IFrame API; the position is polled every 500ms while
-playing, because that API has no time event of its own.
+**The player and API script load only on the first press** (the cover loads
+earlier). The iframe requests autoplay, subject to the browser's sound policy.
+API commands wait for readiness; see Playback recovery below. Afterwards play,
+pause and seek go through the IFrame API; the position is polled every 500ms
+while playing, because that API has no time event of its own.
 
 ### Not on phones (#167)
 
@@ -141,3 +138,13 @@ dev is running), then commit only the completed track update; these commits are
 authorized. Exclude unrelated worktree/index edits. Only use a path-specific
 commit when the entire file diff is the intended change. Leave pushing to the
 existing Obsidian Git workflow. Report the selected track and commit or blocker.
+
+### Playback recovery
+
+The capsule waits for the IFrame API’s `onReady` before issuing commands and
+reads the current state there, since autoplay may have started before the API
+attached. A blocked-autoplay event asks for a second explicit play press. A
+network/player failure remounts a fresh iframe on retry, with a new 20-second
+startup deadline; API loading also times out and can retry. Callbacks from old
+attempts are ignored. Hiding cancels playback intent so a late ready event
+cannot start music. Browser autoplay policy still applies (#168).

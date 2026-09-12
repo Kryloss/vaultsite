@@ -47,10 +47,13 @@ interface YouTubePlayer {
   seekTo(seconds: number, allowSeekAhead: boolean): void;
   getCurrentTime(): number;
   getDuration(): number;
+  getPlayerState(): number;
 }
 interface YouTubeApi {
   Player: new (frame: HTMLIFrameElement, options: {
     events: {
+      onReady?: () => void;
+      onAutoplayBlocked?: () => void;
       onStateChange?: (event: { data: number }) => void;
       onError?: (event: { data: number }) => void;
     };
@@ -76,11 +79,23 @@ function loadPlayerApi(): Promise<YouTubeApi> {
   if (window.YT?.Player) return Promise.resolve(window.YT);
   apiPromise ??= new Promise<YouTubeApi>((resolve, reject) => {
     const previous = window.onYouTubeIframeAPIReady;
-    window.onYouTubeIframeAPIReady = () => { previous?.(); resolve(window.YT!); };
+    const timeout = window.setTimeout(() => fail(), 15000);
+    const fail = () => {
+      window.clearTimeout(timeout);
+      script.remove();
+      window.onYouTubeIframeAPIReady = previous;
+      apiPromise = null;
+      reject(new Error("YouTube player API unavailable"));
+    };
+    window.onYouTubeIframeAPIReady = () => {
+      window.clearTimeout(timeout);
+      previous?.();
+      resolve(window.YT!);
+    };
     const script = document.createElement("script");
     script.src = "https://www.youtube.com/iframe_api";
     script.async = true;
-    script.onerror = () => { apiPromise = null; reject(new Error("YouTube player API unavailable")); };
+    script.onerror = fail;
     document.head.append(script);
   });
   return apiPromise;
@@ -125,39 +140,52 @@ export default function TodaysVibe({ track }: { track: Vibe }) {
   const hidden = saved.startsWith("hidden:");
   /** Empty until the first press: the player is what the press builds. */
   const [source, setSource] = useState("");
+  const [attempt, setAttempt] = useState(0);
   const [playing, setPlaying] = useState(false);
   /** A press is waiting to become sound; cleared only when it does. */
   const [awaiting, setAwaiting] = useState(false);
   const [buffering, setBuffering] = useState(false);
-  const [failed, setFailed] = useState<"retry" | "blocked" | null>(null);
+  const [failed, setFailed] = useState<"retry" | "blocked" | "autoplay" | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [duration, setDuration] = useState(0);
   /** A cover that 404s or is blocked falls back to the note, never a gap. */
   const [coverFailed, setCoverFailed] = useState(false);
   const frame = useRef<HTMLIFrameElement>(null);
   const player = useRef<YouTubePlayer | null>(null);
-  /** Whether sound has ever come out of this frame — see the watchdog below. */
-  const started = useRef(false);
+  /** Commands are safe only after YouTube signals readiness. */
+  const ready = useRef(false);
+  const wantsPlayback = useRef(false);
   const trigger = useRef<HTMLButtonElement>(null);
   const label = saved && saved.split(":")[1] !== track.date ? ui.latestVibe : ui.todaysVibe;
   const loading = awaiting || buffering;
 
   function togglePlayback() {
     if (!track.video) return;
-    setFailed(null);
-    if (!source) {
-      // The frame carries autoplay, so building it here — inside the click —
-      // is the play. Calling into the API a tick later is what browsers block.
+    wantsPlayback.current = !playing;
+    if (!source || (failed && failed !== "autoplay")) {
+      ready.current = false;
+      player.current = null;
+      setPlaying(false);
+      setElapsed(0);
+      setDuration(0);
+      setBuffering(false);
+      setFailed(null);
+      setAttempt(value => value + 1);
       setSource(vibeEmbedUrl(track.video, location.origin));
       setAwaiting(true);
       return;
     }
+    setFailed(null);
     if (playing) { player.current?.pauseVideo(); setAwaiting(false); }
-    else { setAwaiting(true); player.current?.playVideo(); }
+    else {
+      setAwaiting(true);
+      if (ready.current) player.current?.playVideo();
+    }
   }
 
   function visibility(next: boolean) {
-    player.current?.pauseVideo();
+    wantsPlayback.current = false;
+    if (ready.current) player.current?.pauseVideo();
     setAwaiting(false);
     setHidden(next);
     // The note that takes over lives in the chip, in another tree — so it is
@@ -167,27 +195,48 @@ export default function TodaysVibe({ track }: { track: Vibe }) {
       : trigger.current?.focus());
   }
 
-  // Bind the API to the frame the press just mounted. The frame outlives every
-  // remount of this effect, so one player is bound to it and kept — destroying
-  // it would take the frame out of the DOM from under React.
+  // A retry mounts a fresh iframe. React owns its removal; callbacks from an
+  // old attempt are ignored, including a late ready event after hiding.
   useEffect(() => {
     const element = frame.current;
     if (!source || !element) return;
     let live = true;
+    const stateChanged = (state: number) => {
+      if (!live) return;
+      setBuffering(state === BUFFERING);
+      setPlaying(state === PLAYING);
+      if (state === PLAYING) {
+        setAwaiting(false);
+        setFailed(null);
+        if (!wantsPlayback.current) player.current?.pauseVideo();
+      }
+      if (state === ENDED) setElapsed(0);
+    };
     loadPlayerApi().then(api => {
-      if (!live || player.current) return;
+      if (!live) return;
       player.current = new api.Player(element, {
         events: {
-          onStateChange: event => {
-            setBuffering(event.data === BUFFERING);
-            setPlaying(event.data === PLAYING);
-            // Only sound ends the wait. YouTube reports an ordinary "cued" for
-            // an upload it will never play, which is indistinguishable from idle.
-            if (event.data === PLAYING) { started.current = true; setAwaiting(false); }
-            if (event.data === ENDED) setElapsed(0);
+          onReady: () => {
+            if (!live) return;
+            ready.current = true;
+            const active = player.current!;
+            // Autoplay can precede API attachment: reconcile instead of
+            // incorrectly reporting a timeout for an already playing track.
+            stateChanged(active.getPlayerState());
+            if (wantsPlayback.current) active.playVideo();
+            else active.pauseVideo();
+          },
+          onStateChange: event => stateChanged(event.data),
+          onAutoplayBlocked: () => {
+            if (!live || !wantsPlayback.current) return;
+            setAwaiting(false);
+            setBuffering(false);
+            setFailed("autoplay");
           },
           onError: event => {
+            if (!live) return;
             setPlaying(false);
+            setBuffering(false);
             setAwaiting(false);
             setFailed(NOT_EMBEDDABLE.has(event.data) ? "blocked" : "retry");
           },
@@ -195,26 +244,24 @@ export default function TodaysVibe({ track }: { track: Vibe }) {
       });
     }).catch(() => { if (live) { setAwaiting(false); setFailed("retry"); } });
     return () => { live = false; };
-  }, [source]);
+  }, [source, attempt]);
 
-  // A first press that never turns into sound has to say so. The API's error
-  // event can't be relied on for it: an upload that refuses to be embedded
-  // fires that error once, while the page is still fetching the script that
-  // would have listened. So the press itself is timed. Only the first start is
-  // watched — buffering later in a track recovers on its own, and a capsule the
-  // visitor has hidden is not waiting on anything.
   useEffect(() => {
-    if (!awaiting || started.current || hidden) return;
-    const timer = window.setTimeout(() => { setAwaiting(false); setFailed("retry"); }, 8000);
+    if (!awaiting || hidden) return;
+    const timer = window.setTimeout(() => {
+      setAwaiting(false);
+      setBuffering(false);
+      setFailed("retry");
+    }, 20000);
     return () => window.clearTimeout(timer);
-  }, [awaiting, hidden]);
+  }, [awaiting, hidden, attempt]);
 
   // The API has no time event of its own, so the position is read while it runs.
   useEffect(() => {
     if (!playing) return;
     const timer = window.setInterval(() => {
       const active = player.current;
-      if (!active) return;
+      if (!active || !ready.current) return;
       setElapsed(active.getCurrentTime());
       const total = active.getDuration();
       if (Number.isFinite(total) && total > 0) setDuration(total);
@@ -222,7 +269,12 @@ export default function TodaysVibe({ track }: { track: Vibe }) {
     return () => window.clearInterval(timer);
   }, [playing]);
 
-  useEffect(() => { if (hidden) player.current?.pauseVideo(); }, [hidden]);
+  useEffect(() => {
+    if (hidden) {
+      wantsPlayback.current = false;
+      if (ready.current) player.current?.pauseVideo();
+    }
+  }, [hidden]);
   // Restored from the chip's note: take the keyboard back, without starting sound.
   useEffect(() => {
     const onOpen = () => requestAnimationFrame(() => trigger.current?.focus());
@@ -237,7 +289,7 @@ export default function TodaysVibe({ track }: { track: Vibe }) {
           sight rather than removed, hidden or shrunk to nothing: a display:none
           or zero-sized player gets its playback suspended. `inert` keeps it off
           the tab order and out of the accessibility tree. */}
-      {source && <iframe ref={frame} className="vibe-frame" src={source} inert tabIndex={-1}
+      {source && <iframe key={attempt} ref={frame} className="vibe-frame" src={source} inert tabIndex={-1}
         title={`${track.title} — ${track.artist}`} allow="autoplay; encrypted-media"
         referrerPolicy="strict-origin-when-cross-origin" />}
       <div className="vibe-capsule chrome-bar" hidden={hidden}>
@@ -272,12 +324,12 @@ export default function TodaysVibe({ track }: { track: Vibe }) {
           aria-valuetext={`${vibeTime(elapsed)} / ${vibeTime(duration)}`}
           onChange={event => {
             const value = Number(event.currentTarget.value);
-            player.current?.seekTo(value, true);
+            if (ready.current) player.current?.seekTo(value, true);
             setElapsed(value);
           }} />}
       </div>
       {failed && !hidden && <p className="vibe-error" role="status">
-        <T {...(failed === "blocked" ? ui.vibeBlocked : ui.vibeFailed)} />
+        <T {...(failed === "blocked" ? ui.vibeBlocked : failed === "autoplay" ? ui.vibeAutoplay : ui.vibeFailed)} />
         {/* However it failed, the track itself is still one link away. */}
         {track.video && <>
           {" "}

@@ -175,6 +175,8 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 165 | The vibe capsule joins the chrome: cover art, no colour, no label |
 | 166 | Phones show the vibe player, because iOS will not play a hidden one |
 | 167 | Today’s vibe is a desktop control; #166's phone player is withdrawn |
+| 168 | YouTube readiness, bounded waits, and fresh retry attempts |
+| 169 | Today’s vibe rests as cover art and expands on intent |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1082,3 +1084,24 @@ crumbs. With no capsule to be, it is a control of that bar rather than a second
 chip parked beside it, so it wears that bar's button classes and hovers by
 colour alone. It is mounted by `Chrome.tsx` as its own export and returns focus
 to the capsule over a `vibeopen` event, the two being in different trees.
+
+## 168. Recover the YouTube player by attempt (2026-09-12)
+
+The original eight-second first-start watchdog could report failure when
+autoplay preceded API attachment, and retry reused a broken or absent player.
+Each failed attempt now gets a fresh React-owned iframe on retry. API commands
+wait for `onReady`, which reconciles playback state, and stale callbacks are
+ignored. Both API loading and each playback request have bounded waits.
+`onAutoplayBlocked` gets a bilingual second-press instruction rather than an
+undifferentiated failure. Hiding cancels intent even while the API is loading.
+This improves recovery without promising to bypass browser sound policies or
+changing the current desktop-only capsule.
+
+## 169. Today’s vibe rests as cover art and expands on intent (2026-09-12)
+
+The always-visible title made the chrome busier than the track needed. The
+capsule now rests as its cover alone. Hover or keyboard focus expands it in
+place to reveal the title, play/pause mark, seek line, and close button. The
+cover remains under the pointer throughout the transition, and focus receives
+the same controls as hover. Playback may continue while collapsed; returning
+to the cover reveals pause without making the player visually persistent.

@@ -24,6 +24,7 @@ export const ui = {
   pauseVibe: { en: "Pause track", uk: "Призупинити трек" },
   seekVibe: { en: "Track position", uk: "Позиція у треку" },
   vibeUnavailable: { en: "Audio coming soon", uk: "Аудіо незабаром" },
+  vibeAutoplay: { en: "Tap play again to allow sound.", uk: "Натисніть відтворення ще раз, щоб увімкнути звук." },
   vibeFailed: { en: "Couldn’t play. Tap to retry.", uk: "Не вдалося відтворити. Спробуйте ще раз." },
   vibeBlocked: { en: "This one can’t play here.", uk: "Цей трек не можна відтворити тут." },
   vibeOnYouTube: { en: "Open on YouTube", uk: "Відкрити на YouTube" },
