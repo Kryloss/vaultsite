@@ -6862,7 +6862,20 @@ html[data-intro] .chrome-bar,
   border-radius: var(--r-full);
 }
 
-.music-search {
+/* ---- The field, and the label that lifts out of it ----
+   The pill is WRAPPED now, because its label is a row of letter spans painted
+   over the input rather than a `placeholder` (components/lists/MusicNotes.tsx).
+   Everything that sized the field — the flex, the floor, the ceiling — belongs
+   to the wrapper; the input just fills it. `box-sizing: border-box` is global,
+   so the outer width is what it always was, hairline and padding included.
+
+   `overflow: hidden` is the frame the animation is drawn inside. The letters
+   travel UP and out, and clipping them at the pill's edge means they slide
+   away BEHIND the hairline instead of crossing it half-faded — which is the
+   difference between a label leaving a field and letters loose on the page. */
+.music-search-field {
+  position: relative;
+  display: flex;
   flex: 1 1 auto;
   /* A floor where it is still a field rather than a stub. Below this the
      heading wraps another line instead — the heading has somewhere to go and
@@ -6873,11 +6886,160 @@ html[data-intro] .chrome-bar,
      being the middle. Lifted again on a phone, where the field has a whole
      cheek to itself. */
   max-width: 10rem;
+  overflow: hidden;
+}
+
+.music-search {
+  width: 100%;
+  /* An input's intrinsic width is ~20 characters and would hold the wrapper
+     open past its own ceiling. */
+  min-width: 0;
   outline: none;
 }
 
-.music-search::placeholder {
+/* The label, over the input's TEXT rather than over its box: the same padding
+   the input has, plus the hairline that padding sits inside. It carries the
+   type itself instead of inheriting, since it is a sibling of the input and
+   not inside it — the two have to measure identically or the label moves when
+   it hands over to the caret. */
+.music-search-ghost {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(0.6875rem + 1px);
+  right: calc(0.6875rem + 1px);
+  display: flex;
+  align-items: center;
+  font-size: 0.8125rem;
+  line-height: 1.1;
+  /* Exactly what `::placeholder` was painted, so a field nobody has touched
+     looks the way it always did. */
   color: var(--text-tertiary);
+  white-space: nowrap;
+  /* Paint, not a control: the input underneath stays clickable across its
+     whole width, and a press anywhere on the pill still lands on the caret. */
+  pointer-events: none;
+  /* The one number here that is not a token: the gap between one letter
+     leaving and the next. It belongs to the RISE alone — the drop back in is
+     the whole word at once and uses no delay at all. Not a duration (no
+     letter takes this long), so --dur-fast is the wrong thing to reach for;
+     45ms is the reference's 50ms, trimmed, and spreads seven letters over
+     270ms against a 200ms rise, which is the ratio that makes a stagger
+     visible rather than a blur. 35ms was the first attempt and too tight to
+     read. */
+  --music-letter-step: 0.045s;
+}
+
+/* ONE letter. `inline-block` because a transform does nothing to an inline
+   box, and the delay is the letter's own index, handed down from the markup
+   as `--i` — which is the whole reason the label is spans at all.
+
+   NOTHING is declared here but the box: a field nobody has touched has no
+   animation at all, which is what keeps the label from dropping into place on
+   page load. The two states below own a keyframe each. */
+.music-search-letter {
+  display: inline-block;
+}
+
+/* TWO ONE-WAY ANIMATIONS, NOT ONE TRANSITION THE LETTERS RUN BACKWARDS.
+   The label RISES out of the pill a letter at a time when the field is taken
+   over, and a label coming back FALLS in from above it ALL AT ONCE. The
+   asymmetry is the design (owner's call): leaving is a word coming apart, and
+   arriving is a word arriving.
+
+   That is also why one transition cannot do both. A transition's timing
+   belongs to the property, not to the direction, so a staggered exit is a
+   staggered return however it is written — the label peels away and then
+   dribbles back letter by letter, which is the same motion twice and reads as
+   a rewind. Two one-way animations let each direction keep its own timing:
+   the exit stages its letters, the return does not stage them at all.
+
+   The handover is free here: the rise ENDS where the fall BEGINS (-140%,
+   `opacity: 0`), so nothing jumps between them, and a letter parked above the
+   field is in the same place either way.
+
+   Each keyframe names ONE end and lets the other be the element's own
+   computed value — the idiom `wash-in` and `nav-tree-in` use. */
+@keyframes music-letter-rise-away {
+  /* Implicit 0%: where the letter sits, opaque. The fade is done well before
+     the travel is, so the word going away is a wipe across the letters rather
+     than seven boxes being clipped in half at the pill's edge. */
+  60% {
+    opacity: 0;
+  }
+  to {
+    transform: translateY(-140%);
+    opacity: 0;
+  }
+}
+
+@keyframes music-letter-fall-in {
+  from {
+    transform: translateY(-140%);
+    opacity: 0;
+  }
+  /* Opaque EARLY, unlike the way out: the label is meant to be SEEN falling,
+     and a word that only reaches full strength as it lands has already
+     stopped moving by the time you can read it. */
+  30% {
+    opacity: 1;
+  }
+}
+
+/* Out of the way while the field is in use — the caret is in it, or there is
+   already a query in it from before the reader clicked away.
+
+   LONGHANDS, not the `animation` shorthand. A shorthand carrying `var()` is a
+   pending-substitution value for every longhand it covers, `animation-delay`
+   included, and the stagger then depends on a later longhand winning that
+   fight; written out, each property stands on its own. `both` matters twice:
+   the backwards fill holds a letter in place, visible, through its own delay,
+   and the forwards fill keeps it gone once it has left. */
+.music-search-field:focus-within .music-search-letter,
+.music-search-field[data-filled] .music-search-letter {
+  animation-name: music-letter-rise-away;
+  animation-duration: var(--dur);
+  animation-timing-function: var(--ease);
+  animation-fill-mode: both;
+  animation-delay: calc(var(--i) * var(--music-letter-step));
+}
+
+/* Back, once the field is empty and the caret has gone — the whole word in
+   one drop. `animation-delay: 0s` is the entire difference from the rule
+   above, and it is stated OUTRIGHT rather than left to the initial value:
+   `--i` is sitting on every one of these letters and the next person to read
+   this will assume it is used here too. No stagger means no tail to wait
+   through, so the drop takes --dur rather than the --dur-fast a single
+   staggered letter wanted.
+
+   `data-touched` is the only reason React is involved at all: without it this
+   selector also matches on first paint and the label falls into an untouched
+   field for no reason. */
+.music-search-field[data-touched]:not(:focus-within):not([data-filled])
+  .music-search-letter {
+  animation-name: music-letter-fall-in;
+  animation-duration: var(--dur);
+  animation-timing-function: var(--ease);
+  animation-fill-mode: both;
+  animation-delay: 0s;
+}
+
+/* Asked for less motion: the label still gets out of the way and still comes
+   back, it just doesn't travel or queue to do either. The hidden state has to
+   be restated as plain `opacity`, because with the animation gone there is no
+   forwards fill left to hold the letter out of the field — and a label
+   sitting on top of a typed query is worse than no animation at all. */
+@media (prefers-reduced-motion: reduce) {
+  .music-search-field:focus-within .music-search-letter,
+  .music-search-field[data-filled] .music-search-letter {
+    animation: none;
+    opacity: 0;
+  }
+
+  .music-search-field[data-touched]:not(:focus-within):not([data-filled])
+    .music-search-letter {
+    animation: none;
+  }
 }
 
 .music-search:focus-visible {
@@ -7601,9 +7763,11 @@ html[data-intro] .chrome-bar,
      5.5rem is measured, not picked: 88px less 22px of padding and 2px of
      hairline is 64px of content, which holds "Search…" (52.8px) and "Пошук…"
      (55.5px) as well as every step the language label takes — "All", "ENG",
-     "UA", "RU". It also clears the row at 320px, the narrowest window worth
+     "UA", "RU". Those two still measure the same now that the label is a row
+     of spans rather than a `placeholder`: `.music-search-ghost` states the
+     field's own type and sits inside the same padding. It also clears the row at 320px, the narrowest window worth
      drawing for: 88 + 12 + 48 + 12 + 88 is 248px inside 272px of toolbar. */
-  .music-search,
+  .music-search-field,
   .music-lang-button {
     width: 5.5rem;
     /* The floor and the ceiling the wide layout gives the field are both
@@ -7612,7 +7776,7 @@ html[data-intro] .chrome-bar,
     max-width: none;
   }
 
-  .music-search {
+  .music-search-field {
     grid-column: 1;
     grid-row: 1;
     /* Hard against the outside edges, so the gap either side of the portrait

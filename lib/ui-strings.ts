@@ -86,7 +86,7 @@ export const ui = {
      sentence this used to be needed 164px of field and was clipped mid-word
      at EVERY width, the 10rem desktop one included. The full sentence is on
      the aria-label, which is where a screen reader looks anyway. */
-  musicSearch: { en: "Search…", uk: "Пошук…" },
+  musicSearch: { en: "Search", uk: "Пошук" },
   musicSearchLabel: {
     en: "Search artists, tracks, EPs and albums",
     uk: "Пошук виконавців, треків, EP та альбомів",

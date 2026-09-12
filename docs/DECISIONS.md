@@ -177,6 +177,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 167 | Today’s vibe is a desktop control; #166's phone player is withdrawn |
 | 168 | YouTube readiness, bounded waits, and fresh retry attempts |
 | 169 | Today’s vibe rests as cover art and expands on intent |
+| 170 | /music's search label is spans that rise and fall, not a placeholder |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1105,3 +1106,58 @@ place to reveal the title, play/pause mark, seek line, and close button. The
 cover remains under the pointer throughout the transition, and focus receives
 the same controls as hover. Playback may continue while collapsed; returning
 to the cover reveals pause without making the player visually persistent.
+
+## 170. /music's search label is spans that rise and fall, not a placeholder (2026-09-12)
+
+The owner asked for a staggered per-letter label animation on the /music
+search field, from a reference built on Framer Motion. It is adopted, not
+installed: a `placeholder` cannot be animated at all, so the field wears a
+`.music-search-ghost` label of one `<span>` per letter instead, and the whole
+thing runs on CSS transitions — the markup's only job is to hand each letter
+its index as `--i`, which becomes that letter's `transition-delay`. Focus is
+`:focus-within` and a query left in the field is `data-filled`, so no
+JavaScript participates in the animation and none is added to the bundle
+(rule 8 — no new dependency for one field, and `motion/react` would also be
+the site's first animation library and its first `cn()`).
+
+Being spans rather than an attribute is a gain, not a cost: the label is a
+`<T>` pair like every other fixed string, so it is right in the static HTML
+instead of starting in English until `useLang()` reports in. The letters are
+clipped by the wrapper's `overflow: hidden` — they fall away behind the pill's
+hairline rather than crossing it half-faded, which is what keeps the
+reference's motion inside a 26px pill. The reference's spring became `--dur`
+and `--ease` (#58: tokens, not literals); the one number typed in is the 35ms
+step between letters, which is a stagger and not a duration. Reduced motion
+gets the state change without the travel.
+
+**The label rises out a letter at a time and falls back as a whole word, and
+that asymmetry is the decision.** The owner asked for it in those terms after
+seeing both directions staged: leaving is a word coming apart, arriving is a
+word arriving, and a label that dribbles back in letter by letter reads as the
+exit rewound however it is timed. So the rise carries the 45ms stagger and the
+drop carries none — `animation-delay: 0s`, stated outright, since `--i` is
+sitting on every letter and the next reader will assume it is used there too.
+
+This is the reason it is two one-way animations and not one transition, which
+was the first version. A transition's timing belongs to the property rather
+than to the direction, so whatever staging the exit has, the return has too;
+the only way to give each direction its own timing is to give each its own
+animation. The middle version gave the return its own stagger, which was the
+wrong half of the lesson — the return should not be staged at all. A version
+before that had the letters leave through the BOTTOM, on the reading that "the
+same falling effect" meant one continuous downward cycle; the rise on focus is
+the part the owner wanted kept, and it came from the reference. The path is now
+the same both ways, which also makes the handover between the two animations
+free: both meet at `opacity: 0` at `translateY(-140%)`.
+
+Animation properties are written as longhands rather than the `animation`
+shorthand, because a shorthand carrying `var()` makes every longhand it covers
+a pending-substitution value — `animation-delay` included — and the stagger is
+the one thing here that must not depend on a later declaration winning that
+fight.
+
+That one-way cycle is also why `data-touched` exists on the wrapper. "Empty
+and never touched" and "empty again" are the same thing to a selector, so the
+entrance would otherwise play on first paint, dropping a label into a field
+the reader has not been near. It is set on first focus and never unset; the
+animation stays pure CSS either way.

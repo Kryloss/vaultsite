@@ -75,7 +75,7 @@ export interface SocialLink {
  */
 export const socials: SocialLink[] = [
   { label: "GitHub", href: "https://github.com/kryloss", icon: "github" },
-  { label: "Instagram", href: "https://instagram.com/kyryloles", icon: "instagram" },
+  { label: "Instagram", href: "https://www.instagram.com/itskyrylo", icon: "instagram" },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/kyrylo-leshchenko-b379383b0", icon: "linkedin" },
   { label: "X", href: "https://x.com/krylossua", icon: "x" },
   { label: "Email", href: "mailto:kyryloleshchenko@gmail.com", icon: "mail" },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import {
   filterGroups,
@@ -58,9 +58,17 @@ export default function MusicNotes({
   const [active, setActive] = useState(0);
   const [query, setQuery] = useState("");
   const [lang, setLang] = useState<MusicLang | null>(null);
-  /* The placeholder and the label are ATTRIBUTES, so they can't be a <T> pair
-     of spans — this is the one place a component has to know which language is
-     showing. Same hook the command palette's search box uses. */
+  /* Has the field ever had the caret in it? The search label's RETURN is an
+     animation rather than a transition running backwards (see
+     `.music-search-field` in globals.css), and a CSS selector cannot tell
+     "empty and never touched" from "empty again" — so without this the label
+     would fall into place on page load, for a reader who has done nothing.
+     One-way: a field that has been used stays used. */
+  const [touched, setTouched] = useState(false);
+  /* The search field's `aria-label` and the deck's are ATTRIBUTES, so they
+     can't be a <T> pair of spans — this is the one place a component has to
+     know which language is showing. Same hook the command palette's search
+     box uses. (The field's VISIBLE label is a <T> pair: see `GhostLabel`.) */
   const { lang: uiLang } = useLang();
 
   const { groups: shown, fuzzy } = useMemo(
@@ -150,18 +158,45 @@ export default function MusicNotes({
         </div>
 
         <div className="music-controls">
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Escape" && query) setQuery("");
-            }}
-            placeholder={ui.musicSearch[uiLang]}
-            aria-label={ui.musicSearchLabel[uiLang]}
-            className="music-search"
-            spellCheck={false}
-          />
+          {/* The field wears its own label rather than a `placeholder`, so the
+              label can RISE OUT of the pill a letter at a time instead of
+              blinking out of existence, and FALL back in as a whole word. The
+              two directions are deliberately not symmetrical, which is why
+              they are two animations rather than one transition. Three things
+              follow:
+              it is a <T> pair of spans like every other fixed string on the
+              site rather than an attribute that has to pick a language; it is
+              in the static HTML, so it is right before hydration and with JS
+              off; and the animation is entirely CSS (`.music-search-ghost` in
+              globals.css), keyed off `:focus-within` for the caret,
+              `data-filled` for a query already typed, and `data-touched` for
+              "this field has been used, so the label is allowed to arrive".
+              The input keeps NO `placeholder` — two labels in one field would
+              print on top of each other. */}
+          <span
+            className="music-search-field"
+            data-filled={query ? "" : undefined}
+            data-touched={touched ? "" : undefined}
+          >
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => setTouched(true)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape" && query) setQuery("");
+              }}
+              aria-label={ui.musicSearchLabel[uiLang]}
+              className="music-search"
+              spellCheck={false}
+            />
+            {/* `aria-hidden`: the field already has its accessible name from
+                the `aria-label` above, and a name read letter by letter is
+                not a name. */}
+            <span className="music-search-ghost" aria-hidden="true">
+              <GhostLabel label={ui.musicSearch} />
+            </span>
+          </span>
 
           {langs.length > 0 && (
             <button
@@ -211,6 +246,42 @@ export default function MusicNotes({
           }
         />
       )}
+    </>
+  );
+}
+
+/**
+ * The search field's label, one <span> per letter.
+ *
+ * Both languages are rendered, as everywhere else (`T`), and CSS shows the
+ * active one — so the label is correct in the static HTML instead of starting
+ * in English and being corrected once `useLang()` reports in.
+ *
+ * Each letter carries its INDEX as `--i`, which is the whole stagger: CSS
+ * turns it into that letter's `animation-delay` on the way OUT, so the label
+ * comes apart in reading order. Coming back it is unused — the word drops in
+ * together. A space would collapse in a flex row of inline-blocks, so it is
+ * written as a non-breaking one.
+ */
+function GhostLabel({ label }: { label: Str }) {
+  return <T en={<GhostLetters text={label.en} />} uk={<GhostLetters text={label.uk} />} />;
+}
+
+function GhostLetters({ text }: { text: string }) {
+  return (
+    <>
+      {/* Spread, not `split("")`: the label ends in an ellipsis today and could
+          hold any character tomorrow — splitting on "" cuts a surrogate pair
+          in half and prints two replacement squares. */}
+      {[...text].map((char, i) => (
+        <span
+          key={i}
+          className="music-search-letter"
+          style={{ "--i": i } as CSSProperties}
+        >
+          {char === " " ? "\u00A0" : char}
+        </span>
+      ))}
     </>
   );
 }
