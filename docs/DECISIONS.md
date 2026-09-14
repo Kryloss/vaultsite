@@ -180,6 +180,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 170 | Prime the YouTube player before its first press |
 | 170 | /music's search label is spans that rise and fall, not a placeholder |
 | 171 | Instagram reels on the shelf: a bare iframe and a saved cover |
+| 172 | TikTok on the shelf: the official player, uncropped |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1213,3 +1214,27 @@ a result no real post could have, and the frame then shows whole instead of
 cut in the wrong place. The crop also hides Instagram's own attribution — the
 note's creator block and `## Sources` carry the credit instead. Without
 JavaScript the whole embed shows.
+
+## 172. TikTok on the shelf: the official player, uncropped (2026-09-14)
+
+The owner asked for a TikTok on the shelf "the same" as the Instagram reel —
+just the video. `video:` accepts a TikTok video address (`lib/tiktok.ts`), and a
+standalone one becomes TikTok's documented Embed Player,
+`tiktok.com/player/v1/<id>`, as a plain iframe with `music_info`,
+`description`, `rel`, `native_context_menu` and `closed_caption` off and the
+controls left on.
+
+It is not cropped, and that is the difference from #171. Instagram's card sits
+*around* the media, so trimming it removes Instagram and nothing else.
+TikTok's player draws its account header and like/comment/share column *over*
+the picture, and checked while playing they never fade — any crop cuts the
+video itself. Offered the choice (crop anyway, a cover and a link, or the
+player as TikTok ships it), the owner chose the player. Because its frame is
+exactly the video's 9:16, no measuring script is needed: CSS sets the ratio
+and caps the width at 20rem.
+
+Short `vt.tiktok.com` links are rejected rather than resolved: resolving is a
+network request, and the build makes none. The CDN thumbnail is signed and
+expires within days, so a note carries a `cover:` from the oEmbed thumbnail,
+saved with its EXIF removed. The account's avatar stands in the creator block
+on the same footing as a YouTube channel's (docs/CONTENT-WORKFLOW.md).

@@ -845,6 +845,27 @@ body::after {
   margin-top: calc(-1 * var(--ig-top));
 }
 
+/* A standalone TikTok link (lib/tiktok.ts). TikTok's player is exactly the
+   video's 9:16 with its own layers drawn on top, so the frame needs no
+   measuring — only a width cap, or a portrait video would run the length of
+   the column. */
+.tiktok-block {
+  width: 100%;
+  max-width: 20rem;
+  margin: 1.5rem auto;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  background: var(--bg-hover);
+}
+
+.tiktok-embed {
+  display: block;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  border: 0;
+}
+
 /* Content images and inlined diagrams open in the lightbox (avatars excluded) */
 .prose img:not(.avatar),
 .prose svg.diagram {

@@ -33,6 +33,7 @@ import { slugify, getWikiIndex, getAssetIndex, VAULT_DIR } from "./vault";
 import { appleMusicEmbedHtml, isAppleMusicUrl } from "./apple-music";
 import { youtubeEmbedHtml, youtubeId } from "./youtube";
 import { instagramEmbedHtml, instagramPost } from "./instagram";
+import { tiktokEmbedHtml, tiktokId } from "./tiktok";
 import { highlightToHast, parseCodeMeta, langLabel } from "./highlight";
 import { rehypeHeadings, type Heading } from "./toc";
 import { dimsFor, srcSetFor } from "./blur";
@@ -881,6 +882,15 @@ export function preprocessObsidian(
     (m, url: string) => {
       const post = instagramPost(url);
       return post ? `\n${instagramEmbedHtml(post)}\n` : m;
+    }
+  );
+
+  // 7c. TikTok videos standing alone on a line → TikTok's embed player.
+  md = md.replace(
+    /^\s*<?(https?:\/\/(?:www\.|m\.)?tiktok\.com\/[^\s<>]+)>?\s*$/gm,
+    (m, url: string) => {
+      const id = tiktokId(url);
+      return id ? `\n${tiktokEmbedHtml(id)}\n` : m;
     }
   );
 

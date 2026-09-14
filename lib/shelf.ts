@@ -10,6 +10,7 @@ import { resolveCoverUrl, resolveLangVariantUrl } from "./markdown";
 import { blurFor, domFor, dimsFor, srcSetFor } from "./blur";
 import { youtubeId, youtubeThumbnail } from "./youtube";
 import { instagramPost } from "./instagram";
+import { tiktokId } from "./tiktok";
 import { ui, type Str } from "./ui-strings";
 import { categoryLabel } from "./categories";
 
@@ -319,9 +320,11 @@ export function toShelfItem(entry: Entry): ShelfItem {
   // an explicit `cover:` still wins if one is set.
   const link = entry.meta.video ?? entry.meta.url;
   const videoId = typeof link === "string" ? youtubeId(link) : undefined;
-  // An Instagram reel is watched too, but has no derivable thumbnail — its
-  // note carries a `cover:` (DECISIONS #171).
-  const isReel = typeof link === "string" && instagramPost(link) !== undefined;
+  // An Instagram reel or a TikTok is watched too, but has no derivable
+  // thumbnail — its note carries a `cover:` (DECISIONS #171, #172).
+  const isEmbedVideo =
+    typeof link === "string" &&
+    (instagramPost(link) !== undefined || tiktokId(link) !== undefined);
   const cover = resolveCoverUrl(entry.sectionDir, entry.meta.cover);
   const coverDims = dimsFor(cover);
   // Resolved exactly like `cover:`, so a bare file name in the note is enough.
@@ -346,7 +349,7 @@ export function toShelfItem(entry: Entry): ShelfItem {
   // A YouTube link is something you watch even when the note names no medium.
   const verbs =
     (medium ? STATUS_VERBS[medium] : undefined) ??
-    (videoId || isReel ? WATCH_VERBS : READ_VERBS);
+    (videoId || isEmbedVideo ? WATCH_VERBS : READ_VERBS);
   const statusLabel = status ? verbs[status] : undefined;
 
   return {
@@ -385,7 +388,7 @@ export function toShelfItem(entry: Entry): ShelfItem {
     imdbId:
       typeof entry.meta.imdb_id === "string" ? entry.meta.imdb_id : undefined,
     isVideo:
-      medium === "video" || medium === "youtube" || Boolean(videoId) || isReel,
+      medium === "video" || medium === "youtube" || Boolean(videoId) || isEmbedVideo,
     status,
     statusLabel,
     categories: parseCategories(entry.meta),
