@@ -796,6 +796,39 @@ body::after {
   border: 0;
 }
 
+/* A standalone Instagram link (lib/instagram.ts). Instagram's embed page wraps
+   the video in its own header and footer, so the frame is capped in width
+   rather than filling the column. The ratios below are only the no-JS and
+   pre-load fallback: components/InstagramFit.tsx sets the measured height and
+   `data-measured`, which releases the ratio. */
+.instagram-block {
+  width: 100%;
+  max-width: 22rem;
+  margin: 1.5rem auto;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  background: var(--bg-hover);
+}
+
+.instagram-embed {
+  display: block;
+  width: 100%;
+  border: 0;
+}
+
+.instagram-embed-reel {
+  aspect-ratio: 9 / 19;
+}
+
+.instagram-embed-post {
+  aspect-ratio: 4 / 5.6;
+}
+
+.instagram-embed[data-measured] {
+  aspect-ratio: auto;
+}
+
 /* Content images and inlined diagrams open in the lightbox (avatars excluded) */
 .prose img:not(.avatar),
 .prose svg.diagram {

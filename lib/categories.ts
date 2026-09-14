@@ -21,6 +21,7 @@ const CATEGORY_LABELS: Record<string, Str> = {
   education: { en: "Education", uk: "Освіта" },
   music: { en: "Music", uk: "Музика" },
   popsci: { en: "PopSci", uk: "Наукпоп" },
+  war: { en: "War", uk: "Війна" },
   // movie / show
   "sci-fi": { en: "Sci-Fi", uk: "Фантастика" },
   thriller: { en: "Thriller", uk: "Трилер" },

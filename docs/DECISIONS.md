@@ -179,6 +179,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 169 | Today’s vibe rests as cover art and expands on intent |
 | 170 | Prime the YouTube player before its first press |
 | 170 | /music's search label is spans that rise and fall, not a placeholder |
+| 171 | Instagram reels on the shelf: a bare iframe and a saved cover |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1172,3 +1173,26 @@ and never touched" and "empty again" are the same thing to a selector, so the
 entrance would otherwise play on first paint, dropping a label into a field
 the reader has not been near. It is set on first focus and never unset; the
 animation stays pure CSS either way.
+
+## 171. Instagram reels on the shelf: a bare iframe and a saved cover (2026-09-14)
+
+The owner asked for an Instagram reel on the shelf. `video:` now accepts an
+Instagram reel/post link (`lib/instagram.ts`), and a standalone one in a note
+body becomes an iframe of Instagram's own `/embed/` page. Not `embed.js`: that
+script would run on this site's pages, while the iframe keeps Instagram's code
+inside Instagram's frame, and the embed page sets no `frame-ancestors`, so the
+iframe alone works. There is no thumbnail to derive the way `i.ytimg.com`
+gives one for YouTube — Instagram's CDN URLs are signed and expire, and a
+modified one is refused — so a reel note carries a `cover:` saved into
+`vault/Shelf/Videos/covers/` from the reel's own default cover frame. No
+`VideoObject` is emitted for a reel (#41 stays YouTube-only): its `embedUrl`
+would be a third-party page and the thumbnail a vault copy, which is more than
+the markup should claim.
+
+The frame is sized by a thin client listener, `components/InstagramFit.tsx`:
+the embed page posts a `MEASURE` message with its content height once on load,
+and the listener applies it to the frame whose `contentWindow` sent it. A fixed
+CSS ratio was tried first and left 40% of the frame blank for a landscape reel —
+no single ratio fits both orientations. The page never re-measures, so a frame
+whose width later changes by 24px or more is reloaded to ask again. Without
+JavaScript the CSS ratio remains as the fallback.

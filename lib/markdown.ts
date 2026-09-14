@@ -32,6 +32,7 @@ import path from "path";
 import { slugify, getWikiIndex, getAssetIndex, VAULT_DIR } from "./vault";
 import { appleMusicEmbedHtml, isAppleMusicUrl } from "./apple-music";
 import { youtubeEmbedHtml, youtubeId } from "./youtube";
+import { instagramEmbedHtml, instagramPost } from "./instagram";
 import { highlightToHast, parseCodeMeta, langLabel } from "./highlight";
 import { rehypeHeadings, type Heading } from "./toc";
 import { dimsFor, srcSetFor } from "./blur";
@@ -871,6 +872,15 @@ export function preprocessObsidian(
     (m, url: string) => {
       const id = youtubeId(url);
       return id ? `\n${youtubeEmbedHtml(id)}\n` : m;
+    }
+  );
+
+  // 7b. Instagram reels and posts standing alone on a line → embedded frame.
+  md = md.replace(
+    /^\s*<?(https?:\/\/(?:www\.)?instagram\.com\/[^\s<>]+)>?\s*$/gm,
+    (m, url: string) => {
+      const post = instagramPost(url);
+      return post ? `\n${instagramEmbedHtml(post)}\n` : m;
     }
   );
 

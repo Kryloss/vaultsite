@@ -6,6 +6,7 @@ import Chrome from "@/components/Chrome";
 import Constellation from "@/components/Constellation";
 import Lightbox from "@/components/Lightbox";
 import CodeCopy from "@/components/CodeCopy";
+import InstagramFit from "@/components/InstagramFit";
 import HeadingAnchors from "@/components/HeadingAnchors";
 import JsonLd from "@/components/JsonLd";
 import SelectionLink from "@/components/SelectionLink";
@@ -224,6 +225,7 @@ export default function RootLayout({
         <Lightbox />
         <JsonLd data={siteJsonLd()} />
         <CodeCopy />
+        <InstagramFit />
         <HeadingAnchors />
         <SelectionLink />
         {/* Keeps a thrown arrow thrown — see the note in the component. */}
