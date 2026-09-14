@@ -829,6 +829,22 @@ body::after {
   aspect-ratio: auto;
 }
 
+/* Cropped to the video (DECISIONS #171): the block is exactly the media's
+   height and the frame is pulled up past Instagram's header, so its footer
+   falls below the block's clipped edge. Both numbers come from the frame's own
+   measurement, set by InstagramFit. Below the rules it overrides. */
+.instagram-block[data-cropped] {
+  height: var(--ig-media-h);
+}
+
+.instagram-block[data-cropped="landscape"] {
+  max-width: none;
+}
+
+.instagram-block[data-cropped] .instagram-embed {
+  margin-top: calc(-1 * var(--ig-top));
+}
+
 /* Content images and inlined diagrams open in the lightbox (avatars excluded) */
 .prose img:not(.avatar),
 .prose svg.diagram {

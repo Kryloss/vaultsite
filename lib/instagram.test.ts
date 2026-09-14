@@ -4,12 +4,28 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
+  instagramCrop,
   instagramEmbedHtml,
   instagramEmbedUrl,
   instagramMeasure,
   instagramNeedsRemeasure,
   instagramPost,
 } from "./instagram.ts";
+
+test("the crop keeps exactly the media, at the heights the embed really reported", () => {
+  // A landscape reel, measured in the browser at two widths.
+  assert.deepEqual(instagramCrop(368, 284), { top: 54, media: 160, landscape: true });
+  assert.deepEqual(instagramCrop(405, 350), { top: 54, media: 197, landscape: true });
+  // A 9:16 reel at 350px: 622px of video under the same header and footer.
+  assert.deepEqual(instagramCrop(830, 350), { top: 54, media: 622, landscape: false });
+});
+
+test("a shape no post could have leaves the frame uncropped", () => {
+  assert.equal(instagramCrop(150, 350), undefined); // less than the chrome itself
+  assert.equal(instagramCrop(260, 350), undefined); // a sliver of media
+  assert.equal(instagramCrop(2400, 350), undefined); // far taller than 9:16
+  assert.equal(instagramCrop(405, 0), undefined); // a hidden frame
+});
 
 test("a MEASURE message gives the frame's height; nothing else does", () => {
   assert.equal(instagramMeasure('{"details":{"height":368},"type":"MEASURE"}'), 368);

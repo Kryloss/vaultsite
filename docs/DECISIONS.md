@@ -1196,3 +1196,20 @@ CSS ratio was tried first and left 40% of the frame blank for a landscape reel â
 no single ratio fits both orientations. The page never re-measures, so a frame
 whose width later changes by 24px or more is reloaded to ask again. Without
 JavaScript the CSS ratio remains as the fallback.
+
+The owner then asked for the video alone, without Instagram's card around it,
+knowing the trade-offs below. The frame is cropped from outside, since its
+contents are cross-origin: the block is set to the media's height and the
+frame is pulled up past Instagram's 54px header, so its 154px footer falls
+below the clipped edge. Both were measured on 2026-09-14 and hold at every
+width; the media's height is simply the reported total minus 208, so no aspect
+ratio is assumed. Checked before building: a click plays the reel in place,
+with sound and no overlay. A landscape reel is released to the column's width
+(one extra load of the embed page); portrait ones keep the 22rem cap.
+
+This is fragile by construction, and that is accepted, not overlooked. The
+numbers are Instagram's and can change without notice; `instagramCrop` refuses
+a result no real post could have, and the frame then shows whole instead of
+cut in the wrong place. The crop also hides Instagram's own attribution â€” the
+note's creator block and `## Sources` carry the credit instead. Without
+JavaScript the whole embed shows.

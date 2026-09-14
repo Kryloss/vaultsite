@@ -62,6 +62,34 @@ export function instagramNeedsRemeasure(measuredAt: number, width: number): bool
   return measuredAt > 0 && width > 0 && Math.abs(width - measuredAt) >= 24;
 }
 
+/**
+ * Instagram's embed page, measured 2026-09-14: a fixed 54px header (avatar,
+ * name, View profile) above the media and a fixed 154px footer (View more,
+ * actions, likes, comment box) below it, at every width. These are Instagram's
+ * numbers, not ours, and can change without notice (DECISIONS #171).
+ */
+export const INSTAGRAM_HEADER = 54;
+export const INSTAGRAM_FOOTER = 154;
+
+export type InstagramCrop = { top: number; media: number; landscape: boolean };
+
+/**
+ * Where the video sits inside a frame that reported `total` pixels at `width`:
+ * hide the header above it and the footer below it, and nothing else. The
+ * media's own height is whatever is left, so no aspect ratio is assumed.
+ *
+ * A result no real post could have — a sliver, or taller than a 9:16 reel with
+ * room to spare — means the layout has moved under us, and returns undefined
+ * so the frame is shown whole rather than cut in the wrong place.
+ */
+export function instagramCrop(total: number, width: number): InstagramCrop | undefined {
+  if (!(width > 0)) return undefined;
+  const media = total - INSTAGRAM_HEADER - INSTAGRAM_FOOTER;
+  const ratio = media / width;
+  if (!(ratio >= 0.3 && ratio <= 2.2)) return undefined;
+  return { top: INSTAGRAM_HEADER, media, landscape: media < width };
+}
+
 /** Embed iframe HTML — used by the markdown pipeline to auto-embed links. */
 export function instagramEmbedHtml(post: InstagramPost): string {
   // Reels are portrait; a photo post's embed is closer to square.

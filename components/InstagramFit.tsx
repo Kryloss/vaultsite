@@ -2,18 +2,21 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { instagramMeasure, instagramNeedsRemeasure } from "@/lib/instagram";
+import { instagramCrop, instagramMeasure, instagramNeedsRemeasure } from "@/lib/instagram";
 
 /**
- * Sizes Instagram embed frames to their content (DECISIONS #171).
+ * Sizes Instagram embed frames to their content and crops them to the video
+ * (DECISIONS #171).
  *
- * Without it a frame keeps the CSS fallback ratio, which is right for no post
- * in particular: a landscape reel left 40% of its frame blank. The embed page
- * reports its own height once on load; this listens for that message, matches
- * it to the frame that sent it by `event.source`, and sets the height. The
- * page never re-measures, so a frame whose width later changes for real is
- * reloaded to ask again. Delegated from the window and re-scanned on
- * navigation, the same shape as components/CodeCopy.tsx.
+ * Without it a frame keeps the CSS fallback ratio and Instagram's whole card.
+ * The embed page reports its own height once on load; this listens for that
+ * message, matches it to the frame that sent it by `event.source`, sets the
+ * height, and hands the block the crop from `instagramCrop` as custom
+ * properties — the CSS hides the header and footer with them. A landscape
+ * video is released to the column's width. The page never re-measures, so a
+ * frame whose width later changes for real is reloaded to ask again.
+ * Delegated from the window and re-scanned on navigation, the same shape as
+ * components/CodeCopy.tsx.
  */
 export default function InstagramFit() {
   const pathname = usePathname();
@@ -33,9 +36,21 @@ export default function InstagramFit() {
       if (height === undefined) return;
       const frame = frames.find((f) => f.contentWindow === event.source);
       if (!frame) return;
+      const width = frame.getBoundingClientRect().width;
       frame.style.height = `${height}px`;
       frame.dataset.measured = "";
-      measuredAt.set(frame, frame.getBoundingClientRect().width);
+      measuredAt.set(frame, width);
+
+      const block = frame.parentElement;
+      if (!block) return;
+      const crop = instagramCrop(height, width);
+      if (!crop) {
+        delete block.dataset.cropped;
+        return;
+      }
+      block.style.setProperty("--ig-top", `${crop.top}px`);
+      block.style.setProperty("--ig-media-h", `${crop.media}px`);
+      block.dataset.cropped = crop.landscape ? "landscape" : "portrait";
     };
 
     const observer = new ResizeObserver((entries) => {
