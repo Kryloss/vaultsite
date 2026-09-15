@@ -8598,7 +8598,8 @@ html[data-lang="uk"] .book-spine {
   position: absolute;
   /* Clear of the book's head, so the spine is never obscured. */
   bottom: calc(100% + 0.5rem);
-  left: 50%;
+  /* Centred on the spine, except at the two ends of the row (below). */
+  left: var(--cover-left, 50%);
   z-index: 1;
   height: var(--spine-cover-h);
   width: calc(var(--spine-cover-h) / var(--cover-ar, 1.5));
@@ -8614,7 +8615,7 @@ html[data-lang="uk"] .book-spine {
   /* Never a hover target of its own — a pointer moving under it must keep
      hovering the spine it belongs to. */
   pointer-events: none;
-  transform: translateX(-50%) translateY(4px);
+  transform: translateX(var(--cover-shift, -50%)) translateY(4px);
   transition-property: opacity, transform;
   transition-duration: var(--dur);
   transition-timing-function: var(--ease);
@@ -8623,7 +8624,22 @@ html[data-lang="uk"] .book-spine {
 .book-spine:hover .book-spine-cover,
 .book-spine:focus-visible .book-spine-cover {
   opacity: 1;
-  transform: translateX(-50%) translateY(0);
+  transform: translateX(var(--cover-shift, -50%)) translateY(0);
+}
+
+/* The end books open their face INWARD. A centred cover is ~64px over a
+   25–43px spine, so it hangs ~15px past both sides — and `.book-shelf` is a
+   scroller, which clips horizontally at its own edges (`--cover-reach` only
+   buys room at the top). Aligning the first cover to its spine's left edge
+   and the last to its right keeps both whole without widening the row. */
+.book-slot:first-child {
+  --cover-left: 0%;
+  --cover-shift: 0%;
+}
+
+.book-slot:last-child {
+  --cover-left: 100%;
+  --cover-shift: -100%;
 }
 
 /* On touch there is no pointer to rest on a book, so the face can never be
@@ -8745,12 +8761,12 @@ html[data-lang="uk"] .book-spine {
 
   /* The face still appears, it just stops growing into place. */
   .book-spine-cover {
-    transform: translateX(-50%);
+    transform: translateX(var(--cover-shift, -50%));
   }
 
   .book-spine:hover .book-spine-cover,
   .book-spine:focus-visible .book-spine-cover {
-    transform: translateX(-50%);
+    transform: translateX(var(--cover-shift, -50%));
   }
 }
 
