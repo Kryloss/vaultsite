@@ -3,10 +3,10 @@ title: Home
 title_uk: Головна
 icon: 🏠
 order: 0
-vibe_title: Holding On To You
-vibe_artist: twenty one pilots
-vibe_date: "2026-09-12"
-vibe_youtube: https://www.youtube.com/watch?v=ktBMxkLUIwY
+vibe_title: Amsterdam
+vibe_artist: Nothing But Thieves
+vibe_date: "2026-09-19"
+vibe_youtube: https://www.youtube.com/watch?v=X2zcG3bcuMI
 description: Student in Ontario heading into cybersecurity — notes, projects, and what I'm reading.
 description_uk: Студент з Онтаріо на шляху в кібербезпеку — нотатки, проєкти та що я читаю.
 ---
