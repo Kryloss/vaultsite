@@ -169,6 +169,10 @@ export default function Lightbox() {
       const list = gallery();
       origin.current = el;
       const release = nameFor(el, ZOOM);
+      // Marks this transition as an opening, so globals.css can blur and dim
+      // the page behind the picture while it zooms (see `.lightbox-opening`).
+      const root = document.documentElement;
+      root.classList.add("lightbox-opening");
 
       void withViewTransition(() => {
         flushSync(() => {
@@ -179,7 +183,7 @@ export default function Lightbox() {
         // The overlay now carries the name; the thumbnail must give it up
         // before the "after" snapshot is taken.
         release();
-      });
+      }).then(() => root.classList.remove("lightbox-opening"));
     };
 
     document.addEventListener("click", onClick);

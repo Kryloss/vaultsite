@@ -179,6 +179,14 @@ export const ui = {
 
   // command palette actions (components/CommandPalette.tsx)
   actionToggleLang: { en: "Switch language", uk: "Змінити мову" },
+  actionUseNotionColours: {
+    en: "Use Notion colour theme",
+    uk: "Увімкнути колірну тему Notion",
+  },
+  actionUseVaultsiteColours: {
+    en: "Use Vaultsite colour theme",
+    uk: "Увімкнути колірну тему Vaultsite",
+  },
   actionCopyMarkdown: { en: "Copy page as Markdown", uk: "Копіювати сторінку як Markdown" },
   actionCopyLink: { en: "Copy link to this page", uk: "Копіювати посилання на сторінку" },
   actionRandom: { en: "Open a random note", uk: "Відкрити випадкову нотатку" },
@@ -593,8 +601,22 @@ export const devUi = {
   },
   devHelpDone: { en: "Nothing to do.", uk: "Нічого робити не треба." },
   devTipHelp: {
-    en: "Click any paragraph to edit it in place · click below the text to add one · ↑/↓ at the edges move between blocks · Backspace on an empty block removes it · Esc or Cmd+Enter renders it",
-    uk: "Натисніть на абзац, щоб редагувати на місці · під текстом — щоб додати · ↑/↓ на краях — між блоками · Backspace у порожньому блоці видаляє його · Esc чи Cmd+Enter рендерить",
+    en: "Click any paragraph to edit it in place · click below the text to add one · ↑/↓ at the edges move between blocks · Backspace on an empty block removes it · Esc or Cmd+Enter renders it · click a diagram's label to retype it (Enter saves, Tab goes to the next)",
+    uk: "Натисніть на абзац, щоб редагувати на місці · під текстом — щоб додати · ↑/↓ на краях — між блоками · Backspace у порожньому блоці видаляє його · Esc чи Cmd+Enter рендерить · натисніть на підпис діаграми, щоб змінити його (Enter зберігає, Tab — до наступного)",
+  },
+  devDiagramLabel: { en: "Diagram label", uk: "Підпис діаграми" },
+  devLabelSaved: { en: "Label saved to the diagram.", uk: "Підпис збережено в діаграмі." },
+  devLabelConflict: {
+    en: "This label changed in the file. Reload to edit it.",
+    uk: "Цей підпис змінився у файлі. Перезавантажте, щоб редагувати.",
+  },
+  devLabelFailed: {
+    en: "The label could not be saved.",
+    uk: "Не вдалося зберегти підпис.",
+  },
+  devHelpLabelConflict: {
+    en: "The diagram's file no longer has this text at this place — it was edited elsewhere. Reload the page, then retype the label.",
+    uk: "У файлі діаграми на цьому місці вже інший текст — його змінили деінде. Перезавантажте сторінку й змініть підпис знову.",
   },
 } satisfies Record<string, Str>;
 

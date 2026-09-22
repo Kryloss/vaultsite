@@ -17,7 +17,7 @@ Owner: Kyrylo, high-school student in Ontario, heading into cybersecurity. Not a
 3. **Keep `vault/` conventions stable** (top-level folder + `main.md` = section; other `.md` = entries, at any depth inside it). Do not change `slugify()` semantics casually — existing URLs depend on them.
 4. **Update `docs/DECISIONS.md`** when you make a non-obvious architectural choice. Append at the bottom; never renumber.
 5. Assets: never reference vault files directly from components — they're mirrored to `public/vault-assets/` by `scripts/sync-assets.mjs` (runs via predev/prebuild).
-6. Any new UI must work in English and Ukrainian, light and dark, and under `prefers-reduced-motion`. Do not add a manual theme switch, a general accent colour, or a second typeface. Today’s vibe has an owner-requested component colour exception (`docs/DESIGN-SYSTEM.md`).
+6. Any new UI must work in English and Ukrainian, light and dark, both colour families (Vaultsite and Notion), and under `prefers-reduced-motion`. Light/dark follows the system; the colour family switches only through Cmd+K. Do not add a general accent colour or a second typeface. Today’s vibe has an owner-requested component colour exception (`docs/DESIGN-SYSTEM.md`).
 7. Do not build items under "Planned / future" (`docs/SECTIONS.md`) unless the user asks.
 8. Do not commit, push, deploy, or add dependencies unless the user requests that action or it is clearly part of their stated task.
 9. **Code and `docs/DECISIONS.md` are the source of truth.** Where prose disagrees with the code, the code wins — flag it, don't "fix" the code to match a stale sentence.

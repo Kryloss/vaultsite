@@ -68,7 +68,7 @@ export const DEV_EXTRA_FIELDS = [
 export type DevExtraField = (typeof DEV_EXTRA_FIELDS)[number];
 
 /** Must equal `EDITOR_PROTOCOL` in scripts/dev-editor-core.mjs; the server test checks. */
-export const EDITOR_PROTOCOL = 4;
+export const EDITOR_PROTOCOL = 5;
 
 export function isDevToolsAvailable(environment: string | undefined, hostname: string) {
   return environment === "development" && hostname === "localhost";

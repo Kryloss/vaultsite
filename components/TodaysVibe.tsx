@@ -115,9 +115,13 @@ function loadPlayerApi(): Promise<YouTubeApi> {
 
 function NoteIcon() {
   return <svg className="vibe-note" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M9 18V5l11-2v13M9 9l11-2" />
-    <ellipse cx="6" cy="18" rx="3" ry="2.5" fill="currentColor" stroke="none" />
-    <ellipse cx="17" cy="16" rx="3" ry="2.5" fill="currentColor" stroke="none" />
+    {/* `ic-vibe` dances only inside the restore button's `data-icon-motion`
+        (components/icon-motion.ts); the same note elsewhere stays still. */}
+    <g className="ic-vibe">
+      <path d="M9 18V5l11-2v13M9 9l11-2" />
+      <ellipse cx="6" cy="18" rx="3" ry="2.5" fill="currentColor" stroke="none" />
+      <ellipse cx="17" cy="16" rx="3" ry="2.5" fill="currentColor" stroke="none" />
+    </g>
   </svg>;
 }
 function PlayIcon() {
@@ -141,6 +145,7 @@ export function TodaysVibeRestore({ track }: { track: Vibe }) {
   const name = `${ui.showVibe[lang]}: ${track.title} · ${track.artist}`;
   return <button type="button" aria-label={name} title={name}
     className="vibe-restore press flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-secondary)] hover:text-[var(--text)]"
+    data-icon-motion="control"
     onClick={() => { setHidden(false); window.dispatchEvent(new Event(OPEN)); }}>
     <NoteIcon />
   </button>;

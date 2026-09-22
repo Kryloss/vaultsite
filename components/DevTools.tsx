@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useReducer, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -293,7 +293,78 @@ function snapshotHtml(container: HTMLElement) {
       cell.removeAttribute(name);
     }
   });
+  clone.querySelectorAll("[data-dev-label-editing]").forEach((label) => {
+    label.removeAttribute("data-dev-label-editing");
+  });
   return clone.innerHTML;
+}
+
+/** A diagram label as the page reads it: SVG collapses whitespace, so the comparison does too. */
+function labelText(value: string) {
+  return value.replace(/\s+/g, " ").trim();
+}
+
+/**
+ * A diagram's labels in document order: a `<text>` or `<tspan>` holding
+ * text alone. The sidecar's `svgLabels()` builds the same list from the file,
+ * so an index names one label in both; the text rides along and is checked.
+ */
+function leafLabels(svg: Element) {
+  return Array.from(svg.querySelectorAll<SVGTextContentElement>("text, tspan")).filter(
+    (node) => node.childElementCount === 0 && labelText(node.textContent ?? "") !== ""
+  );
+}
+
+/** Retype one label in every copy of its diagram under `root`; true when one changed. */
+function applyLabel(root: ParentNode, source: string, index: number, from: string, to: string) {
+  let changed = false;
+  for (const svg of root.querySelectorAll(`svg[data-dev-svg-source="${CSS.escape(source)}"]`)) {
+    const label = leafLabels(svg)[index];
+    if (label && labelText(label.textContent ?? "") === from) {
+      label.textContent = to;
+      changed = true;
+    }
+  }
+  return changed;
+}
+
+let measureContext: CanvasRenderingContext2D | null = null;
+
+/**
+ * Lay the label's input over the label: its font at the size it is drawn
+ * (the diagram scales with the column), its fill as the text colour, as wide
+ * as what has been typed, and anchored where the label is — a centred label
+ * grows both ways, an end-anchored one leftwards.
+ */
+function placeLabelInput(input: HTMLInputElement, label: SVGTextContentElement) {
+  const rect = label.getBoundingClientRect();
+  const style = getComputedStyle(label);
+  const matrix = label.getScreenCTM();
+  const scale = matrix ? Math.hypot(matrix.a, matrix.b) : 1;
+  const size = (parseFloat(style.fontSize) || 12) * scale;
+  const spacing = (parseFloat(style.letterSpacing) || 0) * scale;
+  const font = `${style.fontStyle} ${style.fontWeight} ${size}px ${style.fontFamily}`;
+  measureContext ??= document.createElement("canvas").getContext("2d");
+  let measured = input.value.length * size * 0.6;
+  if (measureContext) {
+    measureContext.font = font;
+    measured = measureContext.measureText(input.value).width;
+  }
+  const width = Math.ceil(measured + spacing * input.value.length) + 2;
+  const left =
+    style.textAnchor === "middle"
+      ? rect.left + rect.width / 2 - width / 2
+      : style.textAnchor === "end"
+        ? rect.right - width
+        : rect.left;
+  const height = Math.max(rect.height, size * 1.2);
+  input.style.left = `${left + window.scrollX}px`;
+  input.style.top = `${rect.top + rect.height / 2 - height / 2 + window.scrollY}px`;
+  input.style.width = `${width}px`;
+  input.style.height = `${height}px`;
+  input.style.font = font;
+  input.style.letterSpacing = `${spacing}px`;
+  input.style.color = /^(?:none|url)/.test(style.fill) ? "" : style.fill;
 }
 
 
@@ -342,6 +413,19 @@ interface PreviewOriginal {
   html: string;
   facts?: HTMLElement;
   factsHtml?: string;
+}
+
+/** A diagram label being retyped where it renders (`.dev-svg-label`). */
+interface SvgLabelEdit {
+  source: string;
+  index: number;
+  from: string;
+  value: string;
+  element: SVGTextContentElement;
+  /** The article it sits in, to find it again after a server repaint. */
+  field?: string;
+  /** One per opening, so re-opening the same label focuses it again. */
+  serial: number;
 }
 
 interface StoredDraft {
@@ -411,7 +495,10 @@ type EditorMessage =
   | "translationFailed"
   | "outdated"
   | "draftRestored"
-  | "draftDropped";
+  | "draftDropped"
+  | "labelSaved"
+  | "labelConflict"
+  | "labelFailed";
 
 const editorMessages = {
   saved: devUi.devSaved,
@@ -426,6 +513,9 @@ const editorMessages = {
   outdated: devUi.devSidecarOutdated,
   draftRestored: devUi.devDraftRestored,
   draftDropped: devUi.devDraftDropped,
+  labelSaved: devUi.devLabelSaved,
+  labelConflict: devUi.devLabelConflict,
+  labelFailed: devUi.devLabelFailed,
 } satisfies Record<EditorMessage, { en: string; uk: string }>;
 
 /** What to do about a message, shown on hover; the done ones need nothing. */
@@ -442,10 +532,13 @@ const editorHelp = {
   outdated: devUi.devHelpOutdated,
   draftRestored: devUi.devHelpDone,
   draftDropped: devUi.devHelpDraftDropped,
+  labelSaved: devUi.devHelpDone,
+  labelConflict: devUi.devHelpLabelConflict,
+  labelFailed: devUi.devHelpSaveFailed,
 } satisfies Record<EditorMessage, { en: string; uk: string }>;
 
 /** Good news goes on its own; problems stay until dismissed. */
-const TRANSIENT_MESSAGES = new Set<EditorMessage>(["saved", "uploaded", "translationCreated", "draftRestored"]);
+const TRANSIENT_MESSAGES = new Set<EditorMessage>(["saved", "uploaded", "translationCreated", "draftRestored", "labelSaved"]);
 const MESSAGE_TTL = 4000;
 
 interface LinkMenu {
@@ -545,6 +638,12 @@ export default function DevTools() {
   const [previewNonce, setPreviewNonce] = useState(0);
   const editorRef = useRef<DevEditorState | null>(null);
   const factEditing = useRef<HTMLElement | null>(null);
+  const [svgLabel, setSvgLabel] = useState<SvgLabelEdit | null>(null);
+  // Read by the repaint and the press handler at event time.
+  const svgLabelRef = useRef<SvgLabelEdit | null>(null);
+  const svgInputRef = useRef<HTMLInputElement>(null);
+  const labelSerial = useRef(0);
+  const hostObserver = useRef<MutationObserver | null>(null);
   const richLinkAnchor = useRef<{ node: Text; offset: number } | null>(null);
   const richInputRef = useRef<(() => void) | null>(null);
   const richKeyDownRef = useRef<((event: KeyboardEvent) => void) | null>(null);
@@ -643,6 +742,8 @@ export default function DevTools() {
     setOptionsOpen(false);
     setLoading(false);
     setSaving(false);
+    svgLabelRef.current = null;
+    setSvgLabel(null);
     originalHtml.current.clear();
     const timer = window.setTimeout(() => {
       setSource(pageSource());
@@ -1274,8 +1375,10 @@ export default function DevTools() {
         // the abandoned draft over the article a moment after Cancel.
         previewSerial.current[key] = (previewSerial.current[key] ?? 0) + 1;
         const active = activeBodyRef.current;
-        if (original && original.host === host && !(active && active.mode !== "source" && active.host === host)) {
+        const labelHere = host.contains(svgLabelRef.current?.element ?? null);
+        if (original && original.host === host && !(active && active.mode !== "source" && active.host === host) && !labelHere) {
           host.innerHTML = original.html;
+          hostObserver.current?.takeRecords();
           if (original.facts) original.facts.innerHTML = original.factsHtml ?? "";
         }
         continue;
@@ -1320,8 +1423,11 @@ export default function DevTools() {
             const active = activeBodyRef.current;
             const blockOpenHere = active?.mode !== "source" && active?.host === host;
             const editingFact = factEditing.current;
-            if (!blockOpenHere && !(editingFact && host.contains(editingFact))) {
+            // So is a diagram label being retyped.
+            const labelHere = host.contains(svgLabelRef.current?.element ?? null);
+            if (!blockOpenHere && !(editingFact && host.contains(editingFact)) && !labelHere) {
               host.innerHTML = rendered.html;
+              hostObserver.current?.takeRecords();
             }
             const facts = originalHtml.current.get(key)?.facts;
             if (facts && !(editingFact && facts.contains(editingFact))) {
@@ -1453,6 +1559,152 @@ export default function DevTools() {
     setLinkMenu(null);
   };
 
+  // A diagram label: an input laid over it, the label hidden under it. Enter
+  // or leaving writes it into the .svg at once (it is not part of the page
+  // draft — no Save, no undo history), Tab moves to the next label, Escape
+  // puts it back. The page and the snapshots are retyped before the request
+  // goes, and back again if it fails.
+  const writeSvgLabel = async (label: SvgLabelEdit, text: string) => {
+    const generation = pageGeneration.current;
+    const apply = (from: string, to: string) => {
+      applyLabel(document, label.source, label.index, from, to);
+      for (const [key, original] of originalHtml.current) {
+        const template = document.createElement("template");
+        template.innerHTML = original.html;
+        if (applyLabel(template.content, label.source, label.index, from, to)) {
+          originalHtml.current.set(key, { ...original, html: template.innerHTML });
+        }
+      }
+    };
+    apply(label.from, text);
+    setMessage(null);
+    try {
+      await request("save-svg-label", {
+        source: label.source,
+        index: label.index,
+        from: label.from,
+        to: text,
+      });
+      if (generation !== pageGeneration.current) return;
+      setMessage("labelSaved");
+    } catch (error) {
+      if (generation !== pageGeneration.current) return;
+      apply(text, label.from);
+      const code = error instanceof EditorRequestError ? error.code : undefined;
+      setMessage(
+        code === "sidecar_outdated" ? "outdated" : code === "label_conflict" ? "labelConflict" : "labelFailed"
+      );
+    }
+  };
+
+  const closeSvgLabel = (commit: boolean, move?: 1 | -1) => {
+    const label = svgLabelRef.current;
+    if (!label) return;
+    svgLabelRef.current = null;
+    setSvgLabel(null);
+    label.element.removeAttribute("data-dev-label-editing");
+    const diagram = label.element.closest("svg[data-dev-svg-source]");
+    const neighbour = move && diagram ? leafLabels(diagram)[label.index + move] : undefined;
+    const text = labelText(label.value);
+    if (commit && text && text !== label.from) void writeSvgLabel(label, text);
+    // Any repaint held back while the label was open catches up now.
+    setPreviewNonce((value) => value + 1);
+    if (neighbour) openSvgLabel(neighbour);
+  };
+
+  const openSvgLabel = (element: SVGTextContentElement) => {
+    const diagram = element.closest<SVGSVGElement>("svg[data-dev-svg-source]");
+    const source = diagram?.dataset.devSvgSource;
+    if (!diagram || !source) return;
+    if (svgLabelRef.current) closeSvgLabel(true);
+    const index = leafLabels(diagram).indexOf(element);
+    if (index < 0) return;
+    // An open block closes first, as a press on another block would close it.
+    if (activeBodyRef.current && activeBodyRef.current.mode !== "source") setActiveBody(null);
+    const from = labelText(element.textContent ?? "");
+    labelSerial.current += 1;
+    const field = element.closest<HTMLElement>("[data-dev-body-field]")?.dataset.devBodyField;
+    const next = { source, index, from, value: from, element, field, serial: labelSerial.current };
+    element.setAttribute("data-dev-label-editing", "");
+    svgLabelRef.current = next;
+    setSvgLabel(next);
+  };
+
+  useLayoutEffect(() => {
+    const input = svgInputRef.current;
+    if (input && svgLabel) placeLabelInput(input, svgLabel.element);
+  }, [svgLabel]);
+
+  const openLabel = svgLabel?.serial;
+  useEffect(() => {
+    if (openLabel === undefined) return;
+    svgInputRef.current?.focus();
+    svgInputRef.current?.select();
+    // The input is placed in page coordinates; a new layout moves the label.
+    const resize = () => closeSvgLabel(true);
+    window.addEventListener("resize", resize);
+    return () => window.removeEventListener("resize", resize);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- one subscription per open label
+  }, [openLabel]);
+
+  // Any write into vault/ — a label, or a note edited in Obsidian — makes the
+  // dev server rebuild (Tailwind watches the whole project) and Next re-render
+  // the page: an article whose server HTML changed is replaced wholesale
+  // under the dock. Our own repaints are taken off the record as they happen,
+  // so a replacement seen here is the server's. Its HTML becomes the article's
+  // snapshot, an open label moves to its new node, an open block (already in
+  // the draft) closes, and an unsaved draft is painted back over it.
+  useEffect(() => {
+    if (!expanded || !documentInfo) return;
+    const observer = new MutationObserver((records) => {
+      const hosts = new Set<HTMLElement>();
+      for (const record of records) {
+        if (record.removedNodes.length > 0 && record.addedNodes.length > 0) {
+          hosts.add(record.target as HTMLElement);
+        }
+      }
+      if (hosts.size === 0) return;
+      for (const host of hosts) {
+        const key = host.dataset.devBodyField as BodyFieldKey | undefined;
+        const original = key ? originalHtml.current.get(key) : undefined;
+        if (key && original?.host === host) originalHtml.current.set(key, { ...original, html: snapshotHtml(host) });
+      }
+      const active = activeBodyRef.current;
+      if (active && active.mode !== "source" && hosts.has(active.host)) setActiveBody(null);
+      const label = svgLabelRef.current;
+      if (label && !label.element.isConnected) {
+        const scope = label.field ? document.querySelector(`[data-dev-body-field="${label.field}"]`) : null;
+        const diagram = (scope ?? document).querySelector(`svg[data-dev-svg-source="${CSS.escape(label.source)}"]`);
+        const found = diagram ? leafLabels(diagram)[label.index] : undefined;
+        if (found && labelText(found.textContent ?? "") === label.from) {
+          found.setAttribute("data-dev-label-editing", "");
+          const next = { ...label, element: found };
+          svgLabelRef.current = next;
+          setSvgLabel(next);
+        } else {
+          closeSvgLabel(true);
+        }
+      }
+      repaintNow.current = true;
+      setPreviewNonce((value) => value + 1);
+    });
+    for (const host of document.querySelectorAll("[data-dev-body-field]")) {
+      observer.observe(host, { childList: true });
+    }
+    hostObserver.current = observer;
+    return () => {
+      observer.disconnect();
+      hostObserver.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- the handler reads refs; one observer per page
+  }, [expanded, documentInfo]);
+
+  // Closing the dock keeps what was typed, as leaving the label does.
+  useEffect(() => {
+    if (!expanded) closeSvgLabel(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs on the dock closing only
+  }, [expanded]);
+
   // The press listeners re-subscribe with every render while the dock is
   // open (they close over the current draft and block); cheap, and it keeps
   // the opener a plain function rather than a ref written during render.
@@ -1467,6 +1719,16 @@ export default function DevTools() {
         )
       )
         return;
+      // A diagram's label is retyped where it is drawn; a press anywhere
+      // else on the diagram opens its embed like any other block.
+      const label = target.closest<SVGTextContentElement>("svg[data-dev-svg-source] :is(text, tspan)");
+      const diagram = label?.closest("svg[data-dev-svg-source]");
+      if (label && diagram && leafLabels(diagram).includes(label)) {
+        event.preventDefault();
+        event.stopPropagation();
+        openSvgLabel(label);
+        return;
+      }
       const host = target.closest<HTMLElement>("[data-dev-body-field]");
       if (!host) return;
       // Inside the block being edited in place, a press is the caret's.
@@ -2144,6 +2406,7 @@ export default function DevTools() {
             setExpanded((value) => !value);
           }}
           className="press dev-tool-button"
+          data-icon-motion="control"
         >
           <PenIcon className="h-[14px] w-[14px]" />
           {dirty && (
@@ -2485,8 +2748,38 @@ export default function DevTools() {
       : null;
 
 
+  const labelPortal = svgLabel
+    ? createPortal(
+        <input
+          key={svgLabel.serial}
+          ref={svgInputRef}
+          className="dev-svg-label"
+          value={svgLabel.value}
+          spellCheck
+          aria-label={devUi.devDiagramLabel[lang]}
+          onChange={(event) => {
+            const next = { ...svgLabel, value: event.target.value };
+            svgLabelRef.current = next;
+            setSvgLabel(next);
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === "Escape" || event.key === "Tab") {
+              event.preventDefault();
+              event.stopPropagation();
+              closeSvgLabel(event.key !== "Escape", event.key === "Tab" ? (event.shiftKey ? -1 : 1) : undefined);
+            }
+          }}
+          onBlur={() => {
+            if (svgLabelRef.current?.serial === svgLabel.serial) closeSvgLabel(true);
+          }}
+        />,
+        document.body
+      )
+    : null;
+
   return (
     <>
+      {labelPortal}
       {blockPortal}
       {barPortal}
       {toastPortal}

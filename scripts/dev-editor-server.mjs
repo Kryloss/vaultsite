@@ -9,6 +9,7 @@ import {
   deleteEntry,
   previewMarkdown,
   saveMusicSection,
+  saveSvgLabel,
   readDocument,
   readPageDocument,
   reorderDocuments,
@@ -206,6 +207,10 @@ export function createDevEditorServer({
       }
       if (url.pathname === "/save-music-section") {
         send(res, 200, await saveMusicSection(repoRoot, body));
+        return;
+      }
+      if (url.pathname === "/save-svg-label") {
+        send(res, 200, await saveSvgLabel(repoRoot, body));
         return;
       }
       throw new DevEditorError("Unknown vault editor endpoint.", 404, "not_found");

@@ -56,6 +56,31 @@ export const repoBranch = "main";
  */
 export const sidebarTree = false;
 
+/**
+ * SIDEBAR SECTION ICON ANIMATIONS — the house tipping its roof, the clock
+ * spinning, the pen writing, the people stepping apart, the headphones
+ * swaying, the book dropping its bookmark, the spatula flipping. Off. Flip
+ * this to `true` to turn them back on.
+ *
+ * Parked exactly like `controlIconMotion` below — same listener, same CSS,
+ * hosts marked `data-icon-motion="section"` (docs/DECISIONS.md #173).
+ */
+export const sectionIconMotion = false;
+
+/**
+ * CONTROL ICON ANIMATIONS — the menu button's panel sliding open, the hidden
+ * Today's vibe note dancing, the dev-tools pen writing. Off. Flip this to
+ * `true` to turn them back on.
+ *
+ * Built and then parked, like `sidebarTree`: the moving parts in
+ * components/icons.tsx (and the note in TodaysVibe.tsx), the hosts marked
+ * `data-icon-motion="control"`, their keyframes in app/globals.css and the
+ * listener in components/icon-motion.ts are all still here
+ * (docs/DECISIONS.md #173). While this is false the listener ignores those
+ * hosts, so they never get `.icon-live` and rest as static icons.
+ */
+export const controlIconMotion = false;
+
 export const siteDescription =
   "Kyrylo's writing, projects, notes, and the occasional strong opinion.";
 

@@ -122,8 +122,9 @@ export default function RootLayout({
   const today = new Date().toISOString().slice(0, 10);
 
   return (
-    // data-lang is set pre-paint by the inline script below (and toggled at
-    // runtime), so the server HTML intentionally differs — suppress the warning.
+    // data-lang and data-colour-theme can be set pre-paint by the inline
+    // scripts below (and toggled at runtime), so the server HTML intentionally
+    // differs — suppress the warning.
     <html
       lang="en"
       className={sourceSerif.variable}
@@ -143,6 +144,17 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html:
               "try{var q=new URLSearchParams(location.search).get('lang');var l=q||localStorage.getItem('lang');if(l==='uk')document.documentElement.dataset.lang='uk';}catch(e){}",
+          }}
+        />
+        {/* Restore the colour family before first paint. Light versus dark is
+            still the system preference; this chooses only the Vaultsite or
+            Notion token set inside each appearance. The default needs no
+            attribute, so an absent or stale value safely returns to Vaultsite. */}
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(localStorage.getItem('colour-theme')==='notion')document.documentElement.dataset.colourTheme='notion';}catch(e){}",
           }}
         />
         {/* First-visit intro gate — see components/Intro.tsx.

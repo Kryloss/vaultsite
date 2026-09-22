@@ -30,8 +30,8 @@ const env = {
 const children = new Set();
 let stopping = false;
 
-function start(label, command, args) {
-  const child = spawn(command, args, { cwd: root, env, stdio: "inherit" });
+function start(label, command, args, extraEnv = {}) {
+  const child = spawn(command, args, { cwd: root, env: { ...env, ...extraEnv }, stdio: "inherit" });
   children.add(child);
   child.once("exit", (code, signal) => {
     children.delete(child);
@@ -48,14 +48,21 @@ function start(label, command, args) {
 // The sidecar renders live previews with the site's own TypeScript Markdown
 // pipeline, so it runs with type stripping and the `@/` resolver the tests
 // use (scripts/test-hooks.mjs). Without these flags the preview endpoint
-// answers 501 and the rest of the editor works as before.
-start("vault editor", process.execPath, [
-  "--experimental-strip-types",
-  "--disable-warning=MODULE_TYPELESS_PACKAGE_JSON",
-  "--import",
-  pathToFileURL(path.join(root, "scripts", "test-hooks.mjs")).href,
-  path.join(root, "scripts", "dev-editor.mjs"),
-]);
+// answers 501 and the rest of the editor works as before. It renders as
+// `next dev` does, NODE_ENV included, so a preview carries the same
+// development-only markers (a diagram's `data-dev-svg-source`) as the page.
+start(
+  "vault editor",
+  process.execPath,
+  [
+    "--experimental-strip-types",
+    "--disable-warning=MODULE_TYPELESS_PACKAGE_JSON",
+    "--import",
+    pathToFileURL(path.join(root, "scripts", "test-hooks.mjs")).href,
+    path.join(root, "scripts", "dev-editor.mjs"),
+  ],
+  { NODE_ENV: "development" }
+);
 start("Next.js", process.execPath, [
   path.join(root, "node_modules", "next", "dist", "bin", "next"),
   "dev",

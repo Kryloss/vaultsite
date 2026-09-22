@@ -16,8 +16,11 @@ import {
   patchMarkdownBody,
   patchArtistItem,
   patchNowGoalBody,
+  patchSvgLabel,
   previewMarkdown,
   saveMusicSection,
+  saveSvgLabel,
+  svgLabels,
   readDocument,
   readPageDocument,
   reorderDocuments,
@@ -801,4 +804,69 @@ test("saves a music section's playlists and artists together, revision-checked",
   assert.equal(data.artists[0].bio, "Ohio duo — two lines folded.");
   assert.match(raw, /^Body\.$/m);
   assert.notEqual(saved.revision, opened.revision);
+});
+
+const DIAGRAM = `<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 40" aria-label="a > b">
+  <style>.lbl { fill: #333; } @media (prefers-color-scheme: dark) { .lbl { fill: #eee; } }</style>
+  <!-- <text>commented out</text> -->
+  <text class="lbl" x="10" y="12">Obsidian note</text>
+  <text class="sub" x="10" y="24" data-note="x > y">&gt; [!note] Title</text>
+  <text x="10" y="36"><tspan x="10">First</tspan><tspan x="10" dy="12">
+      Second line
+    </tspan></text>
+  <text x="0" y="0">   </text>
+  <text x="0" y="0"/>
+</svg>
+`;
+
+test("lists a diagram's labels the way the page draws them", () => {
+  assert.deepEqual(
+    svgLabels(DIAGRAM).map((label) => label.text),
+    ["Obsidian note", "> [!note] Title", "First", "Second line"]
+  );
+});
+
+test("patches one label, keeping its whitespace and escaping markup", () => {
+  const next = patchSvgLabel(DIAGRAM, 3, "Second line", "Tom & <Jerry>");
+  assert.match(next, /dy="12">\n      Tom &amp; &lt;Jerry&gt;\n    <\/tspan>/);
+  assert.equal(next.replace(/Tom &amp; &lt;Jerry&gt;/, "Second line"), DIAGRAM);
+  // A label that no longer reads the same is refused, not overwritten.
+  assert.equal(patchSvgLabel(DIAGRAM, 0, "Something else", "X"), null);
+  assert.equal(patchSvgLabel(DIAGRAM, 9, "Obsidian note", "X"), null);
+});
+
+test("saves a label into the vault file and its mirror, and refuses what it should", async (t) => {
+  const root = await fs.promises.mkdtemp(path.join(os.tmpdir(), "vault-editor-svg-"));
+  t.after(() => fs.promises.rm(root, { recursive: true, force: true }));
+  const dir = path.join(root, "vault", "Posts", "attachments");
+  const mirrorDir = path.join(root, "public", "vault-assets", "Posts", "attachments");
+  await fs.promises.mkdir(dir, { recursive: true });
+  await fs.promises.mkdir(mirrorDir, { recursive: true });
+  await fs.promises.writeFile(path.join(dir, "flow.svg"), DIAGRAM);
+  await fs.promises.writeFile(path.join(mirrorDir, "flow.svg"), DIAGRAM);
+  await fs.promises.writeFile(path.join(root, "vault", "Posts", "Note.md"), "---\ntitle: N\n---\n");
+  const source = "vault/Posts/attachments/flow.svg";
+
+  const saved = await saveSvgLabel(root, { source, index: 1, from: "> [!note] Title", to: "  A  new\nlabel " });
+  assert.deepEqual(saved, { source, index: 1, text: "A new label" });
+  const written = await fs.promises.readFile(path.join(dir, "flow.svg"), "utf8");
+  assert.match(written, /data-note="x > y">A new label<\/text>/);
+  assert.equal(await fs.promises.readFile(path.join(mirrorDir, "flow.svg"), "utf8"), written);
+
+  await assert.rejects(
+    saveSvgLabel(root, { source, index: 1, from: "> [!note] Title", to: "Again" }),
+    (error) => error instanceof DevEditorError && error.code === "label_conflict"
+  );
+  await assert.rejects(
+    saveSvgLabel(root, { source, index: 0, from: "Obsidian note", to: "  " }),
+    (error) => error.code === "empty_label"
+  );
+  for (const bad of ["vault/Posts/Note.md", "vault/../vault/Posts/attachments/flow.svg", "public/vault-assets/Posts/attachments/flow.svg"]) {
+    await assert.rejects(
+      saveSvgLabel(root, { source: bad, index: 0, from: "Obsidian note", to: "X" }),
+      (error) => error.code === "bad_path"
+    );
+  }
+  assert.equal(await fs.promises.readFile(path.join(dir, "flow.svg"), "utf8"), written);
 });

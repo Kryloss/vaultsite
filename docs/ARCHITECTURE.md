@@ -54,9 +54,9 @@ Next.js only serves static files from `public/`. Instead of a runtime file-servi
 
 ## Design system
 
-**Light/dark** is `prefers-color-scheme` only — there is no manual toggle. It works by re-declaring the colour tokens in a media query.
+**Light/dark** is `prefers-color-scheme` only — there is no manual light/dark toggle. Independently, Cmd+K switches the colour family between Vaultsite (default) and Notion; `components/useColourTheme.ts` persists that choice, and an inline script in `app/layout.tsx` restores `data-colour-theme` before first paint. Each family supplies both light and dark values for the same tokens (DECISIONS #175).
 
-**The design** — serif typeface throughout, large fluid page titles, a wide tonal range, no accent colour at all — state chips, the ToC marker, progress bars and focus rings are `--text` (DECISIONS #64), dark mode with `--surface` sitting above `--bg` — lives in one block at the foot of `globals.css`, kept together because the rules explain each other. It shipped briefly as one of two switchable themes so it could be judged against the design it replaced; that switch is gone (DECISIONS #59).
+**The design** — serif typeface throughout, large fluid page titles, a wide tonal range, no accent colour at all — state chips, the ToC marker, progress bars and focus rings are `--text` (DECISIONS #64), dark mode with `--surface` sitting above `--bg` — lives in one block at the foot of `globals.css`, kept together because the rules explain each other. The discarded switch in #59 changed the complete design; #175's switch changes colour tokens only, leaving this typography, hierarchy and motion intact.
 
 Everything is built from tokens at the top of `globals.css`:
 

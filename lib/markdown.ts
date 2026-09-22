@@ -384,11 +384,21 @@ function inlineSelfThemingSvg(
     .replace(/\s(id|class)="[^"]*"/gi, "");
   const a = altEscaped;
   const labelled = /aria-label=/i.test(attrs);
+  // The localhost dock edits a label where it renders and needs the file it
+  // came from (docs/LOCAL-AUTHORING.md). Development only, so production
+  // HTML never names a vault path; scripts/dev.mjs gives the sidecar's
+  // preview renderer the same NODE_ENV.
+  const devSource =
+    process.env.NODE_ENV === "development"
+      ? ` data-dev-svg-source="${escapeHtml(
+          ["vault", ...path.relative(VAULT_DIR, file).split(path.sep)].join("/")
+        )}"`
+      : "";
   const out = svg.replace(
     open[0],
     `<svg id="${id}" class="diagram"${attrs}${
       labelled || !a ? "" : ` role="img" aria-label="${a}"`
-    }>`
+    }${devSource}>`
   );
 
   // One line, for tidiness and so nothing downstream can mistake a blank line

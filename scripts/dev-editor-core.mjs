@@ -96,7 +96,7 @@ const MAX_MARKDOWN_BODY = 512 * 1024;
  * process with a message that names the fix (restart `npm run dev`) instead
  * of a 404 dressed up as "could not save". Mirrored in lib/dev-tools.ts.
  */
-export const EDITOR_PROTOCOL = 4;
+export const EDITOR_PROTOCOL = 5;
 /** One pasted or dropped image. Obsidian pastes are rarely above 3 MiB. */
 const MAX_ASSET_BYTES = 10 * 1024 * 1024;
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -121,6 +121,15 @@ function inside(parent, child) {
 
 /** Resolve an existing Markdown source while refusing every path outside vault/. */
 export function resolveVaultMarkdown(repoRoot, source) {
+  return resolveVaultFile(repoRoot, source, ".md", "That is not an editable vault Markdown file.");
+}
+
+/** The same guarantees for a diagram: an existing `.svg` inside vault/. */
+export function resolveVaultSvg(repoRoot, source) {
+  return resolveVaultFile(repoRoot, source, ".svg", "That is not an editable vault diagram.");
+}
+
+function resolveVaultFile(repoRoot, source, extension, refusal) {
   const segments = typeof source === "string" ? source.split("/") : [];
   if (
     typeof source !== "string" ||
@@ -128,9 +137,9 @@ export function resolveVaultMarkdown(repoRoot, source) {
     segments.some((segment) => segment === "." || segment === ".." || segment === "") ||
     source.includes("\\") ||
     source.includes("\0") ||
-    !source.toLowerCase().endsWith(".md")
+    !source.toLowerCase().endsWith(extension)
   ) {
-    throw new DevEditorError("That is not an editable vault Markdown file.", 400, "bad_path");
+    throw new DevEditorError(refusal, 400, "bad_path");
   }
 
   const realRoot = fs.realpathSync(repoRoot);
@@ -146,7 +155,7 @@ export function resolveVaultMarkdown(repoRoot, source) {
   } catch {
     throw new DevEditorError("The requested vault file does not exist.", 404, "not_found");
   }
-  if (!inside(vaultRoot, real) || !real.toLowerCase().endsWith(".md")) {
+  if (!inside(vaultRoot, real) || !real.toLowerCase().endsWith(extension)) {
     throw new DevEditorError("The requested file resolves outside the vault.", 403, "outside_vault");
   }
   return real;
@@ -2082,4 +2091,137 @@ export async function saveMusicSection(repoRoot, args) {
     throw error;
   }
   return withOpenTargets(documentPayload(source, next), file);
+}
+
+/** A diagram is a hand-sized drawing; anything larger is not one the site inlines. */
+const MAX_SVG_BYTES = 1024 * 1024;
+const MAX_SVG_LABEL = 300;
+const SVG_ENTITIES = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " };
+
+function decodeSvgText(value) {
+  return value.replace(/&(#x[0-9a-fA-F]+|#[0-9]+|[a-z]+);/g, (entity, name) => {
+    if (name[0] !== "#") return SVG_ENTITIES[name] ?? entity;
+    const code = name[1] === "x" ? parseInt(name.slice(2), 16) : parseInt(name.slice(1), 10);
+    return code <= 0x10ffff ? String.fromCodePoint(code) : entity;
+  });
+}
+
+/** How a label reads on the page: the renderer collapses whitespace, so the comparison does too. */
+export function svgLabelText(value) {
+  return value.replace(/\s+/g, " ").trim();
+}
+
+/**
+ * Every label a diagram draws, in document order: a `<text>` or `<tspan>`
+ * whose content is text alone and not blank. The dock builds the same list
+ * from the inlined diagram (`leafLabels()` in components/DevTools.tsx), so an
+ * index names one label in both; the text travels with it and is checked, so
+ * a list that disagrees is refused rather than written to the wrong label.
+ * Commented-out markup is skipped because the inlining strips it.
+ */
+export function svgLabels(svg) {
+  const hidden = [];
+  for (const match of svg.matchAll(/<!--[\s\S]*?-->|<!\[CDATA\[[\s\S]*?\]\]>/g)) {
+    hidden.push([match.index, match.index + match[0].length]);
+  }
+  const labels = [];
+  const pattern = /(<(text|tspan)\b(?:[^>"']|"[^"]*"|'[^']*')*>)([^<]*)<\/\2\s*>/g;
+  for (const match of svg.matchAll(pattern)) {
+    if (match[1].endsWith("/>")) continue;
+    if (hidden.some(([start, end]) => match.index >= start && match.index < end)) continue;
+    const text = svgLabelText(decodeSvgText(match[3]));
+    if (!text) continue;
+    const start = match.index + match[1].length;
+    labels.push({ text, start, end: start + match[3].length });
+  }
+  return labels;
+}
+
+/** Replace one label's text, keeping the whitespace around it and escaping what XML needs. */
+export function patchSvgLabel(svg, index, from, to) {
+  const label = svgLabels(svg)[index];
+  if (!label || label.text !== svgLabelText(from)) return null;
+  const content = svg.slice(label.start, label.end);
+  const lead = content.match(/^\s*/)[0];
+  const trail = content.slice(lead.length).match(/\s*$/)[0];
+  const escaped = to.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return svg.slice(0, label.start) + lead + escaped + trail + svg.slice(label.end);
+}
+
+/**
+ * Retype one label of a self-theming diagram where it renders. The file is
+ * the one the page inlined (`data-dev-svg-source`, emitted by lib/markdown.ts
+ * in development only), the label is found by its position among the
+ * diagram's labels and must still read `from`, and the write is the same
+ * sibling-fsync-rename as a note's, rechecked just before the rename. The
+ * mirror in public/vault-assets/ follows so the dev server's copy agrees.
+ * Geometry is never touched: a longer label may need its box widened in the
+ * file, which is the drawing's business, not the dock's.
+ */
+export async function saveSvgLabel(repoRoot, args) {
+  if (!args || typeof args !== "object" || Array.isArray(args)) {
+    throw new DevEditorError("A label edit must be an object.");
+  }
+  const { source, index, from, to } = args;
+  const file = resolveVaultSvg(repoRoot, source);
+  if (!Number.isInteger(index) || index < 0 || typeof from !== "string" || typeof to !== "string") {
+    throw new DevEditorError("A label edit names the label and its text.", 400, "invalid_label");
+  }
+  const text = svgLabelText(to);
+  if (!text) {
+    throw new DevEditorError(
+      "A label cannot be empty. Remove it from the file in an editor instead.",
+      400,
+      "empty_label"
+    );
+  }
+  if (text.length > MAX_SVG_LABEL) {
+    throw new DevEditorError(`A label is at most ${MAX_SVG_LABEL} characters.`, 400, "label_too_long");
+  }
+  const stat = await fs.promises.stat(file);
+  if (stat.size > MAX_SVG_BYTES) {
+    throw new DevEditorError("This diagram is too large to edit here.", 413, "too_large");
+  }
+  const raw = await fs.promises.readFile(file, "utf8");
+  const next = patchSvgLabel(raw, index, from, text);
+  if (next === null) {
+    throw new DevEditorError(
+      "This label changed in the file after the page rendered. Reload to see it.",
+      409,
+      "label_conflict"
+    );
+  }
+  if (next !== raw) {
+    const temp = path.join(
+      path.dirname(file),
+      `.${path.basename(file)}.${process.pid}.${randomBytes(6).toString("hex")}.tmp`
+    );
+    try {
+      const handle = await fs.promises.open(temp, "wx", stat.mode);
+      try {
+        await handle.writeFile(next, "utf8");
+        await handle.sync();
+      } finally {
+        await handle.close();
+      }
+      await fs.promises.chmod(temp, stat.mode);
+      if ((await fs.promises.readFile(file, "utf8")) !== raw) {
+        throw new DevEditorError(
+          "This diagram changed while the label was being saved.",
+          409,
+          "label_conflict"
+        );
+      }
+      await fs.promises.rename(temp, file);
+    } catch (error) {
+      await fs.promises.unlink(temp).catch(() => {});
+      throw error;
+    }
+    const realRoot = fs.realpathSync(repoRoot);
+    const vaultRoot = fs.realpathSync(path.join(realRoot, "vault"));
+    const mirror = path.join(realRoot, "public", "vault-assets", path.relative(vaultRoot, file));
+    // Best effort: the vault holds the truth, and the next `npm run dev` re-mirrors it.
+    if (fs.existsSync(mirror)) await fs.promises.copyFile(file, mirror).catch(() => {});
+  }
+  return { source, index, text };
 }

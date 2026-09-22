@@ -181,6 +181,9 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 170 | /music's search label is spans that rise and fall, not a placeholder |
 | 171 | Instagram reels on the shelf: a bare iframe and a saved cover |
 | 172 | TikTok on the shelf: the official player, uncropped |
+| 173 | Sidebar icons act out their section on hover, in CSS only |
+| 174 | Diagram labels are retyped where they are drawn, by position and text |
+| 175 | Cmd+K switches the neutral colour family, not light/dark or the design |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1238,3 +1241,119 @@ network request, and the build makes none. The CDN thumbnail is signed and
 expires within days, so a note carries a `cover:` from the oEmbed thumbnail,
 saved with its EXIF removed. The account's avatar stands in the creator block
 on the same footing as a YouTube channel's (docs/CONTENT-WORKFLOW.md).
+
+## 173. Sidebar icons act out their section on hover, in CSS only (2026-09-14)
+
+The owner asked for each sidebar section icon to animate on hover: the house
+opens a door, the clock spins, the pen writes, the people move, music plays
+from the headphones, the book opens, the spatula (the Projects icon) moves.
+
+The icons stay single SVGs in `components/icons.tsx`; the moving parts are
+split into elements with `ic-*` classes, and anything that only exists
+mid-animation (two notes, the bookmark ribbon) rests at `opacity={0}`. At
+rest every icon draws exactly what it drew before. The motion lives in `globals.css`,
+scoped to `.nav-item`, so `HeadphonesIcon` in the music pill, `ClockIcon` on
+/now and `PenIcon` in dev tools don't move. (The first version was CSS-only; see the last paragraph.)
+
+Every icon plays its gesture once per hover and ends where it started (the
+headphones looped at first; the owner asked for them to stop too). Touch never starts a gesture, so a tap doesn't leave a row stuck mid-gesture. The owner redirected two icons: Home first opened its
+door, and now tips its roof like a hat while the walls squash as it lands;
+the book first grew a second open book, then opened its own cover, and now
+tips out of the shelf by its corner while a bookmark ribbon unrolls,
+swings and rolls back up (it first stayed hanging while hovered; the owner
+wanted it back at rest too). People first bobbed in place, which the owner said read as "one and
+a half men" — the second figure is only ever half-drawn behind the first — so
+they now step apart and each hops in turn. A crossfade from the half outline
+to a whole figure was tried and rejected ("i don't like this fade"): the
+second person is drawn whole and hidden by an SVG mask cut to the front
+person's silhouette, and the cut-out shares the front person's animation,
+so separating uncovers the figure behind with no fading at all. Everything is 2D transforms — not 3D `rotateY` or morphing `d:` in
+CSS, which SVG children and Safari don't reliably honour. Under reduced
+motion nothing animates and every icon stays at rest.
+
+Then the owner required every animation to RETURN to its initial position,
+and the ribbon to hide in reverse. A CSS animation tied to `:hover` is dropped
+the instant hover ends, so a mid-gesture icon jumped home and the ribbon
+vanished. The gestures now key on an `icon-live` class that
+`components/icon-motion.ts` adds on pointer enter (not touch) or
+`:focus-visible` and removes on leave or blur, after reading each part's
+computed pose; `lib/icon-motion.ts` (pure, tested) turns that pose into a Web
+Animation back to rest, and rolls the ribbon up into the book before it
+fades. A JS hook on the link was the smallest way: CSS alone cannot animate
+from wherever a cancelled keyframe happened to be. The ribbon is filled with
+`currentColor` — white in dark mode, as asked, and dark in light mode, where
+white would disappear.
+
+Extended the same day to the controls the owner named: the menu button
+(its panel divider slides open), search in the sidebar and on the 404 (the
+lens sweeps), the language toggle (the flag emoji waves — an HTML span, not
+SVG), mail in the social links (the flap opens, the envelope hops), the music
+pill and the dev-tools pen (reusing the headphones and pen). The per-link
+handlers became one document listener (`useIconMotion`, mounted by Chrome)
+over a `data-icon-motion` attribute, because `SocialLinks` renders from server
+components, which can take an attribute but not an event handler. Icons with
+no host stay still, which is what keeps the clock on /now and mail on the
+résumé static. Returning a mirrored part (the flap) through a matrix
+decomposes as a 180° turn, so axis-aligned poses return as translate + scale.
+
+Then the owner asked that every animation always finish. Easing a cut-off
+gesture home (a pose read on leave, turned into a Web Animation by a tested
+`lib/icon-motion.ts`) was replaced: leaving now waits for the host's running
+`ic-*` CSS animations to settle and only then removes `.icon-live`. Coming
+back mid-run cancels the pending release, so the gesture carries on rather
+than restarting. Since each keyframe ends where it began, nothing needs
+returning, and the module and its tests were deleted.
+
+The owner then removed the search, language and mail gestures; the menu
+button, the sidebar sections, the music pill and the dev-tools pen keep
+theirs. The document listener and the attribute stay, since that is still the
+least wiring per control.
+
+"Music player" meant the hidden Today's vibe control, not the music note
+pill, whose headphones never showed anyway (the page always passes a cover).
+The pill's gesture was removed; the vibe restore note now hops and rocks to
+two beats with a squash on each landing.
+
+Finally the owner asked to keep the NEW control animations (menu button,
+hidden vibe note, dev-tools pen) for the future but switch them off for now;
+the sidebar section icons stay animated. The controls are marked
+`data-icon-motion="control"` and parked behind `controlIconMotion = false` in
+`lib/site-config.ts`, the same way `sidebarTree` parks the second level: the
+listener's host lookup skips a control host while the flag is off, so it
+never gets `.icon-live`. The markup, classes and CSS stay, and at rest they
+draw exactly the static icons, so flipping the flag is the whole of turning
+them back on.
+
+The sidebar section gestures were then parked too, behind their own
+`sectionIconMotion = false` (rows marked `data-icon-motion="section"`), so for
+now no icon animates. Two flags rather than one because the owner switched
+the two kinds off separately and may want them back separately.
+
+## 174. Diagram labels are retyped where they are drawn, by position and text (2026-09-17)
+
+The owner asked for the localhost dock to edit more than notes, SVG files first, meaning a self-theming diagram's labels, edited in place. Only inlined diagrams qualify: an Excalidraw export is an `<img>` that Excalidraw owns (#10), and a diagram over `MAX_INLINE_SVG` is one too. The page needs the file it came from, so `inlineSelfThemingSvg()` stamps `data-dev-svg-source="vault/…svg"` on the `<svg>` when `NODE_ENV === "development"` only. Production HTML never names a vault path, and `scripts/dev.mjs` gives the sidecar the same NODE_ENV so a live preview carries the marker too. The alternative, having the sidecar reverse the `d-<slug>` id, would have made slugify's lossiness part of the write path.
+
+A label is named by its position among the diagram's labels. A label is a `<text>` or `<tspan>` with only text in it and not blank, and both sides build that list the same way: the dock from the DOM (`leafLabels()`), the sidecar from the file with a regex that skips comments, because the inlining strips them (`svgLabels()`). The label's current text goes with the request and must match, or the write is refused (`label_conflict`). A list that drifted between the two can therefore never write to the wrong label. The write keeps the whitespace around the text, escapes `&`, `<` and `>`, and uses the same sibling-fsync-rename as a note with a recheck just before the rename. Geometry is never touched: widening a box is the drawing's job.
+
+The edit writes on Enter or on leaving the field. It is not part of the page draft (no Save, no undo), because the draft models a Markdown pair and a label is a one-line edit in another file. An input is laid over the label in its drawn font, size and fill, and the label is hidden under it. `contentEditable` on SVG text is not dependable across engines. Tab moves to the next label and Escape puts the old text back.
+
+Writing into `vault/` also exposed a gap that was already there. Tailwind v4 registers every scanned folder, `vault/` included, as a watched directory (`@source not` narrows the scan but not the watch; the generated CSS was checked to be identical with vault SVGs excluded, and was not with all of `vault/` excluded, so neither went in). Any vault write, a label or a note saved in Obsidian, therefore rebuilds the CSS. Next then re-renders the page from the server, and React replaces every article whose HTML changed. That had silently dropped a dirty draft's live preview. The dock now watches its articles for a wholesale replacement it did not make itself: its own repaints call `takeRecords()`. On one, it takes the new HTML as the article's snapshot, closes an open block (its text is already in the draft), moves an open label to its new node, and paints the draft back.
+
+## 175. Cmd+K switches the neutral colour family, not light/dark or the design (2026-09-19)
+
+The owner asked for the site's colours to be comparable to Notion's and then
+asked to add them as a theme switchable from Cmd+K. Vaultsite remains the
+default family. The Notion family changes only the existing colour tokens to
+Notion's current warm semantic neutrals: white / `#f9f8f7` / `#f4f3f3` with
+`#2c2c2b` text in light mode, and `#151515` / `#191919` / `#262626` with
+`#f0efed` text in dark mode. It does not bring over Notion's blue interaction
+accent, typography, spacing or component styles, so #59's chosen design and
+#64's monochrome interaction language still stand.
+
+This is independent of appearance. Light versus dark still follows
+`prefers-color-scheme`; each colour family supplies both sets of token values.
+The Cmd+K action toggles the family, `components/useColourTheme.ts` stores it
+under `colour-theme`, and the inline head script in `app/layout.tsx` restores
+`data-colour-theme="notion"` before first paint. Keeping the preference on
+`<html>` lets every existing token consumer change together without a second
+component stylesheet or a client-rendered page.

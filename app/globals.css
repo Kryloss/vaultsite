@@ -131,6 +131,26 @@
   --page-y: 4.5rem;
 }
 
+/* The alternate colour family requested by the owner. This changes colour
+   only: typography, spacing, motion and the site's monochrome interaction
+   language remain Vaultsite's. Values follow Notion's current warm semantic
+   neutrals; the default family above remains the site's own cooler palette.
+   The choice is restored before paint in app/layout.tsx and changed from the
+   Cmd+K palette by components/useColourTheme.ts. See DECISIONS #175. */
+html[data-colour-theme="notion"] {
+  --bg: #ffffff;
+  --bg-sidebar: #f9f8f7;
+  --bg-hover: #f4f3f3;
+  --surface: #f9f8f7;
+  --text: #2c2c2b;
+  --text-secondary: #7d7a75;
+  --text-tertiary: #a19e99;
+  --border: #e6e5e3;
+  --code-bg: #f4f3f3;
+  --chrome-bg: color-mix(in srgb, var(--bg) 78%, transparent);
+  --chrome-ring: color-mix(in srgb, var(--text) 9%, transparent);
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #08080a;
@@ -152,6 +172,20 @@
     /* See the light values above for why these two aren't #0057B7 / #FFD700. */
     --ua-blue: #5b9bea;
     --ua-yellow: #ffd700;
+  }
+
+  html[data-colour-theme="notion"] {
+    --bg: #151515;
+    --bg-sidebar: #191919;
+    --bg-hover: #262626;
+    --surface: #202020;
+    --text: #f0efed;
+    --text-secondary: #ada9a3;
+    --text-tertiary: #7d7a75;
+    --border: #383836;
+    --code-bg: #272727;
+    --chrome-bg: color-mix(in srgb, var(--surface) 88%, transparent);
+    --chrome-ring: color-mix(in srgb, #ffffff 10%, transparent);
   }
 }
 
@@ -231,6 +265,36 @@ html[data-lang="uk"] .lang-uk {
   animation-duration: var(--dur-slow);
   animation-timing-function: var(--ease);
   z-index: 2;
+}
+
+/* On open, the page behind the picture blurs and dims WHILE it zooms. The
+   overlay's own `backdrop-filter` can't do this: Safari doesn't draw it
+   inside a view transition, and Chrome only fades it in. So the snapshot of
+   the page is dimmed and blurred with a plain `filter`, which every engine
+   draws, ending exactly where the overlay begins: black at 65% over the page
+   is `brightness(0.35)`, and 8px is `--blur-sm`, what `backdrop-blur-sm`
+   uses. The new-page snapshot stays hidden until the handover, because in
+   Safari it shows the page dimmed but sharp. The class is set only for the
+   opening transition (components/Lightbox.tsx); closing keeps the default
+   cross-fade.
+
+   Literal values, not tokens, on purpose: the `var()` version never ran in
+   Safari (custom properties don't reach the transition pseudo-elements
+   there), while this exact literal form was watched working in Safari 27.
+   320ms and the curve are `--dur-slow` and `--ease` — keep them in step. */
+@keyframes lightbox-veil {
+  to {
+    filter: blur(8px) brightness(0.35);
+  }
+}
+
+html.lightbox-opening::view-transition-old(root) {
+  animation: lightbox-veil 320ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+html.lightbox-opening::view-transition-new(root) {
+  animation: none;
+  opacity: 0;
 }
 
 /* Lists arrive one item at a time. `.stagger` goes on the container; the
@@ -4398,13 +4462,13 @@ a.series-link:hover {
 /* ============================================================================
    VISUAL DESIGN — the layer that makes the site look like itself.
 
-   These rules shipped as "theme one", one of two complete designs switchable
+   These rules shipped as "theme one", one of two COMPLETE designs switchable
    from the palette while the choice was being made (docs/DECISIONS.md #59).
-   Theme one won; theme two, `lib/theme.ts`, the palette action and the theme
-   half of the inline script in app/layout.tsx are gone. What's left is just
-   the design, and this block is kept together because the rules explain each
-   other — the serif is why the tracking is reset, the big title is why the
-   metadata is demoted.
+   Theme one won and the losing typography/layout was deleted. #175 later
+   added a COLOUR-ONLY family switch in the tokens above; it deliberately does
+   not fork this block. This block stays together because the rules explain
+   each other — the serif is why the tracking is reset, the big title is why
+   the metadata is demoted.
 
    The colour tokens that go with it live in `:root` at the top of this file.
    ========================================================================== */
@@ -4563,6 +4627,296 @@ svg.diagram tspan {
 .list-focus:focus-visible {
   background-color: var(--bg-hover);
   outline: none;
+}
+
+/* --- Icons come alive on hover (components/icons.tsx, icon-motion.ts) ---
+   PARKED, all of it: nothing starts the SECTION gestures (sidebar rows,
+   `data-icon-motion="section"`) while `sectionIconMotion` is false, nor the
+   CONTROL gestures (menu button, hidden vibe note, dev-tools pen,
+   `data-icon-motion="control"`) while `controlIconMotion` is — both in
+   lib/site-config.ts. Kept whole, because the flags are meant to be flipped
+   back.
+
+   Each icon does what it depicts. The sidebar sections: the house tips its
+   roof, the clock's hands go round, the pen writes, the two people step
+   apart and wave, the headphones bop while notes rise out of them, the book
+   is pulled off the shelf and drops its bookmark, the spatula flips. And the
+   controls: the menu button's panel slides open, the hidden Today's vibe
+   note dances, and the dev-tools pen reuses the pen.
+
+   Only a host marked `data-icon-motion` animates, so the same icons on page
+   content (the clock on /now) stay still. Every gesture
+   keys on `.icon-live`, which components/icon-motion.ts puts on the host for
+   a pointer hover or keyboard focus (never a touch). Leaving never cuts a
+   gesture short: the class comes off only once the host's `ic-*` animations
+   have finished. Coordinates are the icon's own 24-unit viewBox: `transform-box:
+   view-box` makes `transform-origin` and `translate` speak those units.
+
+   All are GESTURES: a keyframe played once per hover, ending where it
+   started. */
+[data-icon-motion] svg {
+  overflow: visible;
+}
+
+[data-icon-motion] svg :is([class^="ic-"], [class*=" ic-"]) {
+  transform-box: view-box;
+}
+
+/* The house tips its roof like a hat: the roof lifts and tilts off its
+   left eave, drops back, and the walls squash under it as it lands. */
+[data-icon-motion] .ic-roof {
+  transform-origin: 3px 10.5px;
+}
+
+[data-icon-motion] .ic-walls {
+  transform-origin: 12px 21px;
+}
+
+[data-icon-motion] .ic-hand-long,
+[data-icon-motion] .ic-hand-short {
+  transform-origin: 12px 12px;
+}
+
+[data-icon-motion] .ic-pen {
+  transform-origin: 3px 20px;
+}
+
+[data-icon-motion] .ic-spatula {
+  transform-origin: 4px 20px;
+}
+
+[data-icon-motion] .ic-phones {
+  transform-origin: 12px 13px;
+}
+
+[data-icon-motion] .ic-cup-l {
+  transform-origin: 6px 16px;
+}
+
+[data-icon-motion] .ic-cup-r {
+  transform-origin: 18px 16px;
+}
+
+/* The book is tipped out of a shelf by its bottom-left corner and rocks
+   back; a bookmark ribbon unrolls from under it and swings. The ribbon then
+   rolls back up into the book, so the gesture ends as it began. */
+[data-icon-motion] .ic-book {
+  transform-origin: 4px 22px;
+}
+
+[data-icon-motion] .ic-ribbon {
+  transform-origin: 16.1px 17px;
+}
+
+@keyframes ic-hat-tip {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  30% { transform: translateY(-2.5px) rotate(-14deg); }
+  45% { transform: translateY(-2.5px) rotate(-14deg); }
+  62% { transform: translateY(0.3px) rotate(0deg); }
+  78% { transform: translateY(-0.6px) rotate(0deg); }
+}
+
+@keyframes ic-settle {
+  0%, 55%, 100% { transform: scale(1, 1); }
+  30% { transform: scale(0.97, 1.03); }
+  64% { transform: scale(1.06, 0.9); }
+  80% { transform: scale(0.98, 1.03); }
+}
+
+@keyframes ic-pull {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  30% { transform: translateY(-1.2px) rotate(-11deg); }
+  58% { transform: translateY(0) rotate(3deg); }
+  78% { transform: translateY(0) rotate(-1deg); }
+}
+
+@keyframes ic-ribbon {
+  0%, 18% { opacity: 0; transform: scaleY(0.001) rotate(0deg); }
+  22% { opacity: 1; }
+  40% { opacity: 1; transform: scaleY(1) rotate(14deg); }
+  54% { opacity: 1; transform: scaleY(1) rotate(-9deg); }
+  66% { opacity: 1; transform: scaleY(1) rotate(4deg); }
+  76% { opacity: 1; transform: scaleY(1) rotate(0deg); }
+  94% { opacity: 1; transform: scaleY(0.001) rotate(0deg); }
+  100% { opacity: 0; transform: scaleY(0.001) rotate(0deg); }
+}
+
+/* Time flies: the long hand goes round twice while the short hand goes
+   round once. Both end on whole turns — a hand that stopped anywhere else
+   would snap back to 12 the moment its keyframe finished. */
+@keyframes ic-spin-long {
+  to { transform: rotate(720deg); }
+}
+
+@keyframes ic-spin-short {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes ic-write {
+  from { stroke-dasharray: 1 1.3; stroke-dashoffset: 1.15; }
+  to { stroke-dasharray: 1 1.3; stroke-dashoffset: 0; }
+}
+
+@keyframes ic-scribble {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  20% { transform: translate(1px, -1px) rotate(-5deg); }
+  40% { transform: translate(-0.5px, 0.5px) rotate(3deg); }
+  60% { transform: translate(1px, -1px) rotate(-5deg); }
+  80% { transform: translate(-0.5px, 0.5px) rotate(2deg); }
+}
+
+/* People: the two step apart, so the one standing behind comes out from
+   behind the first (the mask in UsersIcon moves with the front person —
+   nothing fades), each hops in turn as if saying hi, then they step back
+   together. */
+@keyframes ic-step-front {
+  0%, 100% { transform: translate(0, 0); }
+  20%, 30%, 46%, 80% { transform: translate(-2px, 0); }
+  38% { transform: translate(-2px, -1.8px); }
+}
+
+@keyframes ic-step-back {
+  0%, 100% { transform: translate(0, 0); }
+  20%, 50%, 66%, 80% { transform: translate(3px, 0); }
+  58% { transform: translate(3px, -1.8px); }
+}
+
+/* One sway is two beats; the cups thump on each beat and a note leaves on
+   each — all three share the 0.7s pulse, and play through once. */
+@keyframes ic-sway {
+  0%, 50%, 100% { transform: rotate(0deg) translateY(0); }
+  25% { transform: rotate(-8deg) translateY(-0.6px); }
+  75% { transform: rotate(8deg) translateY(-0.6px); }
+}
+
+@keyframes ic-thump {
+  0%, 100% { transform: scale(1); }
+  12% { transform: scale(1.14); }
+  45% { transform: scale(1); }
+}
+
+@keyframes ic-note-a {
+  0% { opacity: 0; transform: translate(0, 0); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-2.5px, -9px) rotate(-12deg); }
+}
+
+@keyframes ic-note-b {
+  0% { opacity: 0; transform: translate(0, 0); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translate(2.5px, -9px) rotate(12deg); }
+}
+
+@keyframes ic-flip {
+  0%, 100% { transform: rotate(0deg); }
+  35% { transform: rotate(-16deg); }
+  65% { transform: rotate(7deg); }
+  85% { transform: rotate(-2deg); }
+}
+
+.icon-live .ic-roof {
+  animation: ic-hat-tip 0.9s ease-in-out;
+}
+
+.icon-live .ic-walls {
+  animation: ic-settle 0.9s ease-in-out;
+}
+
+.icon-live .ic-hand-long {
+  animation: ic-spin-long 1.2s cubic-bezier(0.45, 0, 0.2, 1);
+}
+
+.icon-live .ic-hand-short {
+  animation: ic-spin-short 1.2s cubic-bezier(0.45, 0, 0.2, 1);
+}
+
+.icon-live .ic-ink {
+  animation: ic-write 0.8s linear both;
+}
+
+/* The scribble ends back where it started, so the pen lands at rest the
+   moment the line is finished. */
+.icon-live .ic-pen {
+  animation: ic-scribble 0.8s ease-in-out;
+}
+
+.icon-live .ic-person-front {
+  animation: ic-step-front 1.3s ease-in-out;
+}
+
+.icon-live .ic-person-back {
+  animation: ic-step-back 1.3s ease-in-out;
+}
+
+.icon-live .ic-phones {
+  animation: ic-sway 1.4s ease-in-out;
+}
+
+.icon-live :is(.ic-cup-l, .ic-cup-r) {
+  animation: ic-thump 0.7s ease-out 2;
+}
+
+.icon-live .ic-note-a {
+  animation: ic-note-a 1.4s ease-out;
+}
+
+.icon-live .ic-note-b {
+  animation: ic-note-b 1.4s ease-out 0.7s;
+}
+
+.icon-live .ic-spatula {
+  animation: ic-flip 0.75s ease-in-out;
+}
+
+.icon-live .ic-book {
+  animation: ic-pull 0.9s ease-in-out;
+}
+
+/* Unrolls, swings, and rolls back up on its own. */
+.icon-live .ic-ribbon {
+  animation: ic-ribbon 1.5s ease-in-out;
+}
+
+/* The menu button: its divider slides right, the panel opening wider, and
+   settles back. */
+@keyframes ic-extend {
+  0%, 100% { transform: translateX(0); }
+  40% { transform: translateX(5.5px); }
+  55% { transform: translateX(4.4px); }
+  70% { transform: translateX(5.5px); }
+}
+
+.icon-live .ic-panel-rule {
+  animation: ic-extend 1s ease-in-out;
+}
+
+/* The hidden Today's vibe note (TodaysVibeRestore) dances to two beats:
+   hop and lean one way, land with a squash, hop and lean the other way,
+   land, settle. Pivots on the note heads so it rocks rather than slides. */
+[data-icon-motion] .ic-vibe {
+  transform-origin: 12px 20px;
+}
+
+@keyframes ic-dance {
+  0%, 100% { transform: translateY(0) rotate(0deg) scale(1, 1); }
+  18% { transform: translateY(-2.2px) rotate(-10deg) scale(0.97, 1.04); }
+  34% { transform: translateY(0) rotate(0deg) scale(1.07, 0.9); }
+  52% { transform: translateY(-2.2px) rotate(10deg) scale(0.97, 1.04); }
+  68% { transform: translateY(0) rotate(0deg) scale(1.07, 0.9); }
+  82% { transform: translateY(-0.5px) rotate(0deg) scale(0.99, 1.02); }
+}
+
+.icon-live .ic-vibe {
+  animation: ic-dance 1.2s ease-in-out;
+}
+
+/* Reduced motion: nothing moves — the gestures and the loops simply don't
+   play, and every icon stays as it rests. */
+@media (prefers-reduced-motion: reduce) {
+  [data-icon-motion] :is([class^="ic-"], [class*=" ic-"]) {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 
 /* --- The sidebar's second level (components/Chrome.tsx, lib/nav-tree.ts) ---
@@ -5460,6 +5814,32 @@ html[data-dev-tools] [data-dev-body-ready]:focus-visible {
 
 .dev-block-editor::placeholder {
   color: var(--text-tertiary);
+}
+
+/* A diagram label being retyped: an input laid over the label in its own
+   font, size and fill (components/DevTools.tsx → placeLabelInput), the label
+   hidden under it. No frame, no fill — the caret is the whole affordance. */
+html[data-dev-tools] svg[data-dev-svg-source] :is(text, tspan) {
+  cursor: text;
+}
+
+[data-dev-label-editing] {
+  visibility: hidden;
+}
+
+.dev-svg-label {
+  position: absolute;
+  z-index: 5;
+  box-sizing: content-box;
+  min-width: 1ch;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  caret-color: currentColor;
+  white-space: pre;
 }
 
 /* A block edited in its own place looks exactly as it did: the caret is the

@@ -63,6 +63,10 @@ decode, so a diagram gets stuck in the wrong theme. Two useful consequences:
 - **Labels take the site's typeface.** `globals.css` styles `svg.diagram text`,
   which beats the `font-family` presentation attribute the file carries, so
   diagrams follow the site instead of drifting from it.
+- **Labels can be retyped on the page.** On localhost, with the dock open,
+  press a label to edit it in place, and Enter writes it into the `.svg`
+  (`docs/LOCAL-AUTHORING.md`). Only the text changes: if a label gets longer
+  than its box, widen the box in the file.
 - **A two-file Excalidraw export can't do either.** It's a real `<img>`, so it
   keeps whatever font it was exported with and needs both light and dark files
   for the theme swap. That's a property of the embed, not a bug.

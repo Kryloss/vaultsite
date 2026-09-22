@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { repoBranch, repoUrl } from "@/lib/site-config";
 import T from "@/components/T";
 import { useLang } from "@/components/useLang";
+import { useColourTheme } from "@/components/useColourTheme";
 import { useSearchIndex } from "@/components/useSearchIndex";
 import { recentPaths, remember } from "@/lib/recents";
 import { similarity, fold } from "@/lib/fuzzy";
@@ -25,8 +26,8 @@ import { ui, type Str } from "@/lib/ui-strings";
  * open the note.
  *
  * Every action is something the site can already do without a server — switch
- * language, copy the page's vault source, copy a link, jump somewhere random.
- * An action that needed a backend wouldn't belong here.
+ * language or colour family, copy the page's vault source, copy a link, jump
+ * somewhere random. An action that needed a backend wouldn't belong here.
  */
 
 /**
@@ -77,6 +78,7 @@ export default function CommandPalette({
      downloads it, and nobody who does waits twice. */
   const items = useSearchIndex(everOpen);
   const { lang, toggle: toggleLang } = useLang();
+  const { theme, toggle: toggleColourTheme } = useColourTheme();
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
   const flashTimer = useRef<number | undefined>(undefined);
@@ -211,6 +213,17 @@ export default function CommandPalette({
         },
       },
       {
+        id: "colour-theme",
+        label:
+          theme === "notion"
+            ? ui.actionUseVaultsiteColours
+            : ui.actionUseNotionColours,
+        run: () => {
+          toggleColourTheme();
+          onClose();
+        },
+      },
+      {
         id: "copy-md",
         label: ui.actionCopyMarkdown,
         when: () => !!document.querySelector("button.copy-md"),
@@ -261,7 +274,7 @@ export default function CommandPalette({
         },
       },
     ],
-    [items, lang, toggleLang, onClose, go]
+    [items, lang, theme, toggleLang, toggleColourTheme, onClose, go]
   );
 
   /** Actions matching the query, in both languages. Empty query shows all. */

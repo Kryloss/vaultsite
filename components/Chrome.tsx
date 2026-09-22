@@ -21,6 +21,7 @@ import {
   CanadaFlag,
   UkraineFlag,
 } from "@/components/icons";
+import { useIconMotion } from "@/components/icon-motion";
 import type { NavChildren, NavNote } from "@/lib/nav-tree";
 import CommandPalette from "@/components/CommandPalette";
 import SocialLinks from "@/components/SocialLinks";
@@ -144,6 +145,8 @@ export default function Chrome({
    */
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const { lang, toggle: toggleLang } = useLang();
+  // Every `data-icon-motion` control on the page, not just this component's.
+  useIconMotion();
   const pathname = usePathname();
 
   /**
@@ -715,6 +718,7 @@ export default function Chrome({
              see one. The glyph coming up to full `--text` is the whole hover
              state, and `.press` still answers the click. */
           className="press flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-secondary)] hover:text-[var(--text)]"
+          data-icon-motion="control"
         >
           <PanelIcon className="h-[18px] w-[18px]" />
         </button>
@@ -875,6 +879,10 @@ export default function Chrome({
               <div key={item.slug} className="nav-item">
                 <Link
                   href={item.href}
+                  // The icon acts out its section while the row is hovered or
+                  // keyboard-focused — components/icon-motion.ts. Parked
+                  // behind `sectionIconMotion` in lib/site-config.ts.
+                  data-icon-motion="section"
                   className={`press flex items-center gap-3.5 rounded-lg px-3 py-2 text-lg ${
                     active
                       ? "bg-[var(--bg-hover)] font-medium text-[var(--text)]"

@@ -3,6 +3,14 @@
  * Sidebar icons resolve from vault frontmatter via `resolveIcon`:
  * known emoji (🏠 ✍️ 🎧 👥 🛠️ …) or names ("home", "music") map to SVGs;
  * anything unknown falls back to rendering the emoji text itself.
+ *
+ * The section icons, and the panel, pen and headphones glyphs the chrome
+ * uses, carry `ic-*` class names on their moving parts. They do nothing on
+ * their own: the hover animations in globals.css run only inside a
+ * `data-icon-motion` host (components/icon-motion.ts), so the same icon on
+ * page content — the clock on /now — stays still. Parts that only exist mid-animation (the notes, the book's
+ * bookmark ribbon) rest
+ * at `opacity={0}`, so every icon looks exactly as it did at rest.
  */
 import type { JSX } from "react";
 
@@ -19,8 +27,8 @@ const stroke = {
 export function HomeIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
-      <path d="M3 10.5 12 3l9 7.5" />
-      <path d="M5 9.5V21h5v-6h4v6h5V9.5" />
+      <path className="ic-roof" d="M3 10.5 12 3l9 7.5" />
+      <path className="ic-walls" d="M5 9.5V21h5v-6h4v6h5V9.5" />
     </svg>
   );
 }
@@ -28,8 +36,9 @@ export function HomeIcon({ className }: IconProps) {
 export function PenIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
-      <path d="M12 20h9" />
-      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+      {/* pathLength lets the stroke-dash "writing" run in 0–1 units. */}
+      <path className="ic-ink" d="M12 20h9" pathLength={1} />
+      <path className="ic-pen" d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
     </svg>
   );
 }
@@ -37,8 +46,19 @@ export function PenIcon({ className }: IconProps) {
 export function HeadphonesIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
-      <path d="M4 15v-3a8 8 0 0 1 16 0v3" />
-      <path d="M4 15a2 2 0 0 1 2-2h1a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2Zm16 0a2 2 0 0 0-2-2h-1a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h1a2 2 0 0 0 2-2Z" />
+      <g className="ic-phones">
+        <path d="M4 15v-3a8 8 0 0 1 16 0v3" />
+        <path className="ic-cup-l" d="M4 15a2 2 0 0 1 2-2h1a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2Z" />
+        <path className="ic-cup-r" d="M20 15a2 2 0 0 0-2-2h-1a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h1a2 2 0 0 0 2-2Z" />
+      </g>
+      <g className="ic-note ic-note-a" opacity={0} strokeWidth={1.4}>
+        <circle cx="9.6" cy="15" r="1.2" fill="currentColor" stroke="none" />
+        <path d="M10.7 15v-4.2l1.8.7" />
+      </g>
+      <g className="ic-note ic-note-b" opacity={0} strokeWidth={1.4}>
+        <circle cx="13.6" cy="14.5" r="1.2" fill="currentColor" stroke="none" />
+        <path d="M14.7 14.5v-4.2" />
+      </g>
     </svg>
   );
 }
@@ -46,9 +66,31 @@ export function HeadphonesIcon({ className }: IconProps) {
 export function UsersIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
-      <circle cx="9" cy="8" r="3.25" />
-      <path d="M2.75 19.5a6.25 6.25 0 0 1 12.5 0" />
-      <path d="M15.5 5.2a3.25 3.25 0 0 1 0 5.6M17.6 14a6.27 6.27 0 0 1 3.65 5.5" />
+      {/* The second person is drawn WHOLE and hidden behind the first by a
+          mask: a thickened silhouette of the front person, cut out of a
+          white field. The cut-out carries the front person's class, so it
+          moves with them — step apart and more of the second person comes
+          into view, with nothing fading. Same shared-id reasoning as
+          `ig-grad` below: the icon renders once, in the sidebar. */}
+      <defs>
+        <mask id="users-occlude" maskUnits="userSpaceOnUse" x="-8" y="-8" width="40" height="40">
+          <rect x="-8" y="-8" width="40" height="40" fill="white" stroke="none" />
+          <g className="ic-person-front" fill="black" stroke="black" strokeWidth={4.5}>
+            <circle cx="9" cy="8" r="3.25" />
+            <path d="M2.75 19.5a6.25 6.25 0 0 1 12.5 0Z" />
+          </g>
+        </mask>
+      </defs>
+      <g mask="url(#users-occlude)">
+        <g className="ic-person-back">
+          <circle cx="15" cy="8" r="3.25" />
+          <path d="M8.75 19.5a6.25 6.25 0 0 1 12.5 0" />
+        </g>
+      </g>
+      <g className="ic-person-front">
+        <circle cx="9" cy="8" r="3.25" />
+        <path d="M2.75 19.5a6.25 6.25 0 0 1 12.5 0" />
+      </g>
     </svg>
   );
 }
@@ -56,8 +98,10 @@ export function UsersIcon({ className }: IconProps) {
 export function HammerIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
-      <path d="m14 12-8.5 8.5a2.12 2.12 0 0 1-3-3L11 9" />
-      <path d="M16 16 21.5 10.5a1.4 1.4 0 0 0 0-2L14.9 2a1.4 1.4 0 0 0-2 0L7.5 7.5" />
+      <g className="ic-spatula">
+        <path d="m14 12-8.5 8.5a2.12 2.12 0 0 1-3-3L11 9" />
+        <path d="M16 16 21.5 10.5a1.4 1.4 0 0 0 0-2L14.9 2a1.4 1.4 0 0 0-2 0L7.5 7.5" />
+      </g>
     </svg>
   );
 }
@@ -65,8 +109,19 @@ export function HammerIcon({ className }: IconProps) {
 export function BookIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
-      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5Z" />
-      <path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5" />
+      <g className="ic-book">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5Z" />
+        <path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5" />
+        {/* A bookmark ribbon, tucked away until the book is pulled out.
+            Filled, so it reads as a ribbon rather than another outline. */}
+        <path
+          className="ic-ribbon"
+          d="M15 17v9l1.1-1.1 1.1 1.1v-9Z"
+          fill="currentColor"
+          strokeWidth={1.4}
+          opacity={0}
+        />
+      </g>
     </svg>
   );
 }
@@ -205,7 +260,8 @@ export function ClockIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
       <circle cx="12" cy="12" r="9" />
-      <path d="M12 7v5l3.5 2" />
+      <path className="ic-hand-long" d="M12 12V7" />
+      <path className="ic-hand-short" d="M12 12l3.5 2" />
     </svg>
   );
 }
@@ -228,7 +284,7 @@ export function PanelIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
       <rect x="3" y="4" width="18" height="16" rx="3" />
-      <path d="M9.5 4v16" />
+      <path className="ic-panel-rule" d="M9.5 4v16" />
     </svg>
   );
 }
