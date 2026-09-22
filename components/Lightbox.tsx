@@ -37,7 +37,7 @@ import T from "./T";
  * **It opens as a zoom, not a fade.** The figure you clicked and the figure in
  * the overlay are the same picture, so they share a `view-transition-name` and
  * the browser tweens one into the other — the image grows out of the page
- * instead of a second copy appearing over it. Two details make that work:
+ * instead of a second copy appearing over it. Three details make that work:
  *
  * - The update runs inside `flushSync`, so the DOM has really changed before
  *   the API takes its "after" snapshot. Without it React would still be
@@ -46,6 +46,11 @@ import T from "./T";
  *   underneath the overlay, and two elements sharing one transition name is an
  *   error — so the thumbnail's is released as the overlay's is applied, and
  *   handed back on the way out.
+ * - The thumbnail stays put while the picture grows. Once it has lent its
+ *   name out, it is a hole in the page snapshot until the animation ends, so
+ *   the small version blinked out and back. For the opening only, it takes a
+ *   second name (`ORIGIN`) in the "after" state: that snapshot sits where the
+ *   thumbnail is and blurs and dims with the page (see globals.css).
  *
  * Where the API is missing, or under `prefers-reduced-motion`, the same code
  * just sets state and the overlay appears — see lib/view-transition.ts.
@@ -53,6 +58,8 @@ import T from "./T";
 
 /** The shared name carried by the clicked figure and the overlay's copy. */
 const ZOOM = "lightbox-figure";
+/** The thumbnail's own name while the opening zoom runs, so it stays visible. */
+const ORIGIN = "lightbox-origin";
 
 type Shown =
   | { kind: "img"; src: string; alt: string; caption: string | null }
@@ -173,6 +180,7 @@ export default function Lightbox() {
       // the page behind the picture while it zooms (see `.lightbox-opening`).
       const root = document.documentElement;
       root.classList.add("lightbox-opening");
+      let releaseOrigin = () => {};
 
       void withViewTransition(() => {
         flushSync(() => {
@@ -181,9 +189,14 @@ export default function Lightbox() {
           setShown(described);
         });
         // The overlay now carries the name; the thumbnail must give it up
-        // before the "after" snapshot is taken.
+        // before the "after" snapshot is taken — and takes its own, so it
+        // stays on the page instead of leaving a hole there.
         release();
-      }).then(() => root.classList.remove("lightbox-opening"));
+        releaseOrigin = nameFor(el, ORIGIN);
+      }).then(() => {
+        releaseOrigin();
+        root.classList.remove("lightbox-opening");
+      });
     };
 
     document.addEventListener("click", onClick);

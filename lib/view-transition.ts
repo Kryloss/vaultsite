@@ -53,7 +53,9 @@ export function withViewTransition(update: () => void | Promise<void>): Promise<
  * Give an element a transition name for the length of one transition, then
  * take it back. Names must be unique among rendered elements, so a name that
  * outlives its animation would break the next one — which is why this hands
- * back a cleanup rather than leaving it set.
+ * back a cleanup rather than leaving it set. The cleanup only clears the name
+ * it set: if something renamed the element since (a close starting before the
+ * open finished), that newer name is left alone.
  */
 export function nameFor(el: Element | null | undefined, name: string): () => void {
   // SVG diagrams are lightbox subjects too, and SVGElement is not an
@@ -61,6 +63,6 @@ export function nameFor(el: Element | null | undefined, name: string): () => voi
   if (!(el instanceof HTMLElement) && !(el instanceof SVGElement)) return () => {};
   el.style.viewTransitionName = name;
   return () => {
-    el.style.viewTransitionName = "";
+    if (el.style.viewTransitionName === name) el.style.viewTransitionName = "";
   };
 }

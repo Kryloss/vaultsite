@@ -297,6 +297,20 @@ html.lightbox-opening::view-transition-new(root) {
   opacity: 0;
 }
 
+/* The thumbnail itself, named `lightbox-origin` in the "after" state of an
+   opening only. Its name went to the growing picture, which leaves a hole in
+   the page snapshot where it sat; this snapshot fills it and takes the same
+   veil, so the small version stays in place under the zoom instead of
+   blinking out until the animation ends. Same literal values as above. */
+::view-transition-new(lightbox-origin) {
+  animation: lightbox-veil 320ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+::view-transition-group(lightbox-origin) {
+  animation: none;
+  z-index: 1;
+}
+
 /* Lists arrive one item at a time. `.stagger` goes on the container; the
    delays are nth-child rules rather than an inline `--i` per item, so a list
    component only gains a class name and no server-rendered style attributes.

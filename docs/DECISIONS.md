@@ -185,6 +185,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 174 | Diagram labels are retyped where they are drawn, by position and text |
 | 175 | Cmd+K switches the neutral colour family, not light/dark or the design |
 | 176 | AGENTS.md is the one instruction file; there is no CLAUDE.md |
+| 177 | The lightbox thumbnail stays on the page while the picture zooms |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1364,3 +1365,7 @@ component stylesheet or a client-rendered page.
 Since #147 the two entry files carried a byte-identical body, kept in step by a test. Claude Code now reads `AGENTS.md` natively (code.claude.com/docs/en/memory), so the owner asked for one file and for `CLAUDE.md` to be deleted outright rather than kept as an `@AGENTS.md` import. Claude reads `AGENTS.md` only when NO `CLAUDE.md`, `CLAUDE.local.md` or `.claude/CLAUDE.md` exists in the working directory or above it, so `scripts/docs.test.mjs` asserts none exists at the root; one would silently replace the shared instructions for Claude alone.
 
 The cost, accepted: native reading needs Claude Code v2.1.277+, a session that fetches feature flags (not Bedrock or other third-party providers, not with telemetry off), not the first session after an install or upgrade, and the built-in `agents-md` plugin left enabled. A session missing any of those starts with no project instructions. If that bites, the fallback is a `CLAUDE.md` containing only `@AGENTS.md` (the docs say it never loads the file twice) — and the test changes with it.
+
+## 177. The lightbox thumbnail stays on the page while the picture zooms (2026-09-22)
+
+Opening the lightbox moves the `lightbox-figure` name from the thumbnail to the overlay's copy, and a named element is cut out of the page snapshot — so the small version vanished for the length of the zoom and popped back once the transition handed over to the live page, where it sits under the overlay's blur. The owner asked for it to stay. During the opening only, the thumbnail takes a second name, `lightbox-origin`, in the "after" state: that snapshot fills the hole and runs the same `lightbox-veil` as the page, so it dims and blurs with everything else. A plain clone laid over the thumbnail was the alternative; it loses `.prose img` styling off-flow and duplicates inlined diagrams' ids. `nameFor()`'s cleanup now clears only the name it set, so a close started mid-open can't have its name wiped by the open's late cleanup.
