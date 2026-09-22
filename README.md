@@ -57,4 +57,4 @@ npm run check # typecheck + test + image-note validation — the pre-handoff gat
 - [docs/ADDING-PAGE-TYPES.md](./docs/ADDING-PAGE-TYPES.md) — adding new page styles
 - [docs/DECISIONS.md](./docs/DECISIONS.md) — why things are the way they are
 - [docs/VERIFY.md](./docs/VERIFY.md) — the checks to run before handing off
-- [CLAUDE.md](./CLAUDE.md) / [AGENTS.md](./AGENTS.md) — indexes for AI assistants; they route to the topic files in `docs/`
+- [AGENTS.md](./AGENTS.md) — the index for AI assistants (Codex and Claude Code both read it; there is no CLAUDE.md); it routes to the topic files in `docs/`

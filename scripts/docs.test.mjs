@@ -1,9 +1,9 @@
-// The two agent entry files are indexes into docs/. This pins three things
-// that used to drift silently: every file they route to exists, they route to
-// the SAME set (the "keep CLAUDE.md and AGENTS.md in step" rule, made
-// mechanical), and every `DECISIONS #N` reference anywhere in the repo still
-// resolves to a heading — the decision log keeps a one-line tombstone for
-// removed entries precisely so this holds.
+// AGENTS.md is the one agent entry file, an index into docs/, read natively by
+// Codex and Claude Code (DECISIONS #176). This pins the things that used to
+// drift silently: no CLAUDE.md creeps back in, every file AGENTS.md routes to
+// exists and every topic file is routed to, and every `DECISIONS #N`
+// reference anywhere in the repo still resolves to a heading — the decision
+// log keeps a one-line tombstone for removed entries precisely so this holds.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
@@ -18,37 +18,26 @@ function docsRoutedFrom(file) {
   return refs;
 }
 
-test("every docs file the entry points route to exists", () => {
-  for (const file of ["CLAUDE.md", "AGENTS.md"]) {
-    for (const ref of docsRoutedFrom(file)) {
-      assert.ok(existsSync(join(ROOT, ref)), `${file} routes to missing ${ref}`);
-    }
+test("there is no CLAUDE.md to shadow AGENTS.md", () => {
+  // Any of these makes Claude Code read it INSTEAD of AGENTS.md, and Codex
+  // never reads them, so an instruction there would reach one agent only.
+  for (const f of ["CLAUDE.md", "CLAUDE.local.md", ".claude/CLAUDE.md"]) {
+    assert.ok(!existsSync(join(ROOT, f)), `${f} exists; put its instructions in AGENTS.md`);
   }
 });
 
-test("CLAUDE.md and AGENTS.md route to the same set of docs", () => {
-  const a = [...docsRoutedFrom("CLAUDE.md")].sort();
-  const b = [...docsRoutedFrom("AGENTS.md")].sort();
-  assert.deepEqual(a, b);
+test("every docs file AGENTS.md routes to exists", () => {
+  for (const ref of docsRoutedFrom("AGENTS.md")) {
+    assert.ok(existsSync(join(ROOT, ref)), `AGENTS.md routes to missing ${ref}`);
+  }
 });
 
-test("every topic file in docs/ is routed to by the entry points", () => {
-  const listed = docsRoutedFrom("CLAUDE.md");
+test("every topic file in docs/ is routed to by AGENTS.md", () => {
+  const listed = docsRoutedFrom("AGENTS.md");
   const onDisk = readdirSync(join(ROOT, "docs"))
     .filter((f) => /^[A-Z0-9-]+\.md$/.test(f))
     .map((f) => `docs/${f}`);
-  for (const f of onDisk) assert.ok(listed.has(f), `${f} is not in CLAUDE.md's routing table`);
-});
-
-test("the shared body of CLAUDE.md and AGENTS.md is byte-identical", () => {
-  const marker = "<!-- shared:";
-  const body = (f) => {
-    const t = read(f);
-    const i = t.indexOf(marker);
-    assert.ok(i >= 0, `${f} has no shared-body marker`);
-    return t.slice(i);
-  };
-  assert.equal(body("CLAUDE.md"), body("AGENTS.md"));
+  for (const f of onDisk) assert.ok(listed.has(f), `${f} is not in AGENTS.md's routing table`);
 });
 
 function decisionHeadings() {

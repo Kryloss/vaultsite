@@ -212,7 +212,7 @@ export function mascotSvg(
  * Swap the final full stop of a rendered heading for the mascot.
  *
  * Operates on the FIRST `<h1>` of already-rendered Markdown, because the
- * sentence belongs to the vault and the vault is the owner's (`CLAUDE.md`
+ * sentence belongs to the vault and the vault is the owner's (`AGENTS.md`
  * rule 1): `vault/Home/main.md` still says "Hey, I'm Kyrylo Leshchenko." and
  * always will. What changes is how that last character is drawn.
  *

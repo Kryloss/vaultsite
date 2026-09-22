@@ -3960,7 +3960,7 @@ a.series-link:hover {
    chip landed.
 
    This is a bare class beating a utility of equal specificity, which
-   `CLAUDE.md` warns about — deliberate here, and it works because the block
+   `AGENTS.md` warns about — deliberate here, and it works because the block
    sits below Tailwind's output. */
 .filter-chip {
   line-height: 1.25rem;

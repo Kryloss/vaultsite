@@ -2,7 +2,7 @@
 
 Kyrylo gives you raw content — a half-written post, thoughts on a book, notes
 about a project. Your job: structure it, wire it into the site, and add it to
-the vault. This doc is the playbook. Read CLAUDE.md first for the hard rules.
+the vault. This doc is the playbook. Read AGENTS.md first for the hard rules.
 
 ## The contract
 

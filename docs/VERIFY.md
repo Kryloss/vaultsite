@@ -15,7 +15,7 @@ npm run build
 ```
 
 - **`npm run typecheck`** — `tsc --noEmit` over the whole tree (strict mode, `@/*` alias). Fast, and the only thing that reads every `.tsx` at once.
-- **`npm test`** — Node's own runner (no framework) over `lib/*.test.ts` **and `scripts/*.test.mjs`**, wired through `--import ./scripts/test-hooks.mjs`, which registers `scripts/test-resolve.mjs` on the loader thread to teach it the `@/` alias and extensionless imports. This includes `scripts/docs.test.mjs`, which checks that CLAUDE.md and AGENTS.md route to the same set of `docs/*.md` files, that every file they name exists, and that every `DECISIONS #N` reference in code, docs and the vault resolves to a heading in `docs/DECISIONS.md`.
+- **`npm test`** — Node's own runner (no framework) over `lib/*.test.ts` **and `scripts/*.test.mjs`**, wired through `--import ./scripts/test-hooks.mjs`, which registers `scripts/test-resolve.mjs` on the loader thread to teach it the `@/` alias and extensionless imports. This includes `scripts/docs.test.mjs`, which checks that no `CLAUDE.md` exists to shadow AGENTS.md, that every `docs/*.md` file AGENTS.md names exists and every topic file is named, and that every `DECISIONS #N` reference in code, docs and the vault resolves to a heading in `docs/DECISIONS.md`.
 - **`npm run validate:image-notes`** — gates both `predev` and `prebuild`, so a broken image note fails `dev` and `build` before Next.js starts. Run it directly when iterating on an image note.
 - **`npm run build`** — first validates image notes and syncs vault assets, then statically generates every route. Required because it catches broken content, imports, and static params that unit tests cannot. It is not part of `check` because of the clash below.
 - **`npm run lint`** — `eslint .` with Next's flat configs (`eslint-config-next/core-web-vitals` + `/typescript`, `eslint.config.mjs`). `next lint` is deprecated in Next 15.5 and removed in 16, so the CLI is used directly. Advisory: see the foot of this file.
@@ -40,7 +40,7 @@ That copies the tree (minus `node_modules`, `.next`, `.git`) into a temp directo
 
 ## Docs are part of the change
 
-Change a convention, command, or invariant → update `CLAUDE.md` and `AGENTS.md` together (they are indexes; the detail lives in the `docs/*.md` file they route to), plus `docs/DECISIONS.md` if the choice is non-obvious. Where prose disagrees with code, the code wins — flag it in the doc rather than "fixing" the code to match a stale sentence.
+Change a convention, command, or invariant → update `AGENTS.md` (the one index both agents read natively; the detail lives in the `docs/*.md` file it routes to), plus `docs/DECISIONS.md` if the choice is non-obvious. Where prose disagrees with code, the code wins — flag it in the doc rather than "fixing" the code to match a stale sentence.
 
 ## Lint status
 

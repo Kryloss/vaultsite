@@ -92,4 +92,4 @@ The page still renders the markdown (both languages, both `<article>` elements) 
 - **Don't hard-code a typeface.** The family is set on `body` and everything inherits it; a `font-*` utility would opt your component out of the site's voice.
 - Keep list components server-compatible (no hooks) unless interactivity is truly needed. If a type needs the URL (filter chips, say), split it: a presentational half plus a thin client wrapper, like `PostRows` / `PostListClient`.
 - Check it in **both languages, light and dark**, and under `prefers-reduced-motion`, before calling it done.
-- Document any new frontmatter keys in README.md and CLAUDE.md.
+- Document any new frontmatter keys in README.md and AGENTS.md.

@@ -184,6 +184,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 173 | Sidebar icons act out their section on hover, in CSS only |
 | 174 | Diagram labels are retyped where they are drawn, by position and text |
 | 175 | Cmd+K switches the neutral colour family, not light/dark or the design |
+| 176 | AGENTS.md is the one instruction file; there is no CLAUDE.md |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1357,3 +1358,9 @@ under `colour-theme`, and the inline head script in `app/layout.tsx` restores
 `data-colour-theme="notion"` before first paint. Keeping the preference on
 `<html>` lets every existing token consumer change together without a second
 component stylesheet or a client-rendered page.
+
+## 176. AGENTS.md is the one instruction file; there is no CLAUDE.md (2026-09-22)
+
+Since #147 the two entry files carried a byte-identical body, kept in step by a test. Claude Code now reads `AGENTS.md` natively (code.claude.com/docs/en/memory), so the owner asked for one file and for `CLAUDE.md` to be deleted outright rather than kept as an `@AGENTS.md` import. Claude reads `AGENTS.md` only when NO `CLAUDE.md`, `CLAUDE.local.md` or `.claude/CLAUDE.md` exists in the working directory or above it, so `scripts/docs.test.mjs` asserts none exists at the root; one would silently replace the shared instructions for Claude alone.
+
+The cost, accepted: native reading needs Claude Code v2.1.277+, a session that fetches feature flags (not Bedrock or other third-party providers, not with telemetry off), not the first session after an install or upgrade, and the built-in `agents-md` plugin left enabled. A session missing any of those starts with no project instructions. If that bites, the fallback is a `CLAUDE.md` containing only `@AGENTS.md` (the docs say it never loads the file twice) — and the test changes with it.

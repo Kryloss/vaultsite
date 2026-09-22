@@ -1,8 +1,6 @@
-# AGENTS.md — Codex project guidance
+# AGENTS.md — project guidance for AI agents
 
-Instructions for Codex and other agents working on Vaultsite. This file applies to the whole repository. It is an INDEX: read it, then open the `docs/*.md` file the routing table names for the task at hand. Claude Code loads `CLAUDE.md`, which carries the same body below the marker line; treat both as repository documentation, not as instructions for a different project.
-
-<!-- shared: everything below this line is identical in CLAUDE.md and AGENTS.md; scripts/docs.test.mjs asserts it -->
+Instructions for every coding agent working on Vaultsite (Claude Code, Codex, others). This file applies to the whole repository and is the ONLY place project instructions live: Codex and Claude Code both read it natively. There is deliberately no `CLAUDE.md`. It is an INDEX: read it, then open the `docs/*.md` file the routing table names for the task at hand.
 
 ## What this is
 
@@ -24,9 +22,9 @@ Owner: Kyrylo, high-school student in Ontario, heading into cybersecurity. Not a
 
 ## Two agents work on this repo
 
-Claude Code and Codex are both used here, on the same checkout. Each auto-loads its own file (`CLAUDE.md` / `AGENTS.md`); both are INDEXES and route to the same `docs/*.md` topic files, which are shared and authoritative.
+Claude Code and Codex are both used here, on the same checkout. Both read THIS file natively, so there is nothing to keep in step; it is an INDEX and routes to the `docs/*.md` topic files, which are shared and authoritative.
 
-- **Change a convention, command, or invariant → update BOTH entry files in the same change** (the shared part below the marker line must stay byte-identical — `npm test` checks), plus the topic file it belongs to, plus `docs/DECISIONS.md` if the choice is non-obvious. Feature detail belongs in a topic file, never in an entry file.
+- **Change a convention, command, or invariant → update this file** plus the topic file it belongs to, plus `docs/DECISIONS.md` if the choice is non-obvious. Feature detail belongs in a topic file, never here. Never create a `CLAUDE.md`, `CLAUDE.local.md` or `.claude/CLAUDE.md`: any of them makes Claude Code stop reading this file, and Codex never reads them (DECISIONS #176; `npm test` checks).
 - **One agent at a time in this working tree.** Obsidian Git auto-commits *everything* (`autoCommitOnlyStaged: false`) every 10 minutes and pushes, and Vercel deploys the result — so a half-finished edit publishes itself on a timer. Finish and verify a change, or work in a separate `git worktree`. Don't run Claude and Codex against this checkout simultaneously.
 - **Check `git status --short` before editing.** Uncommitted changes you don't recognise may be the other agent's or the owner's in-flight work: leave them alone and ask. Never `git restore`, `git checkout --`, or `git stash` a file you didn't change yourself.
 
