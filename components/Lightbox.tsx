@@ -42,18 +42,17 @@ import T from "./T";
  * - The update runs inside `flushSync`, so the DOM has really changed before
  *   the API takes its "after" snapshot. Without it React would still be
  *   scheduling the render and the transition would capture nothing.
- * - The name is moved rather than copied. The thumbnail is still on the page
- *   underneath the overlay, and two elements sharing one transition name is an
- *   error — so the thumbnail's is released as the overlay's is applied, and
- *   handed back on the way out.
- * - The thumbnail stays put while the picture grows. Once it has lent its
- *   name out, it is a hole in the page snapshot until the animation ends, so
- *   the small version blinked out and back. For the opening only, it takes a
- *   second name (`ORIGIN`) in the "after" state: that snapshot sits where the
- *   thumbnail is and blurs and dims with the page (see globals.css). It is
- *   also held at the transform it had when clicked: the overlay ends its
- *   `:hover`, and the hover scale easing back would otherwise play out, live,
- *   in that snapshot for the length of the zoom.
+ * - The name is moved rather than copied: two elements sharing one transition
+ *   name is an error. Whatever holds it on one side of a transition gives it
+ *   up before the other side's snapshot is taken.
+ * - On the way in, the thumbnail never carries the name. A named element is
+ *   cut out of the page snapshot, so the small version would vanish for the
+ *   length of the zoom and pop back after it. An empty placeholder laid over
+ *   the thumbnail (`stand-in`) carries it instead: the zoom only needs its
+ *   box, because the "before" picture is hidden anyway (globals.css), and
+ *   the thumbnail stays in the page snapshot, blurring and dimming with the
+ *   rest of the page. A second named copy of the thumbnail was tried first
+ *   and slid about under the blur in Safari (DECISIONS.md #177).
  *
  * Where the API is missing, or under `prefers-reduced-motion`, the same code
  * just sets state and the overlay appears — see lib/view-transition.ts.
@@ -61,8 +60,6 @@ import T from "./T";
 
 /** The shared name carried by the clicked figure and the overlay's copy. */
 const ZOOM = "lightbox-figure";
-/** The thumbnail's own name while the opening zoom runs, so it stays visible. */
-const ORIGIN = "lightbox-origin";
 
 type Shown =
   | { kind: "img"; src: string; alt: string; caption: string | null }
@@ -75,19 +72,24 @@ function captionOf(el: Element): string | null {
 }
 
 /**
- * Pin an element at its current transform with no transition, and hand back
- * the undo. `.prose img:hover` scales; this keeps that scale from animating
- * away under the opening zoom (see "stays put" above).
+ * An empty box over `el`, exactly where it is drawn (hover scale included),
+ * for the opening zoom to start from — see "never carries the name" above.
+ * Fixed to the viewport, so it lands right however far the page is scrolled.
  */
-function freeze(el: Element): () => void {
-  if (!(el instanceof HTMLElement) && !(el instanceof SVGElement)) return () => {};
-  const { transform, transition } = el.style;
-  el.style.transform = getComputedStyle(el).transform;
-  el.style.transition = "none";
-  return () => {
-    el.style.transform = transform;
-    el.style.transition = transition;
-  };
+function standIn(el: Element): HTMLElement {
+  const r = el.getBoundingClientRect();
+  const box = document.createElement("div");
+  box.setAttribute("aria-hidden", "true");
+  Object.assign(box.style, {
+    position: "fixed",
+    left: `${r.left}px`,
+    top: `${r.top}px`,
+    width: `${r.width}px`,
+    height: `${r.height}px`,
+    pointerEvents: "none",
+  });
+  document.body.append(box);
+  return box;
 }
 
 /** Re-namespace an inlined diagram so the copy doesn't collide with the original. */
@@ -194,13 +196,14 @@ export default function Lightbox() {
       e.preventDefault();
       const list = gallery();
       origin.current = el;
-      const release = nameFor(el, ZOOM);
+      // The zoom starts from a stand-in, so the thumbnail itself stays in the
+      // page snapshot rather than leaving a hole there while it plays.
+      const box = standIn(el);
+      nameFor(box, ZOOM);
       // Marks this transition as an opening, so globals.css can blur and dim
       // the page behind the picture while it zooms (see `.lightbox-opening`).
       const root = document.documentElement;
       root.classList.add("lightbox-opening");
-      const unfreeze = freeze(el);
-      let releaseOrigin = () => {};
 
       void withViewTransition(() => {
         flushSync(() => {
@@ -208,16 +211,10 @@ export default function Lightbox() {
           setIndex(Math.max(list.indexOf(el), 0));
           setShown(described);
         });
-        // The overlay now carries the name; the thumbnail must give it up
-        // before the "after" snapshot is taken — and takes its own, so it
-        // stays on the page instead of leaving a hole there.
-        release();
-        releaseOrigin = nameFor(el, ORIGIN);
-      }).then(() => {
-        releaseOrigin();
-        unfreeze();
-        root.classList.remove("lightbox-opening");
-      });
+        // The overlay now carries the name; the stand-in must be gone before
+        // the "after" snapshot is taken.
+        box.remove();
+      }).then(() => root.classList.remove("lightbox-opening"));
     };
 
     document.addEventListener("click", onClick);

@@ -185,7 +185,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 174 | Diagram labels are retyped where they are drawn, by position and text |
 | 175 | Cmd+K switches the neutral colour family, not light/dark or the design |
 | 176 | AGENTS.md is the one instruction file; there is no CLAUDE.md |
-| 177 | The lightbox thumbnail stays on the page while the picture zooms |
+| 177 | The lightbox zoom starts from a stand-in, so the thumbnail stays on the page |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1366,6 +1366,8 @@ Since #147 the two entry files carried a byte-identical body, kept in step by a 
 
 The cost, accepted: native reading needs Claude Code v2.1.277+, a session that fetches feature flags (not Bedrock or other third-party providers, not with telemetry off), not the first session after an install or upgrade, and the built-in `agents-md` plugin left enabled. A session missing any of those starts with no project instructions. If that bites, the fallback is a `CLAUDE.md` containing only `@AGENTS.md` (the docs say it never loads the file twice) — and the test changes with it.
 
-## 177. The lightbox thumbnail stays on the page while the picture zooms (2026-09-22)
+## 177. The lightbox zoom starts from a stand-in, so the thumbnail stays on the page (2026-09-22)
 
-Opening the lightbox moves the `lightbox-figure` name from the thumbnail to the overlay's copy, and a named element is cut out of the page snapshot — so the small version vanished for the length of the zoom and popped back once the transition handed over to the live page, where it sits under the overlay's blur. The owner asked for it to stay. During the opening only, the thumbnail takes a second name, `lightbox-origin`, in the "after" state: that snapshot fills the hole and runs the same `lightbox-veil` as the page, so it dims and blurs with everything else. It is also pinned at the transform it had when clicked (inline, no transition) until the zoom ends: the overlay ends its `:hover`, and the `scale(1.01)` easing back over 300ms played out live in that snapshot, so the small version visibly moved. A plain clone laid over the thumbnail was the alternative; it loses `.prose img` styling off-flow and duplicates inlined diagrams' ids. `nameFor()`'s cleanup now clears only the name it set, so a close started mid-open can't have its name wiped by the open's late cleanup.
+Opening the lightbox used to move the `lightbox-figure` name from the thumbnail to the overlay's copy, and a named element is cut out of the page snapshot, so the small version vanished for the length of the zoom and popped back once the live page took over. The owner asked for it to stay. Now the thumbnail never carries the name on the way in: an empty `position: fixed` box laid over its drawn rect (hover scale included) does, and is removed in the update. The zoom only needs that box's geometry, because `::view-transition-old(lightbox-figure)` is hidden anyway, and the real thumbnail stays in the root snapshot and takes the page's veil with it. Closing is unchanged: the thumbnail takes the name after the overlay is gone.
+
+Tried first and reverted the same day: giving the thumbnail a second name (`lightbox-origin`) in the "after" state and running `lightbox-veil` on that snapshot too. It held still in Chrome but slid under the blur in Safari and snapped into place at the handover, and the hover `scale(1.01)` easing back played out live in it. `nameFor()`'s cleanup still clears only the name it set, from that attempt: a close started mid-open can't have its name wiped by the open's late cleanup.
