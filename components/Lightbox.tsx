@@ -50,7 +50,10 @@ import T from "./T";
  *   name out, it is a hole in the page snapshot until the animation ends, so
  *   the small version blinked out and back. For the opening only, it takes a
  *   second name (`ORIGIN`) in the "after" state: that snapshot sits where the
- *   thumbnail is and blurs and dims with the page (see globals.css).
+ *   thumbnail is and blurs and dims with the page (see globals.css). It is
+ *   also held at the transform it had when clicked: the overlay ends its
+ *   `:hover`, and the hover scale easing back would otherwise play out, live,
+ *   in that snapshot for the length of the zoom.
  *
  * Where the API is missing, or under `prefers-reduced-motion`, the same code
  * just sets state and the overlay appears — see lib/view-transition.ts.
@@ -69,6 +72,22 @@ type Shown =
 function captionOf(el: Element): string | null {
   const cap = el.closest("figure")?.querySelector("figcaption");
   return cap ? cap.innerHTML : null;
+}
+
+/**
+ * Pin an element at its current transform with no transition, and hand back
+ * the undo. `.prose img:hover` scales; this keeps that scale from animating
+ * away under the opening zoom (see "stays put" above).
+ */
+function freeze(el: Element): () => void {
+  if (!(el instanceof HTMLElement) && !(el instanceof SVGElement)) return () => {};
+  const { transform, transition } = el.style;
+  el.style.transform = getComputedStyle(el).transform;
+  el.style.transition = "none";
+  return () => {
+    el.style.transform = transform;
+    el.style.transition = transition;
+  };
 }
 
 /** Re-namespace an inlined diagram so the copy doesn't collide with the original. */
@@ -180,6 +199,7 @@ export default function Lightbox() {
       // the page behind the picture while it zooms (see `.lightbox-opening`).
       const root = document.documentElement;
       root.classList.add("lightbox-opening");
+      const unfreeze = freeze(el);
       let releaseOrigin = () => {};
 
       void withViewTransition(() => {
@@ -195,6 +215,7 @@ export default function Lightbox() {
         releaseOrigin = nameFor(el, ORIGIN);
       }).then(() => {
         releaseOrigin();
+        unfreeze();
         root.classList.remove("lightbox-opening");
       });
     };
