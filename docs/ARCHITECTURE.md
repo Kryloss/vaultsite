@@ -62,7 +62,7 @@ Everything is built from tokens at the top of `globals.css`:
 
 | Group | Tokens | Notes |
 |---|---|---|
-| Colour | `--bg`, `--bg-sidebar`, `--bg-hover`, `--surface`, `--text`, `--text-secondary`, `--text-tertiary`, `--border`, `--code-bg` | `--surface` is the FILL of a card or cover box; `--bg-hover` is the response to a pointer. |
+| Colour | `--bg`, `--bg-sidebar`, `--bg-hover`, `--surface`, `--text`, `--text-secondary`, `--text-tertiary`, `--text-caption`, `--border`, `--code-bg` | `--surface` is the FILL of a card or cover box; `--bg-hover` is the response to a pointer. `--text-caption` is figure captions on the page and in the lightbox (tertiary in light mode, opaque #b5b5b6 in dark). |
 | Floating chrome | `--chrome-bg`, `--chrome-ring` | The breadcrumb bar, contents pill, time-left chip and reading-position offer. Built from `--surface` in dark mode so a pill isn't the same colour as the page it hovers over (DECISIONS #60). |
 | Radius | `--r-xs` … `--r-xl`, `--r-full` | 4/6/8/12/16px + pill, deliberately equal to Tailwind's scale so utilities and hand-written rules can't drift. |
 | Motion | `--ease`, `--dur-fast`, `--dur`, `--dur-slow` | 120/200/320ms. Tailwind's `--default-transition-*` point at these, so `transition-colors` moves like the hand-written rules. |

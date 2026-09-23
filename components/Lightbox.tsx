@@ -52,7 +52,12 @@ import T from "./T";
  *   box, because the "before" picture is hidden anyway (globals.css), and
  *   the thumbnail stays in the page snapshot, blurring and dimming with the
  *   rest of the page. A second named copy of the thumbnail was tried first
- *   and slid about under the blur in Safari (DECISIONS.md #177).
+ *   and slid about under the blur in Safari (DECISIONS.md #177). Closing
+ *   lands on a stand-in too, showing the shrinking overlay picture instead
+ *   of the thumbnail, so the thumbnail brightens with the page underneath.
+ *   The caption gets the same treatment under its own name (`CAPTION`), so
+ *   it travels with the picture instead of popping in after it, in
+ *   `--text-caption` at both ends so it never changes colour on the way.
  *
  * Where the API is missing, or under `prefers-reduced-motion`, the same code
  * just sets state and the overlay appears — see lib/view-transition.ts.
@@ -60,27 +65,41 @@ import T from "./T";
 
 /** The shared name carried by the clicked figure and the overlay's copy. */
 const ZOOM = "lightbox-figure";
+/** The same for the figure's caption, which travels with it. */
+const CAPTION = "lightbox-caption";
+/**
+ * The overlay's own controls. They have no page counterpart to grow out of,
+ * so each fades in (the engine's default for a name with no "before") while
+ * `travel()` moves it the way the picture moves.
+ */
+const CONTROLS = {
+  prev: "lightbox-prev",
+  next: "lightbox-next",
+  count: "lightbox-count",
+} as const;
+/** The zoom's timing, for `travel()`: 320ms and the curve are `--dur-slow`
+ *  and `--ease`, written out like the `lightbox-figure` group's in globals.css. */
+const ZOOM_TIMING = { duration: 320, easing: "cubic-bezier(0.22, 0.61, 0.36, 1)" };
 
 type Shown =
   | { kind: "img"; src: string; alt: string; caption: string | null }
   | { kind: "svg"; markup: string; label: string; caption: string | null };
 
-/** innerHTML of the clicked element's `<figcaption>`, if it sits in a figure. */
-function captionOf(el: Element): string | null {
-  const cap = el.closest("figure")?.querySelector("figcaption");
-  return cap ? cap.innerHTML : null;
+/** The `<figcaption>` of the figure the element sits in, if any. */
+function figcaptionOf(el: Element): Element | null {
+  return el.closest("figure")?.querySelector("figcaption") ?? null;
 }
 
-/**
- * An empty box over `el`, exactly where it is drawn (hover scale included),
- * for the opening zoom to start from — see "never carries the name" above.
- * Fixed to the viewport, so it lands right however far the page is scrolled.
- */
-function standIn(el: Element): HTMLElement {
-  const r = el.getBoundingClientRect();
-  const box = document.createElement("div");
-  box.setAttribute("aria-hidden", "true");
-  Object.assign(box.style, {
+/** innerHTML of the clicked element's `<figcaption>`, if it sits in a figure. */
+function captionOf(el: Element): string | null {
+  return figcaptionOf(el)?.innerHTML ?? null;
+}
+
+/** An empty named box over `r`, fixed to the viewport so scroll can't shift it. */
+function box(r: DOMRect, name: string): HTMLElement {
+  const b = document.createElement("div");
+  b.setAttribute("aria-hidden", "true");
+  Object.assign(b.style, {
     position: "fixed",
     left: `${r.left}px`,
     top: `${r.top}px`,
@@ -88,8 +107,79 @@ function standIn(el: Element): HTMLElement {
     height: `${r.height}px`,
     pointerEvents: "none",
   });
-  document.body.append(box);
-  return box;
+  nameFor(b, name);
+  document.body.append(b);
+  return b;
+}
+
+/**
+ * Stand-ins for a page figure — see "never carries the name" above: one over
+ * `el` exactly as drawn (hover scale included), and one over its caption's
+ * text, so the overlay's caption travels with the picture. The caption's is
+ * the text's own extent, not the full-width `<figcaption>` block: the overlay
+ * caption is shrink-wrapped, and the two boxes must share a shape or the text
+ * would stretch on the way. Both captions are `--text-caption`, so the text
+ * is one colour from start to finish.
+ */
+function standIns(el: Element): HTMLElement[] {
+  const boxes = [box(el.getBoundingClientRect(), ZOOM)];
+  const cap = figcaptionOf(el);
+  if (cap) {
+    const text = document.createRange();
+    text.selectNodeContents(cap);
+    const r = text.getBoundingClientRect();
+    if (r.width > 0) boxes.push(box(r, CAPTION));
+  }
+  return boxes;
+}
+
+/** Where each overlay control is drawn, by transition name. */
+function controlRects(dialog: HTMLElement | null): [string, DOMRect][] {
+  if (!dialog) return [];
+  return Array.from(dialog.querySelectorAll<HTMLElement>("[data-travel]"), (el) => [
+    el.dataset.travel ?? "",
+    el.getBoundingClientRect(),
+  ]);
+}
+
+/**
+ * Carry the controls along with the zoom. Each control's spot relative to the
+ * overlay picture is mapped onto the thumbnail at the thumbnail's scale, and
+ * its transition group is animated between that and where it really is:
+ * inward on the way in, outward on the way out. Width and height scale the
+ * snapshot, exactly as the engine does for a pair.
+ */
+function travel(
+  picture: DOMRect,
+  thumb: DOMRect,
+  controls: [string, DOMRect][],
+  opening: boolean
+) {
+  if (!picture.width) return;
+  const s = thumb.width / picture.width;
+  for (const [name, r] of controls) {
+    const at = {
+      transform: `matrix(1, 0, 0, 1, ${r.left}, ${r.top})`,
+      width: `${r.width}px`,
+      height: `${r.height}px`,
+    };
+    const near = {
+      transform: `matrix(1, 0, 0, 1, ${thumb.left + (r.left - picture.left) * s}, ${
+        thumb.top + (r.top - picture.top) * s
+      })`,
+      width: `${r.width * s}px`,
+      height: `${r.height * s}px`,
+    };
+    try {
+      document.documentElement.animate(opening ? [near, at] : [at, near], {
+        ...ZOOM_TIMING,
+        fill: "both",
+        pseudoElement: `::view-transition-group(${name})`,
+      });
+    } catch {
+      // An engine without pseudo-element animation still fades them.
+    }
+  }
 }
 
 /** Re-namespace an inlined diagram so the copy doesn't collide with the original. */
@@ -147,20 +237,39 @@ export default function Lightbox() {
   const [index, setIndex] = useState(0);
   /** The page element the overlay grew out of — where it shrinks back to. */
   const origin = useRef<Element | null>(null);
+  const dialog = useRef<HTMLDivElement>(null);
+  /** The overlay's copy of the figure, for measuring the zoom's far end. */
+  const picture = useRef<HTMLElement | null>(null);
 
   const close = useCallback(() => {
     const from = origin.current;
-    let release = () => {};
-    void withViewTransition(() => {
-      flushSync(() => {
-        setShown(null);
-        setItems([]);
-      });
-      // Named only now: while the overlay existed it held the name, and the
-      // two may never both have it. This is where the zoom lands.
-      release = nameFor(from, ZOOM);
-    }).then(() => {
-      release();
+    let boxes: HTMLElement[] = [];
+    // Measured while the overlay is still up: the controls leave with it.
+    const pictureAt = picture.current?.getBoundingClientRect();
+    const controls = controlRects(dialog.current);
+    // Shows the shrinking picture itself on the way out (globals.css).
+    const root = document.documentElement;
+    root.classList.add("lightbox-closing");
+    void withViewTransition(
+      () => {
+        flushSync(() => {
+          setShown(null);
+          setItems([]);
+        });
+        // Named only now: while the overlay existed it held the name, and the
+        // two may never both have it. This is where the zoom lands — a
+        // stand-in again, so the thumbnail stays in the page snapshot instead
+        // of fading out of it before the picture arrives.
+        if (from) boxes = standIns(from);
+      },
+      () => {
+        if (from && pictureAt) {
+          travel(pictureAt, from.getBoundingClientRect(), controls, false);
+        }
+      }
+    ).then(() => {
+      boxes.forEach((b) => b.remove());
+      root.classList.remove("lightbox-closing");
       origin.current = null;
     });
   }, []);
@@ -174,6 +283,9 @@ export default function Lightbox() {
       if (!described) return;
       setIndex(next);
       setShown(described);
+      // Close back into the figure on show, not the one first clicked, so
+      // the picture and its caption shrink onto their own thumbnail.
+      origin.current = items[next];
     },
     [items, index]
   );
@@ -198,23 +310,32 @@ export default function Lightbox() {
       origin.current = el;
       // The zoom starts from a stand-in, so the thumbnail itself stays in the
       // page snapshot rather than leaving a hole there while it plays.
-      const box = standIn(el);
-      nameFor(box, ZOOM);
+      const boxes = standIns(el);
       // Marks this transition as an opening, so globals.css can blur and dim
       // the page behind the picture while it zooms (see `.lightbox-opening`).
       const root = document.documentElement;
       root.classList.add("lightbox-opening");
+      const thumb = el.getBoundingClientRect();
+      let pictureAt: DOMRect | undefined;
+      let controls: [string, DOMRect][] = [];
 
-      void withViewTransition(() => {
-        flushSync(() => {
-          setItems(list);
-          setIndex(Math.max(list.indexOf(el), 0));
-          setShown(described);
-        });
-        // The overlay now carries the name; the stand-in must be gone before
-        // the "after" snapshot is taken.
-        box.remove();
-      }).then(() => root.classList.remove("lightbox-opening"));
+      void withViewTransition(
+        () => {
+          flushSync(() => {
+            setItems(list);
+            setIndex(Math.max(list.indexOf(el), 0));
+            setShown(described);
+          });
+          // The overlay now carries the name; the stand-in must be gone
+          // before the "after" snapshot is taken.
+          boxes.forEach((b) => b.remove());
+          pictureAt = picture.current?.getBoundingClientRect();
+          controls = controlRects(dialog.current);
+        },
+        () => {
+          if (pictureAt) travel(pictureAt, thumb, controls, true);
+        }
+      ).then(() => root.classList.remove("lightbox-opening"));
     };
 
     document.addEventListener("click", onClick);
@@ -248,6 +369,8 @@ export default function Lightbox() {
   const arrow = (delta: number, str: { en: string; uk: string }) => (
     <button
       type="button"
+      data-travel={delta < 0 ? CONTROLS.prev : CONTROLS.next}
+      style={{ viewTransitionName: delta < 0 ? CONTROLS.prev : CONTROLS.next }}
       className={`lightbox-arrow ${delta < 0 ? "is-prev" : "is-next"}`}
       onClick={(e) => {
         e.stopPropagation();
@@ -275,12 +398,16 @@ export default function Lightbox() {
       role="dialog"
       aria-modal="true"
       aria-label={label || "Preview"}
+      ref={dialog}
       onClick={close}
       className="fixed inset-0 z-[70] flex cursor-zoom-out flex-col items-center justify-center gap-3 bg-black/65 p-6 backdrop-blur-sm"
     >
       {shown.kind === "img" ? (
         /* eslint-disable-next-line @next/next/no-img-element */
         <img
+          ref={(n) => {
+            picture.current = n;
+          }}
           src={shown.src}
           alt={shown.alt}
           style={{ viewTransitionName: ZOOM }}
@@ -288,6 +415,9 @@ export default function Lightbox() {
         />
       ) : (
         <div
+          ref={(n) => {
+            picture.current = n;
+          }}
           style={{ viewTransitionName: ZOOM }}
           className="lightbox-diagram flex max-h-[85vh] w-full max-w-5xl items-center justify-center"
           dangerouslySetInnerHTML={{ __html: shown.markup }}
@@ -295,11 +425,12 @@ export default function Lightbox() {
       )}
       {shown.caption ? (
         <p
-          className="text-sm text-white/70"
+          style={{ viewTransitionName: CAPTION }}
+          className="text-sm text-[var(--text-caption)]"
           dangerouslySetInnerHTML={{ __html: shown.caption }}
         />
       ) : (
-        label && <p className="text-sm text-white/70">{label}</p>
+        label && <p className="text-sm text-[var(--text-caption)]">{label}</p>
       )}
       {/* One row holding both arrows and the counter: "‹ 1 / 2 ›".
           On a phone the arrows sit inside it, beside the number, where a
@@ -309,7 +440,11 @@ export default function Lightbox() {
       {many && (
         <div className="lightbox-nav">
           {arrow(-1, ui.previousImage)}
-          <p className="lightbox-count">
+          <p
+            data-travel={CONTROLS.count}
+            style={{ viewTransitionName: CONTROLS.count }}
+            className="lightbox-count"
+          >
             {index + 1} / {items.length}
           </p>
           {arrow(1, ui.nextImage)}

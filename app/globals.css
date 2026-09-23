@@ -36,6 +36,10 @@
   --text: #09090b;
   --text-secondary: #3f3f46;
   --text-tertiary: #adadb8;
+  /* Figure captions, on the page and in the lightbox alike, so a caption is
+     one colour as it travels between them (#177). Tertiary in light mode:
+     the dark mode value, a light grey, would vanish on a white page. */
+  --text-caption: var(--text-tertiary);
   --border: #ededf0;
   --code-bg: #f4f4f5;
 
@@ -163,6 +167,9 @@ html[data-colour-theme="notion"] {
     --text: #f5f5f6;
     --text-secondary: #a4a4ae;
     --text-tertiary: #6f6f7a;
+    /* White at 70% over `--bg`, flattened to an opaque grey: two translucent
+       captions overlapping mid-transition add up and flash lighter. */
+    --text-caption: #b5b5b6;
     --border: #26262b;
     --code-bg: #121215;
     /* Built from `--surface`, which is lighter than the page — so the pill
@@ -251,19 +258,36 @@ html[data-lang="uk"] .lang-uk {
 
    The two snapshots are the same picture at two sizes, so cross-fading them
    would show a double image while they travel — the new one is simply shown
-   and the group's growth does the work. */
-::view-transition-old(lightbox-figure) {
+   and the group's growth does the work. The caption (`lightbox-caption`)
+   travels the same way, from the text under the page figure, in
+   `--text-caption` at both ends (components/Lightbox.tsx). */
+::view-transition-old(lightbox-figure),
+::view-transition-old(lightbox-caption) {
   animation: none;
   opacity: 0;
 }
 
-::view-transition-new(lightbox-figure) {
+::view-transition-new(lightbox-figure),
+::view-transition-new(lightbox-caption) {
   animation: none;
 }
 
-::view-transition-group(lightbox-figure) {
-  animation-duration: var(--dur-slow);
-  animation-timing-function: var(--ease);
+/* The overlay's arrows and counter have no page counterpart, so they keep
+   the engine's fade (in on open, out on close) and components/Lightbox.tsx
+   → `travel()` moves their groups the way the picture moves; this rule gives
+   the fade the zoom's length.
+
+   Literal, like `lightbox-veil` below and for the same reason: Safari doesn't
+   resolve `var()` on these pseudo-elements, so a token here isn't reliably
+   the timing that runs.
+   320ms and the curve are `--dur-slow` and `--ease` — keep them in step. */
+::view-transition-group(lightbox-figure),
+::view-transition-group(lightbox-caption),
+::view-transition-group(lightbox-prev),
+::view-transition-group(lightbox-next),
+::view-transition-group(lightbox-count) {
+  animation-duration: 320ms;
+  animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
   z-index: 2;
 }
 
@@ -295,6 +319,15 @@ html.lightbox-opening::view-transition-old(root) {
 html.lightbox-opening::view-transition-new(root) {
   animation: none;
   opacity: 0;
+}
+
+/* Closing lands on an empty stand-in (components/Lightbox.tsx), so the thumbnail
+   stays in the page and brightens with it. The picture and caption seen
+   shrinking are then the overlay's, the "before" side, which the rule above
+   hides on the way in. */
+html.lightbox-closing::view-transition-old(lightbox-figure),
+html.lightbox-closing::view-transition-old(lightbox-caption) {
+  opacity: 1;
 }
 
 /* Lists arrive one item at a time. `.stagger` goes on the container; the
@@ -1172,7 +1205,7 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   margin-top: 0.5rem;
   text-align: center;
   font-size: 0.8125rem;
-  color: var(--text-tertiary);
+  color: var(--text-caption);
 }
 
 /* Obsidian callouts — > [!note] Title */
@@ -3785,6 +3818,22 @@ a.series-link:hover {
   }
   .selection-pill:active {
     transform: translateX(-50%);
+  }
+}
+
+/* Phones sit the arrows in the counter's row with `transform: none` (see
+   `.lightbox-nav`), so the composed press above would lift them by half
+   their height on every tap. Same-specificity overrides, so they come after
+   both rules they replace. */
+@media (max-width: 639px) {
+  .lightbox-arrow:active {
+    transform: scale(0.94);
+  }
+}
+
+@media (max-width: 639px) and (prefers-reduced-motion: reduce) {
+  .lightbox-arrow:active {
+    transform: none;
   }
 }
 

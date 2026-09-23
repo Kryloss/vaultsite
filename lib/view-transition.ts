@@ -36,13 +36,21 @@ export function canTransition(): boolean {
  * `update` may return a promise: the API holds the old frame on screen until
  * it settles, which is how an async route change gets to be a transition.
  * Returns the transition's `finished` promise so callers can clean up
- * temporary `view-transition-name`s once the animation is over.
+ * temporary `view-transition-name`s once the animation is over. `ready`, if
+ * given, runs once the pseudo-elements exist and before the first frame, which
+ * is where a caller animates them with `element.animate({ pseudoElement })`;
+ * it never runs when there is no transition.
  */
-export function withViewTransition(update: () => void | Promise<void>): Promise<void> {
+export function withViewTransition(
+  update: () => void | Promise<void>,
+  ready?: () => void
+): Promise<void> {
   const start = api();
   if (!start) return Promise.resolve(update()).then(() => {});
   try {
-    return start(update).finished.catch(() => {});
+    const transition = start(update);
+    if (ready) transition.ready.then(ready, () => {});
+    return transition.finished.catch(() => {});
   } catch {
     // A transition already running, or the document was hidden mid-call.
     return Promise.resolve(update()).then(() => {});
