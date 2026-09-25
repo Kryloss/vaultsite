@@ -205,6 +205,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 194 | The series badge reads "2 of 5", without "Part" |
 | 195 | "Listen" follows the word count, with a headphones icon |
 | 196 | Maturity removed; series list and previews match the metadata line |
+| 197 | Series list: ticked parts lose their box; count sits right |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1495,3 +1496,7 @@ The owner moved "Listen" again, from after the date (#191) to after the word cou
 ## 196. Maturity removed; series list and previews match the metadata line (2026-09-25)
 
 Follow-ups to #192–#195, at the owner's request. `lib/maturity.ts`, its three `ui` strings, the `.maturity` styles and the dock's Maturity field are gone, since the site no longer shows it; the sidecar still accepts and validates a `maturity:` key, so existing frontmatter is left alone. The series list's count reads "✓ 1 of 2" instead of "· 1 of 2 read" (the full phrase stays as screen-reader text), and its part numbers use the badge's size, 0.8125rem tabular figures. A link preview for a post now shows the post's own line, "date · N min read" (`minutes` in `lib/previews.ts`); every other preview keeps "Section · date".
+
+## 197. Series list: ticked parts lose their box; count sits right (2026-09-25)
+
+At the owner's request a ticked part shows only its tick, with no box: grey (`--text-tertiary`) for other parts, `--text` for the part you're on (`.series-row:has(.series-current)`). An unticked part keeps its empty box so it can still be found and pressed. The "✓ 1 of 2" count is pushed to the right edge of the header, flush with the tick column. `.series-name` became a flex row because the count's inline-flex box took its SVG's bottom as its baseline and sat higher than the name.

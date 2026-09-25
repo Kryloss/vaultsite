@@ -3366,8 +3366,14 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
 /* The series' own name, as the panel's one heading. No "Series:" in front of
    it — the badge that opened this already said which part you're on. */
 .series-name {
+  /* Flex, so the count's tick can't lift it off the name's line: an
+     inline-flex box starting with an SVG takes the SVG's bottom as its
+     baseline, which sat the count higher than the name (#197). */
+  display: flex;
+  align-items: center;
   margin: 0.125rem 0 0.3125rem;
-  padding: 0 0.4375rem;
+  /* No right padding: the count ends flush with the ticks below it. */
+  padding: 0 0 0 0.4375rem;
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--text-tertiary);
@@ -3379,7 +3385,9 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  margin-left: 0.5rem;
+  /* Pushed to the panel's right edge, over the tick column (#197). */
+  margin-left: auto;
+  padding-left: 0.75rem;
   font-weight: 400;
   font-variant-numeric: tabular-nums;
   opacity: 0.75;
@@ -3485,8 +3493,19 @@ a.series-link:hover {
   transition: stroke-dashoffset var(--dur) var(--ease);
 }
 
+/* Ticked: the box goes and only a grey tick is left; the part you're on
+   keeps a text-coloured one, so the list still says where you are (#197). */
 .series-check[aria-checked="true"] {
-  border-color: var(--text);
+  border-color: transparent;
+  color: var(--text-tertiary);
+}
+
+.series-check[aria-checked="true"]:hover {
+  border-color: transparent;
+}
+
+.series-row:has(.series-current) .series-check[aria-checked="true"] {
+  color: var(--text);
 }
 
 .series-check[aria-checked="true"] .series-tick path {
