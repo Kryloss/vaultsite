@@ -75,7 +75,7 @@ export default function NowList({ section }: ListProps) {
           <T en="Short-term goals" uk="Короткострокові цілі" />
         </h2>
         {updated && (
-          <span className="pill">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] px-2.5 py-1 text-xs text-[var(--text-secondary)]">
             <ClockIcon className="h-3.5 w-3.5" />
             <T en={`Updated ${updated}`} uk={`Оновлено ${updatedUk}`} />
           </span>
@@ -110,8 +110,8 @@ export default function NowList({ section }: ListProps) {
           );
 
           const cardClass =
-            `now-goal-card card group flex items-center gap-3.5 rounded-xl px-4 py-3.5${
-              href ? " press press-soft" : ""
+            `now-goal-card group flex items-center gap-3.5 rounded-xl border border-[var(--border)] px-4 py-3.5 transition-colors${
+              href ? " press press-soft hover:bg-[var(--bg-hover)]" : ""
             }`;
 
           return (

@@ -38,37 +38,18 @@
    (a scanned page, a portrait). From 640px only for the side-by-side; a
    phone always stacks. Its title is a step above a row's and a step below
    the page title, so the page still has one headline. */
-/* The card material (#185): `--chrome-bg` and the inset `--chrome-ring`,
-   like every other card and pill. */
 .idea-lead {
   display: flex;
   flex-direction: column;
   margin-top: 1.75rem;
   overflow: hidden;
+  border: 1px solid var(--border);
   border-radius: var(--r-xl);
-  background: var(--chrome-bg);
-  box-shadow: inset 0 0 0 1px var(--chrome-ring);
   transition: background-color var(--dur) var(--ease);
 }
 
 .idea-lead:hover {
-  background: color-mix(in srgb, var(--bg-hover) 88%, transparent);
-}
-
-/* The hairline on a layer of its own, OVER the picture: an inset shadow on
-   the card itself is painted beneath its children, and the picture covered
-   it along the top edge. */
-.idea-lead {
-  position: relative;
-}
-
-.idea-lead::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: inset 0 0 0 1px var(--chrome-ring);
-  pointer-events: none;
+  background: var(--bg-hover);
 }
 
 .idea-lead-art {

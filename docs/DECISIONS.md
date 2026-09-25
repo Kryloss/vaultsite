@@ -194,6 +194,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 183 | The read-aloud player joins the bottom chips, and a language switch restarts the block |
 | 184 | Every floating chip wears the breadcrumb bar's class |
 | 185 | One material for every pill, badge and card |
+| 186 | #185 narrowed to overlays: the page keeps its own chips, cards and badges |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1438,4 +1439,10 @@ After #184 the owner asked for ALL pills to match — naming the dev pencil, a p
 - **`.card`** — Explore, the Now goals and the Posts lead (whose hairline sits on an `::after` over its picture, since an inset shadow paints under children). A person's name card takes the material with a blur and no drop shadow.
 
 The block is unlayered, so it beats the Tailwind utilities these elements used to paint themselves with; that is why their hover is written there too — a `hover:bg-…` utility cannot beat an unlayered background. No `transition` shorthand in it: `.press` owns the transition list (#52). Left alone on purpose: the amber Draft chip (a dev-only warning, #64's named exception), the lightbox's round arrows (circles on a dark viewer, not pills), the 404's two buttons (squared on purpose, #161), and the command palette and shortcut sheet (dialogs, not pills).
+
+## 186. #185 narrowed to overlays: the page keeps its own chips, cards and badges (2026-09-25)
+
+The owner reverted #185 to overlay UI only. The page is back as it was before it — outline category chips at their old size, the /music field and language button, Now's "Updated" and "PDF", the Explore, goal and Posts lead cards, the résumé's small labels, New, the cover badges' scrim, a person's name card — by restoring those files and rules to their #184 state; `.pill`, `.pill-tone` and `.card` are gone.
+
+What floats over the page is one material, finished off rather than removed. **Pills wear `.chrome-bar`**: to #184's breadcrumb, Today's vibe, time remaining, "Continue" and read-aloud player, and #185's dev pencil and selection link, this adds the contents button (identical already, but by copy), the skip link (it was `--bg` with a `--border` outline) and the album button on a phone's music note, which also comes up from 2.25rem to the others' 2.5rem and 0.75rem offset — its square corners stay, since it shows album art (#95). **Panels take the sidebar drawer's version** of the material — the fill, the hairline, one even 14px blur, since a graduated blur shows a seam across something this size: the contents sheet and series list (which had a `--border` outline and a 12px blur), link previews and the ⌘K and shortcut dialogs (which were opaque `--bg` with a `--border` outline). Each keeps its own drop shadow. The phone's music sheet stays frameless on purpose (#94); the lightbox's round arrows stay as they are.
 

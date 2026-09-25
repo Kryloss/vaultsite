@@ -683,7 +683,7 @@ export default function Chrome({
           chrome is a menu button, a breadcrumb and a search box before any
           article begins, and a keyboard reader shouldn't have to walk them on
           every page. */}
-      <a href="#main" className="skip-link">
+      <a href="#main" className="skip-link chrome-bar">
         <T {...ui.skipToContent} />
       </a>
 

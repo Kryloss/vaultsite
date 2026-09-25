@@ -63,7 +63,7 @@ export default function MusicSheet({
         aria-expanded={open}
         aria-label={label}
         title={label}
-        className="music-pill press"
+        className="music-pill chrome-bar press"
       >
         {cover ? (
           /* The cover IS the control: on a phone the reader has not seen the

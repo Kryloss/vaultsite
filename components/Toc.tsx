@@ -365,7 +365,7 @@ export default function Toc({
         aria-label={lang === "uk" ? "Зміст сторінки" : "Table of contents"}
         /* Full text on hover/long-press — the label itself is cut short. */
         title={hereLabel}
-        className="toc-bar"
+        className="toc-bar chrome-bar"
       >
         <MenuIcon className="toc-bar-icon" />
       </button>

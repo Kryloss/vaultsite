@@ -55,7 +55,7 @@ export default function Resume({ section }: { section: Section }) {
           <a
             href={fileUrl}
             download
-            className="group press pill"
+            className="group press inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-hover)] hover:text-[var(--text)]"
           >
             <DownloadIcon className="h-3.5 w-3.5 transition-transform group-hover:translate-y-px" />
             <T {...ui.resumeDownload} />
@@ -105,7 +105,7 @@ export default function Resume({ section }: { section: Section }) {
             {data.languages.map((l, i) => (
               <li
                 key={i}
-                className="pill-tone rounded-full px-3 py-1 text-xs text-[var(--text-secondary)]"
+                className="rounded-full border border-[var(--border)] px-3 py-1 text-xs text-[var(--text-secondary)]"
               >
                 <T en={l} uk={data.languages_uk?.[i]} />
               </li>
@@ -209,7 +209,7 @@ function Timeline({ rows, badge = false }: { rows: ResumeRow[]; badge?: boolean 
                   title
                 )}
                 {badge && row.current && (
-                  <span className="ml-2 align-[2px] pill-tone rounded-full px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[var(--text-secondary)]">
+                  <span className="ml-2 align-[2px] rounded-full bg-[var(--surface)] px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[var(--text-secondary)]">
                     <T {...ui.resumeCurrent} />
                   </span>
                 )}
