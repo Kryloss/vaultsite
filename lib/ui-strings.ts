@@ -51,10 +51,6 @@ export const ui = {
      into the string — see continueReading below. */
   allPosts: { en: "All posts", uk: "Усі дописи" },
   explore: { en: "Explore", uk: "Розділи" },
-  /** Page idea `homeLatest` — precedes the title of a section's newest note. */
-  newestNote: { en: "Newest:", uk: "Найновіше:" },
-  /** Page idea `postsReadingTime` — "4 min" on a posts row. */
-  minShort: { en: "min", uk: "хв" },
 
   // filters
   filterAll: { en: "All", uk: "Усі" },

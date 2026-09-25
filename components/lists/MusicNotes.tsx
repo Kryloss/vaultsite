@@ -17,7 +17,6 @@ import T from "@/components/T";
 import NewBadge from "@/components/NewBadge";
 import { useLang } from "@/components/useLang";
 import { ui, type Str } from "@/lib/ui-strings";
-import { pageIdeas } from "@/lib/site-config";
 
 /**
  * The notes half of /music: a toolbar, then a COVER DECK.
@@ -233,7 +232,6 @@ export default function MusicNotes({
           items={items}
           label={ui.musicDeck[uiLang]}
           onSelect={setActive}
-          ambient={pageIdeas.musicAmbient}
           /* Whose record this is, above the deck; what the record is, below
              it. The artist heads the covers the way they used to head a card
              of rows — the grouping is still the page's spine (#103), it is

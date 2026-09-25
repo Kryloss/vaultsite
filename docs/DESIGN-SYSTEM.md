@@ -27,7 +27,7 @@ that are not visible from the tokens themselves. Reasons: `docs/DECISIONS.md`
 - A keyframe that names only `from` with `animation-fill-mode: both` ends on the element's OWN computed value — `wash-in` and `nav-tree-in` both rely on this. **Never add a `to:`** to either; it would flatten dark mode to the light value, or freeze one list's cap into the other's (#92, #124).
 - `.stagger > *` carries `animation: item-in … both`, and an animation that fills forever on `opacity`/`transform` gives every child a PERMANENT stacking context — nothing inside one can outrank a later sibling. Put a z-index on the slot, not on what is inside it (#110).
 
-- **`app/page-ideas.css`** holds the per-page ideas switched in `pageIdeas` (`lib/site-config.ts`, #179). Every selector there must name an `.idea-` class (`scripts/page-ideas.test.mjs`), so a switch turned off leaves the page exactly as it was. When an idea is kept for good, move its rules into `globals.css` and delete its switch.
+- **`app/page-ideas.css`** holds the design ideas switched in `pageIdeas` (`lib/site-config.ts`, #179). Every selector there must name an `.idea-` class (`scripts/page-ideas.test.mjs`), so a switch turned off leaves the page exactly as it was. When an idea is kept for good, move its rules into `globals.css` and delete its switch.
 
 ## Breakpoints
 

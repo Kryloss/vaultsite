@@ -3,7 +3,6 @@ import Stars from "@/components/Stars";
 import T from "@/components/T";
 import NewBadge from "@/components/NewBadge";
 import type { ShelfItem } from "@/lib/shelf";
-import { pageIdeas } from "@/lib/site-config";
 
 /**
  * One shelf card — a 2:3 cover, or a 16:9 thumbnail with a play badge for
@@ -92,18 +91,6 @@ export default function ShelfCard({
         {/* Opposite corner from the status badge, and client-only — see
             components/NewBadge.tsx. */}
         <NewBadge date={item.date} variant="cover" />
-        {/* Page idea `shelfRatingPeek` (lib/site-config.ts). The rows leave
-            stars off because at rest they make the strips noisy and uneven;
-            this costs no height and appears only when a cover is pointed at
-            or focused, in the scrim the status badge already wears. The one
-            free corner — status is top-left, New top-right. */}
-        {pageIdeas.shelfRatingPeek &&
-          !showRating &&
-          typeof item.rating === "number" && (
-            <span className="idea-shelf-rating">
-              <Stars rating={item.rating} size={11} />
-            </span>
-          )}
       </div>
       <span className="mt-2.5 block truncate font-medium leading-snug text-[var(--text)]">
         <T en={item.title} uk={item.titleUk} />

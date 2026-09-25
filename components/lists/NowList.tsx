@@ -9,8 +9,6 @@ import Resume from "@/components/Resume";
 import Toc from "@/components/Toc";
 import T from "@/components/T";
 import DevNowGoalToggleSlot from "@/components/DevNowGoalToggleSlot";
-import NowFreshness from "@/components/NowFreshness";
-import { pageIdeas } from "@/lib/site-config";
 
 /** Below this many résumé blocks a rail/pill is noise, not navigation — same
  *  threshold the entry page uses for markdown headings (app/[section]/[slug]/page.tsx). */
@@ -80,7 +78,6 @@ export default function NowList({ section }: ListProps) {
           <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] px-2.5 py-1 text-xs text-[var(--text-secondary)]">
             <ClockIcon className="h-3.5 w-3.5" />
             <T en={`Updated ${updated}`} uk={`Оновлено ${updatedUk}`} />
-            {pageIdeas.nowFreshness && <NowFreshness updated={updated} />}
           </span>
         )}
       </header>

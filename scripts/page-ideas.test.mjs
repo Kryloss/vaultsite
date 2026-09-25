@@ -40,7 +40,7 @@ function selectors(source) {
 }
 
 test("the sheet has rules to check", () => {
-  assert.ok(selectors(css).length > 10);
+  assert.ok(selectors(css).length > 0);
 });
 
 test("every selector in app/page-ideas.css names an .idea- class", () => {

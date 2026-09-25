@@ -3,7 +3,6 @@ import T from "@/components/T";
 import NewBadge from "@/components/NewBadge";
 import { ui } from "@/lib/ui-strings";
 import { categoryLabel } from "@/lib/categories";
-import { pageIdeas } from "@/lib/site-config";
 
 export interface PersonRow {
   slug: string;
@@ -150,19 +149,6 @@ export default function PeopleCards({
                 {row.description && (
                   <span className="person-card-role">
                     <T en={row.description} uk={row.descriptionUk} />
-                  </span>
-                )}
-                {/* Page idea `peopleTags` (lib/site-config.ts): the same
-                    words as the chips above, so a card says which of them it
-                    answers to without filtering first. */}
-                {pageIdeas.peopleTags && row.categories.length > 0 && (
-                  <span className="idea-person-tags">
-                    {row.categories.map((c, i) => (
-                      <span key={c}>
-                        {i > 0 && <span aria-hidden> · </span>}
-                        <T {...categoryLabel(c)} />
-                      </span>
-                    ))}
                   </span>
                 )}
               </div>

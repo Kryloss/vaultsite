@@ -187,7 +187,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 176 | AGENTS.md is the one instruction file; there is no CLAUDE.md |
 | 177 | The lightbox zoom starts from a stand-in, so the thumbnail stays on the page |
 | 178 | A design 2.0 was built, tried and fully reverted |
-| 179 | One design idea per page, each behind its own switch |
+| 179 | Design ideas behind their own switches: the 404 search and the Projects fade |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1380,21 +1380,11 @@ The owner asked for a "version 2.0" step up in experience and recognisability, e
 
 **The owner chose a full revert to 1.0.** Nothing from either branch was merged; the site is exactly as it was at commit 0c2164e (tagged `v1.0` locally). Both branches were left in the repository, unmerged, in case any part is wanted later — read them before rebuilding any of it from scratch.
 
-## 179. One design idea per page, each behind its own switch (2026-09-24)
+## 179. Design ideas behind their own switches: the 404 search and the Projects fade (2026-09-24)
 
-The owner asked for one new design idea per page that fits the page it lives on, tried on the local server and easy to take back. After #178's all-or-nothing switch, these are nine SEPARATE switches (`pageIdeas` in `lib/site-config.ts`), so any one can go without the rest, built on branch `design/page-ideas` and not merged to `main` until the owner says so. Nothing from #178 is reintroduced — no counts, no display type, no footer, no Currently board.
+The owner asked for one new design idea per page, tried on the local server and easy to take back. Nine were built on branch `design/page-ideas`, each behind its own switch (`pageIdeas` in `lib/site-config.ts`) rather than #178's single one. The owner kept two and had the other seven deleted: the newest note on Home's Explore cards, "· 2 months ago" on Now, reading time on Posts rows, categories on People cards, the centred cover's glow behind the Music deck, a hover rating on Shelf covers, and the neighbour's description in note footers. Don't rebuild those unasked.
 
-| Switch | Page | The idea |
-|---|---|---|
-| `homeLatest` | Home | Each Explore card names its section's newest dated note, pinned to the card's foot. |
-| `nowFreshness` | Now | "Updated July 2026" gains "· 2 months ago", measured on the reader's clock after mount (`lib/freshness.ts`). |
-| `postsReadingTime` | Posts | Each row carries its reading time beside the date, from the same `readingStats()` as the note's metadata line. |
-| `peopleTags` | People | A card lists the person's categories at the panel's foot; the description clamps at three lines to make room, and the phone composition hides it with the description. |
-| `musicAmbient` | Music | The centred cover's blur placeholder, enlarged and blurred behind the deck, so the record lights its own stage. It fetches nothing new; album art is a photograph, not a site colour (#165). |
-| `shelfRatingPeek` | Shelf | Hovering or focusing a cover in a row shows his stars in the status badge's scrim, bottom-left. Resting rows stay star-free, which is why `showRating` is off there (#54); phones don't get it. |
-| `projectsFade` | Projects | A cut preview fades out into "Continue reading" with a mask, like the 404's number (#161). |
-| `noteNextPreview` | Every note | The prev/next arrows carry the neighbour's `description:` under its title, and the two halves split the row evenly. |
-| `notFoundPrefill` | 404 | Search opens ⌘K holding the broken address's words, selected, so typing replaces them. The palette takes an optional `seed`; a plain `opensearch` event still opens it empty. |
+- `notFoundPrefill` — the 404's Search opens ⌘K holding the broken address's words (the same `terms()` the suggestions use), selected, so typing replaces them. The palette takes an optional `seed`; a plain `opensearch` event still opens it empty.
+- `projectsFade` — a cut preview fades into "Continue reading" with a mask, like the 404's number (#161). The owner asked for it to start earlier and fade less: it begins 9rem above the cut and ends at 45% opacity, so the last line is dimmed, not gone.
 
-**How it stays revertible.** Every switch-guarded piece of markup is simply not rendered when its switch is off, and `app/page-ideas.css` (imported after `globals.css`) only styles `.idea-` classes that that markup carries — `scripts/page-ideas.test.mjs` fails if a selector or keyframe there does not name one. To drop an idea, set its switch to `false`. To drop them all, delete the branch; `main` never had them.
-
+**How it stays revertible.** Switch-guarded markup is not rendered when its switch is off, and `app/page-ideas.css` (imported after `globals.css`) only styles `.idea-` classes that that markup carries — `scripts/page-ideas.test.mjs` fails if a selector or keyframe there does not name one.

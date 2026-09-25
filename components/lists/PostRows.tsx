@@ -94,12 +94,6 @@ export default function PostRows({
                         <T {...categoryLabel(row.category)} />
                       </span>
                     )}
-                    {/* Page idea `postsReadingTime` (lib/site-config.ts). */}
-                    {row.minutes !== undefined && (
-                      <span className="idea-post-minutes">
-                        {row.minutes} <T {...ui.minShort} />
-                      </span>
-                    )}
                     {row.date && (
                       <time
                         dateTime={row.date}
