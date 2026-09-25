@@ -393,7 +393,10 @@ export default async function EntryPage({ params }: Props) {
   /* A <div>, not a <p>: the series popover is a <nav>, which a browser parsing
      the static HTML would kick out of a paragraph — and the resulting DOM
      wouldn't match what React rendered. */
-  const metaLine = meta.length > 0 && (
+  /* Page idea `noteReadAloud` (lib/site-config.ts, DECISIONS #180, #181):
+     every note — posts, people, music, shelf, projects. */
+  const readAloud = pageIdeas.noteReadAloud;
+  const metaLine = (meta.length > 0 || readAloud) && (
     <div className="entry-meta mt-3 flex flex-wrap items-center gap-x-2 text-sm text-[var(--text-tertiary)]">
       {meta.map((part, i) => (
         <Fragment key={i}>
@@ -401,11 +404,10 @@ export default async function EntryPage({ params }: Props) {
           {part}
         </Fragment>
       ))}
-      {/* Page idea `noteReadAloud` (lib/site-config.ts, DECISIONS #180), on
-          notes with a reading time. Last and outside the join: it renders
-          nothing until the browser says it can speak, so it draws its own
-          separator rather than leaving the join a dangling one. */}
-      {pageIdeas.noteReadAloud && stats && <ReadAloud />}
+      {/* Last and outside the join: it renders nothing until the browser says
+          it can speak, so it draws its own separator — and none at all on a
+          note whose line has nothing else on it. */}
+      {readAloud && <ReadAloud separated={meta.length > 0} />}
     </div>
   );
 

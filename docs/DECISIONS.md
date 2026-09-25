@@ -189,6 +189,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 178 | A design 2.0 was built, tried and fully reverted |
 | 179 | Design ideas behind their own switches: the 404 search and the Projects fade |
 | 180 | Round two: the Posts lead and read-aloud on post pages |
+| 181 | "Listen" on every note, reading the note's whole shape, in the best voice there is |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1398,3 +1399,10 @@ After #179 the owner asked for another round — "something major for each" page
 - `noteReadAloud` — "Listen" at the end of a post's metadata line (posts only: the notes with a reading time) reads the note aloud with the browser's own Web Speech API, one block at a time — per-block utterances are also what keeps Chromium from dropping a long one — marking the block it is on and scrolling it into view only once it has left the window. Ukrainian voice when the page is showing Ukrainian. It renders nothing until the browser says it can speak, and draws its own separator for that reason rather than joining the metadata array. A pill at the foot of the window holds Pause/Resume and Stop; leaving the page stops it.
 
 Both switch off alone; with a switch off, its markup isn't rendered and no rule in `app/page-ideas.css` can reach anything.
+
+## 181. "Listen" on every note, reading the note's whole shape, in the best voice there is (2026-09-24)
+
+The owner asked for #180's read-aloud on every kind of note — people, music, shelf and projects as well as posts. It now sits at the end of every entry page's metadata line (drawing its own separator, and none on a note whose line is otherwise empty). Those notes are not shaped like posts, so what is read changed with them (`readingScript()` in `components/ReadAloud.tsx`): the title; on shelf and music notes the creator block ("Director: David Fincher." and the bio); the "At a glance" facts a row at a time ("Born: March 9, 1985."), from whichever copy is on screen — the article's or, on a wide People page, the contents rail's; then the body, skipping the orphaned `fact-heading` the facts were lifted out of, and stopping at Sources. Every element is read in the language showing (a creator block holds both), a rating by its accessible name ("5 out of 5 stars").
+
+**The voice** is now chosen, not taken: `pickVoice()` in `lib/read-aloud.ts` prefers the platforms' better voices (Edge's "Natural" neural voices, Apple's Premium/Enhanced and Siri, Chrome's network "Google" voices) and the reader's own locale, never a macOS novelty voice, never a Russian voice for Ukrainian. Chrome's voice list arrives asynchronously, so it waits briefly for `voiceschanged`. The browser's own speech is still the engine: nothing is fetched and nothing leaves the page. Pre-generated narration from a hosted TTS or a clone of the owner's voice was discussed and not built — it would be a build-time script writing audio files beside the notes, never a runtime API call from the page.
+
