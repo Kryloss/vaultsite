@@ -396,18 +396,23 @@ export default async function EntryPage({ params }: Props) {
   /* Page idea `noteReadAloud` (lib/site-config.ts, DECISIONS #180, #181):
      every note — posts, people, music, shelf, projects. */
   const readAloud = pageIdeas.noteReadAloud;
+  const dated = readAloud && Boolean(entry.date);
   const metaLine = (meta.length > 0 || readAloud) && (
     <div className="entry-meta mt-3 flex flex-wrap items-center gap-x-2 text-sm text-[var(--text-tertiary)]">
       {meta.map((part, i) => (
         <Fragment key={i}>
           {i > 0 && <span aria-hidden>·</span>}
           {part}
+          {/* Right after the date (the owner's placement), but outside the
+              join: it renders nothing until the browser says it can speak,
+              so it draws its own separator in front, and the next item's
+              comes from the join as usual. */}
+          {i === 0 && dated && <ReadAloud />}
         </Fragment>
       ))}
-      {/* Last and outside the join: it renders nothing until the browser says
-          it can speak, so it draws its own separator — and none at all on a
-          note whose line has nothing else on it. */}
-      {readAloud && <ReadAloud separated={meta.length > 0} />}
+      {/* An undated note has nothing to follow, so it goes last — with no
+          separator at all on a line that has nothing else on it. */}
+      {readAloud && !dated && <ReadAloud separated={meta.length > 0} />}
     </div>
   );
 

@@ -199,6 +199,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 188 | The drawer's hairline is softened like the bar's, and its left end is off-screen |
 | 189 | The contents sheet is the drawer's twin |
 | 190 | The series list and link previews join the drawer's material |
+| 191 | "Listen" sits right after the date |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1465,3 +1466,7 @@ The owner asked for the contents card that drops from the contents button (below
 ## 190. The series list and link previews join the drawer's material (2026-09-25)
 
 The owner asked for the two panels #189 left on the single blur to match as well. Both take the drawer's recipe: `--r-xl` (they were `--r-lg`), the inset `--chrome-ring` with no border, the drawer's drop shadow in both themes, and the two blur pseudo-layers instead of one blur on the element. The series list was its own scroller, so, like the contents sheet, its scroller moved to an inner `.series-sheet-body` (`max-height: 45vh`, the 0.375rem padding); the badge-anchored placement still measures the sheet. The link preview never scrolls: it keeps its padding and its `overflow: hidden`, which contains the floated cover — the layers sit inside its box, so the clip leaves them alone. Their `z-index` (45, 60) is the stacking context the layers need. The ⌘K and shortcut dialogs still use the single blur.
+
+## 191. "Listen" sits right after the date (2026-09-25)
+
+The owner moved "Listen" from the end of a note's metadata line (#180) to straight after the date: `July 17, 2026 · Listen · 1 min read · …`. It still stays outside the joined `meta` array, because it renders nothing until the browser says it can speak: it is rendered inside the date's fragment and draws its own separator in front, while the next item's separator comes from the join as before. So a browser without speech gets `date · 1 min read` with no doubled middot, and while the player is open (the inline button gives way to the fixed pill) the line closes up the same way. A note with no `date:` has nothing to follow, so there it goes last, as before.
