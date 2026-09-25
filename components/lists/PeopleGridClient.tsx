@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import PeopleCards, { type PersonRow } from "@/components/lists/PeopleCards";
+import { pageIdeas } from "@/lib/site-config";
 
 /**
  * Client half of the people list: reads the active category from `?category=`
@@ -35,6 +36,7 @@ export default function PeopleGridClient({
       rows={rows}
       categories={categories}
       active={active}
+      view={pageIdeas.peopleTable && params.get("view") === "table" ? "table" : "cards"}
     />
   );
 }

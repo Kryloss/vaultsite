@@ -4,7 +4,8 @@ import { ui } from "@/lib/ui-strings";
 import { categoryLabel } from "@/lib/categories";
 import { shortDate } from "@/lib/dates";
 import NewBadge from "@/components/NewBadge";
-import type { PostRow } from "@/components/lists/PostListClient";
+import type { PostLead, PostRow } from "@/components/lists/PostListClient";
+import PostLeadCard from "@/components/lists/PostLeadCard";
 
 /**
  * Presentational half of the posts list: category chips + year-grouped rows.
@@ -20,14 +21,20 @@ export default function PostRows({
   rows,
   categories,
   active,
+  lead,
 }: {
   sectionSlug: string;
   rows: PostRow[];
   categories: string[];
   /** null = "All" */
   active: string | null;
+  /** Page idea `postsLead` — shown on "All" only, and then not again below. */
+  lead?: PostLead;
 }) {
-  const filtered = active ? rows.filter((r) => r.category === active) : rows;
+  const leadRow = !active && lead ? rows.find((r) => r.slug === lead.slug) : undefined;
+  const filtered = active
+    ? rows.filter((r) => r.category === active)
+    : rows.filter((r) => r !== leadRow);
   const years = groupByYear(filtered);
 
   const chip = (key: string, label: React.ReactNode, value: string | null) => (
@@ -56,6 +63,10 @@ export default function PostRows({
           {chip("__all", <T {...ui.filterAll} />, null)}
           {categories.map((c) => chip(c, <T {...categoryLabel(c)} />, c))}
         </div>
+      )}
+
+      {leadRow && lead && (
+        <PostLeadCard sectionSlug={sectionSlug} row={leadRow} lead={lead} />
       )}
 
       {years.map((year) => (
@@ -110,7 +121,7 @@ export default function PostRows({
         </section>
       ))}
 
-      {filtered.length === 0 && (
+      {filtered.length === 0 && !leadRow && (
         <p className="mt-10 text-sm text-[var(--text-tertiary)]">
           <T {...ui.nothingInCategory} />
         </p>

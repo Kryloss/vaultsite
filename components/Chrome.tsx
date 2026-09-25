@@ -35,7 +35,8 @@ import T from "@/components/T";
 import { useLang } from "@/components/useLang";
 import { ui } from "@/lib/ui-strings";
 import { shortcutKey } from "@/lib/shortcut-key";
-import { sidebarTree } from "@/lib/site-config";
+import { pageIdeas, sidebarTree } from "@/lib/site-config";
+import { BookmarkButton, DrawerBookmarks } from "@/components/Bookmarks";
 
 /**
  * How long the pointer has to stay in the left edge strip before the panel
@@ -781,6 +782,8 @@ export default function Chrome({
             </span>
           </span>
         )}
+        {/* Page idea `bookmarks` (lib/site-config.ts, DECISIONS #180). */}
+        {pageIdeas.bookmarks && crumbs.length > 0 && <BookmarkButton />}
       </div>
 
       {vibe && <TodaysVibe track={vibe} />}
@@ -972,6 +975,8 @@ export default function Chrome({
             );
           })}
         </nav>
+
+        {pageIdeas.bookmarks && <DrawerBookmarks open={open} />}
 
         {/* Social links — plain icons, no background. Rendered by the same
             component as the home page's row (at a smaller size) rather than a

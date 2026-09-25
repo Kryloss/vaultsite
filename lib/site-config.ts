@@ -92,11 +92,49 @@ export const controlIconMotion = false;
  * Typed as `boolean` rather than inferred from the literal, so turning one off
  * can't make a branch unreachable and trip the typecheck.
  */
-export const pageIdeas: Record<"projectsFade" | "notFoundPrefill", boolean> = {
+export const pageIdeas: Record<
+  | "projectsFade"
+  | "notFoundPrefill"
+  | "homeGraph"
+  | "nowTimeline"
+  | "postsLead"
+  | "peopleTable"
+  | "musicListen"
+  | "shelfSearch"
+  | "projectsTimeline"
+  | "noteReadAloud"
+  | "notFoundRecents"
+  | "bookmarks",
+  boolean
+> = {
   /** Projects: a cut preview fades out into "Continue reading". */
   projectsFade: true,
   /** 404: Search opens ⌘K already holding the words from the broken address. */
   notFoundPrefill: true,
+
+  /* Round two (DECISIONS #180) — bigger ideas, one or more per page, and one
+     for the whole site. Each can be switched off on its own. */
+
+  /** Home: a map of the vault — every note, its section and its [[links]]. */
+  homeGraph: true,
+  /** Now: the résumé's periods drawn as bars on a years axis, above the list. */
+  nowTimeline: true,
+  /** Posts: the newest post leads the page with its opening paragraph. */
+  postsLead: true,
+  /** People: a Table view beside the cards — the vault as a database. */
+  peopleTable: true,
+  /** Music: play the centred record in a player that docks over the page. */
+  musicListen: true,
+  /** Shelf: one search field that filters every row at once. */
+  shelfSearch: true,
+  /** Projects: the feed hangs on a dated timeline, like the résumé. */
+  projectsTimeline: true,
+  /** Post pages: "Listen" reads the note aloud and follows along. */
+  noteReadAloud: true,
+  /** 404: the pages you visited last, as a third way out. */
+  notFoundRecents: true,
+  /** Everywhere: bookmark any page from the breadcrumb; they list in the drawer and ⌘K. */
+  bookmarks: true,
 };
 
 export const siteDescription =

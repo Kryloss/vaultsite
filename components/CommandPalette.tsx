@@ -8,6 +8,8 @@ import { useLang } from "@/components/useLang";
 import { useColourTheme } from "@/components/useColourTheme";
 import { useSearchIndex } from "@/components/useSearchIndex";
 import { recentPaths, remember } from "@/lib/recents";
+import { pageIdeas } from "@/lib/site-config";
+import { useBookmarks } from "@/components/Bookmarks";
 import { similarity, fold } from "@/lib/fuzzy";
 import { copyText } from "@/lib/clipboard";
 import { shortcutKey } from "@/lib/shortcut-key";
@@ -87,6 +89,7 @@ export default function CommandPalette({
   const flashTimer = useRef<number | undefined>(undefined);
   const router = useRouter();
   const pathname = usePathname();
+  const bookmarks = useBookmarks();
 
   /* Recorded here because the palette is the only thing that reads recents and
      is mounted on every page anyway (via components/Chrome.tsx). */
@@ -121,7 +124,7 @@ export default function CommandPalette({
    */
   const scoped = query.startsWith(">");
 
-  const { results, fuzzy, recent } = useMemo(() => {
+  const { results, fuzzy, recent, saved } = useMemo(() => {
     // Heading results exist once per language (each has its own anchor); show
     // only the active one. Page results carry no `lang` and always show.
     let pool = items.filter((i) => !i.lang || i.lang === lang);
@@ -137,22 +140,30 @@ export default function CommandPalette({
     if (!q) {
       // Scoped (`>` alone) means "the outline of this page" — recents would be
       // answering a different question.
-      if (scoped) return { results: pool.slice(0, 8), fuzzy: false, recent: 0 };
+      if (scoped) return { results: pool.slice(0, 8), fuzzy: false, recent: 0, saved: 0 };
 
       const pages = pool.filter((i) => !i.lang);
       const byHref = new Map(pages.map((p) => [p.href, p]));
       // Where you've been, then the rest of the site to fill the panel — the
       // empty palette used to show the same eight pages to everyone.
-      const recents = recentPaths(pathname)
+      // Page idea `bookmarks` (DECISIONS #180): kept pages lead, above recents.
+      const kept = (pageIdeas.bookmarks ? bookmarks : [])
         .map((href) => byHref.get(href))
         .filter((p): p is (typeof pages)[number] => p !== undefined)
         .slice(0, 5);
-      const seen = new Set(recents.map((p) => p.href));
+      const keptSet = new Set(kept.map((p) => p.href));
+      const recents = recentPaths(pathname)
+        .filter((href) => !keptSet.has(href))
+        .map((href) => byHref.get(href))
+        .filter((p): p is (typeof pages)[number] => p !== undefined)
+        .slice(0, 5);
+      const seen = new Set([...keptSet, ...recents.map((p) => p.href)]);
       const rest = pages.filter((p) => !seen.has(p.href));
       return {
-        results: [...recents, ...rest].slice(0, 8),
+        results: [...kept, ...recents, ...rest].slice(0, 8 + kept.length),
         fuzzy: false,
         recent: recents.length,
+        saved: kept.length,
       };
     }
     const scored = pool
@@ -175,7 +186,7 @@ export default function CommandPalette({
       .sort((a, b) => b.score - a.score);
 
     if (scored.length > 0) {
-      return { results: scored.slice(0, 8).map((r) => r.item), fuzzy: false, recent: 0 };
+      return { results: scored.slice(0, 8).map((r) => r.item), fuzzy: false, recent: 0, saved: 0 };
     }
 
     // Nothing matched literally — most often a typo. Fall back to trigram
@@ -194,8 +205,8 @@ export default function CommandPalette({
       .sort((a, b) => b.score - a.score)
       .slice(0, 5);
 
-    return { results: near.map((r) => r.item), fuzzy: near.length > 0, recent: 0 };
-  }, [query, items, lang, scoped, pathname]);
+    return { results: near.map((r) => r.item), fuzzy: near.length > 0, recent: 0, saved: 0 };
+  }, [query, items, lang, scoped, pathname, bookmarks]);
 
   const go = useCallback(
     (href: string) => {
@@ -456,12 +467,17 @@ export default function CommandPalette({
                   the first rows are pages you've actually been on; the rest of
                   the site follows under its own heading so the boundary is
                   visible rather than implied by order alone. */}
-              {recent > 0 && i === 0 && (
+              {saved > 0 && i === 0 && (
+                <p className="px-4 pb-1 pt-2 text-xs text-[var(--text-tertiary)]">
+                  <T {...ui.bookmarks} />
+                </p>
+              )}
+              {recent > 0 && i === saved && (
                 <p className="px-4 pb-1 pt-2 text-xs text-[var(--text-tertiary)]">
                   <T {...ui.recentGroup} />
                 </p>
               )}
-              {recent > 0 && i === recent && (
+              {(recent > 0 || saved > 0) && i === saved + recent && (
                 <p className="px-4 pb-1 pt-2 text-xs text-[var(--text-tertiary)]">
                   <T {...ui.pagesGroup} />
                 </p>

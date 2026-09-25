@@ -16,6 +16,21 @@ export interface PostRow {
 }
 
 /**
+ * Page idea `postsLead` (lib/site-config.ts, DECISIONS #180): the newest post,
+ * opened up at the head of the list — its first picture and opening paragraph.
+ */
+export interface PostLead {
+  slug: string;
+  opening?: string;
+  openingUk?: string;
+  image?: string;
+  imageSrcSet?: string;
+  imageBlur?: string;
+  imageW?: number;
+  imageH?: number;
+}
+
+/**
  * Client half of the posts list: reads the active category from `?category=`
  * and hands it to PostRows. No local state — the URL is the source of truth,
  * so a link from a post's own category chip lands here already filtered.
@@ -32,9 +47,11 @@ export interface PostRow {
 export default function PostListClient({
   sectionSlug,
   rows,
+  lead,
 }: {
   sectionSlug: string;
   rows: PostRow[];
+  lead?: PostLead;
 }) {
   const params = useSearchParams();
 
@@ -55,6 +72,7 @@ export default function PostListClient({
       rows={rows}
       categories={categories}
       active={active}
+      lead={lead}
     />
   );
 }

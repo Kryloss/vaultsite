@@ -4,6 +4,8 @@ import NotFoundSuggestions from "@/components/NotFoundSuggestions";
 import { ui } from "@/lib/ui-strings";
 import Page from "@/components/Page";
 import NotFoundSearch from "@/components/NotFoundSearch";
+import NotFoundRecents from "@/components/NotFoundRecents";
+import { pageIdeas } from "@/lib/site-config";
 
 /**
  * 404 — the one page with nothing to read on it.
@@ -45,6 +47,8 @@ export default function NotFound() {
           exported 404 is one file serving every bad URL, so the attempted
           path only exists there. */}
       <NotFoundSuggestions />
+      {/* Page idea `notFoundRecents` (lib/site-config.ts, DECISIONS #180). */}
+      {pageIdeas.notFoundRecents && <NotFoundRecents />}
     </Page>
   );
 }

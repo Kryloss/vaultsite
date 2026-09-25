@@ -91,6 +91,20 @@ export function firstAlbumUrl(markdown: string): string | undefined {
 }
 
 /**
+ * The first Apple Music link of ANY kind on a line of its own — the note's
+ * own player, song or album. Page idea `musicListen` (DECISIONS #180) plays it
+ * from the /music deck; unlike `firstAlbumUrl`, a song counts, because there
+ * the question is "what does this note sound like", not "what is it about".
+ */
+export function firstAppleMusicUrl(markdown: string): string | undefined {
+  for (const line of markdown.split("\n")) {
+    const s = line.trim();
+    if (isAppleMusicUrl(s)) return s;
+  }
+  return undefined;
+}
+
+/**
  * iframe HTML string — used by the markdown pipeline to auto-embed pasted links.
  *
  * NO footer link. There was one — "Open in Apple Music", added so a stalled

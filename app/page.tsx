@@ -17,6 +17,9 @@ import { previewsInHtml } from "@/lib/previews";
 import LinkPreview from "@/components/LinkPreview";
 import Page from "@/components/Page";
 import Intro from "@/components/Intro";
+import { pageIdeas } from "@/lib/site-config";
+import VaultGraph from "@/components/VaultGraph";
+import { GRAPH_HEIGHT, GRAPH_WIDTH, vaultGraph } from "@/lib/vault-graph";
 
 /** Title and description come from the layout's defaults; this adds the
     canonical, which every page needs and the root most of all. */
@@ -168,6 +171,24 @@ export default async function HomePage() {
               );
             })}
           </div>
+        </section>
+      )}
+
+      {/* Page idea `homeGraph` (lib/site-config.ts, DECISIONS #180): the
+          whole vault as a map, under the sections it is made of. */}
+      {pageIdeas.homeGraph && (
+        <section className="mt-10">
+          <h2 className="text-lg font-semibold tracking-tight text-[var(--text)]">
+            <T {...ui.vaultMap} />
+          </h2>
+          <p className="mt-1 text-sm text-[var(--text-tertiary)]">
+            <T {...ui.vaultMapHint} />
+          </p>
+          <VaultGraph
+            {...vaultGraph()}
+            width={GRAPH_WIDTH}
+            height={GRAPH_HEIGHT}
+          />
         </section>
       )}
     </Page>

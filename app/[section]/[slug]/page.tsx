@@ -50,6 +50,8 @@ import { NOTE_THUMB_FIT_SCRIPT } from "@/lib/note-thumb";
 import Page from "@/components/Page";
 import DevEntryOptionsSlot from "@/components/DevEntryOptionsSlot";
 import { DEV_EXTRA_FIELDS } from "@/lib/dev-tools";
+import ReadAloud from "@/components/ReadAloud";
+import { pageIdeas } from "@/lib/site-config";
 
 /** Below this many h2/h3 an outline is noise, not navigation. */
 const MIN_TOC_HEADINGS = 3;
@@ -399,6 +401,11 @@ export default async function EntryPage({ params }: Props) {
           {part}
         </Fragment>
       ))}
+      {/* Page idea `noteReadAloud` (lib/site-config.ts, DECISIONS #180), on
+          notes with a reading time. Last and outside the join: it renders
+          nothing until the browser says it can speak, so it draws its own
+          separator rather than leaving the join a dangling one. */}
+      {pageIdeas.noteReadAloud && stats && <ReadAloud />}
     </div>
   );
 

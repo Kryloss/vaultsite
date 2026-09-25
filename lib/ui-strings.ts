@@ -303,6 +303,38 @@ export const ui = {
   /* Also the command palette's no-exact-match heading — the 404's list lost
      its label, this key did not lose its other caller. */
   didYouMean: { en: "Did you mean…", uk: "Можливо, ви шукали…" },
+
+  /* Page ideas, round two (lib/site-config.ts → pageIdeas, DECISIONS #180). */
+  vaultMap: { en: "Map of the vault", uk: "Мапа нотаток" },
+  vaultMapHint: {
+    en: "Every note is a dot beside its section. The firmer lines are links written between notes.",
+    uk: "Кожна нотатка — крапка біля свого розділу. Чіткіші лінії — посилання між нотатками.",
+  },
+  resumeTimeline: { en: "Timeline", uk: "Хронологія" },
+  resumeNow: { en: "Now", uk: "Зараз" },
+  latestPost: { en: "Latest", uk: "Найновіше" },
+  readPost: { en: "Read", uk: "Читати" },
+  viewCards: { en: "Cards", uk: "Картки" },
+  viewTable: { en: "Table", uk: "Таблиця" },
+  peopleView: { en: "View", uk: "Вигляд" },
+  colPerson: { en: "Person", uk: "Особа" },
+  colBorn: { en: "Born or formed", uk: "Народження" },
+  colKnownFor: { en: "Known for", uk: "Чим відомі" },
+  colCategory: { en: "Category", uk: "Категорія" },
+  musicListen: { en: "Listen", uk: "Слухати" },
+  closePlayer: { en: "Close player", uk: "Закрити плеєр" },
+  shelfSearch: { en: "Search the shelf", uk: "Пошук на полиці" },
+  shelfSearchShort: { en: "Search", uk: "Пошук" },
+  shelfNoMatch: { en: "Nothing on the shelf matches that.", uk: "На полиці нічого такого немає." },
+  readAloud: { en: "Listen", uk: "Слухати" },
+  readAloudPause: { en: "Pause", uk: "Пауза" },
+  readAloudResume: { en: "Resume", uk: "Далі" },
+  readAloudStop: { en: "Stop reading", uk: "Зупинити читання" },
+  readingAloud: { en: "Reading aloud", uk: "Читаю вголос" },
+  recentPages: { en: "Where you were", uk: "Де ви були" },
+  bookmarkAdd: { en: "Bookmark this page", uk: "Додати в закладки" },
+  bookmarkRemove: { en: "Remove bookmark", uk: "Прибрати із закладок" },
+  bookmarks: { en: "Bookmarks", uk: "Закладки" },
 } satisfies Record<string, Str>;
 
 /** Local-only editor copy. Kept out of `ui` so public client chunks do not

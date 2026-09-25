@@ -6,6 +6,9 @@ import type { ResumeData, ResumeRow } from "@/lib/resume";
 import { DownloadIcon, MailIcon } from "@/components/icons";
 import { ui } from "@/lib/ui-strings";
 import T from "@/components/T";
+import ResumeChart, { type ChartRow } from "@/components/ResumeChart";
+import { monthOf, parseSpan } from "@/lib/resume-span";
+import { pageIdeas } from "@/lib/site-config";
 
 /**
  * Résumé block, rendered under the Now cards from `section.meta.resume` — the
@@ -68,6 +71,9 @@ export default function Resume({ section }: { section: Section }) {
           <T en={data.summary} uk={data.summary_uk} />
         </p>
       )}
+
+      {/* Page idea `nowTimeline` (lib/site-config.ts, DECISIONS #180). */}
+      {pageIdeas.nowTimeline && <ResumeChart rows={chartRows(data)} builtAt={monthOf(new Date())} />}
 
       {data.experience?.length ? (
         <Block id="experience" label={<T {...ui.resumeExperience} />}>
@@ -278,4 +284,26 @@ function splitPoint(text: string): ReactNode {
       <span className="text-[var(--text-secondary)]">{text.slice(i)}</span>
     </>
   );
+}
+
+/** Rows the timeline chart can place — only those whose period it can read. */
+function chartRows(data: ResumeData): ChartRow[] {
+  const rows: ChartRow[] = [];
+  const add = (list: ResumeRow[] | undefined, kind: ChartRow["kind"]) => {
+    for (const row of list ?? []) {
+      const span = parseSpan(row.period);
+      if (!span || !row.role) continue;
+      rows.push({
+        role: row.role,
+        roleUk: row.role_uk,
+        org: row.org,
+        orgUk: row.org_uk,
+        span,
+        kind,
+      });
+    }
+  };
+  add(data.experience, "work");
+  add(data.education, "study");
+  return rows;
 }

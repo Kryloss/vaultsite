@@ -17,6 +17,8 @@ import T from "@/components/T";
 import NewBadge from "@/components/NewBadge";
 import { useLang } from "@/components/useLang";
 import { ui, type Str } from "@/lib/ui-strings";
+import { pageIdeas } from "@/lib/site-config";
+import ListenDock from "@/components/ListenDock";
 
 /**
  * The notes half of /music: a toolbar, then a COVER DECK.
@@ -246,6 +248,8 @@ export default function MusicNotes({
           }
         />
       )}
+      {/* Page idea `musicListen` (lib/site-config.ts, DECISIONS #180). */}
+      {pageIdeas.musicListen && <ListenDock note={slides[active]?.note} />}
     </>
   );
 }
