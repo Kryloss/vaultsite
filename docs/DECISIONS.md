@@ -191,6 +191,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 180 | Round two: the Posts lead and read-aloud on post pages |
 | 181 | "Listen" on every note, reading the note's whole shape, in the best voice there is |
 | 182 | The read-aloud player: play/pause, title, close and a seek bar; press a block to go there; it follows the language |
+| 183 | The read-aloud player joins the bottom chips, and a language switch restarts the block |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1416,4 +1417,8 @@ The owner redesigned #180/#181's player and asked for two behaviours. All of it 
 - **Press a block to move the voice there**, while the player is open: every block in the reading script takes `.idea-read-step` (pointer cursor, a faint wash under the pointer); a press on a link or control inside one keeps its own meaning, and a press that ended a text selection is ignored.
 - **Switching language mid-note carries on in the other language from the next block** (`stepAfterSwitch()`): a `MutationObserver` on `<html data-lang>`, the toggle's one source of truth, rebuilds the script in the new language and continues at the old index + 1 — the two readings share their shape (title, creator, facts, then the body block for block, since the translations are made that way). The title in the player changes language with it.
 - **Pause is the engine's own pause**, so a paragraph resumes mid-sentence. But any MOVE while paused — a press on a block, a seek, a language switch — cancels the engine and remembers where to begin, because a paused engine resumes its queued utterance, not the new place.
+
+## 183. The read-aloud player joins the bottom chips, and a language switch restarts the block (2026-09-24)
+
+Two changes to #182, both the owner's. **A language switch now restarts the block being read, in the other language** (`stepOnSwitch()` in `lib/read-aloud.ts`, clamped to the shorter reading) — #182's "carry on from the next block" dropped the rest of a paragraph that had only been half heard. **The player is one of the bottom chips now**, not a card that competed with the page: the same material, size and voice as `.time-left` and "Continue" (`--chrome-bg`, the `--chrome-ring` hairline, a 12px blur, no shadow, `--text-secondary` at 0.8125rem, 0.75rem off the bottom), a single 37px pill in the middle of the bottom edge, since those two own its right-hand corner. Play/pause and close are bare glyphs that come up to `--text` under the pointer, like the breadcrumb's menu button — the filled `--text` play button went with the card. The progress is a 2px line inside the pill's foot, at the reading bar's weight and colour, and it is still the seek control, its thumb appearing only on hover or focus.
 

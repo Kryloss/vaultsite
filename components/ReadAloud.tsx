@@ -10,7 +10,7 @@ import {
   isSourcesHeading,
   pickVoice,
   progressAt,
-  stepAfterSwitch,
+  stepOnSwitch,
   stepAtFraction,
   stepOffsets,
 } from "@/lib/read-aloud";
@@ -129,8 +129,8 @@ function voices(): Promise<SpeechSynthesisVoice[]> {
  *
  * - every block it will read can be pressed to move the voice there — except
  *   on a link or a control, and not when the press ended a text selection;
- * - switching language carries on in the other language from the NEXT block
- *   (the one being read has been heard; lib/read-aloud.ts → stepAfterSwitch).
+ * - switching language restarts the block being read, in the other
+ *   language (lib/read-aloud.ts → stepOnSwitch, #183).
  *
  * Pause is the engine's own pause, so a paragraph resumes mid-sentence. Any
  * MOVE while paused — a press on a block, a seek, a language switch — cancels
@@ -279,14 +279,14 @@ export default function ReadAloud({ separated = true }: { separated?: boolean })
     }
   };
 
-  /* Language switched while open: rebuild in the new language and carry on
-     from the next block. <html data-lang> is the toggle's single source. */
+  /* Language switched while open: rebuild in the new language and restart
+     the block being read. <html data-lang> is the toggle's single source. */
   useEffect(() => {
     if (state === "idle") return;
     const observer = new MutationObserver(() => {
       const nowUk = document.documentElement.dataset.lang === "uk";
       if (nowUk === uk.current) return;
-      const next = stepAfterSwitch(pos.current, readingScript(nowUk).length);
+      const next = stepOnSwitch(pos.current, readingScript(nowUk).length);
       build(nowUk);
       if (next === null) {
         stop();
@@ -337,29 +337,30 @@ export default function ReadAloud({ separated = true }: { separated?: boolean })
   }
 
   const playing = state === "playing";
+  /* One pill in the bottom family's material (`.time-left`, "Continue"):
+     play/pause, the title, close, and the progress line along its foot,
+     which is also the seek control. */
   return (
     <div className="idea-read-player" role="region" aria-label={ui.readAloudPlayer[lang]}>
-      <div className="idea-read-row">
-        <button
-          type="button"
-          onClick={toggle}
-          className="idea-read-play press"
-          aria-label={(playing ? ui.readAloudPause : ui.readAloudPlay)[lang]}
-        >
-          {playing ? <PauseIcon className="h-4 w-4" /> : <PlayIcon className="h-4 w-4 translate-x-px" />}
-        </button>
-        <span className="idea-read-title" title={title}>
-          {title}
-        </span>
-        <button
-          type="button"
-          onClick={stop}
-          className="idea-read-close press"
-          aria-label={ui.readAloudClose[lang]}
-        >
-          <CloseIcon className="h-4 w-4" />
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={toggle}
+        className="idea-read-play press"
+        aria-label={(playing ? ui.readAloudPause : ui.readAloudPlay)[lang]}
+      >
+        {playing ? <PauseIcon className="h-3.5 w-3.5" /> : <PlayIcon className="h-3.5 w-3.5" />}
+      </button>
+      <span className="idea-read-title" title={title}>
+        {title}
+      </span>
+      <button
+        type="button"
+        onClick={stop}
+        className="idea-read-close press"
+        aria-label={ui.readAloudClose[lang]}
+      >
+        <CloseIcon className="h-3 w-3" />
+      </button>
       <input
         type="range"
         min={0}

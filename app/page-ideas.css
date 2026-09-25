@@ -143,12 +143,7 @@
    block it will read is a press target, and says so with the cursor and a
    fainter wash under the pointer.
 
-   The player is the floating chrome's material (`--chrome-bg` over a blur,
-   `--chrome-ring`): play/pause filled in `--text` — the inversion the active
-   chip uses, the one emphasis this site has — the title centred between it
-   and close, and the bar under all three. The bar's filled part is `--text`
-   up to `--p`, set by the component; its thumb shows only on hover or focus,
-   so at rest it reads as a progress line and under the pointer as a control. */
+   The player's own note is below, on `.idea-read-player` (#183). */
 .idea-read-aloud {
   display: inline-flex;
   align-items: center;
@@ -187,30 +182,31 @@
   box-shadow: 0 0 0 0.375rem color-mix(in srgb, var(--bg-hover) 55%, transparent);
 }
 
+/* The player is one of the bottom family — `.time-left` and "Continue"
+   (`.resume-reading`): a full pill of `--chrome-bg` with the `--chrome-ring`
+   hairline and the same 12px blur, 0.75rem off the bottom edge, small type
+   in `--text-secondary`, no shadow of its own. It takes the middle of the
+   bottom edge, since those two own its right corner. Its glyphs are quiet
+   the way the breadcrumb's menu button is: tertiary, coming up to `--text`
+   under the pointer, no fill. The progress is a 2px line inside the pill's
+   foot — the reading bar's weight and colour (`.reading-progress`) — and
+   it is also the seek control: its thumb appears only on hover or focus. */
 .idea-read-player {
   position: fixed;
-  z-index: 40;
-  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 30;
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
   left: 50%;
   display: flex;
-  width: min(24rem, calc(100vw - 2rem));
-  flex-direction: column;
-  gap: 0.375rem;
-  padding: 0.5rem 0.5rem 0.625rem;
-  border-radius: var(--r-xl);
-  /* Nearly opaque: unlike the breadcrumb chip, this sits over the text it is
-     reading, and a see-through panel put the next line behind the title. */
-  background: color-mix(in srgb, var(--surface) 94%, transparent);
-  box-shadow: inset 0 0 0 1px var(--chrome-ring), 0 10px 30px rgb(0 0 0 / 0.22);
-  backdrop-filter: blur(18px) saturate(1.3);
-  translate: -50% 0;
-  animation: idea-read-in var(--dur) var(--ease) both;
-}
-
-.idea-read-row {
-  display: flex;
+  max-width: min(20rem, calc(100vw - 1.5rem));
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.125rem;
+  padding: 0.25rem 0.375rem 0.3125rem 0.25rem;
+  border-radius: var(--r-full);
+  background: var(--chrome-bg);
+  box-shadow: inset 0 0 0 1px var(--chrome-ring);
+  backdrop-filter: blur(12px);
+  translate: -50% 0;
+  animation: idea-read-in var(--dur-slow) var(--ease) both;
 }
 
 .idea-read-play,
@@ -219,47 +215,41 @@
   flex: none;
   align-items: center;
   justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
   border-radius: var(--r-full);
+  color: var(--text-secondary);
   cursor: pointer;
-}
-
-.idea-read-play {
-  width: 2.25rem;
-  height: 2.25rem;
-  background: var(--text);
-  color: var(--bg);
+  transition: color var(--dur-fast) var(--ease);
 }
 
 .idea-read-close {
-  width: 2.25rem;
-  height: 2.25rem;
   color: var(--text-tertiary);
-  transition:
-    color var(--dur-fast) var(--ease),
-    background-color var(--dur-fast) var(--ease);
 }
 
+.idea-read-play:hover,
 .idea-read-close:hover {
-  background: var(--bg-hover);
   color: var(--text);
 }
 
 .idea-read-title {
   min-width: 0;
-  flex: 1;
   overflow: hidden;
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-align: center;
+  padding: 0 0.25rem;
+  font-size: 0.8125rem;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--text);
+  color: var(--text-secondary);
 }
 
 .idea-read-bar {
-  width: calc(100% - 0.5rem);
-  height: 0.875rem;
-  margin: 0 0.25rem;
+  position: absolute;
+  right: 0.875rem;
+  bottom: 1px;
+  left: 0.875rem;
+  width: auto;
+  height: 0.625rem;
+  margin: 0;
   background: transparent;
   cursor: pointer;
   appearance: none;
@@ -267,31 +257,31 @@
 }
 
 .idea-read-bar::-webkit-slider-runnable-track {
-  height: 3px;
+  height: 2px;
   border-radius: var(--r-full);
   background: linear-gradient(
     to right,
     var(--text) var(--p),
-    var(--border) var(--p)
+    color-mix(in srgb, var(--text) 14%, transparent) var(--p)
   );
 }
 
 .idea-read-bar::-moz-range-track {
-  height: 3px;
+  height: 2px;
   border-radius: var(--r-full);
-  background: var(--border);
+  background: color-mix(in srgb, var(--text) 14%, transparent);
 }
 
 .idea-read-bar::-moz-range-progress {
-  height: 3px;
+  height: 2px;
   border-radius: var(--r-full);
   background: var(--text);
 }
 
 .idea-read-bar::-webkit-slider-thumb {
-  width: 11px;
-  height: 11px;
-  margin-top: -4px;
+  width: 9px;
+  height: 9px;
+  margin-top: -3.5px;
   border: 0;
   border-radius: var(--r-full);
   background: var(--text);
@@ -301,8 +291,8 @@
 }
 
 .idea-read-bar::-moz-range-thumb {
-  width: 11px;
-  height: 11px;
+  width: 9px;
+  height: 9px;
   border: 0;
   border-radius: var(--r-full);
   background: var(--text);

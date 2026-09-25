@@ -8,7 +8,7 @@ import {
   isSourcesHeading,
   pickVoice,
   progressAt,
-  stepAfterSwitch,
+  stepOnSwitch,
   stepAtFraction,
   stepOffsets,
 } from "./read-aloud.ts";
@@ -73,8 +73,8 @@ test("a seek lands in the block that holds that point", () => {
   assert.equal(stepAtFraction(o, 5), 2);
 });
 
-test("switching language carries on from the next block", () => {
-  assert.equal(stepAfterSwitch(3, 10), 4);
-  assert.equal(stepAfterSwitch(9, 10), null);
-  assert.equal(stepAfterSwitch(3, 4), null);
+test("switching language restarts the block being read", () => {
+  assert.equal(stepOnSwitch(3, 10), 3);
+  assert.equal(stepOnSwitch(9, 4), 3);
+  assert.equal(stepOnSwitch(0, 0), null);
 });

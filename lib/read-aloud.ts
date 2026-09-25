@@ -101,14 +101,15 @@ export function stepAtFraction(offsets: { starts: number[]; total: number }, fra
 }
 
 /**
- * The language changed mid-note: carry on in the other language from the
- * NEXT block — the one being read has been heard, in one language or the
- * other, and restarting it would say it twice. The two readings share their
- * shape (title, creator, facts, then the body block for block — the
- * translations are made that way), so the position carries by index. Null
- * when that was the last block.
+ * The language changed mid-note: restart the block being read, in the other
+ * language (the owner's call, #183 — the NEXT block, #182's first version,
+ * skipped the rest of a paragraph the reader had only half heard). The two
+ * readings share their shape (title, creator, facts, then the body block for
+ * block — the translations are made that way), so the position carries by
+ * index; a shorter translation clamps to its last block. Null when the other
+ * language has nothing to read.
  */
-export function stepAfterSwitch(current: number, newLength: number): number | null {
-  const next = current + 1;
-  return next < newLength ? next : null;
+export function stepOnSwitch(current: number, newLength: number): number | null {
+  if (newLength === 0) return null;
+  return Math.max(0, Math.min(current, newLength - 1));
 }
