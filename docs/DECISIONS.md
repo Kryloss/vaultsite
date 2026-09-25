@@ -203,6 +203,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 192 | Maturity leaves the metadata line; "Listen" in the line's grey |
 | 193 | The series badge wears a list icon instead of an underline |
 | 194 | The series badge reads "2 of 5", without "Part" |
+| 195 | "Listen" follows the word count, with a headphones icon |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1485,3 +1486,7 @@ At the owner's request "Part 1 of 2" lost its dotted underline and gained a smal
 ## 194. The series badge reads "2 of 5", without "Part" (2026-09-25)
 
 At the owner's request the badge drops the word: `seriesPartLabel()` now gives "2 of 5" / "2 з 5", and #193's list icon says what the numbers count. The button carries the full "Part 2 of 5" / "Частина 2 з 5" as its `aria-label`, since the icon is silent to a screen reader.
+
+## 195. "Listen" follows the word count, with a headphones icon (2026-09-25)
+
+The owner moved "Listen" again, from after the date (#191) to after the word count: `July 17, 2026 · 1 min read · 183 words · Listen · 1 of 2 · #tags`. It still lives outside the joined array and draws its own leading separator; `listenAfter` in the entry page names the item it follows (the word count, else the date on a note without reading stats, else last). Its icon changed from the filled play triangle to the sidebar's `HeadphonesIcon`, at 12px with a 2.4 stroke. The floating player keeps play/pause.

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "
 import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
 import { useLang } from "@/components/useLang";
-import { CloseIcon, PauseIcon, PlayIcon } from "@/components/icons";
+import { CloseIcon, HeadphonesIcon, PauseIcon, PlayIcon } from "@/components/icons";
 import {
   factSentence,
   isSourcesHeading,
@@ -327,9 +327,10 @@ export default function ReadAloud({ separated = true }: { separated?: boolean })
       <>
         {separated && <span aria-hidden>·</span>}
         <button type="button" onClick={start} className="idea-read-aloud press">
-          {/* The second icon on page content, at the owner's request (#182):
-              it says "this plays" before the word is read. */}
-          <PlayIcon className="idea-read-aloud-icon" />
+          {/* The second icon on page content, at the owner's request (#182;
+              headphones since #195): it says "listen" before the word is
+              read. */}
+          <HeadphonesIcon className="idea-read-aloud-icon" />
           <T {...ui.readAloud} />
         </button>
       </>

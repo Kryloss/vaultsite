@@ -386,23 +386,32 @@ export default async function EntryPage({ params }: Props) {
   /* Page idea `noteReadAloud` (lib/site-config.ts, DECISIONS #180, #181):
      every note — posts, people, music, shelf, projects. */
   const readAloud = pageIdeas.noteReadAloud;
-  const dated = readAloud && Boolean(entry.date);
+  /* Where "Listen" goes (#195): after the word count, or after the date on a
+     note without reading stats; -1 means neither, so it goes last. */
+  const listenAfter = !readAloud
+    ? -1
+    : stats
+      ? (entry.date ? 2 : 1)
+      : entry.date
+        ? 0
+        : -1;
   const metaLine = (meta.length > 0 || readAloud) && (
     <div className="entry-meta mt-3 flex flex-wrap items-center gap-x-2 text-sm text-[var(--text-tertiary)]">
       {meta.map((part, i) => (
         <Fragment key={i}>
           {i > 0 && <span aria-hidden>·</span>}
           {part}
-          {/* Right after the date (the owner's placement), but outside the
-              join: it renders nothing until the browser says it can speak,
-              so it draws its own separator in front, and the next item's
-              comes from the join as usual. */}
-          {i === 0 && dated && <ReadAloud />}
+          {/* Outside the join: it renders nothing until the browser says it
+              can speak, so it draws its own separator in front, and the next
+              item's comes from the join as usual. */}
+          {i === listenAfter && <ReadAloud />}
         </Fragment>
       ))}
-      {/* An undated note has nothing to follow, so it goes last — with no
-          separator at all on a line that has nothing else on it. */}
-      {readAloud && !dated && <ReadAloud separated={meta.length > 0} />}
+      {/* Nothing to follow: last, with no separator at all on a line that
+          has nothing else on it. */}
+      {readAloud && listenAfter === -1 && (
+        <ReadAloud separated={meta.length > 0} />
+      )}
     </div>
   );
 
@@ -522,7 +531,7 @@ export default async function EntryPage({ params }: Props) {
               </span>
             )}
           </h1>
-          {/* Date · Listen · reading stats · series · #tags. */}
+          {/* Date · reading stats · Listen · series · #tags. */}
           {metaLine}
         </div>
       </header>

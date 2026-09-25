@@ -161,6 +161,9 @@
   width: 0.75rem;
   height: 0.75rem;
   flex: none;
+  /* The headphones are a stroked sidebar glyph; at 12px the set's 1.7
+     fades, so a heavier line, like the series badge's list icon (#195). */
+  stroke-width: 2.4;
 }
 
 .idea-speaking {
