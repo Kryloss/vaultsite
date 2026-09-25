@@ -16,7 +16,7 @@ import type { Series } from "@/lib/series";
 const EDGE = 12;
 
 /**
- * "Part 2 of 5" in the header meta row, opening the list of parts.
+ * "2 of 5" in the header meta row, opening the list of parts.
  *
  * It was a panel under the article first, and it was too much furniture for
  * what it says: a handful of links the reader mostly doesn't need,
@@ -177,11 +177,20 @@ export default function Series({ series }: { series: Series }) {
                   count — which only exists in the browser — can't come from
                   there. Interpolating numbers rules out a `ui` key too. */}
                 {readCount > 0 && (
+                  /* A tick and "1 of 2", like the badge — no "read" (#196).
+                     The word stays for screen readers. */
                   <span className="series-read-count">
-                    <T
-                      en={`${readCount} of ${series.total} read`}
-                      uk={`${readCount} з ${series.total} прочитано`}
-                    />
+                    <CheckIcon className="series-read-tick" />
+                    <span aria-hidden>
+                      {lang === "uk"
+                        ? `${readCount} з ${series.total}`
+                        : `${readCount} of ${series.total}`}
+                    </span>
+                    <span className="sr-only">
+                      {lang === "uk"
+                        ? `${readCount} з ${series.total} прочитано`
+                        : `${readCount} of ${series.total} read`}
+                    </span>
                   </span>
                 )}
               </p>

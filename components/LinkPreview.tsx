@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import type { LinkPreview as Preview } from "@/lib/previews";
 import T from "./T";
+import { ui } from "@/lib/ui-strings";
 
 /**
  * Hover previews for internal links in prose — the Obsidian page-preview
@@ -179,15 +180,25 @@ export default function LinkPreview({ previews }: { previews: Preview[] }) {
           style={{ "--cover-ar": p.coverAr } as CSSProperties}
         />
       )}
-      <p className="link-preview-meta">
-        <T en={p.section} uk={p.sectionUk} />
-        {p.dateLabel && (
-          <>
-            <span aria-hidden> · </span>
-            <T en={p.dateLabel} uk={p.dateLabelUk} />
-          </>
-        )}
-      </p>
+      {/* A post's card repeats the line under the post's title (#196);
+          everything else says where it lives first. */}
+      {p.minutes && p.dateLabel ? (
+        <p className="link-preview-meta">
+          <T en={p.dateLabel} uk={p.dateLabelUk} />
+          <span aria-hidden> · </span>
+          {p.minutes} <T {...ui.minRead} />
+        </p>
+      ) : (
+        <p className="link-preview-meta">
+          <T en={p.section} uk={p.sectionUk} />
+          {p.dateLabel && (
+            <>
+              <span aria-hidden> · </span>
+              <T en={p.dateLabel} uk={p.dateLabelUk} />
+            </>
+          )}
+        </p>
+      )}
       <p className="link-preview-title">
         <T en={p.title} uk={p.titleUk} />
       </p>

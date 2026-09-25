@@ -274,13 +274,9 @@ export const ui = {
     uk: "Цитат поки немає — додайте > цитату в нотатку книги.",
   },
 
-  // note maturity
-  maturitySeedling: { en: "Seedling", uk: "Паросток" },
-  maturityBudding: { en: "Budding", uk: "Розвивається" },
-  maturityEvergreen: { en: "Evergreen", uk: "Вічнозелена" },
 
   /* Series (multi-part notes): the popover shows the series' own name, and
-     "Part 2 of 5" interpolates numbers, so it's built per note by
+     "2 of 5" interpolates numbers, so it's built per note by
      seriesPartLabel() in lib/series.ts. These two are fixed, so they live
      here — they label the checkbox that ticks a part read by hand. */
   markRead: { en: "Mark as read", uk: "Позначити прочитаним" },
@@ -516,7 +512,6 @@ export const devUi = {
   devAliasesHint: { en: "Other names notes may link with, comma-separated", uk: "Інші назви, якими нотатки можуть посилатися, через кому" },
   devSlug: { en: "URL slug", uk: "Слаг URL" },
   devSlugHint: { en: "Changes this note's address — old links break", uk: "Змінює адресу нотатки — старі посилання зламаються" },
-  devMaturity: { en: "Maturity", uk: "Зрілість" },
   devMediumField: { en: "Medium", uk: "Тип" },
   devCreatorBio: { en: "Creator bio", uk: "Про автора" },
   devCreatorBioUk: { en: "Creator bio (Ukrainian)", uk: "Про автора (українською)" },

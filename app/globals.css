@@ -3022,14 +3022,6 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   color: var(--text-secondary);
 }
 
-/* ---------- Note maturity (lib/maturity.ts) ---------- */
-
-.maturity {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3125rem;
-}
-
 /* ---------- 404 suggestions (components/NotFoundSuggestions.tsx) ------- */
 
 .backlink-ish {
@@ -3291,6 +3283,7 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   border: 0;
   background: none;
   font: inherit;
+  font-variant-numeric: tabular-nums;
   color: inherit;
   cursor: pointer;
   transition: color var(--dur-fast) var(--ease);
@@ -3383,12 +3376,19 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
 /* "3 of 5 read", after the series' name and quieter than it — a count, not a
    second heading. Only rendered once there's something to count. */
 .series-read-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 0.5rem;
   font-weight: 400;
+  font-variant-numeric: tabular-nums;
   opacity: 0.75;
 }
 
-.series-read-count::before {
-  content: " · ";
+.series-read-tick {
+  width: 0.75rem;
+  height: 0.75rem;
+  stroke-width: 2.4;
 }
 
 .series-list {
@@ -3418,11 +3418,12 @@ a.series-link:hover {
   background: var(--bg-hover);
 }
 
+/* The badge's figures: same size as the meta line it sits in (#196). */
 .series-number {
   flex: none;
   width: 0.875rem;
   font-variant-numeric: tabular-nums;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   color: var(--text-tertiary);
 }
 
@@ -4578,7 +4579,7 @@ svg.diagram tspan {
 }
 
 /* --- Metadata that stops competing --------------------------------------
-   Date, reading time, word count, maturity and the series badge could appear
+   Date, reading time, word count, Listen and the series badge could appear
    under one heading at sizes and colours close enough to the title to argue
    with it. One size, one grey, one line — including the pieces that style
    themselves. */
@@ -4588,7 +4589,6 @@ svg.diagram tspan {
   color: var(--text-tertiary);
 }
 
-.entry-meta .maturity,
 .entry-meta .series-badge {
   font-size: 0.8125rem;
   color: inherit;

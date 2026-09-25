@@ -640,17 +640,6 @@ export default function DevEntryOptions({
               <input {...field("slug")} maxLength={120} spellCheck={false} />
               <small>{devUi.devSlugHint[lang]}</small>
             </label>
-            {sectionType === "posts" && (
-              <label>
-                <span>{devUi.devMaturity[lang]}</span>
-                <select {...field("maturity")}>
-                  <option value="">{devUi.devAutomatic[lang]}</option>
-                  <option value="seedling">seedling</option>
-                  <option value="budding">budding</option>
-                  <option value="evergreen">evergreen</option>
-                </select>
-              </label>
-            )}
             {supportsShelf && (
               <>
                 <label>

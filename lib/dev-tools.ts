@@ -48,7 +48,6 @@ export type DevEditorAction =
 export const DEV_EXTRA_FIELDS = [
   "aliases",
   "slug",
-  "maturity",
   "medium",
   "author",
   "author_uk",

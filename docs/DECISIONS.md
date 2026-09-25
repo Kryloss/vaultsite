@@ -204,6 +204,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 193 | The series badge wears a list icon instead of an underline |
 | 194 | The series badge reads "2 of 5", without "Part" |
 | 195 | "Listen" follows the word count, with a headphones icon |
+| 196 | Maturity removed; series list and previews match the metadata line |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1490,3 +1491,7 @@ At the owner's request the badge drops the word: `seriesPartLabel()` now gives "
 ## 195. "Listen" follows the word count, with a headphones icon (2026-09-25)
 
 The owner moved "Listen" again, from after the date (#191) to after the word count: `July 17, 2026 · 1 min read · 183 words · Listen · 1 of 2 · #tags`. It still lives outside the joined array and draws its own leading separator; `listenAfter` in the entry page names the item it follows (the word count, else the date on a note without reading stats, else last). Its icon changed from the filled play triangle to the sidebar's `HeadphonesIcon`, at 12px with a 2.4 stroke. The floating player keeps play/pause.
+
+## 196. Maturity removed; series list and previews match the metadata line (2026-09-25)
+
+Follow-ups to #192–#195, at the owner's request. `lib/maturity.ts`, its three `ui` strings, the `.maturity` styles and the dock's Maturity field are gone, since the site no longer shows it; the sidecar still accepts and validates a `maturity:` key, so existing frontmatter is left alone. The series list's count reads "✓ 1 of 2" instead of "· 1 of 2 read" (the full phrase stays as screen-reader text), and its part numbers use the badge's size, 0.8125rem tabular figures. A link preview for a post now shows the post's own line, "date · N min read" (`minutes` in `lib/previews.ts`); every other preview keeps "Section · date".

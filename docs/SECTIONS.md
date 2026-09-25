@@ -15,7 +15,7 @@ The vault model and the per-section conventions that are not visible from `lib/v
 ## Frontmatter
 
 - Section `main.md`: `title`, `title_uk`, `description`, `description_uk`, `icon`, `order`, `type`, `slug` (override), `draft`. Full frontmatter is exposed as `section.meta` so section types can define their own keys (`music` reads `playlists:` and `artists:`; `now` reads `updated:`/`updated_uk:`, `resume_file:`).
-- Entries: `title`, `title_uk`, `date` (YYYY-MM-DD), `description`, `description_uk` (exposed as `Entry.descriptionUk`), `slug`, `draft` (or `published: false`), `series` (+ optional `series_uk`, `part`), `aliases:`, `category:`/`categories:`, `cover:` (people, shelf and music), `maturity:` (posts; still editable, but no longer shown on the page, #192). Shelf keys: `docs/SHELF.md`. Music keys: `docs/MUSIC.md`. Entry frontmatter is exposed as `entry.meta` (same pattern as `section.meta`) for type-specific keys.
+- Entries: `title`, `title_uk`, `date` (YYYY-MM-DD), `description`, `description_uk` (exposed as `Entry.descriptionUk`), `slug`, `draft` (or `published: false`), `series` (+ optional `series_uk`, `part`), `aliases:`, `category:`/`categories:`, `cover:` (people, shelf and music), `maturity:` (posts; accepted by the sidecar but no longer used or editable in the dock, #192/#196). Shelf keys: `docs/SHELF.md`. Music keys: `docs/MUSIC.md`. Entry frontmatter is exposed as `entry.meta` (same pattern as `section.meta`) for type-specific keys.
 - Section bodies use a sibling `main.uk.md` and entry bodies a sibling `<name>.uk.md`, body only.
 
 ## Posts (`posts`, the default type)

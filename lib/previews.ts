@@ -11,6 +11,7 @@ import {
   getEntries,
   displayDate,
   displayDateUk,
+  readingStats,
 } from "./vault";
 import { resolveCoverUrl } from "./markdown";
 import { dimsFor, srcSetFor } from "./blur";
@@ -28,6 +29,11 @@ export interface LinkPreview {
   /** Pre-formatted so the client does no date work. */
   dateLabel?: string;
   dateLabelUk?: string;
+  /**
+   * Reading time, posts only. When set, the card's line reads like the
+   * post's own — "date · 3 min read" — instead of "Posts · date" (#196).
+   */
+  minutes?: number;
   /** Cover image for section types that have one (people, shelf). */
   cover?: string;
   /**
@@ -108,6 +114,8 @@ export function getLinkPreviews(): LinkPreview[] {
           (entry.contentUk ? excerpt(entry.contentUk) : undefined),
         dateLabel: entry.date ? displayDate(entry.date) : undefined,
         dateLabelUk: entry.date ? displayDateUk(entry.date) : undefined,
+        minutes:
+          section.type === "posts" ? readingStats(entry.content).minutes : undefined,
         cover,
         coverAr: dims ? Number((dims.w / dims.h).toFixed(3)) : undefined,
         coverSrcSet: cover ? srcSetFor(cover) : undefined,
