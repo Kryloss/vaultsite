@@ -206,6 +206,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 195 | "Listen" follows the word count, with a headphones icon |
 | 196 | Maturity removed; series list and previews match the metadata line |
 | 197 | Series list: ticked parts lose their box; count sits right |
+| 198 | Series count without the tick |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1500,3 +1501,7 @@ Follow-ups to #192–#195, at the owner's request. `lib/maturity.ts`, its three 
 ## 197. Series list: ticked parts lose their box; count sits right (2026-09-25)
 
 At the owner's request a ticked part shows only its tick, with no box: grey (`--text-tertiary`) for other parts, `--text` for the part you're on (`.series-row:has(.series-current)`). An unticked part keeps its empty box so it can still be found and pressed. The "✓ 1 of 2" count is pushed to the right edge of the header, flush with the tick column. `.series-name` became a flex row because the count's inline-flex box took its SVG's bottom as its baseline and sat higher than the name.
+
+## 198. Series count without the tick (2026-09-25)
+
+The owner asked for a plain "1 of 2" in the series list header; #196's tick in front of it is gone. The screen-reader text still says "1 of 2 read".

@@ -177,10 +177,9 @@ export default function Series({ series }: { series: Series }) {
                   count — which only exists in the browser — can't come from
                   there. Interpolating numbers rules out a `ui` key too. */}
                 {readCount > 0 && (
-                  /* A tick and "1 of 2", like the badge — no "read" (#196).
+                  /* Just "1 of 2", like the badge — no "read" (#196).
                      The word stays for screen readers. */
                   <span className="series-read-count">
-                    <CheckIcon className="series-read-tick" />
                     <span aria-hidden>
                       {lang === "uk"
                         ? `${readCount} з ${series.total}`

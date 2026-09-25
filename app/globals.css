@@ -3393,11 +3393,7 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   opacity: 0.75;
 }
 
-.series-read-tick {
-  width: 0.75rem;
-  height: 0.75rem;
-  stroke-width: 2.4;
-}
+
 
 .series-list {
   /* The number is its own column rather than a list marker, so the current
