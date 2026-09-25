@@ -10645,23 +10645,71 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   }
 }
 
-/* The drawer floats like the other panels (#187) instead of standing flush
-   against the window's edge: 0.75rem off the top, bottom and left — the
-   breadcrumb bar's offset — rounded, the hairline all the way round, and a
-   drop shadow. Still `w-56` wide (the constellation is measured against
-   that), still ONE even blur (see the note on `.sidebar-panel` above). The
-   position itself stays with Chrome.tsx's `fixed` utility; only the insets
-   are here, and the closed state there parks it its own width PLUS 3rem off
-   screen, so neither the hairline nor the shadow's reach is left showing at
-   the window's edge — the thing an outset line did before (#74). */
+/* The drawer floats like the other panels (#187, #188): 0.75rem off the top
+   and bottom — the breadcrumb bar's offset — rounded, ringed, and lifted by a
+   drop shadow. Its LEFT end is never on screen: it starts 1rem past the
+   window's edge and is 1rem wider (`w-60` + `pl-4` in Chrome.tsx), so the
+   content inside sits exactly where it did at `w-56` and the constellation's
+   strip keeps the width it is measured against. The position itself stays
+   with Chrome.tsx's `fixed` utility; only the insets are here. Closed, it
+   parks its own width PLUS 3rem off-screen, past the shadow's reach (#74).
+
+   THE BLUR IS THE BREADCRUMB BAR'S, and that is what makes its hairline the
+   same soft line (#188). The bar's blur lives on two `z-index: -1` layers,
+   which paint ABOVE its own background and inset ring inside its stacking
+   context — so the ring is softened by them. With the blur on the element
+   itself (#81) the ring was painted crisp on top of it and read as a white
+   outline. Two layers here too, then: 5px over the whole panel, and 14px
+   fading out only in the last few pixels at the rim. #81's seam came from
+   grading the blur ACROSS 224px; a fade confined to the rim cannot draw one.
+   `z-index: 50` from the utility is the stacking context the layers need. */
 .sidebar-panel {
   top: max(0.75rem, env(safe-area-inset-top));
   bottom: max(0.75rem, env(safe-area-inset-bottom));
-  left: max(0.75rem, env(safe-area-inset-left));
+  left: -1rem;
   border-radius: var(--r-xl);
   box-shadow:
     inset 0 0 0 1px var(--chrome-ring),
     0 10px 30px rgb(0 0 0 / 0.18);
+  backdrop-filter: none;
+}
+
+.sidebar-panel::before,
+.sidebar-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.sidebar-panel::before {
+  backdrop-filter: blur(5px);
+}
+
+.sidebar-panel::after {
+  backdrop-filter: blur(14px);
+  -webkit-mask-image:
+    linear-gradient(to right, transparent, #000 8px, #000 calc(100% - 8px), transparent),
+    linear-gradient(to bottom, transparent, #000 8px, #000 calc(100% - 8px), transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent, #000 8px, #000 calc(100% - 8px), transparent),
+    linear-gradient(to bottom, transparent, #000 8px, #000 calc(100% - 8px), transparent);
+  mask-composite: intersect;
+}
+
+/* The album button on a phone's music note (#95) was a step smaller than the
+   contents button beside it; it takes the bar's 2.5rem and the same 0.75rem
+   offset now. Its SQUARE corners stay: it shows album art, and a round crop
+   of a square sleeve is a worse picture of the record. */
+@media (max-width: 639px) {
+  .music-pill {
+    width: 2.5rem;
+    height: 2.5rem;
+    top: 0.75rem;
+  }
 }
 
 /* The panels. */

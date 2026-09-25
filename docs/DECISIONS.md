@@ -196,6 +196,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 185 | One material for every pill, badge and card |
 | 186 | #185 narrowed to overlays: the page keeps its own chips, cards and badges |
 | 187 | The drawer floats like the other overlays |
+| 188 | The drawer's hairline is softened like the bar's, and its left end is off-screen |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1450,4 +1451,8 @@ What floats over the page is one material, finished off rather than removed. **P
 ## 187. The drawer floats like the other overlays (2026-09-25)
 
 The owner asked for the sidebar to match the overlays too. Its material already did — `--chrome-bg`, the hairline, one even 14px blur (#81) — but its SHAPE did not: a full-height slab flush against the window's left edge, square, with the hairline on its right side only, among pills and sheets that all float 0.75rem off the edge, rounded, ringed all round and lifted by a shadow. It now floats the same way: `top`/`bottom`/`left` at `max(0.75rem, env(safe-area-inset-*))` (the breadcrumb bar's offset), `--r-xl`, the inset `--chrome-ring` all round plus `0 10px 30px rgb(0 0 0 / 0.18)`. Width stays `w-56` — the constellation's strip is measured against it — and the blur stays one layer, for #81's reason. The insets are CSS on `.sidebar-panel`; `fixed` stays Chrome.tsx's utility, and `inset-y-0 left-0` left the markup so the class and a utility never both set them. **Parking**: closed, it translates by its own width PLUS 3rem (`-translate-x-[calc(100%+3rem)]`), not `-translate-x-full` — from a 0.75rem inset that leaves neither the hairline nor the shadow's 30px reach on screen, which is the stripe #74/#80 once left down the left of every page. The edge peek and the modal backdrop are unchanged; the peek opens onto the panel exactly as before, verified against main.
+
+## 188. The drawer's hairline is softened like the bar's, and its left end is off-screen (2026-09-25)
+
+The owner saw a white outline on #187's drawer that the breadcrumb bar doesn't have. Cause: the bar's blur lives on two `z-index: -1` pseudo-layers, which paint ABOVE its own background and inset ring inside its stacking context, so its ring is softened by them; the drawer's blur was on the element itself, so its ring painted crisp on top. The drawer now takes the same two layers (5px over all of it, 14px fading out only within 8px of the rim — #81's seam came from grading the blur across the panel's width, which a rim-only fade does not do). And its left end is no longer shown: it starts 1rem past the window's edge and is 1rem wider (`w-60` + `pl-4`), so its content and the constellation keep the `w-56` geometry they were drawn for. Top and bottom still float 0.75rem off the edge.
 
