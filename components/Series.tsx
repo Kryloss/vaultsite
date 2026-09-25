@@ -160,84 +160,88 @@ export default function Series({ series }: { series: Series }) {
         inert={!open}
         aria-label={lang === "uk" ? "Частини циклу" : "Parts of this series"}
       >
-        {everOpen && (
-          <>
-            {/* The series' own name, and no label in front of it — "Series:
+        {/* The scroller is this inner box, not the sheet: the sheet's blur
+            layers are absolutely positioned and would scroll away (#190). */}
+        <div className="series-sheet-body">
+          {everOpen && (
+            <>
+              {/* The series' own name, and no label in front of it — "Series:
                 Road to Security+" says the word twice over, once needlessly. */}
-            <p className="series-name">
-              <T en={series.name} uk={series.nameUk} />
-              {/* Built here rather than in lib/series.ts: this is a client
+              <p className="series-name">
+                <T en={series.name} uk={series.nameUk} />
+                {/* Built here rather than in lib/series.ts: this is a client
                   component and that module reaches the filesystem, so the
                   count — which only exists in the browser — can't come from
                   there. Interpolating numbers rules out a `ui` key too. */}
-              {readCount > 0 && (
-                <span className="series-read-count">
-                  <T
-                    en={`${readCount} of ${series.total} read`}
-                    uk={`${readCount} з ${series.total} прочитано`}
-                  />
-                </span>
-              )}
-            </p>
+                {readCount > 0 && (
+                  <span className="series-read-count">
+                    <T
+                      en={`${readCount} of ${series.total} read`}
+                      uk={`${readCount} з ${series.total} прочитано`}
+                    />
+                  </span>
+                )}
+              </p>
 
-            <ol className="series-list">
-              {series.parts.map((part) => {
-                const done = read.has(part.href);
-                const label = (
-                  <>
-                    <span className="series-number" aria-hidden>
-                      {part.number}
-                    </span>
-                    <span className="series-part-title">
-                      <T en={part.title} uk={part.titleUk} />
-                    </span>
-                  </>
-                );
-
-                return (
-                  <li key={part.href} className="series-row">
-                    {part.current ? (
-                      /* The note you're on stays in the list, unlinked — take
-                         it out and the numbers lie about where you are. */
-                      <span
-                        className="series-link series-current"
-                        aria-current="true"
-                      >
-                        {label}
+              <ol className="series-list">
+                {series.parts.map((part) => {
+                  const done = read.has(part.href);
+                  const label = (
+                    <>
+                      <span className="series-number" aria-hidden>
+                        {part.number}
                       </span>
-                    ) : (
-                      <Link
-                        href={part.href}
-                        className="series-link"
-                        onClick={() => setOpen(false)}
-                      >
-                        {label}
-                      </Link>
-                    )}
+                      <span className="series-part-title">
+                        <T en={part.title} uk={part.titleUk} />
+                      </span>
+                    </>
+                  );
 
-                    {/* Outside the link, deliberately: a checkbox inside an
+                  return (
+                    <li key={part.href} className="series-row">
+                      {part.current ? (
+                        /* The note you're on stays in the list, unlinked — take
+                         it out and the numbers lie about where you are. */
+                        <span
+                          className="series-link series-current"
+                          aria-current="true"
+                        >
+                          {label}
+                        </span>
+                      ) : (
+                        <Link
+                          href={part.href}
+                          className="series-link"
+                          onClick={() => setOpen(false)}
+                        >
+                          {label}
+                        </Link>
+                      )}
+
+                      {/* Outside the link, deliberately: a checkbox inside an
                         anchor is a control you can't reach without following
                         the link. Its own button, its own tab stop, and the
                         panel stays open when you press it. */}
-                    <button
-                      type="button"
-                      role="checkbox"
-                      aria-checked={done}
-                      aria-label={
-                        done ? ui.markUnread[lang] : ui.markRead[lang]
-                      }
-                      title={done ? ui.markUnread[lang] : ui.markRead[lang]}
-                      className="series-check"
-                      onClick={() => toggle(part.href)}
-                    >
-                      <CheckIcon className="series-tick" />
-                    </button>
-                  </li>
-                );
-              })}
-            </ol>
-          </>
-        )}
+                      <button
+                        type="button"
+                        role="checkbox"
+                        aria-checked={done}
+                        aria-label={
+                          done ? ui.markUnread[lang] : ui.markRead[lang]
+                        }
+                        title={done ? ui.markUnread[lang] : ui.markRead[lang]}
+                        className="series-check"
+                        onClick={() => toggle(part.href)}
+                      >
+                        <CheckIcon className="series-tick" />
+                      </button>
+                    </li>
+                  );
+                })}
+              </ol>
+            </>
+          )}
+        </div>
       </nav>
     </span>
   );
