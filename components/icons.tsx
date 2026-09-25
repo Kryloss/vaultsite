@@ -289,6 +289,17 @@ export function PanelIcon({ className }: IconProps) {
   );
 }
 
+/* The series badge's mark (components/Series.tsx, DECISIONS #193): a short
+   list, since the badge opens the list of parts. Heavier than the set's
+   stroke — it is drawn at 12px, where 1.7 fades to grey hairlines. */
+export function ListIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...stroke} strokeWidth={2.4} aria-hidden>
+      <path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01" />
+    </svg>
+  );
+}
+
 /* Play and pause — the read-aloud control (components/ReadAloud.tsx,
    DECISIONS #182). Filled, since at 12–16px a stroked triangle reads as an
    outline of nothing. */

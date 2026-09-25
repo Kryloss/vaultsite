@@ -201,6 +201,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 190 | The series list and link previews join the drawer's material |
 | 191 | "Listen" sits right after the date |
 | 192 | Maturity leaves the metadata line; "Listen" in the line's grey |
+| 193 | The series badge wears a list icon instead of an underline |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1475,3 +1476,7 @@ The owner moved "Listen" from the end of a note's metadata line (#180) to straig
 ## 192. Maturity leaves the metadata line; "Listen" in the line's grey (2026-09-25)
 
 At the owner's request the maturity word ("Seedling", #24) is no longer shown under a post's title. The `maturity:` key, `lib/maturity.ts` and the dock's field stay, so nothing in the vault changes and it can come back by re-adding the one `meta.push`. "Listen" was `--text-secondary`, a step darker than everything else on the line; it now inherits the line's `--text-tertiary` and still darkens to `--text` on hover.
+
+## 193. The series badge wears a list icon instead of an underline (2026-09-25)
+
+At the owner's request "Part 1 of 2" lost its dotted underline and gained a small list icon in front, the same shape as "Listen" beside it (`ListIcon`, 12px, a heavier 2.4 stroke so it doesn't fade at that size). This is the THIRD icon on page content (#64, #161, #182) — asked for directly, like the second. The read-progress line that grew along the underline went with it; the panel still says "N of M read" and ticks each part. `.entry-meta .series-badge` sets `color: inherit` after the badge's own hover rule and so had been keeping it grey on hover; a hover rule below it now darkens it to `--text`, like "Listen".

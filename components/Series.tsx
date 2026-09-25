@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import T from "@/components/T";
-import { CheckIcon } from "@/components/icons";
+import { CheckIcon, ListIcon } from "@/components/icons";
 import { useLang } from "@/components/useLang";
 import { markRead, readNotes, unmarkRead, READ_EVENT } from "@/lib/read-notes";
 import { ui } from "@/lib/ui-strings";
@@ -133,15 +133,11 @@ export default function Series({ series }: { series: Series }) {
         aria-expanded={open}
         aria-controls="series-parts"
         className="series-badge"
-        /* The fraction of the arc read, drawn as a line under the badge in
-           globals.css. Not text: a number here would change the badge's width
-           after hydration, and this row is metadata, not a dashboard. */
-        style={
-          {
-            "--read": String(readCount / series.total),
-          } as React.CSSProperties
-        }
       >
+        {/* The third page-content icon, at the owner's request (#193): it
+            marks the badge as the thing that opens the list of parts, in place
+            of the dotted underline. */}
+        <ListIcon className="series-badge-icon" />
         <T {...series.partLabel} />
       </button>
 
