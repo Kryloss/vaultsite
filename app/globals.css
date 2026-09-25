@@ -10645,6 +10645,25 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   }
 }
 
+/* The drawer floats like the other panels (#187) instead of standing flush
+   against the window's edge: 0.75rem off the top, bottom and left — the
+   breadcrumb bar's offset — rounded, the hairline all the way round, and a
+   drop shadow. Still `w-56` wide (the constellation is measured against
+   that), still ONE even blur (see the note on `.sidebar-panel` above). The
+   position itself stays with Chrome.tsx's `fixed` utility; only the insets
+   are here, and the closed state there parks it its own width PLUS 3rem off
+   screen, so neither the hairline nor the shadow's reach is left showing at
+   the window's edge — the thing an outset line did before (#74). */
+.sidebar-panel {
+  top: max(0.75rem, env(safe-area-inset-top));
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
+  left: max(0.75rem, env(safe-area-inset-left));
+  border-radius: var(--r-xl);
+  box-shadow:
+    inset 0 0 0 1px var(--chrome-ring),
+    0 10px 30px rgb(0 0 0 / 0.18);
+}
+
 /* The panels. */
 .toc-sheet,
 .series-sheet,

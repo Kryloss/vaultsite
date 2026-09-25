@@ -195,6 +195,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 184 | Every floating chip wears the breadcrumb bar's class |
 | 185 | One material for every pill, badge and card |
 | 186 | #185 narrowed to overlays: the page keeps its own chips, cards and badges |
+| 187 | The drawer floats like the other overlays |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1445,4 +1446,8 @@ The block is unlayered, so it beats the Tailwind utilities these elements used t
 The owner reverted #185 to overlay UI only. The page is back as it was before it — outline category chips at their old size, the /music field and language button, Now's "Updated" and "PDF", the Explore, goal and Posts lead cards, the résumé's small labels, New, the cover badges' scrim, a person's name card — by restoring those files and rules to their #184 state; `.pill`, `.pill-tone` and `.card` are gone.
 
 What floats over the page is one material, finished off rather than removed. **Pills wear `.chrome-bar`**: to #184's breadcrumb, Today's vibe, time remaining, "Continue" and read-aloud player, and #185's dev pencil and selection link, this adds the contents button (identical already, but by copy), the skip link (it was `--bg` with a `--border` outline) and the album button on a phone's music note, which also comes up from 2.25rem to the others' 2.5rem and 0.75rem offset — its square corners stay, since it shows album art (#95). **Panels take the sidebar drawer's version** of the material — the fill, the hairline, one even 14px blur, since a graduated blur shows a seam across something this size: the contents sheet and series list (which had a `--border` outline and a 12px blur), link previews and the ⌘K and shortcut dialogs (which were opaque `--bg` with a `--border` outline). Each keeps its own drop shadow. The phone's music sheet stays frameless on purpose (#94); the lightbox's round arrows stay as they are.
+
+## 187. The drawer floats like the other overlays (2026-09-25)
+
+The owner asked for the sidebar to match the overlays too. Its material already did — `--chrome-bg`, the hairline, one even 14px blur (#81) — but its SHAPE did not: a full-height slab flush against the window's left edge, square, with the hairline on its right side only, among pills and sheets that all float 0.75rem off the edge, rounded, ringed all round and lifted by a shadow. It now floats the same way: `top`/`bottom`/`left` at `max(0.75rem, env(safe-area-inset-*))` (the breadcrumb bar's offset), `--r-xl`, the inset `--chrome-ring` all round plus `0 10px 30px rgb(0 0 0 / 0.18)`. Width stays `w-56` — the constellation's strip is measured against it — and the blur stays one layer, for #81's reason. The insets are CSS on `.sidebar-panel`; `fixed` stays Chrome.tsx's utility, and `inset-y-0 left-0` left the markup so the class and a utility never both set them. **Parking**: closed, it translates by its own width PLUS 3rem (`-translate-x-[calc(100%+3rem)]`), not `-translate-x-full` — from a 0.75rem inset that leaves neither the hairline nor the shadow's 30px reach on screen, which is the stripe #74/#80 once left down the left of every page. The edge peek and the modal backdrop are unchanged; the peek opens onto the panel exactly as before, verified against main.
 

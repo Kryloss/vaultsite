@@ -838,8 +838,11 @@ export default function Chrome({
         onPointerLeave={unpeek}
         /* Fill, hairline and the layered blur come from `.sidebar-panel` in
            globals.css, the same way the two floating bars get theirs. */
-        className={`sidebar-panel fixed inset-y-0 left-0 z-50 flex w-56 flex-col py-5 transition-transform duration-300 ease-out ${
-          open ? "translate-x-0" : "-translate-x-full"
+        /* It floats like the other overlays (#187): its top, bottom and left
+           insets live on `.sidebar-panel`, and a closed one parks its own
+           width PLUS 3rem off-screen, past the reach of its drop shadow. */
+        className={`sidebar-panel fixed z-50 flex w-56 flex-col py-5 transition-transform duration-300 ease-out ${
+          open ? "translate-x-0" : "-translate-x-[calc(100%+3rem)]"
         }`}
       >
         <div className="flex items-center justify-between px-6 pb-5">
