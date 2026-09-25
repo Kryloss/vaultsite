@@ -193,6 +193,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 182 | The read-aloud player: play/pause, title, close and a seek bar; press a block to go there; it follows the language |
 | 183 | The read-aloud player joins the bottom chips, and a language switch restarts the block |
 | 184 | Every floating chip wears the breadcrumb bar's class |
+| 185 | One material for every pill, badge and card |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1426,4 +1427,15 @@ Two changes to #182, both the owner's. **A language switch now restarts the bloc
 ## 184. Every floating chip wears the breadcrumb bar's class (2026-09-24)
 
 The owner asked whether the time-remaining chip matched the breadcrumb bar, and it didn't: same fill, ring, text colour and 12px offset, but 34px tall to the bar's 40, 13px regular type to its 14px medium, and one flat 12px blur where the bar has two layers (5px, and a 16px one that fades to the rim) — so its edge read hard where the bar's dissolves. "Continue" had the same copy, and #183's read-aloud player was built to match them. All three now WEAR `.chrome-bar` (the class on the element, in `ReadingProgress.tsx`, `ReadingPosition.tsx`, `ReadAloud.tsx`) instead of copying its declarations, at the bar's 2.5rem, 14px 500 `--text-secondary`, and its z-index 30 — `.time-left` was 25, and #167 is why two things wearing one material must sit at the same level. Their own `background`, `box-shadow` and `backdrop-filter` are deleted: a `backdrop-filter` on the element as well as on the pseudo-elements would blur twice. `.time-left` takes its height from `line-height`, never `display`, because the component shows and hides it with the `hidden` attribute. The dev-only corner pencil's `--corner-pill-h` follows it to 2.5rem.
+
+## 185. One material for every pill, badge and card (2026-09-25)
+
+After #184 the owner asked for ALL pills to match — naming the dev pencil, a person's name card over their portrait, the Posts lead card, the category chips and the search field "for more". The site had four materials for the same shape: `.chrome-bar` for floating chrome, a transparent pill with a `--border` outline for chips and page buttons, `--surface` for the résumé's small labels, and a black scrim for badges on artwork; its cards were a `--border` outline. Now there is one — `--chrome-bg` with the inset `--chrome-ring` hairline — in three sizes, in a block at the very end of `globals.css`:
+
+- **Floating chrome wears `.chrome-bar`**, now including the selection link (it was an inverted `--text` pill; `PILL_HEIGHT` in `SelectionLink.tsx` follows it to 40) and the dev pencil (its own blur off, so the bar's two layers do it; `position`/`z-index` so they stay inside it).
+- **`.pill`** — the page's pressable pills at the bar's 2.5rem, 14px 500 `--text-secondary`: the category chips on Posts, People and the shelf's medium and studio pages; /music's search field and language button (they keep a real 1px border in the ring colour, because the search label is positioned from it, and the label moved with the new padding); Now's "Updated" and the résumé's "PDF". Selected is `.is-active`, the `--text` inversion that is the site's one emphasis (#64).
+- **`.pill-tone`** — the material alone on labels that keep their size: the résumé's Current and strengths, and (by selector) New after a title and the "Reading"/"New" badges on covers, which lose #84's black scrim and blur instead.
+- **`.card`** — Explore, the Now goals and the Posts lead (whose hairline sits on an `::after` over its picture, since an inset shadow paints under children). A person's name card takes the material with a blur and no drop shadow.
+
+The block is unlayered, so it beats the Tailwind utilities these elements used to paint themselves with; that is why their hover is written there too — a `hover:bg-…` utility cannot beat an unlayered background. No `transition` shorthand in it: `.press` owns the transition list (#52). Left alone on purpose: the amber Draft chip (a dev-only warning, #64's named exception), the lightbox's round arrows (circles on a dark viewer, not pills), the 404's two buttons (squared on purpose, #161), and the command palette and shortcut sheet (dialogs, not pills).
 

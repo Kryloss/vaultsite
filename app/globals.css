@@ -10578,3 +10578,156 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   .vibe-trigger:not(:disabled):hover .vibe-note { transform: none; }
 }
 @media print { .chrome-cluster { display: none; } }
+
+/* ==========================================================================
+   ONE PILL MATERIAL (DECISIONS #185)
+
+   Every pill, badge and card on the site is made of the breadcrumb bar's
+   material: `--chrome-bg` for the fill, the `--chrome-ring` hairline drawn
+   INSIDE the box, and a blur wherever it sits over something worth blurring.
+   Three sizes, one material:
+
+   - floating chrome wears `.chrome-bar` itself (the breadcrumb, Today's vibe,
+     the time remaining, "Continue", the read-aloud player, the dev pencil,
+     the selection link) — 2.5rem, 14px medium `--text-secondary`;
+   - `.pill` is the same thing in the page, for the controls a reader
+     presses: category chips, the /music search and language button, the Now
+     page's "Updated" and "PDF". Same 2.5rem, same type. Selected is the
+     site's one emphasis, `--text` inverted (#64);
+   - `.pill-tone` is the material alone, for small labels that keep their own
+     size (the résumé's "Current" and strengths, New, the cover badges), and
+     `.card` for cards (Explore, the Now goals, the Posts lead, a person's
+     name card over their portrait).
+
+   In the page there is only the flat page behind a pill, so the blur is left
+   to the things that sit over pictures. Written LAST so it wins over each
+   component's older rules, and unlayered so it wins over the Tailwind
+   utilities those components used to paint themselves with — which is also
+   why hover is restated here: a `hover:` utility cannot beat an unlayered
+   background. No `transition` shorthand: `.press` owns the transition list.
+   ========================================================================== */
+
+.pill {
+  display: inline-flex;
+  height: 2.5rem;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0 0.875rem;
+  border: 0;
+  border-radius: var(--r-full);
+  background: var(--chrome-bg);
+  box-shadow: inset 0 0 0 1px var(--chrome-ring);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+a.pill:hover,
+button.pill:hover {
+  background: color-mix(in srgb, var(--bg-hover) 88%, transparent);
+  color: var(--text);
+}
+
+.pill.is-active,
+.pill.is-active:hover {
+  background: var(--text);
+  box-shadow: none;
+  color: var(--bg);
+}
+
+.pill-tone {
+  background: var(--chrome-bg);
+  box-shadow: inset 0 0 0 1px var(--chrome-ring);
+}
+
+.card {
+  border: 0;
+  background: var(--chrome-bg);
+  box-shadow: inset 0 0 0 1px var(--chrome-ring);
+}
+
+.card.press:hover {
+  background: color-mix(in srgb, var(--bg-hover) 88%, transparent);
+}
+
+/* A person's name card sits over their portrait (#125): the material, with
+   the blur, and no drop shadow — the floating chips carry none. Its hover
+   still lifts the hairline, from the rule that owns it further up. */
+.person-card-panel {
+  border-color: var(--chrome-ring);
+  background: var(--chrome-bg);
+  box-shadow: none;
+  backdrop-filter: blur(16px);
+}
+
+/* The badges on cover art — "Reading", "New" — were a black scrim (#84); the
+   material reads over any artwork just as well, in both themes. */
+.shelf-status,
+.cover-new {
+  background: var(--chrome-bg);
+  box-shadow: inset 0 0 0 1px var(--chrome-ring);
+  backdrop-filter: blur(12px);
+  color: var(--text);
+}
+
+/* New after a title: the same small chip, in the material. Its size and
+   optical placement (#116) are untouched. */
+.new-chip {
+  border-color: transparent;
+  background: var(--chrome-bg);
+  box-shadow: inset 0 0 0 1px var(--chrome-ring);
+}
+
+/* /music's field and language button, at the pill's size and type. They keep
+   a real 1px border, in the ring's colour, because the search label is
+   positioned from it (`.music-search-ghost`), which moves with them. */
+.music-search,
+.music-lang-button {
+  height: 2.5rem;
+  padding: 0 0.875rem;
+  border-color: var(--chrome-ring);
+  background: var(--chrome-bg);
+  font-size: 0.875rem;
+}
+
+.music-lang-button {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.music-lang-button:hover {
+  background: color-mix(in srgb, var(--bg-hover) 88%, transparent);
+  color: var(--text);
+}
+
+.music-search-ghost {
+  left: calc(0.875rem + 1px);
+  right: calc(0.875rem + 1px);
+  font-size: 0.875rem;
+}
+
+/* The dev pencil and the selection link wear `.chrome-bar`; these undo what
+   their own rules painted before, so the bar's two blur layers do the work
+   (a blur on the element as well would blur twice). */
+.dev-dock-bar {
+  position: relative;
+  z-index: 30;
+  backdrop-filter: none;
+}
+
+.selection-pill {
+  height: 2.5rem;
+  padding: 0 0.875rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.selection-pill:hover {
+  opacity: 1;
+  color: var(--text);
+}

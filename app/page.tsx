@@ -150,7 +150,7 @@ export default async function HomePage() {
                 <Link
                   key={section.slug}
                   href={`/${section.slug}`}
-                  className="group press press-soft rounded-xl border border-[var(--border)] p-4 hover:bg-[var(--bg-hover)]"
+                  className="group press press-soft card rounded-xl p-4"
                 >
                   {/* No icon. The section emoji belongs to the sidebar, where
                       it's a target you aim at in a list you've learned; here

@@ -46,11 +46,8 @@ export default function PostRows({
           : `/${sectionSlug}`
       }
       scroll={false}
-      className={`press rounded-full border px-3 py-1 text-sm ${
-        active === value
-          ? "border-[var(--text)] bg-[var(--text)] font-medium text-[var(--bg)]"
-          : "border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-tertiary)] hover:text-[var(--text)]"
-      }`}
+      /* `.pill`: the breadcrumb bar's material, in the page (#185). */
+      className={`press pill${active === value ? " is-active" : ""}`}
     >
       {label}
     </Link>

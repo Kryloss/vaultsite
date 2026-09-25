@@ -120,11 +120,8 @@ export default function ShelfTypeView({
          says the same thing in class names, but a marker the DOM can be
          queried by survives any change to how the active chip is painted. */
       data-active={isActive ? "" : undefined}
-      className={`filter-chip press rounded-full border px-3 py-1 text-sm ${extra} ${
-        isActive
-          ? "border-[var(--text)] bg-[var(--text)] font-medium text-[var(--bg)]"
-          : "border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--text-tertiary)] hover:text-[var(--text)]"
-      }`}
+      /* `.pill`: the breadcrumb bar's material, in the page (#185). */
+      className={`filter-chip press pill ${extra}${isActive ? " is-active" : ""}`}
     >
       {label}
     </Link>

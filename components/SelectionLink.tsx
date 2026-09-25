@@ -29,7 +29,8 @@ const CONTEXT_WORDS = 5;
 const SPLIT_ABOVE = 12;
 /** URLs beyond this are unusable in most chat apps — fall back to plain. */
 const MAX_URL = 900;
-const PILL_HEIGHT = 34;
+/** The breadcrumb bar's 2.5rem — the pill wears `.chrome-bar` (#185). */
+const PILL_HEIGHT = 40;
 const MARGIN = 8;
 
 /**
@@ -159,7 +160,7 @@ export default function SelectionLink() {
     <button
       type="button"
       onClick={copy}
-      className="selection-pill"
+      className="selection-pill chrome-bar"
       style={{ left: pill.left, top: pill.top }}
     >
       <svg viewBox="0 0 24 24" aria-hidden="true">

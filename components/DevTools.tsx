@@ -2785,7 +2785,7 @@ export default function DevTools() {
       {toastPortal}
       {!expanded && (
         <div className="dev-dock">
-          <div className="dev-dock-bar" role="group" aria-label={devUi.devToolsGroup[lang]}>
+          <div className="dev-dock-bar chrome-bar" role="group" aria-label={devUi.devToolsGroup[lang]}>
             {pencil}
           </div>
         </div>
