@@ -182,29 +182,28 @@
   box-shadow: 0 0 0 0.375rem color-mix(in srgb, var(--bg-hover) 55%, transparent);
 }
 
-/* The player is one of the bottom family — `.time-left` and "Continue"
-   (`.resume-reading`): a full pill of `--chrome-bg` with the `--chrome-ring`
-   hairline and the same 12px blur, 0.75rem off the bottom edge, small type
-   in `--text-secondary`, no shadow of its own. It takes the middle of the
-   bottom edge, since those two own its right corner. Its glyphs are quiet
-   the way the breadcrumb's menu button is: tertiary, coming up to `--text`
-   under the pointer, no fill. The progress is a 2px line inside the pill's
-   foot — the reading bar's weight and colour (`.reading-progress`) — and
-   it is also the seek control: its thumb appears only on hover or focus. */
+/* The player WEARS `.chrome-bar` (components/ReadAloud.tsx, #184): the
+   breadcrumb bar's fill, hairline and two blur layers, its 2.5rem height,
+   its z-index 30 (#167 — the same level is what keeps one material looking
+   like one), its 14px medium type in `--text-secondary`, 0.75rem off the
+   window's edge. It takes the middle of the bottom edge, since the time
+   remaining and "Continue" own its right-hand corner. Its glyphs are the
+   breadcrumb's menu button: 2rem boxes, no fill, coming up to `--text` under
+   the pointer. The progress is a 2px line inside the pill's foot — the
+   reading bar's weight and colour (`.reading-progress`) — and it is also the
+   seek control: its thumb appears only on hover or focus. */
 .idea-read-player {
   position: fixed;
   z-index: 30;
   bottom: max(0.75rem, env(safe-area-inset-bottom));
   left: 50%;
   display: flex;
+  height: 2.5rem;
   max-width: min(20rem, calc(100vw - 1.5rem));
   align-items: center;
   gap: 0.125rem;
-  padding: 0.25rem 0.375rem 0.3125rem 0.25rem;
+  padding: 0 0.5rem 0 0.25rem;
   border-radius: var(--r-full);
-  background: var(--chrome-bg);
-  box-shadow: inset 0 0 0 1px var(--chrome-ring);
-  backdrop-filter: blur(12px);
   translate: -50% 0;
   animation: idea-read-in var(--dur-slow) var(--ease) both;
 }
@@ -215,9 +214,9 @@
   flex: none;
   align-items: center;
   justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  border-radius: var(--r-full);
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--r-md);
   color: var(--text-secondary);
   cursor: pointer;
   transition: color var(--dur-fast) var(--ease);
@@ -236,7 +235,8 @@
   min-width: 0;
   overflow: hidden;
   padding: 0 0.25rem;
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
+  font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--text-secondary);

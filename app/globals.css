@@ -1912,6 +1912,10 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
    the corner it shares with `.time-left` is the one it was designed against —
    the offer is only made before the reader has scrolled and the number only
    appears once they have, so the two are never on screen together. */
+/* It WEARS `.chrome-bar` (components/ReadingPosition.tsx) — the breadcrumb
+   bar's fill, hairline and two blur layers — at its 2.5rem height and its
+   z-index 30, so the floating chips are one material and not a copy of it
+   (DECISIONS #184, and #167 on why the z-index has to be the same one). */
 .resume-reading {
   position: fixed;
   right: 0.75rem;
@@ -1921,11 +1925,9 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   align-items: center;
   gap: 0.4375rem;
   max-width: calc(100vw - 1.5rem);
-  padding: 0.4375rem 0.875rem;
+  height: 2.5rem;
+  padding: 0 0.875rem;
   border-radius: var(--r-full);
-  background: var(--chrome-bg);
-  box-shadow: inset 0 0 0 1px var(--chrome-ring);
-  backdrop-filter: blur(12px);
   cursor: pointer;
   transition: background-color var(--dur-fast) var(--ease);
   animation: item-in var(--dur-slow) var(--ease) both;
@@ -3198,17 +3200,22 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
    `.resume-reading`, so the three read as one family. It shares the corner
    with `.resume-reading`, which is only offered before the reader has
    scrolled — and this only appears once they have. */
+/* It WEARS `.chrome-bar` (components/ReadingProgress.tsx): the breadcrumb
+   bar's material, height, type and z-index, so the two corners hold one kind
+   of object (DECISIONS #184). The height comes from `line-height`, not a flex
+   box: the component shows and hides this with the `hidden` attribute, and a
+   `display` here would override it and pin the chip on screen. */
 .time-left {
   position: fixed;
   right: 0.75rem;
   bottom: 0.75rem;
-  z-index: 25;
-  padding: 0.4375rem 0.875rem;
+  z-index: 30;
+  height: 2.5rem;
+  padding: 0 0.875rem;
   border-radius: var(--r-full);
-  background: var(--chrome-bg);
-  box-shadow: inset 0 0 0 1px var(--chrome-ring);
-  backdrop-filter: blur(12px);
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 2.5rem;
   font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
   pointer-events: none;
@@ -5576,13 +5583,14 @@ svg.diagram tspan {
 
 /* The corner pencil and the reading pill take turns in the same corner, so
    they are one object at a glance: the same box and the same ring. The height
-   is `.time-left`'s, spelled as the arithmetic that makes it — its 0.8125rem
-   text at 1.5 plus its 0.4375rem padding, top and bottom — so the two cannot
-   drift apart silently, and the fill, ring and blur are that pill's own. This
-   is chrome material on a small round control, which is not the same thing as
-   the grey plate the tools bar used to lie under. */
+   is `.time-left`'s — which since #184 is the breadcrumb bar's 2.5rem, the
+   pill wearing `.chrome-bar` itself — and the fill and ring are that
+   material's own. (The pencil keeps one flat blur rather than the bar's two
+   layers: it widens into the tools bar, and it exists only in development.)
+   This is chrome material on a small round control, which is not the same
+   thing as the grey plate the tools bar used to lie under. */
 :root {
-  --corner-pill-h: calc(0.8125rem * 1.5 + 0.875rem);
+  --corner-pill-h: 2.5rem;
 }
 
 .dev-dock-bar {

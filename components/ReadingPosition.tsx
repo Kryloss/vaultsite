@@ -305,7 +305,7 @@ export default function ReadingPosition() {
         hide();
       }}
       onKeyDown={(e) => e.key === "Escape" && hide()}
-      className="resume-reading"
+      className="resume-reading chrome-bar"
     >
       <BookOpenIcon className="resume-reading-icon" />
       <span className="resume-reading-label">

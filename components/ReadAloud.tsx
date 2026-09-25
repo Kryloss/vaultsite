@@ -337,18 +337,18 @@ export default function ReadAloud({ separated = true }: { separated?: boolean })
   }
 
   const playing = state === "playing";
-  /* One pill in the bottom family's material (`.time-left`, "Continue"):
+  /* One pill in the breadcrumb bar's own material (`.chrome-bar`, #184):
      play/pause, the title, close, and the progress line along its foot,
      which is also the seek control. */
   return (
-    <div className="idea-read-player" role="region" aria-label={ui.readAloudPlayer[lang]}>
+    <div className="idea-read-player chrome-bar" role="region" aria-label={ui.readAloudPlayer[lang]}>
       <button
         type="button"
         onClick={toggle}
         className="idea-read-play press"
         aria-label={(playing ? ui.readAloudPause : ui.readAloudPlay)[lang]}
       >
-        {playing ? <PauseIcon className="h-3.5 w-3.5" /> : <PlayIcon className="h-3.5 w-3.5" />}
+        {playing ? <PauseIcon className="h-4 w-4" /> : <PlayIcon className="h-4 w-4" />}
       </button>
       <span className="idea-read-title" title={title}>
         {title}
@@ -359,7 +359,7 @@ export default function ReadAloud({ separated = true }: { separated?: boolean })
         className="idea-read-close press"
         aria-label={ui.readAloudClose[lang]}
       >
-        <CloseIcon className="h-3 w-3" />
+        <CloseIcon className="h-3.5 w-3.5" />
       </button>
       <input
         type="range"

@@ -280,7 +280,7 @@ export default function ReadingProgress({ minutes }: { minutes?: number }) {
           are, the other how much is left. Rendered only where the header
           carries a reading estimate, which is posts (see readingStats). */}
       {minutes ? (
-        <div ref={pillRef} className="time-left" hidden>
+        <div ref={pillRef} className="time-left chrome-bar" hidden>
           <span ref={numberRef}>{minutes}</span> <T {...ui.minLeft} />
         </div>
       ) : null}

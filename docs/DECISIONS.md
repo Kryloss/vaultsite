@@ -192,6 +192,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 181 | "Listen" on every note, reading the note's whole shape, in the best voice there is |
 | 182 | The read-aloud player: play/pause, title, close and a seek bar; press a block to go there; it follows the language |
 | 183 | The read-aloud player joins the bottom chips, and a language switch restarts the block |
+| 184 | Every floating chip wears the breadcrumb bar's class |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1421,4 +1422,8 @@ The owner redesigned #180/#181's player and asked for two behaviours. All of it 
 ## 183. The read-aloud player joins the bottom chips, and a language switch restarts the block (2026-09-24)
 
 Two changes to #182, both the owner's. **A language switch now restarts the block being read, in the other language** (`stepOnSwitch()` in `lib/read-aloud.ts`, clamped to the shorter reading) — #182's "carry on from the next block" dropped the rest of a paragraph that had only been half heard. **The player is one of the bottom chips now**, not a card that competed with the page: the same material, size and voice as `.time-left` and "Continue" (`--chrome-bg`, the `--chrome-ring` hairline, a 12px blur, no shadow, `--text-secondary` at 0.8125rem, 0.75rem off the bottom), a single 37px pill in the middle of the bottom edge, since those two own its right-hand corner. Play/pause and close are bare glyphs that come up to `--text` under the pointer, like the breadcrumb's menu button — the filled `--text` play button went with the card. The progress is a 2px line inside the pill's foot, at the reading bar's weight and colour, and it is still the seek control, its thumb appearing only on hover or focus.
+
+## 184. Every floating chip wears the breadcrumb bar's class (2026-09-24)
+
+The owner asked whether the time-remaining chip matched the breadcrumb bar, and it didn't: same fill, ring, text colour and 12px offset, but 34px tall to the bar's 40, 13px regular type to its 14px medium, and one flat 12px blur where the bar has two layers (5px, and a 16px one that fades to the rim) — so its edge read hard where the bar's dissolves. "Continue" had the same copy, and #183's read-aloud player was built to match them. All three now WEAR `.chrome-bar` (the class on the element, in `ReadingProgress.tsx`, `ReadingPosition.tsx`, `ReadAloud.tsx`) instead of copying its declarations, at the bar's 2.5rem, 14px 500 `--text-secondary`, and its z-index 30 — `.time-left` was 25, and #167 is why two things wearing one material must sit at the same level. Their own `background`, `box-shadow` and `backdrop-filter` are deleted: a `backdrop-filter` on the element as well as on the pseudo-elements would blur twice. `.time-left` takes its height from `line-height`, never `display`, because the component shows and hides it with the `hidden` attribute. The dev-only corner pencil's `--corner-pill-h` follows it to 2.5rem.
 
