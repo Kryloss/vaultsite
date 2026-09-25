@@ -10675,7 +10675,9 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
 }
 
 .sidebar-panel::before,
-.sidebar-panel::after {
+.sidebar-panel::after,
+.toc-sheet::before,
+.toc-sheet::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -10684,11 +10686,13 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   pointer-events: none;
 }
 
-.sidebar-panel::before {
+.sidebar-panel::before,
+.toc-sheet::before {
   backdrop-filter: blur(5px);
 }
 
-.sidebar-panel::after {
+.sidebar-panel::after,
+.toc-sheet::after {
   backdrop-filter: blur(14px);
   -webkit-mask-image:
     linear-gradient(to right, transparent, #000 8px, #000 calc(100% - 8px), transparent),
@@ -10726,3 +10730,31 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   background: var(--chrome-bg);
   backdrop-filter: blur(14px);
 }
+
+/* The contents sheet is the drawer's twin (#189): the same corners, the
+   same inset hairline with no border, the same drop shadow, and the same two
+   blur layers above (so its hairline is softened the way the breadcrumb
+   bar's is, #188) instead of the panels' single blur on the element. Its
+   scroller moved to `.toc-sheet-body`, since the layers are absolutely
+   positioned and would scroll away with the rows. `z-index: 45` is the
+   stacking context they need. */
+.toc-sheet {
+  max-height: none;
+  overflow: visible;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-xl);
+  box-shadow:
+    inset 0 0 0 1px var(--chrome-ring),
+    0 10px 30px rgb(0 0 0 / 0.18);
+  backdrop-filter: none;
+}
+
+.toc-sheet-body {
+  max-height: 55vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.5rem;
+  border-radius: inherit;
+}
+

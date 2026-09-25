@@ -389,12 +389,17 @@ export default function Toc({
         {/* A third copy of the outline in every page's HTML, for a panel most
             readers never open — so it waits for the first tap, then stays so
             it can animate shut. */}
-        {everOpen && (
-          <>
-            {topLink(" toc-sheet-top")}
-            {outline}
-          </>
-        )}
+        {/* The sheet's scroller is this inner box, not the sheet: the
+            sheet carries the drawer's blur layers (#189), which are
+            absolutely positioned and would scroll away with the rows. */}
+        <div className="toc-sheet-body">
+          {everOpen && (
+            <>
+              {topLink(" toc-sheet-top")}
+              {outline}
+            </>
+          )}
+        </div>
       </nav>
     </>
   );

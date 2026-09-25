@@ -197,6 +197,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 186 | #185 narrowed to overlays: the page keeps its own chips, cards and badges |
 | 187 | The drawer floats like the other overlays |
 | 188 | The drawer's hairline is softened like the bar's, and its left end is off-screen |
+| 189 | The contents sheet is the drawer's twin |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1455,4 +1456,8 @@ The owner asked for the sidebar to match the overlays too. Its material already 
 ## 188. The drawer's hairline is softened like the bar's, and its left end is off-screen (2026-09-25)
 
 The owner saw a white outline on #187's drawer that the breadcrumb bar doesn't have. Cause: the bar's blur lives on two `z-index: -1` pseudo-layers, which paint ABOVE its own background and inset ring inside its stacking context, so its ring is softened by them; the drawer's blur was on the element itself, so its ring painted crisp on top. The drawer now takes the same two layers (5px over all of it, 14px fading out only within 8px of the rim — #81's seam came from grading the blur across the panel's width, which a rim-only fade does not do). And its left end is no longer shown: it starts 1rem past the window's edge and is 1rem wider (`w-60` + `pl-4`), so its content and the constellation keep the `w-56` geometry they were drawn for. Top and bottom still float 0.75rem off the edge.
+
+## 189. The contents sheet is the drawer's twin (2026-09-25)
+
+The owner asked for the contents card that drops from the contents button (below 1168px, phones included) to match the drawer. It takes #187/#188's recipe exactly: `--r-xl`, the inset `--chrome-ring` with no border, the drawer's drop shadow in both themes, and the drawer's two blur layers — 5px, and 14px fading out only at the rim — instead of one blur on the element, so its hairline is softened the way the breadcrumb bar's is. The layers are absolutely positioned, and the sheet WAS its own scroller, so they would have scrolled away with the rows: the scroller moved to an inner `.toc-sheet-body` (`max-height: 55vh`, `overflow-y: auto`, the 0.5rem padding), and the sheet itself no longer scrolls or pads. Width, position, the drop-from-the-button motion and the backdrop are unchanged. The series list and link previews keep the panels' single blur for now.
 
