@@ -17,6 +17,8 @@ import { previewsInHtml } from "@/lib/previews";
 import LinkPreview from "@/components/LinkPreview";
 import Page from "@/components/Page";
 import Intro from "@/components/Intro";
+import { pageIdeas } from "@/lib/site-config";
+import type { Entry } from "@/lib/vault";
 
 /** Title and description come from the layout's defaults; this adds the
     canonical, which every page needs and the root most of all. */
@@ -57,6 +59,17 @@ export default async function HomePage() {
   const explore = getSections().filter(
     (s) => s.slug !== "home" && s.slug !== "posts" && s.slug !== "now"
   );
+  /* Page idea `homeLatest` (lib/site-config.ts): the newest dated note in
+     each Explore section, named on its card. By date rather than by the
+     section's own order, which is alphabetical everywhere but posts. */
+  const newest = (slug: string): Entry | undefined => {
+    if (!pageIdeas.homeLatest) return undefined;
+    const section = getSectionBySlug(slug);
+    if (!section) return undefined;
+    return getEntries(section)
+      .filter((e) => e.date && !e.draft)
+      .sort((a, b) => b.date!.localeCompare(a.date!))[0];
+  };
 
   return (
     <Page
@@ -146,11 +159,14 @@ export default async function HomePage() {
           </h2>
           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
             {explore.map((section) => {
+              const latest = newest(section.slug);
               return (
                 <Link
                   key={section.slug}
                   href={`/${section.slug}`}
-                  className="group press press-soft rounded-xl border border-[var(--border)] p-4 hover:bg-[var(--bg-hover)]"
+                  className={`group press press-soft rounded-xl border border-[var(--border)] p-4 hover:bg-[var(--bg-hover)]${
+                    latest ? " idea-home-card" : ""
+                  }`}
                 >
                   {/* No icon. The section emoji belongs to the sidebar, where
                       it's a target you aim at in a list you've learned; here
@@ -162,6 +178,14 @@ export default async function HomePage() {
                   {section.description && (
                     <span className="mt-1.5 line-clamp-2 block text-sm leading-snug text-[var(--text-secondary)]">
                       <T en={section.description} uk={section.descriptionUk} />
+                    </span>
+                  )}
+                  {latest && (
+                    <span className="idea-home-latest">
+                      <span className="idea-home-latest-label">
+                        <T {...ui.newestNote} />
+                      </span>{" "}
+                      <T en={latest.title} uk={latest.titleUk} />
                     </span>
                   )}
                 </Link>

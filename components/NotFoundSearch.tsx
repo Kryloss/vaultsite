@@ -4,6 +4,8 @@ import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
 import { warmSearchIndex } from "@/components/useSearchIndex";
 import { SearchIcon } from "@/components/icons";
+import { pageIdeas } from "@/lib/site-config";
+import { terms } from "@/components/NotFoundSuggestions";
 
 /**
  * The 404's second way out: the search field, in place of a link to a section.
@@ -27,7 +29,19 @@ export default function NotFoundSearch() {
   return (
     <button
       type="button"
-      onClick={() => window.dispatchEvent(new Event(OPEN_SEARCH_EVENT))}
+      onClick={() =>
+        window.dispatchEvent(
+          /* Page idea `notFoundPrefill` (lib/site-config.ts): the palette
+             opens already holding the words of the address that failed, so
+             the search starts from what was typed rather than from nothing.
+             The palette selects them, so typing replaces them. */
+          pageIdeas.notFoundPrefill
+            ? new CustomEvent<string>(OPEN_SEARCH_EVENT, {
+                detail: terms(window.location.pathname).join(" "),
+              })
+            : new Event(OPEN_SEARCH_EVENT)
+        )
+      }
       /* The suggestions below already pull the index on this page, so this is
          usually a no-op — it matters on the 404s that suggest nothing, which
          are exactly the ones where someone reaches for search. */

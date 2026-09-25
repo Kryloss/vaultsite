@@ -4,6 +4,8 @@ import PostListClient, { type PostRow } from "@/components/lists/PostListClient"
 import PostRows from "@/components/lists/PostRows";
 import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
+import { readingStats } from "@/lib/vault";
+import { pageIdeas } from "@/lib/site-config";
 
 /**
  * Default "posts" list (server side): slims entries down to serializable rows
@@ -31,6 +33,10 @@ export default function PostList({ section, entries }: ListProps) {
     draft: entry.draft,
     category:
       typeof entry.meta.category === "string" ? entry.meta.category : undefined,
+    // Same count the note's own metadata line shows, so the two agree.
+    minutes: pageIdeas.postsReadingTime
+      ? readingStats(entry.content).minutes
+      : undefined,
   }));
 
   const categories: string[] = [];

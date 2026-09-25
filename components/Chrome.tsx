@@ -452,6 +452,8 @@ export default function Chrome({
   }, [cancelOpen]);
 
   const openSearch = useCallback(() => setSearchOpen(true), []);
+  /** What the palette opens holding, when an opener asked for something. */
+  const [searchSeed, setSearchSeed] = useState("");
 
   /* The 404's search bar lives in `main`, outside this component's subtree, so
      it asks by event rather than by prop — the same reasoning as the palette
@@ -459,8 +461,16 @@ export default function Chrome({
      this component owns the palette's open state, and threading a callback
      down through the page tree would be a second copy of it. */
   useEffect(() => {
-    window.addEventListener(OPEN_SEARCH_EVENT, openSearch);
-    return () => window.removeEventListener(OPEN_SEARCH_EVENT, openSearch);
+    /* A CustomEvent may carry a query to open with — page idea
+       `notFoundPrefill` (lib/site-config.ts). A plain Event opens empty,
+       exactly as before. */
+    const onOpenSearch = (event: Event) => {
+      const seed = (event as CustomEvent<unknown>).detail;
+      setSearchSeed(typeof seed === "string" ? seed : "");
+      openSearch();
+    };
+    window.addEventListener(OPEN_SEARCH_EVENT, onOpenSearch);
+    return () => window.removeEventListener(OPEN_SEARCH_EVENT, onOpenSearch);
   }, [openSearch]);
 
   /**
@@ -979,7 +989,11 @@ export default function Chrome({
 
       <CommandPalette
         open={searchOpen}
-        onClose={() => setSearchOpen(false)}
+        seed={searchSeed}
+        onClose={() => {
+          setSearchOpen(false);
+          setSearchSeed("");
+        }}
       />
 
       {/* Mounted here rather than in the layout because it needs the same nav

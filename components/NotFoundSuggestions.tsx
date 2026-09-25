@@ -21,7 +21,7 @@ import type { SearchItem } from "@/lib/vault";
 const STOPWORDS = new Set(["the", "a", "an", "of", "and", "my", "to", "in"]);
 
 /** "/posts/my-frist-certifcation" → ["frist", "certifcation"] */
-function terms(pathname: string): string[] {
+export function terms(pathname: string): string[] {
   return pathname
     .split("/")
     .filter(Boolean)

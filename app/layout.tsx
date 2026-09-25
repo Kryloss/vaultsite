@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Source_Serif_4 } from "next/font/google";
 import "./globals.css";
+// Page ideas (lib/site-config.ts → pageIdeas); after globals.css, see its header.
+import "./page-ideas.css";
 import { parseTodaysVibe } from "@/lib/todays-vibe";
 import Chrome from "@/components/Chrome";
 import Constellation from "@/components/Constellation";

@@ -84,6 +84,12 @@ export interface CoverflowProps {
   fade?: number;
   /** Space between cards, as a fraction of card width. */
   gap?: number;
+  /**
+   * Page idea `musicAmbient` (lib/site-config.ts): the centred cover's blur
+   * placeholder, blown up behind the deck, so the record's own colours light
+   * the stage it stands on.
+   */
+  ambient?: boolean;
 }
 
 /**
@@ -135,6 +141,7 @@ export default function Coverflow({
   falloff = 0.56,
   fade = 0.11,
   gap = 0.05,
+  ambient = false,
 }: CoverflowProps) {
   const count = items.length;
   const loop = count >= MIN_LOOP;
@@ -642,6 +649,18 @@ export default function Coverflow({
           touchAction: "pan-y",
         }}
       >
+        {/* Behind the stage, and out of hit-testing and the accessibility
+            tree. The blur placeholder is a few hundred bytes already in the
+            page, so this fetches nothing; `key` restarts its fade-in on each
+            new record. */}
+        {ambient && items[selected]?.blur && (
+          <div
+            key={items[selected].key}
+            className="idea-cf-ambient"
+            aria-hidden="true"
+            style={{ backgroundImage: `url("${items[selected].blur}")` }}
+          />
+        )}
         <div className="cf-stage">
           {items.map((item, index) => (
             <Link

@@ -1,0 +1,231 @@
+/* ==========================================================================
+   PAGE IDEAS — one small design idea per page (docs/DECISIONS.md #179).
+
+   Every idea is switched in `pageIdeas` (lib/site-config.ts), and every rule
+   here targets an `.idea-` class that ONLY the switched-on markup carries, so
+   a switch turned off leaves nothing for these rules to touch.
+   scripts/page-ideas.test.mjs fails the build if a selector here does not name
+   one. Imported by app/layout.tsx AFTER globals.css, so position still wins as
+   the tie-breaker the way that file expects (#52).
+
+   Tokens only, no colour: the one hue on this sheet is album art, which is a
+   photograph, not the site's (the vibe capsule's rule, #165).
+   ========================================================================== */
+
+/* ---------- Home: the newest note on each Explore card (`homeLatest`) ----------
+   Pinned to the card's foot so the two cards in a row end on one line even
+   when their descriptions run to different lengths. The link carries no
+   display utility, so a class may set it (DESIGN-SYSTEM → Editing). */
+.idea-home-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.idea-home-latest {
+  display: block;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  overflow: hidden;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  color: var(--text-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.idea-home-latest-label {
+  color: var(--text-tertiary);
+}
+
+/* ---------- Now: how long ago "Updated" was (`nowFreshness`) ---------- */
+.idea-now-fresh {
+  color: var(--text-tertiary);
+}
+
+/* ---------- Posts: reading time on every row (`postsReadingTime`) ----------
+   The size of the category word beside it, not the date: it is metadata about
+   the note, and the date is the row's own index. */
+.idea-post-minutes {
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+/* ---------- People: categories on the card (`peopleTags`) ----------
+   At the panel's foot, under the description. The description gives up its
+   fourth line to make room — it was a safety valve, not the normal case, and
+   the panel must not stand taller than the portrait (#125). Hidden on the
+   phone composition with the description, for the same reason. */
+.idea-person-tags {
+  display: block;
+  margin-top: auto;
+  padding-top: 0.375rem;
+  overflow: hidden;
+  font-size: 0.6875rem;
+  line-height: 1.3;
+  color: var(--text-tertiary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.person-card-panel:has(.idea-person-tags) .person-card-role {
+  -webkit-line-clamp: 3;
+}
+
+@media (max-width: 639px) {
+  .idea-person-tags {
+    display: none;
+  }
+}
+
+/* ---------- Music: the centred record lights the deck (`musicAmbient`) ----------
+   The cover's own blur placeholder, blown up and blurred again behind the
+   stage, and masked to an ellipse so it has no edge — the frame's
+   `overflow: hidden` would otherwise cut it into a visible box. Quieter in
+   light mode, where a coloured haze on white reads louder than on near-black.
+   The keyframe names only `from`, so the fade ends on each theme's own
+   opacity (the `wash-in` pattern). */
+.cf-frame:has(> .idea-cf-ambient) {
+  position: relative;
+}
+
+.idea-cf-ambient {
+  position: absolute;
+  inset-block: 0;
+  left: 50%;
+  width: calc(var(--cf-card) * 3.4);
+  translate: -50% 0;
+  background-position: center;
+  background-size: cover;
+  opacity: 0.32;
+  filter: blur(44px) saturate(1.35);
+  -webkit-mask-image: radial-gradient(closest-side, #000 30%, transparent);
+  mask-image: radial-gradient(closest-side, #000 30%, transparent);
+  pointer-events: none;
+  animation: idea-ambient-in 600ms var(--ease) both;
+}
+
+@media (prefers-color-scheme: dark) {
+  .idea-cf-ambient {
+    opacity: 0.55;
+  }
+}
+
+@keyframes idea-ambient-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .idea-cf-ambient {
+    animation: none;
+  }
+}
+
+/* ---------- Shelf: his rating, on a cover you point at (`shelfRatingPeek`) ----------
+   The status badge's scrim (`.shelf-status`) in the one free corner. Hidden
+   at rest, so the strips stay as even as #54 made them; phones never see it,
+   and their rating is one tap away on the note. The stars take white in the
+   scrim, as the badge's text does — `fill` in CSS outranks the component's
+   presentation attribute, and the nested svg is the filled half. */
+.idea-shelf-rating {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3125rem 0.5rem;
+  border-radius: var(--r-full);
+  background: rgb(0 0 0 / 0.62);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  translate: 0 4px;
+  transition:
+    opacity var(--dur) var(--ease),
+    translate var(--dur) var(--ease);
+  pointer-events: none;
+}
+
+.idea-shelf-rating svg > g {
+  fill: rgb(255 255 255 / 0.3);
+}
+
+.idea-shelf-rating svg svg g {
+  fill: #fff;
+}
+
+.group:hover .idea-shelf-rating,
+.group:focus-visible .idea-shelf-rating {
+  opacity: 1;
+  translate: 0 0;
+}
+
+@media (hover: none) {
+  .idea-shelf-rating {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .idea-shelf-rating {
+    translate: 0 0;
+  }
+}
+
+/* ---------- Projects: a cut preview fades out (`projectsFade`) ----------
+   A mask, like the 404's number (#161): no colour, so it works on either
+   theme and family, and it never hides the last line entirely — the words
+   under the fade are still the note's, and still selectable. */
+.idea-til-fade {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 calc(100% - 4.5rem),
+    rgb(0 0 0 / 0.18)
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 calc(100% - 4.5rem),
+    rgb(0 0 0 / 0.18)
+  );
+}
+
+/* ---------- Note pages: what the neighbour is about (`noteNextPreview`) ----------
+   Title over description, each ellipsing on its own line; the next link
+   aligns both to its outer edge, beside its arrow. The two halves split the
+   row evenly: sized by content, a long description on one side ate the
+   other's title down to "Draft edit…". The empty placeholder span a lone
+   "next" leaves behind takes its half too. */
+.entry-siblings:has(.idea-sibling-text) > * {
+  flex: 1 1 0;
+}
+
+.entry-siblings:has(.idea-sibling-text) > .sibling-next {
+  justify-content: flex-end;
+}
+
+.idea-sibling-text {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.idea-sibling-text > * {
+  max-width: 100%;
+}
+
+.sibling-next .idea-sibling-text {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.idea-sibling-desc {
+  overflow: hidden;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--text-tertiary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

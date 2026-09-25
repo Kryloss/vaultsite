@@ -31,9 +31,7 @@ export default function EntryFooter({
           <span className="sr-only">
             <T {...ui.previousEntry} />
           </span>
-          <span className="sibling-title">
-            <T en={prev.title} uk={prev.titleUk} />
-          </span>
+          <SiblingText entry={prev} />
         </Link>
       ) : (
         <span />
@@ -43,14 +41,36 @@ export default function EntryFooter({
           <span className="sr-only">
             <T {...ui.nextEntry} />
           </span>
-          <span className="sibling-title">
-            <T en={next.title} uk={next.titleUk} />
-          </span>
+          <SiblingText entry={next} />
           <span className="sibling-arrow" aria-hidden>
             ›
           </span>
         </Link>
       )}
     </nav>
+  );
+}
+
+/**
+ * The neighbour's title, and — with page idea `noteNextPreview` on
+ * (lib/site-config.ts) — its one-line description under it, so the arrow
+ * says what the next read is about and not only what it is called. `lib/siblings.ts`
+ * only fills `description` while that switch is on, so with it off this is
+ * exactly the title span it replaced.
+ */
+function SiblingText({ entry }: { entry: EntryRef }) {
+  const title = (
+    <span className="sibling-title">
+      <T en={entry.title} uk={entry.titleUk} />
+    </span>
+  );
+  if (!entry.description) return title;
+  return (
+    <span className="idea-sibling-text">
+      {title}
+      <span className="idea-sibling-desc">
+        <T en={entry.description} uk={entry.descriptionUk} />
+      </span>
+    </span>
   );
 }

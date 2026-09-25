@@ -13,6 +13,8 @@ export interface PostRow {
   date?: string;
   draft: boolean;
   category?: string;
+  /** Page idea `postsReadingTime` — set only while that switch is on. */
+  minutes?: number;
 }
 
 /**

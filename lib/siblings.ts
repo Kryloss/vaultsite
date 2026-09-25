@@ -6,12 +6,16 @@
  * in Obsidian.
  */
 import { entryMedium, isShelfSection } from "./shelf";
+import { pageIdeas } from "./site-config";
 import { getEntries, getSectionBySlug, type Entry, type Section } from "./vault";
 
 export interface EntryRef {
   href: string;
   title: string;
   titleUk?: string;
+  /** Page idea `noteNextPreview` — only carried while that switch is on. */
+  description?: string;
+  descriptionUk?: string;
 }
 
 function toRef(section: Section, entry: Entry): EntryRef {
@@ -19,6 +23,9 @@ function toRef(section: Section, entry: Entry): EntryRef {
     href: `/${section.slug}/${entry.slug}`,
     title: entry.title,
     titleUk: entry.titleUk,
+    ...(pageIdeas.noteNextPreview && entry.description
+      ? { description: entry.description, descriptionUk: entry.descriptionUk }
+      : {}),
   };
 }
 

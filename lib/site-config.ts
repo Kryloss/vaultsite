@@ -81,6 +81,50 @@ export const sectionIconMotion = false;
  */
 export const controlIconMotion = false;
 
+/**
+ * PAGE IDEAS — one small design idea per page, each behind its own switch.
+ * Built together on branch `design/page-ideas` (docs/DECISIONS.md #179) to be
+ * tried on the local server. Flip one to `false` to take that idea out; every
+ * other page is untouched. With all nine off the site renders exactly as it
+ * did before them: the markup behind each switch is not rendered at all, and
+ * every rule in app/page-ideas.css targets only an `.idea-` class that markup
+ * carries (scripts/page-ideas.test.mjs enforces that).
+ *
+ * Typed as `boolean` rather than inferred from the literal, so turning one off
+ * can't make a branch unreachable and trip the typecheck.
+ */
+export const pageIdeas: Record<
+  | "homeLatest"
+  | "nowFreshness"
+  | "postsReadingTime"
+  | "peopleTags"
+  | "musicAmbient"
+  | "shelfRatingPeek"
+  | "projectsFade"
+  | "noteNextPreview"
+  | "notFoundPrefill",
+  boolean
+> = {
+  /** Home: each Explore card names the newest note in that section. */
+  homeLatest: true,
+  /** Now: "Updated July 2026" adds how long ago that was, in the reader's time. */
+  nowFreshness: true,
+  /** Posts: every row carries its reading time beside the date. */
+  postsReadingTime: true,
+  /** People: a card lists the person's categories under the description. */
+  peopleTags: true,
+  /** Music: the centred cover's colours glow softly behind the deck. */
+  musicAmbient: true,
+  /** Shelf: hovering a cover shows his star rating on the artwork. */
+  shelfRatingPeek: true,
+  /** Projects: a cut preview fades out into "Continue reading". */
+  projectsFade: true,
+  /** Note pages: the prev/next arrows carry the neighbour's one-line description. */
+  noteNextPreview: true,
+  /** 404: Search opens ⌘K already holding the words from the broken address. */
+  notFoundPrefill: true,
+};
+
 export const siteDescription =
   "Kyrylo's writing, projects, notes, and the occasional strong opinion.";
 

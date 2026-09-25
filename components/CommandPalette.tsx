@@ -55,9 +55,12 @@ interface Action {
 }
 export default function CommandPalette({
   open,
+  seed = "",
   onClose,
 }: {
   open: boolean;
+  /** A query to open with, selected so typing replaces it (page idea `notFoundPrefill`). */
+  seed?: string;
   onClose: () => void;
 }) {
   const [query, setQuery] = useState("");
@@ -91,12 +94,18 @@ export default function CommandPalette({
 
   useEffect(() => {
     if (open) {
-      setQuery("");
+      setQuery(seed);
       setSelected(0);
       setFlash(false);
       // Focus after the element mounts
-      requestAnimationFrame(() => inputRef.current?.focus());
+      requestAnimationFrame(() => {
+        inputRef.current?.focus();
+        if (seed) inputRef.current?.select();
+      });
     }
+    // `seed` is read at the moment of opening only — it is set in the same
+    // batch as `open`, and a change while open must not rewrite the query.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   useEffect(() => () => window.clearTimeout(flashTimer.current), []);

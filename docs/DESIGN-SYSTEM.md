@@ -27,6 +27,8 @@ that are not visible from the tokens themselves. Reasons: `docs/DECISIONS.md`
 - A keyframe that names only `from` with `animation-fill-mode: both` ends on the element's OWN computed value — `wash-in` and `nav-tree-in` both rely on this. **Never add a `to:`** to either; it would flatten dark mode to the light value, or freeze one list's cap into the other's (#92, #124).
 - `.stagger > *` carries `animation: item-in … both`, and an animation that fills forever on `opacity`/`transform` gives every child a PERMANENT stacking context — nothing inside one can outrank a later sibling. Put a z-index on the slot, not on what is inside it (#110).
 
+- **`app/page-ideas.css`** holds the per-page ideas switched in `pageIdeas` (`lib/site-config.ts`, #179). Every selector there must name an `.idea-` class (`scripts/page-ideas.test.mjs`), so a switch turned off leaves the page exactly as it was. When an idea is kept for good, move its rules into `globals.css` and delete its switch.
+
 ## Breakpoints
 
 - **The gutters arrive at 1168px**, not Tailwind's `xl` — the contents rail, sidenotes, pull-quotes, `.resume-reading`'s move under the rail, and the shelf note's gutter column all share that one query. It is DERIVED (39rem measure → 19.5rem half + 2.5rem gap + 13rem rail + 1.5rem margin = 73rem), so re-derive it if `--measure` or the rail's width changes rather than nudging it, and move all the queries together or the page goes lopsided (#107, #136).

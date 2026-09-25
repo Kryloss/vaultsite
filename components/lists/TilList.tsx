@@ -7,6 +7,7 @@ import T from "@/components/T";
 import NewBadge from "@/components/NewBadge";
 import { ui } from "@/lib/ui-strings";
 import { previewBodies } from "@/lib/til-preview";
+import { pageIdeas } from "@/lib/site-config";
 
 /**
  * "projects" section type — TIL-style feed: entries rendered inline, newest
@@ -70,7 +71,10 @@ export default async function TilList({ section, entries }: ListProps) {
           doc.preview ? (
             <>
               <div
-                className="prose mt-3"
+                /* Page idea `projectsFade` (lib/site-config.ts): a cut
+                   preview fades into the page instead of stopping on a
+                   sentence that looks like the end. */
+                className={`prose mt-3${pageIdeas.projectsFade ? " idea-til-fade" : ""}`}
                 dangerouslySetInnerHTML={{ __html: doc.preview }}
               />
               <Link
