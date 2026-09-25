@@ -64,7 +64,8 @@ export interface Series {
 }
 
 /**
- * "Part 2 of 5", both languages.
+ * "2 of 5", both languages — no "Part" in front since #194; the list icon
+ * before it says what the numbers count.
  *
  * A pair rather than a `ui` key because it interpolates numbers, and `ui` is
  * a flat dictionary of fixed strings — same reason categoryLabel() lives in
@@ -72,8 +73,8 @@ export interface Series {
  */
 export function seriesPartLabel(index: number, total: number): Str {
   return {
-    en: `Part ${index} of ${total}`,
-    uk: `Частина ${index} з ${total}`,
+    en: `${index} of ${total}`,
+    uk: `${index} з ${total}`,
   };
 }
 

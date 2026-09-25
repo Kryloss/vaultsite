@@ -202,6 +202,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 191 | "Listen" sits right after the date |
 | 192 | Maturity leaves the metadata line; "Listen" in the line's grey |
 | 193 | The series badge wears a list icon instead of an underline |
+| 194 | The series badge reads "2 of 5", without "Part" |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1480,3 +1481,7 @@ At the owner's request the maturity word ("Seedling", #24) is no longer shown un
 ## 193. The series badge wears a list icon instead of an underline (2026-09-25)
 
 At the owner's request "Part 1 of 2" lost its dotted underline and gained a small list icon in front, the same shape as "Listen" beside it (`ListIcon`, 12px, a heavier 2.4 stroke so it doesn't fade at that size). This is the THIRD icon on page content (#64, #161, #182) — asked for directly, like the second. The read-progress line that grew along the underline went with it; the panel still says "N of M read" and ticks each part. `.entry-meta .series-badge` sets `color: inherit` after the badge's own hover rule and so had been keeping it grey on hover; a hover rule below it now darkens it to `--text`, like "Listen".
+
+## 194. The series badge reads "2 of 5", without "Part" (2026-09-25)
+
+At the owner's request the badge drops the word: `seriesPartLabel()` now gives "2 of 5" / "2 з 5", and #193's list icon says what the numbers count. The button carries the full "Part 2 of 5" / "Частина 2 з 5" as its `aria-label`, since the icon is silent to a screen reader.

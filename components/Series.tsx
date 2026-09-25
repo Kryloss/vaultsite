@@ -132,6 +132,13 @@ export default function Series({ series }: { series: Series }) {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-controls="series-parts"
+        /* The visible "2 of 5" drops the word "Part" (#194); a screen reader
+           still hears it, since the icon that stands in for it is silent. */
+        aria-label={
+          lang === "uk"
+            ? `Частина ${series.index} з ${series.total}`
+            : `Part ${series.index} of ${series.total}`
+        }
         className="series-badge"
       >
         {/* The third page-content icon, at the owner's request (#193): it
