@@ -3,9 +3,6 @@ import T from "@/components/T";
 import NewBadge from "@/components/NewBadge";
 import { ui } from "@/lib/ui-strings";
 import { categoryLabel } from "@/lib/categories";
-import { pageIdeas } from "@/lib/site-config";
-import type { PersonFacts } from "@/lib/people-table";
-import PeopleTable from "@/components/lists/PeopleTable";
 
 export interface PersonRow {
   slug: string;
@@ -22,8 +19,6 @@ export interface PersonRow {
   categories: string[];
   /** `date:` frontmatter — read by components/NewBadge.tsx. */
   date?: string;
-  /** Page idea `peopleTable` — the Table view's columns, from "At a glance". */
-  facts?: PersonFacts;
 }
 
 /**
@@ -44,24 +39,13 @@ export default function PeopleCards({
   rows,
   categories,
   active,
-  view = "cards",
 }: {
   sectionSlug: string;
   rows: PersonRow[];
   categories: string[];
   /** null = "All" */
   active: string | null;
-  /** Page idea `peopleTable` — `?view=table`; always "cards" while it is off. */
-  view?: "cards" | "table";
 }) {
-  /* Category and view both live in the URL, and each link keeps the other. */
-  const href = (category: string | null, nextView: "cards" | "table") => {
-    const params = new URLSearchParams();
-    if (category) params.set("category", category);
-    if (nextView === "table") params.set("view", "table");
-    const query = params.toString();
-    return query ? `/${sectionSlug}?${query}` : `/${sectionSlug}`;
-  };
   const filtered = active
     ? rows.filter((r) => r.categories.includes(active))
     : rows;
@@ -69,7 +53,11 @@ export default function PeopleCards({
   const chip = (key: string, label: React.ReactNode, value: string | null) => (
     <Link
       key={key}
-      href={href(value, view)}
+      href={
+        value
+          ? `/${sectionSlug}?category=${encodeURIComponent(value)}`
+          : `/${sectionSlug}`
+      }
       scroll={false}
       className={`press rounded-full border px-3 py-1 text-sm ${
         active === value
@@ -83,38 +71,13 @@ export default function PeopleCards({
 
   return (
     <div>
-      {(categories.length > 0 || pageIdeas.peopleTable) && (
+      {categories.length > 0 && (
         <div className="mt-6 flex flex-wrap gap-2">
-          {categories.length > 0 && chip("__all", <T {...ui.filterAll} />, null)}
+          {chip("__all", <T {...ui.filterAll} />, null)}
           {categories.map((c) => chip(c, <T {...categoryLabel(c)} />, c))}
-          {/* Page idea `peopleTable`: Cards | Table, at the chips' far end. */}
-          {pageIdeas.peopleTable && (
-            <span className="idea-view-switch" role="group" aria-labelledby="people-view-label">
-              {/* Named in both languages: an aria-label can hold only one. */}
-              <span id="people-view-label" className="sr-only">
-                <T {...ui.peopleView} />
-              </span>
-              {(["cards", "table"] as const).map((v) => (
-                <Link
-                  key={v}
-                  href={href(active, v)}
-                  scroll={false}
-                  aria-current={view === v ? "true" : undefined}
-                  className="idea-view-option press"
-                >
-                  <T {...(v === "cards" ? ui.viewCards : ui.viewTable)} />
-                </Link>
-              ))}
-            </span>
-          )}
         </div>
       )}
 
-      {view === "table" ? (
-        <div className="mt-8">
-          <PeopleTable sectionSlug={sectionSlug} rows={filtered} />
-        </div>
-      ) : (
       <ul className="stagger person-cards mt-8">
         {filtered.map((row) => (
           <li key={row.slug}>
@@ -193,7 +156,6 @@ export default function PeopleCards({
           </li>
         ))}
       </ul>
-      )}
 
       {filtered.length === 0 && (
         <p className="mt-10 text-sm text-[var(--text-tertiary)]">

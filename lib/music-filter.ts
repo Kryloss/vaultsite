@@ -137,8 +137,6 @@ export interface MusicNote {
   coverSrcSet?: string;
   /** The note's own fact rows — Released, Album/Label, Length. May be empty. */
   facts?: MusicFact[];
-  /** Page idea `musicListen` — the note's first Apple Music link, song or album. */
-  listen?: string;
 }
 
 export interface ArtistGroup {

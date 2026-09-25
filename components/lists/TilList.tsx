@@ -59,11 +59,7 @@ export default async function TilList({ section, entries }: ListProps) {
   );
 
   return (
-    <div
-      className={`stagger mt-10 flex flex-col gap-12${
-        pageIdeas.projectsTimeline ? " idea-til-timeline" : ""
-      }`}
-    >
+    <div className="stagger mt-10 flex flex-col gap-12">
       {entries.map((entry, i) => {
         const href = `/${section.slug}/${entry.slug}`;
         /* Preview plus its "Continue reading" link, per language. The pair

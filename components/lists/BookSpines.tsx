@@ -5,8 +5,6 @@ import ShelfRow from "@/components/lists/ShelfRow";
 import T from "@/components/T";
 import { spineHeight, spineStyle } from "@/lib/spine";
 import type { ShelfItem } from "@/lib/shelf";
-import { pageIdeas } from "@/lib/site-config";
-import { shelfHaystack } from "@/lib/shelf-search";
 
 /**
  * The books as an actual shelf: standing spines on one hairline.
@@ -199,17 +197,7 @@ export default function BookSpines({
              the slot needs `--spine-w` for its own shrink floor. They still
              reach `.book-spine` — custom properties inherit — so every rule
              that reads them is unchanged. */
-          <li
-            key={item.slug}
-            className="book-slot"
-            style={style}
-            /* Page idea `shelfSearch` — see components/ShelfSearch.tsx. */
-            data-shelf-q={
-              pageIdeas.shelfSearch
-                ? shelfHaystack([item.title, item.titleUk, item.author, item.authorUk])
-                : undefined
-            }
-          >
+          <li key={item.slug} className="book-slot" style={style}>
             <Link
               href={`/${sectionSlug}/${item.slug}`}
               className="book-spine press"

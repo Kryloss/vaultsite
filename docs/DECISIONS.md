@@ -188,7 +188,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 177 | The lightbox zoom starts from a stand-in, so the thumbnail stays on the page |
 | 178 | A design 2.0 was built, tried and fully reverted |
 | 179 | Design ideas behind their own switches: the 404 search and the Projects fade |
-| 180 | Round two: a major idea per page, and bookmarks for the whole site |
+| 180 | Round two: the Posts lead and read-aloud on post pages |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1390,22 +1390,11 @@ The owner asked for one new design idea per page, tried on the local server and 
 
 **How it stays revertible.** Switch-guarded markup is not rendered when its switch is off, and `app/page-ideas.css` (imported after `globals.css`) only styles `.idea-` classes that that markup carries — `scripts/page-ideas.test.mjs` fails if a selector or keyframe there does not name one.
 
-## 180. Round two: a major idea per page, and bookmarks for the whole site (2026-09-24)
+## 180. Round two: the Posts lead and read-aloud on post pages (2026-09-24)
 
-After #179 the owner asked for another round, "something major for each" page plus one thing for the whole site, tried locally and easy to revert. Built on branch `design/page-ideas-2` with the same machinery: one switch per idea in `pageIdeas` (`lib/site-config.ts`), styles only in `app/page-ideas.css` under `.idea-` classes (`scripts/page-ideas.test.mjs`), and everything a list can't exercise as pure functions in `lib/` with tests. None of #178's rejected pieces or #179's seven are rebuilt.
+After #179 the owner asked for another round — "something major for each" page plus one thing for the whole site — built on branch `design/page-ideas-2` with #179's machinery (one switch per idea in `pageIdeas`, styles only under `.idea-` classes in `app/page-ideas.css`, logic as tested pure functions in `lib/`). The owner kept the two that belong to posts and had the rest deleted: a map of the vault on Home, a résumé timeline chart on Now, a Table view on People, a docked Apple Music player on the Music deck, a search across the Shelf, a dated timeline for the Projects feed, recent pages on the 404, and site-wide bookmarks. Don't rebuild those unasked; the deleted code is in the branch history (commit fce968f).
 
-| Switch | Where | The idea |
-|---|---|---|
-| `homeGraph` | Home | "Map of the vault": every published note a dot in a sunflower spiral round its section's hub, with the written `[[links]]` drawn between them (`lib/graph.ts` lays it out deterministically at build time; `lib/vault-graph.ts` feeds it). Hover lights a note's neighbourhood and names it; pressing opens it. Pointer-only and hidden from assistive tech — every dot is reachable elsewhere, and ~130 tab stops would be a trap. A pure force simulation was tried first and pushed the biggest section into the walls. |
-| `nowTimeline` | Now | The résumé's periods as bars on a years axis above the list (`lib/resume-span.ts` reads "Oct 2025 — present", "2022 — 2026", "From Sept 2026", and skips what it can't). Work filled, study outlined, current in `--text`; a dashed Now rule on the READER's month — the static HTML is drawn at the build's month so the chart never changes height. |
-| `postsLead` | Posts | The newest post leads, with its first picture and opening paragraph (`lib/post-lead.ts`; a one-line hook takes the next paragraph too). Shown on "All" only and left out of the list below. |
-| `peopleTable` | People | A Cards/Table switch at the end of the chips, in the URL like the category (`?view=table`). The table takes Born/Formed and Known for from each note's "At a glance" (`lib/people-table.ts`, via `factRows()`), and sorts by Person or Born. |
-| `musicListen` | Music | A pill at the foot of the window while the deck is on screen plays the centred record's own Apple Music player, docked; it keeps playing while the deck moves, and offers a swap when a different record is centred. Fixed, so the page (which must not change height) doesn't. In the left gutter from 1168px, so it doesn't cover the caption. |
-| `shelfSearch` | Shelf | One field over every row; items and emptied rows are hidden, never re-rendered (`lib/shelf-search.ts`, word-prefix like /music, both languages). |
-| `projectsTimeline` | Projects | The feed hangs on a dated rule, the date in the résumé's 104px small-caps column, newest dot filled. |
-| `noteReadAloud` | Post pages | "Listen" in the metadata line reads the note aloud with the browser's own speech, one block at a time, marking and (only when it's off screen) bringing into view the block it's on; Ukrainian voice when the page is Ukrainian. A pill keeps Pause and Stop in reach. |
-| `notFoundRecents` | 404 | "Where you were": the ⌘K recents that still exist, under the suggestions. |
-| `bookmarks` | Everywhere | A bookmark glyph in the breadcrumb chip (and `b`) keeps any page; kept pages lead the empty ⌘K under "Bookmarks" and list in the drawer. Paths only, in this browser (`lib/bookmarks.ts`); titles come from the search index, fetched for the drawer only once it is open with something to name. |
+- `postsLead` — the newest post leads the Posts page with its first picture and opening paragraphs (`lib/post-lead.ts`: the first prose block, and the next ones while it is under 160 characters, cut at a word by 320; the first raster/vector embed). Picture above the words when it is wide, beside them from 640px when it is tall. Shown on "All" only and left out of the year list below, so the post isn't offered twice. In dev, where drafts show, the newest non-draft leads.
+- `noteReadAloud` — "Listen" at the end of a post's metadata line (posts only: the notes with a reading time) reads the note aloud with the browser's own Web Speech API, one block at a time — per-block utterances are also what keeps Chromium from dropping a long one — marking the block it is on and scrolling it into view only once it has left the window. Ukrainian voice when the page is showing Ukrainian. It renders nothing until the browser says it can speak, and draws its own separator for that reason rather than joining the metadata array. A pill at the foot of the window holds Pause/Resume and Stop; leaving the page stops it.
 
-**Reverting.** Each switch removes its idea alone; with a switch off its markup isn't rendered and no rule in `app/page-ideas.css` can reach anything. The shared components touched (Chrome, CommandPalette, Coverflow, Resume, PostRows, PeopleCards, ShelfGrid, BookSpines, TilList, the entry page) change nothing while their switch is off — the palette's empty list keeps its eight rows, the chip keeps its buttons. To drop the whole round, delete the branch.
-
+Both switch off alone; with a switch off, its markup isn't rendered and no rule in `app/page-ideas.css` can reach anything.

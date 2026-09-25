@@ -289,15 +289,6 @@ export function PanelIcon({ className }: IconProps) {
   );
 }
 
-/** Page idea `bookmarks` (DECISIONS #180). `filled` is the kept state. */
-export function BookmarkIcon({ className, filled = false }: IconProps & { filled?: boolean }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
-      <path d="M7 4.5h10a1 1 0 0 1 1 1V20l-6-4-6 4V5.5a1 1 0 0 1 1-1Z" fill={filled ? "currentColor" : "none"} />
-    </svg>
-  );
-}
-
 export function CloseIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>

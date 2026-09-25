@@ -6,9 +6,6 @@ import ShelfRow from "@/components/lists/ShelfRow";
 import BookSpines from "@/components/lists/BookSpines";
 import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
-import { pageIdeas } from "@/lib/site-config";
-import { shelfHaystack } from "@/lib/shelf-search";
-import ShelfSearch from "@/components/ShelfSearch";
 
 /**
  * "shelf" section type — one row per medium (videos, movies, shows, books).
@@ -49,10 +46,8 @@ export default function ShelfGrid({ section, entries }: ListProps) {
 
   return (
     <div className="mt-8 flex flex-col gap-6">
-      {/* Page idea `shelfSearch` (lib/site-config.ts, DECISIONS #180). */}
-      {pageIdeas.shelfSearch && <ShelfSearch />}
       {groups.map((group) => (
-        <section key={group.medium} data-shelf-row={pageIdeas.shelfSearch ? "" : undefined}>
+        <section key={group.medium}>
           <h2
             /* Books only: that row's scroller reserves padding for the hover
                cover and overlaps this heading, so it has to sit above it to
@@ -112,11 +107,6 @@ export default function ShelfGrid({ section, entries }: ListProps) {
               {group.items.map((item) => (
                 <li
                   key={item.slug}
-                  data-shelf-q={
-                    pageIdeas.shelfSearch
-                      ? shelfHaystack([item.title, item.titleUk, item.author, item.authorUk])
-                      : undefined
-                  }
                   className={`shrink-0 snap-start ${
                     item.isVideo ? "shelf-card-wide" : "shelf-card-tall"
                   }`}

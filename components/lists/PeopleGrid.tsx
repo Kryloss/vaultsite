@@ -7,8 +7,6 @@ import PeopleCards, { type PersonRow } from "@/components/lists/PeopleCards";
 import PeopleGridClient from "@/components/lists/PeopleGridClient";
 import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
-import { pageIdeas } from "@/lib/site-config";
-import { personFacts } from "@/lib/people-table";
 
 /**
  * "people" section type (server side) — two cards to a row from 640px, the
@@ -48,7 +46,6 @@ export default function PeopleGrid({ section, entries }: ListProps) {
     contain: entry.meta.coverFit === "contain" || undefined,
     categories: parseCategories(entry.meta),
     date: entry.date,
-    facts: pageIdeas.peopleTable ? personFacts(entry.content, entry.contentUk) : undefined,
   }));
 
   const categories: string[] = [];
