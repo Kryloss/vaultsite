@@ -65,3 +65,50 @@ export function factSentence(label: string, value: string): string {
 export function isSourcesHeading(text: string): boolean {
   return /^(sources|джерела|references|посилання)$/i.test(text.replace(/#\s*$/, "").trim());
 }
+
+/**
+ * Where each step starts, counted in characters, plus the total — so the
+ * playback bar moves with the text, not with the number of paragraphs (a
+ * title and a long paragraph are not the same distance).
+ */
+export function stepOffsets(lengths: number[]): { starts: number[]; total: number } {
+  const starts: number[] = [];
+  let total = 0;
+  for (const n of lengths) {
+    starts.push(total);
+    total += Math.max(n, 1);
+  }
+  return { starts, total };
+}
+
+/** 0–1 through the note: step `i`, `charIndex` characters into it. */
+export function progressAt(
+  offsets: { starts: number[]; total: number },
+  i: number,
+  charIndex = 0
+): number {
+  if (offsets.total === 0 || i < 0) return 0;
+  if (i >= offsets.starts.length) return 1;
+  return Math.min(1, (offsets.starts[i] + Math.max(0, charIndex)) / offsets.total);
+}
+
+/** The step a seek to `fraction` (0–1) of the note lands in. */
+export function stepAtFraction(offsets: { starts: number[]; total: number }, fraction: number): number {
+  const target = Math.max(0, Math.min(1, fraction)) * offsets.total;
+  let i = 0;
+  while (i + 1 < offsets.starts.length && offsets.starts[i + 1] <= target) i++;
+  return i;
+}
+
+/**
+ * The language changed mid-note: carry on in the other language from the
+ * NEXT block — the one being read has been heard, in one language or the
+ * other, and restarting it would say it twice. The two readings share their
+ * shape (title, creator, facts, then the body block for block — the
+ * translations are made that way), so the position carries by index. Null
+ * when that was the last block.
+ */
+export function stepAfterSwitch(current: number, newLength: number): number | null {
+  const next = current + 1;
+  return next < newLength ? next : null;
+}

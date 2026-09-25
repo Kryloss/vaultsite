@@ -308,10 +308,11 @@ export const ui = {
   latestPost: { en: "Latest", uk: "Найновіше" },
   readPost: { en: "Read", uk: "Читати" },
   readAloud: { en: "Listen", uk: "Слухати" },
+  readAloudPlay: { en: "Play", uk: "Відтворити" },
   readAloudPause: { en: "Pause", uk: "Пауза" },
-  readAloudResume: { en: "Resume", uk: "Далі" },
-  readAloudStop: { en: "Stop reading", uk: "Зупинити читання" },
-  readingAloud: { en: "Reading aloud", uk: "Читаю вголос" },
+  readAloudClose: { en: "Close player", uk: "Закрити плеєр" },
+  readAloudSeek: { en: "Position in the note", uk: "Позиція в нотатці" },
+  readAloudPlayer: { en: "Listening to this note", uk: "Прослуховування нотатки" },
 } satisfies Record<string, Str>;
 
 /** Local-only editor copy. Kept out of `ui` so public client chunks do not

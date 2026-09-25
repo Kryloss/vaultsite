@@ -135,22 +135,37 @@
   }
 }
 
-/* ---------- Post pages: read aloud (`noteReadAloud`) ----------
-   "Listen" is a word in the metadata line, underlined like an action link.
-   The block being read takes the hover wash, bled a little past its box so
-   the text doesn't sit on the edge of it. The pill at the foot of the window
-   is the floating chrome's material, and its dot breathes while speaking. */
+/* ---------- Every note: read aloud (`noteReadAloud`, #180–#182) ----------
+   "Listen" is a quiet word in the metadata line led by a small filled play
+   mark (the owner's request, #182), and it steps aside while the player is
+   open. The block being read takes the hover wash, bled a little past its
+   box so the text doesn't sit on its edge; while the player is open every
+   block it will read is a press target, and says so with the cursor and a
+   fainter wash under the pointer.
+
+   The player is the floating chrome's material (`--chrome-bg` over a blur,
+   `--chrome-ring`): play/pause filled in `--text` — the inversion the active
+   chip uses, the one emphasis this site has — the title centred between it
+   and close, and the bar under all three. The bar's filled part is `--text`
+   up to `--p`, set by the component; its thumb shows only on hover or focus,
+   so at rest it reads as a progress line and under the pointer as a control. */
 .idea-read-aloud {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
   color: var(--text-secondary);
-  text-decoration: underline;
-  text-decoration-color: var(--text-tertiary);
-  text-underline-offset: 3px;
   cursor: pointer;
+  transition: color var(--dur-fast) var(--ease);
 }
 
 .idea-read-aloud:hover {
   color: var(--text);
-  text-decoration-color: var(--text);
+}
+
+.idea-read-aloud-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+  flex: none;
 }
 
 .idea-speaking {
@@ -162,54 +177,147 @@
     box-shadow var(--dur) var(--ease);
 }
 
-.idea-read-pill {
+.idea-read-step {
+  cursor: pointer;
+}
+
+.idea-read-step:not(.idea-speaking):hover {
+  border-radius: var(--r-sm);
+  background: color-mix(in srgb, var(--bg-hover) 55%, transparent);
+  box-shadow: 0 0 0 0.375rem color-mix(in srgb, var(--bg-hover) 55%, transparent);
+}
+
+.idea-read-player {
   position: fixed;
   z-index: 40;
   bottom: max(1rem, env(safe-area-inset-bottom));
   left: 50%;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.625rem;
-  padding: 0.375rem 0.5rem 0.375rem 0.875rem;
-  border-radius: var(--r-full);
-  background: var(--chrome-bg);
-  box-shadow: inset 0 0 0 1px var(--chrome-ring), 0 8px 24px rgb(0 0 0 / 0.18);
-  backdrop-filter: blur(14px) saturate(1.3);
-  font-size: 0.8125rem;
-  color: var(--text-secondary);
-  white-space: nowrap;
+  display: flex;
+  width: min(24rem, calc(100vw - 2rem));
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.5rem 0.5rem 0.625rem;
+  border-radius: var(--r-xl);
+  /* Nearly opaque: unlike the breadcrumb chip, this sits over the text it is
+     reading, and a see-through panel put the next line behind the title. */
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  box-shadow: inset 0 0 0 1px var(--chrome-ring), 0 10px 30px rgb(0 0 0 / 0.22);
+  backdrop-filter: blur(18px) saturate(1.3);
   translate: -50% 0;
   animation: idea-read-in var(--dur) var(--ease) both;
 }
 
-.idea-read-pill-dot {
-  width: 0.5rem;
-  height: 0.5rem;
+.idea-read-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.idea-read-play,
+.idea-read-close {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
   border-radius: var(--r-full);
-  background: var(--text);
-  animation: idea-read-breathe 1.6s var(--ease) infinite alternate;
-}
-
-.idea-read-pill-dot[data-paused] {
-  animation: none;
-  opacity: 0.4;
-}
-
-.idea-read-pill-label {
-  font-weight: 600;
-  color: var(--text);
-}
-
-.idea-read-pill-btn {
-  padding: 0.1875rem 0.625rem;
-  border-radius: var(--r-full);
-  color: var(--text-secondary);
   cursor: pointer;
 }
 
-.idea-read-pill-btn:hover {
+.idea-read-play {
+  width: 2.25rem;
+  height: 2.25rem;
+  background: var(--text);
+  color: var(--bg);
+}
+
+.idea-read-close {
+  width: 2.25rem;
+  height: 2.25rem;
+  color: var(--text-tertiary);
+  transition:
+    color var(--dur-fast) var(--ease),
+    background-color var(--dur-fast) var(--ease);
+}
+
+.idea-read-close:hover {
   background: var(--bg-hover);
   color: var(--text);
+}
+
+.idea-read-title {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.idea-read-bar {
+  width: calc(100% - 0.5rem);
+  height: 0.875rem;
+  margin: 0 0.25rem;
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.idea-read-bar::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: var(--r-full);
+  background: linear-gradient(
+    to right,
+    var(--text) var(--p),
+    var(--border) var(--p)
+  );
+}
+
+.idea-read-bar::-moz-range-track {
+  height: 3px;
+  border-radius: var(--r-full);
+  background: var(--border);
+}
+
+.idea-read-bar::-moz-range-progress {
+  height: 3px;
+  border-radius: var(--r-full);
+  background: var(--text);
+}
+
+.idea-read-bar::-webkit-slider-thumb {
+  width: 11px;
+  height: 11px;
+  margin-top: -4px;
+  border: 0;
+  border-radius: var(--r-full);
+  background: var(--text);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease);
+  -webkit-appearance: none;
+}
+
+.idea-read-bar::-moz-range-thumb {
+  width: 11px;
+  height: 11px;
+  border: 0;
+  border-radius: var(--r-full);
+  background: var(--text);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease);
+}
+
+.idea-read-bar:hover::-webkit-slider-thumb,
+.idea-read-bar:focus-visible::-webkit-slider-thumb {
+  opacity: 1;
+}
+
+.idea-read-bar:hover::-moz-range-thumb,
+.idea-read-bar:focus-visible::-moz-range-thumb {
+  opacity: 1;
 }
 
 @keyframes idea-read-in {
@@ -219,15 +327,8 @@
   }
 }
 
-@keyframes idea-read-breathe {
-  from {
-    opacity: 0.35;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .idea-read-pill,
-  .idea-read-pill-dot {
+  .idea-read-player {
     animation: none;
   }
 }

@@ -3,7 +3,15 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { factSentence, isSourcesHeading, pickVoice } from "./read-aloud.ts";
+import {
+  factSentence,
+  isSourcesHeading,
+  pickVoice,
+  progressAt,
+  stepAfterSwitch,
+  stepAtFraction,
+  stepOffsets,
+} from "./read-aloud.ts";
 
 const voices = [
   { name: "Albert", lang: "en-US" },
@@ -45,4 +53,28 @@ test("reading stops at Sources, in either language", () => {
   assert.ok(isSourcesHeading("Sources#"));
   assert.ok(isSourcesHeading("Джерела"));
   assert.ok(!isSourcesHeading("Why him"));
+});
+
+test("the bar moves with the text, not the paragraph count", () => {
+  const o = stepOffsets([10, 90]);
+  assert.deepEqual(o, { starts: [0, 10], total: 100 });
+  assert.equal(progressAt(o, 0), 0);
+  assert.equal(progressAt(o, 1), 0.1);
+  assert.equal(progressAt(o, 1, 45), 0.55);
+  assert.equal(progressAt(o, 2), 1);
+});
+
+test("a seek lands in the block that holds that point", () => {
+  const o = stepOffsets([10, 90, 100]);
+  assert.equal(stepAtFraction(o, 0), 0);
+  assert.equal(stepAtFraction(o, 0.049), 0);
+  assert.equal(stepAtFraction(o, 0.05), 1);
+  assert.equal(stepAtFraction(o, 0.99), 2);
+  assert.equal(stepAtFraction(o, 5), 2);
+});
+
+test("switching language carries on from the next block", () => {
+  assert.equal(stepAfterSwitch(3, 10), 4);
+  assert.equal(stepAfterSwitch(9, 10), null);
+  assert.equal(stepAfterSwitch(3, 4), null);
 });

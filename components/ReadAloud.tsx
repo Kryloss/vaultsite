@@ -3,7 +3,17 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import T from "@/components/T";
 import { ui } from "@/lib/ui-strings";
-import { factSentence, isSourcesHeading, pickVoice } from "@/lib/read-aloud";
+import { useLang } from "@/components/useLang";
+import { CloseIcon, PauseIcon, PlayIcon } from "@/components/icons";
+import {
+  factSentence,
+  isSourcesHeading,
+  pickVoice,
+  progressAt,
+  stepAfterSwitch,
+  stepAtFraction,
+  stepOffsets,
+} from "@/lib/read-aloud";
 
 type State = "idle" | "playing" | "paused";
 
@@ -106,21 +116,26 @@ function voices(): Promise<SpeechSynthesisVoice[]> {
 
 /**
  * Read the note aloud — page idea `noteReadAloud` (lib/site-config.ts,
- * DECISIONS #180, #181), on every note: posts, people, music, shelf,
+ * DECISIONS #180, #181, #182), on every note: posts, people, music, shelf,
  * projects. The browser's own speech (Web Speech API), so nothing is fetched
- * and nothing leaves the page; in Ukrainian when the page is showing
- * Ukrainian, with the best voice the system has for it (lib/read-aloud.ts →
- * pickVoice — a neural or enhanced voice over the compact default).
+ * and nothing leaves the page; in the language the page is showing, with the
+ * best voice the system has for it (lib/read-aloud.ts → pickVoice).
  *
- * It reads one block at a time and marks the block it is on, bringing it into
- * view only when it has left the window — the reader follows the voice, and a
- * reader who scrolls away to look at something is not dragged back until the
- * next paragraph starts. Per-block utterances are also what keeps Chromium
- * from silently stopping a long one mid-sentence.
+ * "Listen" in the metadata line starts it and then steps aside until the
+ * player is closed. The player floats at the foot of the window: play/pause,
+ * the note's title, close, and under them a bar that is both where the voice
+ * is and a way to move it (dragging or arrow keys seek to the block at that
+ * point). While it is open:
  *
- * Hidden until mounted and only where speech exists, like every other
- * reader-side control. A pill at the foot of the window keeps Pause and Stop
- * in reach once the "Listen" in the metadata line has scrolled away.
+ * - every block it will read can be pressed to move the voice there — except
+ *   on a link or a control, and not when the press ended a text selection;
+ * - switching language carries on in the other language from the NEXT block
+ *   (the one being read has been heard; lib/read-aloud.ts → stepAfterSwitch).
+ *
+ * Pause is the engine's own pause, so a paragraph resumes mid-sentence. Any
+ * MOVE while paused — a press on a block, a seek, a language switch — cancels
+ * the engine instead and remembers where to begin, because a paused engine
+ * holding a queued utterance resumes that utterance, not the new place.
  */
 export default function ReadAloud({ separated = true }: { separated?: boolean }) {
   const supported = useSyncExternalStore(
@@ -128,9 +143,27 @@ export default function ReadAloud({ separated = true }: { separated?: boolean })
     () => "speechSynthesis" in window,
     () => false
   );
+  const { lang } = useLang();
   const [state, setState] = useState<State>("idle");
+  const [progress, setProgress] = useState(0);
+  const [title, setTitle] = useState("");
+  /** Bumped whenever the script is rebuilt, so the press targets follow it. */
+  const [version, setVersion] = useState(0);
+
   const run = useRef(0);
   const current = useRef<HTMLElement | null>(null);
+  const steps = useRef<Step[]>([]);
+  const offsets = useRef(stepOffsets([]));
+  const pos = useRef(0);
+  /** Paused, but the engine was cancelled — resume means "speak from pos". */
+  const pending = useRef(false);
+  const uk = useRef(false);
+  const voiceList = useRef<SpeechSynthesisVoice[]>([]);
+  /** The state as the async start and the language observer see it. */
+  const stateRef = useRef<State>("idle");
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   const mark = (el: HTMLElement | null) => {
     current.current?.classList.remove("idea-speaking");
@@ -138,87 +171,210 @@ export default function ReadAloud({ separated = true }: { separated?: boolean })
     if (!el) return;
     el.classList.add("idea-speaking");
     const r = el.getBoundingClientRect();
-    if (r.top < 80 || r.bottom > window.innerHeight - 80) {
+    if (r.top < 80 || r.bottom > window.innerHeight - 120) {
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       el.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
     }
   };
+
+  const build = useCallback((inUk: boolean) => {
+    uk.current = inUk;
+    steps.current = readingScript(inUk);
+    offsets.current = stepOffsets(steps.current.map((s) => s.text.length));
+    setTitle(steps.current[0]?.text ?? document.title);
+    setVersion((v) => v + 1);
+  }, []);
 
   const stop = useCallback(() => {
     run.current++;
     window.speechSynthesis?.cancel();
     current.current?.classList.remove("idea-speaking");
     current.current = null;
+    pending.current = false;
+    pos.current = 0;
+    setProgress(0);
     setState("idle");
   }, []);
 
   useEffect(() => stop, [stop]);
 
-  const start = async () => {
-    const uk = document.documentElement.dataset.lang === "uk";
-    const steps = readingScript(uk);
-    if (steps.length === 0) return;
-    const id = ++run.current;
-    setState("playing");
-    const voice = pickVoice(await voices(), uk ? "uk" : "en", navigator.language);
-    if (id !== run.current) return;
-    window.speechSynthesis.cancel();
-
-    const speak = (i: number) => {
-      if (id !== run.current) return;
-      if (i >= steps.length) {
-        stop();
-        return;
-      }
-      const u = new SpeechSynthesisUtterance(steps[i].text);
-      u.lang = voice?.lang ?? (uk ? "uk-UA" : "en-US");
-      if (voice) u.voice = voice;
-      u.onstart = () => mark(steps[i].el);
-      u.onend = () => speak(i + 1);
-      u.onerror = () => {
-        if (id === run.current) stop();
+  /** Speak from step `from` to the end, as one run that a newer run cancels. */
+  const speakFrom = useCallback(
+    (from: number) => {
+      const id = ++run.current;
+      window.speechSynthesis.cancel();
+      pending.current = false;
+      const voice = pickVoice(voiceList.current, uk.current ? "uk" : "en", navigator.language);
+      const speak = (i: number) => {
+        if (id !== run.current) return;
+        const step = steps.current[i];
+        if (!step) {
+          stop();
+          return;
+        }
+        const u = new SpeechSynthesisUtterance(step.text);
+        u.lang = voice?.lang ?? (uk.current ? "uk-UA" : "en-US");
+        if (voice) u.voice = voice;
+        u.onstart = () => {
+          if (id !== run.current) return;
+          pos.current = i;
+          mark(step.el);
+          setProgress(progressAt(offsets.current, i));
+        };
+        u.onboundary = (e) => {
+          if (id === run.current) setProgress(progressAt(offsets.current, i, e.charIndex));
+        };
+        u.onend = () => speak(i + 1);
+        u.onerror = (e) => {
+          // A cancel from a newer run reports "interrupted"/"canceled" here.
+          if (id === run.current && e.error !== "interrupted" && e.error !== "canceled") stop();
+        };
+        window.speechSynthesis.speak(u);
       };
-      window.speechSynthesis.speak(u);
-    };
-    speak(0);
+      speak(from);
+      setState("playing");
+    },
+    [stop]
+  );
+
+  /** Move the voice to step `i`: at once if playing, on resume if paused. */
+  const moveTo = useCallback(
+    (i: number, play: boolean) => {
+      const step = steps.current[i];
+      if (!step) return;
+      pos.current = i;
+      mark(step.el);
+      setProgress(progressAt(offsets.current, i));
+      if (play) {
+        speakFrom(i);
+      } else {
+        run.current++;
+        window.speechSynthesis.cancel();
+        pending.current = true;
+      }
+    },
+    [speakFrom]
+  );
+
+  const start = async () => {
+    build(document.documentElement.dataset.lang === "uk");
+    if (steps.current.length === 0) return;
+    setState("playing");
+    // Closed while the voices were arriving? `stop` bumps the run.
+    const id = ++run.current;
+    voiceList.current = await voices();
+    if (id !== run.current) return;
+    speakFrom(0);
   };
 
   const toggle = () => {
-    if (state === "idle") start();
-    else if (state === "playing") {
+    if (state === "playing") {
       window.speechSynthesis.pause();
       setState("paused");
+    } else if (pending.current) {
+      speakFrom(pos.current);
     } else {
       window.speechSynthesis.resume();
       setState("playing");
     }
   };
 
+  /* Language switched while open: rebuild in the new language and carry on
+     from the next block. <html data-lang> is the toggle's single source. */
+  useEffect(() => {
+    if (state === "idle") return;
+    const observer = new MutationObserver(() => {
+      const nowUk = document.documentElement.dataset.lang === "uk";
+      if (nowUk === uk.current) return;
+      const next = stepAfterSwitch(pos.current, readingScript(nowUk).length);
+      build(nowUk);
+      if (next === null) {
+        stop();
+        return;
+      }
+      moveTo(next, stateRef.current === "playing");
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-lang"] });
+    return () => observer.disconnect();
+  }, [state, build, moveTo, stop]);
+
+  /* Press a block to move the voice there. The blocks are marked as targets
+     only while the player is open, and a press on a link or a control inside
+     one keeps its own meaning. */
+  useEffect(() => {
+    if (state === "idle") return;
+    const els = steps.current.map((s) => s.el);
+    els.forEach((el) => el.classList.add("idea-read-step"));
+    const onClick = (e: MouseEvent) => {
+      const target = e.target as Element | null;
+      if (!target || target.closest("a, button, input, textarea, select, summary, label, iframe")) return;
+      if ((window.getSelection()?.toString() ?? "").trim()) return;
+      const i = els.findIndex((el) => el.contains(target));
+      if (i === -1) return;
+      moveTo(i, true);
+    };
+    document.addEventListener("click", onClick);
+    return () => {
+      document.removeEventListener("click", onClick);
+      els.forEach((el) => el.classList.remove("idea-read-step"));
+    };
+  }, [state, version, moveTo]);
+
   if (!supported) return null;
 
-  const label =
-    state === "idle" ? ui.readAloud : state === "playing" ? ui.readAloudPause : ui.readAloudResume;
+  if (state === "idle") {
+    return (
+      <>
+        {separated && <span aria-hidden>·</span>}
+        <button type="button" onClick={start} className="idea-read-aloud press">
+          {/* The second icon on page content, at the owner's request (#182):
+              it says "this plays" before the word is read. */}
+          <PlayIcon className="idea-read-aloud-icon" />
+          <T {...ui.readAloud} />
+        </button>
+      </>
+    );
+  }
 
+  const playing = state === "playing";
   return (
-    <>
-      {separated && <span aria-hidden>·</span>}
-      <button type="button" onClick={toggle} className="idea-read-aloud press">
-        <T {...label} />
-      </button>
-      {state !== "idle" && (
-        <div className="idea-read-pill" role="status">
-          <span className="idea-read-pill-dot" data-paused={state === "paused" ? "" : undefined} aria-hidden />
-          <span className="idea-read-pill-label">
-            <T {...ui.readingAloud} />
-          </span>
-          <button type="button" onClick={toggle} className="idea-read-pill-btn press">
-            <T {...(state === "playing" ? ui.readAloudPause : ui.readAloudResume)} />
-          </button>
-          <button type="button" onClick={stop} className="idea-read-pill-btn press">
-            <T {...ui.readAloudStop} />
-          </button>
-        </div>
-      )}
-    </>
+    <div className="idea-read-player" role="region" aria-label={ui.readAloudPlayer[lang]}>
+      <div className="idea-read-row">
+        <button
+          type="button"
+          onClick={toggle}
+          className="idea-read-play press"
+          aria-label={(playing ? ui.readAloudPause : ui.readAloudPlay)[lang]}
+        >
+          {playing ? <PauseIcon className="h-4 w-4" /> : <PlayIcon className="h-4 w-4 translate-x-px" />}
+        </button>
+        <span className="idea-read-title" title={title}>
+          {title}
+        </span>
+        <button
+          type="button"
+          onClick={stop}
+          className="idea-read-close press"
+          aria-label={ui.readAloudClose[lang]}
+        >
+          <CloseIcon className="h-4 w-4" />
+        </button>
+      </div>
+      <input
+        type="range"
+        min={0}
+        max={1000}
+        step={1}
+        value={Math.round(progress * 1000)}
+        onChange={(e) => {
+          const i = stepAtFraction(offsets.current, Number(e.target.value) / 1000);
+          if (i !== pos.current || !playing) moveTo(i, playing);
+        }}
+        aria-label={ui.readAloudSeek[lang]}
+        aria-valuetext={`${Math.round(progress * 100)}%`}
+        className="idea-read-bar"
+        style={{ "--p": `${progress * 100}%` } as React.CSSProperties}
+      />
+    </div>
   );
 }

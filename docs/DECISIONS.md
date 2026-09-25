@@ -190,6 +190,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 179 | Design ideas behind their own switches: the 404 search and the Projects fade |
 | 180 | Round two: the Posts lead and read-aloud on post pages |
 | 181 | "Listen" on every note, reading the note's whole shape, in the best voice there is |
+| 182 | The read-aloud player: play/pause, title, close and a seek bar; press a block to go there; it follows the language |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1405,4 +1406,14 @@ Both switch off alone; with a switch off, its markup isn't rendered and no rule 
 The owner asked for #180's read-aloud on every kind of note — people, music, shelf and projects as well as posts. It now sits at the end of every entry page's metadata line (drawing its own separator, and none on a note whose line is otherwise empty). Those notes are not shaped like posts, so what is read changed with them (`readingScript()` in `components/ReadAloud.tsx`): the title; on shelf and music notes the creator block ("Director: David Fincher." and the bio); the "At a glance" facts a row at a time ("Born: March 9, 1985."), from whichever copy is on screen — the article's or, on a wide People page, the contents rail's; then the body, skipping the orphaned `fact-heading` the facts were lifted out of, and stopping at Sources. Every element is read in the language showing (a creator block holds both), a rating by its accessible name ("5 out of 5 stars").
 
 **The voice** is now chosen, not taken: `pickVoice()` in `lib/read-aloud.ts` prefers the platforms' better voices (Edge's "Natural" neural voices, Apple's Premium/Enhanced and Siri, Chrome's network "Google" voices) and the reader's own locale, never a macOS novelty voice, never a Russian voice for Ukrainian. Chrome's voice list arrives asynchronously, so it waits briefly for `voiceschanged`. The browser's own speech is still the engine: nothing is fetched and nothing leaves the page. Pre-generated narration from a hosted TTS or a clone of the owner's voice was discussed and not built — it would be a build-time script writing audio files beside the notes, never a runtime API call from the page.
+
+## 182. The read-aloud player: play/pause, title, close and a seek bar; press a block to go there; it follows the language (2026-09-24)
+
+The owner redesigned #180/#181's player and asked for two behaviours. All of it is `components/ReadAloud.tsx`, with the arithmetic in `lib/read-aloud.ts` (tested).
+
+- **"Listen" is a play mark and a word**, not an underlined word — the second icon on page content, at the owner's request (`docs/DESIGN-SYSTEM.md`). It **disappears while the player is open**, separator and all, and comes back when it closes.
+- **The player** is one floating card at the foot of the window: a filled play/pause (the active chip's `--text` inversion), the note's title centred, a close button, and a bar under all three. The bar is a real `<input type="range">` — it shows progress and seeks (drag, click, arrow keys) — and moves with the TEXT, not the block count: `stepOffsets()`/`progressAt()` weigh each block by its length, and `onboundary` moves it within a block where the voice reports word boundaries. Its thumb appears on hover or focus only. Nearly opaque (`--surface` at 94%) rather than the chip's translucency, because it sits over the text being read.
+- **Press a block to move the voice there**, while the player is open: every block in the reading script takes `.idea-read-step` (pointer cursor, a faint wash under the pointer); a press on a link or control inside one keeps its own meaning, and a press that ended a text selection is ignored.
+- **Switching language mid-note carries on in the other language from the next block** (`stepAfterSwitch()`): a `MutationObserver` on `<html data-lang>`, the toggle's one source of truth, rebuilds the script in the new language and continues at the old index + 1 — the two readings share their shape (title, creator, facts, then the body block for block, since the translations are made that way). The title in the player changes language with it.
+- **Pause is the engine's own pause**, so a paragraph resumes mid-sentence. But any MOVE while paused — a press on a block, a seek, a language switch — cancels the engine and remembers where to begin, because a paused engine resumes its queued utterance, not the new place.
 
