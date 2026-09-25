@@ -148,7 +148,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.3125rem;
-  color: var(--text-secondary);
+  color: inherit; /* the line's own --text-tertiary, like its neighbours */
   cursor: pointer;
   transition: color var(--dur-fast) var(--ease);
 }

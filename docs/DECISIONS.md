@@ -200,6 +200,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 189 | The contents sheet is the drawer's twin |
 | 190 | The series list and link previews join the drawer's material |
 | 191 | "Listen" sits right after the date |
+| 192 | Maturity leaves the metadata line; "Listen" in the line's grey |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1470,3 +1471,7 @@ The owner asked for the two panels #189 left on the single blur to match as well
 ## 191. "Listen" sits right after the date (2026-09-25)
 
 The owner moved "Listen" from the end of a note's metadata line (#180) to straight after the date: `July 17, 2026 · Listen · 1 min read · …`. It still stays outside the joined `meta` array, because it renders nothing until the browser says it can speak: it is rendered inside the date's fragment and draws its own separator in front, while the next item's separator comes from the join as before. So a browser without speech gets `date · 1 min read` with no doubled middot, and while the player is open (the inline button gives way to the fixed pill) the line closes up the same way. A note with no `date:` has nothing to follow, so there it goes last, as before.
+
+## 192. Maturity leaves the metadata line; "Listen" in the line's grey (2026-09-25)
+
+At the owner's request the maturity word ("Seedling", #24) is no longer shown under a post's title. The `maturity:` key, `lib/maturity.ts` and the dock's field stay, so nothing in the vault changes and it can come back by re-adding the one `meta.push`. "Listen" was `--text-secondary`, a step darker than everything else on the line; it now inherits the line's `--text-tertiary` and still darkens to `--text` on hover.

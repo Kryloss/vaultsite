@@ -45,7 +45,6 @@ import ReadingPosition from "@/components/ReadingPosition";
 import NoteThumbFit from "@/components/NoteThumbFit";
 import JsonLd from "@/components/JsonLd";
 import { breadcrumbJsonLd, entryJsonLd } from "@/lib/jsonld";
-import { maturityOf } from "@/lib/maturity";
 import { NOTE_THUMB_FIT_SCRIPT } from "@/lib/note-thumb";
 import Page from "@/components/Page";
 import DevEntryOptionsSlot from "@/components/DevEntryOptionsSlot";
@@ -356,15 +355,6 @@ export default async function EntryPage({ params }: Props) {
         {stats.words.toLocaleString()} <T {...ui.words} />
       </span>
     );
-    /* Maturity is a writing idea, so it rides with the writing stats. Unset
-       notes fall back to Seedling — see lib/maturity.ts. Word only: the
-       seedling/tree glyph was the last emoji left on a reading page, and
-       "Seedling" says it without one. */
-    meta.push(
-      <span className="maturity">
-        <T {...maturityOf(entry.meta).label} />
-      </span>
-    );
   }
 
   /* "Part 2 of 5" — a badge that opens the list of parts. Someone landing here
@@ -532,7 +522,7 @@ export default async function EntryPage({ params }: Props) {
               </span>
             )}
           </h1>
-          {/* Date · reading stats · maturity · series · #tags. */}
+          {/* Date · Listen · reading stats · series · #tags. */}
           {metaLine}
         </div>
       </header>

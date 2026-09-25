@@ -15,7 +15,7 @@ The vault model and the per-section conventions that are not visible from `lib/v
 ## Frontmatter
 
 - Section `main.md`: `title`, `title_uk`, `description`, `description_uk`, `icon`, `order`, `type`, `slug` (override), `draft`. Full frontmatter is exposed as `section.meta` so section types can define their own keys (`music` reads `playlists:` and `artists:`; `now` reads `updated:`/`updated_uk:`, `resume_file:`).
-- Entries: `title`, `title_uk`, `date` (YYYY-MM-DD), `description`, `description_uk` (exposed as `Entry.descriptionUk`), `slug`, `draft` (or `published: false`), `series` (+ optional `series_uk`, `part`), `aliases:`, `category:`/`categories:`, `cover:` (people, shelf and music), `maturity:` (posts; anything unset falls back to seedling, #24). Shelf keys: `docs/SHELF.md`. Music keys: `docs/MUSIC.md`. Entry frontmatter is exposed as `entry.meta` (same pattern as `section.meta`) for type-specific keys.
+- Entries: `title`, `title_uk`, `date` (YYYY-MM-DD), `description`, `description_uk` (exposed as `Entry.descriptionUk`), `slug`, `draft` (or `published: false`), `series` (+ optional `series_uk`, `part`), `aliases:`, `category:`/`categories:`, `cover:` (people, shelf and music), `maturity:` (posts; still editable, but no longer shown on the page, #192). Shelf keys: `docs/SHELF.md`. Music keys: `docs/MUSIC.md`. Entry frontmatter is exposed as `entry.meta` (same pattern as `section.meta`) for type-specific keys.
 - Section bodies use a sibling `main.uk.md` and entry bodies a sibling `<name>.uk.md`, body only.
 
 ## Posts (`posts`, the default type)
@@ -23,7 +23,7 @@ The vault model and the per-section conventions that are not visible from `lib/v
 - Category filter chips from entry `category:` frontmatter — chips are links to `/posts?category=X`, read by `useSearchParams()` in `PostListClient`, so a post's own category chip lands here pre-filtered. Unlike the shelf these are NOT separate pages: no per-category title/OG/sitemap entry, and filtering needs JS; the Suspense fallback renders the full unfiltered list into the static HTML (#14). The owner asked specifically not to add pages for these.
 - The list groups entries by year (empty years never render); row dates are DD.MM. This date treatment is posts-only — other types show full dates.
 - Filterable lists are split server/client: `PostList`→`PostListClient` (server slims entries to serializable rows). A server component RENDERED BY a client one still ships to the browser and so cannot import `lib/vault.ts` — `components/lists/PostRows.tsx` is the example, and `lib/dates.ts` and `lib/categories.ts` exist because of it (#15).
-- Reading time and the reading bar are posts-only (`docs/READING.md`). One metadata line under the title: date · reading time · words · maturity · series, then the `#tags` — pieces collected into an array and joined, never hand-written separators (#66).
+- Reading time and the reading bar are posts-only (`docs/READING.md`). One metadata line under the title: date · Listen · reading time · words · series, then the `#tags` — pieces collected into an array and joined, never hand-written separators (#66).
 
 ## Projects (`projects`)
 
