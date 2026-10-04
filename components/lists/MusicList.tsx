@@ -7,6 +7,8 @@ import {
 } from "@/lib/apple-music";
 import { groupByArtist } from "@/lib/music";
 import MusicNotes from "@/components/lists/MusicNotes";
+import MusicBackdrop from "@/components/MusicBackdrop";
+import { musicBackdrop } from "@/lib/site-config";
 import T from "@/components/T";
 
 /**
@@ -41,6 +43,11 @@ export default function MusicList({ section, entries, body }: ListProps) {
 
   return (
     <div>
+      {/* SpongeBob, cut out, levitating in the right gutter beside the
+          player — see components/MusicBackdrop.tsx and DECISIONS #199.
+          Parked: `musicBackdrop` in lib/site-config.ts. */}
+      {musicBackdrop && <MusicBackdrop />}
+
       {playlists.length > 0 ? (
         <div
           className={`mt-8 grid grid-cols-1 gap-5 ${

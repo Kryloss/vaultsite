@@ -8,7 +8,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseNowBody } from "./now-content.ts";
+import { parseNow, parseNowBody } from "./now-content.ts";
 
 test("intro is everything above the first heading", () => {
   const { intro } = parseNowBody("Hello there.\n\nStill intro.\n\n## Goals\n\n- [ ] a");
@@ -41,6 +41,48 @@ test("a trailing wiki link becomes the goal's link and leaves the label", () => 
   const { goals } = parseNowBody("## Goals\n\n- [ ] Ship the site → [[Vaultsite]]");
   assert.equal(goals[0].label, "Ship the site");
   assert.equal(goals[0].link, "Vaultsite");
+});
+
+test("technical skills, projects and participation are résumé blocks too", () => {
+  const { resume } = parseNow(
+    [
+      "## Résumé",
+      "### Technical skills",
+      "- **Languages** — Python, C",
+      "### Projects",
+      "#### site.example · Personal Website",
+      "Vercel, Supabase",
+      "- Built it.",
+      "### Participation",
+      "#### Workshop",
+      "*Mar 12, 2024* · Newmarket",
+    ].join("\n"),
+    [
+      "## Резюме",
+      "### Технічні навички",
+      "- **Мови** — Python, C",
+      "### Проєкти",
+      "#### site.example · Особистий сайт",
+      "Vercel, Supabase",
+      "- Зробив його.",
+      "### Участь",
+      "#### Воркшоп",
+      "*12 бер. 2024* · Ньюмаркет",
+    ].join("\n"),
+    (m) => assert.fail(m)
+  );
+  assert.ok(resume, "expected a résumé");
+  assert.deepEqual(resume.technical, ["Languages — Python, C"]);
+  assert.deepEqual(resume.technical_uk, ["Мови — Python, C"]);
+  const [project] = resume.projects ?? [];
+  // A second line with no italics is a sub-label, not a date.
+  assert.equal(project.meta, "Vercel, Supabase");
+  assert.equal(project.period, undefined);
+  assert.equal(project.org_uk, "Особистий сайт");
+  assert.deepEqual(project.points_uk, ["Зробив його."]);
+  const [event] = resume.participation ?? [];
+  assert.equal(event.period, "Mar 12, 2024");
+  assert.equal(event.role_uk, "Воркшоп");
 });
 
 test("no Goals heading means no goals, not a crash", () => {

@@ -34,8 +34,13 @@ export interface ResumeData {
   summary?: string;
   summary_uk?: string;
   file?: string;
-  experience?: ResumeRow[];
+  /** "Label — detail" lines, like `skills` (the block the page calls Strengths). */
+  technical?: string[];
+  technical_uk?: string[];
+  projects?: ResumeRow[];
   education?: ResumeRow[];
+  experience?: ResumeRow[];
+  participation?: ResumeRow[];
   certifications?: ResumeRow[];
   skills?: string[];
   skills_uk?: string[];
@@ -51,16 +56,27 @@ interface ResumeBlockDef {
   has: (data: ResumeData) => boolean;
 }
 
-/** Document order — Toc and the page render in this order. */
+/**
+ * Document order — Toc and the page render in this order, which is the order
+ * of the owner's PDF (DECISIONS #200) plus the blocks only the page has:
+ * Strengths sits right under Technical skills at his request, the rest follow.
+ */
 export const RESUME_BLOCKS: ResumeBlockDef[] = [
-  { id: "experience", label: ui.resumeExperience, has: (d) => !!d.experience?.length },
+  { id: "technical", label: ui.resumeTechnical, has: (d) => !!d.technical?.length },
+  { id: "strengths", label: ui.resumeSkills, has: (d) => !!d.skills?.length },
+  { id: "projects", label: ui.resumeProjects, has: (d) => !!d.projects?.length },
   { id: "education", label: ui.resumeEducation, has: (d) => !!d.education?.length },
+  { id: "experience", label: ui.resumeExperience, has: (d) => !!d.experience?.length },
+  {
+    id: "participation",
+    label: ui.resumeParticipation,
+    has: (d) => !!d.participation?.length,
+  },
   {
     id: "certifications",
     label: ui.resumeCertifications,
     has: (d) => !!d.certifications?.length,
   },
-  { id: "strengths", label: ui.resumeSkills, has: (d) => !!d.skills?.length },
   { id: "languages", label: ui.resumeLanguages, has: (d) => !!d.languages?.length },
   { id: "contact", label: ui.resumeContact, has: (d) => !!d.contact?.email },
 ];
@@ -96,8 +112,12 @@ export function resumeSearchText(data: ResumeData): string {
   return [
     data.summary,
     data.summary_uk,
-    ...(data.experience ?? []).map(rowText),
+    ...(data.technical ?? []),
+    ...(data.technical_uk ?? []),
+    ...(data.projects ?? []).map(rowText),
     ...(data.education ?? []).map(rowText),
+    ...(data.experience ?? []).map(rowText),
+    ...(data.participation ?? []).map(rowText),
     ...(data.certifications ?? []).map(rowText),
     ...(data.skills ?? []),
     ...(data.skills_uk ?? []),

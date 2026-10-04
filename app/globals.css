@@ -8371,6 +8371,84 @@ html[data-intro] .chrome-bar,
   }
 }
 
+/* ---- SpongeBob beside the /music player (components/MusicBackdrop.tsx, DECISIONS #199) ----
+
+   A cut-out floating in the right gutter, alongside the player: his body
+   level with its top edge (14rem down), the cord and iPod hanging down its
+   side. Two pictures, cut where the cord forks (scripts/make-music-backdrop.py):
+   him, and the cord and iPod below the fork, which hang from it as a
+   pendulum. Both are already transparent round him; the effects here are a
+   slight see-through, 0.85, so he sits in the page rather than on it, and a
+   small glow. The levitation is script (lib/levitation.ts), writing
+   `transform` on the two pictures; without it, or under reduced motion, he
+   simply hangs here, whole.
+
+   Hung off the TEXT column, not centred in the gutter: `left` is 2rem past the
+   column's right edge (`.page` is `--measure` wide with `--gutter` padding, so
+   the text ends at 50vw + measure/2 - gutter), and he takes whatever room is
+   left before a 1.5rem margin at the window's edge, up to 24rem. At 1168px
+   that is 15rem; `100vw` counts a classic scrollbar, a few pixels this can
+   absorb. Absolute to the document's top-left, like `.note-wash` (`main` and
+   the page are unpositioned), `z-index: -1` inside `main`'s `.page-in`
+   stacking context so it can never cover anything. Gutter widths only (#107's
+   1168px); `loading="lazy"` on the imgs keeps them unfetched while this is
+   `display: none`. */
+.music-backdrop {
+  display: none;
+}
+
+@media (min-width: 1168px) {
+  .music-backdrop {
+    --backdrop-left: calc(50vw + var(--measure) / 2 - var(--gutter) + 2rem);
+    display: block;
+    position: absolute;
+    top: 14rem;
+    left: var(--backdrop-left);
+    width: min(24rem, 100vw - var(--backdrop-left) - 1.5rem);
+    opacity: 0.85;
+    z-index: -1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .music-backdrop img {
+    display: block;
+    max-width: none;
+    height: auto;
+    /* A small glow round each silhouette (owner's request): the tight shadow
+       covers what is left of the source's pale rim, the wide one softens it
+       into a halo. `--text`, so it stays monochrome and follows the theme — a
+       light glow on dark, a faint shadow on light. On the pictures, not the
+       box, so moving them is a transform the compositor does alone and the
+       glow is never redrawn. */
+    filter: drop-shadow(0 0 1px color-mix(in srgb, var(--text) 35%, transparent))
+      drop-shadow(0 0 6px color-mix(in srgb, var(--text) 22%, transparent));
+    will-change: transform;
+  }
+
+  .music-backdrop-body {
+    width: 100%;
+  }
+
+  /* Placed and pivoted by inline styles from lib/music-backdrop.json. */
+  .music-backdrop-cord {
+    position: absolute;
+  }
+
+  /* A swing tips the pictures' boxes (transparent corners and all) past the
+     window's right edge, which would put a sideways scrollbar on /music. Clip
+     it there only, like the album player's rule below. */
+  html:has(.music-backdrop) {
+    overflow-x: clip;
+  }
+}
+
+@media print {
+  .music-backdrop {
+    display: none;
+  }
+}
+
 /* ---- a music note's album player sits in the gutter (DECISIONS #94) ----
 
    On a review, the album IS the subject: it belongs beside the whole note

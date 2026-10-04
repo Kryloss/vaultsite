@@ -17,9 +17,10 @@
  *
  *   One-paragraph summary, right under the heading.
  *
- *   ### Experience                           ← Experience | Education |
- *                                              Certifications | Strengths |
- *                                              Languages | Contact
+ *   ### Experience                           ← Technical skills | Projects |
+ *                                              Education | Experience |
+ *                                              Participation | Certifications |
+ *                                              Strengths | Languages | Contact
  *   #### Barista · Starbucks                 ← "role · org", optional "→ link"
  *   *Oct 2025 — present* · Newmarket #current  ← *italic* = period, rest =
  *                                                sub-label, #current fills the dot
@@ -100,8 +101,10 @@ const RESUME_HEADINGS: Record<string, keyof ResumeData> = {};
 
 /** Blocks that are lists of timeline rows rather than plain strings. */
 const ROW_FIELDS = new Set<keyof ResumeData>([
+  "projects",
   "experience",
   "education",
+  "participation",
   "certifications",
 ]);
 
@@ -378,6 +381,9 @@ export function parseNow(
     mergeRows(r.experience, ukResume.experience);
     mergeRows(r.education, ukResume.education);
     mergeRows(r.certifications, ukResume.certifications);
+    mergeRows(r.projects, ukResume.projects);
+    mergeRows(r.participation, ukResume.participation);
+    r.technical_uk = ukList(r.technical, ukResume.technical);
     r.skills_uk = ukList(r.skills, ukResume.skills);
     r.languages_uk = ukList(r.languages, ukResume.languages);
     if (r.contact) r.contact.location_uk = uk(r.contact.location, ukResume.contact?.location);

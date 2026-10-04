@@ -39,6 +39,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
+  // The standalone résumé page (app/resume/page.tsx) — not a vault section.
+  urls.push({ url: `${siteUrl}/resume`, changeFrequency: "monthly", priority: 0.5 });
+
   for (const section of getSections()) {
     const entries = getEntries(section);
 

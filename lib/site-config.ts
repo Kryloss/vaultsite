@@ -82,6 +82,22 @@ export const sectionIconMotion = false;
 export const controlIconMotion = false;
 
 /**
+ * SPONGEBOB ON /MUSIC — the cut-out levitating beside the player, with the
+ * iPod swinging from its cord. Off (owner's request). Flip this to `true` to
+ * turn him back on.
+ *
+ * Parked like `sidebarTree`: the component (components/MusicBackdrop.tsx), the
+ * physics (lib/levitation.ts, still tested), the pictures in public/art/, the
+ * styles (`.music-backdrop` in app/globals.css) and the reasoning
+ * (docs/MUSIC.md, docs/DECISIONS.md #199) are all still here. While this is
+ * false he is not rendered at all, so nothing is fetched or run, and the
+ * page's `overflow-x: clip` (which keys on him) does not apply.
+ *
+ * Typed as `boolean` so switching it can't make a branch unreachable.
+ */
+export const musicBackdrop: boolean = false;
+
+/**
  * PAGE IDEAS — small design ideas, each behind its own switch
  * (docs/DECISIONS.md #179). Flip one to `false` to take it out; with both off
  * the site renders exactly as it did before them: the markup behind each

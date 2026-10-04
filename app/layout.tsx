@@ -5,6 +5,7 @@ import "./globals.css";
 import "./page-ideas.css";
 import { parseTodaysVibe } from "@/lib/todays-vibe";
 import Chrome from "@/components/Chrome";
+import BareRoute from "@/components/BareRoute";
 import Constellation from "@/components/Constellation";
 import Lightbox from "@/components/Lightbox";
 import CodeCopy from "@/components/CodeCopy";
@@ -224,17 +225,20 @@ export default function RootLayout({
       <body>
         {/* `socials` used to be threaded through here; the sidebar's icon row
             is now <SocialLinks />, which reads lib/site-config itself. */}
-        <Chrome
-          items={items}
-          vibe={parseTodaysVibe(sections.find(section => section.slug === "home")?.meta ?? {})}
-          siteName={siteName}
-          siteNameUk={siteNameUk}
-          resistanceDay={resistanceDay()}
-          observance={observance()}
-          constellation={<Constellation notes={notes} today={today} />}
-        >
-          {children}
-        </Chrome>
+        {/* /resume renders without the chrome — see components/BareRoute.tsx. */}
+        <BareRoute page={children}>
+          <Chrome
+            items={items}
+            vibe={parseTodaysVibe(sections.find(section => section.slug === "home")?.meta ?? {})}
+            siteName={siteName}
+            siteNameUk={siteNameUk}
+            resistanceDay={resistanceDay()}
+            observance={observance()}
+            constellation={<Constellation notes={notes} today={today} />}
+          >
+            {children}
+          </Chrome>
+        </BareRoute>
         <DevToolsSlot />
         <Lightbox />
         <JsonLd data={siteJsonLd()} />

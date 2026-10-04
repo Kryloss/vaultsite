@@ -1,0 +1,19 @@
+{
+  "note": "Written by scripts/make-music-backdrop.py; px of the body picture.",
+  "width": 626,
+  "height": 728,
+  "cord": {
+    "left": 200,
+    "top": 268,
+    "width": 66,
+    "height": 448
+  },
+  "pivot": {
+    "x": 213,
+    "y": 268
+  },
+  "bob": {
+    "x": 243.0,
+    "y": 665.0
+  }
+}

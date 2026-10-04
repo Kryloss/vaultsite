@@ -17,9 +17,13 @@ import T from "@/components/T";
  *
  *   One-paragraph summary, right under the heading.
  *
- *   ### Experience                          ← Experience | Education |
- *                                             Certifications | Strengths |
+ *   ### Experience                          ← Technical skills |
+ *                                             Strengths | Projects is next,
+ *                                             then Education | Experience |
+ *                                             Participation | Certifications |
  *                                             Languages | Contact
+ *                                             (rendered in that order, whatever
+ *                                             order the note lists them in)
  *   #### Barista · Starbucks                ← role · org ("→ [[Note]]" links it)
  *   *Oct 2025 — present* · Upper Canada Mall, Newmarket #current
  *      ↑ italics = the date column   ↑ sub-label       ↑ fills the dot,
@@ -69,21 +73,15 @@ export default function Resume({ section }: { section: Section }) {
         </p>
       )}
 
-      {data.experience?.length ? (
-        <Block id="experience" label={<T {...ui.resumeExperience} />}>
-          <Timeline rows={data.experience} badge />
-        </Block>
-      ) : null}
-
-      {data.education?.length ? (
-        <Block id="education" label={<T {...ui.resumeEducation} />}>
-          <Timeline rows={data.education} />
-        </Block>
-      ) : null}
-
-      {data.certifications?.length ? (
-        <Block id="certifications" label={<T {...ui.resumeCertifications} />}>
-          <Timeline rows={data.certifications} />
+      {data.technical?.length ? (
+        <Block id="technical" label={<T {...ui.resumeTechnical} />}>
+          <ul className="flex flex-col gap-2.5">
+            {data.technical.map((s, i) => (
+              <li key={i} className="text-sm leading-relaxed">
+                <Point en={s} uk={data.technical_uk?.[i]} />
+              </li>
+            ))}
+          </ul>
         </Block>
       ) : null}
 
@@ -96,6 +94,36 @@ export default function Resume({ section }: { section: Section }) {
               </li>
             ))}
           </ul>
+        </Block>
+      ) : null}
+
+      {data.projects?.length ? (
+        <Block id="projects" label={<T {...ui.resumeProjects} />}>
+          <Timeline rows={data.projects} />
+        </Block>
+      ) : null}
+
+      {data.education?.length ? (
+        <Block id="education" label={<T {...ui.resumeEducation} />}>
+          <Timeline rows={data.education} />
+        </Block>
+      ) : null}
+
+      {data.experience?.length ? (
+        <Block id="experience" label={<T {...ui.resumeExperience} />}>
+          <Timeline rows={data.experience} badge />
+        </Block>
+      ) : null}
+
+      {data.participation?.length ? (
+        <Block id="participation" label={<T {...ui.resumeParticipation} />}>
+          <Timeline rows={data.participation} />
+        </Block>
+      ) : null}
+
+      {data.certifications?.length ? (
+        <Block id="certifications" label={<T {...ui.resumeCertifications} />}>
+          <Timeline rows={data.certifications} />
         </Block>
       ) : null}
 
