@@ -22,5 +22,8 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      # The renderer tests read image sizes from the manifest this writes;
+      # locally `npm run dev` and `npm run build` generate it.
+      - run: node scripts/sync-assets.mjs
       # typecheck, unit tests, image-note validation (docs/VERIFY.md)
       - run: npm run check
