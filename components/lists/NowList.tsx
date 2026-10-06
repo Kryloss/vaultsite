@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { ListProps } from "@/lib/section-types";
-import { ClockIcon, ArrowIcon } from "@/components/icons";
+import { ClockIcon, ArrowGlyph } from "@/components/icons";
 import { getWikiIndex } from "@/lib/vault";
 import type { ResumeData } from "@/lib/resume";
 import { resumeHeadings } from "@/lib/resume";
@@ -98,7 +98,9 @@ export default function NowList({ section }: ListProps) {
                   <T en={goal.label ?? ""} uk={goal.label_uk} />
                 </span>
                 {href && (
-                  <ArrowIcon className="h-4 w-4 shrink-0 -translate-x-1 text-[var(--text-tertiary)] opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
+                  <span className="now-goal-arrow">
+                    <ArrowGlyph />
+                  </span>
                 )}
               </span>
               {goal.note && (
@@ -130,7 +132,7 @@ export default function NowList({ section }: ListProps) {
                 />
                 {href ? (
                   isInternal(href) ? (
-                    <Link href={href} className="now-goal-link">
+                    <Link href={href} className="now-goal-link action-link">
                       {text}
                     </Link>
                   ) : (
@@ -138,7 +140,7 @@ export default function NowList({ section }: ListProps) {
                       href={href}
                       target="_blank"
                       rel="noreferrer"
-                      className="now-goal-link"
+                      className="now-goal-link action-link"
                     >
                       {text}
                     </a>

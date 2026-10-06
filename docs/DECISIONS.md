@@ -211,6 +211,9 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 200 | /resume is its own page: the PDF as a sheet, and a download button |
 | 201 | The arrow is drawn, not typed |
 | 202 | The arrow leaves its ring: head and shaft move, the ring stays |
+| 203 | The prev/next footer wears the same arrow |
+| 204 | Shelf row headings end in the same arrow |
+| 205 | /now goal rows: the arrow is drawn out of its ring on hover |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1549,3 +1552,26 @@ At the owner's request the arrow's motion was redone for #201's drawing. Sliding
 - **Units are the drawing's, not pixels.** A CSS `px` on an SVG child is a viewBox unit, so the travel scales with the font size (about 3px and 17px at 14px, the old 3px and 16px). The shaft's scale is `(14.4 + travel) / 14.4`; its origin and length are repeated in `globals.css` from the path in `components/icons.tsx`, so the two change together.
 - **No `.is-back` motion rules.** The mirrored `<svg>` mirrors the movement inside it.
 - Reduced motion: no transition and no movement, as before. `.sibling-arrow` (the `‹ ›` footer) still slides as one piece.
+
+## 203. The prev/next footer wears the same arrow (2026-10-06)
+
+At the owner's request the `‹ ›` under an article are `ArrowGlyph` too, with #202's motion. This replaces the "left alone" line of #201 and the last line of #202 as far as the footer goes.
+
+- **One set of motion rules.** `.sibling:hover`, `:active` and `.is-thrown` are added to the selectors that already move `.arrow-head` and `.arrow-shaft`; the footer's own `translateX` rules are gone. `.sibling-prev` uses `back`, so its mirror does the direction. `ArrowThrow.tsx` and the `[` / `]` shortcuts already put `.is-thrown` on `a.sibling` and needed nothing.
+- **`.sibling-arrow` stays as a wrapper** for the size and the tertiary-to-text colour. 1rem, down from the chevron's 1.25rem: the chevron was a narrow glyph and needed the size, the drawn arrow is 1.1em wide. The glyph's own 0.3em margin is zeroed there (the row's `gap` spaces it), with a selector one class heavier than `.arrow-glyph.is-back`, which comes later in the file.
+- Still not this drawing: `ArrowIcon` on /now's rows.
+
+## 204. Shelf row headings end in the same arrow (2026-10-06)
+
+At the owner's request the chevron after each medium heading on /shelf ("Videos", "Movies", …) is `ArrowGlyph`, with #202's motion. The heading link took `action-link` in place of Tailwind's `group`, which is all the hover lead, the throw on press and `ArrowThrow.tsx` need.
+
+- **A heavier stroke here only** (`.shelf-heading-arrow`: 1.5 on a 0.9em glyph). The heading is semibold and the 1.2 hairline that suits body text read as a different drawing beside it. Grey until hovered, as the chevron was.
+- The shelf has no backward arrow; nothing else on the page changed.
+
+## 205. /now goal rows: the arrow is drawn out of its ring on hover (2026-10-06)
+
+At the owner's request the hover arrow on a linked goal (`components/lists/NowList.tsx`) is `ArrowGlyph` too. That was the last use of the lucide-style `ArrowIcon`, which is deleted from `components/icons.tsx`; every arrow on the site is now the one drawing.
+
+- **Still hidden at rest**, as the icon was: an arrow on some goals and not others made the list read as links. On card hover it fades in and is drawn out of the ring (head from 8 units back, shaft from 0.44 of its length), and stops at the plain resting arrow — no extra lead on top of the arrival.
+- **Press throws it** like the others: both goal anchors took `action-link`, so `ArrowThrow.tsx` holds `.is-thrown` on them. The /now rules carry `.now-goal-card` to outrank the generic hover rules, with the thrown pair last.
+- An external goal link opens a new tab, so its thrown arrow comes back after `ArrowThrow`'s 1.5s give-up rather than being unmounted. Touch has no hover and never sees this arrow, unchanged.

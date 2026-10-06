@@ -3574,30 +3574,31 @@ a.series-link:hover {
    asks for (the same reasoning as `.press`), and this fills it with something
    that means something.
 
-   Distances are small on purpose. Two pixels on hover is under the threshold
-   where it reads as an animation and over the one where it reads as nothing —
-   the arrow just seems eager. */
+   Distances are small on purpose. A few pixels on hover is under the
+   threshold where it reads as an animation and over the one where it reads as
+   nothing — the arrow just seems eager.
+
+   The footer's arrows are the same drawing as an action link's (`ArrowGlyph`,
+   #203) and move by the same rules, further down: this span only sets the
+   size and the colour. 1rem against the titles' 0.875rem, so the pair reads
+   as the row's controls rather than as part of either title. */
 .sibling-arrow {
   flex: none;
-  font-size: 1.25rem;
+  font-size: 1rem;
   line-height: 1;
   color: var(--text-tertiary);
-  transition:
-    color var(--dur-fast) var(--ease),
-    transform var(--dur) var(--ease),
-    opacity var(--dur) var(--ease);
+  transition: color var(--dur-fast) var(--ease);
 }
 
 .sibling:hover .sibling-arrow {
   color: var(--text);
 }
 
-.sibling-prev:hover .sibling-arrow {
-  transform: translateX(-3px);
-}
-
-.sibling-next:hover .sibling-arrow {
-  transform: translateX(3px);
+/* The row's own `gap` does the spacing here. The extra class in the selector
+   is to outrank `.arrow-glyph.is-back`'s margin, which comes later. */
+.sibling .sibling-arrow .arrow-glyph {
+  display: block;
+  margin: 0;
 }
 
 /* Thrown — and it STAYS thrown. `.is-thrown` is added at the click by
@@ -3612,25 +3613,15 @@ a.series-link:hover {
 
    `--dur-slow` on purpose. The throw is the one piece of motion here anyone
    is meant to WATCH — everything else is a response you feel rather than
-   see — and at 120ms it was a jump rather than a departure. */
-.sibling-prev:active .sibling-arrow,
-.sibling-prev.is-thrown .sibling-arrow {
-  transform: translateX(-16px);
-  opacity: 0;
-  transition-duration: var(--dur-slow);
-}
+   see — and at 120ms it was a jump rather than a departure.
 
-.sibling-next:active .sibling-arrow,
-.sibling-next.is-thrown .sibling-arrow {
-  transform: translateX(16px);
-  opacity: 0;
-  transition-duration: var(--dur-slow);
-}
+   The rules themselves are with the drawing's, below. */
 
-/* A standalone action link's arrow — "Continue reading", "All posts",
-   "Back home" — where the arrow is a sibling span rather than part of the
-   translated string (see lib/ui-strings.ts). `.is-back` is the leading kind:
-   it sits before the words and points back the way you came. */
+/* The arrow of a standalone action link — "Continue reading", "All posts",
+   "Back home" — where it is a sibling span rather than part of the translated
+   string (see lib/ui-strings.ts), and of the entry footer's prev/next
+   (`.sibling`). `.is-back` is the leading kind: it sits before the words and
+   points back the way you came. */
 .arrow-glyph {
   display: inline-block;
   margin-left: 0.3em;
@@ -3658,6 +3649,25 @@ a.series-link:hover {
   transform: scaleX(-1);
 }
 
+/* After a shelf row's heading (components/lists/ShelfGrid.tsx, #204). The
+   heading is semibold, so the hairline the arrow wears beside body text looked
+   like a different drawing here: a heavier stroke, on a slightly smaller
+   glyph so the ring doesn't close up. Grey until the heading is hovered, as
+   the chevron it replaced was. */
+.shelf-heading-arrow {
+  font-size: 0.9em;
+  color: var(--text-tertiary);
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.shelf-heading-arrow svg {
+  stroke-width: 1.5;
+}
+
+.action-link:hover .shelf-heading-arrow {
+  color: var(--text);
+}
+
 /* The ring is where you are, so it never moves. The head leads on hover and
    the shaft stretches from the ring to keep hold of it; on press the head is
    thrown and the shaft is drawn out after it until both are gone, leaving the
@@ -3679,23 +3689,29 @@ a.series-link:hover {
   transform-origin: 4.1px 6px;
 }
 
-.action-link:hover .arrow-head {
+.action-link:hover .arrow-head,
+.sibling:hover .arrow-head {
   transform: translateX(4px);
 }
 
-.action-link:hover .arrow-shaft {
+.action-link:hover .arrow-shaft,
+.sibling:hover .arrow-shaft {
   transform: scaleX(1.28);
 }
 
 .action-link:active .arrow-head,
-.action-link.is-thrown .arrow-head {
+.action-link.is-thrown .arrow-head,
+.sibling:active .arrow-head,
+.sibling.is-thrown .arrow-head {
   transform: translateX(22px);
   opacity: 0;
   transition-duration: var(--dur-slow);
 }
 
 .action-link:active .arrow-shaft,
-.action-link.is-thrown .arrow-shaft {
+.action-link.is-thrown .arrow-shaft,
+.sibling:active .arrow-shaft,
+.sibling.is-thrown .arrow-shaft {
   transform: scaleX(2.53);
   opacity: 0;
   transition-duration: var(--dur-slow);
@@ -3703,20 +3719,17 @@ a.series-link:hover {
 
 /* Someone who asked for less motion asked for this too. */
 @media (prefers-reduced-motion: reduce) {
-  .sibling-arrow {
-    transition: color var(--dur-fast) var(--ease);
-  }
-
   .arrow-shaft,
   .arrow-head {
     transition: none;
   }
 
-  .sibling:hover .sibling-arrow,
-  .sibling-prev:active .sibling-arrow,
-  .sibling-next:active .sibling-arrow,
-  .sibling-prev.is-thrown .sibling-arrow,
-  .sibling-next.is-thrown .sibling-arrow,
+  .sibling:hover .arrow-shaft,
+  .sibling:hover .arrow-head,
+  .sibling:active .arrow-shaft,
+  .sibling:active .arrow-head,
+  .sibling.is-thrown .arrow-shaft,
+  .sibling.is-thrown .arrow-head,
   .action-link:hover .arrow-shaft,
   .action-link:hover .arrow-head,
   .action-link:active .arrow-shaft,
@@ -7002,6 +7015,65 @@ html[data-dev-tools] .dev-page-title-row {
 .now-goal-link:focus-visible::after {
   outline: 2px solid var(--text-tertiary);
   outline-offset: 2px;
+}
+
+/* The arrow on a goal that leads somewhere (#205). Unlike the site's other
+   arrows it is not there at rest: a row of goals with an arrow on every other
+   one read as a list of links rather than a list of goals. Hovering the card
+   brings it in, and it arrives the way the drawing suggests — the ring shows
+   and the arrow is drawn OUT of it, the head starting 8 units back with the
+   shaft at (14.4 − 8) / 14.4 of its length (the pairing rule beside
+   `.arrow-shaft`). Hovered, it is the plain arrow at rest: no further lead,
+   which would be a second movement on top of the first.
+
+   The selectors carry `.now-goal-card` to outrank the generic
+   `.action-link:hover` rules, and the thrown pair comes last so a press still
+   wins over the hover it happens during. Touch has no hover and so never
+   sees this arrow, as before. */
+.now-goal-arrow {
+  flex: none;
+  color: var(--text-tertiary);
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease);
+}
+
+.now-goal-card:hover .now-goal-arrow {
+  opacity: 1;
+}
+
+.now-goal-card .now-goal-arrow .arrow-head {
+  transform: translateX(-8px);
+}
+
+.now-goal-card .now-goal-arrow .arrow-shaft {
+  transform: scaleX(0.44);
+}
+
+.now-goal-card:hover .now-goal-arrow .arrow-head,
+.now-goal-card:hover .now-goal-arrow .arrow-shaft {
+  transform: none;
+}
+
+.now-goal-card .action-link:active .now-goal-arrow .arrow-head,
+.now-goal-card .action-link.is-thrown .now-goal-arrow .arrow-head {
+  transform: translateX(22px);
+}
+
+.now-goal-card .action-link:active .now-goal-arrow .arrow-shaft,
+.now-goal-card .action-link.is-thrown .now-goal-arrow .arrow-shaft {
+  transform: scaleX(2.53);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .now-goal-card .now-goal-arrow .arrow-head,
+  .now-goal-card .now-goal-arrow .arrow-shaft,
+  .now-goal-card .action-link:active .now-goal-arrow .arrow-head,
+  .now-goal-card .action-link.is-thrown .now-goal-arrow .arrow-head,
+  .now-goal-card .action-link:active .now-goal-arrow .arrow-shaft,
+  .now-goal-card .action-link.is-thrown .now-goal-arrow .arrow-shaft {
+    transform: none;
+    opacity: 1;
+  }
 }
 
 .now-goal-check {

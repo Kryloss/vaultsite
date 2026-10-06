@@ -48,7 +48,7 @@ A nownownow-style page: a "Short-term goals" checklist plus an optional résumé
 ## Entry pages, all sections
 
 - Breadcrumb, `<h1>`, metadata line, then for shelf and music the creator block and fact list (`docs/SHELF.md`). A `[!pull]` and footnotes: `docs/READING.md`.
-- **Entry footer arrows** (`lib/siblings.ts`, `components/EntryFooter.tsx`, #20, #126): `‹ prev / next ›` is the section's own list, one step either way, a single row with a chevron at each edge — except on the shelf, where the pool is the note's own medium. Related-by-category was built and removed the same day.
+- **Entry footer arrows** (`lib/siblings.ts`, `components/EntryFooter.tsx`, #20, #126): `‹ prev / next ›` is the section's own list, one step either way, a single row with the site's drawn arrow at each edge (`ArrowGlyph`, #203; a `‹ ›` chevron before that) — except on the shelf, where the pool is the note's own medium. Related-by-category was built and removed the same day.
 - **Series**: `docs/READING.md`.
 - The "← Section" link above the title was removed (#61) — the floating breadcrumb already names the section.
 

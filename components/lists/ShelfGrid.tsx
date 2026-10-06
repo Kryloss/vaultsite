@@ -5,6 +5,7 @@ import ShelfCard from "@/components/lists/ShelfCard";
 import ShelfRow from "@/components/lists/ShelfRow";
 import BookSpines from "@/components/lists/BookSpines";
 import T from "@/components/T";
+import { ArrowGlyph } from "@/components/icons";
 import { ui } from "@/lib/ui-strings";
 
 /**
@@ -56,28 +57,21 @@ export default function ShelfGrid({ section, entries }: ListProps) {
               group.medium === "book" ? " book-shelf-heading" : ""
             }`}
           >
-            {/* "Everything else" has no medium page to link to. The chevron is
-                shown even for a single item so the page stays discoverable. */}
+            {/* "Everything else" has no medium page to link to. The arrow is
+                shown even for a single item so the page stays discoverable.
+                `action-link` is what moves it — see `.arrow-glyph` in
+                globals.css. */}
             {group.medium === "unsorted" ? (
               <T {...group.label} />
             ) : (
               <Link
                 href={`/${section.slug}/type/${group.slug}`}
-                className="group press inline-flex items-center gap-0.5"
+                className="action-link press inline-flex items-center"
               >
                 <T {...group.label} />
-                <svg
-                  viewBox="0 0 24 24"
-                  aria-hidden
-                  className="h-[18px] w-[18px] shrink-0 translate-y-px text-[var(--text-tertiary)] transition-all duration-150 group-hover:translate-x-0.5 group-hover:text-[var(--text)]"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m9 6 6 6-6 6" />
-                </svg>
+                <span className="shelf-heading-arrow">
+                  <ArrowGlyph />
+                </span>
               </Link>
             )}
           </h2>

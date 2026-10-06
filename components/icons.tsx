@@ -136,14 +136,6 @@ export function BookOpenIcon({ className }: IconProps) {
   );
 }
 
-export function ArrowIcon({ className }: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
-      <path d="M5 12h14M13 6l6 6-6 6" />
-    </svg>
-  );
-}
-
 /**
  * The site's own arrow, drawn in place of the "→" character (#201).
  *

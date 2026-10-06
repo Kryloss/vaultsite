@@ -1,5 +1,6 @@
 import Link from "next/link";
 import T from "@/components/T";
+import { ArrowGlyph } from "@/components/icons";
 import { ui } from "@/lib/ui-strings";
 import type { EntryRef } from "@/lib/siblings";
 
@@ -25,7 +26,7 @@ export default function EntryFooter({
       {prev ? (
         <Link href={prev.href} className="sibling sibling-prev">
           <span className="sibling-arrow" aria-hidden>
-            ‹
+            <ArrowGlyph back />
           </span>
           {/* The arrow alone has no meaning read aloud. */}
           <span className="sr-only">
@@ -47,7 +48,7 @@ export default function EntryFooter({
             <T en={next.title} uk={next.titleUk} />
           </span>
           <span className="sibling-arrow" aria-hidden>
-            ›
+            <ArrowGlyph />
           </span>
         </Link>
       )}
