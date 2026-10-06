@@ -227,6 +227,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 216 | "Listen" stays in the metadata line while reading, as "Stop"; its icon is yellow |
 | 217 | Phones: arrows a quarter bigger; a shortened line is cut by script so "…" never follows a comma or a space |
 | 218 | Drafts live in Git-ignored `_drafts/` folders, because the repository is public |
+| 219 | Sentence links lose their underline; the link preview opens sooner and animates in and out |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1737,3 +1738,13 @@ The repository is public and linked from the owner's résumé. `draft: true` onl
 - **Publishing a draft** is two steps: move the note, its `.uk.md` and its images out of `_drafts/` into the section, and remove `draft: true`.
 
 Costs, accepted: drafts are no longer backed up or synced to other devices by Git, and the versions pushed before this date remain in the public history. Rejected: making the repository private, because the résumé links to it. `Post Sample` and `Draft example` in `Posts/Examples/` stay tracked: they are scaffolding, not writing.
+
+## 219. Sentence links lose their underline; the link preview opens sooner and animates (2026-10-06)
+
+At the owner's request, starting from "here" on the home page.
+
+**No underline.** A link inside a paragraph, list item, quote or table cell is weight 600 in the text colour, against the body's softer grey. Hover lays a `--bg-hover` wash behind the words (a background plus a `box-shadow` spread, so nothing moves). This replaces the underline sweep, and with it the reasoning in #64 that "the underline already says link". Weight is there because in light mode the text colour and the body grey are too close to tell apart on their own. Other links in prose (heading anchors, footnote references, embed fallbacks) keep the plain underline.
+
+**The preview card.** It opens after 120ms instead of 350ms (40ms when a card is already showing, so moving along a row of links does not wait each time), and closes 100ms after the pointer leaves. It sits centred under its link, nudged 20px to the right, rather than starting at the link's left edge. A section's card no longer opens with the word "Section". It scales up from the edge nearest the link over 140ms, its text fading in 30ms behind the surface; a card flipped above its link travels the other way (`data-side`). It used to vanish on unmount; now `data-state="closing"` plays a `--dur-fast` fade first and the component unmounts it after `EXIT_MS`. Reduced motion gets no animation either way.
+
+Cost, accepted: a link is less obvious at a glance than an underlined one, and on a phone there is no hover and no card, so weight is the only mark.

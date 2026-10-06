@@ -554,56 +554,47 @@ body::after {
   text-decoration-color: var(--text);
 }
 
-/* ---------- The underline sweeps ----------
-   A link in a sentence rests on a grey rule and takes a black one from the
-   left when you point at it, instead of the whole line changing colour at
-   once. On a page with no accent, the underline IS the link's only voice, and
-   this gives it a way to answer that costs the sentence nothing.
+/* ---------- Links in a sentence carry no underline (#219) ----------
+   At the owner's request. A link in a paragraph, list item, quote or table
+   cell is marked by weight and by being the text colour against the body's
+   softer grey; pointing at it lays a quiet grey wash behind the words, and an
+   internal link then opens its preview card (components/LinkPreview.tsx).
 
-   Two gradients rather than `text-decoration`, because a decoration can only
-   change colour — there is no way to grow one from one end. The cost is
-   `text-decoration-skip-ink`, which a background can't do, so this is scoped
-   to links inside actual prose (paragraphs, list items, quotes, table cells)
-   and the line is placed at the very bottom of the text box, clear of the
-   descenders it would otherwise cut through. Everything else on the page —
-   heading anchors, footnote references, embed fallbacks, a link wrapping an
-   image — keeps the plain decoration above.
+   The wash is a background plus a `box-shadow` spread of the same grey, so it
+   reaches a little past the letters without moving them, and
+   `box-decoration-break: clone` gives each line of a wrapped link its own
+   rounded piece.
 
-   `background-position` in `em` rather than pixels so the rule holds its
-   distance from the text at every size the prose uses. That one number is
-   also the only thing to touch if the rule ever sits too low or too close:
-   100% is the bottom of the text box (below the descenders), and subtracting
-   walks it back up toward the baseline. */
+   This replaced the underline sweep (two gradients growing from the left).
+   Everything else in prose — heading anchors, footnote references, embed
+   fallbacks — keeps the plain decoration above. */
 .prose p > a,
 .prose li > a,
 .prose blockquote a,
 .prose td > a {
   text-decoration: none;
-  background-image:
-    linear-gradient(var(--text), var(--text)),
-    linear-gradient(var(--text-tertiary), var(--text-tertiary));
-  background-repeat: no-repeat;
-  background-position: 0 calc(100% - 0.08em), 0 calc(100% - 0.08em);
-  background-size: 0 1px, 100% 1px;
+  font-weight: 600;
+  border-radius: var(--r-xs);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
   transition:
-    background-size var(--dur) var(--ease),
-    color var(--dur-fast) var(--ease);
+    background-color var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease);
 }
 
 .prose p > a:hover,
 .prose li > a:hover,
 .prose blockquote a:hover,
 .prose td > a:hover {
-  background-size: 100% 1px, 100% 1px;
+  background-color: var(--bg-hover);
+  box-shadow: 0 0 0 0.16em var(--bg-hover);
 }
 
-/* Links in prose that aren't sentences: a superscript reference, or an image
-   wrapped in a link. Neither is a phrase you read past, and a rule growing
-   under a raised number is a rendering fault. */
-.prose sup > a,
+/* A link wrapping an image is not a phrase: no wash around the picture. */
 .prose p > a:has(img),
 .prose li > a:has(img) {
-  background-image: none;
+  background-color: transparent;
+  box-shadow: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -611,22 +602,7 @@ body::after {
   .prose li > a,
   .prose blockquote a,
   .prose td > a {
-    /* No sweep, but the link still has to answer: the grey rule goes black,
-       which is what it did before any of this. */
-    background-size: 100% 1px, 100% 1px;
-    background-image:
-      linear-gradient(var(--text-tertiary), var(--text-tertiary)),
-      linear-gradient(var(--text-tertiary), var(--text-tertiary));
     transition: none;
-  }
-
-  .prose p > a:hover,
-  .prose li > a:hover,
-  .prose blockquote a:hover,
-  .prose td > a:hover {
-    background-image:
-      linear-gradient(var(--text), var(--text)),
-      linear-gradient(var(--text), var(--text));
   }
 }
 
@@ -2276,7 +2252,76 @@ html[data-lang="uk"] .callout[data-callout="failure"] { --callout-label: "Нев
   background: var(--bg);
   box-shadow: 0 8px 30px rgb(0 0 0 / 0.12);
   pointer-events: none;
-  animation: preview-in 0.14s var(--ease) both;
+  /* It grows out of the link: from the edge nearest the words, a few
+     pixels toward them and slightly small. `--preview-dir` is 1 for a card
+     below its link and -1 for one flipped above (`data-side`), so both
+     travel AWAY from the link as they arrive. */
+  --preview-dir: 1;
+  /* Centred under its link: the component sets `left` to the link's middle
+     and this takes back half the card's width, whatever that turns out to
+     be. `translate`, not `transform`, so the animation doesn't replace it. */
+  translate: -50% 0;
+  transform-origin: center top;
+  animation: link-preview-in 140ms var(--ease) both;
+}
+
+.link-preview[data-side="above"] {
+  --preview-dir: -1;
+  transform-origin: center bottom;
+}
+
+/* Leaving is shorter than arriving and travels less. The component keeps the
+   card mounted for `--dur-fast` (EXIT_MS) so this can play. */
+.link-preview[data-state="closing"] {
+  animation: link-preview-out var(--dur-fast) var(--ease) both;
+}
+
+/* The words settle a beat after the card, so the surface arrives first. */
+.link-preview > * {
+  animation: link-preview-content 140ms var(--ease) 30ms both;
+}
+
+.link-preview[data-state="closing"] > * {
+  animation: none;
+}
+
+@keyframes link-preview-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(var(--preview-dir) * -6px)) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes link-preview-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(calc(var(--preview-dir) * -2px)) scale(0.985);
+  }
+}
+
+@keyframes link-preview-content {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link-preview,
+  .link-preview > *,
+  .link-preview[data-state="closing"] {
+    animation: none;
+  }
 }
 
 @media (prefers-color-scheme: dark) {

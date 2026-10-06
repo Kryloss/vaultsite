@@ -19,10 +19,16 @@ import { ui } from "@/lib/ui-strings";
  * just follow the link. The card itself is pointer-events: none, so it can
  * never swallow a click or get stuck open.
  */
-const OPEN_DELAY = 350;
-const CLOSE_DELAY = 180;
+const OPEN_DELAY = 120;
+const CLOSE_DELAY = 100;
+/** With a card already up, the next link's card follows almost at once. */
+const WARM_DELAY = 40;
+/** How long a leaving card stays mounted: `--dur-fast`, its exit animation. */
+const EXIT_MS = 120;
 const CARD_WIDTH = 320;
 const MARGIN = 12;
+/** The card sits a little right of dead centre under its link. */
+const SHIFT = 20;
 /** Enough room to render the tallest card below the link, else flip above.
    Two lines of title over three of excerpt, plus padding — the cover no
    longer sets a floor, it floats inside the text (see globals.css). */
@@ -34,18 +40,44 @@ interface Position {
   bottom?: number;
 }
 
+interface Shown {
+  p: Preview;
+  pos: Position;
+  /** Still mounted, playing its exit animation. */
+  closing?: boolean;
+}
+
 export default function LinkPreview({ previews }: { previews: Preview[] }) {
   const pathname = usePathname();
-  const [shown, setShown] = useState<{ p: Preview; pos: Position } | null>(null);
+  const [shown, setShown] = useState<Shown | null>(null);
 
   const openTimer = useRef<number | undefined>(undefined);
   const closeTimer = useRef<number | undefined>(undefined);
+  const exitTimer = useRef<number | undefined>(undefined);
+  /** A card is up and not leaving — the next one may skip the open delay. */
+  const warm = useRef(false);
   /** The link currently under the pointer — keeps hover state from thrashing. */
   const hovered = useRef<HTMLAnchorElement | null>(null);
 
   const clearTimers = useCallback(() => {
     window.clearTimeout(openTimer.current);
     window.clearTimeout(closeTimer.current);
+  }, []);
+
+  useEffect(() => {
+    warm.current = !!shown && !shown.closing;
+  }, [shown]);
+
+  /** Let the card play its exit, then unmount it — unless a new card has
+     taken its place in the meantime. */
+  const dismiss = useCallback(() => {
+    setShown((s) => (s && !s.closing ? { ...s, closing: true } : s));
+    // `scroll` calls this on every event; the first one starts the clock.
+    if (exitTimer.current !== undefined) return;
+    exitTimer.current = window.setTimeout(() => {
+      exitTimer.current = undefined;
+      setShown((s) => (s?.closing ? null : s));
+    }, EXIT_MS);
   }, []);
 
   // Close whenever the page changes underneath us.
@@ -79,9 +111,12 @@ export default function LinkPreview({ previews }: { previews: Preview[] }) {
     const position = (a: HTMLAnchorElement): Position => {
       const r = a.getBoundingClientRect();
       const width = Math.min(CARD_WIDTH, window.innerWidth - MARGIN * 2);
+      // `left` is the card's CENTRE (the CSS shifts it back by half its own
+      // width), nudged right by SHIFT and held far enough from either edge for the widest card to fit.
+      const half = width / 2 + MARGIN;
       const left = Math.min(
-        Math.max(r.left, MARGIN),
-        window.innerWidth - width - MARGIN
+        Math.max(r.left + r.width / 2 + SHIFT, half),
+        window.innerWidth - half
       );
       const spaceBelow = window.innerHeight - r.bottom;
       // Anchoring by `bottom` when flipping up means we never have to measure
@@ -110,7 +145,7 @@ export default function LinkPreview({ previews }: { previews: Preview[] }) {
       clearTimers();
       openTimer.current = window.setTimeout(
         () => setShown({ p, pos: position(a) }),
-        OPEN_DELAY
+        warm.current ? WARM_DELAY : OPEN_DELAY
       );
     };
 
@@ -126,13 +161,13 @@ export default function LinkPreview({ previews }: { previews: Preview[] }) {
 
       hovered.current = null;
       clearTimers();
-      closeTimer.current = window.setTimeout(() => setShown(null), CLOSE_DELAY);
+      closeTimer.current = window.setTimeout(dismiss, CLOSE_DELAY);
     };
 
     const close = () => {
       clearTimers();
       hovered.current = null;
-      setShown(null);
+      dismiss();
     };
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
 
@@ -147,14 +182,20 @@ export default function LinkPreview({ previews }: { previews: Preview[] }) {
       window.removeEventListener("scroll", close);
       window.removeEventListener("keydown", onKey);
     };
-  }, [previews, pathname, clearTimers]);
+  }, [previews, pathname, clearTimers, dismiss]);
+
+  useEffect(() => () => window.clearTimeout(exitTimer.current), []);
 
   if (!shown) return null;
-  const { p, pos } = shown;
+  const { p, pos, closing } = shown;
 
   return (
     <div
+      // A different note's card is a new card: it arrives again.
+      key={p.href}
       className="link-preview"
+      data-state={closing ? "closing" : "open"}
+      data-side={pos.bottom !== undefined ? "above" : "below"}
       // Tells the CSS to stop shrink-wrapping — see globals.css for why a
       // floated cover can't be measured by `fit-content`.
       data-cover={p.cover ? "" : undefined}
@@ -188,7 +229,7 @@ export default function LinkPreview({ previews }: { previews: Preview[] }) {
           <span aria-hidden> · </span>
           {p.minutes} <T {...ui.minRead} />
         </p>
-      ) : (
+      ) : p.section ? (
         <p className="link-preview-meta">
           <T en={p.section} uk={p.sectionUk} />
           {p.dateLabel && (
@@ -198,7 +239,7 @@ export default function LinkPreview({ previews }: { previews: Preview[] }) {
             </>
           )}
         </p>
-      )}
+      ) : null}
       <p className="link-preview-title">
         <T en={p.title} uk={p.titleUk} />
       </p>

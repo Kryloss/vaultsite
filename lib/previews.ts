@@ -22,8 +22,9 @@ export interface LinkPreview {
   href: string;
   title: string;
   titleUk?: string;
-  /** Where it lives, e.g. "Posts" (sections themselves read "Section"). */
-  section: string;
+  /** Where it lives, e.g. "Posts". Absent on a section's own card, which
+     opens with its title (#219). */
+  section?: string;
   sectionUk?: string;
   excerpt: string;
   excerptUk?: string;
@@ -92,8 +93,6 @@ export function getLinkPreviews(): LinkPreview[] {
       href: section.slug === "home" ? "/" : `/${section.slug}`,
       title: section.title,
       titleUk: section.titleUk,
-      section: "Section",
-      sectionUk: "Розділ",
       excerpt: section.description?.trim() || excerpt(section.content),
       excerptUk:
         section.descriptionUk?.trim() ||
