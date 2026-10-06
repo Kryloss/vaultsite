@@ -8,7 +8,7 @@ author: GSC Game World
 author_photo: gsc-game-world.jpg
 # author photo: the studio's own YouTube channel avatar, already square
 author_bio: >-
-  Kyiv studio founded in 1995, behind Cossacks and S.T.A.L.K.E.R. — and still shipping games
+  Kyiv studio founded in 1995, behind Cossacks and S.T.A.L.K.E.R., and still shipping games
   through a full-scale war.
 author_bio_uk: >-
   Київська студія, заснована 1995 року, авторка «Козаків» і S.T.A.L.K.E.R. — і досі випускає

@@ -214,6 +214,18 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 203 | The prev/next footer wears the same arrow |
 | 204 | Shelf row headings end in the same arrow |
 | 205 | /now goal rows: the arrow is drawn out of its ring on hover |
+| 206 | Three stock patterns removed: the Explore card grid, "min read", the empty-quotes hint |
+| 207 | Em dashes taken out of the published English text |
+| 208 | Home "Explore" is four picture tiles, one per section |
+| 209 | Home sections are a plain 2×2 of names with their descriptions |
+| 210 | A fletched arrow, tried and taken back the same day |
+| 211 | The arrow's motion in three beats: spring, wind-up, throw with a ripple |
+| 212 | The arrow's svg is larger than the arrow, so its motion is never clipped |
+| 213 | Pictures lift on hover instead of zooming; book spines spring and tip |
+| 214 | Callouts: a hairline box with the kind on its top border |
+| 215 | Colour as a small mark for a kind or a state: four hues, seven places |
+| 216 | "Listen" stays in the metadata line while reading, as "Stop"; its icon is yellow |
+| 217 | Phones: arrows a quarter bigger; a shortened line is cut by script so "…" never follows a comma or a space |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1575,3 +1587,140 @@ At the owner's request the hover arrow on a linked goal (`components/lists/NowLi
 - **Still hidden at rest**, as the icon was: an arrow on some goals and not others made the list read as links. On card hover it fades in and is drawn out of the ring (head from 8 units back, shaft from 0.44 of its length), and stops at the plain resting arrow — no extra lead on top of the arrival.
 - **Press throws it** like the others: both goal anchors took `action-link`, so `ArrowThrow.tsx` holds `.is-thrown` on them. The /now rules carry `.now-goal-card` to outrank the generic hover rules, with the thrown pair last.
 - An external goal link opens a new tab, so its thrown arrow comes back after `ArrowThrow`'s 1.5s give-up rather than being unmounted. Touch has no hover and never sees this arrow, unchanged.
+
+## 206. Three stock patterns removed: the Explore card grid, "min read", the empty-quotes hint (2026-10-06)
+
+The owner asked for the things that make the site read as generated to go, and picked these three from a list.
+
+- **Home "Explore" is a list, not a 2×2 grid of bordered cards.** Rows in the shape of Recent posts above it: section name, its `description:` in grey truncated to one line, the drawn arrow at the end (`.explore-arrow`, moved by `action-link`). A grid of title-plus-one-liner cards is the most recognisable template block there is. On a phone the description truncates early; that is accepted, the name is the link.
+- **A note's metadata line no longer says "N min read".** It stood beside the word count and said the same thing. `readingStats().minutes` is still computed: link previews (`components/LinkPreview.tsx`) and the reading bar's time left use it, and `ui.minRead` stays for the preview. "Listen" now follows the word count at index 1 (0 without a date).
+- **The Quotes view shows nothing when there are no quotes.** The old line told the reader to add a blockquote to a book's note, which is an instruction to the author. `ui.quotesEmpty` is deleted.
+
+## 207. Em dashes taken out of the published English text (2026-10-06)
+
+At the owner's request, and with the smallest change per sentence: each " — " in a published English note became a comma, colon, semicolon, full stop or a pair of brackets, whichever that sentence needed; nothing else in the sentence was rewritten. About 180 places in 67 notes (People, Now, Projects, Music, Shelf, the Home description), including four video `title:` values, which are now quoted because they contain a colon. File names, and so URLs, are unchanged.
+
+- **Ukrainian is untouched.** The dash is ordinary punctuation there.
+- **Drafts are untouched** (every post, and one People note): not public, and one had the owner's uncommitted edits in it.
+- **The résumé's "Label — detail" lines keep their dash in the vault.** It is the separator `components/Resume.tsx` and `scripts/build-resume-pdf.py` split on. The page now prints a colon instead, in both languages; the PDF script is unchanged. Date ranges on /now use an en dash.
+- Left as they were: the two `*— p. 000*` placeholder attributions in the Sapiens note, YAML comments, and the lone "—" a shelf card shows for a missing author.
+- New notes should follow suit: `docs/CONTENT-WORKFLOW.md` says so.
+
+## 208. Home "Explore" is four picture tiles, one per section (2026-10-06)
+
+The list from #206 read badly: names of different widths pushed each description to a different start, the descriptions truncated, and it looked like a second Recent posts. The owner asked about four cards in a row; text cards would be the stock "features" strip, so the tiles are pictures instead.
+
+- **The picture is the newest note in the section that has one** (`cover:`, or a shelf video's derived thumbnail via `toShelfItem`), cropped square, with the section name and that note's title under it. Built in `app/page.tsx` at build time, so the block changes as notes are added and needs no upkeep.
+- **A section with no pictures prints its newest note's title in the tile** (`.explore-tile-words`). Projects is the only one today. Giving a project a `cover:` turns its tile into a picture with no code change.
+- **No border, no description, no arrow.** Four across from 640px, two by two on a phone. The section `description:` is no longer shown on the home page; it still feeds each section's own page and metadata.
+- The image is decorative (`alt=""`): the link's name is the section title and the note title beside it.
+
+## 209. Home sections are a plain 2×2 of names with their descriptions (2026-10-06)
+
+The owner preferred the original 2×2 to #206's list and #208's picture tiles (both replaced by this) and asked how to keep it without the generated look. Three things made the original read that way, and each is answered:
+
+- **Identical bordered boxes → no boxes.** One rule across and one down, drawn as borders on the cells (`.explore-ruled`), stopping at the block's edges.
+- **A generic tagline in each → what is in the section.** "29 notes" through `noteCount` in `lib/plural.ts`, then "Latest: <title>" from the first of `getEntries`. The count is of published notes; `npm run dev` also counts drafts, so the figures there run higher than production.
+- **Label-sized names → the name as the cell's headline**, 1.375rem semibold, followed by the shelf heading's arrow (`.shelf-heading-arrow`, moved by `action-link`).
+
+Two columns at every width. The section `description:` is still not shown on the home page.
+
+**Pared back the same day, at the owner's request:** the rules are gone, the names are the size of the "Explore" heading itself rather than a size up, and the "Latest:" line is deleted. What remains in a cell is the name with its arrow and the count. The class is `.explore-grid`; the bullets above describe the first version.
+
+**And once more:** the "Explore" heading is deleted (with names the size of a heading it read as a fifth one) and each cell shows the section's `description:` again in place of the note count, wrapping instead of truncating. So the block is the original's content without its boxes: name, arrow, description. `ui.explore` stays in `lib/ui-strings.ts` (its header uses it as the example) but nothing renders it; `noteCount` is no longer used here.
+
+**Two lines each, in both languages:** the owner wanted the four descriptions to take the same number of lines. Layout cannot do that for texts of 27 to 73 characters, so the two short ones were lengthened in the vault (People in English, Shelf in Ukrainian); the other six already wrapped to two. That holds from tablet width up. On a phone the columns are about 24 characters wide and the count varies by a line between cells (3 or 4), which the grid's shared row height absorbs. A new section's `description:` wants roughly 45 to 75 characters to match.
+
+## 210. A fletched arrow, tried and taken back the same day (2026-10-06)
+
+The owner found #201's ring-tailed arrow still too close to what other sites use: it was the usual arrow with one thing added at the tail. Five silhouettes were drawn in place of the home page's five arrows (fletched, a print arrow with a solid head, a dotted trail, a one-barb harpoon, a hook) and he chose the fletched one: two feathers, shaft, the same curved barbs. `ArrowGlyph` is still the only arrow on the site, so every place from #201 to #209 changed with it.
+
+- **The motion follows the object** and replaces #202's. Hover draws the whole arrow BACK 2.5 units, as an arrow is drawn before release; press and `.is-thrown` loose it 24 units forward, fading. The drawing is one `<g class="arrow-body">`; `.arrow-head` and `.arrow-shaft` are gone, and so is the shaft arithmetic.
+- **The draw is small on purpose:** it moves towards the label, into the 0.3em the glyph stands off it by. A longer pull touches the words.
+- **/now's hidden arrow** (#205) slides in from 8 units back as it fades in and stops; press looses it. Same selectors, one class instead of two.
+- Mirroring (`back`, the prev footer) and reduced motion work as before.
+
+**Reverted.** Once it was on the site the owner asked for the ring-tailed arrow back. `ArrowGlyph`, the motion rules and /now's reveal are exactly #201, #202 and #205 again, and the bullets above describe a version that no longer exists. Kept as a record that the fletched silhouette was tried: at body size its two feathers crowd together and read as a "»" in front of the arrow.
+
+## 211. The arrow's motion in three beats: spring, wind-up, throw with a ripple (2026-10-06)
+
+The owner asked for more feel in #202's animation. Same drawing, same parts, same distances on hover; what changed is that each state now has a character of its own.
+
+- **Hover springs.** Head and shaft share a 320ms curve that overshoots (`--arrow-spring`), so the head goes a touch past and settles; the ring tightens to 0.8 as if pulled on. One curve and one duration for both parts, or the head leaves the shaft mid-overshoot.
+- **`:active` is now a wind-up, not the throw.** While held, the head is drawn back 1.5 units past rest and the ring swells to 1.25, in 120ms with the plain ease. A press that never becomes a click (dragged off, or a modified click that opens a tab) just releases.
+- **The throw belongs to `.is-thrown` alone**, which `ArrowThrow.tsx` and the `[` / `]` shortcuts already set at the click. It accelerates (`--arrow-loose`) over 26 units, up from 22, and a second ring (`.arrow-ping`, a circle that rests at opacity 0) spreads from the first and fades, with `non-scaling-stroke` so it stays a hairline.
+- The two curves are custom properties on `.arrow-glyph`, not site tokens: nothing else should bounce. Reduced motion removes all of it. /now's hidden arrow takes the same wind-up and throw.
+
+## 212. The arrow's svg is larger than the arrow, so its motion is never clipped (2026-10-06)
+
+The owner saw the arrow sometimes cut off at an edge that isn't drawn anywhere. No ancestor clips it (checked on home, shelf, posts, a note and /now: every `overflow` in the chain is `visible`), and it could not be reproduced in the preview browser, which points at the svg's own box: it was exactly the arrow's size with `overflow: visible`, and the thrown head, the stretched shaft and #211's ripple all painted outside it. A browser that composites the link on its own layer while something on it animates can size that layer to the box and drop the rest.
+
+So nothing paints outside the box any more. The viewBox is `-6 -4 54 20` around the same 20×12 drawing (room for 26 units of throw and the ripple), the svg is sized to match at 0.055em a unit, and negative margins pull it back so `.arrow-glyph` still measures 1.1em × 0.66em and sits where it did. `pointer-events: none` on the svg, since it now overlaps its neighbours. The mirror for `back` turns about the arrow's centre (`transform-origin: 0.88em 50%`), not the box's. A longer throw than 26 units needs a wider viewBox with it.
+
+## 213. Pictures lift on hover instead of zooming; book spines spring and tip (2026-10-06)
+
+At the owner's request every hover zoom on a picture is gone (shelf covers 1.04, people portraits 1.05, images in a note 1.01, the Posts lead picture 1.025) and the picture rises instead. A zoom inside a fixed frame is the stock card hover; a lift moves the object.
+
+- **One set of rules, `.lift` in `globals.css`.** Up 3px on a spring (5 at first; the owner asked for less) that overshoots (`--lift-spring`), a longer and softer shadow (`--lift-shadow`), and while held it is pushed back to 1px in 120ms. On the dark ground a shadow barely shows, so the shadow list starts with a 7% white hairline: the raised edge.
+- **`translate`, not `transform`,** so it composes with `.press` on the link and with any transform the element owns. Inside `@media (hover: hover)` only: a lifted card would stay lifted after a tap.
+- **Who lifts.** `.lift` in a `.group` link (the frame in `ShelfCard`, so rows and medium grids both); both children of `.person-card`, so the name panel that overlaps the portrait rises with it; `.prose img`. Excalidraw figures opt out. The Posts lead picture lost its zoom and gained nothing: it sits inside a card that already answers the pointer.
+- **Headroom in the shelf rows.** A horizontal scroller clips vertically, so `ShelfRow` carries `pt-2` and gives it back as `mt-1` in place of `mt-3`; the rows sit where they did.
+- **Books** already lifted (#54 and after). They now come up 6px (10 at first, 8 before today) on a spring of their own, much gentler than the covers'. A first pass used the covers' spring and tipped the spine 1.5° on its foot; the owner said the books felt wrong, and the tip (a spine leaning into its neighbour, with its pop-up cover leaning too) and the visible bounce were both taken out the same day. Putting one back uses the plain ease.
+- Reduced motion keeps the shadow and drops the travel.
+
+**#211 addendum, the Posts lead card:** its arrow only answered a pointer that was on the word "Read", because `action-link` sat on that inner span rather than on the card's link; anywhere else on the card the arrow stayed still, and a press never threw it (`ArrowThrow.tsx` matches `a.action-link`). The class is on the card's `<Link>` now. Rule of thumb: `action-link` goes on the element whose hover should move the arrow, which for a card is the card.
+
+## 214. Callouts: a hairline box with the kind on its top border (2026-10-06)
+
+The owner pointed at the callouts as generated-looking: a bordered box with a 3px coloured stripe down the left and a coloured title is the default of every docs theme. Four sketches in chat were all rejected; eight were then put on the formatting playground itself by a temporary dev-only component (deleted afterwards), and he chose a hybrid of two of them.
+
+- **The box is neutral:** a 1px hairline all round, title in ordinary text colour. The four hues survive in exactly one place, a small word naming the kind.
+- **Below 1168px the word sits on the top border** like a form's legend, with `--bg` behind it to break the line. **From 1168px it stands in the left margin** beside the title instead, 1.25rem off the box, and the box takes back its plain spacing. Same query as the contents rail and sidenotes; the left gutter is empty at that width.
+- **The word is CSS,** `content: var(--callout-label)` on `.callout::before`, set per kind and again under `html[data-lang="uk"]`. The build-time HTML is unchanged and the label follows the language toggle. Fifteen kinds have one; any other kind, and the spoiler, is just the box.
+- **Known limits.** A callout inside a surface that is not `--bg` (none today) would show a `--bg` patch behind the word on narrow screens. Pseudo-element text is not reliably read aloud; the callout had no spoken kind before either.
+
+**One style at every width.** The margin version above 1168px was built and the owner took it back the same hour: the word is on the top border everywhere now, and the media query is gone. The second bullet above describes what was removed.
+
+## 215. Colour as a small mark for a kind or a state: four hues, seven places (2026-10-06)
+
+After #214 the owner said the callouts' use of colour makes the site more engaging and asked where else it could go without taking attention. This widens the monochrome rule (#64 and after) on the callouts' own principle; it does not repeal it. He asked for every candidate to be built so he could say which work, so **each of these is on trial** and some may be taken back.
+
+**The rule.** Colour is never a surface, a border, a heading or a link. It is a small mark that says what KIND a thing is or what STATE it is in, drawn from four tokens (`--hue-blue`, `--hue-green`, `--hue-amber`, `--hue-red`; the callouts now read them too). Blue is new or in motion, green is done, amber is under way or rated, red is danger.
+
+1. **Done, green.** Ticked parts in a series list (the part you are on at full strength, the others at 65%, which is how #197's distinction survives). A finished goal on /now: a green tick in a 13% green box, class `is-done`, replacing a solid block of the text colour.
+2. **Under way, amber.** A dot before the shelf cover's "in progress" badge (`data-status="progress"`), and the filled dot of a current row on /now's timeline.
+3. **New, blue.** The "New" chip's text and hairline; a dot before the cover's "New" badge.
+4. **Ratings, amber.** The filled stars, in both renderers (`components/Stars.tsx` and the fact-table stars in `lib/markdown.ts`).
+5. **Categories.** `categoryHue()` in `lib/categories.ts` gives each category one of the four from its name. It colours the `#` of a tag in the metadata line and a dot on the Posts and People filter chips. An identity, not a meaning; with four hues, categories will share. The shelf's genre chips are not dotted.
+6. **The reading bar, blue.**
+7. **The arrow's ring fills blue on hover**, and its ripple on a throw is blue. The one use that is pleasure, not meaning.
+
+**The verdict, same day.** Kept: 1 (done), 2 (under way), 3 (new), 4 (ratings). Taken back: 5 (category hues; `categoryHue` and its dots are deleted), 6 (the reading bar is `--text` again) and 7 (the arrow's ring no longer fills). With the keeps came three changes:
+
+- **A finished series says so.** When every part is read, the list's header shows "Done" (`ui.seriesDone`) in green in place of "2 of 2", and the badge in the metadata line shows its ICON in green (`data-done` on both; the count beside it stays grey, after a first pass that coloured the whole badge).
+- **Ratings use `--hue-star`,** amber desaturated to `#d2a955`: a row of five full-strength amber stars was louder than any single mark.
+- So the meanings in use are blue for new, green for done, amber for under way, the softer amber for ratings, and the callouts' four.
+
+## 216. "Listen" stays in the metadata line while reading, as "Stop"; its icon is yellow (2026-10-06)
+
+At the owner's request. `ReadAloud` used to replace its metadata-line button with the floating player the moment it was pressed, so the control disappeared from where the reader had just clicked. It now renders both: the same button, relabelled "Stop" (`ui.readAloudStop`) and wired to `stop`, and the player. Pausing is still the player's job; the line's button only starts and stops.
+
+The headphones are `--hue-star`, the ratings' soft gold, at rest and while reading. It marks the one control on the page that makes sound and is a fifth use of colour under #215's rule, added by name.
+
+**#215, the /now timeline:** the filled dot of a current row is the text colour again, at the owner's request. Amber for "under way" is now only the dot on a shelf cover's in-progress badge.
+
+## 217. Phones: bigger arrows, and shortened text that ends cleanly (2026-10-06)
+
+Two things the owner saw on a phone.
+
+**Arrows were too small.** Below 640px `.arrow-glyph` is `font-size: 1.25em`. It is set on the glyph, not on its wrappers, so every arrow grows by the same share and the drawing, stroke and motion (all in em or viewBox units) scale with it.
+
+**A shortened line could end "…for a year, …".** `text-overflow` and `-webkit-line-clamp` cut wherever the room runs out and CSS has no say in where. So `components/ClampTidy.tsx` (mounted once in the layout) looks at every element marked `data-tidy`, and where one overflows it shortens the text itself: the longest whole-word cut that fits, with trailing spaces, commas, colons, dashes and opened brackets or quotes removed, then "…" with no space before it. The rule is `lib/tidy-cut.ts`, tested. Text that fits is never touched; the CSS truncation stays as the no-script fallback. It re-runs on a width change, a language switch, late fonts and newly added rows.
+
+Rejected: shortening at build time, because the cut depends on the reader's width and font. Limits: a marked element must hold only text or one `<T>` pair, so titles that carry a chip (post rows, the home list) are still cut by CSS; a screen reader hears the shortened text where it used to hear the whole.
+
+The build-time excerpts (`lib/previews.ts`, `lib/til-preview.ts`) follow the same ending rule.
+
+**#215 and #216, later the same day:** "New" (the chip and the dot on a shelf cover) is the soft gold `--hue-star` instead of blue. The metadata line carries no colour again: the Listen icon and the finished series badge's icon are back to the line's grey. Green for a finished series stays inside the series card ("Done", the ticks). Blue is now used by callouts only.
+
+**#215, the series card:** "Done" is the header's own grey too. The green left for a finished series is the ticks beside its parts.

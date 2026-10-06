@@ -1019,7 +1019,7 @@ function starsHast(rating: number): any {
           viewBox: box,
           preserveAspectRatio: "xMinYMid slice",
         },
-        children: [row("var(--text-tertiary)")],
+        children: [row("var(--hue-star)")],
       },
     ],
   };

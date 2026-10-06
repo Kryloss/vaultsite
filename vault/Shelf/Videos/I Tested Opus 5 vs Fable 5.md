@@ -5,7 +5,7 @@ author: Nate Herk | AI Automation
 author_photo: nate-herk.jpg
 # author photo: the channel's own avatar, youtube.com/@nateherk
 author_bio: >-
-  A YouTube channel that builds AI agent workflows on camera — mostly in n8n, mostly end to end, with the failures left in.
+  A YouTube channel that builds AI agent workflows on camera, mostly in n8n, mostly end to end, with the failures left in.
 author_bio_uk: >-
   YouTube-канал, на якому автор будує робочі процеси з AI-агентами наживо — здебільшого в n8n, від початку до кінця, не вирізаючи невдач.
 medium: video

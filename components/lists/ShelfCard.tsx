@@ -30,11 +30,14 @@ export default function ShelfCard({
       className={`group press press-soft block ${className}`}
     >
       <div
-        /* Video cards keep the thumbnail's native 16:9 — nothing is cropped.
+        /* `lift`: under the pointer the cover rises off the page instead of
+           zooming inside its frame — see `.lift` in globals.css (#213).
+
+           Video cards keep the thumbnail's native 16:9 — nothing is cropped.
            They're made smaller instead, by being sized from their own
            (shorter) height rather than the shared one; see `--shelf-video-h`
            in globals.css. */
-        className={`relative overflow-hidden rounded-lg bg-[var(--surface)] shadow-sm transition-shadow duration-300 group-hover:shadow-md ${
+        className={`lift relative overflow-hidden rounded-lg bg-[var(--surface)] shadow-sm ${
           item.isVideo ? "aspect-video" : "aspect-[2/3]"
         }`}
       >
@@ -50,7 +53,7 @@ export default function ShelfCard({
             className={
               item.coverFit === "contain"
                 ? "h-full w-full object-contain p-6"
-                : "h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+                : "h-full w-full object-cover"
             }
             // Blur-up: the placeholder is the image's OWN background, so the
             // real cover paints straight over it with no JS and no swap.
@@ -84,7 +87,7 @@ export default function ShelfCard({
         {/* Overlaid on the cover so it reads at a glance while scanning a row,
             and costs no extra height under the title. */}
         {item.statusLabel && (
-          <span className="shelf-status">
+          <span className="shelf-status" data-status={item.status}>
             <T {...item.statusLabel} />
           </span>
         )}
@@ -92,11 +95,11 @@ export default function ShelfCard({
             components/NewBadge.tsx. */}
         <NewBadge date={item.date} variant="cover" />
       </div>
-      <span className="mt-2.5 block truncate font-medium leading-snug text-[var(--text)]">
+      <span data-tidy className="mt-2.5 block truncate font-medium leading-snug text-[var(--text)]">
         <T en={item.title} uk={item.titleUk} />
       </span>
       {item.author && (
-        <span className="mt-0.5 block truncate text-sm leading-snug text-[var(--text-secondary)]">
+        <span data-tidy className="mt-0.5 block truncate text-sm leading-snug text-[var(--text-secondary)]">
           <T en={item.author} uk={item.authorUk} />
         </span>
       )}

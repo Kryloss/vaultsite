@@ -30,7 +30,7 @@ spine: new-version-spine.jpg
 | Published | 2026 |
 | One-liner | Ship a new version of yourself the way you'd ship a product |
 
-A personal development guide by Silicon Valley tech entrepreneur Andrey Doronichev, applying product-building strategies and startup frameworks to self-transformation and personal growth. Written for people whose current life still works but no longer fits — a new country, a new industry, or a career AI is about to rearrange. Available in Ukrainian, Russian and English editions.
+A personal development guide by Silicon Valley tech entrepreneur Andrey Doronichev, applying product-building strategies and startup frameworks to self-transformation and personal growth. Written for people whose current life still works but no longer fits: a new country, a new industry, or a career AI is about to rearrange. Available in Ukrainian, Russian and English editions.
 
 ## Review
 
@@ -42,5 +42,5 @@ A personal development guide by Silicon Valley tech entrepreneur Andrey Doronich
 
 ## Sources
 
-- [«Новая Версия» — the author's own store](https://nv.doronichev.com/)
-- [Новая версия: Измени себя, не изменяя себе — Amazon](https://www.amazon.com/dp/B0H538YNWM)
+- [«Новая Версия», the author's own store](https://nv.doronichev.com/)
+- [Новая версия: Измени себя, не изменяя себе, Amazon](https://www.amazon.com/dp/B0H538YNWM)

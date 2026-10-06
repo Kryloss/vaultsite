@@ -36,7 +36,7 @@ genres: [Rap]
 
 *PRAY* started as a melody ALISA hummed to herself in Bucha in the first weeks of the invasion, under shelling. Tricky Nicki heard it afterwards and said the only sensible thing to do was make something good out of it so people would keep some hope; he wrote his half in English and left hers in Ukrainian, which is why the song switches languages at the chorus.
 
-It came out in October 2022. The bilingual split is not a stylistic choice — it is two people writing from two different places about the same thing.
+It came out in October 2022. The bilingual split is not a stylistic choice; it is two people writing from two different places about the same thing.
 
 https://music.apple.com/ca/album/pray-feat-alisa/1645459060?i=1645459061
 

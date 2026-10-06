@@ -30,7 +30,7 @@ spine: hero-with-a-thousand-faces-spine.jpg
 | Published | 1949 |
 | One-liner | One story, retold by every culture that ever told stories |
 
-A landmark work in comparative mythology outlining the "Monomyth" (the Hero's Journey) — the universal narrative archetype found across cultures throughout human history.
+A landmark work in comparative mythology outlining the "Monomyth" (the Hero's Journey), the universal narrative archetype found across cultures throughout human history.
 
 ## Review
 

@@ -12,7 +12,7 @@ artist_photo: sonnium.jpg
 # artist photo: his own Apple Music artist image. Commons has nothing, and his
 # YouTube presence is an auto-generated Topic channel using album art.
 artist_bio: >-
-  A standalone single from January 2022, exactly a year after he joined Глава 94 — his own record rather than the group's, made while the group was still running.
+  A standalone single from January 2022, exactly a year after he joined Глава 94, his own record rather than the group's, made while the group was still running.
 artist_bio_uk: >-
   Окремий сингл січня 2022 року — рівно через рік після того, як він приєднався до «Глави 94»: власна річ, а не гуртова, зроблена, коли гурт іще діяв.
 format: single
@@ -36,7 +36,7 @@ genres: [Rap]
 
 *Amplitude* came out on 21 January 2022, on its own. Dmytro Paranchuk was born in Lviv in 1995 and joined [[Найгірша пісня про любов|Глава 94]] in January 2021 as its third member, which makes him the late arrival to a group that was already eleven years old.
 
-Two minutes and twenty-one seconds, and nothing around it — the shape of a rapper working between a group's records rather than instead of them.
+Two minutes and twenty-one seconds, and nothing around it, the shape of a rapper working between a group's records rather than instead of them.
 
 https://music.apple.com/ca/album/amplitude/1604203121?i=1604203127
 

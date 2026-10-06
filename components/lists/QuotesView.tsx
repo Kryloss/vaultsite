@@ -1,6 +1,5 @@
 import Link from "next/link";
 import T from "@/components/T";
-import { ui } from "@/lib/ui-strings";
 import type { BookQuotes } from "@/lib/quotes";
 
 /**
@@ -17,13 +16,9 @@ export default function QuotesView({
   sectionSlug: string;
   books: BookQuotes[];
 }) {
-  if (books.length === 0) {
-    return (
-      <p className="mt-10 text-sm text-[var(--text-tertiary)]">
-        <T {...ui.quotesEmpty} />
-      </p>
-    );
-  }
+  /* No message when there are none (#206): it was an instruction to the
+     author, shown to readers. */
+  if (books.length === 0) return null;
 
   return (
     <div className="mt-8 flex flex-col gap-10">

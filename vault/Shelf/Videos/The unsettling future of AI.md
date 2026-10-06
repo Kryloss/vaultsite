@@ -1,5 +1,5 @@
 ---
-title: The unsettling future of AI — Varlamov and Doronichev in Silicon Valley
+title: "The unsettling future of AI: Varlamov and Doronichev in Silicon Valley"
 title_uk: Моторошне майбутнє ШІ — Варламов і Доронічев у Кремнієвій долині
 aliases:
   - Varlamov and Doronichev
@@ -26,7 +26,7 @@ description_uk: "Андрій Доронічев про те, що ШІ роби
 | | |
 |---|---|
 | Topic | How AI reshaped Silicon Valley, and which work goes first |
-| Guest | Andrey Doronichev, ex-Google — author of [[New Version]] |
+| Guest | Andrey Doronichev, ex-Google, author of [[New Version]] |
 | Language | Russian |
 | Released | 2026-08-04 |
 
@@ -38,5 +38,5 @@ https://www.youtube.com/watch?v=hvXOIjjkSHM
 
 ## Sources
 
-- [Жуткое будущее ИИ — varlamov (YouTube)](https://www.youtube.com/watch?v=hvXOIjjkSHM)
-- [Ilya Varlamov — Wikipedia](https://en.wikipedia.org/wiki/Ilya_Varlamov)
+- [Жуткое будущее ИИ, varlamov (YouTube)](https://www.youtube.com/watch?v=hvXOIjjkSHM)
+- [Ilya Varlamov, Wikipedia](https://en.wikipedia.org/wiki/Ilya_Varlamov)

@@ -11,7 +11,7 @@ artist_photo: twenty-one-pilots.jpg
 # The bio HERE is about this record. The band's own description lives once, in
 # the section's main.md, and drives their card on /music.
 artist_bio: >-
-  Their fifth album, and the end of the Dema story. It follows Scaled And Icy, which the band framed as a broadcast made under the Bishops' control — so Clancy is the record where the narrator finally speaks for himself.
+  Their fifth album, and the end of the Dema story. It follows Scaled And Icy, which the band framed as a broadcast made under the Bishops' control, so Clancy is the record where the narrator finally speaks for himself.
 artist_bio_uk: >-
   П'ятий альбом гурту й фінал історії Деми. Він іде після Scaled And Icy, який гурт подавав як передачу, зроблену під контролем Єпископів, — тож Clancy це платівка, де оповідач нарешті говорить від себе.
 format: album
@@ -33,7 +33,7 @@ genres: [Alternative]
 | Label | Fueled by Ramen |
 | Length | 47 min · 13 tracks |
 
-*Clancy* (2024) wraps up the storyline the band started with *Blurryface* back in 2015 — a whole fictional universe about the city of Dema, its escapee Clancy, and the Bishops chasing him. Knowing the lore isn't required, but it rewards people who've been paying attention for ten years, which is a rare thing in pop music.
+*Clancy* (2024) wraps up the storyline the band started with *Blurryface* back in 2015, a whole fictional universe about the city of Dema, its escapee Clancy, and the Bishops chasing him. Knowing the lore isn't required, but it rewards people who've been paying attention for ten years, which is a rare thing in pop music.
 
 What I like most is how it sounds like a summary of everything they've tried: the heavy synth stuff, the rap verses, [[Twenty One Pilots|Josh Dun]]'s drums pushed way up front. It debuted top-three in the US and hit number one in a few countries, so clearly the long-game storytelling worked.
 
@@ -41,4 +41,4 @@ https://music.apple.com/ca/album/lavish/1733370881?i=1733371051
 
 https://music.apple.com/us/album/clancy/1733370881
 
-Favourite deep cut: the back half of the album, where it gets quieter and more honest. That contrast — big anthems up front, small confessions at the end — is very them.
+Favourite deep cut: the back half of the album, where it gets quieter and more honest. That contrast (big anthems up front, small confessions at the end) is very them.

@@ -37,7 +37,7 @@ genres: [Rock]
 | Album | POST HUMAN: NeX GEn (2024) |
 | Length | 3:16 |
 
-*sTraNgeRs* is a post-lockdown song about being in a room full of people who are all recovering from something, and the double meaning Oli Sykes found in that line — the room is also the crowd in front of them. The band asked people to send in their own struggles anonymously and built the video out of what came back.
+*sTraNgeRs* is a post-lockdown song about being in a room full of people who are all recovering from something, and the double meaning Oli Sykes found in that line: the room is also the crowd in front of them. The band asked people to send in their own struggles anonymously and built the video out of what came back.
 
 Two years passed between the single and the album it belongs to, which is a long time for a song to stand on its own. It held up.
 

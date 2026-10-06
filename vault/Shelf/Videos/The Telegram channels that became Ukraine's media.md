@@ -27,13 +27,13 @@ description_uk: "Як анонімні Telegram-канали стали голо
 |---|---|
 | Subject | Anonymous Telegram channels as a main news source, with no editors and no named owners |
 | Channels | "Trukha", "Rezydent", "Lehitymnyi" |
-| Host | Oleksiy Kovzhun — media expert and political consultant |
+| Host | Oleksiy Kovzhun, media expert and political consultant |
 | Language | Ukrainian |
 | Released | 2026-08-21 |
 
 https://www.youtube.com/watch?v=GgbgoeBW3JI
 
-A companion piece, from the other side of the desk, is [[I made propaganda for my Religion class]] — the same question of where reporting ends and persuasion begins.
+A companion piece, from the other side of the desk, is [[I made propaganda for my Religion class]]: the same question of where reporting ends and persuasion begins.
 
 ## Review
 
@@ -41,5 +41,5 @@ A companion piece, from the other side of the desk, is [[I made propaganda for m
 
 ## Sources
 
-- [Як влада полюбила анонімні Telegram-канали — Олексій Ковжун (YouTube)](https://www.youtube.com/watch?v=GgbgoeBW3JI)
-- [Ковжун Олексій Олександрович — Вікіпедія](https://uk.wikipedia.org/wiki/Ковжун_Олексій_Олександрович)
+- [Як влада полюбила анонімні Telegram-канали, Олексій Ковжун (YouTube)](https://www.youtube.com/watch?v=GgbgoeBW3JI)
+- [Ковжун Олексій Олександрович, Вікіпедія](https://uk.wikipedia.org/wiki/Ковжун_Олексій_Олександрович)

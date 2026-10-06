@@ -3,7 +3,7 @@ import { CheckIcon } from "@/components/icons";
 function goalToggleClass(done: boolean) {
   return `now-goal-check flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-colors ${
     done
-      ? "border-[var(--text)] bg-[var(--text)] text-[var(--bg)]"
+      ? "is-done"
       : "border-[var(--border)] text-transparent"
   }`;
 }

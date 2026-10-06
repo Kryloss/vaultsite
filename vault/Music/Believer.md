@@ -12,7 +12,7 @@ artist_photo: imagine-dragons.jpg
 # artist photo: Wikimedia Commons — Davidwbaker, CC BY-SA 4.0 (Dan Reynolds,
 # 2017). A four-across band shot can't survive a square crop; the frontman can.
 artist_bio: >-
-  The lead single from Evolve, and the song that reset what the band sounded like — everything stripped back to a stamp and a shout. Reynolds has been open about where the pain in it came from.
+  The lead single from Evolve, and the song that reset what the band sounded like: everything stripped back to a stamp and a shout. Reynolds has been open about where the pain in it came from.
 artist_bio_uk: >-
   Головний сингл з Evolve і пісня, яка перевизначила звучання гурту: усе зведене до тупоту й вигуку. Рейнольдс відкрито говорив, звідки в ній узявся біль.
 format: track
@@ -36,7 +36,7 @@ genres: [Alternative]
 
 *Believer* came out on 1 February 2017 as the lead single from *Evolve*, which followed in June. It is the point where the band stopped layering and started hitting one thing very hard, and it worked well enough that most of what they have done since answers to it.
 
-Dan Reynolds was diagnosed with ankylosing spondylitis at twenty, as the band was taking off — an arthritis of the spine that made playing hurt — and he has talked openly about the song coming out of that pain and the depression around it. The line about pain making you is not a figure of speech in his case.
+Dan Reynolds was diagnosed with ankylosing spondylitis at twenty, as the band was taking off, an arthritis of the spine that made playing hurt, and he has talked openly about the song coming out of that pain and the depression around it. The line about pain making you is not a figure of speech in his case.
 
 https://music.apple.com/ca/album/believer/1411625594?i=1411628233
 

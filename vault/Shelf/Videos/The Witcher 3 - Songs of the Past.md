@@ -1,5 +1,5 @@
 ---
-title: The Witcher 3 gets a third expansion — Songs of the Past
+title: "The Witcher 3 gets a third expansion: Songs of the Past"
 title_uk: «Відьмак 3» отримає третє доповнення — «Пісні минулого»
 aliases:
   - Songs of the Past
@@ -33,7 +33,7 @@ description_uk: "Перший показ третього доповнення �
 
 https://www.youtube.com/watch?v=K1KI-0ovzfs
 
-Geralt's world here is the continuation the games wrote onto Andrzej Sapkowski's — [[The Last Wish]] and [[Sword of Destiny]] are where it starts.
+Geralt's world here is the continuation the games wrote onto Andrzej Sapkowski's; [[The Last Wish]] and [[Sword of Destiny]] are where it starts.
 
 ## Review
 
@@ -41,6 +41,6 @@ Geralt's world here is the continuation the games wrote onto Andrzej Sapkowski's
 
 ## Sources
 
-- [Wiedźmin 3: Dziki Gon – Pieśni przeszłości | Oficjalna zapowiedź — The Witcher (YouTube)](https://www.youtube.com/watch?v=K1KI-0ovzfs)
-- [The Witcher 3: Wild Hunt — Remastered announced, Songs of the Past gets first look — CD PROJEKT RED](https://press.cdprojektred.com/en/news/1839/the-witcher-3-wild-hunt-remastered-announced-songs-of-the-past-gets-first-look)
-- [The Witcher 3: Wild Hunt – Songs of the Past — Wikipedia](https://en.wikipedia.org/wiki/The_Witcher_3:_Wild_Hunt_%E2%80%93_Songs_of_the_Past)
+- [Wiedźmin 3: Dziki Gon – Pieśni przeszłości | Oficjalna zapowiedź, The Witcher (YouTube)](https://www.youtube.com/watch?v=K1KI-0ovzfs)
+- [The Witcher 3: Wild Hunt, Remastered announced, Songs of the Past gets first look, CD PROJEKT RED](https://press.cdprojektred.com/en/news/1839/the-witcher-3-wild-hunt-remastered-announced-songs-of-the-past-gets-first-look)
+- [The Witcher 3: Wild Hunt – Songs of the Past, Wikipedia](https://en.wikipedia.org/wiki/The_Witcher_3:_Wild_Hunt_%E2%80%93_Songs_of_the_Past)

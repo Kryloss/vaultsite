@@ -33,5 +33,5 @@ https://www.youtube.com/watch?v=3DA7EXbf_d4
 
 ## Sources
 
-- [This man is destroying Putin's empire — Caolan Robertson (YouTube)](https://www.youtube.com/watch?v=3DA7EXbf_d4)
-- [Caolan Robertson — Wikipedia](https://en.wikipedia.org/wiki/Caolan_Robertson)
+- [This man is destroying Putin's empire, Caolan Robertson (YouTube)](https://www.youtube.com/watch?v=3DA7EXbf_d4)
+- [Caolan Robertson, Wikipedia](https://en.wikipedia.org/wiki/Caolan_Robertson)

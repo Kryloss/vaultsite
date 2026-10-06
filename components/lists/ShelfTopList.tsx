@@ -128,7 +128,7 @@ export default function ShelfTopList({
             </span>
 
             {item.description && (
-              <span className="top-desc">
+              <span data-tidy className="top-desc">
                 <T en={item.description} uk={item.descriptionUk} />
               </span>
             )}

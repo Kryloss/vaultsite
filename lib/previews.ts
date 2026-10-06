@@ -15,6 +15,7 @@ import {
 } from "./vault";
 import { resolveCoverUrl } from "./markdown";
 import { dimsFor, srcSetFor } from "./blur";
+import { tidyCut } from "./tidy-cut";
 
 export interface LinkPreview {
   /** Site-absolute URL, e.g. "/posts/how-was-my-day" — the lookup key. */
@@ -74,9 +75,9 @@ function excerpt(md: string): string {
     .trim();
 
   if (text.length <= EXCERPT_CHARS) return text;
-  const cut = text.slice(0, EXCERPT_CHARS);
-  const lastSpace = cut.lastIndexOf(" ");
-  return `${(lastSpace > 60 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`;
+  const lastSpace = text.slice(0, EXCERPT_CHARS).lastIndexOf(" ");
+  // Same ending rule as every other shortened line (lib/tidy-cut.ts).
+  return tidyCut(text, lastSpace > 60 ? lastSpace : EXCERPT_CHARS);
 }
 
 /**

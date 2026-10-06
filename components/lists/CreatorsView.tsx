@@ -99,7 +99,7 @@ export default function CreatorsView({
                 </span>
 
                 {creator.bio && (
-                  <span className="top-desc">
+                  <span data-tidy className="top-desc">
                     <T en={creator.bio} uk={creator.bioUk} />
                   </span>
                 )}

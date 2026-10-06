@@ -10,7 +10,7 @@ author_photo: cd-projekt-red.jpg
 # author photo: the studio's own YouTube channel avatar, already square
 author_bio: >-
   Warsaw studio that grew out of a Polish game distributor, built GOG alongside it, and has
-  spent fifteen years on two open worlds — the Witcher games and Cyberpunk 2077.
+  spent fifteen years on two open worlds, the Witcher games and Cyberpunk 2077.
 author_bio_uk: >-
   Варшавська студія, що виросла з польського дистриб'ютора ігор, побудувала поряд GOG і вже
   п'ятнадцять років робить два відкриті світи — ігри про відьмака та Cyberpunk 2077.

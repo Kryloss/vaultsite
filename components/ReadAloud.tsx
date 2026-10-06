@@ -322,26 +322,36 @@ export default function ReadAloud({ separated = true }: { separated?: boolean })
 
   if (!supported) return null;
 
-  if (state === "idle") {
-    return (
-      <>
-        {separated && <span aria-hidden>·</span>}
-        <button type="button" onClick={start} className="idea-read-aloud press">
-          {/* The second icon on page content, at the owner's request (#182;
-              headphones since #195): it says "listen" before the word is
-              read. */}
-          <HeadphonesIcon className="idea-read-aloud-icon" />
-          <T {...ui.readAloud} />
-        </button>
-      </>
-    );
-  }
+  /* The control in the metadata line. It stays put for as long as the note
+     is being read and says "Stop" (#216); it used to vanish the moment it
+     was pressed, which left the line shorter and the way back to silence
+     only in the floating player. */
+  const trigger = (
+    <>
+      {separated && <span aria-hidden>·</span>}
+      <button
+        type="button"
+        onClick={state === "idle" ? start : stop}
+        className="idea-read-aloud press"
+      >
+        {/* The second icon on page content, at the owner's request (#182;
+            headphones since #195): it says "listen" before the word is
+            read. */}
+        <HeadphonesIcon className="idea-read-aloud-icon" />
+        <T {...(state === "idle" ? ui.readAloud : ui.readAloudStop)} />
+      </button>
+    </>
+  );
+
+  if (state === "idle") return trigger;
 
   const playing = state === "playing";
   /* One pill in the breadcrumb bar's own material (`.chrome-bar`, #184):
      play/pause, the title, close, and the progress line along its foot,
      which is also the seek control. */
   return (
+    <>
+    {trigger}
     <div className="idea-read-player chrome-bar" role="region" aria-label={ui.readAloudPlayer[lang]}>
       <button
         type="button"
@@ -378,5 +388,6 @@ export default function ReadAloud({ separated = true }: { separated?: boolean })
         style={{ "--p": `${progress * 100}%` } as React.CSSProperties}
       />
     </div>
+    </>
   );
 }

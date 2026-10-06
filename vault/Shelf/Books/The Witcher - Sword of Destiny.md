@@ -30,7 +30,7 @@ spine: sword-of-destiny-spine.jpg
 | Published | 1992 (Polish, *Miecz przeznaczenia*) |
 | One-liner | Moral dilemmas, Yennefer, and the child of destiny |
 
-A short-story collection following monster hunter Geralt of Rivia as he encounters complex moral dilemmas, navigates his romance with Yennefer, and meets his child of destiny, Ciri. Published a year before [[The Witcher - The Last Wish|The Last Wish]], but written to be read second — the frame story in that book reorders the series for newcomers.
+A short-story collection following monster hunter Geralt of Rivia as he encounters complex moral dilemmas, navigates his romance with Yennefer, and meets his child of destiny, Ciri. Published a year before [[The Witcher - The Last Wish|The Last Wish]], but written to be read second; the frame story in that book reorders the series for newcomers.
 
 ## Review
 

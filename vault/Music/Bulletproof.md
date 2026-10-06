@@ -14,7 +14,7 @@ artist_photo: blind8.jpg
 # The bio HERE is about this track. The band's own description lives once, in
 # the section's main.md, and drives their card on /music.
 artist_bio: >-
-  The title track of their first EP, released on 23 February 2023 — the eve of the first anniversary of the full-scale invasion, which is not a date anyone picks by accident.
+  The title track of their first EP, released on 23 February 2023, the eve of the first anniversary of the full-scale invasion, which is not a date anyone picks by accident.
 artist_bio_uk: >-
   Заголовний трек їхнього першого EP, випущений 23 лютого 2023 року — напередодні першої річниці повномасштабного вторгнення, а таку дату не обирають випадково.
 format: track
@@ -36,7 +36,7 @@ genres: [Alternative]
 | EP | Bulletproof (2023) |
 | Length | 3:32 |
 
-*Bulletproof* is the title track of BLIND8's first EP, out on 23 February 2023. The band formed in Kyiv in 2021 — Roman Liashchenko sings, his brother Ihor plays bass, with Kyrylo Ozerov and Viktor Bartsikhovsky — and since 2022 two of them have been combining service with the band, playing shows that raise money for the army.
+*Bulletproof* is the title track of BLIND8's first EP, out on 23 February 2023. The band formed in Kyiv in 2021: Roman Liashchenko sings, his brother Ihor plays bass, with Kyrylo Ozerov and Viktor Bartsikhovsky, and since 2022 two of them have been combining service with the band, playing shows that raise money for the army.
 
 They have been unusually direct about the job being to make people abroad keep paying attention, which is a strange thing to ask of a metal band and is roughly what happened: in 2024 they recorded *Labyrinth* with Within Temptation and went out on that tour.
 

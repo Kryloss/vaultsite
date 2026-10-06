@@ -12,7 +12,7 @@ artist_photo: noize-mc.jpg
 # artist photo: Wikimedia Commons — Justice for the Beholder of the Harvester
 # of Blackened Straw, CC BY-SA 4.0 (Indigo at the O2, London, 10 Sep 2025)
 artist_bio: >-
-  A standalone single from February 2024, made in exile — two years and two albums' distance from the record he was touring when the war started.
+  A standalone single from February 2024, made in exile, two years and two albums' distance from the record he was touring when the war started.
 artist_bio_uk: >-
   Окремий сингл лютого 2024 року, зроблений в еміграції, — за два роки й дві платівки від того альбому, який він возив у турі, коли почалася війна.
 format: single

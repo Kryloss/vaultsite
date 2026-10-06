@@ -1,5 +1,5 @@
 ---
-title: Quantum mechanics — the common questions
+title: "Quantum mechanics: the common questions"
 title_uk: Квантова механіка — найпоширеніші запитання
 aliases:
   - Quantum mechanics
@@ -38,5 +38,5 @@ https://www.youtube.com/watch?v=OOVmoKJbdf0
 
 ## Sources
 
-- [Что такое Квантовая механика? Ответы на самые распространённые вопросы — ИССЛЕДОВАТЕЛЬ ВСЕЛЕННОЙ (YouTube)](https://www.youtube.com/watch?v=OOVmoKJbdf0)
-- [ИССЛЕДОВАТЕЛЬ ВСЕЛЕННОЙ — YouTube channel](https://www.youtube.com/@UniverseExplorer_IV)
+- [Что такое Квантовая механика? Ответы на самые распространённые вопросы, ИССЛЕДОВАТЕЛЬ ВСЕЛЕННОЙ (YouTube)](https://www.youtube.com/watch?v=OOVmoKJbdf0)
+- [ИССЛЕДОВАТЕЛЬ ВСЕЛЕННОЙ, YouTube channel](https://www.youtube.com/@UniverseExplorer_IV)

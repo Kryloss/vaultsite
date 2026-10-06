@@ -58,6 +58,10 @@ the vault. This doc is the playbook. Read AGENTS.md first for the hard rules.
   commented line: `# cover: name.jpg   ← drop into the section's covers/ folder and uncomment`.
 - Titles: his working title if he gave one; otherwise derive from content, plain
   and specific — nothing clickbaity.
+- No em dashes in English text, titles or descriptions (#207): use a comma,
+  colon, full stop or brackets. Ukrainian keeps its dash, where it is ordinary
+  punctuation, and so do the résumé's "Label — detail" lines on Now, which the
+  parser splits on.
 
 ## Templates
 

@@ -14,32 +14,32 @@ artists:
   - name: Twenty One Pilots
     photo: twenty-one-pilots.jpg
     bio: >-
-      Ohio duo — Tyler Joseph writes and sings, Josh Dun drums. Together since 2009, they spent ten years building a single story across Blurryface, Trench and Clancy.
+      Ohio duo. Tyler Joseph writes and sings, Josh Dun drums. Together since 2009, they spent ten years building a single story across Blurryface, Trench and Clancy.
     bio_uk: >-
       Дует з Огайо — Тайлер Джозеф пише пісні та співає, Джош Дан грає на барабанах. Разом із 2009 року вони десять років вибудовували одну історію через Blurryface, Trench і Clancy.
   - name: Måneskin
     photo: maneskin.jpg
     bio: >-
-      Four-piece from Rome — Damiano David sings, Victoria De Angelis on bass, Thomas Raggi on guitar, Ethan Torchio on drums. They went from busking on Via del Corso to winning Eurovision in 2021.
+      Four-piece from Rome. Damiano David sings, Victoria De Angelis on bass, Thomas Raggi on guitar, Ethan Torchio on drums. They went from busking on Via del Corso to winning Eurovision in 2021.
     bio_uk: >-
       Четвірка з Рима — Даміано Давід співає, Вікторія Де Анджеліс на басу, Томас Раджі на гітарі, Ітан Торкіо на барабанах. Пройшли шлях від вуличних виступів на Віа-дель-Корсо до перемоги на Євробаченні 2021 року.
   - name: Noize MC
     photo: noize-mc.jpg
     bio: >-
-      Ivan Alekseyev, working under the name since the mid-2000s — rap laid over live rock instruments, and songs pointed at the Russian state for most of that time. He left Russia in 2022 and plays in exile.
+      Ivan Alekseyev, working under the name since the mid-2000s, rap laid over live rock instruments, and songs pointed at the Russian state for most of that time. He left Russia in 2022 and plays in exile.
     bio_uk: >-
       Іван Алексєєв, який виступає під цим іменем із середини 2000-х, — реп поверх живих рокових інструментів і пісні, спрямовані проти російської держави майже весь цей час. У 2022-му він виїхав з росії й грає в еміграції.
   - name: Boombox
     name_uk: Бумбокс
     photo: boombox.jpg
     bio: >-
-      Kyiv band, together since the summer of 2004 — Andriy Khlyvnyuk writes and sings, Andriy "Muha" Samoylo plays guitar. Funk and hip-hop under Ukrainian-language pop-rock, and one of the voices the country recognises instantly.
+      Kyiv band, together since the summer of 2004. Andriy Khlyvnyuk writes and sings, Andriy "Muha" Samoylo plays guitar. Funk and hip-hop under Ukrainian-language pop-rock, and one of the voices the country recognises instantly.
     bio_uk: >-
       Київський гурт, разом із літа 2004 року — Андрій Хливнюк пише й співає, Андрій «Муха» Самойло грає на гітарі. Фанк і хіп-хоп під українськомовним поп-роком, і один із голосів, які країна впізнає миттєво.
   - name: Bring Me The Horizon
     photo: bring-me-the-horizon.jpg
     bio: >-
-      Sheffield band built around Oli Sykes, formed in 2004. They started as deathcore and have not stopped moving since — metalcore, electronics, arena rock — until each album sounds like a different band with the same singer.
+      Sheffield band built around Oli Sykes, formed in 2004. They started as deathcore and have not stopped moving since (metalcore, electronics, arena rock) until each album sounds like a different band with the same singer.
     bio_uk: >-
       Гурт із Шеффілда навколо Олі Сайкса, заснований 2004 року. Починали як деткор і відтоді не зупиняються — металкор, електроніка, аренний рок, — аж доки кожен альбом не став звучати як інший гурт із тим самим вокалістом.
   - name: МУР
@@ -52,7 +52,7 @@ artists:
     name_uk: Нерви
     photo: nervy.jpg
     bio: >-
-      Built around Zhenya Milkovsky, who writes and sings — guitar music aimed squarely at people in their late teens, and plain enough on purpose that the plainness is the style.
+      Built around Zhenya Milkovsky, who writes and sings. Guitar music aimed squarely at people in their late teens, and plain enough on purpose that the plainness is the style.
     bio_uk: >-
       Побудований навколо Жені Мільковського, який пише й співає, — гітарна музика, адресована передусім тим, кому під двадцять, і навмисне настільки проста, що ця простота і є стилем.
   - name: Ляпис Трубецкой
@@ -72,7 +72,7 @@ artists:
   - name: теорія розбитих вікон
     photo: teoriya-rozbytykh-vikon.jpg
     bio: >-
-      Kyiv three-piece — Oleksandr Zaika sings, Bohdan Makeienko plays guitar, Valerii Nizhynets drums. Old friends who write about their own heads; the debut album arrived in November 2025.
+      Kyiv three-piece. Oleksandr Zaika sings, Bohdan Makeienko plays guitar, Valerii Nizhynets drums. Old friends who write about their own heads; the debut album arrived in November 2025.
     bio_uk: >-
       Київське тріо — Олександр Заїка співає, Богдан Макеєнко грає на гітарі, Валерій Ніжинець на барабанах. Давні друзі, які пишуть про те, що в них у головах; дебютний альбом вийшов у листопаді 2025 року.
   - name: BLIND8
@@ -111,13 +111,13 @@ artists:
   - name: OTOY
     photo: otoy.jpg
     bio: >-
-      Viacheslav Drofa, born in Lviv in 1998 — trip-hop and trap in Ukrainian and English, and the first artist signed to Alina Pash's Bitanga Blood. He rapped Shevchenko on the Eurovision stage in 2023.
+      Viacheslav Drofa, born in Lviv in 1998. Trip-hop and trap in Ukrainian and English, and the first artist signed to Alina Pash's Bitanga Blood. He rapped Shevchenko on the Eurovision stage in 2023.
     bio_uk: >-
       В'ячеслав Дрофа, народжений у Львові 1998 року, — трип-хоп і треп українською та англійською, перший артист на лейблі Аліни Паш Bitanga Blood. У 2023-му читав Шевченка на сцені Євробачення.
   - name: Гоня
     photo: honya.jpg
     bio: >-
-      Ihor Honia, the other founder of Глава 94 — he and Stepan Burban started the Lviv group in 2010 and ran it until 2023. He records under his own name as well.
+      Ihor Honia, the other founder of Глава 94. He and Stepan Burban started the Lviv group in 2010 and ran it until 2023. He records under his own name as well.
     bio_uk: >-
       Ігор Гоня, другий засновник «Глави 94»: вони зі Степаном Бурбаном заснували львівський гурт 2010 року й вели його до 2023-го. Записується також під власним іменем.
   - name: Imagine Dragons
@@ -136,7 +136,7 @@ artists:
   - name: Міша Правильний
     photo: misha-pravylnyi.jpg
     bio: >-
-      Ukrainian rapper who works in whole records rather than singles — his 2022 album with ValeryBlahBlah is built with skits between the songs and meant to be played through.
+      Ukrainian rapper who works in whole records rather than singles. His 2022 album with ValeryBlahBlah is built with skits between the songs and meant to be played through.
     bio_uk: >-
       Український репер, який працює цілими платівками, а не синглами: його альбом 2022 року з ValeryBlahBlah зібраний зі скітами між піснями й розрахований на прослуховування підряд.
   # The Lviv group behind three of the cards above: Паліндром and Гоня founded
@@ -151,13 +151,13 @@ artists:
   - name: Ницо Потворно
     photo: nytso-potvorno.jpg
     bio: >-
-      Serhiy Husak — musician and ENT doctor, in whichever order the year demands. A debut mini-album in 2019, noticed after Реанімація in 2020, and serving with the National Guard since mobilisation.
+      Serhiy Husak, musician and ENT doctor, in whichever order the year demands. A debut mini-album in 2019, noticed after Реанімація in 2020, and serving with the National Guard since mobilisation.
     bio_uk: >-
       Сергій Гусак — музикант і лор-лікар, у тому порядку, якого вимагає рік. Дебютний мініальбом 2019-го, помітили після «Реанімації» 2020-го, а від мобілізації служить у НГУ.
   - name: Sonnium
     photo: sonnium.jpg
     bio: >-
-      Dmytro Paranchuk, born in Lviv in 1995 — rapper and composer, and the third and last member to join Глава 94, in January 2021.
+      Dmytro Paranchuk, born in Lviv in 1995, rapper and composer, and the third and last member to join Глава 94, in January 2021.
     bio_uk: >-
       Дмитро Паранчук, народжений у Львові 1995 року, — репер і композитор, третій і останній учасник, що приєднався до «Глави 94», у січні 2021-го.
   - name: Zombo
@@ -175,7 +175,7 @@ artists:
   - name: Krechet
     photo: krechet.jpg
     bio: >-
-      Anonymous Ukrainian rapper — the mask is the entire public identity. Mumble rap in Ukrainian, which is a small field, and he works fast: an EP in April 2022 and a double album by July.
+      Anonymous Ukrainian rapper. The mask is the entire public identity. Mumble rap in Ukrainian, which is a small field, and he works fast: an EP in April 2022 and a double album by July.
     bio_uk: >-
       Анонімний український репер — маска і є вся публічна ідентичність. Мамбл-реп українською, а це невелике поле; працює швидко: EP у квітні 2022-го й подвійний альбом уже в липні.
 ---

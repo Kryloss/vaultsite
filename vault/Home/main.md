@@ -7,7 +7,7 @@ vibe_title: Zombie
 vibe_artist: YUNGBLUD
 vibe_date: "2026-09-24"
 vibe_youtube: https://www.youtube.com/watch?v=Yv97b2oPk3w
-description: Student in Ontario heading into cybersecurity — notes, projects, and what I'm reading.
+description: Student in Ontario heading into cybersecurity. Notes, projects, and what I'm reading.
 description_uk: Студент з Онтаріо на шляху в кібербезпеку — нотатки, проєкти та що я читаю.
 ---
 ![[me.jpeg|93]]

@@ -220,6 +220,8 @@ export const ui = {
      the shelf you operate rather than sit in front of. */
   currentlyPlaying: { en: "Playing", uk: "Граю" },
   wantToPlay: { en: "To play", uk: "Зіграти" },
+  /* The series list's header, once every part is read (#215). */
+  seriesDone: { en: "Done", uk: "Завершено" },
   quotesCategory: { en: "Quotes", uk: "Цитати" },
   /* The studio index on the games page (#139). It says STUDIOS rather
      than the generic "Creators" because the chip is games-only and a
@@ -269,11 +271,6 @@ export const ui = {
      rather than on the metadata line (`docs/DECISIONS.md` #88). */
   ratingRow: { en: "Rating", uk: "Оцінка" },
 
-  quotesEmpty: {
-    en: "No quotes saved yet — add a > blockquote to a book’s note.",
-    uk: "Цитат поки немає — додайте > цитату в нотатку книги.",
-  },
-
 
   /* Series (multi-part notes): the popover shows the series' own name, and
      "2 of 5" interpolates numbers, so it's built per note by
@@ -307,6 +304,9 @@ export const ui = {
   latestPost: { en: "Latest", uk: "Найновіше" },
   readPost: { en: "Read", uk: "Читати" },
   readAloud: { en: "Listen", uk: "Слухати" },
+  /* The same control while the note is being read: it stays where it was
+     and stops it (#216). */
+  readAloudStop: { en: "Stop", uk: "Зупинити" },
   readAloudPlay: { en: "Play", uk: "Відтворити" },
   readAloudPause: { en: "Pause", uk: "Пауза" },
   readAloudClose: { en: "Close player", uk: "Закрити плеєр" },

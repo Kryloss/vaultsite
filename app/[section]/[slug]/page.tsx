@@ -340,16 +340,10 @@ export default async function EntryPage({ params }: Props) {
   }
 
   if (stats) {
-    /* Two entries, not one span with a middot typed inside it. That middot was
-       surrounded by ordinary spaces while every other separator on the line is
-       spaced by the row's `gap`, so the reading time and the word count sat
-       visibly closer together than anything else. Anything that looks like a
-       separator has to BE one. */
-    meta.push(
-      <span>
-        {stats.minutes} <T {...ui.minRead} />
-      </span>
-    );
+    /* The word count alone. "6 min read" stood beside it until #206: the
+       two say one thing twice, and the pair is every blogging platform's
+       byline. The minutes are still worked out — link previews and the
+       reading bar show them. */
     meta.push(
       <span>
         {stats.words.toLocaleString()} <T {...ui.words} />
@@ -391,7 +385,7 @@ export default async function EntryPage({ params }: Props) {
   const listenAfter = !readAloud
     ? -1
     : stats
-      ? (entry.date ? 2 : 1)
+      ? (entry.date ? 1 : 0)
       : entry.date
         ? 0
         : -1;

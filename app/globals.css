@@ -104,6 +104,17 @@
      one curve; if something needs a fourth, that's a decision worth making
      here rather than a number typed at the call site. */
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  /* The four hues (#215). Colour here is never a surface and never an
+     accent: it is a small mark that says what KIND of thing something is or
+     what STATE it is in. Blue is new, green is done, amber is under way, red
+     is danger. Callouts drew from these first. `--hue-star` is amber with
+     the saturation taken down, for ratings: five stars in a row is a lot
+     more yellow than one dot, and at full strength it shouted. */
+  --hue-blue: #3b82f6;
+  --hue-green: #10b981;
+  --hue-amber: #f59e0b;
+  --hue-red: #ef4444;
+  --hue-star: #d2a955;
   --dur-fast: 120ms; /* colour and other in-place changes */
   --dur: 200ms; /* the default: most things that move */
   --dur-slow: 320ms; /* panels, drawers, anything that travels far */
@@ -636,11 +647,6 @@ body::after {
   margin: 1.5rem 0;
   max-width: 100%;
   height: auto;
-  transition: transform 0.3s var(--ease);
-}
-
-.prose img:hover {
-  transform: scale(1.01);
 }
 
 /* Inline progress bars — [progress:: 45%] in any note */
@@ -1007,7 +1013,8 @@ body::after {
 }
 
 .prose figure.excalidraw img:hover {
-  transform: none;
+  translate: none;
+  box-shadow: none;
 }
 
 /* Self-theming diagrams are inlined into the page rather than loaded via
@@ -1208,10 +1215,24 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   color: var(--text-caption);
 }
 
-/* Obsidian callouts — > [!note] Title */
+/* Obsidian callouts — > [!note] Title
+
+   A plain hairline box, with the KIND as a small word in the kind's colour
+   on the box's top border, like the legend of a form, at every width (#214).
+   The colour is in that one word and nowhere else; the title is ordinary
+   text.
+
+   Before this it was the box with a 3px coloured stripe down its left edge
+   and a coloured title, which is the callout of every generated docs page.
+
+   The word is a pseudo-element fed by `--callout-label`, set per kind and
+   again per language below, so the build-time HTML stays as it was and the
+   label follows the language toggle. A kind with no label (anything outside
+   the fifteen named here, and the spoiler) is just the box. On the border the
+   word needs the page's own ground behind it to break the line. */
 .callout {
+  position: relative;
   border: 1px solid var(--border);
-  border-left: 3px solid var(--callout-color, var(--text-tertiary));
   border-radius: var(--r-lg);
   padding: 0.875rem 1.125rem;
   margin: 1.25rem 0;
@@ -1219,7 +1240,7 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
 
 .callout .callout-title {
   font-weight: 600;
-  color: var(--callout-color, var(--text));
+  color: var(--text);
   margin: 0 0 0.25rem;
 }
 
@@ -1227,32 +1248,95 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   margin-bottom: 0;
 }
 
+.callout::before {
+  content: var(--callout-label);
+  position: absolute;
+  top: -0.7em;
+  left: 0.75rem;
+  padding: 0 0.4rem;
+  background: var(--bg);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: var(--callout-color, var(--text-tertiary));
+}
+
+/* Room for the word above the box, and under it inside. Only where there IS
+   a word: `:where()` keeps this at the base rule's weight, so the spoiler's
+   own rules still win. */
+.callout:where(
+    [data-callout="note"], [data-callout="info"], [data-callout="todo"],
+    [data-callout="abstract"], [data-callout="tip"], [data-callout="success"],
+    [data-callout="check"], [data-callout="done"], [data-callout="warning"],
+    [data-callout="question"], [data-callout="caution"],
+    [data-callout="danger"], [data-callout="error"], [data-callout="bug"],
+    [data-callout="failure"]
+  ) {
+  margin-top: 1.75rem;
+  padding-top: 1.05rem;
+}
+
 .callout[data-callout="note"],
 .callout[data-callout="info"],
 .callout[data-callout="todo"],
 .callout[data-callout="abstract"] {
-  --callout-color: #3b82f6;
+  --callout-color: var(--hue-blue);
 }
 
 .callout[data-callout="tip"],
 .callout[data-callout="success"],
 .callout[data-callout="check"],
 .callout[data-callout="done"] {
-  --callout-color: #10b981;
+  --callout-color: var(--hue-green);
 }
 
 .callout[data-callout="warning"],
 .callout[data-callout="question"],
 .callout[data-callout="caution"] {
-  --callout-color: #f59e0b;
+  --callout-color: var(--hue-amber);
 }
 
 .callout[data-callout="danger"],
 .callout[data-callout="error"],
 .callout[data-callout="bug"],
 .callout[data-callout="failure"] {
-  --callout-color: #ef4444;
+  --callout-color: var(--hue-red);
 }
+
+/* The word itself, in both languages. */
+.callout[data-callout="note"] { --callout-label: "Note"; }
+.callout[data-callout="info"] { --callout-label: "Info"; }
+.callout[data-callout="todo"] { --callout-label: "To do"; }
+.callout[data-callout="abstract"] { --callout-label: "Summary"; }
+.callout[data-callout="tip"] { --callout-label: "Tip"; }
+.callout[data-callout="success"] { --callout-label: "Success"; }
+.callout[data-callout="check"] { --callout-label: "Check"; }
+.callout[data-callout="done"] { --callout-label: "Done"; }
+.callout[data-callout="warning"] { --callout-label: "Warning"; }
+.callout[data-callout="question"] { --callout-label: "Question"; }
+.callout[data-callout="caution"] { --callout-label: "Caution"; }
+.callout[data-callout="danger"] { --callout-label: "Danger"; }
+.callout[data-callout="error"] { --callout-label: "Error"; }
+.callout[data-callout="bug"] { --callout-label: "Bug"; }
+.callout[data-callout="failure"] { --callout-label: "Failure"; }
+
+html[data-lang="uk"] .callout[data-callout="note"] { --callout-label: "Нотатка"; }
+html[data-lang="uk"] .callout[data-callout="info"] { --callout-label: "Інфо"; }
+html[data-lang="uk"] .callout[data-callout="todo"] { --callout-label: "Зробити"; }
+html[data-lang="uk"] .callout[data-callout="abstract"] { --callout-label: "Підсумок"; }
+html[data-lang="uk"] .callout[data-callout="tip"] { --callout-label: "Порада"; }
+html[data-lang="uk"] .callout[data-callout="success"] { --callout-label: "Успіх"; }
+html[data-lang="uk"] .callout[data-callout="check"] { --callout-label: "Перевірено"; }
+html[data-lang="uk"] .callout[data-callout="done"] { --callout-label: "Готово"; }
+html[data-lang="uk"] .callout[data-callout="warning"] { --callout-label: "Увага"; }
+html[data-lang="uk"] .callout[data-callout="question"] { --callout-label: "Питання"; }
+html[data-lang="uk"] .callout[data-callout="caution"] { --callout-label: "Обережно"; }
+html[data-lang="uk"] .callout[data-callout="danger"] { --callout-label: "Небезпека"; }
+html[data-lang="uk"] .callout[data-callout="error"] { --callout-label: "Помилка"; }
+html[data-lang="uk"] .callout[data-callout="bug"] { --callout-label: "Баг"; }
+html[data-lang="uk"] .callout[data-callout="failure"] { --callout-label: "Невдача"; }
 
 /* Avatar images — small sized Obsidian embeds like ![[me.jpeg|93]] (≤128px) */
 .prose img.avatar {
@@ -3075,6 +3159,27 @@ html[data-lang="uk"] .image-note-diagram > .lang-uk {
   right: 0.5rem;
 }
 
+/* A dot in front of the word (#215): amber for something under way, blue for
+   something new. On the scrim the word itself stays white. */
+.shelf-status[data-status="progress"]::before,
+.cover-new::before {
+  content: "";
+  display: inline-block;
+  width: 0.375rem;
+  height: 0.375rem;
+  margin-right: 0.3125rem;
+  border-radius: var(--r-full);
+  vertical-align: 0.08em;
+}
+
+.shelf-status[data-status="progress"]::before {
+  background: var(--hue-amber);
+}
+
+.cover-new::before {
+  background: var(--hue-star);
+}
+
 /* ---------- Copy as Markdown (components/CopyMarkdown.tsx) ---------- */
 
 /* Sits outside the title in the heading's left margin — same placement as
@@ -3493,7 +3598,10 @@ a.series-link:hover {
    keeps a text-coloured one, so the list still says where you are (#197). */
 .series-check[aria-checked="true"] {
   border-color: transparent;
-  color: var(--text-tertiary);
+  /* Green, for done (#215); the other parts' ticks are a step quieter than
+     the tick of the part you are on, which is how #197's grey-versus-text
+     distinction survives the colour. */
+  color: color-mix(in srgb, var(--hue-green) 65%, transparent);
 }
 
 .series-check[aria-checked="true"]:hover {
@@ -3501,7 +3609,7 @@ a.series-link:hover {
 }
 
 .series-row:has(.series-current) .series-check[aria-checked="true"] {
-  color: var(--text);
+  color: var(--hue-green);
 }
 
 .series-check[aria-checked="true"] .series-tick path {
@@ -3633,20 +3741,50 @@ a.series-link:hover {
 }
 
 /* The arrow itself is drawn, not typed (`ArrowGlyph` in components/icons.tsx,
-   #201). `display: block` makes the span exactly as tall as the drawing, so it
-   stands on the baseline and its middle lands at a third of an em — where the
-   character's shaft was. `overflow: visible` because the head travels past
-   the drawing's own box. The back one is the same drawing mirrored, which
-   mirrors every movement below with it — there are no `.is-back` motion rules. */
+   #201). One unit of the drawing is 0.055em: the arrow is 20×12 of them, so
+   1.1em by 0.66em, standing on the baseline with its middle a third of an em
+   up, where the character's shaft was.
+
+   The <svg> is BIGGER than the arrow (#212): 54×20 units, with room for the
+   throw to the right and the ripple around the ring, and negative margins
+   that pull it back so the span still measures exactly the arrow. Before
+   this the svg was the arrow's size with `overflow: visible`, and the moving
+   parts were sometimes cut off at its edge: a browser that puts the link on
+   its own layer while something on it animates may size that layer to the
+   svg's box, and whatever is painted outside the box is lost. Nothing is
+   painted outside it now. `overflow: visible` stays as a second line of
+   defence only.
+
+   `pointer-events: none` because the box now lies over whatever is beside
+   the arrow; the click lands on the link underneath as it did. The back one
+   is the same drawing mirrored, about the ARROW's centre rather than the
+   box's (6 + 10 units in), which mirrors every movement below with it —
+   there are no `.is-back` motion rules. */
 .arrow-glyph svg {
   display: block;
-  width: 1.1em;
-  height: 0.66em;
+  width: 2.97em;
+  height: 1.1em;
+  margin: -0.22em -1.54em -0.22em -0.33em;
   overflow: visible;
+  pointer-events: none;
 }
 
 .arrow-glyph.is-back svg {
   transform: scaleX(-1);
+  transform-origin: 0.88em 50%;
+}
+
+/* Phones: a quarter bigger (#217). Beside 16px text the arrow is 17.6px long
+   with a ring 2.6px across, which a laptop screen draws clearly and a phone
+   held at arm's length does not. The size is set on the glyph itself, so
+   every arrow on the site grows by the same share whatever its wrapper's own
+   size is, and the drawing, its stroke and its motion scale with it. The
+   nudge down keeps the taller arrow's middle on the text's. */
+@media (max-width: 639px) {
+  .arrow-glyph {
+    font-size: 1.25em;
+    vertical-align: -0.06em;
+  }
 }
 
 /* After a shelf row's heading (components/lists/ShelfGrid.tsx, #204). The
@@ -3668,27 +3806,80 @@ a.series-link:hover {
   color: var(--text);
 }
 
-/* The ring is where you are, so it never moves. The head leads on hover and
-   the shaft stretches from the ring to keep hold of it; on press the head is
-   thrown and the shaft is drawn out after it until both are gone, leaving the
-   ring behind (#202). Before the ring the whole glyph slid as one piece, which
-   with a ring looked like the page's own position drifting.
+/* The home page's Explore block (app/page.tsx, #209): a 2×2 with no boxes
+   and no rules, held together by its alignment alone. Two columns at every
+   width: a cell is a name and its description, which wraps. */
+.explore-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 1.25rem;
+}
 
-   Lengths here are the drawing's units, not screen pixels (20 of them span
-   1.1em), so the travel scales with the text: 4 is ~3px and 22 is ~17px at
-   14px. The shaft is 14.4 long from x=4.1, so each scale is
-   (14.4 + the head's travel) / 14.4 — change them as a pair. */
+.explore-grid > li {
+  min-width: 0;
+  padding: 0.75rem 0;
+}
+
+/* The size and weight of the page's other headings ("Recent posts":
+   Tailwind's `text-lg font-semibold tracking-tight`), at the owner's request,
+   with the shelf heading's arrow after it. The block has no heading of its
+   own, so these four are its headings. */
+.explore-grid-name {
+  display: flex;
+  align-items: center;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.75rem;
+  letter-spacing: -0.025em;
+  color: var(--text);
+}
+
+/* The ring is where you are, so it never leaves. Everything else is a bow
+   being used (#202, given more feel in #211), in three beats:
+
+   Hover   the head springs forward and settles, the shaft stretching from
+           the ring to keep hold of it, and the ring tightens a little, as if
+           the arrow were pulling on it.
+   Held    while the pointer or finger is down the head is drawn BACK past
+           where it rests and the ring swells: the wind-up.
+   Thrown  on release (`.is-thrown`, set at the click by ArrowThrow.tsx) the
+           head goes, slow then fast, the shaft is drawn out after it until
+           both are gone, and a second ring spreads out from the first and
+           fades, like the place it left ringing.
+
+   `:active` used to BE the throw. Splitting it is what gives the press a
+   before and an after; a held press that never becomes a click (a drag off,
+   a modified click that opens a tab) just lets the arrow back down.
+
+   Lengths are the drawing's units, not screen pixels (20 of them span 1.1em),
+   so the travel scales with the text: 4 is ~3px and 26 is ~20px at 14px. The
+   shaft is 14.4 long from x=4.1, so each scale is
+   (14.4 + the head's travel) / 14.4 — change them as a pair, or the head
+   comes off the shaft. They share one duration and one curve for the same
+   reason: the overshoot of the spring is the same instant for both. */
+.arrow-glyph {
+  --arrow-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --arrow-loose: cubic-bezier(0.5, 0, 0.9, 0.5);
+}
+
+.arrow-ring,
 .arrow-shaft,
 .arrow-head {
   transition:
-    transform var(--dur) var(--ease),
+    transform var(--dur-slow) var(--arrow-spring),
     opacity var(--dur) var(--ease);
+}
+
+.arrow-ring,
+.arrow-ping {
+  transform-origin: 2.6px 6px;
 }
 
 .arrow-shaft {
   transform-origin: 4.1px 6px;
 }
 
+/* Hover. */
 .action-link:hover .arrow-head,
 .sibling:hover .arrow-head {
   transform: translateX(4px);
@@ -3699,45 +3890,109 @@ a.series-link:hover {
   transform: scaleX(1.28);
 }
 
+.action-link:hover .arrow-ring,
+.sibling:hover .arrow-ring {
+  transform: scale(0.8);
+}
+
+/* Held: quick and plain, a hand tightening rather than a thing bouncing. */
+.action-link:active .arrow-ring,
+.action-link:active .arrow-shaft,
 .action-link:active .arrow-head,
-.action-link.is-thrown .arrow-head,
-.sibling:active .arrow-head,
-.sibling.is-thrown .arrow-head {
-  transform: translateX(22px);
-  opacity: 0;
-  transition-duration: var(--dur-slow);
+.sibling:active .arrow-ring,
+.sibling:active .arrow-shaft,
+.sibling:active .arrow-head {
+  transition-duration: var(--dur-fast);
+  transition-timing-function: var(--ease);
+}
+
+.action-link:active .arrow-head,
+.sibling:active .arrow-head {
+  transform: translateX(-1.5px);
 }
 
 .action-link:active .arrow-shaft,
+.sibling:active .arrow-shaft {
+  transform: scaleX(0.9);
+}
+
+.action-link:active .arrow-ring,
+.sibling:active .arrow-ring {
+  transform: scale(1.25);
+}
+
+/* Thrown. After the two above on purpose: the class arrives while the link
+   is still hovered, and has to win. */
+.action-link.is-thrown .arrow-ring,
 .action-link.is-thrown .arrow-shaft,
-.sibling:active .arrow-shaft,
-.sibling.is-thrown .arrow-shaft {
-  transform: scaleX(2.53);
-  opacity: 0;
+.action-link.is-thrown .arrow-head,
+.sibling.is-thrown .arrow-ring,
+.sibling.is-thrown .arrow-shaft,
+.sibling.is-thrown .arrow-head {
   transition-duration: var(--dur-slow);
+  transition-timing-function: var(--arrow-loose);
+}
+
+.action-link.is-thrown .arrow-head,
+.sibling.is-thrown .arrow-head {
+  transform: translateX(26px);
+  opacity: 0;
+}
+
+.action-link.is-thrown .arrow-shaft,
+.sibling.is-thrown .arrow-shaft {
+  transform: scaleX(2.81);
+  opacity: 0;
+}
+
+.action-link.is-thrown .arrow-ring,
+.sibling.is-thrown .arrow-ring {
+  transform: none;
+}
+
+/* `non-scaling-stroke` keeps the spreading ring a hairline; scaled with the
+   rest it would thicken into a disc. */
+.arrow-ping {
+  vector-effect: non-scaling-stroke;
+}
+
+.action-link.is-thrown .arrow-ping,
+.sibling.is-thrown .arrow-ping {
+  animation: arrow-ping calc(var(--dur-slow) * 1.6) var(--ease) forwards;
+}
+
+@keyframes arrow-ping {
+  from {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(3.2);
+  }
 }
 
 /* Someone who asked for less motion asked for this too. */
 @media (prefers-reduced-motion: reduce) {
+  .arrow-ring,
   .arrow-shaft,
   .arrow-head {
     transition: none;
   }
 
-  .sibling:hover .arrow-shaft,
-  .sibling:hover .arrow-head,
-  .sibling:active .arrow-shaft,
-  .sibling:active .arrow-head,
-  .sibling.is-thrown .arrow-shaft,
-  .sibling.is-thrown .arrow-head,
-  .action-link:hover .arrow-shaft,
-  .action-link:hover .arrow-head,
-  .action-link:active .arrow-shaft,
-  .action-link:active .arrow-head,
-  .action-link.is-thrown .arrow-shaft,
-  .action-link.is-thrown .arrow-head {
+  .sibling:hover :is(.arrow-ring, .arrow-shaft, .arrow-head),
+  .sibling:active :is(.arrow-ring, .arrow-shaft, .arrow-head),
+  .sibling.is-thrown :is(.arrow-ring, .arrow-shaft, .arrow-head),
+  .action-link:hover :is(.arrow-ring, .arrow-shaft, .arrow-head),
+  .action-link:active :is(.arrow-ring, .arrow-shaft, .arrow-head),
+  .action-link.is-thrown :is(.arrow-ring, .arrow-shaft, .arrow-head) {
     transform: none;
     opacity: 1;
+  }
+
+  .action-link.is-thrown .arrow-ping,
+  .sibling.is-thrown .arrow-ping {
+    animation: none;
   }
 }
 
@@ -3747,6 +4002,81 @@ a.series-link:hover {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* ---------- Lift ---------- */
+
+/* What a picture does under the pointer (#213): it comes up off the page.
+   Every cover used to ZOOM inside its frame instead, which is the stock
+   hover of every card grid there is, and it moved the picture without moving
+   the object.
+
+   Three beats, the same grammar as the arrow's (#211). It rises 3px on a
+   spring that carries it a little past and lets it settle; its shadow
+   lengthens and softens, because the thing is further from the surface; and
+   while it is held it is pushed most of the way back down, quickly, so the
+   release has somewhere to come up from. The shadow is nearly invisible on
+   the dark theme's ground, so a faint light edge comes on with it there —
+   one hairline, the only thing that tells a raised dark card from a flat one.
+
+   `translate`, not `transform`: it composes with whatever transform the
+   element or its link already has (`.press` scales the link on `:active`),
+   and the two never have to be restated together. Only where there is a
+   real hover — on touch a lifted card would stay lifted after the tap.
+
+   Who lifts: `.lift` inside a `.group` link (shelf covers); both halves of a
+   person card, so the name panel that overlaps the portrait goes up with it;
+   and an image in a note. A horizontal scroller clips vertically, so a row
+   of lifting cards needs headroom above it: the shelf rows carry `pt-2` and
+   give the same back from their top margin. */
+:root {
+  --lift-spring: cubic-bezier(0.34, 1.45, 0.64, 1);
+  --lift-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.07), 0 12px 20px -12px rgb(0 0 0 / 0.45),
+    0 4px 8px -5px rgb(0 0 0 / 0.25);
+}
+
+.lift,
+.person-card > *,
+.prose img {
+  transition:
+    translate var(--dur-slow) var(--lift-spring),
+    box-shadow var(--dur-slow) var(--ease),
+    border-color var(--dur) var(--ease);
+}
+
+@media (hover: hover) {
+  .group:hover .lift,
+  .person-card:hover > *,
+  .prose img:hover {
+    translate: 0 -3px;
+  }
+
+  .group:hover .lift,
+  .person-card:hover .person-card-art,
+  .prose img:hover {
+    box-shadow: var(--lift-shadow);
+  }
+
+  .group:active .lift,
+  .person-card:active > *,
+  .prose img:active {
+    translate: 0 -1px;
+    transition-duration: var(--dur-fast);
+    transition-timing-function: var(--ease);
+  }
+}
+
+/* The shadow may stay: it is a state, not a movement. */
+@media (prefers-reduced-motion: reduce) {
+  .group:hover .lift,
+  .group:active .lift,
+  .person-card:hover > *,
+  .person-card:active > *,
+  .prose img:hover,
+  .prose img:active {
+    translate: none;
+  }
 }
 
 /* ---------- Pressed state ---------- */
@@ -4323,12 +4653,6 @@ a.series-link:hover {
   background: var(--surface);
 }
 
-/* The cover's hover scale used to be eased by `.person-photo`'s own
-   transition; that class is gone, and a Tailwind `group-hover:` utility
-   declares no transition of its own, so the ease lives here now. */
-.person-card-art img {
-  transition: transform var(--dur-slow) var(--ease);
-}
 
 /* The "New" mark rides the PORTRAIT here, not the name (components/NewBadge.tsx,
    variant="cover"). It keeps the shelf badge's scrim material — set far above
@@ -4408,8 +4732,8 @@ a.series-link:hover {
   color: var(--text-tertiary);
 }
 
-/* Under the pointer the hairline lifts and the portrait leans in a little
-   (`group-hover:scale-105` on the image). Nothing changes colour. */
+/* Under the pointer the hairline darkens and the whole card lifts (`.lift`
+   rules, #213). Nothing changes colour. */
 .person-card:hover .person-card-panel,
 .person-card:focus-visible .person-card-panel {
   border-color: var(--text-tertiary);
@@ -4717,7 +5041,9 @@ svg.diagram tspan {
    IS the emphasis.
 
    Callouts keep their four hues. They're the exception that proves it: colour
-   there is carrying a meaning nothing else on the page carries. */
+   there is carrying a meaning nothing else on the page carries. (#215 widened
+   that to small marks for a state; this bar was blue for an hour and went
+   back.) */
 .reading-progress-fill {
   background: var(--text);
 }
@@ -7054,23 +7380,29 @@ html[data-dev-tools] .dev-page-title-row {
   transform: none;
 }
 
-.now-goal-card .action-link:active .now-goal-arrow .arrow-head,
-.now-goal-card .action-link.is-thrown .now-goal-arrow .arrow-head {
-  transform: translateX(22px);
+/* Held and thrown, restated with the card in front so they outrank the hover
+   rule above; the generic ones still supply the timing, the fade and the
+   ping. */
+.now-goal-card .action-link:active .now-goal-arrow .arrow-head {
+  transform: translateX(-1.5px);
 }
 
-.now-goal-card .action-link:active .now-goal-arrow .arrow-shaft,
+.now-goal-card .action-link:active .now-goal-arrow .arrow-shaft {
+  transform: scaleX(0.9);
+}
+
+.now-goal-card .action-link.is-thrown .now-goal-arrow .arrow-head {
+  transform: translateX(26px);
+}
+
 .now-goal-card .action-link.is-thrown .now-goal-arrow .arrow-shaft {
-  transform: scaleX(2.53);
+  transform: scaleX(2.81);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .now-goal-card .now-goal-arrow .arrow-head,
-  .now-goal-card .now-goal-arrow .arrow-shaft,
-  .now-goal-card .action-link:active .now-goal-arrow .arrow-head,
-  .now-goal-card .action-link.is-thrown .now-goal-arrow .arrow-head,
-  .now-goal-card .action-link:active .now-goal-arrow .arrow-shaft,
-  .now-goal-card .action-link.is-thrown .now-goal-arrow .arrow-shaft {
+  .now-goal-card .now-goal-arrow :is(.arrow-shaft, .arrow-head),
+  .now-goal-card .action-link:active .now-goal-arrow :is(.arrow-shaft, .arrow-head),
+  .now-goal-card .action-link.is-thrown .now-goal-arrow :is(.arrow-shaft, .arrow-head) {
     transform: none;
     opacity: 1;
   }
@@ -7080,6 +7412,16 @@ html[data-dev-tools] .dev-page-title-row {
   position: relative;
   z-index: 1;
   pointer-events: none;
+}
+
+/* A goal that is done (#215): a green tick in a faintly green box, where it
+   was a solid block of the text colour. The box is 36px, so it is tinted
+   rather than filled; a filled green square that size would be the loudest
+   thing on the page. */
+.now-goal-check.is-done {
+  border-color: color-mix(in srgb, var(--hue-green) 45%, transparent);
+  background: color-mix(in srgb, var(--hue-green) 13%, transparent);
+  color: var(--hue-green);
 }
 
 .dev-now-goal-toggle {
@@ -9313,10 +9655,21 @@ html[data-lang="uk"] .book-spine {
 
 /* Pulled out, the way you take a book off a shelf. A lift is honest HERE
    because a hand is on the book: it is a gesture, it lasts as long as the
-   pointer does, and the cover comes out with it. */
+   pointer does, and the cover comes out with it.
+
+   Given the covers' feel in #213: it comes up on a spring, and less far
+   than before (6px, from 8; 10 was tried and was too much). The spring is gentler than the covers' own
+   (`--lift-spring` overshoots by about a fifth, this by a twentieth): a spine
+   is tall and narrow and stands between neighbours, and a visible bounce on
+   it read as a wobble. It also TIPPED a degree and a half for an afternoon;
+   leaning into the book beside it, with its pop-up cover leaning too, was the
+   part that felt wrong, and it is gone. Leaving is the plain ease: a book put
+   back does not bounce. */
 .book-spine:hover,
 .book-spine:focus-visible {
-  --spine-lift: 8px;
+  --spine-lift: 6px;
+  transition-duration: var(--dur-slow);
+  transition-timing-function: cubic-bezier(0.3, 1.15, 0.5, 1);
 }
 
 /* Part-way through it, so it stands proud of its neighbours AT REST — which
@@ -10373,8 +10726,10 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
 }
 
 .new-chip {
-  border-color: var(--border);
-  color: var(--text-secondary);
+  /* Yellow, for new (#215, changed from blue the same day): the one mark in
+     a list that is meant to be found. The ratings' soft gold. */
+  border-color: color-mix(in srgb, var(--hue-star) 40%, transparent);
+  color: var(--hue-star);
 }
 
 /* Dev-only — `draft: true` entries never reach a production build. Amber

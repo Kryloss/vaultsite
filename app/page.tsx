@@ -25,7 +25,7 @@ export const metadata: Metadata = pageMeta({ path: "/" });
 
 /**
  * Home page — renders vault/Home/main.md, then two generated blocks:
- * the latest posts and an "Explore" grid of all sections. Both are built
+ * the latest posts and an "Explore" 2×2, one cell per section. Both are built
  * from the vault at build time, so they never need manual updating.
  */
 export default async function HomePage() {
@@ -140,33 +140,32 @@ export default async function HomePage() {
 
       {explore.length > 0 && (
         <section className="mt-10">
-          <h2 className="text-lg font-semibold tracking-tight text-[var(--text)]">
-            <T {...ui.explore} />
-          </h2>
-          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {explore.map((section) => {
-              return (
+          {/* A plain 2×2 (#209): no heading, no boxes and no rules. Each
+              cell is the section's name with its own `description:` under it,
+              wrapping rather than truncating. No icon: the section emoji
+              belongs to the sidebar. */}
+          <ul className="explore-grid">
+            {explore.map((section) => (
+              <li key={section.slug}>
                 <Link
-                  key={section.slug}
                   href={`/${section.slug}`}
-                  className="group press press-soft rounded-xl border border-[var(--border)] p-4 hover:bg-[var(--bg-hover)]"
+                  className="action-link press press-soft block"
                 >
-                  {/* No icon. The section emoji belongs to the sidebar, where
-                      it's a target you aim at in a list you've learned; here
-                      it's decoration on a card that already says the name in
-                      words. */}
-                  <span className="block font-medium text-[var(--text)]">
+                  <span className="explore-grid-name">
                     <T en={section.title} uk={section.titleUk} />
+                    <span className="shelf-heading-arrow">
+                      <ArrowGlyph />
+                    </span>
                   </span>
                   {section.description && (
-                    <span className="mt-1.5 line-clamp-2 block text-sm leading-snug text-[var(--text-secondary)]">
+                    <span className="mt-0.5 block text-sm leading-snug text-[var(--text-tertiary)]">
                       <T en={section.description} uk={section.descriptionUk} />
                     </span>
                   )}
                 </Link>
-              );
-            })}
-          </div>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
     </Page>

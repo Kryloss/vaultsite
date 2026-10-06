@@ -13,7 +13,7 @@ artist_photo: otoy.jpg
 # artist photo: the artist's own YouTube channel avatar. uk.wikipedia has an
 # article on him but no free image.
 artist_bio: >-
-  From CVIT, the EP that counts as his real debut — trip-hop and trap under lyrics in two languages, and the first release on Alina Pash's Bitanga Blood label.
+  From CVIT, the EP that counts as his real debut: trip-hop and trap under lyrics in two languages, and the first release on Alina Pash's Bitanga Blood label.
 artist_bio_uk: >-
   З CVIT — платівки, яку варто вважати справжнім дебютом: трип-хоп і треп під текстами двома мовами, і перший реліз на лейблі Аліни Паш Bitanga Blood.
 format: track

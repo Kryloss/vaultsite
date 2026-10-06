@@ -148,16 +148,23 @@ export function BookOpenIcon({ className }: IconProps) {
  * it sits in a line of words the way the character did.
  *
  * Renders the `.arrow-glyph` span too. The ring stays put; `.arrow-head` leads
- * on hover and is thrown on press while `.arrow-shaft` stretches after it
- * (globals.css, components/ArrowThrow.tsx). The shaft's start and length are
+ * on hover, is pulled back while the link is held and thrown on release, and
+ * `.arrow-shaft` stretches after it (globals.css, components/ArrowThrow.tsx). The shaft's start and length are
  * repeated in that CSS, so change them together. `back` is the leading kind —
  * mirrored, and so thrown the other way.
  */
 export function ArrowGlyph({ back }: { back?: boolean }) {
   return (
     <span className={back ? "arrow-glyph is-back" : "arrow-glyph"} aria-hidden>
-      <svg viewBox="0 0 20 12" {...stroke} strokeWidth={1.2}>
-        <circle cx="2.6" cy="6" r="1.5" />
+      {/* The drawing is 20×12; the viewBox is wider and taller than that so
+          everything the arrow does when it moves happens INSIDE the svg and
+          nothing depends on painting outside it. Sized and pulled back into
+          place in globals.css (`.arrow-glyph svg`). */}
+      <svg viewBox="-6 -4 54 20" {...stroke} strokeWidth={1.2}>
+        {/* Invisible until the arrow is thrown, when it spreads out from the
+            ring and fades: see `arrow-ping` in globals.css. */}
+        <circle className="arrow-ping" cx="2.6" cy="6" r="1.5" opacity={0} />
+        <circle className="arrow-ring" cx="2.6" cy="6" r="1.5" />
         <path className="arrow-shaft" d="M4.1 6h14.4" />
         <path className="arrow-head" d="M13.5 1.5c.6 2.5 2.4 4 5 4.5-2.6.5-4.4 2-5 4.5" />
       </svg>

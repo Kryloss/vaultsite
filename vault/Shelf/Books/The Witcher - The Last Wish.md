@@ -30,7 +30,7 @@ spine: the-last-wish-spine.jpg
 | Published | 1993 (Polish, *Ostatnie życzenie*) |
 | One-liner | The introductory anthology: Geralt's origins, his code, and the wish that binds him to Yennefer |
 
-The introductory short-story anthology to The Witcher universe, introducing Geralt's origins, his code of conduct, and how his fate became bound to Yennefer. Read it before [[The Witcher - Sword of Destiny|Sword of Destiny]] — the two collections set up everything the novels then spend five books paying off.
+The introductory short-story anthology to The Witcher universe, introducing Geralt's origins, his code of conduct, and how his fate became bound to Yennefer. Read it before [[The Witcher - Sword of Destiny|Sword of Destiny]]; the two collections set up everything the novels then spend five books paying off.
 
 ## Review
 

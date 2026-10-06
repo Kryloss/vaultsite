@@ -41,5 +41,5 @@ https://www.instagram.com/reel/Da7-rSIhsj7/
 ## Sources
 
 - [Hanna Oborina's reel (Instagram)](https://www.instagram.com/reel/Da7-rSIhsj7/)
-- [Оборін Костянтин Вікторович — Wikipedia](https://uk.wikipedia.org/wiki/Оборін_Костянтин_Вікторович)
-- [Kostiantyn Oborin, director of the Odesa aero club, killed in action — Suspilne Odesa](https://suspilne.media/odesa/1070529-dla-bagatoh-buv-nadijnou-oporou-na-vijni-zaginuv-lotcik-z-odesi-kostantin-oborin/)
+- [Оборін Костянтин Вікторович, Wikipedia](https://uk.wikipedia.org/wiki/Оборін_Костянтин_Вікторович)
+- [Kostiantyn Oborin, director of the Odesa aero club, killed in action, Suspilne Odesa](https://suspilne.media/odesa/1070529-dla-bagatoh-buv-nadijnou-oporou-na-vijni-zaginuv-lotcik-z-odesi-kostantin-oborin/)

@@ -94,7 +94,7 @@ export default function PostRows({
                       <NewBadge date={row.date} />
                     </span>
                     {row.description && (
-                      <span className="mt-0.5 block truncate text-sm text-[var(--text-secondary)]">
+                      <span data-tidy className="mt-0.5 block truncate text-sm text-[var(--text-secondary)]">
                         <T en={row.description} uk={row.descriptionUk} />
                       </span>
                     )}

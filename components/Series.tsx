@@ -71,6 +71,10 @@ export default function Series({ series }: { series: Series }) {
   }, []);
 
   const readCount = series.parts.filter((p) => read.has(p.href)).length;
+  /* Every part read: the badge turns green and the list's header says
+     "Done" in place of "2 of 2" (#215). Read state lives in the browser, so
+     this is false on the server and for the first paint. */
+  const allRead = series.total > 0 && readCount === series.total;
 
   /**
    * Tick a part by hand.
@@ -140,6 +144,7 @@ export default function Series({ series }: { series: Series }) {
             : `Part ${series.index} of ${series.total}`
         }
         className="series-badge"
+        data-done={allRead ? "" : undefined}
       >
         {/* The third page-content icon, at the owner's request (#193): it
             marks the badge as the thing that opens the list of parts, in place
@@ -179,11 +184,16 @@ export default function Series({ series }: { series: Series }) {
                 {readCount > 0 && (
                   /* Just "1 of 2", like the badge — no "read" (#196).
                      The word stays for screen readers. */
-                  <span className="series-read-count">
+                  <span
+                    className="series-read-count"
+                    data-done={allRead ? "" : undefined}
+                  >
                     <span aria-hidden>
-                      {lang === "uk"
-                        ? `${readCount} з ${series.total}`
-                        : `${readCount} of ${series.total}`}
+                      {allRead
+                        ? ui.seriesDone[lang]
+                        : lang === "uk"
+                          ? `${readCount} з ${series.total}`
+                          : `${readCount} of ${series.total}`}
                     </span>
                     <span className="sr-only">
                       {lang === "uk"

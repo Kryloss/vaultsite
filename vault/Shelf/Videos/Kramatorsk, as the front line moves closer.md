@@ -38,5 +38,5 @@ An earlier film from the same channel is [[This man is destroying Putin's empire
 
 ## Sources
 
-- [The frontline is moving fast towards this city — Caolan Robertson (YouTube)](https://www.youtube.com/watch?v=RQyclVmeuuY)
-- [Caolan Robertson — Wikipedia](https://en.wikipedia.org/wiki/Caolan_Robertson)
+- [The frontline is moving fast towards this city, Caolan Robertson (YouTube)](https://www.youtube.com/watch?v=RQyclVmeuuY)
+- [Caolan Robertson, Wikipedia](https://en.wikipedia.org/wiki/Caolan_Robertson)

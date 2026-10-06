@@ -334,7 +334,7 @@ function Caption({ slide, lang }: { slide: MusicSlide; lang: "en" | "uk" }) {
       </p>
 
       {note.description && (
-        <p className="cf-desc">
+        <p data-tidy className="cf-desc">
           <T en={note.description} uk={note.descriptionUk} />
         </p>
       )}

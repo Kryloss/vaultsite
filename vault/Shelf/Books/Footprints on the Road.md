@@ -43,5 +43,5 @@ An autobiographical novel providing a candid, firsthand account of military serv
 
 ## Sources
 
-- [Сліди на дорозі — Вікіпедія](https://uk.wikipedia.org/wiki/%D0%A1%D0%BB%D1%96%D0%B4%D0%B8_%D0%BD%D0%B0_%D0%B4%D0%BE%D1%80%D0%BE%D0%B7%D1%96)
-- [Сліди на дорозі — Наш Формат](https://nashformat.ua/products/slidy-na-dorozi-908728)
+- [Сліди на дорозі, Вікіпедія](https://uk.wikipedia.org/wiki/%D0%A1%D0%BB%D1%96%D0%B4%D0%B8_%D0%BD%D0%B0_%D0%B4%D0%BE%D1%80%D0%BE%D0%B7%D1%96)
+- [Сліди на дорозі, Наш Формат](https://nashformat.ua/products/slidy-na-dorozi-908728)

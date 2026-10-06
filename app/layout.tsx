@@ -14,6 +14,7 @@ import HeadingAnchors from "@/components/HeadingAnchors";
 import JsonLd from "@/components/JsonLd";
 import SelectionLink from "@/components/SelectionLink";
 import ArrowThrow from "@/components/ArrowThrow";
+import ClampTidy from "@/components/ClampTidy";
 import DevToolsSlot from "@/components/DevToolsSlot";
 import { Analytics } from "@vercel/analytics/next";
 import { siteJsonLd } from "@/lib/jsonld";
@@ -248,6 +249,8 @@ export default function RootLayout({
         <SelectionLink />
         {/* Keeps a thrown arrow thrown — see the note in the component. */}
         <ArrowThrow />
+        {/* Moves the "…" of a shortened line off its comma — see the component. */}
+        <ClampTidy />
         {/* Vercel Analytics: page views only, no cookies and no cross-site
             identifier, so there's nothing to consent to. It injects a script
             tag on Vercel and is a no-op in local dev. */}

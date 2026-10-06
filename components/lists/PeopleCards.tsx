@@ -99,12 +99,12 @@ export default function PeopleCards({
                        `.person-photo`, which held them at `grayscale(0.3)`
                        until the pointer arrived — removed at the owner's
                        request, and with it the people half of DECISIONS #56.
-                       The hover scale's easing moved to `.person-card-art img`
-                       in globals.css, since the class that carried it is gone. */
+                       No hover zoom either: the whole card lifts instead
+                       (`.person-card` in globals.css, #213). */
                     className={
                       row.contain
                         ? "h-full w-full object-contain p-6"
-                        : "h-full w-full object-cover group-hover:scale-105"
+                        : "h-full w-full object-cover"
                     }
                     // Blur-up placeholder as the image's own background — see
                     // the matching note in ShelfCard.tsx and lib/blur.ts.
@@ -147,7 +147,7 @@ export default function PeopleCards({
                   <T en={row.title} uk={row.titleUk} />
                 </span>
                 {row.description && (
-                  <span className="person-card-role">
+                  <span data-tidy className="person-card-role">
                     <T en={row.description} uk={row.descriptionUk} />
                   </span>
                 )}

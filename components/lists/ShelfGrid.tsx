@@ -97,7 +97,7 @@ export default function ShelfGrid({ section, entries }: ListProps) {
                that agreement on purpose: a spine is a different object from a
                card, with its own hairline under it, so it is not being
                dragged to a height that belongs to artwork. */
-            <ShelfRow className="shelf-row stagger mt-3 flex snap-x snap-proximity gap-5 overflow-x-auto pb-1">
+            <ShelfRow className="shelf-row stagger mt-1 flex snap-x snap-proximity gap-5 overflow-x-auto pb-1 pt-2">
               {group.items.map((item) => (
                 <li
                   key={item.slug}

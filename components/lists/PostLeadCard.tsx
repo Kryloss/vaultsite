@@ -35,7 +35,7 @@ export default function PostLeadCard({
   return (
     <Link
       href={`/${sectionSlug}/${row.slug}`}
-      className={`idea-lead group press press-soft${lead.image ? "" : " is-text"}${
+      className={`idea-lead action-link group press press-soft${lead.image ? "" : " is-text"}${
         landscape ? " is-landscape" : " is-portrait"
       }`}
     >
@@ -85,14 +85,19 @@ export default function PostLeadCard({
           <NewBadge date={row.date} />
         </span>
         {(lead.opening ?? row.description) && (
-          <span className="idea-lead-opening">
+          <span data-tidy className="idea-lead-opening">
             <T
               en={lead.opening ?? row.description}
               uk={lead.openingUk ?? lead.opening ?? row.descriptionUk ?? row.description}
             />
           </span>
         )}
-        <span className="idea-lead-read action-link">
+        {/* `action-link` is on the CARD, not here: it is what moves the arrow,
+            and on this span the arrow only answered a pointer that was on
+            the word "Read" itself. On the link it answers the whole card and
+            is thrown when the card is pressed (ArrowThrow looks for
+            `a.action-link`). */}
+        <span className="idea-lead-read">
           <T {...ui.readPost} />
           <ArrowGlyph />
         </span>

@@ -10,7 +10,7 @@ author_uk: Брати Капранови
 author_photo: kapranov-brothers.jpg
 # author photo: Wikimedia Commons — Ilya, CC BY-SA 4.0
 author_bio: >-
-  Dmytro and Vitaliy Kapranov — Ukrainian writers, publicists and publishers who have spent thirty years putting Ukrainian history in front of people who thought it was boring.
+  Dmytro and Vitaliy Kapranov, Ukrainian writers, publicists and publishers who have spent thirty years putting Ukrainian history in front of people who thought it was boring.
 author_bio_uk: >-
   Дмитро й Віталій Капранови — українські письменники, публіцисти та видавці, які тридцять років показують українську історію тим, хто вважав її нудною.
 medium: book
@@ -43,5 +43,5 @@ A concise, visual graphic guide detailing the history of Ukrainian statehood, ke
 
 ## Sources
 
-- [Мальована історія Незалежності України — Yakaboo](https://www.yakaboo.ua/ua/mal-ovana-istorija-nezalezhnosti-ukraini.html)
-- [Брати Капранови — Зелений Пес](https://greenpes.com/authors/braty-kapranovy-5/)
+- [Мальована історія Незалежності України, Yakaboo](https://www.yakaboo.ua/ua/mal-ovana-istorija-nezalezhnosti-ukraini.html)
+- [Брати Капранови, Зелений Пес](https://greenpes.com/authors/braty-kapranovy-5/)

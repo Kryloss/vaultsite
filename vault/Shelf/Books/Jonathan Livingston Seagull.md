@@ -29,7 +29,7 @@ spine: jonathan-livingston-seagull-spine.jpg
 | | |
 |---|---|
 | Published | 1970 |
-| One-liner | Practice, exile, mastery — in about a hundred pages |
+| One-liner | Practice, exile, mastery, in about a hundred pages |
 
 A philosophical fable about a young seagull who strives to transcend ordinary flight to achieve self-mastery, freedom, and artistic perfection.
 

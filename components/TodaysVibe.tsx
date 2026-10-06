@@ -336,7 +336,7 @@ export default function TodaysVibe({ track }: { track: Vibe }) {
              from an older Toronto date reads “Latest vibe” and that is the
              whole point of the distinction (#162), so it moves in here. */
           aria-label={`${label[lang]}: ${track.title} · ${track.artist} · ${action[lang]}`} aria-pressed={playing}
-          title={`${label[lang]} (${track.date}) · ${track.title} — ${track.artist} · ${action[lang]}`}>
+          title={`${label[lang]} (${track.date}) · ${track.title} · ${track.artist} · ${action[lang]}`}>
           <span className="vibe-symbol" data-loading={loading}>
             {/* The track's own artwork, which is what a player shows. The note
                 stays as the fallback for a pick with no video and for a cover

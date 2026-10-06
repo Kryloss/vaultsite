@@ -9,7 +9,7 @@ author: GSC Game World
 author_photo: gsc-game-world.jpg
 # author photo: the studio's own YouTube channel avatar, already square
 author_bio: >-
-  Kyiv studio founded in 1995, behind Cossacks and S.T.A.L.K.E.R. — and still shipping games
+  Kyiv studio founded in 1995, behind Cossacks and S.T.A.L.K.E.R., and still shipping games
   through a full-scale war.
 author_bio_uk: >-
   Київська студія, заснована 1995 року, авторка «Козаків» і S.T.A.L.K.E.R. — і досі випускає
@@ -17,7 +17,7 @@ author_bio_uk: >-
 medium: game
 categories: [Shooter, Post-apocalyptic]
 date: 2026-09-06
-description: The Zone at full size, built by the studio that imagined it — and finished through a war.
+description: The Zone at full size, built by the studio that imagined it, and finished through a war.
 description_uk: Зона в повний розмір, збудована студією, яка її вигадала, — і дороблена крізь війну.
 cover: stalker-2.jpg
 # cover source: Steam store page (600×900 library capsule, low-res)

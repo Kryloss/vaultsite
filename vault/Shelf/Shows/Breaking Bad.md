@@ -40,16 +40,16 @@ Everybody recommended this show to me with the same sentence, and the sentence i
 
 Gilligan sold the series to AMC as "Mr. Chips turns into Scarface", which is a great pitch and a slightly inaccurate description of his own show.[^1] The transformation story needs Walter White to start as a mild, decent chemistry teacher. He doesn't. He starts as a man who walked away from the company he co-founded, watched it become worth billions without him, and has been quietly furious about it for twenty years while grading tests and washing other people's wheel rims.
 
-The cancer doesn't create anything. It removes the reason to keep pretending. Everything the drugs unlock was already loaded before the pilot starts — which is why the first episode works on a rewatch in a way the transformation reading can't explain.
+The cancer doesn't create anything. It removes the reason to keep pretending. Everything the drugs unlock was already loaded before the pilot starts, which is why the first episode works on a rewatch in a way the transformation reading can't explain.
 
 ## What it's actually about
 
 Pride, and how expensive it is.
 
-Almost every catastrophe across five seasons traces back to one moment where Walt could have taken the safe, humiliating option and refused it. Elliott and Gretchen offer to pay for the treatment outright in season one; taking the money would end the series in episode five, so he says no — not because he can't accept charity, but because accepting it from *them* would mean they were right about him. Every body after that is downstream of a man who would rather run a drug empire than be pitied.
+Almost every catastrophe across five seasons traces back to one moment where Walt could have taken the safe, humiliating option and refused it. Elliott and Gretchen offer to pay for the treatment outright in season one; taking the money would end the series in episode five, so he says no, not because he can't accept charity, but because accepting it from *them* would mean they were right about him. Every body after that is downstream of a man who would rather run a drug empire than be pitied.
 
 > [!pull] Walter White, "Felina"
-> I did it for me. I liked it. I was good at it. And I was really — I was alive.
+> I did it for me. I liked it. I was good at it. And I was really… I was alive.
 
 That line is the show admitting, in its last hour, that the family-man justification was never true. Five seasons of "everything I do, I do for this family" collapse into three sentences, and the reason it lands is that we already knew. We'd just been letting him get away with it, the same way Skyler did.
 
@@ -77,15 +77,15 @@ That's the half-star. It's the only stretch where I've ever wanted to skip forwa
 ## The ending
 
 > [!spoiler] How it lands
-> "Felina" gives Walt a clean win, and that's the interesting choice — the machine gun in the trunk works, Jesse gets out, the money reaches his son through the people Walt hates most. What it doesn't give him is the lie. He tells Skyler the truth about why he did it, and then dies in the one room where he was happy, which is a lab. It's not a punishment ending and it's not a redemption; it's a man finally being accurate about himself, roughly a decade too late for everyone standing near him.
+> "Felina" gives Walt a clean win, and that's the interesting choice: the machine gun in the trunk works, Jesse gets out, the money reaches his son through the people Walt hates most. What it doesn't give him is the lie. He tells Skyler the truth about why he did it, and then dies in the one room where he was happy, which is a lab. It's not a punishment ending and it's not a redemption; it's a man finally being accurate about himself, roughly a decade too late for everyone standing near him.
 
 ## Why I'm keeping it on the shelf
 
-Walt's actual weapon is never the chemistry. The chemistry is a product; the weapon is his read on the people closest to him — what Jesse needs to hear, what Skyler will accept, exactly how much of the truth Hank can be handed before he stops looking. He runs social engineering on his own family for five years and it works almost every time, because the trust was real and trust is the thing that doesn't get patched.
+Walt's actual weapon is never the chemistry. The chemistry is a product; the weapon is his read on the people closest to him: what Jesse needs to hear, what Skyler will accept, exactly how much of the truth Hank can be handed before he stops looking. He runs social engineering on his own family for five years and it works almost every time, because the trust was real and trust is the thing that doesn't get patched.
 
-I wrote something similar in my note on [[Sapiens]] — most attacks don't break the maths, they break the shared fictions. Breaking Bad is 62 hours of that, with better lighting.
+I wrote something similar in my note on [[Sapiens]]: most attacks don't break the maths, they break the shared fictions. Breaking Bad is 62 hours of that, with better lighting.
 
 > [!note] What to watch after
 > *Better Call Saul* is the better-written show and the worse pitch; start it after this, never before. If you want the same register somewhere else on the shelf, [[The Sopranos]] is the ancestor and [[Mindhunter]] is the cold, procedural cousin.
 
-[^1]: Mr. Chips was never the real state. The show knows it — the pilot spends its first ten minutes on humiliation, not on decency.
+[^1]: Mr. Chips was never the real state. The show knows it: the pilot spends its first ten minutes on humiliation, not on decency.

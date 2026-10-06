@@ -61,7 +61,7 @@ export function applyPreviewCut(
   const trimmed = md.trim();
   const blocks = blocksOf(trimmed);
   if (cut.capFirst && blocks[0].length > limit) {
-    return blocks[0].slice(0, limit).replace(/\s+\S*$/, "") + "…";
+    return blocks[0].slice(0, limit).replace(/\s+\S*$/, "").replace(/[,;:—–-]+$/, "") + "…";
   }
   const preview = blocks.slice(0, cut.blocks).join("\n\n");
   return preview.length >= trimmed.length ? null : preview;

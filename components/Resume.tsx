@@ -290,7 +290,9 @@ function MaybeLink({ href, children }: { href: string; children: ReactNode }) {
 
 /**
  * "Label — detail" renders the lead-in in the primary text colour and the rest
- * secondary; a line with no em dash just renders as secondary text.
+ * secondary; a line with no em dash just renders as secondary text. The em
+ * dash is how the vault marks the split and stays there; the page shows a
+ * colon in its place (#207).
  */
 function Point({ en, uk }: { en: string; uk?: string }) {
   return <T en={splitPoint(en)} uk={uk ? splitPoint(uk) : undefined} />;
@@ -302,8 +304,7 @@ function splitPoint(text: string): ReactNode {
   return (
     <>
       <span className="font-medium text-[var(--text)]">{text.slice(0, i)}</span>
-      {/* slice from the space, not past it, so the dash keeps its breathing room */}
-      <span className="text-[var(--text-secondary)]">{text.slice(i)}</span>
+      <span className="text-[var(--text-secondary)]">{`: ${text.slice(i + 3)}`}</span>
     </>
   );
 }

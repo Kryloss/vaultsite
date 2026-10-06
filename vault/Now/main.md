@@ -73,21 +73,21 @@ OpenClaw
 ### Education
 
 #### Bachelor of Cyber Science (Honours) · Toronto Metropolitan University
-*Sept 2026 — expected 2030* #current
+*Sept 2026 – expected 2030* #current
 
 #### Ontario Secondary School Diploma · Sacred Heart Catholic High School
-*Sept 2022 — June 2026*
+*Sept 2022 – June 2026*
 
 ### Experience
 
 #### Barista · Starbucks
-*Oct 2025 — present* · Upper Canada Mall, Newmarket #current
+*Oct 2025 – present* · Upper Canada Mall, Newmarket #current
 
 - Deliver friendly service in a high-volume store, building repeat customers.
 - Support teammates during peak periods and keep operations running smoothly.
 
 #### Shift Supervisor · Tim Hortons
-*Oct 2023 — Oct 2025* · Newmarket
+*Oct 2023 – Oct 2025* · Newmarket
 
 - Supervised and coordinated team members. Assisted with scheduling, training, and performance monitoring.
 - Led closing shifts, delegating tasks and ensuring closing duties were completed.

@@ -51,7 +51,7 @@ export default function Stars({
         viewBox={`0 0 ${STARS_WIDTH} ${STAR_BOX}`}
         preserveAspectRatio="xMinYMid slice"
       >
-        {row("var(--text-tertiary)")}
+        {row("var(--hue-star)")}
       </svg>
     </svg>
   );

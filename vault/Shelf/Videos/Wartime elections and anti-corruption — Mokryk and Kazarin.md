@@ -1,5 +1,5 @@
 ---
-title: Wartime elections and anti-corruption — Mokryk and Kazarin
+title: "Wartime elections and anti-corruption: Mokryk and Kazarin"
 title_uk: Вибори під час війни й антикорупція — Мокрик і Казарін
 aliases:
   - Mokryk and Kazarin
@@ -27,8 +27,8 @@ description_uk: "Мокрик і Казарін про вибори під ча�
 |---|---|
 | Subject | Wartime elections, the NABU disclosures, and the protests around them |
 | Prompted by | [[Mykhailo Fedorov]]'s call for elections in Ukraine |
-| Host | Danylo Mokryk — investigative journalist, The Kyiv Independent |
-| Guest | Pavlo Kazarin — journalist, in the Armed Forces since 2022 |
+| Host | Danylo Mokryk, investigative journalist, The Kyiv Independent |
+| Guest | Pavlo Kazarin, journalist, in the Armed Forces since 2022 |
 | Language | Ukrainian |
 | Released | 2026-08-21 |
 
@@ -40,6 +40,6 @@ https://www.youtube.com/watch?v=qP2pzC7ZaqE
 
 ## Sources
 
-- [Вибори: ТАБУ чи необхідність? Антикорупція ШКОДИТЬ нацбезпеці? / МокРозбір №8 — MokRec (YouTube)](https://www.youtube.com/watch?v=qP2pzC7ZaqE)
-- [Мокрик Данило Романович — Вікіпедія](https://uk.wikipedia.org/wiki/Мокрик_Данило_Романович)
-- [Казарін Павло Володимирович — Вікіпедія](https://uk.wikipedia.org/wiki/Казарін_Павло_Володимирович)
+- [Вибори: ТАБУ чи необхідність? Антикорупція ШКОДИТЬ нацбезпеці? / МокРозбір №8, MokRec (YouTube)](https://www.youtube.com/watch?v=qP2pzC7ZaqE)
+- [Мокрик Данило Романович, Вікіпедія](https://uk.wikipedia.org/wiki/Мокрик_Данило_Романович)
+- [Казарін Павло Володимирович, Вікіпедія](https://uk.wikipedia.org/wiki/Казарін_Павло_Володимирович)

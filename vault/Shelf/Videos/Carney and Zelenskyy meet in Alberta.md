@@ -39,6 +39,6 @@ https://www.tiktok.com/@cbccalgary/video/7683987896038296839
 
 ## Sources
 
-- [Meeting in Calgary, Prime Minister Mark Carney spoke about Alberta's past and future ties to Ukraine — CBC Calgary (TikTok)](https://www.tiktok.com/@cbccalgary/video/7683987896038296839)
-- [Joint statement by Prime Minister Carney and President Zelenskyy — Prime Minister of Canada](https://www.pm.gc.ca/en/news/statements/2026/09/10/joint-statement-prime-minister-carney-and-president-zelenskyy)
-- [PM Carney, Zelenskyy sign 100-year partnership declaration — CP24](https://www.cp24.com/news/canada/2026/09/10/pm-carney-zelenskyy-sign-100-year-partnership-declaration-pledge-drone-collaboration/)
+- [Meeting in Calgary, Prime Minister Mark Carney spoke about Alberta's past and future ties to Ukraine, CBC Calgary (TikTok)](https://www.tiktok.com/@cbccalgary/video/7683987896038296839)
+- [Joint statement by Prime Minister Carney and President Zelenskyy, Prime Minister of Canada](https://www.pm.gc.ca/en/news/statements/2026/09/10/joint-statement-prime-minister-carney-and-president-zelenskyy)
+- [PM Carney, Zelenskyy sign 100-year partnership declaration, CP24](https://www.cp24.com/news/canada/2026/09/10/pm-carney-zelenskyy-sign-100-year-partnership-declaration-pledge-drone-collaboration/)

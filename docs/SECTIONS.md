@@ -23,7 +23,7 @@ The vault model and the per-section conventions that are not visible from `lib/v
 - Category filter chips from entry `category:` frontmatter — chips are links to `/posts?category=X`, read by `useSearchParams()` in `PostListClient`, so a post's own category chip lands here pre-filtered. Unlike the shelf these are NOT separate pages: no per-category title/OG/sitemap entry, and filtering needs JS; the Suspense fallback renders the full unfiltered list into the static HTML (#14). The owner asked specifically not to add pages for these.
 - The list groups entries by year (empty years never render); row dates are DD.MM. This date treatment is posts-only — other types show full dates.
 - Filterable lists are split server/client: `PostList`→`PostListClient` (server slims entries to serializable rows). A server component RENDERED BY a client one still ships to the browser and so cannot import `lib/vault.ts` — `components/lists/PostRows.tsx` is the example, and `lib/dates.ts` and `lib/categories.ts` exist because of it (#15).
-- Reading time and the reading bar are posts-only (`docs/READING.md`). One metadata line under the title: date · reading time · words · Listen · series, then the `#tags` — pieces collected into an array and joined, never hand-written separators (#66).
+- Reading time and the reading bar are posts-only (`docs/READING.md`). One metadata line under the title: date · words · Listen · series (the reading time left this line in #206; link previews and the reading bar still show it), then the `#tags` — pieces collected into an array and joined, never hand-written separators (#66).
 
 ## Projects (`projects`)
 

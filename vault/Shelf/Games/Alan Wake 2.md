@@ -4,7 +4,7 @@ author: Remedy Entertainment
 author_photo: remedy-entertainment.jpg
 # author photo: the studio's own YouTube channel avatar, already square
 author_bio: >-
-  Finnish studio founded in 1995 — Max Payne, Alan Wake, Control — with a long habit of putting
+  Finnish studio founded in 1995 (Max Payne, Alan Wake, Control) with a long habit of putting
   live-action film inside a game.
 author_bio_uk: >-
   Фінська студія, заснована 1995 року: Max Payne, Alan Wake, Control — і давня звичка вставляти

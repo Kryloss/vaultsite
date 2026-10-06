@@ -7,8 +7,8 @@ author: Quantic Dream
 author_photo: quantic-dream.jpg
 # author photo: the studio's own YouTube channel avatar, already square
 author_bio: >-
-  Paris studio founded by David Cage in 1997, which makes branching stories — Heavy Rain,
-  Beyond, Detroit — where the plot forks on what you actually did.
+  Paris studio founded by David Cage in 1997, which makes branching stories (Heavy Rain,
+  Beyond, Detroit) where the plot forks on what you actually did.
 author_bio_uk: >-
   Паризька студія, заснована Девідом Кейджем 1997 року, робить розгалужені історії — Heavy Rain,
   Beyond, Detroit, — де сюжет розходиться від того, що ти справді зробив.
