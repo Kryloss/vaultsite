@@ -1,6 +1,8 @@
 {
   "name": "vaultsite",
   "version": "1.0.0",
+  "description": "A personal site published straight from an Obsidian vault: static Next.js, no database.",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "validate:image-notes": "node scripts/validate-image-notes.mjs",

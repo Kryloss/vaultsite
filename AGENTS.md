@@ -19,6 +19,7 @@ Owner: Kyrylo, high-school student in Ontario, heading into cybersecurity. Not a
 7. Do not build items under "Planned / future" (`docs/SECTIONS.md`) unless the user asks.
 8. Do not commit, push, deploy, or add dependencies unless the user requests that action or it is clearly part of their stated task.
 9. **Code and `docs/DECISIONS.md` are the source of truth.** Where prose disagrees with the code, the code wins — flag it, don't "fix" the code to match a stale sentence.
+10. **The repository is public and linked from the owner's résumé.** `draft: true` hides a note from the site, not from GitHub: a draft and its images go in `vault/<Section>/_drafts/`, which Git ignores (DECISIONS #218). Never commit secrets, private notes or scratch files.
 
 ## Two agents work on this repo
 

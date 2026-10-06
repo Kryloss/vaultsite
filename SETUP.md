@@ -11,7 +11,7 @@ git add -A
 git commit -m "Initial commit: vaultsite"
 ```
 
-Create a repo on [github.com/new](https://github.com/new) (private is fine — Vercel can deploy private repos), then:
+Create a repo on [github.com/new](https://github.com/new). Private is fine, Vercel can deploy private repos. If you make it public, keep unfinished notes in a `_drafts/` folder: `draft: true` hides a note from the site, not from GitHub. Then:
 
 ```bash
 git remote add origin https://github.com/<your-username>/vaultsite.git
@@ -29,10 +29,9 @@ git push -u origin main
 ## 3. Set up Obsidian
 
 1. Install [Obsidian](https://obsidian.md).
-2. **Open the `Vaultsite` folder itself as your vault** (Open folder as vault). The repo root must be the vault root — that's what makes the git plugin work. You'll see code folders (`app/`, `lib/`…) in the file explorer; ignore them, you only ever work inside `vault/`.
+2. **Open the `vault/` folder inside the repo as your vault** (Open folder as vault). Obsidian then shows only your notes; the code stays out of the way. The Git plugin finds the repository in the parent folder on its own, and commits the whole repo, code included.
 3. Settings → **Files and links**:
    - *Default location for new attachments* → **Same folder as current file** (required — images must sit next to the note that uses them)
-   - *Excluded files* → add `node_modules` and `.next` (keeps search clean)
 4. Settings → **Community plugins** → turn off Restricted mode → Browse → install and enable **Git** (by Vinzent).
 5. Git plugin settings:
    - *Split automatic commit and push* → off (commit-and-sync together)
@@ -52,6 +51,6 @@ New page = new folder in `vault/` containing a `main.md`. New post = new `.md` f
 
 ## Troubleshooting
 
-- **Post not showing up?** Check frontmatter — `draft: true` or `published: false` hides it. Also confirm the push happened (Git plugin status bar) and the Vercel build succeeded (vercel.com dashboard).
+- **Post not showing up?** Check frontmatter — `draft: true` or `published: false` hides it, and so does sitting in a `_drafts/` folder, which Git never uploads. Also confirm the push happened (Git plugin status bar) and the Vercel build succeeded (vercel.com dashboard).
 - **Image broken?** The image file must be inside the same section folder as the note (e.g. `vault/Posts/photo.png`).
 - **Vercel build failed?** Open the build log in the Vercel dashboard — usually a malformed frontmatter block (missing closing `---`).
