@@ -209,6 +209,8 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 198 | Series count without the tick |
 | 199 | SpongeBob, cut out, hangs beside the /music player |
 | 200 | /resume is its own page: the PDF as a sheet, and a download button |
+| 201 | The arrow is drawn, not typed |
+| 202 | The arrow leaves its ring: head and shaft move, the ring stays |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1529,3 +1531,21 @@ At the owner's request `/resume` stops redirecting to `/now` (this replaces the 
 - **English only**, at the owner's request: the button says "Download PDF" whatever the language toggle is set to, an exception to the bilingual-UI rule for this one page. The résumé is an English document.
 - **The PDF is now the owner's own file, with his phone number on it.** The same day he supplied a résumé made outside the repo (not by `scripts/build-resume-pdf.py`) and chose to publish it as is, on `/resume`. That lifts #25's "no phone number" for the copy on `/resume`, knowingly; still no street address. Now's `resume_file:` is the same PDF with the phone number cut out of the contact line (he asked for that straight after) — so the two files differ on purpose, and `make-resume-page.mjs` must be given the full file by path, never run bare, or `/resume` loses the number too. Running `build-resume-pdf.py` would overwrite his file with the generated one.
 - **Now's written résumé was rewritten to match that PDF**, at his request: three new blocks (`technical`, `projects`, `participation` in `lib/resume.ts`), and `RESUME_BLOCKS` reordered to the PDF's order — Technical skills, Projects, Education, Experience, Participation — followed by what only the page has (Certifications and Strengths, which he chose to keep; he then moved Strengths up to sit right under Technical skills, and filled the kryloss.com project's dot with `#current`). Spoken languages moved into Technical skills as on the PDF, so the Languages block is empty in the vault; the code still supports it. `build-resume-pdf.py` does not know the new blocks.
+
+## 201. The arrow is drawn, not typed (2026-10-06)
+
+At the owner's request the "→" and "←" characters on action links ("All posts", "Read", "Continue reading", the 404's Home) are replaced by the site's own arrow: `ArrowGlyph` in `components/icons.tsx`, a small open ring at the tail, a long shaft, and two barbs that curve in to the tip, round-capped. The typed character is whatever the font ships and reads as stock. A first version without the ring was correct but too close to the font's own arrow at 14px; the owner asked for something more its own, and of five drawn side by side (asymmetric barbs, a one-barb harpoon, the ring, a tail bar, a wave) the ring was the one still legible and still plainly an arrow at that size.
+
+- **Still the `.arrow-glyph` span.** The component renders the span and puts an `<svg>` inside it, so `ArrowThrow.tsx` and the `.action-link` hooks are untouched. `back` mirrors the drawing with `scaleX(-1)` on the `<svg>`. The motion itself moved off the span in #202.
+- **Sized in `em`, coloured by `currentColor`**, so it follows whatever text it sits in. 20×12 units at 1.1em wide with a 1.2 stroke: a first draft at 1.5 was visibly heavier than the serif beside it.
+- **Not an icon in #64's sense.** It replaces a character that was already there; it does not add a mark to page content.
+- Left alone: the `‹ ›` of the prev/next footer (`.sibling-arrow`), `ArrowIcon` on /now's rows, and any arrow typed in a vault note, which is content.
+
+## 202. The arrow leaves its ring: head and shaft move, the ring stays (2026-10-06)
+
+At the owner's request the arrow's motion was redone for #201's drawing. Sliding the whole glyph, as the typed character did, moved the ring too, and the ring is the one part that stands for where you are.
+
+- **Hover:** `.arrow-head` moves 4 units and `.arrow-shaft` scales from its ring end to stay attached. **Press / `.is-thrown`:** the head goes 22 units and fades, the shaft is drawn out after it and fades, the ring is left alone on the page.
+- **Units are the drawing's, not pixels.** A CSS `px` on an SVG child is a viewBox unit, so the travel scales with the font size (about 3px and 17px at 14px, the old 3px and 16px). The shaft's scale is `(14.4 + travel) / 14.4`; its origin and length are repeated in `globals.css` from the path in `components/icons.tsx`, so the two change together.
+- **No `.is-back` motion rules.** The mirrored `<svg>` mirrors the movement inside it.
+- Reduced motion: no transition and no movement, as before. `.sibling-arrow` (the `‹ ›` footer) still slides as one piece.

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import T from "@/components/T";
+import { ArrowGlyph } from "@/components/icons";
 import NotFoundSuggestions from "@/components/NotFoundSuggestions";
 import { ui } from "@/lib/ui-strings";
 import Page from "@/components/Page";
@@ -31,9 +32,7 @@ export default function NotFound() {
           >
             {/* Leading, so it points back the way you came — `.is-back` flips
                 the spacing and the direction it's thrown in. */}
-            <span className="arrow-glyph is-back" aria-hidden>
-              ←
-            </span>
+            <ArrowGlyph back />
             <T {...ui.home} />
           </Link>
 

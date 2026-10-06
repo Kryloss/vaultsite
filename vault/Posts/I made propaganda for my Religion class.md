@@ -8,6 +8,7 @@ description_uk: Дев'ятисторінкова газета про одну �
 aliases:
   - War Newspaper
   - the war newspaper
+draft: true
 ---
 
 I want to use the honest word for this, so: the thing below is propaganda.

@@ -4,6 +4,7 @@ import type { ListProps } from "@/lib/section-types";
 import { renderMarkdown } from "@/lib/markdown";
 import { displayDate, displayDateUk } from "@/lib/vault";
 import T from "@/components/T";
+import { ArrowGlyph } from "@/components/icons";
 import NewBadge from "@/components/NewBadge";
 import { ui } from "@/lib/ui-strings";
 import { previewBodies } from "@/lib/til-preview";
@@ -84,9 +85,7 @@ export default async function TilList({ section, entries }: ListProps) {
                 <T {...ui.continueReading} />
                 {/* Its own element so it can lead on hover and be thrown on
                     press — see `.arrow-glyph` in globals.css. */}
-                <span className="arrow-glyph" aria-hidden>
-                  →
-                </span>
+                <ArrowGlyph />
               </Link>
             </>
           ) : (

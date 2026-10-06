@@ -144,6 +144,35 @@ export function ArrowIcon({ className }: IconProps) {
   );
 }
 
+/**
+ * The site's own arrow, drawn in place of the "→" character (#201).
+ *
+ * A typed arrow is whatever the font ships, and Inter's is the one on every
+ * other page of the internet. This one leaves from a small open ring — the
+ * place you are — along a long shaft to two barbs that curve in to the tip,
+ * in the round-capped stroke the rest of this file uses.
+ * It is sized in `em` — 20×12 units at 1.1em wide, so the 1.2 stroke lands
+ * between the serif's hairline and its stem — and takes the text's colour, so
+ * it sits in a line of words the way the character did.
+ *
+ * Renders the `.arrow-glyph` span too. The ring stays put; `.arrow-head` leads
+ * on hover and is thrown on press while `.arrow-shaft` stretches after it
+ * (globals.css, components/ArrowThrow.tsx). The shaft's start and length are
+ * repeated in that CSS, so change them together. `back` is the leading kind —
+ * mirrored, and so thrown the other way.
+ */
+export function ArrowGlyph({ back }: { back?: boolean }) {
+  return (
+    <span className={back ? "arrow-glyph is-back" : "arrow-glyph"} aria-hidden>
+      <svg viewBox="0 0 20 12" {...stroke} strokeWidth={1.2}>
+        <circle cx="2.6" cy="6" r="1.5" />
+        <path className="arrow-shaft" d="M4.1 6h14.4" />
+        <path className="arrow-head" d="M13.5 1.5c.6 2.5 2.4 4 5 4.5-2.6.5-4.4 2-5 4.5" />
+      </svg>
+    </span>
+  );
+}
+
 export function ExternalLinkIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>

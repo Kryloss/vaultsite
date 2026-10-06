@@ -1,5 +1,6 @@
 import Link from "next/link";
 import T from "@/components/T";
+import { ArrowGlyph } from "@/components/icons";
 import NewBadge from "@/components/NewBadge";
 import { ui } from "@/lib/ui-strings";
 import { categoryLabel } from "@/lib/categories";
@@ -93,9 +94,7 @@ export default function PostLeadCard({
         )}
         <span className="idea-lead-read action-link">
           <T {...ui.readPost} />
-          <span className="arrow-glyph" aria-hidden>
-            →
-          </span>
+          <ArrowGlyph />
         </span>
       </span>
     </Link>

@@ -3627,17 +3627,13 @@ a.series-link:hover {
   transition-duration: var(--dur-slow);
 }
 
-/* The same behaviour for a standalone action link's arrow — "Continue
-   reading →", "All posts →", "← Back home" — where the arrow is a sibling
-   span rather than part of the translated string (see lib/ui-strings.ts).
-   `.is-back` is the leading kind: it sits before the words and is thrown the
-   other way, because it points back the way you came. */
+/* A standalone action link's arrow — "Continue reading", "All posts",
+   "Back home" — where the arrow is a sibling span rather than part of the
+   translated string (see lib/ui-strings.ts). `.is-back` is the leading kind:
+   it sits before the words and points back the way you came. */
 .arrow-glyph {
   display: inline-block;
   margin-left: 0.3em;
-  transition:
-    transform var(--dur) var(--ease),
-    opacity var(--dur) var(--ease);
 }
 
 .arrow-glyph.is-back {
@@ -3645,33 +3641,75 @@ a.series-link:hover {
   margin-right: 0.3em;
 }
 
-.action-link:hover .arrow-glyph {
-  transform: translateX(3px);
+/* The arrow itself is drawn, not typed (`ArrowGlyph` in components/icons.tsx,
+   #201). `display: block` makes the span exactly as tall as the drawing, so it
+   stands on the baseline and its middle lands at a third of an em — where the
+   character's shaft was. `overflow: visible` because the head travels past
+   the drawing's own box. The back one is the same drawing mirrored, which
+   mirrors every movement below with it — there are no `.is-back` motion rules. */
+.arrow-glyph svg {
+  display: block;
+  width: 1.1em;
+  height: 0.66em;
+  overflow: visible;
 }
 
-.action-link:hover .arrow-glyph.is-back {
-  transform: translateX(-3px);
+.arrow-glyph.is-back svg {
+  transform: scaleX(-1);
 }
 
-.action-link:active .arrow-glyph,
-.action-link.is-thrown .arrow-glyph {
-  transform: translateX(16px);
+/* The ring is where you are, so it never moves. The head leads on hover and
+   the shaft stretches from the ring to keep hold of it; on press the head is
+   thrown and the shaft is drawn out after it until both are gone, leaving the
+   ring behind (#202). Before the ring the whole glyph slid as one piece, which
+   with a ring looked like the page's own position drifting.
+
+   Lengths here are the drawing's units, not screen pixels (20 of them span
+   1.1em), so the travel scales with the text: 4 is ~3px and 22 is ~17px at
+   14px. The shaft is 14.4 long from x=4.1, so each scale is
+   (14.4 + the head's travel) / 14.4 — change them as a pair. */
+.arrow-shaft,
+.arrow-head {
+  transition:
+    transform var(--dur) var(--ease),
+    opacity var(--dur) var(--ease);
+}
+
+.arrow-shaft {
+  transform-origin: 4.1px 6px;
+}
+
+.action-link:hover .arrow-head {
+  transform: translateX(4px);
+}
+
+.action-link:hover .arrow-shaft {
+  transform: scaleX(1.28);
+}
+
+.action-link:active .arrow-head,
+.action-link.is-thrown .arrow-head {
+  transform: translateX(22px);
   opacity: 0;
   transition-duration: var(--dur-slow);
 }
 
-.action-link:active .arrow-glyph.is-back,
-.action-link.is-thrown .arrow-glyph.is-back {
-  transform: translateX(-16px);
+.action-link:active .arrow-shaft,
+.action-link.is-thrown .arrow-shaft {
+  transform: scaleX(2.53);
   opacity: 0;
   transition-duration: var(--dur-slow);
 }
 
 /* Someone who asked for less motion asked for this too. */
 @media (prefers-reduced-motion: reduce) {
-  .sibling-arrow,
-  .arrow-glyph {
+  .sibling-arrow {
     transition: color var(--dur-fast) var(--ease);
+  }
+
+  .arrow-shaft,
+  .arrow-head {
+    transition: none;
   }
 
   .sibling:hover .sibling-arrow,
@@ -3679,9 +3717,12 @@ a.series-link:hover {
   .sibling-next:active .sibling-arrow,
   .sibling-prev.is-thrown .sibling-arrow,
   .sibling-next.is-thrown .sibling-arrow,
-  .action-link:hover .arrow-glyph,
-  .action-link:active .arrow-glyph,
-  .action-link.is-thrown .arrow-glyph {
+  .action-link:hover .arrow-shaft,
+  .action-link:hover .arrow-head,
+  .action-link:active .arrow-shaft,
+  .action-link:active .arrow-head,
+  .action-link.is-thrown .arrow-shaft,
+  .action-link.is-thrown .arrow-head {
     transform: none;
     opacity: 1;
   }

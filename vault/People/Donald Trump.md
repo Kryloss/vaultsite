@@ -7,10 +7,11 @@ description_uk: Людина поза Україною, від якої найб
 cover: donald-trump.jpg
 # cover: Wikimedia Commons — Daniel Torok / White House, public domain
 # (official presidential portrait, 2025). Cropped square.
-category: Politics
 aliases:
   - Trump
   - Donald J. Trump
+draft: true
+categories: ["Politics"]
 ---
 
 ## At a glance

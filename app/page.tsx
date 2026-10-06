@@ -8,6 +8,7 @@ import {
 } from "@/lib/vault";
 import { renderMarkdown } from "@/lib/markdown";
 import T from "@/components/T";
+import { ArrowGlyph } from "@/components/icons";
 import SocialLinks from "@/components/SocialLinks";
 import NewBadge from "@/components/NewBadge";
 import { ui } from "@/lib/ui-strings";
@@ -104,9 +105,7 @@ export default async function HomePage() {
               className="action-link press text-sm text-[var(--text-tertiary)] hover:text-[var(--text)]"
             >
               <T {...ui.allPosts} />
-              <span className="arrow-glyph" aria-hidden>
-                →
-              </span>
+              <ArrowGlyph />
             </Link>
           </div>
           <ul className="mt-2 flex flex-col">
