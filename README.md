@@ -80,4 +80,4 @@ I designed the site and direct the work; most of the code was written with AI co
 
 ## License
 
-The code is under the [MIT License](./LICENSE). The content in `vault/` (writing, notes, photographs) is © Kyrylo Leshchenko, all rights reserved. Cover art and portraits belong to their owners.
+The code is under the [MIT License](./LICENSE). The content in `vault/` (writing, notes, photographs) is © Kyrylo Leshchenko, all rights reserved. Cover art and portraits belong to their owners. Details in [NOTICE.md](./NOTICE.md).
