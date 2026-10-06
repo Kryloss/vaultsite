@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import type { LinkPreview as Preview } from "@/lib/previews";
 import T from "./T";
@@ -25,24 +25,15 @@ const CLOSE_DELAY = 100;
 const WARM_DELAY = 40;
 /** How long a leaving card stays mounted: `--dur-fast`, its exit animation. */
 const EXIT_MS = 120;
-const CARD_WIDTH = 320;
 const MARGIN = 12;
 /** The card sits a little right of dead centre under its link. */
-const SHIFT = 20;
-/** Enough room to render the tallest card below the link, else flip above.
-   Two lines of title over three of excerpt, plus padding — the cover no
-   longer sets a floor, it floats inside the text (see globals.css). */
-const ESTIMATED_HEIGHT = 155;
-
-interface Position {
-  left: number;
-  top?: number;
-  bottom?: number;
-}
-
+const SHIFT = 36;
+/** Between the link and the card. */
+const GAP = 8;
 interface Shown {
   p: Preview;
-  pos: Position;
+  /** The link it belongs to; the card is placed from it once it has a size. */
+  link: HTMLAnchorElement;
   /** Still mounted, playing its exit animation. */
   closing?: boolean;
 }
@@ -108,24 +99,6 @@ export default function LinkPreview({ previews }: { previews: Preview[] }) {
       return p;
     };
 
-    const position = (a: HTMLAnchorElement): Position => {
-      const r = a.getBoundingClientRect();
-      const width = Math.min(CARD_WIDTH, window.innerWidth - MARGIN * 2);
-      // `left` is the card's CENTRE (the CSS shifts it back by half its own
-      // width), nudged right by SHIFT and held far enough from either edge for the widest card to fit.
-      const half = width / 2 + MARGIN;
-      const left = Math.min(
-        Math.max(r.left + r.width / 2 + SHIFT, half),
-        window.innerWidth - half
-      );
-      const spaceBelow = window.innerHeight - r.bottom;
-      // Anchoring by `bottom` when flipping up means we never have to measure
-      // the card's real height.
-      return spaceBelow < ESTIMATED_HEIGHT && r.top > ESTIMATED_HEIGHT
-        ? { left, bottom: window.innerHeight - r.top + 8 }
-        : { left, top: r.bottom + 8 };
-    };
-
     const onOver = (e: MouseEvent) => {
       const t = e.target;
       if (!(t instanceof Element)) return;
@@ -144,7 +117,7 @@ export default function LinkPreview({ previews }: { previews: Preview[] }) {
       hovered.current = a;
       clearTimers();
       openTimer.current = window.setTimeout(
-        () => setShown({ p, pos: position(a) }),
+        () => setShown({ p, link: a }),
         warm.current ? WARM_DELAY : OPEN_DELAY
       );
     };
@@ -186,26 +159,79 @@ export default function LinkPreview({ previews }: { previews: Preview[] }) {
 
   useEffect(() => () => window.clearTimeout(exitTimer.current), []);
 
+  // Place the card before paint, by MEASURING rather than by arithmetic on
+  // viewport numbers.
+  //
+  // Under a pinch zoom there are two viewports — the full layout one that
+  // `position: fixed` is laid out against, and the zoomed-in visual one — and
+  // browsers disagree about which of them `getBoundingClientRect()` and
+  // `innerWidth/innerHeight` describe. Trusting any of them put the card up
+  // and to the left of its link. So: park the card at 0,0, read where that
+  // actually lands in the same coordinates the link's rectangle is in, and
+  // place it by the difference. Whatever the browser means by those
+  // coordinates, the link and the card now agree.
+  //
+  // The size is measured too: guessing (20rem wide, 155px tall) put a small
+  // card far from its link whenever the window was small in CSS pixels.
+  const card = useRef<HTMLDivElement>(null);
+  const link = shown?.link;
+  const href = shown?.p.href;
+  useLayoutEffect(() => {
+    const el = card.current;
+    if (!el || !link) return;
+
+    // Measured at rest: the entrance animation starts scaled and offset.
+    el.style.animation = "none";
+    el.style.left = "0px";
+    el.style.top = "0px";
+    const at0 = el.getBoundingClientRect();
+    const w = at0.width;
+    const h = at0.height;
+    // Where `left: 0; top: 0` lands. `left` is the card's CENTRE: the CSS
+    // shifts it back by half its width.
+    const dx = at0.left + w / 2;
+    const dy = at0.top;
+
+    // The part of the page actually on screen, in those same coordinates.
+    const vv = window.visualViewport;
+    const root = document.documentElement;
+    const x0 = (vv?.offsetLeft ?? 0) + dx;
+    const y0 = (vv?.offsetTop ?? 0) + dy;
+    const x1 = x0 + (vv?.width ?? root.clientWidth);
+    const y1 = y0 + (vv?.height ?? root.clientHeight);
+
+    const r = link.getBoundingClientRect();
+    const half = w / 2 + MARGIN;
+    const centre =
+      x1 - x0 < half * 2
+        ? (x0 + x1) / 2
+        : Math.min(Math.max(r.left + r.width / 2 + SHIFT, x0 + half), x1 - half);
+
+    // Below the link unless it only fits above.
+    const need = h + GAP + MARGIN;
+    const above = y1 - r.bottom < need && r.top - y0 >= need;
+    el.dataset.side = above ? "above" : "below";
+    el.style.left = `${centre - dx}px`;
+    el.style.top = `${(above ? r.top - GAP - h : r.bottom + GAP) - dy}px`;
+    el.style.animation = "";
+  }, [link, href]);
+
   if (!shown) return null;
-  const { p, pos, closing } = shown;
+  const { p, closing } = shown;
+  const isPost = !!(p.minutes && p.dateLabel);
 
   return (
     <div
       // A different note's card is a new card: it arrives again.
       key={p.href}
+      ref={card}
       className="link-preview"
       data-state={closing ? "closing" : "open"}
-      data-side={pos.bottom !== undefined ? "above" : "below"}
       // Tells the CSS to stop shrink-wrapping — see globals.css for why a
       // floated cover can't be measured by `fit-content`.
       data-cover={p.cover ? "" : undefined}
       role="tooltip"
       aria-hidden="true"
-      style={{
-        left: pos.left,
-        ...(pos.top !== undefined ? { top: pos.top } : {}),
-        ...(pos.bottom !== undefined ? { bottom: pos.bottom } : {}),
-      }}
     >
       {p.cover && (
         // The cover floats and the excerpt wraps beneath it, so its height is
@@ -221,11 +247,15 @@ export default function LinkPreview({ previews }: { previews: Preview[] }) {
           style={{ "--cover-ar": p.coverAr } as CSSProperties}
         />
       )}
-      {/* A post's card repeats the line under the post's title (#196);
-          everything else says where it lives first. */}
-      {p.minutes && p.dateLabel ? (
+      {/* Title first, then one grey line, then the excerpt (#219). A post's
+          line is the one under its own title — "date · 3 min read" (#196);
+          any other note says where it lives. A section has no line. */}
+      <p className="link-preview-title">
+        <T en={p.title} uk={p.titleUk} />
+      </p>
+      {isPost ? (
         <p className="link-preview-meta">
-          <T en={p.dateLabel} uk={p.dateLabelUk} />
+          <T en={p.dateLabel!} uk={p.dateLabelUk} />
           <span aria-hidden> · </span>
           {p.minutes} <T {...ui.minRead} />
         </p>
@@ -240,9 +270,6 @@ export default function LinkPreview({ previews }: { previews: Preview[] }) {
           )}
         </p>
       ) : null}
-      <p className="link-preview-title">
-        <T en={p.title} uk={p.titleUk} />
-      </p>
       {p.excerpt && (
         <p className="link-preview-excerpt">
           <T en={p.excerpt} uk={p.excerptUk} />

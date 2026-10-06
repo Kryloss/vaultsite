@@ -2364,15 +2364,16 @@ html[data-lang="uk"] .callout[data-callout="failure"] { --callout-label: "Нев
   object-fit: contain;
 }
 
+/* Sits UNDER the title (#219). */
 .link-preview-meta {
-  margin: 0;
+  margin: 0.125rem 0 0;
   font-size: 0.75rem;
   line-height: 1.35;
   color: var(--text-tertiary);
 }
 
 .link-preview-title {
-  margin: 0.0625rem 0 0;
+  margin: 0;
   font-size: 0.9375rem;
   font-weight: 600;
   line-height: 1.3;
