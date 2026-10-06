@@ -37,3 +37,14 @@ __pycache__/
 
 # Claude Code / Cowork local settings — machine-specific, not the repo's business
 .claude/
+
+# Unpublished drafts. This repository is public, and `draft: true` only hides a
+# note from the built site, not from GitHub. A note (and its images) inside any
+# `_drafts/` folder never leaves this machine; see docs/SECTIONS.md.
+_drafts/
+
+# Local staging for files on their way out
+/_to_delete/
+
+# Obsidian opens `vault/`; a settings folder at the repo root is a stray
+/.obsidian/

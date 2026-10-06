@@ -302,7 +302,7 @@ test("creates section-specific drafts and toggles Now goals over HTTP", async (t
   assert.equal(created.pathname, "/posts/created-here");
   assert.equal(created.fields.title_uk, "Створено тут");
   assert.equal(
-    fs.existsSync(path.join(root, "vault", "Posts", "Created Here.uk.md")),
+    fs.existsSync(path.join(root, "vault", "Posts", "_drafts", "Created Here.uk.md")),
     true
   );
 

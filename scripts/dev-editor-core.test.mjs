@@ -449,9 +449,9 @@ test("creates bilingual draft scaffolds for every supported section type", async
     assert.equal(matter(raw).data.draft, true);
     assert.equal(fs.existsSync(path.join(root, created.sourceUk)), true);
   }
-  assert.equal(fs.existsSync(path.join(root, "vault", "Shelf", "Movies", "New Film.md")), true);
+  assert.equal(fs.existsSync(path.join(root, "vault", "Shelf", "Movies", "_drafts", "New Film.md")), true);
   const music = matter(
-    await fs.promises.readFile(path.join(root, "vault", "Music", "New Record.md"), "utf8")
+    await fs.promises.readFile(path.join(root, "vault", "Music", "_drafts", "New Record.md"), "utf8")
   ).data;
   assert.equal(music.lang, "uk");
   assert.deepEqual(music.genres, ["Alternative"]);

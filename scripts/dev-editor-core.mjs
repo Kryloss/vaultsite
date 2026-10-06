@@ -994,6 +994,8 @@ export async function savePageDocument(repoRoot, args) {
 }
 
 const CREATABLE_SECTION_TYPES = new Set(["posts", "music", "people", "shelf", "projects"]);
+/** Same name as `DRAFTS_DIR` in lib/vault.ts; Git ignores every folder called this. */
+const DRAFTS_DIR = "_drafts";
 const SHELF_FOLDERS = {
   book: "Books",
   movie: "Movies",
@@ -1275,12 +1277,16 @@ export async function createEntry(repoRoot, args) {
     throw new DevEditorError("Choose the English, Ukrainian, or Russian music shelf.", 422, "invalid_music_lang");
   }
 
-  const targetDir = section.type === "shelf"
+  const filingDir = section.type === "shelf"
     ? fs.realpathSync(path.join(section.sectionDir, SHELF_FOLDERS[medium]))
     : section.sectionDir;
-  if (!inside(section.sectionDir, targetDir)) {
+  if (!inside(section.sectionDir, filingDir)) {
     throw new DevEditorError("The template folder is outside its section.", 403, "outside_vault");
   }
+  // A new note is a draft, and drafts live in the Git-ignored `_drafts/`
+  // folder so they never reach the public repository (DECISIONS #218).
+  const targetDir = path.join(filingDir, DRAFTS_DIR);
+  fs.mkdirSync(targetDir, { recursive: true });
   const file = path.join(targetDir, `${fileName}.md`);
   const fileUk = path.join(targetDir, `${fileName}.uk.md`);
   assertUniqueEntry(section.sectionDir, slug, file, fileUk);

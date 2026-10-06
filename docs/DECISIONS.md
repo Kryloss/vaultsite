@@ -226,6 +226,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 215 | Colour as a small mark for a kind or a state: four hues, seven places |
 | 216 | "Listen" stays in the metadata line while reading, as "Stop"; its icon is yellow |
 | 217 | Phones: arrows a quarter bigger; a shortened line is cut by script so "…" never follows a comma or a space |
+| 218 | Drafts live in Git-ignored `_drafts/` folders, because the repository is public |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1724,3 +1725,15 @@ The build-time excerpts (`lib/previews.ts`, `lib/til-preview.ts`) follow the sam
 **#215 and #216, later the same day:** "New" (the chip and the dot on a shelf cover) is the soft gold `--hue-star` instead of blue. The metadata line carries no colour again: the Listen icon and the finished series badge's icon are back to the line's grey. Green for a finished series stays inside the series card ("Done", the ticks). Blue is now used by callouts only.
 
 **#215, the series card:** "Done" is the header's own grey too. The green left for a finished series is the ticks beside its parts.
+
+## 218. Drafts live in Git-ignored `_drafts/` folders, because the repository is public (2026-10-06)
+
+The repository is public and linked from the owner's résumé. `draft: true` only keeps a note out of the built site: Obsidian Git still pushed the Markdown, so six unfinished notes and their images were readable on GitHub, and the images were served from `/vault-assets/` on the live site.
+
+- `.gitignore` ignores every folder named `_drafts`. A note there, its `.uk.md` and its images never leave the owner's machine.
+- A draft sits in `vault/<Section>/_drafts/` (or deeper, e.g. `Shelf/Movies/_drafts/`), not in one `vault/_drafts/`, so it is still inside its section and `npm run dev` shows it with the Draft badge as before.
+- `lib/vault.ts` treats any note under `_drafts` as a draft whatever its frontmatter says (`DRAFTS_DIR`). Without that, clearing `draft: true` in the dock would show the note as published locally while it could never reach production.
+- The dock's `+` creates its Draft pair inside `_drafts/` (`createEntry` in `scripts/dev-editor-core.mjs`).
+- **Publishing a draft** is two steps: move the note, its `.uk.md` and its images out of `_drafts/` into the section, and remove `draft: true`.
+
+Costs, accepted: drafts are no longer backed up or synced to other devices by Git, and the versions pushed before this date remain in the public history. Rejected: making the repository private, because the résumé links to it. `Post Sample` and `Draft example` in `Posts/Examples/` stay tracked: they are scaffolding, not writing.

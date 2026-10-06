@@ -17,6 +17,8 @@ the vault. This doc is the playbook. Read AGENTS.md first for the hard rules.
    covers.
 3. **Publish directly.** No `draft: true` unless he says "draft". Files go
    live on his next Obsidian Git sync.
+   A draft goes in `vault/<Section>/_drafts/` with its images, never in the
+   section itself: the repository is public (DECISIONS #218).
 4. **Never break conventions.** Frontmatter keys, folder structure, and slugs
    follow this doc exactly. When done, sanity-check your YAML (a missing
    closing `---` breaks the build).

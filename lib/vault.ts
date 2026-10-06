@@ -101,6 +101,17 @@ function isDraft(data: Record<string, unknown>): boolean {
   return data.draft === true || data.published === false;
 }
 
+/**
+ * The folder unpublished notes are kept in. Git ignores every `_drafts/`
+ * (.gitignore), so a note inside one exists only on the owner's machine and
+ * stays a draft whatever its frontmatter says (DECISIONS #218).
+ */
+export const DRAFTS_DIR = "_drafts";
+
+function inDraftsFolder(sub: string): boolean {
+  return sub.split(path.sep).includes(DRAFTS_DIR);
+}
+
 /** All sections (folders with a main.md), sorted for the sidebar. */
 export function getSections(): Section[] {
   if (!fs.existsSync(VAULT_DIR)) return [];
@@ -223,7 +234,8 @@ export function getEntries(section: Section): Entry[] {
 
   for (const { file, dir, sub } of noteFiles(path.join(VAULT_DIR, section.dirName))) {
     const { data, content } = matter(fs.readFileSync(path.join(dir, file), "utf8"));
-    if (isDraft(data) && !SHOW_DRAFTS) continue;
+    const draft = isDraft(data) || inDraftsFolder(sub);
+    if (draft && !SHOW_DRAFTS) continue;
 
     const fileName = file.replace(/\.md$/i, "");
     // Optional Ukrainian body: a sibling <name>.uk.md (frontmatter stripped).
@@ -248,7 +260,7 @@ export function getEntries(section: Section): Entry[] {
       content,
       contentUk,
       meta: data,
-      draft: isDraft(data),
+      draft,
     });
   }
 
