@@ -3,10 +3,10 @@ title: Home
 title_uk: Головна
 icon: 🏠
 order: 0
-vibe_title: Zombie
-vibe_artist: YUNGBLUD
-vibe_date: "2026-09-24"
-vibe_youtube: https://www.youtube.com/watch?v=Yv97b2oPk3w
+vibe_title: Levitate
+vibe_artist: twenty one pilots
+vibe_date: "2026-10-08"
+vibe_youtube: https://www.youtube.com/watch?v=uv_1AKKKJnk
 description: Student in Ontario heading into cybersecurity. Notes, projects, and what I'm reading.
 description_uk: Студент з Онтаріо на шляху в кібербезпеку — нотатки, проєкти та що я читаю.
 ---
