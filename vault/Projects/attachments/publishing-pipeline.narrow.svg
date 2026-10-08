@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 314" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" role="img" aria-label="Publishing pipeline: Obsidian to GitHub to Vercel to live site">
+  <style>
+    .box   { fill: #33373d; fill-opacity: .04; stroke: #33373d; stroke-width: 1.5; }
+    .solid { fill: #33373d; stroke: #33373d; stroke-width: 1.5; }
+    .lbl   { fill: #33373d; font-size: 15px; font-weight: 600; }
+    .sub   { fill: #6b7280; font-size: 12px; }
+    .inv   { fill: #ffffff; font-size: 15px; font-weight: 700; }
+    .subinv{ fill: #ffffff; fill-opacity: .72; font-size: 12px; }
+    .arw   { fill: none; stroke: #8b919b; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    @media (prefers-color-scheme: dark) {
+      .box   { fill: #e6e8eb; fill-opacity: .05; stroke: #c8ccd2; }
+      .solid { fill: #e6e8eb; stroke: #e6e8eb; }
+      .lbl { fill: #e6e8eb; }
+      .sub { fill: #9aa0aa; }
+      .inv, .subinv { fill: #0a0a0a; }
+      .arw   { stroke: #737986; }
+    }
+  </style>
+
+  <rect class="box" x="40" y="2" width="240" height="58" rx="12" />
+  <text class="lbl" x="160" y="28" text-anchor="middle">Obsidian</text>
+  <text class="sub" x="160" y="47" text-anchor="middle">write a note</text>
+  <circle class="arw" cx="160" cy="66.8" r="1.8" />
+  <path class="arw" d="M160 68.6L160 81M165 75.5C162.2 76.2 160.6 78.1 160 81C159.4 78.1 157.8 76.2 155 75.5" />
+
+  <rect class="box" x="40" y="86" width="240" height="58" rx="12" />
+  <text class="lbl" x="160" y="112" text-anchor="middle">GitHub</text>
+  <text class="sub" x="160" y="131" text-anchor="middle">git auto-push</text>
+  <circle class="arw" cx="160" cy="150.8" r="1.8" />
+  <path class="arw" d="M160 152.6L160 165M165 159.5C162.2 160.2 160.6 162.1 160 165C159.4 162.1 157.8 160.2 155 159.5" />
+
+  <rect class="box" x="40" y="170" width="240" height="58" rx="12" />
+  <text class="lbl" x="160" y="196" text-anchor="middle">Vercel</text>
+  <text class="sub" x="160" y="215" text-anchor="middle">static build</text>
+  <circle class="arw" cx="160" cy="234.8" r="1.8" />
+  <path class="arw" d="M160 236.6L160 249M165 243.5C162.2 244.2 160.6 246.1 160 249C159.4 246.1 157.8 244.2 155 243.5" />
+
+  <rect class="solid" x="40" y="254" width="240" height="58" rx="12" />
+  <text class="inv" x="160" y="280" text-anchor="middle">kryloss.com</text>
+  <text class="subinv" x="160" y="299" text-anchor="middle">live in ~1 min</text>
+</svg>

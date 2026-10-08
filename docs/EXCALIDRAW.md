@@ -76,6 +76,26 @@ decode, so a diagram gets stuck in the wrong theme. Two useful consequences:
 Beyond Excalidraw, any embed gets a theme swap for free: if `chart.png` has a
 sibling `chart.dark.png`, embedding `![[chart.png]]` shows the right one per theme.
 
+### A phone redraw (self-theming SVGs)
+
+A diagram is scaled to its column. Four boxes in a row that read well on a
+laptop are a third the size on a phone, labels and all, and nothing outside the
+file can change its layout. So a self-theming SVG may have a second drawing
+beside it for narrow screens:
+
+| Wide (the one you embed) | Phone redraw |
+|---|---|
+| `diagram.svg` | `diagram.narrow.svg` |
+| `diagram.uk.svg` | `diagram.uk.narrow.svg` |
+
+Embed the wide English name as always. Below 640px the page shows the
+`.narrow` one, in whichever language is active; without that file the wide one
+shows at every width. Draw it on a `viewBox` about 320 wide so a unit is a
+pixel on a phone, usually the same nodes stacked top to bottom. Working
+example: `vault/Projects/attachments/publishing-pipeline.narrow.svg`. Not
+supported for image notes, whose diagram must match its photo's shape
+(DECISIONS #225).
+
 ## Translated diagrams (English / Ukrainian)
 
 Diagrams swap with the site's language toggle, just like text. Add a Ukrainian

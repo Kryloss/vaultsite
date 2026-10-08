@@ -145,7 +145,8 @@ storage still remembers the choice during the visit. Stored state renders after
 hydration, initially hidden.
 
 Toronto date is checked every minute and on visibility changes; an older pick
-reads “Latest vibe”. A missed morning does not change the selection date.
+reads “Latest vibe” in the trigger’s accessible name; there is no tooltip (#224).
+A missed morning does not change the selection date.
 
 ### Daily update workflow
 

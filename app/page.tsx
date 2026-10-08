@@ -4,7 +4,6 @@ import {
   getSections,
   getSectionBySlug,
   getEntries,
-  displayDate,
 } from "@/lib/vault";
 import { renderMarkdown } from "@/lib/markdown";
 import T from "@/components/T";
@@ -12,7 +11,7 @@ import { ArrowGlyph, ChevronIcon } from "@/components/icons";
 import SocialLinks from "@/components/SocialLinks";
 import NewBadge from "@/components/NewBadge";
 import { ui } from "@/lib/ui-strings";
-import { displayDateUk } from "@/lib/vault";
+import { columnDate } from "@/lib/dates";
 import { pageMeta } from "@/lib/metadata";
 import { previewsInHtml } from "@/lib/previews";
 import LinkPreview from "@/components/LinkPreview";
@@ -56,6 +55,8 @@ export default async function HomePage() {
 
   const posts = getSectionBySlug("posts");
   const recent = posts ? getEntries(posts).slice(0, 4) : [];
+  // The year is shown only once the four don't share one (lib/dates.ts).
+  const recentDate = columnDate(recent.map((entry) => entry.date));
   const explore = getSections().filter(
     (s) => s.slug !== "home" && s.slug !== "posts" && s.slug !== "now"
   );
@@ -126,10 +127,7 @@ export default async function HomePage() {
                       dateTime={entry.date}
                       className="shrink-0 text-sm tabular-nums text-[var(--text-tertiary)]"
                     >
-                      <T
-                        en={displayDate(entry.date)}
-                        uk={displayDateUk(entry.date)}
-                      />
+                      {recentDate(entry.date)}
                     </time>
                   )}
                 </Link>

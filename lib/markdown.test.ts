@@ -308,3 +308,32 @@ test("liftFacts works on a People note too — card kept, block still travels", 
   assert.doesNotMatch(html, /<table/);
   assert.match(html, /id="at-a-glance"/);
 });
+
+test("a diagram with a .narrow sibling carries both, per language", async () => {
+  const html = await renderMarkdown(
+    "![[publishing-pipeline.svg|How a note becomes a page :: Як нотатка стає сторінкою]]",
+    "Projects",
+    "projects",
+    { idPrefix: "en-" }
+  );
+  for (const id of [
+    "d-publishing-pipeline",
+    "d-publishing-pipeline-narrow",
+    "d-publishing-pipeline-uk",
+    "d-publishing-pipeline-uk-narrow",
+  ]) {
+    assert.match(html, new RegExp(`<svg id="${id}" class="diagram"`));
+  }
+  assert.match(html, /<span class="lang-en"><span class="only-wide">/);
+  assert.match(html, /<span class="only-narrow"><svg id="d-publishing-pipeline-uk-narrow"/);
+});
+
+test("a diagram without a .narrow sibling is left as it was", async () => {
+  const html = await renderMarkdown(
+    "![[rendering-pipeline.svg|Rendering pipeline :: Конвеєр рендерингу]]",
+    "Posts/attachments",
+    "posts",
+    { idPrefix: "en-" }
+  );
+  assert.doesNotMatch(html, /only-narrow|only-wide/);
+});

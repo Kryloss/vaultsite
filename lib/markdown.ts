@@ -137,6 +137,22 @@ function langVariantName(file: string): string | undefined {
   return `${m[1]}.uk.${m[2]}`;
 }
 
+/**
+ * "diagram.svg" → "diagram.narrow.svg", "diagram.uk.svg" →
+ * "diagram.uk.narrow.svg": the same diagram redrawn for a phone's column.
+ *
+ * A diagram is scaled to the width it is given, so four boxes in a row that
+ * read well at 576px are a third the size at 327px, labels included. No CSS
+ * can fix that from outside: the layout is the file. When this sibling
+ * exists the page carries both and shows this one below 640px (DECISIONS
+ * #225). SVG only, and each language file has its own.
+ */
+export function narrowVariantName(file: string): string | undefined {
+  const m = file.trim().match(/^(.*)\.svg$/i);
+  if (!m || /\.narrow$/i.test(m[1])) return undefined;
+  return `${m[1]}.narrow.svg`;
+}
+
 /** Does an embeddable file exist (same-folder or anywhere in the vault)? */
 function assetExists(sectionDir: string, file: string): boolean {
   const clean = file.trim();
@@ -181,28 +197,39 @@ function diagramCaption(alt?: string): string {
     : `<figcaption>${escapeHtml(en)}</figcaption>`;
 }
 
+/** One language's image set: light, an optional dark, an optional phone one. */
+type DiagramSide = { light: string; dark?: string; narrow?: string };
+
+/** A side's media, with its phone redraw beside it when there is one. */
+function sideMedia(side: DiagramSide, alt: string, extraClass: string): string {
+  const wide = themedImg(side.light, side.dark, alt, extraClass);
+  if (!side.narrow) return wide;
+  return (
+    `<span class="only-wide">${wide}</span>` +
+    `<span class="only-narrow">${themedImg(side.narrow, undefined, alt, extraClass)}</span>`
+  );
+}
+
 /** Theme/language-aware diagram media without its outer figure or caption. */
 function diagramMedia(
-  en: { light: string; dark?: string },
-  uk: { light: string; dark?: string } | undefined,
+  en: DiagramSide,
+  uk: DiagramSide | undefined,
   alt?: string,
   extraClass = ""
 ): string {
   const { en: capEn, uk: capUk } = captionParts(alt);
   if (uk) {
-    return `<span class="lang-en">${themedImg(
-      en.light,
-      en.dark,
+    return `<span class="lang-en">${sideMedia(
+      en,
       capEn,
       extraClass
-    )}</span><span class="lang-uk">${themedImg(
-      uk.light,
-      uk.dark,
+    )}</span><span class="lang-uk">${sideMedia(
+      uk,
       capUk ?? capEn,
       extraClass
     )}</span>`;
   }
-  return themedImg(en.light, en.dark, capEn, extraClass);
+  return sideMedia(en, capEn, extraClass);
 }
 
 /**
@@ -210,8 +237,8 @@ function diagramMedia(
  * Each side is a {light, dark?} image set; `uk` omitted → single-language.
  */
 function diagramFigure(
-  en: { light: string; dark?: string },
-  uk: { light: string; dark?: string } | undefined,
+  en: DiagramSide,
+  uk: DiagramSide | undefined,
   alt: string | undefined,
   figClass: string
 ): string {
@@ -809,15 +836,23 @@ export function preprocessObsidian(
       // SVG diagrams (borderless), or any embed that has a dark/uk variant, or
       // a bilingual "en :: uk" caption → render as a swap-aware figure.
       if (isSvg || enDark || hasUk || caps.uk) {
+        // The phone redraw, if this file has one beside it.
+        const narrow = (name: string) => {
+          const n = narrowVariantName(name);
+          return n && assetExists(sectionDir, n)
+            ? resolveImageUrl(sectionDir, n)
+            : undefined;
+        };
         const uk =
           hasUk && ukName
             ? {
                 light: resolveImageUrl(sectionDir, ukName),
                 dark: darkVariantUrl(ukName),
+                narrow: narrow(ukName),
               }
             : undefined;
         return `\n${diagramFigure(
-          { light: src, dark: enDark },
+          { light: src, dark: enDark, narrow: narrow(file) },
           uk,
           alt,
           isSvg ? "excalidraw" : ""

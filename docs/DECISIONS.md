@@ -230,6 +230,12 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 219 | Sentence links lose their underline; the link preview opens sooner and animates in and out |
 | 220 | Diagram arrowheads are drawn paths, never `<marker>`s; diagrams, stars and four icons redrawn |
 | 221 | The chevron is the arrow's head; headings that open a page wear it; diagram arrows are the site's arrow; the portrait does not lift |
+| 222 | The chevron sits further off, moves slower and opens into two; the arrow keeps one weight and fades as one |
+| 223 | Shelf is a stack of books; the arrow is a little slower |
+| 224 | The hammer's handle meets its head; the vibe capsule has no tooltip |
+| 225 | A diagram may have a `.narrow.svg` phone redraw; the social row is one weight; lightbox arrows open into two; a `favicon.ico` |
+| 226 | Recent posts dates are numeric, `06.09.2026`, so the column lines up on both sides |
+| 227 | Recent posts leave the year out while all four share one |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1780,3 +1786,55 @@ At the owner's request, from a session that worked in a scratch copy.
 **Diagrams.** An arrow in a self-theming diagram is that same arrow: an open ring where it leaves, a shaft, curved barbs. Drawn, not built from markers, for the reason in #220. A two-way arrow has barbs at both ends and no ring.
 
 **The portrait.** `.prose img.avatar` no longer lifts or takes a shadow on hover. #213 gave every image in a note the lift and exempted the avatar from `transform` only, while the lift itself is on `translate`. A portrait is not a picture to open, so it stays put.
+
+## 222. The chevron sits further off, moves slower and opens into two; the arrow keeps one weight and fades as one (2026-10-08)
+
+At the owner's request, two hours after #221: the chevron "feels too fast and is not cool".
+
+**The chevron.** It stands a third of an em from its heading, up from a fifth. On hover it glides 6 units forward over 520ms on a softer spring, and 90ms later a second chevron at 40% fades in where the first one was, so one `>` opens into two. Held, both draw back. Thrown, the first leaves over 420ms and the second follows 70ms behind. This is deliberately slower than the arrow's 200ms throw (#221): the reasoning there, that a prefetched page can arrive before a slow throw is seen, still holds, and the cost is accepted here because the hover, not the throw, is now the part meant to be watched. The second chevron is a transition, not a keyframe animation, so leaving mid-hover reverses it. In a /now goal row there is no second chevron until the throw.
+
+**The arrow, two faults seen on click.** The ring is scaled (0.8 hovered, 1.25 held), and a scaled stroke changes weight, so the ring went pale or heavy beside a head that did not. Its `stroke-width` is now the inverse of its scale (`--arrow-w` is the drawing's stroke; a wrapper that changes the stroke restates it). And the shaft and head faded separately on the throw while overlapping at the tip, where two half-faded strokes are darker than one, so the head read darker than the rest. Ring, shaft and head now sit in one `<g class="arrow-body">` and the group fades, so no part of the arrow is ever a different tone from another; only the ripple stays behind. Do not put `opacity` back on the parts.
+
+**Icons, tried and withdrawn.** Shelf as three books and Projects as an upright hammer turned 45° were drawn and rejected by the owner the same day ("even worse"); `BookIcon` and `HammerIcon` are as they were.
+
+## 223. Shelf is a stack of books; the arrow is a little slower (2026-10-08)
+
+At the owner's request, after the first pair of replacement icons was withdrawn (#222).
+
+**Icons.** `BookIcon` is three books stacked, each a little out of line with the one below: the vault's own 📚, and a section that holds more than one thing. A wrench was drawn for Projects in the same pass and withdrawn within the hour (#224). Both were chosen from a sheet of eight candidates at the sidebar's 18px, not at display size, which is where the withdrawn pair failed: three book outlines side by side and a small turned hammer closed up into smudges. A candidate is judged at 18px beside Home and Now, or not at all. The parked gestures (`.ic-book`, `.ic-ribbon`, #173) keep their class names and have new origins.
+
+**The arrow.** The throw is 300ms (200ms in #221) and the hover spring 440ms (320ms), as `--arrow-throw` and `--arrow-hover`. The chevron's own slower timings (#222) are unchanged.
+
+## 224. The hammer's handle meets its head; the vibe capsule has no tooltip (2026-10-08)
+
+Both at the owner's request.
+
+**The hammer.** Projects keeps `HammerIcon`, the drawing it had before #222 and #223 tried to replace it, with one fault fixed: the head was open on the side facing the handle and the handle stopped short inside it, so the two never touched. The head is now a closed path and the handle's two sides end on its near edge. Nothing else about the drawing moved, so `.ic-spatula` keeps its origin.
+
+**The tooltip.** The capsule's trigger had a `title` reading "Latest vibe (2026-09-24) · track · artist · Listen", which the browser showed over the cover on hover. It is gone. The same words, without the date, stay in `aria-label`, which is where #162 needs the Today/Latest distinction to be said; sighted readers get the track from the pill opening.
+
+## 225. A diagram may have a `.narrow.svg` phone redraw; the social row is one weight; lightbox arrows open into two; a `favicon.ico` (2026-10-08)
+
+Four small things the owner picked from a list of suggestions.
+
+**Phone redraws.** A self-theming SVG named `x.svg` may have `x.narrow.svg` beside it (`x.uk.narrow.svg` for the Ukrainian twin), and the page shows that one below 640px (`narrowVariantName` and `sideMedia` in `lib/markdown.ts`, `.only-wide` / `.only-narrow` in `globals.css`). The publishing pipeline is the first: four boxes in a row put its small labels at 6px on a phone, and the stacked redraw puts them at 12. Both drawings are in the page, as both languages and both themes already are. This is a second file and not a media query inside one, because the fix is a different `viewBox`, and a `viewBox` is an attribute that CSS cannot change. Regular embeds only: an image note's diagram is held to its photo's shape by the validator, and a second shape would break the stage it reserves.
+
+**Social icons.** Instagram and the envelope are outlines beside three solid marks and read as fainter. In `.social-link` their stroke is 2.2, up from the set's 1.7. The solid marks were not redrawn as outlines: they are other people's logos.
+
+**Lightbox arrows.** They take the heading chevron's hover (#222): the chevron moves the way it points and a paler second one fades in behind. The pair moves apart about the button's centre so it stays centred in its circle. Behind `(hover: hover)`, since a phone keeps `:hover` after a tap.
+
+**`public/favicon.ico`.** 16, 32 and 48px, rendered from `app/icon.svg`. In `public/`, not `app/`: it answers the `/favicon.ico` request that browsers and tools make unasked, which was a 404, without adding a `<link>` that could outrank the SVG icon. If the mark changes, regenerate this file from the SVG.
+
+The dates in Recent posts were on the list too; tabular numerals were already on and were not the fault. See #226.
+
+## 226. Recent posts dates are numeric, `06.09.2026`, so the column lines up on both sides (2026-10-08)
+
+The owner's choice from three options, after pointing at "6 вересня 2026 р." standing further left than "25 липня 2026 р." on the home page. The column was right-aligned and its digits were already tabular; what made it ragged was the month's NAME, which is a different length every month and far more so in Ukrainian. No alignment of a written-out date fixes both edges. `numericDate` (`lib/dates.ts`) writes day, month and year as digits with their zeros, so every date is the same width.
+
+The same string in both languages, day first, as `shortDate` already is in the posts list ("16.07"): one convention for dates in a column. Written-out dates stay where a date is read as a sentence and not scanned down a column: an entry's own header, the lead card, the TIL list.
+
+## 227. Recent posts leave the year out while all four share one (2026-10-08)
+
+The owner, minutes after #226: "as long as it's simply 2026, don't display year until other years appear". `columnDate` (`lib/dates.ts`) takes the column's dates and returns `shortDate` ("06.09") while they share a year and `numericDate` ("06.09.2026") for every row once they do not. All or none, never per row: the point of #226 was one width down the column.
+
+The test is "one year in the column", not "the current year". The site is static and has no clock at build time worth trusting for this, and the cost is small: in early January, before the first post of a new year, four dates from the year before show without it.

@@ -381,15 +381,18 @@ export default function Lightbox() {
       <span className="sr-only">
         <T {...str} />
       </span>
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          d={delta < 0 ? CHEVRON_PATH.prev : CHEVRON_PATH.next}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path className="chev-main" d={delta < 0 ? CHEVRON_PATH.prev : CHEVRON_PATH.next} />
+        {/* The second chevron of the hover, as on a heading's (globals.css). */}
+        <path className="chev-echo" d={delta < 0 ? CHEVRON_PATH.prev : CHEVRON_PATH.next} opacity={0} />
       </svg>
     </button>
   );

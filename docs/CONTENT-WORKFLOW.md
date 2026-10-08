@@ -646,6 +646,12 @@ reader's theme. Report the file path and where you embedded it.
 
 Copy the pair `vault/Posts/attachments/rendering-pipeline.svg` / `.uk.svg` as a reference.
 
+**A wide diagram needs a phone redraw.** If the labels would fall under about
+12 CSS pixels at a 327px column (the diagram is more than ~450 units wide),
+also write `<name>.narrow.svg` and `<name>.uk.narrow.svg`: the same nodes
+stacked on a `viewBox` about 320 wide. The page swaps to them below 640px on
+its own; see `docs/EXCALIDRAW.md` → A phone redraw.
+
 **If Kyrylo wants to hand-edit the diagram in Excalidraw:** say so — he can open
 the SVG in the Excalidraw plugin, or draw his own and embed `![[Name.excalidraw]]`
 (needs Auto-export SVG on; see EXCALIDRAW.md). Don't hand-author Excalidraw

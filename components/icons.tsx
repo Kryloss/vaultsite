@@ -95,28 +95,42 @@ export function UsersIcon({ className }: IconProps) {
   );
 }
 
+/**
+ * A hammer, for the things being built. The head is a closed shape and the
+ * handle's two sides end ON its near edge, so the two are one tool: before
+ * (#224) the head was open on that side and the handle stopped short inside
+ * it, which read as two loose parts, or a spatula. `.ic-spatula` is the
+ * parked gesture's name from then (#173).
+ */
 export function HammerIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
       <g className="ic-spatula">
-        <path d="m14 12-8.5 8.5a2.12 2.12 0 0 1-3-3L11 9" />
-        <path d="M16 16 21.5 10.5a1.4 1.4 0 0 0 0-2L14.9 2a1.4 1.4 0 0 0-2 0L7.5 7.5" />
+        <path d="M13 13 5.5 20.5a2.12 2.12 0 0 1-3-3L10 10" />
+        <path d="M16 16 21.5 10.5a1.4 1.4 0 0 0 0-2L14.9 2a1.4 1.4 0 0 0-2 0L7.5 7.5Z" />
       </g>
     </svg>
   );
 }
 
+/**
+ * A stack of three books, each pushed a little out of line with the one
+ * under it (the 📚 in the vault): the shelf holds more than one thing, and a
+ * single closed book said "a book". The top one is the one `.ic-book` tips up
+ * by its bottom-left corner, and its bookmark ribbon hangs from it.
+ */
 export function BookIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
+      <rect x="4.5" y="14.5" width="15" height="5" rx="1.3" />
+      <rect x="6.5" y="9.5" width="14" height="5" rx="1.3" />
       <g className="ic-book">
-        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5Z" />
-        <path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5" />
-        {/* A bookmark ribbon, tucked away until the book is pulled out.
+        <rect x="3.5" y="4.5" width="14" height="5" rx="1.3" />
+        {/* A bookmark ribbon, tucked away until the book is tipped up.
             Filled, so it reads as a ribbon rather than another outline. */}
         <path
           className="ic-ribbon"
-          d="M15 17v9l1.1-1.1 1.1 1.1v-9Z"
+          d="M13 9.5v6l1.1-1.1 1.1 1.1v-6Z"
           fill="currentColor"
           strokeWidth={1.4}
           opacity={0}
@@ -164,9 +178,15 @@ export function ArrowGlyph({ back }: { back?: boolean }) {
         {/* Invisible until the arrow is thrown, when it spreads out from the
             ring and fades: see `arrow-ping` in globals.css. */}
         <circle className="arrow-ping" cx="2.6" cy="6" r="1.5" opacity={0} />
-        <circle className="arrow-ring" cx="2.6" cy="6" r="1.5" />
-        <path className="arrow-shaft" d="M4.1 6h14.4" />
-        <path className="arrow-head" d="M13.5 1.5c.6 2.5 2.4 4 5 4.5-2.6.5-4.4 2-5 4.5" />
+        {/* One group, so the throw fades the ring, the shaft and the head as
+            ONE thing and no part of the arrow is ever a different tone from
+            another. Faded separately, the tip, where shaft and head overlap,
+            stayed darker than the rest all the way out. */}
+        <g className="arrow-body">
+          <circle className="arrow-ring" cx="2.6" cy="6" r="1.5" />
+          <path className="arrow-shaft" d="M4.1 6h14.4" />
+          <path className="arrow-head" d="M13.5 1.5c.6 2.5 2.4 4 5 4.5-2.6.5-4.4 2-5 4.5" />
+        </g>
       </svg>
     </span>
   );
@@ -312,8 +332,9 @@ export function ChevronIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
       <path className="chev-main" d={CHEVRON_PATH.next} />
-      {/* Invisible until the chevron is thrown, when it follows the first one
-          out and fades: see `chev-echo` in globals.css. */}
+      {/* A second chevron, invisible at rest. Hovered, it appears in the
+          place the first one has just left; thrown, it follows the first
+          one out: see `chev-echo` in globals.css. */}
       <path className="chev-echo" d={CHEVRON_PATH.next} opacity={0} />
     </svg>
   );

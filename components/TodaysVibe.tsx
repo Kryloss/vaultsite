@@ -334,9 +334,11 @@ export default function TodaysVibe({ track }: { track: Vibe }) {
           /* “Today’s vibe” left the capsule — the owner asked for the track
              alone. The label still has to be said somewhere, because a pick
              from an older Toronto date reads “Latest vibe” and that is the
-             whole point of the distinction (#162), so it moves in here. */
-          aria-label={`${label[lang]}: ${track.title} · ${track.artist} · ${action[lang]}`} aria-pressed={playing}
-          title={`${label[lang]} (${track.date}) · ${track.title} · ${track.artist} · ${action[lang]}`}>
+             whole point of the distinction (#162), so it moves in here.
+             In the accessible name only: there was a `title` tooltip saying
+             the same with the date, and the owner had it removed (#224). The
+             pill already opens to show the track on hover. */
+          aria-label={`${label[lang]}: ${track.title} · ${track.artist} · ${action[lang]}`} aria-pressed={playing}>
           <span className="vibe-symbol" data-loading={loading}>
             {/* The track's own artwork, which is what a player shows. The note
                 stays as the fallback for a pick with no video and for a cover

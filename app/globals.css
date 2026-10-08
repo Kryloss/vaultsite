@@ -973,6 +973,23 @@ body::after {
   }
 }
 
+/* A diagram with a phone redraw beside it (`<name>.narrow.svg`, #225) shows
+   that one below 640px and the wide one everywhere else. Both are in the
+   page; a diagram is scaled to its column, so the wide drawing's labels
+   shrink with it and only a different drawing keeps them readable. */
+.only-narrow {
+  display: none;
+}
+
+@media (max-width: 639px) {
+  .only-wide {
+    display: none;
+  }
+  .only-narrow {
+    display: revert;
+  }
+}
+
 /* Excalidraw drawings — transparent, centered, no frame (the drawing is art) */
 .prose figure.excalidraw {
   margin: 1.75rem 0;
@@ -2120,12 +2137,45 @@ html[data-lang="uk"] .callout[data-callout="failure"] { --callout-label: "Нев
 /* A shorter throw than the entry footer's, and no fade: these arrows step
    through a gallery you stay in, so the glyph has to come back. An arrow that
    flew off the screen would promise a page change that isn't happening. */
-.lightbox-arrow.is-prev:hover svg {
-  transform: translateX(-2px);
+.lightbox-arrow svg {
+  overflow: visible;
 }
 
-.lightbox-arrow.is-next:hover svg {
-  transform: translateX(2px);
+/* Hover is the heading chevron's (#222, #225): the chevron glides the way it
+   points and a paler second one fades in behind it, so one opens into two.
+   The two move apart about the button's centre, 3 units each way, so the
+   pair stays centred in its circle. `--lb-dir` is the direction. Behind
+   `(hover: hover)`: a phone keeps `:hover` after a tap, and the arrow would
+   stay doubled until the next touch. */
+.lightbox-arrow.is-next {
+  --lb-dir: 1;
+}
+
+.lightbox-arrow.is-prev {
+  --lb-dir: -1;
+}
+
+.lightbox-arrow :is(.chev-main, .chev-echo) {
+  transition:
+    transform 520ms cubic-bezier(0.3, 1.45, 0.45, 1),
+    opacity var(--dur-slow) var(--ease);
+}
+
+.lightbox-arrow .chev-echo {
+  opacity: 0;
+  transform: translateX(calc(var(--lb-dir) * -7px));
+}
+
+@media (hover: hover) {
+  .lightbox-arrow:hover .chev-main {
+    transform: translateX(calc(var(--lb-dir) * 3px));
+  }
+
+  .lightbox-arrow:hover .chev-echo {
+    opacity: 0.45;
+    transform: translateX(calc(var(--lb-dir) * -3px));
+    transition-delay: 90ms;
+  }
 }
 
 .lightbox-arrow.is-prev:active svg {
@@ -2145,11 +2195,21 @@ html[data-lang="uk"] .callout[data-callout="failure"] { --callout-label: "Нев
     transition: none;
   }
 
-  .lightbox-arrow.is-prev:hover svg,
-  .lightbox-arrow.is-next:hover svg,
   .lightbox-arrow.is-prev:active svg,
   .lightbox-arrow.is-next:active svg {
     transform: none;
+  }
+
+  .lightbox-arrow :is(.chev-main, .chev-echo) {
+    transition: none;
+  }
+
+  .lightbox-arrow:hover .chev-main {
+    transform: none;
+  }
+
+  .lightbox-arrow:hover .chev-echo {
+    opacity: 0;
   }
 }
 
@@ -3852,6 +3912,7 @@ a.series-link:hover {
 }
 
 .shelf-heading-arrow svg {
+  --arrow-w: 1.5;
   stroke-width: 1.5;
 }
 
@@ -3868,9 +3929,9 @@ a.series-link:hover {
   flex: none;
   width: 0.72em;
   height: 0.72em;
-  /* The drawing starts a third of the way into its own box, so the box is
-     pulled in under the word: the visible gap is about 0.2em. */
-  margin-left: -0.06em;
+  /* The drawing starts a third of the way into its own box, so the visible
+     gap is this plus about 0.25em: a third of an em in all. */
+  margin-left: 0.08em;
   overflow: visible;
   stroke-width: 2;
   color: var(--text-tertiary);
@@ -3935,52 +3996,72 @@ html[data-lang="uk"] .chev-uk-deep {
 }
 
 /* Its motion is the arrow's, in the same three beats (#211), on the drawing's
-   own units (24 of them span the glyph, so 4 is about 2.5px beside a heading):
+   own units (24 of them span the glyph, so 6 is about 3px beside a heading).
+   It is slower than the arrow, and it has a second chevron (#222):
 
-   Hover   it springs forward and settles.
-   Held    it is drawn back past where it rests: the wind-up.
-   Thrown  on the click (`.is-thrown`, components/ArrowThrow.tsx) it goes,
-           at once, and fades; a second chevron follows it out of the
-           place it left and fades too, as the ring's ripple does for the
-           arrow.
+   Hover   it glides forward on a soft spring, and a moment later a paler
+           chevron fades in where it was: one `>` opens into two.
+   Held    both are drawn back together, past where they rest: the wind-up.
+   Thrown  on the click (`.is-thrown`, components/ArrowThrow.tsx) the first
+           goes and fades, and the second follows it out a beat behind.
 
    The paths move, not the <svg>, so the heading beside it never shifts. */
-.heading-chevron .chev-main {
+.heading-chevron {
+  --chev-spring: cubic-bezier(0.3, 1.45, 0.45, 1);
+  --chev-throw: 420ms;
+}
+
+.heading-chevron .chev-main,
+.heading-chevron .chev-echo {
   transition:
-    transform var(--dur-slow) cubic-bezier(0.34, 1.56, 0.64, 1),
-    opacity var(--dur) var(--ease);
+    transform 520ms var(--chev-spring),
+    opacity var(--dur-slow) var(--ease);
+}
+
+/* Presentation attributes lose to any rule, so the echo's resting `opacity`
+   is restated here; it waits a little way back. */
+.heading-chevron .chev-echo {
+  opacity: 0;
+  transform: translateX(-4px);
 }
 
 .action-link:hover .heading-chevron .chev-main {
-  transform: translateX(4px);
+  transform: translateX(6px);
+}
+
+.action-link:hover .heading-chevron .chev-echo {
+  opacity: 0.4;
+  transform: none;
+  transition-delay: 90ms;
 }
 
 .action-link:active .heading-chevron .chev-main {
-  transform: translateX(-2px);
-  transition-duration: var(--dur-fast);
+  transform: translateX(3px);
+}
+
+.action-link:active .heading-chevron .chev-echo {
+  transform: translateX(-3px);
+  transition-delay: 0s;
+}
+
+.action-link:active .heading-chevron :is(.chev-main, .chev-echo) {
+  transition-duration: var(--dur);
   transition-timing-function: var(--ease);
 }
 
-.action-link.is-thrown .heading-chevron .chev-main {
-  transform: translateX(16px);
+.action-link.is-thrown .heading-chevron :is(.chev-main, .chev-echo) {
   opacity: 0;
-  transition-duration: var(--arrow-throw);
-  transition-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
+  transition-duration: var(--chev-throw);
+  transition-timing-function: cubic-bezier(0.3, 0, 0.3, 1);
+}
+
+.action-link.is-thrown .heading-chevron .chev-main {
+  transform: translateX(22px);
 }
 
 .action-link.is-thrown .heading-chevron .chev-echo {
-  animation: chev-echo var(--arrow-throw) var(--ease) 40ms forwards;
-}
-
-@keyframes chev-echo {
-  from {
-    opacity: 0.55;
-    transform: translateX(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateX(9px);
-  }
+  transform: translateX(16px);
+  transition-delay: 70ms;
 }
 
 /* At the end of a /now goal row it is hidden until the row is hovered, and
@@ -4007,12 +4088,19 @@ html[data-lang="uk"] .chev-uk-deep {
 }
 
 .now-goal-card .action-link.is-thrown .now-goal-arrow .heading-chevron .chev-main {
-  transform: translateX(16px);
+  transform: translateX(22px);
+}
+
+/* No second chevron here until the throw: the first one's hover is its
+   arrival, and there is no place it has just left. */
+.now-goal-card .action-link:not(.is-thrown) .now-goal-arrow .heading-chevron .chev-echo {
+  opacity: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .heading-chevron,
-  .heading-chevron .chev-main {
+  .heading-chevron .chev-main,
+  .heading-chevron .chev-echo {
     transition: none;
   }
 
@@ -4025,8 +4113,10 @@ html[data-lang="uk"] .chev-uk-deep {
     opacity: 1;
   }
 
+  .heading-chevron .chev-echo,
+  .action-link:hover .heading-chevron .chev-echo,
   .action-link.is-thrown .heading-chevron .chev-echo {
-    animation: none;
+    opacity: 0;
   }
 }
 
@@ -4081,12 +4171,15 @@ html[data-lang="uk"] .chev-uk-deep {
    (14.4 + the head's travel) / 14.4 — change them as a pair, or the head
    comes off the shaft. They share one duration and one curve for the same
    reason: the overshoot of the spring is the same instant for both. */
-/* The throw is short and leaves at once. These pages are prefetched, so a
-   click can swap the page within a few frames; the throw used to start slowly
-   (320ms, accelerating), and a quick click showed a twitch and then the next
-   page. Most of the travel now happens in the first 80ms. */
+/* The throw leaves at once. These pages are prefetched, so a click can swap
+   the page within a few frames; the throw used to start slowly (320ms,
+   accelerating), and a quick click showed a twitch and then the next page.
+   The curve still puts most of the travel up front. 300ms, up from the 200ms
+   of #221, and the hover spring 440ms, up from 320ms: the owner asked for the
+   arrow a little slower (#223). */
 :root {
-  --arrow-throw: 200ms;
+  --arrow-throw: 300ms;
+  --arrow-hover: 440ms;
 }
 
 .arrow-glyph {
@@ -4098,8 +4191,25 @@ html[data-lang="uk"] .chev-uk-deep {
 .arrow-shaft,
 .arrow-head {
   transition:
-    transform var(--dur-slow) var(--arrow-spring),
-    opacity var(--dur) var(--ease);
+    transform var(--arrow-hover) var(--arrow-spring),
+    stroke-width var(--arrow-hover) var(--arrow-spring);
+}
+
+/* The whole arrow fades as one group (#222), never part by part: the shaft
+   and the head overlap at the tip, and two half-faded strokes laid over each
+   other are darker than either, so the head stayed dark while the rest paled.
+   The ring is in the group too, so it is never a different tone from the
+   head; only the ripple it leaves (`.arrow-ping`) is outside. */
+.arrow-body {
+  transition: opacity var(--dur) var(--ease);
+}
+
+/* The ring is scaled, and a scaled stroke changes weight: smaller it went
+   thin and pale beside the head, larger it went heavy. Its stroke is set to
+   the inverse of its scale, so the line stays the arrow's own. `--arrow-w`
+   is the drawing's stroke, restated wherever a wrapper changes it. */
+.arrow-glyph {
+  --arrow-w: 1.2;
 }
 
 .arrow-ring,
@@ -4125,6 +4235,7 @@ html[data-lang="uk"] .chev-uk-deep {
 .action-link:hover .arrow-ring,
 .sibling:hover .arrow-ring {
   transform: scale(0.8);
+  stroke-width: calc(var(--arrow-w) / 0.8);
 }
 
 /* Held: quick and plain, a hand tightening rather than a thing bouncing. */
@@ -4151,6 +4262,7 @@ html[data-lang="uk"] .chev-uk-deep {
 .action-link:active .arrow-ring,
 .sibling:active .arrow-ring {
   transform: scale(1.25);
+  stroke-width: calc(var(--arrow-w) / 1.25);
 }
 
 /* Thrown. After the two above on purpose: the class arrives while the link
@@ -4168,18 +4280,24 @@ html[data-lang="uk"] .chev-uk-deep {
 .action-link.is-thrown .arrow-head,
 .sibling.is-thrown .arrow-head {
   transform: translateX(26px);
-  opacity: 0;
 }
 
 .action-link.is-thrown .arrow-shaft,
 .sibling.is-thrown .arrow-shaft {
   transform: scaleX(2.81);
+}
+
+.action-link.is-thrown .arrow-body,
+.sibling.is-thrown .arrow-body {
   opacity: 0;
+  transition-duration: var(--arrow-throw);
+  transition-timing-function: var(--arrow-loose);
 }
 
 .action-link.is-thrown .arrow-ring,
 .sibling.is-thrown .arrow-ring {
   transform: none;
+  stroke-width: var(--arrow-w);
 }
 
 /* `non-scaling-stroke` keeps the spreading ring a hairline; scaled with the
@@ -4208,8 +4326,18 @@ html[data-lang="uk"] .chev-uk-deep {
 @media (prefers-reduced-motion: reduce) {
   .arrow-ring,
   .arrow-shaft,
-  .arrow-head {
+  .arrow-head,
+  .arrow-body {
     transition: none;
+  }
+
+  .action-link.is-thrown .arrow-body,
+  .sibling.is-thrown .arrow-body {
+    opacity: 1;
+  }
+
+  :is(.action-link, .sibling):is(:hover, :active, .is-thrown) .arrow-ring {
+    stroke-width: var(--arrow-w);
   }
 
   .sibling:hover :is(.arrow-ring, .arrow-shaft, .arrow-head),
@@ -5062,6 +5190,15 @@ html[data-lang="uk"] .chev-uk-deep {
   color: var(--brand);
 }
 
+/* One weight along the row (#225). GitHub, LinkedIn and X are solid marks;
+   Instagram and the envelope are outlines in the icon set's 1.7 stroke, which
+   beside three solid shapes read as two fainter icons. A heavier line brings
+   them level. Their brand shapes cannot be filled, and the three solid marks
+   cannot honestly be redrawn as outlines, so the stroke is what moves. */
+.social-link:is([data-social="instagram"], [data-social="mail"]) svg {
+  stroke-width: 2.2;
+}
+
 .social-link[data-social="github"] { --brand: #24292f; }
 /* Instagram's `--brand` deliberately holds still: the gradient copy of the
    glyph is what arrives on hover, and letting the grey copy drift pink
@@ -5378,11 +5515,11 @@ svg.diagram tspan {
    back; a bookmark ribbon unrolls from under it and swings. The ribbon then
    rolls back up into the book, so the gesture ends as it began. */
 [data-icon-motion] .ic-book {
-  transform-origin: 4px 22px;
+  transform-origin: 3.5px 9.5px;
 }
 
 [data-icon-motion] .ic-ribbon {
-  transform-origin: 16.1px 17px;
+  transform-origin: 14.1px 9.5px;
 }
 
 @keyframes ic-hat-tip {
