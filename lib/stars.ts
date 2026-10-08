@@ -16,9 +16,13 @@
  * generated SVG are the classic way to have them quietly clip each other.
  */
 
-/** One star, drawn in a 24×24 box. */
+/**
+ * One star, drawn in a 24×24 box. The ten corners are eased with a short
+ * quadratic each — more at the five tips than in the notches — so the mark
+ * sits with the round-capped icon set instead of ending in needle points.
+ */
 export const STAR_PATH =
-  "M12 2.5l2.95 6.35 6.95.62-5.25 4.62 1.55 6.81L12 17.3l-6.2 3.6 1.55-6.81L2.1 9.47l6.95-.62L12 2.5z";
+  "M11.37 3.86Q12 2.5 12.63 3.86L14.66 8.22Q14.95 8.85 15.65 8.91L20.41 9.34Q21.9 9.47 20.77 10.46L17.18 13.63Q16.65 14.09 16.81 14.77L17.87 19.44Q18.2 20.9 16.9 20.15L12.61 17.65Q12 17.3 11.39 17.65L7.1 20.15Q5.8 20.9 6.13 19.44L7.19 14.77Q7.35 14.09 6.82 13.63L3.23 10.46Q2.1 9.47 3.59 9.34L8.35 8.91Q9.05 8.85 9.34 8.22Z";
 
 export const STAR_BOX = 24;
 export const STAR_COUNT = 5;

@@ -1,117 +1,118 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 540" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" role="img" aria-label="Як рендериться нотатка: нотатку Obsidian препроцесор обробляє (виноски, вставки, вікі-посилання, смуги прогресу, музику та Excalidraw), потім вона проходить конвеєр remark→rehype у HTML зі стилями prose і стає статичною сторінкою під час збірки.">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 510" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" role="img" aria-label="Як рендериться нотатка: нотатка Obsidian проходить препроцесинг (виноски, вставки, вікі-посилання, смуги прогресу, музика, Excalidraw), далі конвеєр unified remark→rehype перетворює її на HTML, який стилізує prose CSS — і виходить статична сторінка під час збірки.">
   <style>
-    .box  { fill: none; stroke: #33373d; stroke-width: 1.5; }
-    .grp  { fill: none; stroke: #b7bcc4; stroke-width: 1.2; stroke-dasharray: 5 4; }
-    .pill { fill: #f4f4f5; stroke: #d3d6db; stroke-width: 1.2; }
-    .solid{ fill: #33373d; stroke: #33373d; stroke-width: 1.5; }
-    .lbl  { fill: #33373d; font-size: 13.5px; font-weight: 600; }
-    .lbl2 { fill: #33373d; font-size: 15px; font-weight: 700; }
-    .sub  { fill: #6b7280; font-size: 11px; }
-    .mono { fill: #33373d; font-size: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-    .msub { fill: #6b7280; font-size: 10px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-    .tag  { fill: #6b7280; font-size: 11px; font-weight: 600; letter-spacing: .04em; }
-    .inv  { fill: #ffffff; font-size: 13.5px; font-weight: 700; }
-    .cap  { fill: #6b7280; font-size: 11.5px; font-style: italic; }
-    .arw  { stroke: #9aa0aa; stroke-width: 1.5; fill: none; }
-    .ah   { fill: #9aa0aa; }
+    .box   { fill: #33373d; fill-opacity: .04; stroke: #33373d; stroke-width: 1.5; }
+    .solid { fill: #33373d; stroke: #33373d; stroke-width: 1.5; }
+    .pill  { fill: #33373d; fill-opacity: .05; stroke: #33373d; stroke-opacity: .24; stroke-width: 1; }
+    .grp   { fill: none; stroke: #33373d; stroke-opacity: .34; stroke-width: 1; stroke-dasharray: 4 4; }
+    .lbl   { fill: #33373d; font-size: 14px; font-weight: 600; }
+    .lbl2  { fill: #33373d; font-size: 15px; font-weight: 700; }
+    .sub   { fill: #6b7280; font-size: 12px; }
+    .mono  { fill: #33373d; font-size: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .msub  { fill: #6b7280; font-size: 10.5px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .tag   { fill: #6b7280; font-size: 11px; font-weight: 600; letter-spacing: .06em; }
+    .inv   { fill: #ffffff; font-size: 14px; font-weight: 700; }
+    .cap   { fill: #6b7280; font-size: 12px; font-style: italic; }
+    .arw   { fill: none; stroke: #8b919b; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
     @media (prefers-color-scheme: dark) {
-      .box  { stroke: #c8ccd2; }
-      .grp  { stroke: #4a4e57; }
-      .pill { fill: #17171a; stroke: #33373d; }
-      .solid{ fill: #e6e8eb; stroke: #e6e8eb; }
-      .lbl  { fill: #e6e8eb; }
-      .lbl2 { fill: #f2f3f5; }
+      .box   { fill: #e6e8eb; fill-opacity: .05; stroke: #c8ccd2; }
+      .solid { fill: #e6e8eb; stroke: #e6e8eb; }
+      .pill  { fill: #e6e8eb; fill-opacity: .06; stroke: #e6e8eb; }
+      .grp   { stroke: #e6e8eb; }
+      .lbl, .mono { fill: #e6e8eb; }
+      .lbl2  { fill: #f2f3f5; }
       .sub, .msub, .tag, .cap { fill: #9aa0aa; }
-      .mono { fill: #e6e8eb; }
-      .inv  { fill: #0a0a0a; }
-      .arw  { stroke: #6b7280; }
-      .ah   { fill: #6b7280; }
+      .inv { fill: #0a0a0a; }
+      .arw   { stroke: #737986; }
     }
   </style>
-  <defs>
-    <marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
-      <path class="ah" d="M0 0 L6 3 L0 6 Z" />
-    </marker>
-  </defs>
 
   <!-- input -->
-  <rect class="box" x="300" y="18" width="160" height="52" rx="12" />
-  <text class="lbl2" x="380" y="42" text-anchor="middle">Нотатка Obsidian</text>
-  <text class="sub"  x="380" y="59" text-anchor="middle">.md у сховищі</text>
-  <text class="tag"  x="712" y="30" text-anchor="end">СТАТИКА · ЧАС ЗБІРКИ</text>
-  <line class="arw" x1="380" y1="70" x2="380" y2="102" marker-end="url(#ah)" />
+  <rect class="box" x="290" y="14" width="180" height="54" rx="12" />
+  <text class="lbl2" x="380" y="38" text-anchor="middle">Нотатка Obsidian</text>
+  <text class="sub" x="380" y="56" text-anchor="middle">.md у сховищі</text>
+  <text class="tag" x="720" y="30" text-anchor="end">СТАТИКА · ЧАС ЗБІРКИ</text>
+  <circle class="arw" cx="380" cy="74.8" r="1.8" />
+  <path class="arw" d="M380 76.6L380 97M385 91.5C382.2 92.2 380.6 94.1 380 97C379.4 94.1 377.8 92.2 375 91.5" />
 
   <!-- stage 1: preprocess -->
-  <rect class="grp" x="40" y="104" width="680" height="150" rx="14" />
-  <text class="tag" x="58" y="126">1 · ПРЕПРОЦЕС  (синтаксис Obsidian → стандартний markdown)</text>
+  <rect class="grp" x="40" y="102" width="680" height="150" rx="14" />
+  <text class="tag" x="64" y="126">1 · ПРЕПРОЦЕС</text>
+  <text class="sub" x="696" y="126" text-anchor="end">синтаксис Obsidian → стандартний markdown</text>
 
-  <rect class="pill" x="66"  y="142" width="185" height="42" rx="9" />
-  <text class="lbl"  x="158" y="161" text-anchor="middle">Виноски</text>
-  <text class="msub" x="158" y="176" text-anchor="middle">&gt; [!note] Заголовок</text>
+  <rect class="pill" x="64" y="140" width="186" height="42" rx="9" />
+  <text class="lbl" x="157" y="158" text-anchor="middle">Виноски</text>
+  <text class="msub" x="157" y="173" text-anchor="middle">&gt; [!note] Заголовок</text>
 
-  <rect class="pill" x="288" y="142" width="185" height="42" rx="9" />
-  <text class="lbl"  x="380" y="161" text-anchor="middle">Вставки зображень</text>
-  <text class="msub" x="380" y="176" text-anchor="middle">![[img|300]]</text>
+  <rect class="pill" x="287" y="140" width="186" height="42" rx="9" />
+  <text class="lbl" x="380" y="158" text-anchor="middle">Вставки зображень</text>
+  <text class="msub" x="380" y="173" text-anchor="middle">![[img|300]]</text>
 
-  <rect class="pill" x="510" y="142" width="185" height="42" rx="9" />
-  <text class="lbl"  x="602" y="161" text-anchor="middle">Вікі-посилання</text>
-  <text class="msub" x="602" y="176" text-anchor="middle">[[Note|підпис]]</text>
+  <rect class="pill" x="510" y="140" width="186" height="42" rx="9" />
+  <text class="lbl" x="603" y="158" text-anchor="middle">Вікі-посилання</text>
+  <text class="msub" x="603" y="173" text-anchor="middle">[[Note|підпис]]</text>
 
-  <rect class="pill" x="66"  y="196" width="185" height="42" rx="9" />
-  <text class="lbl"  x="158" y="215" text-anchor="middle">Смуги прогресу</text>
-  <text class="msub" x="158" y="230" text-anchor="middle">[progress:: 45]</text>
+  <rect class="pill" x="64" y="194" width="186" height="42" rx="9" />
+  <text class="lbl" x="157" y="212" text-anchor="middle">Смуги прогресу</text>
+  <text class="msub" x="157" y="227" text-anchor="middle">[progress:: 45]</text>
 
-  <rect class="pill" x="288" y="196" width="185" height="42" rx="9" />
-  <text class="lbl"  x="380" y="215" text-anchor="middle">Apple Music</text>
-  <text class="msub" x="380" y="230" text-anchor="middle">music.apple.com/…</text>
+  <rect class="pill" x="287" y="194" width="186" height="42" rx="9" />
+  <text class="lbl" x="380" y="212" text-anchor="middle">Apple Music</text>
+  <text class="msub" x="380" y="227" text-anchor="middle">music.apple.com/…</text>
 
-  <rect class="pill" x="510" y="196" width="185" height="42" rx="9" />
-  <text class="lbl"  x="602" y="215" text-anchor="middle">Excalidraw</text>
-  <text class="msub" x="602" y="230" text-anchor="middle">![[x.excalidraw]]</text>
+  <rect class="pill" x="510" y="194" width="186" height="42" rx="9" />
+  <text class="lbl" x="603" y="212" text-anchor="middle">Excalidraw</text>
+  <text class="msub" x="603" y="227" text-anchor="middle">![[x.excalidraw]]</text>
 
-  <line class="arw" x1="380" y1="254" x2="380" y2="282" marker-end="url(#ah)" />
+  <circle class="arw" cx="380" cy="258.8" r="1.8" />
+  <path class="arw" d="M380 260.6L380 283M385 277.5C382.2 278.2 380.6 280.1 380 283C379.4 280.1 377.8 278.2 375 277.5" />
 
   <!-- stage 2: unified pipeline -->
-  <rect class="grp" x="40" y="284" width="680" height="98" rx="14" />
-  <text class="tag" x="58" y="306">2 · КОНВЕЄР ОБРОБКИ  (remark → rehype)</text>
+  <rect class="grp" x="40" y="288" width="680" height="88" rx="14" />
+  <text class="tag" x="64" y="312">2 · КОНВЕЄР ОБРОБКИ</text>
+  <text class="sub" x="696" y="312" text-anchor="end">remark → rehype</text>
 
-  <g>
-    <rect class="pill" x="66"  y="320" width="90" height="34" rx="8" />
-    <text class="mono" x="111" y="341" text-anchor="middle">parse</text>
-    <rect class="pill" x="176" y="320" width="90" height="34" rx="8" />
-    <text class="mono" x="221" y="341" text-anchor="middle">gfm</text>
-    <rect class="pill" x="286" y="320" width="90" height="34" rx="8" />
-    <text class="mono" x="331" y="341" text-anchor="middle">rehype</text>
-    <rect class="pill" x="396" y="320" width="90" height="34" rx="8" />
-    <text class="mono" x="441" y="341" text-anchor="middle">raw</text>
-    <rect class="pill" x="506" y="320" width="90" height="34" rx="8" />
-    <text class="mono" x="551" y="341" text-anchor="middle">figures</text>
-    <rect class="pill" x="616" y="320" width="90" height="34" rx="8" />
-    <text class="mono" x="661" y="341" text-anchor="middle">stringify</text>
+  <rect class="pill" x="64" y="326" width="87" height="34" rx="8" />
+  <text class="mono" x="107.5" y="347" text-anchor="middle">parse</text>
+  <circle class="arw" cx="156.8" cy="343" r="1.8" />
+  <path class="arw" d="M158.6 343L169 343M163.5 338C164.2 340.8 166.1 342.4 169 343C166.1 343.6 164.2 345.2 163.5 348" />
+  <rect class="pill" x="173" y="326" width="87" height="34" rx="8" />
+  <text class="mono" x="216.5" y="347" text-anchor="middle">gfm</text>
+  <circle class="arw" cx="265.8" cy="343" r="1.8" />
+  <path class="arw" d="M267.6 343L278 343M272.5 338C273.2 340.8 275.1 342.4 278 343C275.1 343.6 273.2 345.2 272.5 348" />
+  <rect class="pill" x="282" y="326" width="87" height="34" rx="8" />
+  <text class="mono" x="325.5" y="347" text-anchor="middle">rehype</text>
+  <circle class="arw" cx="374.8" cy="343" r="1.8" />
+  <path class="arw" d="M376.6 343L387 343M381.5 338C382.2 340.8 384.1 342.4 387 343C384.1 343.6 382.2 345.2 381.5 348" />
+  <rect class="pill" x="391" y="326" width="87" height="34" rx="8" />
+  <text class="mono" x="434.5" y="347" text-anchor="middle">raw</text>
+  <circle class="arw" cx="483.8" cy="343" r="1.8" />
+  <path class="arw" d="M485.6 343L496 343M490.5 338C491.2 340.8 493.1 342.4 496 343C493.1 343.6 491.2 345.2 490.5 348" />
+  <rect class="pill" x="500" y="326" width="87" height="34" rx="8" />
+  <text class="mono" x="543.5" y="347" text-anchor="middle">figures</text>
+  <circle class="arw" cx="592.8" cy="343" r="1.8" />
+  <path class="arw" d="M594.6 343L605 343M599.5 338C600.2 340.8 602.1 342.4 605 343C602.1 343.6 600.2 345.2 599.5 348" />
+  <rect class="pill" x="609" y="326" width="87" height="34" rx="8" />
+  <text class="mono" x="652.5" y="347" text-anchor="middle">stringify</text>
 
-    <line class="arw" x1="156" y1="337" x2="174" y2="337" marker-end="url(#ah)" />
-    <line class="arw" x1="266" y1="337" x2="284" y2="337" marker-end="url(#ah)" />
-    <line class="arw" x1="376" y1="337" x2="394" y2="337" marker-end="url(#ah)" />
-    <line class="arw" x1="486" y1="337" x2="504" y2="337" marker-end="url(#ah)" />
-    <line class="arw" x1="596" y1="337" x2="614" y2="337" marker-end="url(#ah)" />
-  </g>
-
-  <line class="arw" x1="380" y1="382" x2="380" y2="426" marker-end="url(#ah)" />
+  <circle class="arw" cx="380" cy="382.8" r="1.8" />
+  <path class="arw" d="M380 384.6L380 407M385 401.5C382.2 402.2 380.6 404.1 380 407C379.4 404.1 377.8 402.2 375 401.5" />
 
   <!-- output row -->
-  <rect class="box" x="96"  y="428" width="150" height="52" rx="12" />
-  <text class="lbl2" x="171" y="452" text-anchor="middle">HTML</text>
-  <text class="sub"  x="171" y="469" text-anchor="middle">рядок</text>
+  <rect class="box" x="84" y="412" width="160" height="54" rx="12" />
+  <text class="lbl2" x="164" y="436" text-anchor="middle">HTML</text>
+  <text class="sub" x="164" y="454" text-anchor="middle">рядок</text>
 
-  <rect class="box" x="305" y="428" width="150" height="52" rx="12" />
-  <text class="lbl2" x="380" y="452" text-anchor="middle">.prose CSS</text>
-  <text class="sub"  x="380" y="469" text-anchor="middle">стилі</text>
+  <rect class="box" x="300" y="412" width="160" height="54" rx="12" />
+  <text class="lbl2" x="380" y="436" text-anchor="middle">.prose CSS</text>
+  <text class="sub" x="380" y="454" text-anchor="middle">стилі</text>
 
-  <rect class="solid" x="514" y="428" width="164" height="52" rx="12" />
-  <text class="inv"  x="596" y="458" text-anchor="middle">Готова сторінка</text>
+  <rect class="solid" x="516" y="412" width="160" height="54" rx="12" />
+  <text class="inv" x="596" y="444" text-anchor="middle">Готова сторінка</text>
 
-  <line class="arw" x1="246" y1="454" x2="303" y2="454" marker-end="url(#ah)" />
-  <line class="arw" x1="455" y1="454" x2="512" y2="454" marker-end="url(#ah)" />
+  <circle class="arw" cx="250.8" cy="439" r="1.8" />
+  <path class="arw" d="M252.6 439L295 439M289.5 434C290.2 436.8 292.1 438.4 295 439C292.1 439.6 290.2 441.2 289.5 444" />
+  <circle class="arw" cx="466.8" cy="439" r="1.8" />
+  <path class="arw" d="M468.6 439L511 439M505.5 434C506.2 436.8 508.1 438.4 511 439C508.1 439.6 506.2 441.2 505.5 444" />
 
-  <text class="cap" x="380" y="512" text-anchor="middle">Збирається один раз під час білду — статичний HTML на CDN, під час запиту нічого не виконується.</text>
+  <text class="cap" x="380" y="494" text-anchor="middle">Збирається один раз під час білду — статичний HTML на CDN, під час запиту нічого не виконується.</text>
 </svg>

@@ -5,8 +5,9 @@ import ShelfCard from "@/components/lists/ShelfCard";
 import ShelfRow from "@/components/lists/ShelfRow";
 import BookSpines from "@/components/lists/BookSpines";
 import T from "@/components/T";
-import { ArrowGlyph } from "@/components/icons";
+import { ChevronIcon } from "@/components/icons";
 import { ui } from "@/lib/ui-strings";
+import { chevronFitClass } from "@/lib/letter-shape";
 
 /**
  * "shelf" section type — one row per medium (videos, movies, shows, books).
@@ -66,12 +67,12 @@ export default function ShelfGrid({ section, entries }: ListProps) {
             ) : (
               <Link
                 href={`/${section.slug}/type/${group.slug}`}
-                className="action-link press inline-flex items-center"
+                className="action-link press inline-flex items-baseline"
               >
                 <T {...group.label} />
-                <span className="shelf-heading-arrow">
-                  <ArrowGlyph />
-                </span>
+                <ChevronIcon
+                  className={`heading-chevron ${chevronFitClass(group.label.en, group.label.uk)}`}
+                />
               </Link>
             )}
           </h2>

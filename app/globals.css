@@ -1321,8 +1321,13 @@ html[data-lang="uk"] .callout[data-callout="failure"] { --callout-label: "Нев
   margin: 0 0 1.25rem;
 }
 
-.prose img.avatar:hover {
+/* A portrait stays put: it is not a picture to open, so it neither zooms nor
+   takes the lift every other image in a note does (#213, #221). */
+.prose img.avatar:hover,
+.prose img.avatar:active {
   transform: none;
+  translate: none;
+  box-shadow: none;
 }
 
 .prose blockquote {
@@ -2109,7 +2114,7 @@ html[data-lang="uk"] .callout[data-callout="failure"] { --callout-label: "Нев
 .lightbox-arrow svg {
   width: 1.25rem;
   height: 1.25rem;
-  transition: transform var(--dur) var(--ease);
+  transition: transform var(--dur-slow) cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* A shorter throw than the entry footer's, and no fade: these arrows step
@@ -2126,11 +2131,13 @@ html[data-lang="uk"] .callout[data-callout="failure"] { --callout-label: "Нев
 .lightbox-arrow.is-prev:active svg {
   transform: translateX(-7px);
   transition-duration: var(--dur-fast);
+  transition-timing-function: var(--ease);
 }
 
 .lightbox-arrow.is-next:active svg {
   transform: translateX(7px);
   transition-duration: var(--dur-fast);
+  transition-timing-function: var(--ease);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -3852,6 +3859,177 @@ a.series-link:hover {
   color: var(--text);
 }
 
+/* The chevron after a heading that opens a page (the shelf's medium rows, the
+   home page's Explore cells) and at the end of a /now goal row that links
+   somewhere. It is the arrow's head on its own (`ChevronIcon`): the arrow is
+   for a link made of words that takes you away, the chevron for a row or a
+   heading that opens. Grey until hovered. */
+.heading-chevron {
+  flex: none;
+  width: 0.72em;
+  height: 0.72em;
+  /* The drawing starts a third of the way into its own box, so the box is
+     pulled in under the word: the visible gap is about 0.2em. */
+  margin-left: -0.06em;
+  overflow: visible;
+  stroke-width: 2;
+  color: var(--text-tertiary);
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.action-link:hover .heading-chevron {
+  color: var(--text);
+}
+
+/* Centred on the LAST LETTER of the heading, not on the line (lib/letter-shape.ts).
+   The label's last letter is classified at build time (lib/letter-shape.ts)
+   into `chev-en-*` and `chev-uk-*`, and `--chev-c` is that letter's centre
+   above the baseline: half the x-height, half the cap height, or half the
+   x-height less half a descender.
+
+   The chevron stands on the baseline (its flex row is `baseline`-aligned, and
+   an <svg>'s baseline is its bottom edge), so its own centre starts 0.36em
+   up, half its 0.72em box, and `translate` moves it to the letter's.
+   `translate`, not `transform`: the paths inside own `transform` for their
+   motion. */
+.heading-chevron.chev-fit {
+  align-self: baseline;
+  translate: 0 calc(0.36em - var(--chev-c, 0.5ex));
+}
+
+.chev-en-tall {
+  --chev-c: 0.35em;
+}
+
+.chev-en-deep {
+  --chev-c: calc(0.5ex - 0.11em);
+}
+
+html[data-lang="uk"] .chev-uk-x {
+  --chev-c: 0.5ex;
+}
+
+html[data-lang="uk"] .chev-uk-tall {
+  --chev-c: 0.35em;
+}
+
+html[data-lang="uk"] .chev-uk-deep {
+  --chev-c: calc(0.5ex - 0.11em);
+}
+
+/* A custom property takes any value, so an unsupported unit would not fall
+   back on its own: it has to be asked for. */
+@supports (height: 1cap) {
+  .chev-en-tall,
+  html[data-lang="uk"] .chev-uk-tall {
+    --chev-c: 0.5cap;
+  }
+
+  html[data-lang="uk"] .chev-uk-x {
+    --chev-c: 0.5ex;
+  }
+
+  html[data-lang="uk"] .chev-uk-deep {
+    --chev-c: calc(0.5ex - 0.11em);
+  }
+}
+
+/* Its motion is the arrow's, in the same three beats (#211), on the drawing's
+   own units (24 of them span the glyph, so 4 is about 2.5px beside a heading):
+
+   Hover   it springs forward and settles.
+   Held    it is drawn back past where it rests: the wind-up.
+   Thrown  on the click (`.is-thrown`, components/ArrowThrow.tsx) it goes,
+           at once, and fades; a second chevron follows it out of the
+           place it left and fades too, as the ring's ripple does for the
+           arrow.
+
+   The paths move, not the <svg>, so the heading beside it never shifts. */
+.heading-chevron .chev-main {
+  transition:
+    transform var(--dur-slow) cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity var(--dur) var(--ease);
+}
+
+.action-link:hover .heading-chevron .chev-main {
+  transform: translateX(4px);
+}
+
+.action-link:active .heading-chevron .chev-main {
+  transform: translateX(-2px);
+  transition-duration: var(--dur-fast);
+  transition-timing-function: var(--ease);
+}
+
+.action-link.is-thrown .heading-chevron .chev-main {
+  transform: translateX(16px);
+  opacity: 0;
+  transition-duration: var(--arrow-throw);
+  transition-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+.action-link.is-thrown .heading-chevron .chev-echo {
+  animation: chev-echo var(--arrow-throw) var(--ease) 40ms forwards;
+}
+
+@keyframes chev-echo {
+  from {
+    opacity: 0.55;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(9px);
+  }
+}
+
+/* At the end of a /now goal row it is hidden until the row is hovered, and
+   then arrives from a little way back on the same spring. Specific enough to
+   outrank the hover lead above; the thrown rule comes last so a click wins
+   over the hover it happens during. */
+.now-goal-arrow .heading-chevron {
+  display: block;
+  width: 1em;
+  height: 1em;
+  margin-left: 0;
+}
+
+.now-goal-card .now-goal-arrow .heading-chevron .chev-main {
+  transform: translateX(-6px);
+}
+
+.now-goal-card:hover .now-goal-arrow .heading-chevron .chev-main {
+  transform: none;
+}
+
+.now-goal-card .action-link:active .now-goal-arrow .heading-chevron .chev-main {
+  transform: translateX(-2px);
+}
+
+.now-goal-card .action-link.is-thrown .now-goal-arrow .heading-chevron .chev-main {
+  transform: translateX(16px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heading-chevron,
+  .heading-chevron .chev-main {
+    transition: none;
+  }
+
+  .heading-chevron .chev-main,
+  .action-link:hover .heading-chevron .chev-main,
+  .action-link:active .heading-chevron .chev-main,
+  .action-link.is-thrown .heading-chevron .chev-main,
+  .now-goal-card .now-goal-arrow .heading-chevron .chev-main {
+    transform: none !important;
+    opacity: 1;
+  }
+
+  .action-link.is-thrown .heading-chevron .chev-echo {
+    animation: none;
+  }
+}
+
 /* The home page's Explore block (app/page.tsx, #209): a 2×2 with no boxes
    and no rules, held together by its alignment alone. Two columns at every
    width: a cell is a name and its description, which wraps. */
@@ -3872,7 +4050,7 @@ a.series-link:hover {
    own, so these four are its headings. */
 .explore-grid-name {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   font-size: 1.125rem;
   font-weight: 600;
   line-height: 1.75rem;
@@ -3889,7 +4067,7 @@ a.series-link:hover {
    Held    while the pointer or finger is down the head is drawn BACK past
            where it rests and the ring swells: the wind-up.
    Thrown  on release (`.is-thrown`, set at the click by ArrowThrow.tsx) the
-           head goes, slow then fast, the shaft is drawn out after it until
+           head goes at once, the shaft is drawn out after it until
            both are gone, and a second ring spreads out from the first and
            fades, like the place it left ringing.
 
@@ -3903,9 +4081,17 @@ a.series-link:hover {
    (14.4 + the head's travel) / 14.4 — change them as a pair, or the head
    comes off the shaft. They share one duration and one curve for the same
    reason: the overshoot of the spring is the same instant for both. */
+/* The throw is short and leaves at once. These pages are prefetched, so a
+   click can swap the page within a few frames; the throw used to start slowly
+   (320ms, accelerating), and a quick click showed a twitch and then the next
+   page. Most of the travel now happens in the first 80ms. */
+:root {
+  --arrow-throw: 200ms;
+}
+
 .arrow-glyph {
   --arrow-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --arrow-loose: cubic-bezier(0.5, 0, 0.9, 0.5);
+  --arrow-loose: cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
 .arrow-ring,
@@ -3975,7 +4161,7 @@ a.series-link:hover {
 .sibling.is-thrown .arrow-ring,
 .sibling.is-thrown .arrow-shaft,
 .sibling.is-thrown .arrow-head {
-  transition-duration: var(--dur-slow);
+  transition-duration: var(--arrow-throw);
   transition-timing-function: var(--arrow-loose);
 }
 
@@ -5544,8 +5730,9 @@ svg.diagram tspan {
   }
 
   /* ONE GLYPH, TURNED a quarter — not two icons that could drift apart. */
+  /* The quarter turn lands on the arrow's spring: a touch past, then back. */
   .nav-twisty svg {
-    transition: transform var(--dur-fast) var(--ease);
+    transition: transform var(--dur-slow) cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   .nav-twisty[aria-expanded="true"] svg {

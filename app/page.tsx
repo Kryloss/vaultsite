@@ -8,7 +8,7 @@ import {
 } from "@/lib/vault";
 import { renderMarkdown } from "@/lib/markdown";
 import T from "@/components/T";
-import { ArrowGlyph } from "@/components/icons";
+import { ArrowGlyph, ChevronIcon } from "@/components/icons";
 import SocialLinks from "@/components/SocialLinks";
 import NewBadge from "@/components/NewBadge";
 import { ui } from "@/lib/ui-strings";
@@ -18,6 +18,7 @@ import { previewsInHtml } from "@/lib/previews";
 import LinkPreview from "@/components/LinkPreview";
 import Page from "@/components/Page";
 import Intro from "@/components/Intro";
+import { chevronFitClass } from "@/lib/letter-shape";
 
 /** Title and description come from the layout's defaults; this adds the
     canonical, which every page needs and the root most of all. */
@@ -153,9 +154,9 @@ export default async function HomePage() {
                 >
                   <span className="explore-grid-name">
                     <T en={section.title} uk={section.titleUk} />
-                    <span className="shelf-heading-arrow">
-                      <ArrowGlyph />
-                    </span>
+                    <ChevronIcon
+                      className={`heading-chevron ${chevronFitClass(section.title, section.titleUk)}`}
+                    />
                   </span>
                   {section.description && (
                     <span className="mt-0.5 block text-sm leading-snug text-[var(--text-tertiary)]">

@@ -228,6 +228,8 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 217 | Phones: arrows a quarter bigger; a shortened line is cut by script so "…" never follows a comma or a space |
 | 218 | Drafts live in Git-ignored `_drafts/` folders, because the repository is public |
 | 219 | Sentence links lose their underline; the link preview opens sooner and animates in and out |
+| 220 | Diagram arrowheads are drawn paths, never `<marker>`s; diagrams, stars and four icons redrawn |
+| 221 | The chevron is the arrow's head; headings that open a page wear it; diagram arrows are the site's arrow; the portrait does not lift |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1750,3 +1752,31 @@ At the owner's request, starting from "here" on the home page.
 **Every card** reads title, then one grey line, then the excerpt. A post's line is "date · N min read", as on its own page; any other note's says where it lives ("Shelf · date"); a section has none.
 
 Cost, accepted: a link is less obvious at a glance than an underlined one, and on a phone there is no hover and no card, so weight is the only mark.
+
+## 220. Diagram arrowheads are drawn paths, never `<marker>`s; diagrams, stars and four icons redrawn (2026-10-08)
+
+At the owner's request ("enhance the visuals of all SVGs"), kept inside the existing style.
+
+**Arrowheads.** Every self-theming diagram drew its arrowheads with a `<marker>`. An entry page renders the English and the Ukrainian article, each article inlines both language twins of a diagram, and `url(#id)` resolves to the first element with that id in the document. In Ukrainian that first copy sits in the hidden English article, and a browser builds no marker for a `display: none` subtree: the arrows lost their heads, on the live site, in one language only. Unique ids per file do not fix it, since the same file is inlined twice. So an arrow is now drawn in full (its shape is #221), and the rule in `docs/CONTENT-WORKFLOW.md` forbids anything reached through `url(#id)` in a diagram. Do not bring markers back without making `inlineSelfThemingSvg` rewrite ids per inlined copy.
+
+**Diagrams.** All five pairs were redrawn on their existing layouts: nodes carry a 4% tint of their stroke, the node that is the result is solid, margins and gaps are equal, and each `viewBox` is cut to the drawing. The last point is the one with an effect on a phone: a diagram is scaled to the column, so every unit of empty canvas made the labels smaller. English and Ukrainian twins keep identical geometry.
+
+**Stars.** `STAR_PATH` has its ten corners eased, in the path itself, so both renderers (`components/Stars.tsx` and the fact-table row in `lib/markdown.ts`) get it without a change.
+
+**Icons.** `ReloadIcon` (its arc and its arrowhead did not meet) and `SaveIcon` (square corners in a rounded set) were redrawn. `UkraineFlag` is a yellow disc under a blue half, because two abutting halves left a hairline of the page between them. `CanadaFlag` has a faint rim, because its white disc has no edge on a white page.
+
+Left alone on purpose: the favicon (one grey, for the reason in its own comment), the mascot (its numbers are tuned per size and tested) and the animated section icons, whose hover motion is tied to their paths.
+
+## 221. The chevron is the arrow's head; headings that open a page wear it; diagram arrows are the site's arrow; the portrait does not lift (2026-10-08)
+
+At the owner's request, from a session that worked in a scratch copy.
+
+**One chevron.** `ChevronIcon` was a straight-sided `>`. It is now `ArrowGlyph`'s head on its own, the same two barbs curving in to the tip, and `CHEVRON_PATH` in `components/icons.tsx` is shared with the lightbox's previous/next buttons so the two cannot drift.
+
+**Where it goes.** The arrow stays for a link made of words that takes you away ("All posts"). A heading or a row that OPENS a page takes the chevron instead (`.heading-chevron`): the shelf's medium rows, the home page's Explore cells, a /now goal row with a link. It is centred on the last LETTER of its label, not on the line: `lib/letter-shape.ts` classifies that letter at build time (x-height, tall, descending) for each language, and the stylesheet places the chevron with `ex` and `cap`. CSS cannot ask what the neighbouring glyph is, which is why this is not done in CSS alone.
+
+**Motion.** The chevron moves in the arrow's three beats (#211): it springs forward on hover, is drawn back while held, and is thrown on the click with a second chevron following it out. The throw itself, for arrows too, is `--arrow-throw: 200ms` on a curve that leaves at once. These pages are prefetched, so a click can swap the page within a few frames; the old 320ms throw that started slowly showed a twitch and then the next page. The sidebar twisty's quarter turn and the lightbox arrows land on the same spring.
+
+**Diagrams.** An arrow in a self-theming diagram is that same arrow: an open ring where it leaves, a shaft, curved barbs. Drawn, not built from markers, for the reason in #220. A two-way arrow has barbs at both ends and no ring.
+
+**The portrait.** `.prose img.avatar` no longer lifts or takes a shadow on hover. #213 gave every image in a note the lift and exempted the avatar from `transform` only, while the lift itself is on `translate`. A portrait is not a picture to open, so it stays put.

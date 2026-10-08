@@ -602,15 +602,26 @@ embed it like an image:
 Rules for the SVG:
 
 - Write the SVG markup directly: simple `<rect>`, `<path>`/`<line>`, and
-  `<text>` elements. Use a marker for real directional arrows and a monospace
-  secondary label for literal syntax when useful. Do not route the default
-  workflow through a drawing tool or an Excalidraw export.
+  `<text>` elements, and a monospace secondary label for literal syntax when
+  useful. Do not route the default workflow through a drawing tool or an
+  Excalidraw export.
+- **Draw arrowheads as part of the arrow's own `<path>`; never use a
+  `<marker>`** (or a gradient, clip-path or anything else reached through
+  `url(#id)`). A page inlines every diagram several times — each language's
+  article carries both language twins — so an id resolves to the FIRST copy in
+  the document, and when that copy is in a hidden article the browser draws
+  nothing: the arrowheads vanished in Ukrainian (DECISIONS #220). An arrow is
+  the site's own (#221): a small open ring where it leaves (`<circle r="1.8">`),
+  then one `<path>` holding the shaft and two barbs curving in to the tip. Copy
+  one from `vault/Projects/attachments/publishing-pipeline.svg`.
 - Transparent background; no outer `<rect>` fill.
 - Include an internal `<style>` with a `@media (prefers-color-scheme: dark)`
   block that recolors strokes/text for dark mode — so ONE file works on both
   themes (copy the pattern in `vault/Projects/attachments/publishing-pipeline.svg`).
 - Neutral, legible palette: strokes/labels ~`#33373d` light / ~`#e6e8eb` dark,
-  secondary text grey, thin arrows with a marker head. Rounded rectangles.
+  secondary text grey, thin round-capped arrows. Rounded rectangles with a
+  faint tint of the stroke colour (`fill-opacity: .04`) so a node reads as a
+  surface; the one node that is the result is solid, with inverted text.
 - Keep it simple and readable — a handful of labelled nodes, not a blueprint.
 - Add `role="img"` and an `aria-label` describing the diagram.
 - **Don't fuss over `font-family`.** A self-theming SVG is inlined into the

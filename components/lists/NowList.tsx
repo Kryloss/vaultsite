@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { ListProps } from "@/lib/section-types";
-import { ClockIcon, ArrowGlyph } from "@/components/icons";
+import { ClockIcon, ChevronIcon } from "@/components/icons";
 import { getWikiIndex } from "@/lib/vault";
 import type { ResumeData } from "@/lib/resume";
 import { resumeHeadings } from "@/lib/resume";
@@ -99,7 +99,7 @@ export default function NowList({ section }: ListProps) {
                 </span>
                 {href && (
                   <span className="now-goal-arrow">
-                    <ArrowGlyph />
+                    <ChevronIcon className="heading-chevron" />
                   </span>
                 )}
               </span>

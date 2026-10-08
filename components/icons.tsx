@@ -202,8 +202,8 @@ export function RedoIcon({ className }: IconProps) {
 export function SaveIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
-      <path d="M5 3h12l3 3v15H4V4a1 1 0 0 1 1-1Z" />
-      <path d="M8 3v6h8V3M8 21v-7h8v7" />
+      <path d="M6 3h10l4 4v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" />
+      <path d="M8 3v5h7V3M8 21v-7h8v7" />
     </svg>
   );
 }
@@ -221,8 +221,8 @@ export function ObsidianIcon({ className }: IconProps) {
 export function ReloadIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
-      <path d="M20 7v5h-5" />
-      <path d="M19 12a7.5 7.5 0 1 0-2 5" />
+      <path d="M20 4v4.5h-4.5" />
+      <path d="M20 12a8 8 0 1 1-2.34-5.66L20 8.5" />
     </svg>
   );
 }
@@ -298,11 +298,23 @@ export function ClockIcon({ className }: IconProps) {
  * The sidebar tree's disclosure twisty. Points right when shut and is turned
  * a quarter by CSS when open, so the two states are one glyph and one
  * transition rather than two icons that could drift apart.
+ *
+ * The shape is `ArrowGlyph`'s head on its own: the same two barbs curving in
+ * to the tip, scaled from 9 units tall to this icon's 14. `CHEVRON_PATH` is
+ * shared with the lightbox's arrows so the two cannot drift apart.
  */
+export const CHEVRON_PATH = {
+  next: "M8.5 5c.9 3.9 3.7 6.2 7.8 7-4.1.8-6.9 3.1-7.8 7",
+  prev: "M15.5 5c-.9 3.9-3.7 6.2-7.8 7 4.1.8 6.9 3.1 7.8 7",
+};
+
 export function ChevronIcon({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
-      <path d="m9 5 7 7-7 7" />
+      <path className="chev-main" d={CHEVRON_PATH.next} />
+      {/* Invisible until the chevron is thrown, when it follows the first one
+          out and fades: see `chev-echo` in globals.css. */}
+      <path className="chev-echo" d={CHEVRON_PATH.next} opacity={0} />
     </svg>
   );
 }
@@ -374,17 +386,25 @@ export function CanadaFlag({ className }: IconProps) {
           fill="#d52b1e"
           d="M12 4l.9 3.3 2.9-1.9-1 3.4 3.3-.6-1.4 2.5 3.9 1-1.5 1.2.6 1.9-3.7-.3.5 3-2.6-2-.3 5.2h-1.6l-.3-5.2-2.6 2 .5-3-3.7.3.6-1.9L4 15.1l3.9-1-1.4-2.5 3.3.6-1-3.4 2.9 1.9z"
         />
+        {/* A hairline rim: the white disc has no edge of its own on a white
+            page, where the roundel would read as two red slivers. */}
+        <circle cx="12" cy="12" r="11.5" fill="none" stroke="#000" strokeOpacity={0.14} />
       </g>
     </svg>
   );
 }
 
-/** Circular Ukraine roundel — blue top half, yellow bottom half. */
+/**
+ * Circular Ukraine roundel — blue top half, yellow bottom half. A whole
+ * yellow disc with the blue half laid over it, not two halves side by side:
+ * two abutting edges each antialias against the page and leave a hairline of
+ * it showing along the join.
+ */
 export function UkraineFlag({ className }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <circle cx="12" cy="12" r="12" fill="#ffd500" />
       <path d="M0 12a12 12 0 0 1 24 0z" fill="#005bbb" />
-      <path d="M0 12a12 12 0 0 0 24 0z" fill="#ffd500" />
     </svg>
   );
 }

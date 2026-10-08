@@ -5,6 +5,7 @@ import { flushSync } from "react-dom";
 import { ui } from "@/lib/ui-strings";
 import { nameFor, withViewTransition } from "@/lib/view-transition";
 import T from "./T";
+import { CHEVRON_PATH } from "./icons";
 
 /**
  * Global content lightbox: click any content image (`.prose img`, avatars
@@ -382,7 +383,7 @@ export default function Lightbox() {
       </span>
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path
-          d={delta < 0 ? "M15 5l-7 7 7 7" : "M9 5l7 7-7 7"}
+          d={delta < 0 ? CHEVRON_PATH.prev : CHEVRON_PATH.next}
           fill="none"
           stroke="currentColor"
           strokeWidth="2"
