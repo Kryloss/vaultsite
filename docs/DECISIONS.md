@@ -236,6 +236,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 225 | A diagram may have a `.narrow.svg` phone redraw; the social row is one weight; lightbox arrows open into two; a `favicon.ico` |
 | 226 | Recent posts dates are numeric, `06.09.2026`, so the column lines up on both sides |
 | 227 | Recent posts leave the year out while all four share one |
+| 228 | Sentence links get a thin underline back; the hover wash goes |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1838,3 +1839,11 @@ The same string in both languages, day first, as `shortDate` already is in the p
 The owner, minutes after #226: "as long as it's simply 2026, don't display year until other years appear". `columnDate` (`lib/dates.ts`) takes the column's dates and returns `shortDate` ("06.09") while they share a year and `numericDate` ("06.09.2026") for every row once they do not. All or none, never per row: the point of #226 was one width down the column.
 
 The test is "one year in the column", not "the current year". The site is static and has no clock at build time worth trusting for this, and the cost is small: in early January, before the first post of a new year, four dates from the year before show without it.
+
+## 228. Sentence links get a thin underline back; the hover wash goes (2026-10-09)
+
+Reverses the first half of #219. A link in a paragraph, list item, quote or table cell keeps weight 600 in the text colour and sits on a 1px `--text-tertiary` underline (`text-underline-offset: 0.22em`) that darkens to `--text` on hover. The `--bg-hover` wash, its `box-shadow` spread and `box-decoration-break: clone` are gone. A link wrapping an image carries no line. It also answers the cost #219 accepted: on a phone, with no hover, weight had been the only mark of a link.
+
+It is a plain `text-decoration`, not the two-gradient sweep from before #219, so `skip-ink` works and nothing animates but the line's colour. The link preview timings from #219 are unchanged.
+
+This was made in the working copy the 2026-10-08 arrows work was done in and was left out when that work was committed (`84d19a7`); it is carried over here as it was.

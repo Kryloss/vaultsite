@@ -554,47 +554,38 @@ body::after {
   text-decoration-color: var(--text);
 }
 
-/* ---------- Links in a sentence carry no underline (#219) ----------
-   At the owner's request. A link in a paragraph, list item, quote or table
-   cell is marked by weight and by being the text colour against the body's
-   softer grey; pointing at it lays a quiet grey wash behind the words, and an
-   internal link then opens its preview card (components/LinkPreview.tsx).
+/* ---------- Links in a sentence: weight and a thin underline (#228) ----------
+   A link in a paragraph, list item, quote or table cell is weight 600 in the
+   text colour, against the body's softer grey, over a 1px grey line that
+   darkens to the text colour when pointed at; an internal link then opens its
+   preview card (components/LinkPreview.tsx).
 
-   The wash is a background plus a `box-shadow` spread of the same grey, so it
-   reaches a little past the letters without moving them, and
-   `box-decoration-break: clone` gives each line of a wrapped link its own
-   rounded piece.
-
-   This replaced the underline sweep (two gradients growing from the left).
-   Everything else in prose — heading anchors, footnote references, embed
-   fallbacks — keeps the plain decoration above. */
+   #219 had removed the line and laid a grey wash behind the words on hover.
+   The line is back at the owner's request; it also marks a link on a phone,
+   where there is no hover. It is a real `text-decoration`, not the
+   two-gradient sweep that came before #219. */
 .prose p > a,
 .prose li > a,
 .prose blockquote a,
 .prose td > a {
-  text-decoration: none;
   font-weight: 600;
-  border-radius: var(--r-xs);
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
-  transition:
-    background-color var(--dur-fast) var(--ease),
-    box-shadow var(--dur-fast) var(--ease);
+  text-decoration: underline var(--text-tertiary);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  transition: text-decoration-color var(--dur-fast) var(--ease);
 }
 
 .prose p > a:hover,
 .prose li > a:hover,
 .prose blockquote a:hover,
 .prose td > a:hover {
-  background-color: var(--bg-hover);
-  box-shadow: 0 0 0 0.16em var(--bg-hover);
+  text-decoration-color: var(--text);
 }
 
-/* A link wrapping an image is not a phrase: no wash around the picture. */
+/* A link wrapping an image is not a phrase: no line under the picture. */
 .prose p > a:has(img),
 .prose li > a:has(img) {
-  background-color: transparent;
-  box-shadow: none;
+  text-decoration: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
