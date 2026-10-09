@@ -209,6 +209,7 @@ export default function RootLayout({
             The win here is modest and worth stating: Next already prefetches
             route payloads for in-app clicks, so this covers the cases its own
             router never sees. Ignored by browsers that don't support it. */}
+        <ImageReveal />
         <script
           type="speculationrules"
           dangerouslySetInnerHTML={{
@@ -245,7 +246,6 @@ export default function RootLayout({
         <Lightbox />
         <JsonLd data={siteJsonLd()} />
         <CodeCopy />
-        <ImageReveal />
         <InstagramFit />
         <HeadingAnchors />
         <SelectionLink />

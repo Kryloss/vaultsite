@@ -239,7 +239,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 228 | Sentence links get a thin underline back; the hover wash goes |
 | 229 | The /now goal chevron moves like every other chevron |
 | 230 | Sidebar rows open on a bare digit, home on `1`, and the sidebar prints them |
-| 231 | A picture that has just arrived sharpens out of its blur placeholder |
+| 231 | A picture sharpens out of its blur placeholder as it appears |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1865,16 +1865,16 @@ The digit sits at the row's right edge as `.nav-key` (hairline box, mono figure 
 
 **Parked the same day.** The owner asked for the printed digits to be disabled "for now": `sidebarKeyHints` in `lib/site-config.ts` is `false`, so no row prints its key. The keys themselves, the `?` sheet and `aria-keyshortcuts` are unchanged, and the `.nav-key` styles stay for when the switch is flipped back.
 
-## 231. A picture that has just arrived sharpens out of its blur placeholder (2026-10-09)
+## 231. A picture sharpens out of its blur placeholder as it appears (2026-10-09)
 
-The owner, after looking at onur.dev/workspace: "I really like the way images load on this website". There it is one keyframe on the `<img>` (blur, a little brightness and scale, settling over 0.7s) that starts when the element appears, whether or not the file has. That suits one eager photo; here most images are `loading="lazy"`, and the animation would be over before the picture came.
+The owner, after looking at onur.dev/workspace: "I really like the way images load on this website". There it is one CSS keyframe on the `<img>` (blur, a little brightness and scale, settling over 0.7s `ease-in-out`) that starts when the element appears, whether or not the file has. That suits one eager photo; here most images are `loading="lazy"`, and a keyframe alone would be over before the picture came.
 
-So it is tied to the image's own `load`. `components/ImageReveal.tsx`, mounted once in the layout, catches `load` on the way down (it does not bubble) and sets `data-reveal` on the image; `img[data-reveal]` in `globals.css` plays `img-reveal` (`blur(12px) brightness(1.12)` and `scale: 1.0125` to nothing, over twice `--dur-slow`). The blur placeholder of #19 is the image's own background, so the first frame, the real picture blurred, looks like what was already on screen. There is no `opacity` in it for that reason. It follows lazy loading with no code of its own: a shelf row reveals the covers on screen and the rest as they are scrolled to.
+So it is tied to the image's own `load`, and to its being on screen. `components/ImageReveal.tsx` renders one inline script in `<head>` that catches `load` on the way down (it does not bubble) and runs the same three keyframes with `element.animate()`: `blur(15px)`, through `blur(10px) brightness(1.25)` at 10%, to nothing, with `scale` from 1.0125, over 700ms. The blur placeholder of #19 is the image's own background, so the first frame looks like what was already there; there is no `opacity` in it for that reason. An image that loads outside the viewport (the browser fetches lazy images early) waits for an IntersectionObserver and plays as it is scrolled in.
 
-Three rules, each of which would otherwise be a visible bug:
-
+- **In `<head>`, not a client component.** The first screen's images finish loading before React hydrates, and those are the ones a visitor is looking at.
+- **`element.animate()`, not an attribute and a CSS rule.** Anything written to the DOM before hydration sits on server-rendered markup and trips React's mismatch warning. This is why the 700ms and the curve are in the component and not on the `--dur-*` scale.
 - **Nothing waits for it.** An image is never hidden pending the script. Without JavaScript, or under `prefers-reduced-motion`, pictures load exactly as before.
-- **Only an arrival is revealed** (`shouldReveal()`, `lib/image-reveal.ts`, with tests). Not a cache hit, not a 304, not a remount served from memory, or it would replay on every visit after the first and on every back button. A 304 is the common case in production (Vercel revalidates `public/`), and Chrome reports it as 300 transferred with no body, which is what the check reads. Fetches are collected with a `PerformanceObserver` because the browser's own buffer stops at 250 entries. Also skipped: SVGs, data URLs and anything painted under 48px.
-- **A press ends it.** `pointerdown`, `animationend` and `animationcancel` remove the attribute, so the lightbox's zoom never snapshots a half-blurred picture and no `filter` is left behind.
+- **Once per element, and a press cancels it**, so the lightbox's zoom never snapshots a half-blurred picture.
+- Skipped: SVGs and data URLs, anything painted under 48px, and any subtree marked `data-no-reveal`: the Coverflow and the music backdrop (already moving in 3D, where a filter per cover is what a phone would feel), the spine hover covers (invisible when they load) and the lightbox dialog.
 
-`data-no-reveal` opts a subtree out: the Coverflow and the music backdrop (already moving in 3D, where a filter per cover is what a phone would feel), the spine hover covers (invisible when they load) and the lightbox dialog.
+**Replaced the same day.** The first version (`6f736f3`) was a client component that revealed only a picture that had come over the network, never a cached or revalidated one, on a short ease-out. The owner: "I don't feel the difference". It missed every first-screen image (loaded before hydration), skipped every repeat view, and spent most of its change in the first 150ms. The reference plays on every view, and that is what was liked, so it now plays whenever an image appears. `lib/image-reveal.ts` and its tests went with it; the rule left is small enough to read in the script.

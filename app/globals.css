@@ -261,37 +261,6 @@ html[data-lang="uk"] .lang-uk {
   animation: page-in var(--dur-slow) var(--ease) both;
 }
 
-/* A picture that has just arrived (components/ImageReveal.tsx, #231). The
-   blur placeholder is the image's own background, so the first frame, the
-   real picture blurred, looks like what was already there, and it sharpens
-   from that instead of swapping. No `opacity`: fading from nothing would
-   flash the page through the placeholder.
-
-   `scale`, not `transform`, so it composes with the `translate` lift on
-   `.prose img`. No fill mode: when it ends the image is exactly as it was
-   before, with no filter left behind to start a stacking context. Twice
-   `--dur-slow`, as the reveal is watched and not waited on. */
-@keyframes img-reveal {
-  from {
-    filter: blur(12px) brightness(1.12);
-    scale: 1.0125;
-  }
-  to {
-    filter: blur(0) brightness(1);
-    scale: 1;
-  }
-}
-
-img[data-reveal] {
-  animation: img-reveal calc(var(--dur-slow) * 2) var(--ease);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  img[data-reveal] {
-    animation: none;
-  }
-}
-
 /* ---------- View transitions (components/Lightbox.tsx) ---------- */
 
 /* Navigations used to run through this API too, and it was reverted — see
