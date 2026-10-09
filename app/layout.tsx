@@ -9,6 +9,7 @@ import BareRoute from "@/components/BareRoute";
 import Constellation from "@/components/Constellation";
 import Lightbox from "@/components/Lightbox";
 import CodeCopy from "@/components/CodeCopy";
+import ImageReveal from "@/components/ImageReveal";
 import InstagramFit from "@/components/InstagramFit";
 import HeadingAnchors from "@/components/HeadingAnchors";
 import JsonLd from "@/components/JsonLd";
@@ -244,6 +245,7 @@ export default function RootLayout({
         <Lightbox />
         <JsonLd data={siteJsonLd()} />
         <CodeCopy />
+        <ImageReveal />
         <InstagramFit />
         <HeadingAnchors />
         <SelectionLink />

@@ -288,6 +288,7 @@ export default function BookSpines({
                   sizes="200px"
                   alt=""
                   aria-hidden
+                  data-no-reveal
                   className="book-spine-cover"
                   style={
                     {

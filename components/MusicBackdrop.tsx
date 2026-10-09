@@ -148,7 +148,7 @@ export default function MusicBackdrop() {
   }, []);
 
   return (
-    <div ref={box} className="music-backdrop" aria-hidden="true">
+    <div ref={box} className="music-backdrop" data-no-reveal aria-hidden="true">
       {/* Decorative (`alt=""`); lazy so that below 1168px, where this is
           `display: none`, neither picture is ever fetched. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}

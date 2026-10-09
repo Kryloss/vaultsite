@@ -239,6 +239,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 228 | Sentence links get a thin underline back; the hover wash goes |
 | 229 | The /now goal chevron moves like every other chevron |
 | 230 | Sidebar rows open on a bare digit, home on `1`, and the sidebar prints them |
+| 231 | A picture that has just arrived sharpens out of its blur placeholder |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1863,3 +1864,17 @@ The owner, after looking at onur.dev: the `g` chords go. `g 1…9` and `g h` bec
 The digit sits at the row's right edge as `.nav-key` (hairline box, mono figure in `--text-tertiary`, the whole thing at half opacity after the owner found it too noticeable at full; the box was taken off and put back the same day), is `aria-hidden` with `aria-keyshortcuts` on the link, and shows on desktop only, at the owner's request: `(min-width: 640px) and (hover: hover) and (pointer: fine)`, the same pointer test the edge peek uses. The keys themselves still work at any width. Both `Chrome.tsx` and `Shortcuts.tsx` count the nav items in order, capped at nine. The sheet names the row "Home" from the nav like every other, so `ui.shortcutHome` is deleted.
 
 **Parked the same day.** The owner asked for the printed digits to be disabled "for now": `sidebarKeyHints` in `lib/site-config.ts` is `false`, so no row prints its key. The keys themselves, the `?` sheet and `aria-keyshortcuts` are unchanged, and the `.nav-key` styles stay for when the switch is flipped back.
+
+## 231. A picture that has just arrived sharpens out of its blur placeholder (2026-10-09)
+
+The owner, after looking at onur.dev/workspace: "I really like the way images load on this website". There it is one keyframe on the `<img>` (blur, a little brightness and scale, settling over 0.7s) that starts when the element appears, whether or not the file has. That suits one eager photo; here most images are `loading="lazy"`, and the animation would be over before the picture came.
+
+So it is tied to the image's own `load`. `components/ImageReveal.tsx`, mounted once in the layout, catches `load` on the way down (it does not bubble) and sets `data-reveal` on the image; `img[data-reveal]` in `globals.css` plays `img-reveal` (`blur(12px) brightness(1.12)` and `scale: 1.0125` to nothing, over twice `--dur-slow`). The blur placeholder of #19 is the image's own background, so the first frame, the real picture blurred, looks like what was already on screen. There is no `opacity` in it for that reason. It follows lazy loading with no code of its own: a shelf row reveals the covers on screen and the rest as they are scrolled to.
+
+Three rules, each of which would otherwise be a visible bug:
+
+- **Nothing waits for it.** An image is never hidden pending the script. Without JavaScript, or under `prefers-reduced-motion`, pictures load exactly as before.
+- **Only an arrival is revealed** (`shouldReveal()`, `lib/image-reveal.ts`, with tests). Not a cache hit, not a 304, not a remount served from memory, or it would replay on every visit after the first and on every back button. A 304 is the common case in production (Vercel revalidates `public/`), and Chrome reports it as 300 transferred with no body, which is what the check reads. Fetches are collected with a `PerformanceObserver` because the browser's own buffer stops at 250 entries. Also skipped: SVGs, data URLs and anything painted under 48px.
+- **A press ends it.** `pointerdown`, `animationend` and `animationcancel` remove the attribute, so the lightbox's zoom never snapshots a half-blurred picture and no `filter` is left behind.
+
+`data-no-reveal` opts a subtree out: the Coverflow and the music backdrop (already moving in 3D, where a filter per cover is what a phone would feel), the spine hover covers (invisible when they load) and the lightbox dialog.
