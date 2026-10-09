@@ -9,7 +9,6 @@ import BareRoute from "@/components/BareRoute";
 import Constellation from "@/components/Constellation";
 import Lightbox from "@/components/Lightbox";
 import CodeCopy from "@/components/CodeCopy";
-import ImageReveal from "@/components/ImageReveal";
 import InstagramFit from "@/components/InstagramFit";
 import HeadingAnchors from "@/components/HeadingAnchors";
 import JsonLd from "@/components/JsonLd";
@@ -209,7 +208,6 @@ export default function RootLayout({
             The win here is modest and worth stating: Next already prefetches
             route payloads for in-app clicks, so this covers the cases its own
             router never sees. Ignored by browsers that don't support it. */}
-        <ImageReveal />
         <script
           type="speculationrules"
           dangerouslySetInnerHTML={{

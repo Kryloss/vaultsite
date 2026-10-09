@@ -239,7 +239,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 228 | Sentence links get a thin underline back; the hover wash goes |
 | 229 | The /now goal chevron moves like every other chevron |
 | 230 | Sidebar rows open on a bare digit, home on `1`, and the sidebar prints them |
-| 231 | A picture sharpens out of its blur placeholder as it appears |
+| 231 | A blur-to-sharp image reveal was tried and reverted |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1865,16 +1865,12 @@ The digit sits at the row's right edge as `.nav-key` (hairline box, mono figure 
 
 **Parked the same day.** The owner asked for the printed digits to be disabled "for now": `sidebarKeyHints` in `lib/site-config.ts` is `false`, so no row prints its key. The keys themselves, the `?` sheet and `aria-keyshortcuts` are unchanged, and the `.nav-key` styles stay for when the switch is flipped back.
 
-## 231. A picture sharpens out of its blur placeholder as it appears (2026-10-09)
+## 231. A blur-to-sharp image reveal was tried and reverted (2026-10-09)
 
-The owner, after looking at onur.dev/workspace: "I really like the way images load on this website". There it is one CSS keyframe on the `<img>` (blur, a little brightness and scale, settling over 0.7s `ease-in-out`) that starts when the element appears, whether or not the file has. That suits one eager photo; here most images are `loading="lazy"`, and a keyframe alone would be over before the picture came.
+The owner liked how the photo on onur.dev/workspace arrives: one keyframe on the `<img>`, blurred, a little bright and a hair large, settling over 0.7s. Two versions were built here the same day and both removed at the owner's request; images load as before, the blur placeholder of #19 with the picture painting over it.
 
-So it is tied to the image's own `load`, and to its being on screen. `components/ImageReveal.tsx` renders one inline script in `<head>` that catches `load` on the way down (it does not bubble) and runs the same three keyframes with `element.animate()`: `blur(15px)`, through `blur(10px) brightness(1.25)` at 10%, to nothing, with `scale` from 1.0125, over 700ms. The blur placeholder of #19 is the image's own background, so the first frame looks like what was already there; there is no `opacity` in it for that reason. An image that loads outside the viewport (the browser fetches lazy images early) waits for an IntersectionObserver and plays as it is scrolled in.
+- **First** (`6f736f3`): a client component that revealed only an image that had just come over the network, never a cached or revalidated one. The owner could not feel it: first-screen images load before hydration and were missed, and every repeat view was skipped.
+- **Second** (`89d528c`): an inline head script running the reference's keyframes with `element.animate()` on every image as it came on screen. That was visible, but it ran on everything over 48px, because "across the website" was asked for and not because each place wanted it: link preview popups, the note wash, the résumé page and small round photos included.
 
-- **In `<head>`, not a client component.** The first screen's images finish loading before React hydrates, and those are the ones a visitor is looking at.
-- **`element.animate()`, not an attribute and a CSS rule.** Anything written to the DOM before hydration sits on server-rendered markup and trips React's mismatch warning. This is why the 700ms and the curve are in the component and not on the `--dur-*` scale.
-- **Nothing waits for it.** An image is never hidden pending the script. Without JavaScript, or under `prefers-reduced-motion`, pictures load exactly as before.
-- **Once per element, and a press cancels it**, so the lightbox's zoom never snapshots a half-blurred picture.
-- Skipped: SVGs and data URLs, anything painted under 48px, and any subtree marked `data-no-reveal`: the Coverflow and the music backdrop (already moving in 3D, where a filter per cover is what a phone would feel), the spine hover covers (invisible when they load) and the lightbox dialog.
+If it comes back, start from where it earns its place (images inside notes, shelf and people covers, the lead card, the note cover) and opt in, not out. Both commits have the working code.
 
-**Replaced the same day.** The first version (`6f736f3`) was a client component that revealed only a picture that had come over the network, never a cached or revalidated one, on a short ease-out. The owner: "I don't feel the difference". It missed every first-screen image (loaded before hydration), skipped every repeat view, and spent most of its change in the first 150ms. The reference plays on every view, and that is what was liked, so it now plays whenever an image appears. `lib/image-reveal.ts` and its tests went with it; the rule left is small enough to read in the script.

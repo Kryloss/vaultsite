@@ -610,7 +610,7 @@ export default function Coverflow({
   if (count === 0) return null;
 
   return (
-    <div className="coverflow" data-no-reveal role="group" aria-roledescription="carousel" aria-label={label}>
+    <div className="coverflow" role="group" aria-roledescription="carousel" aria-label={label}>
       {/* Not a live region, unlike the caption. The centred record is what the
           deck announces as you move; the artist is already in every card's own
           accessible name, and reading a biography out on each step would bury

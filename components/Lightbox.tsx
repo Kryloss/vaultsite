@@ -402,7 +402,6 @@ export default function Lightbox() {
       role="dialog"
       aria-modal="true"
       aria-label={label || "Preview"}
-      data-no-reveal
       ref={dialog}
       onClick={close}
       className="fixed inset-0 z-[70] flex cursor-zoom-out flex-col items-center justify-center gap-3 bg-black/65 p-6 backdrop-blur-sm"
