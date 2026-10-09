@@ -31,7 +31,7 @@
 
 ## Keyboard shortcuts
 
-`components/Shortcuts.tsx`: `[`/`]` prev/next (read from the footer's links), `j`/`k` list rows via `.stagger` with real focus and `.list-focus` painting the hover wash, `g h`, `g 1…9`, `l` language, `m` menu (modal), `/` search, `?` sheet. Every key goes through `shortcutKey()` (`lib/shortcut-key.ts`: `e.key`, then the Latin label of `e.code`) — adding a key outside letters, digits, brackets and slash needs `SHORTCUT_CHARS` and the code map. The palette forwards `?` on an empty query via a `shortcuts` window event. Never fires in a dialog; doesn't swallow keys on a page with no list; the listener is never re-subscribed on render (`sections` and `useLang().toggle` are memoized).
+`components/Shortcuts.tsx`: `[`/`]` prev/next (read from the footer's links), `j`/`k` list rows via `.stagger` with real focus and `.list-focus` painting the hover wash, `1…9` for the nth sidebar row, home being `1` (bare digits since #230, no `g` chord; the sidebar can print each on its row as `.nav-key`, **parked** behind `sidebarKeyHints` in `lib/site-config.ts` (`false`), desktop only: `(min-width: 640px) and (hover: hover) and (pointer: fine)`; Chrome and `Shortcuts` both count the nav items in order, capped at 9), `l` language, `m` menu (modal), `/` search, `?` sheet. Every key goes through `shortcutKey()` (`lib/shortcut-key.ts`: `e.key`, then the Latin label of `e.code`) — adding a key outside letters, digits, brackets and slash needs `SHORTCUT_CHARS` and the code map. The palette forwards `?` on an empty query via a `shortcuts` window event. Never fires in a dialog; doesn't swallow keys on a page with no list; the listener is never re-subscribed on render (`sections` and `useLang().toggle` are memoized).
 
 ## Command palette
 

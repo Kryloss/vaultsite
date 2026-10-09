@@ -35,7 +35,7 @@ import T from "@/components/T";
 import { useLang } from "@/components/useLang";
 import { ui } from "@/lib/ui-strings";
 import { shortcutKey } from "@/lib/shortcut-key";
-import { sidebarTree } from "@/lib/site-config";
+import { sidebarKeyHints, sidebarTree } from "@/lib/site-config";
 
 /**
  * How long the pointer has to stay in the left edge strip before the panel
@@ -883,8 +883,14 @@ export default function Chrome({
         </div>
 
         <nav className="flex flex-col gap-3 overflow-y-auto px-3">
-          {nav.map((item) => {
+          {nav.map((item, i) => {
             const Icon = resolveIcon(item.icon);
+            // The digit that opens this row (components/Shortcuts.tsx counts
+            // the same list the same way). Past the ninth row there is none.
+            // The key works either way; PRINTING it is parked behind
+            // `sidebarKeyHints` in lib/site-config.ts.
+            const key = i < 9 ? String(i + 1) : undefined;
+            const hint = sidebarKeyHints ? key : undefined;
             const active = isActive(item.href);
             // The subtree belongs to the section you're IN, and only in a
             // panel you meant to open. Everywhere else this row is exactly
@@ -898,6 +904,7 @@ export default function Chrome({
                   // keyboard-focused — components/icon-motion.ts. Parked
                   // behind `sectionIconMotion` in lib/site-config.ts.
                   data-icon-motion="section"
+                  aria-keyshortcuts={key}
                   className={`press flex items-center gap-3.5 rounded-lg px-3 py-2 text-lg ${
                     active
                       ? "bg-[var(--bg-hover)] font-medium text-[var(--text)]"
@@ -912,6 +919,11 @@ export default function Chrome({
                     <span className="w-6 shrink-0 text-center text-lg leading-none">{item.icon}</span>
                   ) : null}
                   <span><T en={item.title} uk={item.titleUk} /></span>
+                  {hint ? (
+                    <kbd className="nav-key" aria-hidden="true">
+                      {hint}
+                    </kbd>
+                  ) : null}
                 </Link>
 
                 {sub ? (
@@ -1002,7 +1014,7 @@ export default function Chrome({
       />
 
       {/* Mounted here rather than in the layout because it needs the same nav
-          list the sidebar shows — `g 1…9` follows that order. `openSearch` is
+          list the sidebar shows — `1…9` follows that order. `openSearch` is
           memoized so its key listener isn't torn down on every render. */}
       <Shortcuts items={items} onSearch={openSearch} onMenu={toggleMenu} />
 

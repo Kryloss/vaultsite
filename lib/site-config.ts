@@ -57,6 +57,17 @@ export const repoBranch = "main";
 export const sidebarTree = false;
 
 /**
+ * SIDEBAR KEY HINTS — the small boxed digit at the right of each sidebar row,
+ * naming the key that opens it (`1` home, `2` the first section…). Off
+ * (owner's request, "for now"). Flip this to `true` to print them again.
+ *
+ * Only the printed hint is parked: the digit keys themselves stay live
+ * (components/Shortcuts.tsx) and the `?` sheet still lists them. The `.nav-key`
+ * styles stay in globals.css, desktop only (docs/DECISIONS.md #230).
+ */
+export const sidebarKeyHints = false;
+
+/**
  * SIDEBAR SECTION ICON ANIMATIONS — the house tipping its roof, the clock
  * spinning, the pen writing, the people stepping apart, the headphones
  * swaying, the book dropping its bookmark, the spatula flipping. Off. Flip

@@ -2052,6 +2052,32 @@ html[data-lang="uk"] .callout[data-callout="failure"] { --callout-label: "Нев
   text-align: center;
 }
 
+/* The digit on a sidebar row: the key that opens it (#230). Quieter
+   than `.shortcut-key`, since it sits on every row rather than in a sheet you
+   asked for. Desktop only: from 640px AND with a mouse, so a phone, a tablet
+   and a narrow window show the plain row. */
+.nav-key {
+  display: none;
+  margin-left: auto;
+  min-width: 1.25rem;
+  padding: 0 0.3125rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-xs);
+  color: var(--text-tertiary);
+  font-size: 0.6875rem;
+  font-weight: 400;
+  line-height: 1.6;
+  text-align: center;
+  /* Box and figure together at half strength: at full it read as a badge on
+     every row. */
+  opacity: 0.5;
+}
+@media (min-width: 640px) and (hover: hover) and (pointer: fine) {
+  .nav-key {
+    display: inline-block;
+  }
+}
+
 /* ---------- Command palette: the selected row (components/CommandPalette.tsx)
    One wash that slides, rather than a background switching off one row and on
    at another — the same object as the contents rail's `.toc-marker`, and for
@@ -4055,37 +4081,20 @@ html[data-lang="uk"] .chev-uk-deep {
   transition-delay: 70ms;
 }
 
-/* At the end of a /now goal row it is hidden until the row is hovered, and
-   then arrives from a little way back on the same spring. Specific enough to
-   outrank the hover lead above; the thrown rule comes last so a click wins
-   over the hover it happens during. */
-.now-goal-arrow .heading-chevron {
-  display: block;
-  width: 1em;
-  height: 1em;
-  margin-left: 0;
-}
-
-.now-goal-card .now-goal-arrow .heading-chevron .chev-main {
-  transform: translateX(-6px);
-}
-
-.now-goal-card:hover .now-goal-arrow .heading-chevron .chev-main {
-  transform: none;
-}
-
-.now-goal-card .action-link:active .now-goal-arrow .heading-chevron .chev-main {
-  transform: translateX(-2px);
-}
-
-.now-goal-card .action-link.is-thrown .now-goal-arrow .heading-chevron .chev-main {
-  transform: translateX(22px);
-}
-
-/* No second chevron here until the throw: the first one's hover is its
-   arrival, and there is no place it has just left. */
-.now-goal-card .action-link:not(.is-thrown) .now-goal-arrow .heading-chevron .chev-echo {
+/* At the end of a /now goal row it is the same chevron with the same three
+   beats (#229); the one difference is that it is not there at rest (#205: an
+   arrow on every other goal read as a list of links). Hovering the card fades
+   it in, already gliding forward with its second chevron behind it. Touch has
+   no hover and so never sees it, as before. */
+.heading-chevron.now-goal-arrow {
   opacity: 0;
+  transition:
+    opacity var(--dur) var(--ease),
+    color var(--dur-fast) var(--ease);
+}
+
+.now-goal-card:hover .heading-chevron.now-goal-arrow {
+  opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -4098,8 +4107,7 @@ html[data-lang="uk"] .chev-uk-deep {
   .heading-chevron .chev-main,
   .action-link:hover .heading-chevron .chev-main,
   .action-link:active .heading-chevron .chev-main,
-  .action-link.is-thrown .heading-chevron .chev-main,
-  .now-goal-card .now-goal-arrow .heading-chevron .chev-main {
+  .action-link.is-thrown .heading-chevron .chev-main {
     transform: none !important;
     opacity: 1;
   }
@@ -5294,6 +5302,7 @@ code,
 pre,
 kbd,
 .shortcut-key,
+.nav-key,
 .code-file,
 .code-lang {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -7702,71 +7711,6 @@ html[data-dev-tools] .dev-page-title-row {
 .now-goal-link:focus-visible::after {
   outline: 2px solid var(--text-tertiary);
   outline-offset: 2px;
-}
-
-/* The arrow on a goal that leads somewhere (#205). Unlike the site's other
-   arrows it is not there at rest: a row of goals with an arrow on every other
-   one read as a list of links rather than a list of goals. Hovering the card
-   brings it in, and it arrives the way the drawing suggests — the ring shows
-   and the arrow is drawn OUT of it, the head starting 8 units back with the
-   shaft at (14.4 − 8) / 14.4 of its length (the pairing rule beside
-   `.arrow-shaft`). Hovered, it is the plain arrow at rest: no further lead,
-   which would be a second movement on top of the first.
-
-   The selectors carry `.now-goal-card` to outrank the generic
-   `.action-link:hover` rules, and the thrown pair comes last so a press still
-   wins over the hover it happens during. Touch has no hover and so never
-   sees this arrow, as before. */
-.now-goal-arrow {
-  flex: none;
-  color: var(--text-tertiary);
-  opacity: 0;
-  transition: opacity var(--dur) var(--ease);
-}
-
-.now-goal-card:hover .now-goal-arrow {
-  opacity: 1;
-}
-
-.now-goal-card .now-goal-arrow .arrow-head {
-  transform: translateX(-8px);
-}
-
-.now-goal-card .now-goal-arrow .arrow-shaft {
-  transform: scaleX(0.44);
-}
-
-.now-goal-card:hover .now-goal-arrow .arrow-head,
-.now-goal-card:hover .now-goal-arrow .arrow-shaft {
-  transform: none;
-}
-
-/* Held and thrown, restated with the card in front so they outrank the hover
-   rule above; the generic ones still supply the timing, the fade and the
-   ping. */
-.now-goal-card .action-link:active .now-goal-arrow .arrow-head {
-  transform: translateX(-1.5px);
-}
-
-.now-goal-card .action-link:active .now-goal-arrow .arrow-shaft {
-  transform: scaleX(0.9);
-}
-
-.now-goal-card .action-link.is-thrown .now-goal-arrow .arrow-head {
-  transform: translateX(26px);
-}
-
-.now-goal-card .action-link.is-thrown .now-goal-arrow .arrow-shaft {
-  transform: scaleX(2.81);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .now-goal-card .now-goal-arrow :is(.arrow-shaft, .arrow-head),
-  .now-goal-card .action-link:active .now-goal-arrow :is(.arrow-shaft, .arrow-head),
-  .now-goal-card .action-link.is-thrown .now-goal-arrow :is(.arrow-shaft, .arrow-head) {
-    transform: none;
-    opacity: 1;
-  }
 }
 
 .now-goal-check {

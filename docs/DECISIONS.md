@@ -237,6 +237,8 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 226 | Recent posts dates are numeric, `06.09.2026`, so the column lines up on both sides |
 | 227 | Recent posts leave the year out while all four share one |
 | 228 | Sentence links get a thin underline back; the hover wash goes |
+| 229 | The /now goal chevron moves like every other chevron |
+| 230 | Sidebar rows open on a bare digit, home on `1`, and the sidebar prints them |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1847,3 +1849,17 @@ Reverses the first half of #219. A link in a paragraph, list item, quote or tabl
 It is a plain `text-decoration`, not the two-gradient sweep from before #219, so `skip-ink` works and nothing animates but the line's colour. The link preview timings from #219 are unchanged.
 
 This was made in the working copy the 2026-10-08 arrows work was done in and was left out when that work was committed (`84d19a7`); it is carried over here as it was.
+
+## 229. The /now goal chevron moves like every other chevron (2026-10-09)
+
+The owner: the `>` on /now "doesn't follow the visuals of the `>` family". It had its own rules from the arrow it replaced (#205): a full 1em box, an arrival from 6 units BEHIND its place, and no second chevron until the throw (#222's last sentence, now void). Beside a heading's chevron it was larger, heavier and moved the other way.
+
+It is now the plain `.heading-chevron` (0.72em, `chev-fit` at the x-height centre): hovered it glides forward and opens into two, held it draws back, thrown it leaves. The one thing kept from #205 is that it is **hidden at rest** and fades in with the card's hover, for #205's reason: an arrow on some goals and not others made the list read as links. The `.now-goal-arrow` wrapper span and the leftover `.arrow-head` / `.arrow-shaft` rules for it are deleted; the class now sits on the `<svg>` and only carries the fade.
+
+## 230. Sidebar rows open on a bare digit, home on `1`, and the sidebar prints them (2026-10-09)
+
+The owner, after looking at onur.dev: the `g` chords go. `g 1…9` and `g h` become one run of bare digits down the sidebar, home on `1` and the first section on `2`, each printed on its row. The chord existed to keep single keys free, and nothing ever claimed them; a key printed beside a row promises one press, not two. A bare `h` for home was tried the same day and replaced: one unbroken column of numbers reads better than a letter above five digits. Every section's number therefore moved up by one from the `g` days.
+
+The digit sits at the row's right edge as `.nav-key` (hairline box, mono figure in `--text-tertiary`, the whole thing at half opacity after the owner found it too noticeable at full; the box was taken off and put back the same day), is `aria-hidden` with `aria-keyshortcuts` on the link, and shows on desktop only, at the owner's request: `(min-width: 640px) and (hover: hover) and (pointer: fine)`, the same pointer test the edge peek uses. The keys themselves still work at any width. Both `Chrome.tsx` and `Shortcuts.tsx` count the nav items in order, capped at nine. The sheet names the row "Home" from the nav like every other, so `ui.shortcutHome` is deleted.
+
+**Parked the same day.** The owner asked for the printed digits to be disabled "for now": `sidebarKeyHints` in `lib/site-config.ts` is `false`, so no row prints its key. The keys themselves, the `?` sheet and `aria-keyshortcuts` are unchanged, and the `.nav-key` styles stay for when the switch is flipped back.

@@ -13,8 +13,7 @@ import type { NavItem } from "@/components/Chrome";
  *
  *   [ / ]   previous / next entry in this section
  *   j / k           down / up the list on this page
- *   g then h        home
- *   g then 1…9      the nth section, in sidebar order
+ *   1…9             the nth sidebar row: 1 is home, 2 the first section
  *   l               switch language
  *   m               open / close the menu
  *   /               open search
@@ -28,15 +27,14 @@ import type { NavItem } from "@/components/Chrome";
  * visible links — and this component is mounted globally, where that data
  * doesn't exist. Same event-delegation approach as Lightbox and CodeCopy.
  *
- * `g 1…9` uses digits rather than initials on purpose: Posts, People and
+ * `1…9` are digits rather than initials on purpose: Posts, People and
  * Projects all start with P, and any letter scheme either collides or needs a
  * hand-maintained table that goes stale the moment a section is added. The
- * numbers come from the nav order the sidebar already shows, and the cheat
- * sheet prints the real names beside them.
+ * numbers come from the nav order the sidebar already shows; the sidebar
+ * prints each one on its row (`.nav-key`, Chrome.tsx) and the cheat sheet
+ * prints the real names beside them. Until DECISIONS #230 these were chords,
+ * `g 1…9` for the sections and `g h` for home.
  */
-
-/** How long a pressed `g` waits for its second key before giving up. */
-const CHORD_MS = 1200;
 
 /** Typing somewhere real — never steal the key. */
 function isTyping(el: EventTarget | null): boolean {
@@ -113,14 +111,14 @@ export default function Shortcuts({
   }, [sheet]);
 
   /**
-   * Sections in sidebar order, minus home — it has its own key.
+   * The sidebar's rows in its own order, home first — the first nine.
    *
    * Memoized because the listener below depends on it: a fresh array each
-   * render would tear down and re-add the handler, and a half-typed `g` chord
-   * lives in that closure. It would be dropped every time anything re-rendered.
+   * render would tear down and re-add the handler every time anything
+   * re-rendered.
    */
   const sections = useMemo(
-    () => items.filter((i) => i.slug !== "home").slice(0, 9),
+    () => items.slice(0, 9),
     [items]
   );
 
@@ -194,15 +192,6 @@ export default function Shortcuts({
   );
 
   useEffect(() => {
-    /** Set when `g` is pressed, cleared on the next key or on timeout. */
-    let chord = false;
-    let timer = 0;
-
-    const endChord = () => {
-      chord = false;
-      window.clearTimeout(timer);
-    };
-
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
       if (isTyping(e.target)) return;
@@ -220,29 +209,18 @@ export default function Shortcuts({
          these. See lib/shortcut-key.ts. */
       const key = shortcutKey(e);
 
-      // Any other key while the sheet is up should close it and still act.
-      if (chord) {
-        endChord();
-        if (key === "h") {
-          e.preventDefault();
-          setSheet(false);
-          router.push("/");
-          return;
-        }
-        const n = Number(key);
-        if (n >= 1 && n <= sections.length) {
-          e.preventDefault();
-          setSheet(false);
-          router.push(`/${sections[n - 1].slug}`);
-        }
+      // A bare digit goes to that sidebar row. `key` is one character or empty,
+      // and Number("") is 0, so nothing but 1…9 gets past the range check.
+      const n = Number(key);
+      if (n >= 1 && n <= sections.length) {
+        e.preventDefault();
+        setSheet(false);
+        const { slug } = sections[n - 1];
+        router.push(slug === "home" ? "/" : `/${slug}`);
         return;
       }
 
       switch (key) {
-        case "g":
-          chord = true;
-          timer = window.setTimeout(endChord, CHORD_MS);
-          return;
         case "[":
           e.preventDefault();
           sibling("prev");
@@ -295,7 +273,6 @@ export default function Shortcuts({
     return () => {
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("shortcuts", onAsk);
-      window.clearTimeout(timer);
     };
   }, [router, sibling, moveList, onSearch, onMenu, toggleLang, sections]);
 
@@ -304,9 +281,8 @@ export default function Shortcuts({
     { keys: ["]"], label: ui.nextEntry },
     { keys: ["j"], label: ui.shortcutListDown },
     { keys: ["k"], label: ui.shortcutListUp },
-    { keys: ["g", "h"], label: ui.shortcutHome },
     ...sections.map((s, i) => ({
-      keys: ["g", String(i + 1)],
+      keys: [String(i + 1)],
       label: { en: s.title, uk: s.titleUk ?? s.title },
     })),
     { keys: ["l"], label: ui.actionToggleLang },

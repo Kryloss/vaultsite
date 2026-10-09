@@ -98,9 +98,7 @@ export default function NowList({ section }: ListProps) {
                   <T en={goal.label ?? ""} uk={goal.label_uk} />
                 </span>
                 {href && (
-                  <span className="now-goal-arrow">
-                    <ChevronIcon className="heading-chevron" />
-                  </span>
+                  <ChevronIcon className="heading-chevron chev-fit now-goal-arrow" />
                 )}
               </span>
               {goal.note && (

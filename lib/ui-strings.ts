@@ -167,7 +167,6 @@ export const ui = {
 
   // keyboard shortcuts (components/Shortcuts.tsx)
   shortcutSheet: { en: "Keyboard shortcuts", uk: "Клавіатурні скорочення" },
-  shortcutHome: { en: "Home", uk: "Головна" },
   shortcutSearch: { en: "Search", uk: "Пошук" },
   shortcutMenu: { en: "Menu", uk: "Меню" },
   shortcutListDown: { en: "Down the list", uk: "Вниз списком" },
