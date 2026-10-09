@@ -16,13 +16,7 @@ import { pageIdeas } from "@/lib/site-config";
  * "Continue reading" link to the entry's own full page.
  */
 export default async function TilList({ section, entries }: ListProps) {
-  if (entries.length === 0) {
-    return (
-      <p className="mt-10 text-sm text-[var(--text-tertiary)]">
-        <T {...ui.emptyState} />
-      </p>
-    );
-  }
+  if (entries.length === 0) return null;
 
   const rendered = await Promise.all(
     entries.map(async (e) => {

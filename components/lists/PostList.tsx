@@ -6,8 +6,6 @@ import { blurFor, dimsFor, srcSetFor } from "@/lib/blur";
 import { firstImage, openingParagraph } from "@/lib/post-lead";
 import { pageIdeas } from "@/lib/site-config";
 import PostRows from "@/components/lists/PostRows";
-import T from "@/components/T";
-import { ui } from "@/lib/ui-strings";
 
 /**
  * Default "posts" list (server side): slims entries down to serializable rows
@@ -17,13 +15,7 @@ import { ui } from "@/lib/ui-strings";
  *   category: Cybersecurity
  */
 export default function PostList({ section, entries }: ListProps) {
-  if (entries.length === 0) {
-    return (
-      <p className="mt-10 text-sm text-[var(--text-tertiary)]">
-        <T {...ui.emptyState} />
-      </p>
-    );
-  }
+  if (entries.length === 0) return null;
 
   const rows: PostRow[] = entries.map((entry) => ({
     slug: entry.slug,

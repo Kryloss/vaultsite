@@ -6,7 +6,6 @@ import ShelfRow from "@/components/lists/ShelfRow";
 import BookSpines from "@/components/lists/BookSpines";
 import T from "@/components/T";
 import { ChevronIcon } from "@/components/icons";
-import { ui } from "@/lib/ui-strings";
 import { chevronFitClass } from "@/lib/letter-shape";
 
 /**
@@ -36,13 +35,7 @@ import { chevronFitClass } from "@/lib/letter-shape";
  *                                  from the link, so `cover:` is optional)
  */
 export default function ShelfGrid({ section, entries }: ListProps) {
-  if (entries.length === 0) {
-    return (
-      <p className="mt-10 text-sm text-[var(--text-tertiary)]">
-        <T {...ui.emptyState} />
-      </p>
-    );
-  }
+  if (entries.length === 0) return null;
 
   const groups = shelfGroups(entries);
 

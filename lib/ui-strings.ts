@@ -116,10 +116,6 @@ export const ui = {
      arrow baked into a translated string is also one more thing a translator
      can drop. */
   continueReading: { en: "Continue reading", uk: "Читати далі" },
-  emptyState: {
-    en: "Nothing here yet. Add a .md file next to this section’s main.md in your vault and it will show up automatically.",
-    uk: "Тут поки що порожньо. Додайте файл .md поряд із main.md цього розділу у вашому сховищі — і він з’явиться автоматично.",
-  },
   nothingInCategory: {
     en: "No posts in this category yet.",
     uk: "У цій категорії поки що немає дописів.",

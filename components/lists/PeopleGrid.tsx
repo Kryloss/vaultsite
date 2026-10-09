@@ -5,8 +5,6 @@ import { blurFor, srcSetFor } from "@/lib/blur";
 import { parseCategories } from "@/lib/vault";
 import PeopleCards, { type PersonRow } from "@/components/lists/PeopleCards";
 import PeopleGridClient from "@/components/lists/PeopleGridClient";
-import T from "@/components/T";
-import { ui } from "@/lib/ui-strings";
 
 /**
  * "people" section type (server side) — two cards to a row from 640px, the
@@ -26,13 +24,7 @@ import { ui } from "@/lib/ui-strings";
  * aren't separate pages the way the shelf's categories are.
  */
 export default function PeopleGrid({ section, entries }: ListProps) {
-  if (entries.length === 0) {
-    return (
-      <p className="mt-10 text-sm text-[var(--text-tertiary)]">
-        <T {...ui.emptyState} />
-      </p>
-    );
-  }
+  if (entries.length === 0) return null;
 
   const rows: PersonRow[] = entries.map((entry) => ({
     slug: entry.slug,
