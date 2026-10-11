@@ -240,6 +240,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 229 | The /now goal chevron moves like every other chevron |
 | 230 | Sidebar rows open on a bare digit, home on `1`, and the sidebar prints them |
 | 231 | A blur-to-sharp image reveal was tried and reverted |
+| 232 | `/post` and `/sync`: publishing from a phone, pulling on the laptop |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1874,3 +1875,12 @@ The owner liked how the photo on onur.dev/workspace arrives: one keyframe on the
 
 If it comes back, start from where it earns its place (images inside notes, shelf and people covers, the lead card, the note cover) and opt in, not out. Both commits have the working code.
 
+
+## 232. `/post` and `/sync`: publishing from a phone, pulling on the laptop (2026-10-11)
+
+The owner wants to send content from his phone to a cloud Claude Code session and have it published, then see it in Obsidian when he is home. Two commands, written up in `docs/REMOTE-POSTING.md`: `/post <message>` runs the ordinary intake and publishes; `/sync` pulls `main` onto the laptop and reports what arrived.
+
+- **A cloud `/post` merges its own PR and never pushes to `main`**, the rule the nightly shelf task already follows, for the same reason: a direct push races Obsidian Git's 10-minute sync, and a server-side merge is absorbed by `pullBeforePush`.
+- **`.claude/commands/` is tracked; the rest of `.claude/` stays ignored.** A cloud session has only what is in the repository, so an ignored command would not exist there. The command files are two lines pointing at the doc, so Codex and any agent without slash commands follow the same text. This does not touch #176: there is still no `CLAUDE.md`.
+- **`/sync` aborts a conflicted merge and never stashes.** Obsidian Git commits everything on a timer, so a tree left mid-merge would publish its conflict markers.
+- **No drafts from the cloud.** `_drafts/` is ignored (#218), so a remote draft would be lost when the session ends.

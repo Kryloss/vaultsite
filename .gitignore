@@ -35,8 +35,12 @@ __pycache__/
 # former name of the same file — keep ignored so stale copies stay invisible
 .blur-manifest.json
 
-# Claude Code / Cowork local settings — machine-specific, not the repo's business
-.claude/
+# Claude Code / Cowork local settings — machine-specific, not the repo's business.
+# `.claude/*`, not `.claude/`: Git cannot re-include a file under an ignored
+# directory. The commands are tracked because a cloud session only has what is
+# in the repository (docs/REMOTE-POSTING.md).
+.claude/*
+!.claude/commands/
 
 # Unpublished drafts. This repository is public, and `draft: true` only hides a
 # note from the built site, not from GitHub. A note (and its images) inside any

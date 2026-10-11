@@ -43,6 +43,8 @@ Claude Code and Codex are both used here, on the same checkout. Both read THIS f
 
 When Kyrylo hands you raw content, follow **`docs/CONTENT-WORKFLOW.md`** — the full playbook. Core rules: light-touch editing only, his voice stays; ask only when genuinely ambiguous, batched; publish directly (no `draft: true` unless he asks); add wiki links and `aliases:`, then retro-link existing exact mentions; source images automatically from the approved sources, batch-ask before downloading, never random image results or AI portraits; factual notes end with `## Sources`; **translate ALL content, both languages** — `title_uk:` plus a full body in a sibling `.uk.md`, a note without one is unfinished; write to `vault/<Section>/…` (matching subfolder where one exists) and report path, URL, links, images and sources, fixes and assumptions.
 
+`/post <message>` is this same intake plus publishing, from the laptop or a cloud session; `/sync` pulls what was published remotely onto the laptop. Both are in `docs/REMOTE-POSTING.md`. The only tracked files under `.claude/` are `.claude/commands/`.
+
 ## Verify
 
 Full loop in `docs/VERIFY.md`. Before handing off:
@@ -70,6 +72,7 @@ npm run check
 | New section / list type | `docs/ADDING-PAGE-TYPES.md` |
 | Excalidraw, diagrams, image notes | `docs/EXCALIDRAW.md` |
 | A YouTube video reaching the shelf (nightly task) | `docs/YOUTUBE-SHELF.md` |
+| A message starting `/post` or `/sync`; publishing from a cloud session | `docs/REMOTE-POSTING.md` |
 | The localhost pencil dock and its sidecar | `docs/LOCAL-AUTHORING.md` |
 | Checks to run, isolated build, lint status | `docs/VERIFY.md` |
 | Why something is the way it is | search `docs/DECISIONS.md` (index at the top; `#N` references are stable) |
