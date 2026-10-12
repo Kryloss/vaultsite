@@ -97,6 +97,47 @@ test("[!pull] becomes a margin pull-quote, not a callout", async () => {
   assert.doesNotMatch(html, /callout-title/);
 });
 
+test("a run of [!update] callouts becomes one timeline, newest first", async () => {
+  const source = [
+    "## Updates",
+    "",
+    "> [!update] 2025-12-30 Launch: First commit",
+    "> It **began** here.",
+    "",
+    "> [!update] 2026-10-12 Design: The drawer floats",
+    "> Second body.",
+    "",
+    "> [!update] 2026-09-01 No kind here",
+    "",
+    "After the log.",
+  ].join("\n");
+  const [en, uk] = await Promise.all([
+    renderMarkdown(source, "Projects", "projects"),
+    renderMarkdown(source, "Projects", "projects", { idPrefix: "uk-" }),
+  ]);
+
+  // One wrapper for the three, and the paragraph after it is outside.
+  assert.equal(en.match(/class="updates"/g)?.length, 1);
+  assert.equal(en.match(/<article class="update"/g)?.length, 3);
+  assert.match(en, /<\/article>\s*<\/div>\s*<p>After the log\.<\/p>/);
+  // Sorted by date whatever order they were typed in; the newest is marked.
+  const order = [...en.matchAll(/datetime="([\d-]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(order, ["2026-10-12", "2026-09-01", "2025-12-30"]);
+  assert.match(en, /<article class="update" data-latest="">\s*<time class="update-date" datetime="2026-10-12">/);
+  // "Kind: Title" splits; a title without one is just a title.
+  assert.match(en, /<p class="update-kind">Design<\/p>\s*<p class="update-title">The drawer floats<\/p>/);
+  assert.match(en, /<p class="update-title">No kind here<\/p>/);
+  assert.equal(en.match(/update-kind/g)?.length, 2);
+  // The body is still markdown; an entry with none has no body box.
+  assert.match(en, /<p>It <strong>began<\/strong> here\.<\/p>/);
+  assert.equal(en.match(/class="update-body"/g)?.length, 2);
+  // The year prints once per year, and the day follows the language.
+  assert.equal(en.match(/update-year/g)?.length, 2);
+  assert.match(en, /<span class="update-day">Oct 12<\/span> <span class="update-year">2026<\/span>/);
+  assert.match(uk, /<span class="update-day">12 жовт\.<\/span>/);
+  assert.doesNotMatch(en, /class="callout"/);
+});
+
 test("a pull-quote with no title has no attribution line", async () => {
   const html = await renderMarkdown("> [!pull]\n> Just the line.", "Posts", "posts");
   assert.match(html, /<aside class="pullquote">/);

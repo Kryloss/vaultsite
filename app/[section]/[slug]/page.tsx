@@ -51,6 +51,9 @@ import DevEntryOptionsSlot from "@/components/DevEntryOptionsSlot";
 import { DEV_EXTRA_FIELDS } from "@/lib/dev-tools";
 import ReadAloud from "@/components/ReadAloud";
 import { pageIdeas } from "@/lib/site-config";
+import NoteSkin from "@/components/NoteSkin";
+import { entrySkin, skinBeats } from "@/lib/skins";
+import { dimsFor, srcSetFor } from "@/lib/blur";
 
 /** Below this many h2/h3 an outline is noise, not navigation. */
 const MIN_TOC_HEADINGS = 3;
@@ -283,6 +286,23 @@ export default async function EntryPage({ params }: Props) {
   const albumUrl =
     section.type === "music" ? firstAlbumUrl(entry.content) : undefined;
 
+  /* A note with `skin:` is handed to that skin whole: its own stylesheet and
+     driver, loaded by this page alone (lib/skins.ts, DECISIONS #234).
+     `skin_art:` is the picture behind its title, resolved the way `cover:`
+     is. Undefined for every other note, and then nothing below renders. */
+  const skin = entrySkin(entry.meta);
+  const skinArtUrl = skin
+    ? resolveCoverUrl(entry.sectionDir, entry.meta.skin_art)
+    : undefined;
+  const skinArt = skinArtUrl
+    ? {
+        src: skinArtUrl,
+        srcSet: srcSetFor(skinArtUrl),
+        width: dimsFor(skinArtUrl)?.w,
+        height: dimsFor(skinArtUrl)?.h,
+      }
+    : undefined;
+
   /* The wrapper below exists whenever the note has header matter of its own.
      It is also where the contents rail goes when that matter takes the gutter
      — see the comment on `.note-gutter` in the JSX. */
@@ -418,6 +438,7 @@ export default async function EntryPage({ params }: Props) {
       /* Scopes the gutter player to music notes only — an album link pasted
          into a post keeps its place in the writing (#94). */
       className={section.type === "music" ? "music-note" : ""}
+      data-skin={skin}
       data-vault-source={`vault/${entry.sectionDir}/${entry.fileName}.md`}
       data-vault-source-uk={
         entry.contentUk
@@ -431,6 +452,10 @@ export default async function EntryPage({ params }: Props) {
           : undefined
       }
     >
+      {skin && (
+        <NoteSkin skin={skin} beats={skinBeats(entry.meta)} art={skinArt} />
+      )}
+
       {noteWash && (
         /* The note's own artwork, blurred past recognition, dissolving behind
            its opening. A WASH, not a card: `.creator` is deliberately a row

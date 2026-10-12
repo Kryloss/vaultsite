@@ -845,6 +845,7 @@ his claims. Never fabricate facts, quotes, or sources to fill a template gap.
 ## What NOT to do
 
 - Don't touch code, styling, or docs during content work.
+- Don't give a note a `skin:` unless he asks for one. A skin is a named exception to the whole design (`docs/DESIGN-SYSTEM.md` → Note skins).
 - Don't reorganize or rename existing notes without being asked. (Exception:
   retro-linking edits — converting an existing exact phrase into a wiki link —
   are expected and always reported.)

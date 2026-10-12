@@ -251,6 +251,11 @@ test("a line prefix is added to every touched line and removed when all have it"
 
 test("word count ignores fences and punctuation; source position finds a block", () => {
   assert.equal(countWords("# Hi\n\nOne **two** [[three]]\n\n```js\nlet a = 1;\n```\n"), 4);
+  // Neither a raw HTML tag nor the address behind a link is a word.
+  assert.equal(
+    countWords('<section class="mx-plate mx-black">\n\nOne [two](https://example.com/a-b) three\n\n</section>\n'),
+    3
+  );
   const md = "## Review\n\nThe *second* season is [[Arcane|better]] than\nthe first.\n";
   assert.equal(sourcePositionFor(md, "The second season is better than the first."), 11);
   assert.equal(sourcePositionFor(md, "Review"), 3);

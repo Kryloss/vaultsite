@@ -334,6 +334,11 @@ export function ukDescription(
 export function readingStats(md: string): { words: number; minutes: number } {
   const words = md
     .replace(/```[\s\S]*?```/g, " ")
+    // A raw HTML tag is markup and the address a link points at is not
+    // prose: a skinned note (lib/skins.ts) is wrapped in `<section>`s and
+    // ends on a list of sources, and counted twice its length with these in.
+    .replace(/<[^>\n]+>/g, " ")
+    .replace(/\]\([^)\s]*\)/g, "] ")
     .replace(/[#>*_`|\[\]()!-]/g, " ")
     .split(/\s+/)
     .filter(Boolean).length;

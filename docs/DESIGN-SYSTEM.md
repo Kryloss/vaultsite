@@ -51,7 +51,7 @@ The exceptions, all of them named:
 - The sidebar's flag-coloured line on Ukrainian CELEBRATION days (`--ua-blue`/`--ua-yellow`, #104) — one line, eight days a year, never an accent; the seven remembrance days stay monochrome on purpose. See `docs/CHROME.md`.
 - **There is now a SECOND use of those tokens, and it is permanent**: the /music language button paints its label in the same gradient while **`RU`** is the selected step (#117). That was asked for directly and stretches #104 by exactly one exception — a third use would end the rule, so rewrite it rather than erode it again.
 - A book spine's colour is computed per book from its own cover and does not flip with the theme; nothing there is the site's colour (#110).
-- Draft's amber chip is a dev-only warning, not a published colour.
+- Draft's green outline chip is a dev-only warning, not a published colour.
 
 ## Typeface
 
@@ -82,3 +82,19 @@ The exceptions, all of them named:
 ## Shortened text
 
 Any element that truncates prose with `truncate` or `-webkit-line-clamp` also takes `data-tidy`, so `components/ClampTidy.tsx` can move the "…" off a comma or a space (DECISIONS #217). The element must contain only text or one `<T>`.
+
+## Note skins
+
+A note with `skin:` in its frontmatter is outside every rule in this file, by the owner's request (#234): its own colours, a second typeface, full-bleed layout, motion. Today there is one, `monster`, on `vault/Posts/Monster Energy.md`.
+
+- The skin's CSS is `public/skins/<name>.css`: plain CSS, served as written, linked only by the skinned page (`components/NoteSkin.tsx`). It is not imported, and Tailwind and PostCSS never see it.
+- **Every selector there names `[data-skin="<name>"]`** and no keyframe reuses a site name (`scripts/skins.test.mjs`). Restyle the site's chrome by re-pointing tokens under `html:has(.page[data-skin="<name>"])`, never by reaching into `Chrome`.
+- **The Monster skin is a dark room, and nothing in it meets anything else along a hard line.** The page is black throughout; a screen, a picture or a word is something lit that falls off into the dark. A new block does the same. Flat colour to the window's edge, a shaped divider between two fields, and a bright rim on glowing type were all built first and taken out at the owner's request.
+- Inside a plate (`.mx-plate`) the site's text tokens are re-pointed at that plate's ink. Without that, any site rule that paints with `--text` draws white on a white screen.
+- In the note, plates are raw `<section class="mx-plate">` tags (`mx-screen mx-red` or `mx-screen mx-white` for a lit screen, `mx-end` for sources) with a blank line after the opening tag and before the closing one, so the Markdown between them is still parsed. A picture directly followed by a `##` or a `>` takes that block in: the words are set into the photograph by the driver.
+- Pictures are graded by hand with `node scripts/skin-grade.mjs in.jpg out-bw.jpg --look bw|red` before they enter the vault; `--red 0..1` sets how far a picture goes from black and white toward red (the truck is at 0.6, the MotoGP picture at 0.5, both at the owner's eye). The file name ends in `-bw` or `-red`, and that suffix is what the skin reads to choose the ink of the words it sets into the picture: red on `-bw`, white on `-red`. `--key white` writes a cut-out with an alpha channel, which is what `skin_art:` wants.
+- **Speed is measured, and four things are not allowed** (#234 has the numbers): a blurred `text-shadow` on display type (it alone took the page to 12 frames a second; echo the word unblurred and put a gradient behind it instead); a custom property written per frame from script; a `filter` or anything but a transform or opacity driven by the scroll; a big blurred `box-shadow` or `drop-shadow` where a gradient will do. Check a change with a real scroll gesture in a visible or headless browser. The app's preview pane throttles its timeline while hidden and proves nothing about smoothness.
+- A `filter: url(#…)` rule goes in the driver's inline `<style>`, never in the linked sheet, where some engines resolve the fragment against the sheet's own address. One element only: an SVG filter is drawn on the CPU.
+- Hide a not-yet-revealed element with `opacity`, never a zero-area `clip-path`: clipped away it never intersects the viewport, so it is never revealed and its lazy image never loads.
+- Motion hangs off `data-mx="live"`, which the driver sets only when it runs without reduced motion. Anything hidden until revealed is scoped to that attribute.
+- A new skin is a name in `SKINS` (`lib/skins.ts`), a stylesheet and a branch in `NoteSkin`. Do not add one unasked, and do not carry a skin's look into the site.

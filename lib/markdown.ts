@@ -3,7 +3,8 @@
  *
  * Preprocessing (regex, before the unified pipeline):
  * 1. Obsidian callouts: > [!note] Title  → styled <div class="callout">
- *    (`[!spoiler]` blurs its body; `[!pull]` becomes a margin pull-quote)
+ *    (`[!spoiler]` blurs its body; `[!pull]` becomes a margin pull-quote;
+ *    a run of `[!update]` becomes a dated timeline, newest first)
  * 2. ![[image.png]] / ![[image.png|alt]] / ![[image.png|300]] → images
  *    (≤128px sized embeds render as circular avatars)
  * 3. [[Note Name]] / [[Note Name|label]] → internal links, resolved
@@ -613,6 +614,87 @@ function imageNoteHtml(
 }
 
 /**
+ * One entry of an updates log, written as
+ * `> [!update] 2026-10-12 Design: The drawer floats`.
+ *
+ * The date comes first so the log can be sorted; the word before the colon is
+ * the KIND (free text, so the Ukrainian note writes its own) and the rest is
+ * the title. Both are optional: a title with no "Kind:" is just a title, and
+ * a line with no date sorts last and shows none.
+ */
+interface UpdateItem {
+  date: string;
+  kind: string;
+  title: string;
+  body: string[];
+}
+
+function parseUpdate(head: string, body: string[]): UpdateItem {
+  const dated = head.trim().match(/^(\d{4}-\d{2}-\d{2})\b\s*(.*)$/);
+  const rest = dated ? dated[2] : head.trim();
+  // A kind is a word or two; anything longer before a colon is a sentence.
+  const kinded = rest.match(/^([^:]{1,24}):\s+(.+)$/);
+  return {
+    date: dated ? dated[1] : "",
+    kind: kinded ? kinded[1].trim() : "",
+    title: kinded ? kinded[2].trim() : rest,
+    body,
+  };
+}
+
+/**
+ * A run of updates → one `.updates` timeline, newest first whatever order
+ * they were typed in.
+ *
+ * The year is printed once, on the first entry of each year: repeated down a
+ * column it says nothing (the reasoning of #227). `data-latest` marks the
+ * newest, which is the one filled node on the rail.
+ */
+function updatesHtml(items: UpdateItem[], uk: boolean): string[] {
+  const sorted = items
+    .map((item, i) => ({ item, i }))
+    .sort((a, b) => b.item.date.localeCompare(a.item.date) || a.i - b.i)
+    .map(({ item }) => item);
+  const out: string[] = [`<div class="updates">`];
+  let year = "";
+  sorted.forEach((item, i) => {
+    const [y, m, d] = item.date.split("-").map(Number);
+    const day = item.date
+      ? new Date(Date.UTC(y, m - 1, d)).toLocaleDateString(
+          uk ? "uk-UA" : "en-US",
+          { month: "short", day: "numeric", timeZone: "UTC" }
+        )
+      : "";
+    const showYear = item.date !== "" && String(y) !== year;
+    if (item.date) year = String(y);
+    out.push(
+      `<article class="update"${i === 0 ? " data-latest" : ""}>`,
+      item.date
+        ? `<time class="update-date" datetime="${item.date}"><span class="update-day">${escapeHtml(
+            day
+          )}</span>${
+            showYear ? ` <span class="update-year">${y}</span>` : ""
+          }</time>`
+        : `<span class="update-date"></span>`,
+      `<div class="update-main">`,
+      ...(item.kind
+        ? [`<p class="update-kind">${escapeHtml(item.kind)}</p>`]
+        : []),
+      ...(item.title
+        ? [`<p class="update-title">${escapeHtml(item.title)}</p>`]
+        : []),
+      ...(item.body.some((line) => line.trim())
+        ? [`<div class="update-body">`, "", ...item.body, "", `</div>`]
+        : []),
+      `</div>`,
+      `</article>`
+    );
+  });
+  out.push(`</div>`, "");
+  return out;
+}
+
+/**
  * Obsidian callouts → styled divs. The body is emitted as markdown between
  * raw HTML tags (separated by blank lines) so the pipeline still parses it.
  */
@@ -628,13 +710,24 @@ function transformCallouts(md: string, idPrefix = ""): string {
     : "Reveal spoiler";
   // Shown beside the title once revealed, as the way back to hidden.
   const hideLabel = idPrefix.startsWith("uk-") ? "Сховати" : "Hide";
+  // Consecutive `[!update]` callouts collect here and leave as ONE timeline;
+  // blank lines between them don't end the run, anything else does.
+  let updates: UpdateItem[] = [];
+  const flushUpdates = () => {
+    if (!updates.length) return;
+    out.push(...updatesHtml(updates, idPrefix.startsWith("uk-")));
+    updates = [];
+  };
   for (let i = 0; i < lines.length; i++) {
     const m = lines[i].match(/^>\s*\[!(\w+)\][+-]?\s*(.*)$/);
     if (!m) {
+      if (updates.length && !lines[i].trim()) continue;
+      flushUpdates();
       out.push(lines[i]);
       continue;
     }
     const type = m[1].toLowerCase();
+    if (type !== "update") flushUpdates();
     const title =
       m[2].trim() || type.charAt(0).toUpperCase() + type.slice(1);
     const body: string[] = [];
@@ -644,6 +737,11 @@ function transformCallouts(md: string, idPrefix = ""): string {
       j++;
     }
     i = j - 1;
+
+    if (type === "update") {
+      updates.push(parseUpdate(m[2], body));
+      continue;
+    }
 
     // `> [!spoiler]` blurs its body until the blurred text itself is clicked.
     //
@@ -717,6 +815,7 @@ function transformCallouts(md: string, idPrefix = ""): string {
       `</div>`
     );
   }
+  flushUpdates();
   return out.join("\n");
 }
 

@@ -6038,6 +6038,217 @@ svg.diagram tspan {
   }
 }
 
+/* --- Updates log (`> [!update]` — lib/markdown.ts, DECISIONS #233) ---------
+   A dated log as a timeline: the date in its own column, one hairline rail,
+   a node per entry, and the entry beside it. Monochrome like the rest of the
+   page; the one emphasis is the newest entry's node, which is filled.
+
+   The rail is drawn per entry, from its own node to the next one's, so it
+   never has to know how many entries there are; the last one fades out
+   instead of stopping. `--u-y` is the centre of an entry's first line, where
+   both the node and the rail's top sit.
+
+   Written phone-first: below 640px there is no room for a date column, so the
+   date and the kind share one line above the title and the rail runs down the
+   left edge. */
+.prose .updates {
+  --u-rail: 0.25rem; /* the rail's centre, from the entry's left edge */
+  --u-node: 0.5625rem;
+  --u-y: 0.625rem;
+  margin: 1.5rem 0 0;
+}
+
+.prose .update {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 0.5rem;
+  padding: 0 0 1.75rem 1.5rem;
+}
+
+.prose .update:last-child {
+  padding-bottom: 0;
+}
+
+.prose .update::before {
+  content: "";
+  position: absolute;
+  top: var(--u-y);
+  left: calc(var(--u-rail) - 0.5px);
+  width: 1px;
+  height: 100%;
+  background: var(--border);
+}
+
+.prose .update:last-child::before {
+  height: calc(100% - var(--u-y));
+  min-height: 2rem;
+  background: linear-gradient(var(--border), transparent);
+}
+
+.prose .update::after {
+  content: "";
+  position: absolute;
+  top: calc(var(--u-y) - var(--u-node) / 2);
+  left: calc(var(--u-rail) - var(--u-node) / 2);
+  width: var(--u-node);
+  height: var(--u-node);
+  box-sizing: border-box;
+  border: 1.5px solid var(--text-tertiary);
+  border-radius: var(--r-full);
+  background: var(--bg);
+  transition: border-color var(--dur) var(--ease);
+}
+
+/* The newest entry: the only filled node, with a faint ring so it reads as
+   "now" rather than as one more stop. */
+.prose .update[data-latest]::after {
+  border-color: var(--text);
+  background: var(--text);
+  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--text) 10%, transparent);
+}
+
+.prose .update-date {
+  font-size: 0.8125rem;
+  line-height: 1.25rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--text-secondary);
+  transition: color var(--dur) var(--ease);
+}
+
+.prose .update-date:empty {
+  display: none;
+}
+
+.prose .update-year {
+  color: var(--text-tertiary);
+}
+
+/* On a phone the entry's parts sit directly in the wrapping row. */
+.prose .update-main {
+  display: contents;
+}
+
+.prose .update-kind {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.prose .update-date:not(:empty) + .update-main > .update-kind::before {
+  content: "·";
+  margin-right: 0.5rem;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.prose .update-title {
+  flex-basis: 100%;
+  margin: 0.125rem 0 0;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: -0.005em;
+  text-wrap: balance;
+  color: var(--text);
+}
+
+.prose .update-body {
+  flex-basis: 100%;
+  margin-top: 0.375rem;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.prose .update-body > * {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose .update-body > :first-child {
+  margin-top: 0;
+}
+
+.prose .update-body > :last-child {
+  margin-bottom: 0;
+}
+
+.prose .update-body li {
+  margin: 0.125rem 0;
+}
+
+@media (hover: hover) {
+  .prose .update:hover::after {
+    border-color: var(--text);
+  }
+
+  .prose .update:hover .update-date {
+    color: var(--text);
+  }
+}
+
+/* From 640px the date takes a column of its own, right-aligned against the
+   rail, with the year under the first entry of each year. */
+@media (min-width: 640px) {
+  .prose .updates {
+    --u-date: 4.25rem;
+    --u-gap: 2.75rem;
+    --u-rail: calc(var(--u-date) + var(--u-gap) / 2);
+  }
+
+  .prose .update {
+    display: grid;
+    grid-template-columns: var(--u-date) minmax(0, 1fr);
+    column-gap: var(--u-gap);
+    align-items: start;
+    padding: 0 0 2.25rem;
+  }
+
+  .prose .update-date {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-size: 0.875rem;
+  }
+
+  .prose .update-date:empty {
+    display: block;
+  }
+
+  .prose .update-year {
+    font-size: 0.75rem;
+    line-height: 1.125rem;
+  }
+
+  .prose .update-main {
+    display: block;
+    min-width: 0;
+  }
+
+  .prose .update-date:not(:empty) + .update-main > .update-kind::before {
+    content: none;
+  }
+
+  /* With no kind above it the title is the first line, and its taller line
+     box would put its text below the node. */
+  .prose .update-main > .update-title:first-child {
+    margin-top: -0.125rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prose .update::after,
+  .prose .update-date {
+    transition: none;
+  }
+}
+
 /* --- Note constellation in the drawer (components/Constellation.tsx) -------
    Six months of writing as a bar per week, in the sidebar footer.
 
@@ -11005,9 +11216,8 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
 .draft-chip {
   display: inline-block;
   margin-left: 0.5rem;
-  /* Draft is a FILLED chip with no visible outline, but it carries the border
-     anyway, transparent, so both chips are the same box and one rule can place
-     them. Without it Draft would sit 1px off from the New beside it. */
+  /* Both chips are an outline in their own hue; each sets its border colour
+     below. */
   border: 1px solid transparent;
   border-radius: var(--r-xs);
   /* Symmetric now that the whole chip is lifted below — the lift does the
@@ -11039,10 +11249,12 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
 
 /* Dev-only — `draft: true` entries never reach a production build. Amber
    because it is a WARNING about the page you are looking at, which is the one
-   sanctioned exception to the monochrome rule (#64). */
+   sanctioned exception to the monochrome rule (#64). Drawn like New, an
+   outline with no fill, in green at the owner's request (amber, then New's
+   own gold, came first). */
 .draft-chip {
-  background: color-mix(in srgb, #f59e0b 15%, transparent);
-  color: #f59e0b;
+  border-color: color-mix(in srgb, var(--hue-green) 40%, transparent);
+  color: var(--hue-green);
 }
 
 /* Beside the note's own <h1>, which is 46px against a list row's 16px. The

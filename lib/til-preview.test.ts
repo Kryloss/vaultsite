@@ -37,6 +37,13 @@ test("the cut falls on a block boundary", () => {
   assert.equal(applyPreviewCut(md, cut!, 1000), body(3, 300));
 });
 
+test("the cut never stops on a heading", () => {
+  const md = [body(3, 300), "## Updates", body(2, 300)].join("\n\n");
+  const cut = previewCut(md, 1000);
+  assert.deepEqual(cut, { blocks: 3, capFirst: false });
+  assert.equal(applyPreviewCut(md, cut!, 1000), body(3, 300));
+});
+
 test("a first block over the limit is cut at a word boundary", () => {
   const md = "word ".repeat(40) + "\n\nsecond block";
   const cut = previewCut(md, 100);

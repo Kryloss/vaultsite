@@ -44,6 +44,9 @@ export function previewCut(md: string, limit: number): PreviewCut | null {
     kept += 1;
     length += block.length;
   }
+  // Never stop on a heading: it would sit at the foot of the preview
+  // announcing a section the cut has just removed.
+  while (kept > 1 && /^#{1,6}\s.*$/.test(blocks[kept - 1])) kept -= 1;
   return { blocks: kept, capFirst: false };
 }
 

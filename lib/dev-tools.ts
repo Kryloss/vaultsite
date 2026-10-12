@@ -310,6 +310,8 @@ export function toggleLinePrefix(value: string, start: number, end: number, pref
 export function countWords(markdown: string) {
   return markdown
     .replace(/```[\s\S]*?```/g, " ")
+    .replace(/<[^>\n]+>/g, " ")
+    .replace(/\]\([^)\s]*\)/g, "] ")
     .replace(/[#>*_`|\[\]()!-]/g, " ")
     .split(/\s+/)
     .filter(Boolean).length;

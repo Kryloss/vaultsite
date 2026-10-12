@@ -10,3 +10,10 @@ Kyrylo Leshchenko, all rights reserved. Book, film, show, game and album
 artwork, and portraits of other people, belong to their respective owners and
 are shown for commentary. The fonts in `assets/fonts/` are under the SIL Open
 Font License (`assets/fonts/OFL.txt`).
+
+The font in `public/skins/` is under the SIL Open Font License
+(`public/skins/OFL.txt`). Photographs credited to Wikimedia Commons in a note
+are under the Creative Commons licence named beside them there, and the
+recoloured versions in `vault/` carry the same licence. Product packaging shown
+in a note (the Monster Energy can) belongs to its maker and is shown for
+commentary.
