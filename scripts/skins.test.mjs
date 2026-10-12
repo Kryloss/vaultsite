@@ -96,6 +96,55 @@ for (const skin of skins) {
     }
   });
 
+  // A finished animation that fills forwards keeps its element a compositor
+  // layer for good. Every revealed paragraph, word and picture did, 134 layers
+  // by the foot of the Monster page, and a 5K screen ran out of room for them
+  // (DECISIONS #234). An entrance ends on the element's own style, so it has
+  // no reason to hold on.
+  test(`${skin}: no entrance (\`.mx-in\`) fills forwards`, () => {
+    const text = read(path).replace(/\/\*[\s\S]*?\*\//g, "");
+    const rules = [...text.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(([, selector]) => /\.mx-in(?![\w-])/.test(selector));
+    assert.ok(rules.length > 0);
+    for (const [, selector, body] of rules) {
+      for (const [, value] of body.matchAll(/animation(?:-fill-mode)?\s*:([^;]+)/g)) {
+        assert.ok(!/\b(both|forwards)\b/.test(value), `"${selector.trim()}" would stay a layer after it has played`);
+      }
+    }
+  });
+
+  // Two animations on one element that set the same property (two transforms,
+  // two opacities) are both taken off the compositor and run on the main
+  // thread, where the element is drawn again from scratch on every frame. The
+  // Monster title's entrance did, beside its flicker, and so did the last
+  // word of the opening (DECISIONS #234). One animation an element; a second
+  // movement goes on an element inside or outside it. The opening's overlay
+  // is the one exception: its second animation only flips `visibility`.
+  test(`${skin}: an element has one animation`, () => {
+    const text = read(path).replace(/\/\*[\s\S]*?\*\//g, "");
+    for (const [, selector, body] of text.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      for (const [, value] of body.matchAll(/animation\s*:([^;]+)/g)) {
+        const count = split(value).length;
+        assert.ok(
+          count === 1 || /\.mx-intro(?![\w-])/.test(selector),
+          `"${selector.trim()}" has ${count} animations; move one to a wrapper`
+        );
+      }
+    }
+  });
+
+  // The Monster hero stands still when the opening lifts. Its title and can
+  // each made an entrance once: the owner saw the can with no words, then the
+  // words stretched and dim, each held for a moment (DECISIONS #234). Only the
+  // scroll may move them (`[data-mx="live"]`).
+  test(`${skin}: nothing in the hero makes an entrance`, () => {
+    const text = read(path).replace(/\/\*[\s\S]*?\*\//g, "");
+    for (const [, selector, body] of text.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      if (!/\.(page-title|mx-stand|mx-lit|mx-art|entry-meta)(?![\w-])/.test(selector)) continue;
+      assert.ok(!/animation\s*:(?!\s*none)/.test(body), `"${selector.trim()}" animates a part of the hero`);
+      assert.ok(!/filter\s*:\s*url/.test(body), `"${selector.trim()}" puts an SVG filter on a part of the hero`);
+    }
+  });
+
   test(`${skin}: every file the stylesheet loads from /skins/ is there`, () => {
     for (const [, file] of read(path).matchAll(/url\("\/skins\/([^"]+)"\)/g)) {
       assert.ok(existsSync(new URL(`../public/skins/${file}`, import.meta.url)), `public/skins/${file} is missing`);

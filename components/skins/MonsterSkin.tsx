@@ -30,15 +30,6 @@ export interface SkinArt {
 
 const SCOPE = '.page[data-skin="monster"]';
 
-/**
- * The title takes the smear, and only the title: see the filters below. It
- * was on every headline at first. An SVG filter is drawn on the CPU, and a
- * dozen of them on type this size, repainted whenever a word inside one
- * moved, is most of what took the page to twelve frames a second.
- */
-const SMEARED = `${SCOPE} .page-title`;
-const SMEAR = `${SMEARED}{filter:url(#mx-smear-s)}@media (min-width:600px) and (min-aspect-ratio:1/1){${SMEARED}{filter:url(#mx-smear)}}`;
-
 /* ---------------------------------------------------------------- smoke */
 
 const VERT = "attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}";
@@ -46,7 +37,14 @@ const VERT = "attribute vec2 a;void main(){gl_Position=vec4(a,0.,1.);}";
 /* Red smoke in a dark room: two rounds of domain-warped noise, lit only
    where a lamp behind the can would reach, then pushed through a black → red
    ramp with a little dither so it bands like bad tape rather than blending
-   like a gradient. Most of the frame stays black on purpose. */
+   like a gradient. Most of the frame stays black on purpose.
+
+   The last lines are the room's corners and its floor: black coming up from
+   the foot, so the page below has nothing to be cut against, and the corners
+   going dark. They were a sheet of two CSS gradients laid over the canvas,
+   which was one more window-sized layer for the graphics card to lay down on
+   every frame the hero was on screen; here they cost nothing. `u` runs 0 to 1
+   from the bottom left. */
 const FRAG = `
 precision mediump float;
 uniform vec2 r;uniform float t;uniform vec2 m;
@@ -65,7 +63,12 @@ float v=smoothstep(.36,.9,f)*(.05+lamp*1.15);
 v+=(h(gl_FragCoord.xy+fract(t)*91.7)-.5)*.06;
 vec3 c=mix(vec3(.008,0.,0.),vec3(.95,.12,.04),smoothstep(.05,.85,v));
 c=mix(c,vec3(1.,.72,.62),smoothstep(.9,1.25,v));
-gl_FragColor=vec4(c,1.);
+vec2 u=gl_FragCoord.xy/r;
+float fl=u.y<.14?mix(1.,.82,u.y/.14):clamp(.82*(1.-(u.y-.14)/.3),0.,1.);
+float d=length((u-vec2(.5,.54))/vec2(.78,.82));
+float co=d<.3?0.:d<.78?.78*(d-.3)/.48:mix(.78,1.,clamp((d-.78)/.22,0.,1.));
+float lit=(1.-fl)*(1.-co);
+gl_FragColor=vec4(c*lit+vec3(.012)*(1.-lit),1.);
 }`;
 
 /** Starts the smoke on `canvas`; returns its teardown. `still` draws one frame. */
@@ -73,27 +76,37 @@ function startSmoke(canvas: HTMLCanvasElement, still: boolean): () => void {
   const gl = canvas.getContext("webgl", { antialias: false, alpha: false, powerPreference: "low-power" });
   if (!gl) return () => {};
 
-  const compile = (type: number, source: string) => {
-    const shader = gl.createShader(type)!;
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    return shader;
-  };
-  const program = gl.createProgram()!;
-  gl.attachShader(program, compile(gl.VERTEX_SHADER, VERT));
-  gl.attachShader(program, compile(gl.FRAGMENT_SHADER, FRAG));
-  gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return () => {};
-  gl.useProgram(program);
+  let uR: WebGLUniformLocation | null = null;
+  let uT: WebGLUniformLocation | null = null;
+  let uM: WebGLUniformLocation | null = null;
+  /* Everything the context holds, made in one place, because a context can be
+     taken away and handed back empty (see `lost` below). False when there is
+     nothing to draw with. */
+  const build = () => {
+    if (gl.isContextLost()) return false;
+    const compile = (type: number, source: string) => {
+      const shader = gl.createShader(type)!;
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      return shader;
+    };
+    const program = gl.createProgram()!;
+    gl.attachShader(program, compile(gl.VERTEX_SHADER, VERT));
+    gl.attachShader(program, compile(gl.FRAGMENT_SHADER, FRAG));
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return false;
+    gl.useProgram(program);
 
-  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-  const a = gl.getAttribLocation(program, "a");
-  gl.enableVertexAttribArray(a);
-  gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
-  const uR = gl.getUniformLocation(program, "r");
-  const uT = gl.getUniformLocation(program, "t");
-  const uM = gl.getUniformLocation(program, "m");
+    gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    const a = gl.getAttribLocation(program, "a");
+    gl.enableVertexAttribArray(a);
+    gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
+    uR = gl.getUniformLocation(program, "r");
+    uT = gl.getUniformLocation(program, "t");
+    uM = gl.getUniformLocation(program, "m");
+    return true;
+  };
 
   /* Drawn small and stretched: smoke has no edges to keep, a soft upscale is
      most of the look, and a phone is spared a full-screen five-octave noise
@@ -107,28 +120,68 @@ function startSmoke(canvas: HTMLCanvasElement, still: boolean): () => void {
     gl.uniform2f(uR, canvas.width, canvas.height);
   };
 
+  /* Thirty frames a second, whatever the screen's own rate. A frame of smoke
+     is not the cost; having the whole hero put together again in front of it
+     is, and smoke this slow looks the same at thirty as at a hundred and
+     twenty. On a 120Hz screen that is a quarter of the work. */
+  const STEP = 1000 / 30;
   let pointer = [0, 0];
   let eased = [0, 0];
   let raf = 0;
   let seen = true;
+  let ready = false;
+  let drawn = -Infinity;
   const start = performance.now();
-  const frame = () => {
-    raf = 0;
-    eased = [eased[0] + (pointer[0] - eased[0]) * 0.05, eased[1] + (pointer[1] - eased[1]) * 0.05];
-    gl.uniform1f(uT, still ? 14 : (performance.now() - start) / 1000 + 14);
+  const frame = (now = performance.now()) => {
+    raf = still || !ready || !seen || document.hidden ? 0 : requestAnimationFrame(frame);
+    if (!ready) return;
+    /* A little short of the step, so a 60Hz screen's every second frame
+       (33.3ms, give or take) is not turned away. */
+    if (now - drawn < STEP - 4) return;
+    /* Eased by the clock, not by the frame: a fixed share per frame followed
+       the pointer twice as fast on a screen twice as quick. */
+    const k = 1 - Math.exp(-3 * Math.min(0.1, (now - drawn) / 1000));
+    drawn = now;
+    eased = [eased[0] + (pointer[0] - eased[0]) * k, eased[1] + (pointer[1] - eased[1]) * k];
+    gl.uniform1f(uT, still ? 14 : (now - start) / 1000 + 14);
     gl.uniform2f(uM, eased[0], eased[1]);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
-    if (!still && seen && !document.hidden) raf = requestAnimationFrame(frame);
   };
   const wake = () => {
     if (!raf) raf = requestAnimationFrame(frame);
   };
 
-  size();
-  frame();
+  /* (Re)makes the program and draws. Without one the canvas is hidden and the
+     hero's own black shows: a canvas with no context behind it is not always
+     drawn black (Chrome has drawn it white). */
+  const light = () => {
+    ready = build();
+    canvas.style.visibility = ready ? "" : "hidden";
+    if (!ready) return;
+    size();
+    drawn = -Infinity;
+    cancelAnimationFrame(raf);
+    frame();
+  };
+  /* A browser may take the context away at any time (the graphics process
+     restarted, too many contexts open across tabs, a tab left in the
+     background) and nothing here used to answer: the smoke was gone until a
+     reload. `preventDefault` is what asks for it back. */
+  const lost = (event: Event) => {
+    event.preventDefault();
+    ready = false;
+    canvas.style.visibility = "hidden";
+  };
+  canvas.addEventListener("webglcontextlost", lost);
+  canvas.addEventListener("webglcontextrestored", light);
+
+  light();
 
   const resize = new ResizeObserver(() => {
+    if (!ready) return;
     size();
+    /* A new size is an empty canvas: the next frame draws, due or not. */
+    drawn = -Infinity;
     wake();
   });
   resize.observe(canvas);
@@ -150,9 +203,15 @@ function startSmoke(canvas: HTMLCanvasElement, still: boolean): () => void {
     cancelAnimationFrame(raf);
     resize.disconnect();
     watch.disconnect();
+    canvas.removeEventListener("webglcontextlost", lost);
+    canvas.removeEventListener("webglcontextrestored", light);
     removeEventListener("pointermove", onPointer);
     document.removeEventListener("visibilitychange", wake);
-    gl.getExtension("WEBGL_lose_context")?.loseContext();
+    /* The context is given up only with the canvas. This also runs when the
+       effect is run again on the SAME canvas (a development refresh), and a
+       context thrown away there is the one the next start is handed back:
+       lost, and silent about it. */
+    if (!canvas.isConnected) gl.getExtension("WEBGL_lose_context")?.loseContext();
   };
 }
 
@@ -344,7 +403,13 @@ export default function MonsterSkin({ beats, art }: { beats: string[]; art?: Ski
           reveal.unobserve(entry.target);
         }
       },
-      { rootMargin: "0px 0px -7% 0px", threshold: 0.05 }
+      /* From a little BELOW the window, and at the first pixel. It used to
+         wait until the thing was 7% up the window and a twentieth of it was
+         in view. The observer reports on the main thread, the scroll does
+         not wait for it, and on a busy page that report can be late: late
+         from inside the window was a screen of nothing, and of a tall plate
+         a twentieth is a long way. */
+      { rootMargin: "0px 0px 12% 0px", threshold: 0 }
     );
     /* Only what is still below the window waits. This chunk can arrive after
        the reader has started down the page, or the page can open part-way
@@ -386,7 +451,12 @@ export default function MonsterSkin({ beats, art }: { beats: string[]; art?: Ski
         <div className="mx-intro" data-n={beats.length} aria-hidden="true">
           {beats.map((word, i) => (
             <span key={i} className="mx-beat" style={{ "--i": i } as CSSProperties}>
-              <b>{word}</b>
+              {/* Two elements for two movements: the word lands on the inner
+                  one and the last word is pulled out on the outer. Both on
+                  one element, neither runs on the compositor. */}
+              <b>
+                <span>{word}</span>
+              </b>
             </span>
           ))}
         </div>
@@ -395,7 +465,6 @@ export default function MonsterSkin({ beats, art }: { beats: string[]; art?: Ski
       {/* Behind the title: smoke and the dark. */}
       <div className="mx-hero" aria-hidden="true">
         <canvas ref={smoke} className="mx-smoke" />
-        <div className="mx-veil" />
       </div>
 
       {/* In FRONT of the title: the thing photographed, cut out of its
@@ -407,7 +476,11 @@ export default function MonsterSkin({ beats, art }: { beats: string[]; art?: Ski
           aria-hidden="true"
           style={{ "--mx-ar": art.width && art.height ? art.width / art.height : undefined } as CSSProperties}
         >
+          {/* Two boxes on purpose. `.mx-stand` is the can's place and shape;
+              `.mx-lit` inside it carries the shadow, the mask and the light,
+              so all three are drawn once into the picture the scroll moves. */}
           <div className="mx-stand">
+            <div className="mx-lit">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               ref={can}
@@ -420,50 +493,13 @@ export default function MonsterSkin({ beats, art }: { beats: string[]; art?: Ski
               alt=""
               fetchPriority="high"
             />
+            </div>
           </div>
         </div>
       )}
 
       {/* Scanlines and the vignette, over the whole window. */}
       <div className="mx-fx" aria-hidden="true" />
-
-      {/* What a word looks like on the frame it arrives: pulled into a
-          vertical streak, soft at the edge, and bitten by the grain. Two
-          sizes, because the streak is in pixels and a phone's headline is a
-          third the height of a desktop's.
-
-          Applied from an inline <style>, not from the linked sheet: a
-          `url(#…)` in a linked stylesheet is resolved against the
-          stylesheet's own address by some engines, and finds nothing there. */}
-      <svg className="mx-defs" width="0" height="0" aria-hidden="true" focusable="false">
-        {(
-          [
-            ["mx-smear", 15, 1],
-            ["mx-smear-s", 6, 0.6],
-          ] as const
-        ).map(([id, streak, soft]) => (
-          <filter key={id} id={id} x="-4%" y="-40%" width="108%" height="180%" colorInterpolationFilters="sRGB">
-            <feGaussianBlur in="SourceGraphic" stdDeviation={`0 ${streak}`} result="streak" />
-            <feComponentTransfer in="streak" result="trail">
-              <feFuncA type="linear" slope="0.6" />
-            </feComponentTransfer>
-            <feGaussianBlur in="SourceGraphic" stdDeviation={soft} result="soft" />
-            <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="11" result="noise" />
-            <feColorMatrix
-              in="noise"
-              type="matrix"
-              values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  7 0 0 0 -1.7"
-              result="bite"
-            />
-            <feComposite in="soft" in2="bite" operator="in" result="bitten" />
-            <feMerge>
-              <feMergeNode in="trail" />
-              <feMergeNode in="bitten" />
-            </feMerge>
-          </filter>
-        ))}
-      </svg>
-      <style>{SMEAR}</style>
     </>
   );
 }

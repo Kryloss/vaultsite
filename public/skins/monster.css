@@ -36,6 +36,17 @@
  * the page is the same room, standing still. What waits carries `.mx-hold`,
  * which the driver gives only to what is still below the window when it
  * starts, and trades for `.mx-in` when the thing is scrolled to.
+ *
+ * AN ENTRANCE FILLS `backwards`, NEVER `both` OR `forwards`. A finished
+ * animation that still fills forwards keeps its element a surface of its own
+ * on the graphics card, for good. Every paragraph, every word of every
+ * headline and both copies of every photograph stayed one: 134 surfaces by
+ * the foot of the page, 3.4 GB of them on a 5K screen against 1.7 on a
+ * laptop's, which is where the page lagged and froze and the laptop did not.
+ * Every entrance here ends on the element's own resting style, so letting go
+ * at the end changes nothing that can be seen. Only what the scroll drives
+ * and the opening (hidden once it has played) fill forwards
+ * (scripts/skins.test.mjs).
  */
 
 /* Sofia Sans Extra Condensed Black (SIL OFL 1.1, public/skins/OFL.txt). Two
@@ -135,8 +146,12 @@ html:has(.page[data-skin="monster"]) body::after {
   color: var(--mx-red);
 }
 
-.page[data-skin="monster"] .mx-defs {
-  position: absolute;
+/* The site fades every page in on `<main>`, and that fade fills forwards, so
+   `<main>` stays a surface of its own for good. Here it would be a second
+   sheet the height of the whole note under everything else, and the opening
+   already covers the arrival. */
+main:has(> .page[data-skin="monster"]) {
+  animation: none;
 }
 
 /* The reading bar is the one line of the site's chrome that lives inside the
@@ -235,14 +250,21 @@ html:has(.page[data-skin="monster"]) body::after {
   font: 900 min(44vw, 74vh) / 0.8 var(--mx-display);
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+/* The word lands on the inner element and the last word is pulled out on
+   the outer one. Two transform animations on ONE element cannot run on the
+   compositor; they ran on the main thread, and a word the height of the
+   window was drawn again, sharp, at every size on its way to twenty times
+   its height. */
+.page[data-skin="monster"] .mx-beat b > span {
+  display: inline-block;
   animation: mx-beat-word 0.44s var(--mx-snap) calc(var(--i) * var(--mx-beat)) both;
 }
 
 .page[data-skin="monster"] .mx-beat:last-child b {
   text-shadow: var(--mx-ghost);
-  animation:
-    mx-beat-word 0.44s var(--mx-snap) calc(var(--i) * var(--mx-beat)) both,
-    mx-streak-out 0.5s var(--mx-cut) calc(var(--mx-wait) - 0.5s) forwards;
+  animation: mx-streak-out 0.5s var(--mx-cut) calc(var(--mx-wait) - 0.5s) forwards;
 }
 
 /* Lands stretched and smeared, the way a word looks on the frame it arrives. */
@@ -259,10 +281,12 @@ html:has(.page[data-skin="monster"]) body::after {
 }
 
 /* A scale and nothing else: the compositor stretches the word it already
-   has, and a texture stretched twenty times IS the smear. */
+   has, and a texture stretched twenty times IS the smear. On top of where
+   the word landed (1.06 by 1.03, on the element inside), which is why this
+   stops a little short of 1.5 by 22. */
 @keyframes mx-streak-out {
   to {
-    transform: scale(1.5, 22);
+    transform: scale(1.415, 21.36);
     opacity: 0;
   }
 }
@@ -297,8 +321,36 @@ html:has(.page[data-skin="monster"]) body::after {
   overflow: hidden;
 }
 
+/* THE HERO IS DRAWN ONCE, BEHIND THE OPENING, AND THEN ONLY MOVED. Nothing in
+   it makes an entrance: the title, the can and the line under them are all
+   standing there when the dark lifts. The title used to slam in half a
+   second after the can, stretched to three times its height, and the can
+   came forward from 1.3 times its size; the owner saw a can with no words,
+   then tall dim words, each held for a moment, and asked for the title to
+   simply be there. An entrance is also a thing drawn again at every size it
+   passes through and once more when it lets go.
+
+   Three things move when the hero is LEFT, each ONE layer with nothing but a
+   transform and an opacity on it:
+
+   - the smoke's corners and floor are in its shader, not a sheet over it,
+     and the scroll moves the canvas, not the box round it;
+   - the can's shadow, mask and light are on `.mx-lit`, a box that stands
+     still INSIDE the one the scroll moves;
+   - the title has no animation of its own; the flicker is on the block
+     round it.
+
+   A filter, a mask or a blend on the moving thing itself is worked out
+   again by the graphics card for every frame of the move, and two layers
+   under one fading parent are first drawn to a target the size of the
+   window. An element with two animations on one property gets neither on
+   the compositor: it is re-drawn from scratch, every frame, at whatever
+   size it has reached. scripts/skins.test.mjs holds the one-animation rule
+   and the hero's stillness. */
 .page[data-skin="monster"] .mx-hero {
   z-index: 0;
+  /* The smoke sinks out of this box as the hero is left; nothing clips it. */
+  overflow: visible;
   background: var(--mx-black);
 }
 
@@ -307,16 +359,6 @@ html:has(.page[data-skin="monster"]) body::after {
   inset: 0;
   width: 100%;
   height: 100%;
-}
-
-/* The room's corners, and black coming up from the foot so the page below
-   has nothing to be cut against. */
-.page[data-skin="monster"] .mx-veil {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(to top, var(--mx-black) 0, rgb(3 3 3 / 0.82) 14%, transparent 44%),
-    radial-gradient(ellipse 78% 82% at 50% 46%, transparent 30%, rgb(3 3 3 / 0.78) 78%, var(--mx-black) 100%);
 }
 
 /* THE CAN IS IN FRONT OF THE TITLE. It is a cut-out with an alpha channel
@@ -338,6 +380,13 @@ html:has(.page[data-skin="monster"]) body::after {
   height: min(92vh, 190vw);
   aspect-ratio: var(--mx-ar, 0.45);
   translate: -50% -50%;
+}
+
+/* What the can wears, on a box of its own inside the stand (see "The hero is
+   drawn once" above). */
+.page[data-skin="monster"] .mx-lit {
+  position: absolute;
+  inset: 0;
   /* The shadow is what puts the can in front of the letters. One, and tight:
      a second, wide one for the glow cost more than everything else in the
      hero put together, and the smoke behind already does that job. */
@@ -345,7 +394,6 @@ html:has(.page[data-skin="monster"]) body::after {
   /* Top and foot go into the dark: the room has no floor and no ceiling. */
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 17%, #000 58%, transparent 95%);
   mask-image: linear-gradient(to bottom, transparent 0, #000 17%, #000 58%, transparent 95%);
-  animation: mx-art-in 1.9s var(--mx-snap) calc(var(--mx-wait) - 0.45s) both;
 }
 
 .page[data-skin="monster"] .mx-art {
@@ -359,7 +407,7 @@ html:has(.page[data-skin="monster"]) body::after {
    sides the way a cylinder does, cut to the can's own outline so none of it
    lands on the air. A product picture is lit evenly from everywhere, which
    is exactly what a thing standing in a dark room is not. */
-.page[data-skin="monster"] .mx-stand::after {
+.page[data-skin="monster"] .mx-lit::after {
   content: "";
   position: absolute;
   inset: 0;
@@ -381,17 +429,6 @@ html:has(.page[data-skin="monster"]) body::after {
      mask at all, and the light would be a dark rectangle round the can. */
   -webkit-mask: var(--mx-art, linear-gradient(transparent, transparent)) center / 100% 100% no-repeat;
   mask: var(--mx-art, linear-gradient(transparent, transparent)) center / 100% 100% no-repeat;
-}
-
-@keyframes mx-art-in {
-  from {
-    opacity: 0;
-    scale: 1.3;
-  }
-  to {
-    opacity: 1;
-    scale: 1;
-  }
 }
 
 .page[data-skin="monster"] > header {
@@ -417,10 +454,19 @@ html:has(.page[data-skin="monster"]) body::after {
   /* Each word its own line, without touching the markup React owns. */
   word-spacing: 100vw;
   color: var(--mx-red);
-  transform-origin: 50% 100%;
-  animation:
-    mx-title-in 0.75s var(--mx-snap) calc(var(--mx-wait) + 0.02s) both,
-    mx-flicker 9s linear calc(var(--mx-wait) + 2s) infinite;
+  /* The same ghost every headline has. It was an SVG filter (a vertical
+     blur, a second blur and a field of noise to bite the edge), the one
+     filter left on the page: drawn off the graphics card, and drawn again
+     whenever the layer it is in was. The title was the last thing on the
+     page to turn up and the first to go missing. */
+  text-shadow: var(--mx-ghost);
+}
+
+/* The lamp's flicker is on the block round the title, not on the title, so
+   the title and the line under it dip together and the header that fades
+   out as the hero is left holds one layer. */
+.page[data-skin="monster"] .note-header-text {
+  animation: mx-flicker 9s linear calc(var(--mx-wait) + 2s) infinite;
 }
 
 @media (max-width: 599px), (max-aspect-ratio: 1/1) {
@@ -429,23 +475,7 @@ html:has(.page[data-skin="monster"]) body::after {
   }
 }
 
-@keyframes mx-title-in {
-  0% {
-    opacity: 0;
-    transform: scaleY(3.2);
-  }
-  45% {
-    opacity: 1;
-    transform: scaleY(0.94);
-  }
-  100% {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-/* A lamp that never quite settles: two short dips in nine seconds. Opacity,
-   because `filter` on this element is the smear. */
+/* A lamp that never quite settles: two short dips in nine seconds. */
 @keyframes mx-flicker {
   0%,
   41%,
@@ -478,7 +508,6 @@ html:has(.page[data-skin="monster"]) body::after {
   font: 600 0.8125rem / 1.4 var(--mx-sans);
   letter-spacing: -0.01em;
   color: rgb(246 241 238 / 0.62);
-  animation: mx-rise 0.8s var(--mx-snap) calc(var(--mx-wait) + 0.55s) both;
 }
 
 @keyframes mx-rise {
@@ -509,6 +538,22 @@ html:has(.page[data-skin="monster"]) body::after {
     padding: 0;
   }
 
+  /* The block round the title fills the header and centres the title
+     itself, so that the date line, which is placed against a corner of the
+     window, is placed against THIS box. Placed against the header, it sat
+     outside the block that flickers, on a layer of its own, and a block that
+     fades with two layers in it is first drawn to a target of its own on
+     every frame. */
+  .page[data-skin="monster"] .note-header-text {
+    position: relative;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    align-self: stretch;
+  }
+
   .page[data-skin="monster"] .page-title {
     font-size: 13vw;
     line-height: 1;
@@ -536,7 +581,7 @@ html:has(.page[data-skin="monster"]) body::after {
 /* Leaving the hero, each layer goes at its own speed: the smoke sinks, the
    can comes toward you, the title falls behind. */
 @supports (animation-timeline: scroll()) {
-  .page[data-skin="monster"][data-mx="live"] .mx-hero {
+  .page[data-skin="monster"][data-mx="live"] .mx-smoke {
     animation: mx-sink linear both;
     animation-timeline: scroll(root);
     animation-range: 0 100vh;
@@ -753,7 +798,7 @@ html:has(.page[data-skin="monster"]) body::after {
 }
 
 .page[data-skin="monster"][data-mx="live"] .mx-screen.mx-in {
-  animation: mx-switch-on 0.7s var(--mx-snap) both;
+  animation: mx-switch-on 0.7s var(--mx-snap) backwards;
 }
 
 @keyframes mx-switch-on {
@@ -845,7 +890,7 @@ html:has(.page[data-skin="monster"]) body::after {
 }
 
 .page[data-skin="monster"][data-mx="live"] .prose :is(h2, blockquote).mx-in .mx-w > span {
-  animation: mx-slam 0.62s var(--mx-snap) calc(var(--i) * 110ms) both;
+  animation: mx-slam 0.62s var(--mx-snap) calc(var(--i) * 110ms) backwards;
 }
 
 @keyframes mx-slam {
@@ -921,7 +966,7 @@ html:has(.page[data-skin="monster"]) body::after {
 }
 
 .page[data-skin="monster"][data-mx="live"] .prose :is(p, li).mx-in {
-  animation: mx-rise 0.75s var(--mx-snap) 0.08s both;
+  animation: mx-rise 0.75s var(--mx-snap) 0.08s backwards;
 }
 
 /* ---- Pictures ---- */
@@ -1082,7 +1127,7 @@ html:has(.page[data-skin="monster"]) body::after {
 }
 
 .page[data-skin="monster"][data-mx="live"] .prose figure.mx-in > :is(img, .mx-fore) {
-  animation: mx-expose 1.1s var(--mx-snap) both;
+  animation: mx-expose 1.1s var(--mx-snap) backwards;
 }
 
 @keyframes mx-expose {
@@ -1097,16 +1142,24 @@ html:has(.page[data-skin="monster"]) body::after {
 }
 
 /* The words in a picture travel a little slower than it does. A translate,
-   which is all the scroll is allowed to drive. */
-@supports (animation-timeline: view()) {
-  .page[data-skin="monster"][data-mx="live"] .prose figure {
-    view-timeline: --mx-shot block;
-  }
+   which is all the scroll is allowed to drive.
 
-  .page[data-skin="monster"][data-mx="live"] .mx-frame > :is(h2, blockquote) {
-    animation: mx-drift linear both;
-    animation-timeline: --mx-shot;
-    animation-range: cover 0% cover 100%;
+   Not in a large window on a dense screen. A heading that moves is a surface
+   of its own, and so then is everything drawn over it and the mask round the
+   lot: about 170 MB a picture at 5120px across, for a movement of a few
+   dozen pixels. There the words stand still in the picture. A wide window at
+   one pixel a point keeps it, and so does a laptop. */
+@supports (animation-timeline: view()) {
+  @media (max-width: 1800px), (max-resolution: 1.49dppx) {
+    .page[data-skin="monster"][data-mx="live"] .prose figure {
+      view-timeline: --mx-shot block;
+    }
+
+    .page[data-skin="monster"][data-mx="live"] .mx-frame > :is(h2, blockquote) {
+      animation: mx-drift linear both;
+      animation-timeline: --mx-shot;
+      animation-range: cover 0% cover 100%;
+    }
   }
 
   @keyframes mx-drift {
@@ -1228,7 +1281,7 @@ html:has(.page[data-skin="monster"]) body::after {
 
 .page[data-skin="monster"][data-mx="live"] .prose table.mx-in tr {
   transform-origin: 0 100%;
-  animation: mx-row 0.7s var(--mx-snap) both;
+  animation: mx-row 0.7s var(--mx-snap) backwards;
 }
 
 .page[data-skin="monster"][data-mx="live"] .prose table.mx-in tr:nth-child(2) {
@@ -1361,9 +1414,7 @@ html:has(.page[data-skin="monster"]) body::after {
     display: none;
   }
 
-  .page[data-skin="monster"] .mx-stand,
-  .page[data-skin="monster"] .page-title,
-  .page[data-skin="monster"] .entry-meta {
+  .page[data-skin="monster"] .note-header-text {
     animation: none;
   }
 }

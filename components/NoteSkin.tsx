@@ -37,6 +37,20 @@ export default function NoteSkin({
   return (
     <>
       <link rel="stylesheet" href={`/skins/${skin}.css`} precedence="skin" />
+      {/* The display face, asked for with the stylesheet and not after it.
+          The page opens on one word in it the size of the window; found only
+          once the sheet had been read, the face arrived a beat late and the
+          word was first drawn in whatever the system had. The Latin subset
+          alone: the opening and the title are Latin in both languages. */}
+      {skin === "monster" && (
+        <link
+          rel="preload"
+          as="font"
+          type="font/woff2"
+          href="/skins/sofia-sans-xc-900-latin.woff2"
+          crossOrigin="anonymous"
+        />
+      )}
       {skin === "monster" && <MonsterSkin beats={beats} art={art} />}
     </>
   );
