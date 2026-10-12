@@ -454,12 +454,25 @@ main:has(> .page[data-skin="monster"]) {
   /* Each word its own line, without touching the markup React owns. */
   word-spacing: 100vw;
   color: var(--mx-red);
-  /* The same ghost every headline has. It was an SVG filter (a vertical
-     blur, a second blur and a field of noise to bite the edge), the one
-     filter left on the page: drawn off the graphics card, and drawn again
-     whenever the layer it is in was. The title was the last thing on the
-     page to turn up and the first to go missing. */
-  text-shadow: var(--mx-ghost);
+  /* Out of focus and lit, as the owner drew it. The letters have no ink of
+     their own: what shows is their shadows, so the edge itself is soft. On
+     top the word twice over (once is thin at the rim), under it a dim smear
+     straight up and straight down, and a halo. Nothing is slipped sideways:
+     a darker copy to the right read as letters cut in 3D, and the owner
+     turned it down. These are BLURRED shadows, the one place on the page
+     that has them (see `--mx-ghost`): the title makes no entrance and has no
+     animation of its own, so it is drawn once and after that only moved. It
+     was an SVG filter before that, drawn off the graphics card and the first
+     thing to go missing. */
+  color: transparent;
+  text-shadow:
+    0 0 0.012em #ff3a1c,
+    0 0 0.012em #ff3a1c,
+    0 0.05em 0.035em rgb(190 20 8 / 0.42),
+    0 -0.05em 0.035em rgb(190 20 8 / 0.3),
+    0 0.11em 0.06em rgb(150 12 4 / 0.22),
+    0 -0.1em 0.06em rgb(150 12 4 / 0.14),
+    0 0 0.07em rgb(255 42 18 / 0.28);
 }
 
 /* The lamp's flicker is on the block round the title, not on the title, so
