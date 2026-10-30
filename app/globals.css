@@ -11374,7 +11374,8 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
    carry a min-width so they match each other instead of being sized by the
    length of their own word. No icons — those are the sidebar's (#64); the
    arrow is the site's own `.arrow-glyph`, which throws it on the press. */
-.notfound-btn {
+.notfound-btn,
+.routine-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -11404,14 +11405,156 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   opacity: 0.75;
 }
 
-.notfound-btn-quiet {
+.notfound-btn-quiet,
+.routine-btn {
   border-color: var(--border);
   background: var(--surface);
   color: var(--text);
 }
 
-.notfound-btn-quiet:hover {
+.notfound-btn-quiet:hover,
+.routine-btn:hover {
   background: var(--bg-hover);
+}
+
+/* /routine — components/RoutineAccess.tsx. Two doors of equal weight, the same
+   boxes as the 404's. Inputs are 1rem so a phone doesn't zoom in on focus. */
+.routine-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.routine-note {
+  margin-top: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.routine-note a {
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.routine-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.routine-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+/* `>` from the form: the day choices' labels hold <T>'s language spans, and
+   giving those a `display` paints both languages at once. */
+.routine-form > label > span,
+.routine-form legend {
+  display: block;
+  margin-bottom: 0.375rem;
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.routine-input {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  color: var(--text);
+  padding: 0.5rem 0.75rem;
+  font: inherit;
+  font-size: 1rem;
+}
+
+.routine-input:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 1px;
+}
+
+.routine-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.routine-days label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.routine-days input {
+  accent-color: var(--text);
+}
+
+.routine-heading {
+  margin-top: 2.5rem;
+  color: var(--text);
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.routine-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.routine-card {
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.routine-card-title {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.routine-card .routine-note {
+  margin-top: 0.125rem;
+}
+
+.routine-card dl {
+  margin-top: 0.75rem;
+}
+
+.routine-card dt {
+  color: var(--text-tertiary);
+  font-size: 0.875rem;
+}
+
+.routine-card dd {
+  margin: 0 0 0.5rem;
+  color: var(--text);
+}
+
+.routine-card .routine-actions {
+  margin-top: 0.875rem;
+}
+
+.routine-account {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 2.5rem;
+  color: var(--text-tertiary);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
 }
 
 /* The suggestions — the useful half of the page, and the only part of it that

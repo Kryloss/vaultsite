@@ -1,7 +1,7 @@
 {
   "name": "vaultsite",
   "version": "1.0.0",
-  "description": "A personal site published straight from an Obsidian vault: static Next.js, no database.",
+  "description": "A personal site published straight from an Obsidian vault: static Next.js, with one private page behind Supabase.",
   "license": "MIT",
   "private": true,
   "scripts": {
@@ -17,6 +17,8 @@
     "test": "node --test --experimental-strip-types --import ./scripts/test-hooks.mjs lib/*.test.ts scripts/*.test.mjs"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.118.0",
     "@vercel/analytics": "^2.0.1",
     "github-slugger": "^2.0.0",
     "gray-matter": "^4.0.3",

@@ -4,7 +4,7 @@ import "./globals.css";
 // Page ideas (lib/site-config.ts → pageIdeas); after globals.css, see its header.
 import "./page-ideas.css";
 import { parseTodaysVibe } from "@/lib/todays-vibe";
-import Chrome from "@/components/Chrome";
+import Chrome, { type NavItem } from "@/components/Chrome";
 import BareRoute from "@/components/BareRoute";
 import Constellation from "@/components/Constellation";
 import Lightbox from "@/components/Lightbox";
@@ -23,6 +23,7 @@ import { navChildren } from "@/lib/nav-tree";
 import { resistanceDay } from "@/lib/resistance";
 import { observance } from "@/lib/observances";
 import { siteName, siteNameUk, siteUrl, siteDescription } from "@/lib/site-config";
+import { ui } from "@/lib/ui-strings";
 
 /**
  * Source Serif 4 — the site's one typeface, self-hosted by next/font so the
@@ -89,7 +90,7 @@ export default function RootLayout({
 }) {
   // Navigation (and breadcrumb titles) generated from the vault at build time.
   const sections = getSections();
-  const items = sections.map((section) => ({
+  const items: NavItem[] = sections.map((section) => ({
     slug: section.slug,
     title: section.title,
     titleUk: section.titleUk,
@@ -99,6 +100,13 @@ export default function RootLayout({
     // so only the client half of the chrome can make that choice.
     tree: navChildren(section),
   }));
+  // /routine is a route, not a vault folder: a private page has no note behind it.
+  items.push({
+    slug: "routine",
+    title: ui.routineTitle.en,
+    titleUk: ui.routineTitle.uk,
+    icon: "routine",
+  });
 
   /**
    * Every dated note in the vault, for the sidebar constellation. Flattened

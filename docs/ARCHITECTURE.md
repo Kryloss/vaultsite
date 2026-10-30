@@ -22,6 +22,11 @@ writer for the local authoring dock, bound to `127.0.0.1`, with a rewrite that
 exists only in development. Production builds replace the dock with null
 components and stay static. See `docs/LOCAL-AUTHORING.md`.
 
+`app/api/routine/*` is the one exception in production: route handlers for the
+private organizer, backed by a Supabase project. The `/routine` page is still
+static, there is no middleware, and no public page touches the database. See
+`docs/ROUTINE.md`.
+
 ## Content model
 
 - **Section** = TOP-LEVEL folder in `vault/` containing `main.md`. Gets a route (`/posts`), a sidebar item, and a list of its entries. The folder `Home` is special only in that its slug `home` renders at `/`.

@@ -11,7 +11,7 @@ Owner: Kyrylo, high-school student in Ontario, heading into cybersecurity. Not a
 ## Hard rules
 
 1. **Never make content edits outside `vault/`** unless asked — content belongs to the owner via Obsidian. Never touch `vault/` as a side effect of code work: it auto-publishes.
-2. **Keep the site fully static.** No runtime fs reads, no server actions for content. Everything resolves at build time via `generateStaticParams`; `dynamicParams = false` stays. The one exception is the localhost authoring sidecar (`docs/LOCAL-AUTHORING.md`), which production never starts.
+2. **Keep the site fully static.** No runtime fs reads, no server actions for content. Everything resolves at build time via `generateStaticParams`; `dynamicParams = false` stays. Two exceptions: the localhost authoring sidecar (`docs/LOCAL-AUTHORING.md`), which production never starts, and `app/api/routine/*`, the private organizer's route handlers (`docs/ROUTINE.md`, DECISIONS #235). `/routine` itself stays a static page; the database is for that feature alone, and content stays in git.
 3. **Keep `vault/` conventions stable** (top-level folder + `main.md` = section; other `.md` = entries, at any depth inside it). Do not change `slugify()` semantics casually — existing URLs depend on them.
 4. **Update `docs/DECISIONS.md`** when you make a non-obvious architectural choice. Append at the bottom; never renumber.
 5. Assets: never reference vault files directly from components — they're mirrored to `public/vault-assets/` by `scripts/sync-assets.mjs` (runs via predev/prebuild).
@@ -74,6 +74,7 @@ npm run check
 | A YouTube video reaching the shelf (nightly task) | `docs/YOUTUBE-SHELF.md` |
 | A message starting `/post` or `/sync`; publishing from a cloud session | `docs/REMOTE-POSTING.md` |
 | The localhost pencil dock and its sidecar | `docs/LOCAL-AUTHORING.md` |
+| The private `/routine` page, sign-in, viewers, its database | `docs/ROUTINE.md` |
 | Checks to run, isolated build, lint status | `docs/VERIFY.md` |
 | Why something is the way it is | search `docs/DECISIONS.md` (index at the top; `#N` references are stable) |
 
