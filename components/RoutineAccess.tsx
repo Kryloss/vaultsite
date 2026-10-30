@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
+import RoutineOrganizer from "@/components/RoutineOrganizer";
+import RoutineShared from "@/components/RoutineShared";
 import T from "@/components/T";
 import { dayCount } from "@/lib/plural";
 import {
@@ -253,9 +255,6 @@ function OwnerPanel({
 }) {
   return (
     <>
-      <p className="routine-note">
-        <T {...ui.routineOwnerEmpty} />
-      </p>
       <h2 className="routine-heading">
         <T {...ui.routineRequests} />
       </h2>
@@ -368,13 +367,15 @@ export default function RoutineAccess() {
           <p className="routine-note">
             <T {...until(status.expiresAt)} />
           </p>
-          <p className="routine-note">
-            <T {...ui.routineViewerEmpty} />
-          </p>
+          <RoutineShared />
           <SignOut email={status.email} />
         </>
       );
     case "owner":
-      return <OwnerPanel pending={status.pending} active={status.active} onChange={load} />;
+      return (
+        <RoutineOrganizer
+          access={<OwnerPanel pending={status.pending} active={status.active} onChange={load} />}
+        />
+      );
   }
 }

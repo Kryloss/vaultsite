@@ -17,7 +17,10 @@ const routineCode = [
   ...files("supabase"),
   "app/routine/page.tsx",
   "components/RoutineAccess.tsx",
+  "components/RoutineOrganizer.tsx",
+  "components/RoutineShared.tsx",
   "lib/routine-access.ts",
+  "lib/routine-model.ts",
   "lib/routine-server.ts",
 ];
 
@@ -41,6 +44,17 @@ test("the page stays static and nothing in the browser imports the server half",
   assert.doesNotMatch(page, /force-dynamic|next\/headers|routine-server/);
   const client = readFileSync("components/RoutineAccess.tsx", "utf8");
   assert.doesNotMatch(client, /routine-server|next\/headers|dangerouslySetInnerHTML/);
+});
+
+test("a viewer's week only ever comes from the sanitizing function", () => {
+  const route = readFileSync("app/api/routine/data/route.ts", "utf8");
+  const viewerBranch = route.slice(route.indexOf('"viewer"'), route.indexOf('!== "owner"'));
+  assert.match(viewerBranch, /routine_shared_days/);
+  assert.doesNotMatch(viewerBranch, /\.from\(/);
+
+  const sql = readFileSync("supabase/migrations/20261030210000_routine_organizer.sql", "utf8");
+  const shared = sql.slice(sql.indexOf("create function public.routine_shared_days"));
+  assert.doesNotMatch(shared, /location|notes|routine_habits|routine_logs/);
 });
 
 test("the site has no middleware, so only the API routes run per request", () => {

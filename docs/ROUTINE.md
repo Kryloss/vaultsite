@@ -1,6 +1,14 @@
 # Routine
 
-`/routine` is the owner's private daily organizer. Phase 1 is the access layer only: sign-in, requests, approval, expiry and the viewer gate. The organizer itself, Gemini and the Uni sync come later. Why it is built this way: `docs/DECISIONS.md` #235.
+`/routine` is the owner's private daily organizer. Built so far: the access layer (sign-in, requests, approval, expiry, the viewer gate) and the organizer itself (Today and Week views, tasks, habits, the daily log, undo). Gemini and the Uni sync come later. Why it is built this way: `docs/DECISIONS.md` #235 and #236.
+
+## The organizer
+
+- **`lib/routine-model.ts` holds the rules:** what a day contains, and what a save may contain. Dates are `YYYY-MM-DD` strings and times are minutes since midnight, so neither passes through a time zone. Weekdays are ISO: 1 is Monday.
+- **A task with no date waits on today** so it can't get lost. Past-due tasks collapse into one card on today with **Move all to today**, so they don't pile up. The owner's own weekly notes showed why: 11 overdue reminders that nobody cleared.
+- **Nothing is deleted.** Remove sets `archived_at`, the app has no DELETE privilege on blocks, tasks or habits, and `routine_changes` records every insert and update through a trigger, whoever made it. **Undo** works on any recent change. Habit ticks and the daily log are not in the history: a tick is undone by unticking, and the log is one text box.
+- **Later phases write through the same tables.** They set `routine.actor` so the history names them, and `source` plus `source_key` so a sync can find what it already added.
+- **New items are private.** `shareable` is off unless the owner ticks it, and a value that isn't exactly `true` stays off.
 
 ## How it fits a static site
 
@@ -11,7 +19,11 @@
 
 ## Where the rules live
 
-Postgres, in `supabase/migrations/`. Signed-in users hold no privilege on any table, only EXECUTE on five functions: `routine_status`, `submit_access_request`, `routine_access_overview`, `decide_access_request`, `revoke_access`. Each one checks who is calling. Anonymous callers can execute none of them.
+Postgres, in `supabase/migrations/`. Signed-in users hold no privilege on the access tables, only EXECUTE on seven functions: `routine_status`, `submit_access_request`, `routine_access_overview`, `decide_access_request`, `revoke_access`, `routine_undo`, `routine_shared_days`. Each one checks who is calling. Anonymous callers can execute none of them.
+
+The organizer tables (`routine_*`) grant `authenticated` the privileges the app needs, behind a row level security policy that only the owner passes. For anyone else they read as empty and refuse writes.
+
+**A viewer's only way in is `routine_shared_days()`.** It returns seven days of block times, with titles only for shareable blocks, plus the titles of shareable tasks. It reads no location, note, habit or log, and clamps its dates so a viewer can't read history. An unshared block still shows that the owner is busy at that time; that is the agreed trade.
 
 The site has **no service-role key**. Route handlers run as the visitor with the publishable key, so a mistake in one can't grant more than the database would.
 
@@ -61,6 +73,6 @@ Changing the owner takes SQL on purpose. Nothing in the site can do it.
 
 ## Checking changes
 
-Schema changes go in a new migration file, and get tested as fake users in a transaction that rolls back: set `request.jwt.claims` and `set local role authenticated`, then try what each kind of user must not be able to do. Run the Supabase security advisor after. Two findings are expected: `rls_enabled_no_policy` on the access tables, and `authenticated_security_definer_function_executable` on the five functions above.
+Schema changes go in a new migration file, and get tested as fake users in a transaction that rolls back: set `request.jwt.claims` and `set local role authenticated`, then try what each kind of user must not be able to do. Run the Supabase security advisor after. Two findings are expected: `rls_enabled_no_policy` on the access tables, and `authenticated_security_definer_function_executable` on the seven functions above. `auth_leaked_password_protection` also appears and doesn't apply, since password sign-in is off.
 
 `/routine` has a limit no test covers: the Google redirect only works on the real domain.

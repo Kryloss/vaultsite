@@ -64,6 +64,7 @@ const ACCESS_ERRORS = [
   "not_owner",
   "not_pending",
   "not_signed_in",
+  "not_undoable",
 ] as const;
 
 export type AccessError = (typeof ACCESS_ERRORS)[number] | "unknown";

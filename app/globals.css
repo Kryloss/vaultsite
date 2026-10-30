@@ -11546,6 +11546,220 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   margin-top: 0.875rem;
 }
 
+/* The organizer. Monochrome: the selected tab inverts like an active chip, a
+   done item dims, and the block happening now takes the one state mark (#215). */
+.routine-tabs {
+  display: flex;
+  gap: 0.375rem;
+  margin-top: 1.5rem;
+}
+
+.routine-tab {
+  border-radius: var(--r-full);
+  padding: 0.3125rem 0.875rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.routine-tab:hover {
+  background: var(--bg-hover);
+}
+
+.routine-tab[aria-pressed="true"] {
+  background: var(--text);
+  color: var(--bg);
+}
+
+.routine-day-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+.routine-day-head .routine-heading {
+  margin-top: 0;
+}
+
+.routine-stepper {
+  display: flex;
+  gap: 0.375rem;
+}
+
+.routine-stepper .routine-btn {
+  min-width: 2.75rem;
+}
+
+.routine-subheading {
+  margin-top: 1.75rem;
+  color: var(--text-tertiary);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.routine-meta {
+  color: var(--text-tertiary);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.routine-plain {
+  margin-top: 0.375rem;
+  padding: 0;
+  list-style: none;
+}
+
+.routine-row {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  border-radius: var(--r-md);
+  padding: 0.5rem 0.625rem;
+  margin-inline: -0.625rem;
+  color: var(--text);
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+button.routine-row:hover {
+  background: var(--bg-hover);
+}
+
+.routine-row[aria-current="time"] .routine-meta:first-child::before {
+  content: "";
+  display: inline-block;
+  width: 0.375rem;
+  height: 0.375rem;
+  margin-right: 0.375rem;
+  vertical-align: 0.125em;
+  border-radius: var(--r-full);
+  background: var(--hue-amber);
+}
+
+.routine-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.3125rem 0;
+}
+
+.routine-check input {
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-top: 0.25rem;
+  accent-color: var(--text);
+}
+
+.routine-check-title {
+  color: var(--text);
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.routine-check-title[data-done] {
+  color: var(--text-tertiary);
+  text-decoration: line-through;
+}
+
+.routine-overdue {
+  margin-top: 1.25rem;
+}
+
+.routine-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.routine-pair label {
+  min-width: 0;
+}
+
+.routine-pair label > span {
+  display: block;
+  margin-bottom: 0.375rem;
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.routine-editor {
+  margin-top: 1.75rem;
+}
+
+.routine-editor .routine-form {
+  margin-top: 0;
+}
+
+.routine-history {
+  margin-top: 2.5rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.routine-history summary {
+  cursor: pointer;
+}
+
+.routine-history-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+.routine-history-row .routine-btn {
+  min-width: 0;
+  flex: none;
+}
+
+.routine-week {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.routine-week-day {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 0.75rem;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.routine-week-day:hover {
+  background: var(--bg-hover);
+}
+
+.routine-week-day[aria-current="date"] {
+  border-color: var(--text);
+}
+
+.routine-week-line {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+/* The gutters' own breakpoint (#107). Past the measure so seven days have room,
+   centred on the page; the drawer floats, so nothing sits beside it. */
+@media (min-width: 1168px) {
+  .routine-week {
+    --routine-week: min(72rem, calc(100vw - 4rem));
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    width: var(--routine-week);
+    margin-left: calc((100% - var(--routine-week)) / 2);
+  }
+}
+
 .routine-account {
   display: flex;
   flex-wrap: wrap;
