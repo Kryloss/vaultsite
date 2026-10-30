@@ -244,6 +244,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 233 | An updates log is a run of `[!update]` callouts, drawn as a timeline |
 | 234 | A note can wear a skin: `skin:` hands one page its own stylesheet and driver |
 | 235 | `/routine` is a static page over route handlers, and Postgres holds the rules |
+| 236 | The organizer never deletes, and a viewer's data is built by one function |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1948,3 +1949,13 @@ The owner asked for a private organizer with one editor and temporary viewers, w
 **The owner's email only opens the page.** One-click approve links were rejected because mail scanners follow links and a forwarded email would carry the power to approve.
 
 The session cookies are httpOnly and scoped to `/api/routine`, so no script on the site can read them and public pages never carry them. The Google consent screen names the Supabase project's address, because a custom auth domain is a paid add-on; rewriting the flow around Google's ID tokens would hide that at the cost of hand-written auth code, and it isn't worth it. Settings exist only on Vercel's Production environment, so previews of a public repository have no way in. See `docs/ROUTINE.md`.
+
+## 236. The organizer never deletes, and a viewer's data is built by one function (2026-10-30)
+
+Gemini and the Uni sync will change this data without a person pressing Save, and the owner chose that over approving each change. That only stays safe if a bad change can always be taken back, so the guarantee sits below the app: the role has no DELETE on blocks, tasks or habits, Remove sets `archived_at`, and a trigger writes every insert and update to `routine_changes`. In a trigger, nothing can write around the history, including a later phase with a bug. Undo restores a row from that record and adds nothing to it. Habit ticks and the daily log stay out of the history: a tick has its own undo, and logging every edit of one text box would bury the changes that matter.
+
+The organizer tables differ from the access tables on purpose. Access has no table privileges at all, because its rules are decisions; the organizer is plain owner CRUD, where seven more functions would only re-state "is this the owner?" a row level security policy already answers. That needed `private.is_owner()` to be executable by `authenticated`, which reveals nothing beyond the caller's own status.
+
+A viewer never touches those tables. Filtering the owner's rows in a route handler was rejected: a viewer's privacy would then depend on every future field being remembered in a filter. `routine_shared_days()` builds what a viewer gets by naming what is allowed out, so a new column stays private by default. `scripts/routine.test.mjs` fails if that function ever reads a location, a note, a habit or a log.
+
+Past-due tasks collapse into one card rather than a growing list, from the owner's own weekly notes, where 11 overdue reminders sat unticked. Dates are strings in the owner's calendar rather than instants, because a block at 08:10 is 08:10 on both sides of a clock change.

@@ -41,6 +41,14 @@ export function en(n: number, one: string, many: string): string {
   return `${n} ${n === 1 ? one : many}`;
 }
 
+/** "3 overdue" / "3 прострочені", ready for `<T>`. */
+export function overdueCount(n: number): Str {
+  return {
+    en: `${n} overdue`,
+    uk: uk(n, "прострочене", "прострочені", "прострочених"),
+  };
+}
+
 /** "7 days" / "7 днів", ready for `<T>`. */
 export function dayCount(n: number): Str {
   return {
