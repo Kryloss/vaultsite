@@ -57,6 +57,32 @@ test("a viewer's week only ever comes from the sanitizing function", () => {
   assert.doesNotMatch(shared, /location|notes|routine_habits|routine_logs/);
 });
 
+test("Gemini can't change what a viewer sees, and it has no key to leak", () => {
+  const sql = readFileSync("supabase/migrations/20261030220000_routine_gemini.sql", "utf8");
+  const apply = sql.slice(
+    sql.indexOf("create function public.routine_apply_gemini"),
+    sql.indexOf("create function public.routine_undo_batch")
+  );
+  assert.doesNotMatch(apply, /shareable|access_grants|access_requests|private\.owner/);
+
+  const gemini = readFileSync("lib/routine-gemini.ts", "utf8");
+  assert.doesNotMatch(gemini.slice(0, gemini.indexOf("function time(")).replace(/\/\*[\s\S]*?\*\//g, ""), /shareable/);
+
+  const vertex = readFileSync("lib/routine-vertex.ts", "utf8");
+  assert.doesNotMatch(vertex, /API_KEY|private_key|GOOGLE_APPLICATION_CREDENTIALS/);
+});
+
+test("only the owner's organize route reaches Gemini", () => {
+  const callers = files("app/api/routine").filter((path) =>
+    readFileSync(path, "utf8").includes("askGemini")
+  );
+  assert.deepEqual(callers, ["app/api/routine/organize/route.ts"]);
+
+  const route = readFileSync("app/api/routine/organize/route.ts", "utf8");
+  assert.ok(route.indexOf('rpc("routine_ai_reserve"') < route.indexOf("askGemini(systemPrompt"));
+  assert.ok(route.indexOf("parseAnswer(result") < route.indexOf('rpc("routine_apply_gemini"'));
+});
+
 test("the site has no middleware, so only the API routes run per request", () => {
   const root = readdirSync(".");
   assert.equal(root.some((name) => /^(middleware|proxy)\./.test(name)), false);

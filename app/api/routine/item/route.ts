@@ -90,5 +90,9 @@ export async function POST(request: NextRequest) {
       const { error } = await supabase.rpc("routine_undo", { p_change: action.change });
       return error ? refuse(error.message) : reply({ ok: true });
     }
+    case "undo_note": {
+      const { error } = await supabase.rpc("routine_undo_batch", { p_batch: action.batch });
+      return error ? refuse(error.message) : reply({ ok: true });
+    }
   }
 }

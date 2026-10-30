@@ -1,6 +1,18 @@
 # Routine
 
-`/routine` is the owner's private daily organizer. Built so far: the access layer (sign-in, requests, approval, expiry, the viewer gate) and the organizer itself (Today and Week views, tasks, habits, the daily log, undo). Gemini and the Uni sync come later. Why it is built this way: `docs/DECISIONS.md` #235 and #236.
+`/routine` is the owner's private daily organizer. Built so far: the access layer (sign-in, requests, approval, expiry, the viewer gate), the organizer itself (Today and Week views, tasks, habits, the daily log, undo), and Gemini organizing a typed note. The Uni sync comes later. Why it is built this way: `docs/DECISIONS.md` #235, #236 and #237.
+
+## Gemini
+
+The owner types a note on Today, and Gemini applies it straight away. It can add, change, finish and remove items, in English whatever language the note was in. **Undo** beside its reply takes the whole note back.
+
+- **It has no tools.** `/api/routine/organize` sends a note and returns JSON. `parseAnswer()` in `lib/routine-gemini.ts` checks every change, and one bad change refuses the whole note. `routine_apply_gemini()` then applies it as one transaction.
+- **It can only name what it was shown.** Items reach it as `b1`, `t2`, `h3`, never as database ids.
+- **It can't change what viewers see.** `shareable` is not sent, not in the answer's schema, and not in the database function. Anything Gemini adds starts private.
+- **What it reads:** titles, times, locations, notes and the last 7 days of daily logs, with long fields cut. Requests, viewers and email addresses never reach it.
+- **Limits:** 40 calls a day in `routine_ai_reserve()`, counted before the call. Each note is capped at 30 changes and 5 removals. Google's spend cap sits above that.
+- **Costs:** model `gemini-3.1-flash-lite` on Vertex, overridable with `ROUTINE_GEMINI_MODEL`. Output stops at 2048 tokens.
+- **No key exists.** Vercel proves which deployment is asking and Google issues a short-lived token. Only the Production environment is trusted.
 
 ## The organizer
 
@@ -19,7 +31,7 @@
 
 ## Where the rules live
 
-Postgres, in `supabase/migrations/`. Signed-in users hold no privilege on the access tables, only EXECUTE on seven functions: `routine_status`, `submit_access_request`, `routine_access_overview`, `decide_access_request`, `revoke_access`, `routine_undo`, `routine_shared_days`. Each one checks who is calling. Anonymous callers can execute none of them.
+Postgres, in `supabase/migrations/`. Signed-in users hold no privilege on the access tables, only EXECUTE on eleven functions: `routine_status`, `submit_access_request`, `routine_access_overview`, `decide_access_request`, `revoke_access`, `routine_undo`, `routine_undo_batch`, `routine_shared_days`, `routine_apply_gemini`, `routine_ai_reserve`, `routine_ai_record`. Each one checks who is calling. Anonymous callers can execute none of them.
 
 The organizer tables (`routine_*`) grant `authenticated` the privileges the app needs, behind a row level security policy that only the owner passes. For anyone else they read as empty and refuse writes.
 
@@ -49,6 +61,13 @@ Set on Vercel's **Production** environment only. Anywhere else the routes return
 | `RESEND_API_KEY` | Sends the request email |
 | `ROUTINE_FROM_EMAIL` | A sender on a domain verified in Resend |
 | `ROUTINE_NOTIFY_EMAIL` | Where requests go |
+| `GCP_PROJECT_ID` | The Google Cloud project's ID |
+| `GCP_PROJECT_NUMBER` | Its number |
+| `GCP_SERVICE_ACCOUNT_EMAIL` | The service account Vercel acts as, holding only Vertex AI User |
+| `GCP_WORKLOAD_IDENTITY_POOL_ID` | The identity pool, `vercel` |
+| `GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID` | Its provider, `vercel` |
+
+Google Cloud needs: the Vertex AI API on; a workload identity pool whose OIDC provider has the issuer `https://oidc.vercel.com/kryloss-projects`, allowed audience `https://vercel.com/kryloss-projects` and `google.subject` mapped to `assertion.sub`; Workload Identity User on the service account for only the subject `owner:kryloss-projects:project:vaultsite:environment:production`; project-wide caching disabled; and a spend cap on Vertex. Without these the note box says Gemini isn't connected.
 
 Supabase Authentication: Google on, Email and Phone off, Site URL `https://kryloss.com`, redirect URL `https://kryloss.com/api/routine/auth/callback`.
 
@@ -73,6 +92,6 @@ Changing the owner takes SQL on purpose. Nothing in the site can do it.
 
 ## Checking changes
 
-Schema changes go in a new migration file, and get tested as fake users in a transaction that rolls back: set `request.jwt.claims` and `set local role authenticated`, then try what each kind of user must not be able to do. Run the Supabase security advisor after. Two findings are expected: `rls_enabled_no_policy` on the access tables, and `authenticated_security_definer_function_executable` on the seven functions above. `auth_leaked_password_protection` also appears and doesn't apply, since password sign-in is off.
+Schema changes go in a new migration file, and get tested as fake users in a transaction that rolls back: set `request.jwt.claims` and `set local role authenticated`, then try what each kind of user must not be able to do. Run the Supabase security advisor after. Two findings are expected: `rls_enabled_no_policy` on the access tables, and `authenticated_security_definer_function_executable` on the eleven functions above. `auth_leaked_password_protection` also appears and doesn't apply, since password sign-in is off.
 
 `/routine` has a limit no test covers: the Google redirect only works on the real domain.
