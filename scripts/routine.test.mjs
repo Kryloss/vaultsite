@@ -88,6 +88,17 @@ test("the site has no middleware, so only the API routes run per request", () =>
   assert.equal(root.some((name) => /^(middleware|proxy)\./.test(name)), false);
 });
 
+test("the organizer's write routes check for a session before touching data", () => {
+  for (const path of ["app/api/routine/item/route.ts", "app/api/routine/organize/route.ts"]) {
+    const source = readFileSync(path, "utf8");
+    const signedIn = source.indexOf("auth.getUser()");
+    assert.ok(signedIn > 0, path);
+    assert.ok(signedIn < source.indexOf(".rpc("), path);
+  }
+  const item = readFileSync("app/api/routine/item/route.ts", "utf8");
+  assert.ok(item.indexOf("auth.getUser()") < item.indexOf("supabase.from("));
+});
+
 test("every routine API route that changes state checks where it came from", () => {
   for (const path of files("app/api/routine")) {
     const source = readFileSync(path, "utf8");

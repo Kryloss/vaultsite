@@ -25,7 +25,12 @@ export async function POST(request: NextRequest) {
   const action = parseAction(await request.json().catch(() => null));
   if (!action) return reply({ error: "invalid_request" }, 400);
 
-  const refuse = (message: string | undefined) => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return reply({ error: "not_signed_in" }, 401);
+
+  const refuse =(message: string | undefined) => {
     const code = accessError(message);
     return reply({ error: code }, accessErrorStatus(code));
   };
