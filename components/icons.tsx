@@ -314,6 +314,17 @@ export function ClockIcon({ className }: IconProps) {
   );
 }
 
+export function CalendarIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...stroke} aria-hidden>
+      <rect x="3.5" y="5" width="17" height="15.5" rx="2.5" />
+      <path d="M3.5 10h17" />
+      <path d="M8 3v4" />
+      <path d="M16 3v4" />
+    </svg>
+  );
+}
+
 /**
  * The sidebar tree's disclosure twisty. Points right when shut and is turned
  * a quarter by CSS when open, so the two states are one glyph and one
@@ -565,6 +576,8 @@ const byName: Record<string, (p: IconProps) => JSX.Element> = {
   graduation: SchoolIcon,
   now: ClockIcon,
   clock: ClockIcon,
+  calendar: CalendarIcon,
+  routine: CalendarIcon,
   search: SearchIcon,
   github: GitHubIcon,
   instagram: InstagramIcon,

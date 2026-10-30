@@ -15,6 +15,52 @@ export interface Str {
   uk: string;
 }
 
+/** The sections of /routine/privacy. Must stay true to what `docs/ROUTINE.md` describes. */
+export const routinePrivacy: { heading: Str; body: Str }[] = [
+  {
+    heading: { en: "What this covers", uk: "Чого це стосується" },
+    body: {
+      en: "This covers the Routine page on kryloss.com and nothing else on the site. You only give it data if you sign in.",
+      uk: "Це стосується лише сторінки «Розпорядок» на kryloss.com. Ви передаєте їй дані, тільки якщо входите.",
+    },
+  },
+  {
+    heading: { en: "What I store", uk: "Що я зберігаю" },
+    body: {
+      en: "Your name, your email address and your Google account ID from Google sign-in. If you ask for access, I also store what you wrote in the form, how long you asked for, my decision, and when your access ends. Requests and decisions are kept in an access log. The page asks Google for your basic profile only, and nothing else from your Google account.",
+      uk: "Ваше ім’я, адресу електронної пошти та ідентифікатор облікового запису Google зі входу через Google. Якщо ви просите доступ, я також зберігаю те, що ви написали у формі, бажаний строк, моє рішення та дату завершення доступу. Запити й рішення записуються в журнал доступу. Сторінка запитує в Google лише базовий профіль і більше нічого з вашого облікового запису.",
+    },
+  },
+  {
+    heading: { en: "How I use it", uk: "Як я це використовую" },
+    body: {
+      en: "Only to decide who can see the page, and to let you in. I don’t sell it, share it for advertising, or send your request to an AI model.",
+      uk: "Лише щоб вирішити, хто може бачити сторінку, і впустити вас. Я не продаю ці дані, не передаю їх для реклами й не надсилаю ваш запит моделям ШІ.",
+    },
+  },
+  {
+    heading: { en: "Who handles it", uk: "Хто це обробляє" },
+    body: {
+      en: "Google handles sign-in. Supabase stores the data and runs sign-in, in Canada. Vercel hosts the site. Resend delivers the email that tells me about your request. Those companies process the data only to provide these services.",
+      uk: "Google відповідає за вхід. Supabase зберігає дані й керує входом у Канаді. Vercel розміщує сайт. Resend доставляє лист про ваш запит. Ці компанії обробляють дані лише для надання цих послуг.",
+    },
+  },
+  {
+    heading: { en: "Cookies", uk: "Файли cookie" },
+    body: {
+      en: "Signing in sets cookies that keep you signed in. They’re sent only to this page’s sign-in and access routes, and scripts on the site can’t read them.",
+      uk: "Вхід створює файли cookie, які зберігають вашу сесію. Вони надсилаються лише маршрутам входу й доступу цієї сторінки, а скрипти на сайті не можуть їх прочитати.",
+    },
+  },
+  {
+    heading: { en: "Keeping and deleting it", uk: "Зберігання й видалення" },
+    body: {
+      en: "Your access ends on the date I set, or sooner if I revoke it. Your details stay until you ask me to delete them, and I’ll then remove your account and your requests.",
+      uk: "Ваш доступ завершується у визначену дату або раніше, якщо я його скасую. Ваші дані зберігаються, доки ви не попросите їх видалити. Тоді я вилучу ваш обліковий запис і запити.",
+    },
+  },
+];
+
 export const ui = {
   todaysVibe: { en: "Today’s vibe", uk: "Настрій дня" },
   latestVibe: { en: "Latest vibe", uk: "Останній настрій" },
@@ -28,6 +74,80 @@ export const ui = {
   vibeFailed: { en: "Couldn’t play. Tap to retry.", uk: "Не вдалося відтворити. Спробуйте ще раз." },
   vibeBlocked: { en: "This one can’t play here.", uk: "Цей трек не можна відтворити тут." },
   vibeOnYouTube: { en: "Open on YouTube", uk: "Відкрити на YouTube" },
+  // routine — components/RoutineAccess.tsx
+  routineTitle: { en: "Routine", uk: "Розпорядок" },
+  routineIntro: {
+    en: "My private organizer for my daily schedule, tasks, habits and notes. Log in, or ask for temporary view-only access.",
+    uk: "Мій приватний органайзер для щоденного розкладу, завдань, звичок і нотаток. Увійдіть або попросіть тимчасовий доступ для перегляду.",
+  },
+  routinePrivacyTitle: { en: "Privacy", uk: "Конфіденційність" },
+  routinePrivacyUpdated: { en: "Last updated October 30, 2026.", uk: "Оновлено 30 жовтня 2026 р." },
+  routinePrivacyContact: { en: "Email me about your data", uk: "Написати мені про ваші дані" },
+  routineLogIn: { en: "Log in", uk: "Увійти" },
+  routineRequestAccess: { en: "Request access", uk: "Попросити доступ" },
+  routineSignOut: { en: "Sign out", uk: "Вийти" },
+  routineRequestIntro: {
+    en: "You’re signed in, but you don’t have access yet. Tell me who you are and I’ll decide.",
+    uk: "Ви увійшли, але доступу ще немає. Напишіть, хто ви, і я вирішу.",
+  },
+  routineRelationship: { en: "How do you know me?", uk: "Звідки ви мене знаєте?" },
+  routineReason: { en: "Why do you want access?", uk: "Навіщо вам доступ?" },
+  routineHowLong: { en: "For how long?", uk: "На який час?" },
+  routineSend: { en: "Send request", uk: "Надіслати запит" },
+  routinePending: {
+    en: "Your request is waiting for my decision.",
+    uk: "Ваш запит чекає на моє рішення.",
+  },
+  routineDenied: {
+    en: "Your request was declined. You can ask again after 7 days.",
+    uk: "Ваш запит відхилено. Спробувати знову можна через 7 днів.",
+  },
+  routineUnverified: {
+    en: "This account can’t request access. Sign in with a verified Google account.",
+    uk: "Цей обліковий запис не може попросити доступ. Увійдіть через підтверджений обліковий запис Google.",
+  },
+  routineUnavailable: {
+    en: "Sign-in isn’t available right now.",
+    uk: "Вхід зараз недоступний.",
+  },
+  routineSignInFailed: {
+    en: "That sign-in didn’t work. Please try again.",
+    uk: "Не вдалося увійти. Спробуйте ще раз.",
+  },
+  /** {date} is replaced with the expiry — see components/RoutineAccess.tsx */
+  routineUntil: { en: "Access until {date}", uk: "Доступ до {date}" },
+  routineViewerEmpty: {
+    en: "Nothing is shared here yet.",
+    uk: "Тут поки нічого не поширено.",
+  },
+  routineOwnerEmpty: {
+    en: "The organizer isn’t built yet. Access is ready.",
+    uk: "Органайзер ще не готовий. Доступ уже працює.",
+  },
+  routineRequests: { en: "Requests", uk: "Запити" },
+  routineNoRequests: { en: "No requests waiting.", uk: "Немає запитів." },
+  routineViewers: { en: "Viewers", uk: "Глядачі" },
+  routineNoViewers: { en: "Nobody has access.", uk: "Ні в кого немає доступу." },
+  routineApprove: { en: "Approve", uk: "Схвалити" },
+  routineDeny: { en: "Deny", uk: "Відхилити" },
+  routineRevoke: { en: "Revoke", uk: "Скасувати" },
+  routineErrorCooldown: {
+    en: "You can ask again 7 days after a declined request.",
+    uk: "Попросити знову можна через 7 днів після відмови.",
+  },
+  routineErrorDaily: {
+    en: "Too many requests today. Please try again tomorrow.",
+    uk: "Сьогодні забагато запитів. Спробуйте завтра.",
+  },
+  routineErrorInvalid: {
+    en: "Please check the form and try again.",
+    uk: "Перевірте форму та спробуйте ще раз.",
+  },
+  routineErrorGeneric: {
+    en: "Something went wrong. Please try again.",
+    uk: "Щось пішло не так. Спробуйте ще раз.",
+  },
+
   // chrome / sidebar
   publishedFrom: { en: "Published from Obsidian", uk: "Опубліковано з Obsidian" },
   /** {n} is replaced with the day number — see components/ResistanceDay.tsx */

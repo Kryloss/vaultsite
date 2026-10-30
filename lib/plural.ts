@@ -41,6 +41,14 @@ export function en(n: number, one: string, many: string): string {
   return `${n} ${n === 1 ? one : many}`;
 }
 
+/** "7 days" / "7 днів", ready for `<T>`. */
+export function dayCount(n: number): Str {
+  return {
+    en: en(n, "day", "days"),
+    uk: uk(n, "день", "дні", "днів"),
+  };
+}
+
 /** "14 notes" / "14 нотаток", ready for `<T>`. */
 export function noteCount(n: number): Str {
   return {
