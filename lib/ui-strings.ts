@@ -167,6 +167,18 @@ export const ui = {
   routineByYou: { en: "you", uk: "ви" },
   routineByGemini: { en: "Gemini", uk: "Gemini" },
   routineByUni: { en: "Uni sync", uk: "Синхронізація Uni" },
+  routineNoteLabel: { en: "Tell Gemini what changed", uk: "Напишіть Gemini, що змінилося" },
+  routineOrganize: { en: "Organize", uk: "Упорядкувати" },
+  routineOrganizing: { en: "Organizing…", uk: "Упорядковую…" },
+  routineGeminiOff: { en: "Gemini isn’t connected yet.", uk: "Gemini ще не під’єднано." },
+  routineGeminiLimit: {
+    en: "That’s today’s limit for Gemini. Try again tomorrow.",
+    uk: "Це сьогоднішній ліміт для Gemini. Спробуйте завтра.",
+  },
+  routineGeminiBad: {
+    en: "Gemini’s answer didn’t make sense, so nothing changed. Try rewording the note.",
+    uk: "Відповідь Gemini була незрозумілою, тож нічого не змінено. Спробуйте переформулювати.",
+  },
   routineBusy: { en: "Busy", uk: "Зайнято" },
   routineDue: { en: "Due", uk: "Термін" },
   routineRequests: { en: "Requests", uk: "Запити" },

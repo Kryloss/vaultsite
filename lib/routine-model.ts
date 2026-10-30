@@ -251,7 +251,8 @@ export type RoutineAction =
   | { action: "reschedule"; ids: string[]; due_on: string }
   | { action: "check"; habit_id: string; on_date: string; checked: boolean }
   | { action: "log"; on_date: string; body: string }
-  | { action: "undo"; change: number };
+  | { action: "undo"; change: number }
+  | { action: "undo_note"; batch: string };
 
 /** One request body from the organizer, or null when it can't be one. */
 export function parseAction(body: unknown): RoutineAction | null {
@@ -296,6 +297,8 @@ export function parseAction(body: unknown): RoutineAction | null {
       return Number.isInteger(raw.change) && (raw.change as number) > 0
         ? { action: "undo", change: raw.change as number }
         : null;
+    case "undo_note":
+      return isId(raw.batch) ? { action: "undo_note", batch: raw.batch } : null;
     default:
       return null;
   }

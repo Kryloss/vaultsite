@@ -416,6 +416,88 @@ function HabitForm({ item, onSave, onClose }: FormProps & { item?: Habit }) {
   );
 }
 
+function noteError(code: string | undefined): Str {
+  if (code === "gemini_off") return ui.routineGeminiOff;
+  if (code === "daily_limit") return ui.routineGeminiLimit;
+  if (code === "gemini_bad") return ui.routineGeminiBad;
+  return ui.routineErrorGeneric;
+}
+
+/** Type anything; Gemini changes the routine straight away, and one press takes it all back. */
+function NoteBox({ onOrganized, onUndo }: { onOrganized: () => void; onUndo: (batch: string) => void }) {
+  const [note, setNote] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<Str | null>(null);
+  const [result, setResult] = useState<{ message: string; batch: string | null } | null>(null);
+
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    setBusy(true);
+    setError(null);
+    setResult(null);
+    try {
+      const response = await fetch("/api/routine/organize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ note }),
+      });
+      const body = await response.json();
+      if (response.ok) {
+        setResult(body);
+        setNote("");
+        onOrganized();
+      } else {
+        setError(noteError(body.error));
+      }
+    } catch {
+      setError(ui.routineErrorGeneric);
+    }
+    setBusy(false);
+  }
+
+  return (
+    <form className="routine-note-box" onSubmit={submit}>
+      <label htmlFor="routine-note"><T {...ui.routineNoteLabel} /></label>
+      <textarea
+        id="routine-note"
+        className="routine-input"
+        required
+        rows={3}
+        maxLength={4000}
+        value={note}
+        onChange={(event) => setNote(event.target.value)}
+      />
+      <div className="routine-actions">
+        <button type="submit" disabled={busy} className="routine-btn press">
+          <T {...(busy ? ui.routineOrganizing : ui.routineOrganize)} />
+        </button>
+      </div>
+      {error ? (
+        <p role="alert" className="routine-note">
+          <T {...error} />
+        </p>
+      ) : null}
+      {result ? (
+        <div role="status" className="routine-history-row routine-note">
+          <span>{result.message}</span>
+          {result.batch ? (
+            <button
+              type="button"
+              onClick={() => {
+                onUndo(result.batch as string);
+                setResult(null);
+              }}
+              className="routine-btn press"
+            >
+              <T {...ui.routineUndo} />
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+    </form>
+  );
+}
+
 function History({ changes, onUndo }: { changes: Change[]; onUndo: (id: number) => void }) {
   const actors: Record<string, Str> = {
     owner: ui.routineByYou,
@@ -689,6 +771,11 @@ export default function RoutineOrganizer({ access }: { access: ReactNode }) {
     <>
       {header}
       {alert}
+
+      <NoteBox
+        onOrganized={load}
+        onUndo={(batch) => void act({ action: "undo_note", batch })}
+      />
 
       <div className="routine-day-head">
         <h2 className="routine-heading">

@@ -11571,6 +11571,22 @@ html[data-dev-tools] .top-list[data-dev-top-list] [data-dev-dragging] {
   color: var(--bg);
 }
 
+.routine-note-box {
+  margin-top: 1.5rem;
+}
+
+.routine-note-box label {
+  display: block;
+  margin-bottom: 0.375rem;
+  color: var(--text);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.routine-note-box .routine-actions {
+  margin-top: 0.625rem;
+}
+
 .routine-day-head {
   display: flex;
   flex-wrap: wrap;

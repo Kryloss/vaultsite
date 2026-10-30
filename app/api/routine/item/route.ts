@@ -25,7 +25,12 @@ export async function POST(request: NextRequest) {
   const action = parseAction(await request.json().catch(() => null));
   if (!action) return reply({ error: "invalid_request" }, 400);
 
-  const refuse = (message: string | undefined) => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return reply({ error: "not_signed_in" }, 401);
+
+  const refuse =(message: string | undefined) => {
     const code = accessError(message);
     return reply({ error: code }, accessErrorStatus(code));
   };
@@ -88,6 +93,10 @@ export async function POST(request: NextRequest) {
     }
     case "undo": {
       const { error } = await supabase.rpc("routine_undo", { p_change: action.change });
+      return error ? refuse(error.message) : reply({ ok: true });
+    }
+    case "undo_note": {
+      const { error } = await supabase.rpc("routine_undo_batch", { p_batch: action.batch });
       return error ? refuse(error.message) : reply({ ok: true });
     }
   }

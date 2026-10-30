@@ -245,6 +245,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 234 | A note can wear a skin: `skin:` hands one page its own stylesheet and driver |
 | 235 | `/routine` is a static page over route handlers, and Postgres holds the rules |
 | 236 | The organizer never deletes, and a viewer's data is built by one function |
+| 237 | Gemini returns data, never acts, and can't change what a viewer sees |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1959,3 +1960,13 @@ The organizer tables differ from the access tables on purpose. Access has no tab
 A viewer never touches those tables. Filtering the owner's rows in a route handler was rejected: a viewer's privacy would then depend on every future field being remembered in a filter. `routine_shared_days()` builds what a viewer gets by naming what is allowed out, so a new column stays private by default. `scripts/routine.test.mjs` fails if that function ever reads a location, a note, a habit or a log.
 
 Past-due tasks collapse into one card rather than a growing list, from the owner's own weekly notes, where 11 overdue reminders sat unticked. Dates are strings in the owner's calendar rather than instants, because a block at 08:10 is 08:10 on both sides of a clock change.
+
+## 237. Gemini returns data, never acts, and can't change what a viewer sees (2026-10-30)
+
+The owner chose the widest setting on each question: Gemini applies a note straight away, may remove items as well as add them, and reads locations, notes and recent logs. Those are the owner's calls and they stand. What keeps them safe is the shape around the model rather than a review step.
+
+Gemini has no tools and no database access. It answers in a fixed JSON schema, `parseAnswer()` checks all of it, and `routine_apply_gemini()` applies it in one transaction. One bad change refuses the note, since half a note applied is harder to notice than none. Items are shown as `b1` and `t2`, so it can't name an id it wasn't given, and a hallucinated reference fails instead of hitting the wrong row. The limits are in the database, where a bug in the handler can't lift them: 30 changes and 5 removals a note, 40 calls a day. Removal only archives, so even a bad note is one Undo away, and all of a note's changes share a `batch` so that Undo is one press.
+
+`shareable` is outside the whole path: not sent, not in the schema, and not in the function, which on an update leaves the column alone. A note mentioning that something is public still can't reveal it. This is the rule that matters most for the Uni sync, where the text reaching Gemini will not all be the owner's own.
+
+Login is workload identity federation rather than a service account key, because there is then no long-lived secret for a public repository or a stolen environment to leak, and the trust is limited to this project's Production environment. Calls go to Vertex rather than AI Studio because the trial credit can't pay for AI Studio. The app's 40-a-day limit sits under Google's spend cap because the cap isn't instant and counts cost before credits. `gemini-3.1-flash-lite` is the default on cost: about US$1 a month at the expected use, against 3.8 Flash doubling in price on 2027-01-01. Only one short sentence of Gemini's goes on the page, and the owner reads it, so it is text and never markup.
