@@ -82,12 +82,17 @@ export async function POST(request: NextRequest) {
     p_output: result.outputTokens,
   });
 
-  const parsed = parseAnswer(result.answer, refs);
+  const parsed = parseAnswer(result.answer, refs, (reason) =>
+    console.error("routine: answer refused:", reason)
+  );
   if (!parsed) return reply({ error: "gemini_bad" }, 422);
   if (!parsed.ops.length) return reply({ message: parsed.message, batch: null });
 
   const { data: batch, error } = await supabase.rpc("routine_apply_gemini", { p_ops: parsed.ops });
-  if (error) return reply({ error: "gemini_bad" }, 422);
+  if (error) {
+    console.error("routine: apply refused:", error.code, error.message);
+    return reply({ error: "gemini_bad" }, 422);
+  }
 
   return reply({ message: parsed.message, batch });
 }
