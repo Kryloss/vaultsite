@@ -11,7 +11,7 @@ The owner types a note on Today, and Gemini applies it straight away. It can add
 - **It can't change what viewers see.** `shareable` is not sent, not in the answer's schema, and not in the database function. Anything Gemini adds starts private.
 - **What it reads:** titles, times, locations, notes and the last 7 days of daily logs, with long fields cut. Requests, viewers and email addresses never reach it.
 - **Limits:** 40 calls a day in `routine_ai_reserve()`, counted before the call. Each note is capped at 30 changes and 5 removals. Google's spend cap sits above that.
-- **Costs:** model `gemini-3.1-flash-lite` on Vertex, overridable with `ROUTINE_GEMINI_MODEL`. Output stops at 2048 tokens.
+- **Costs:** model `gemini-3.1-flash-lite` on Vertex, overridable with `ROUTINE_GEMINI_MODEL`. Output stops at 8192 tokens, which has to cover thinking as well as the answer: a real note was cut off at 2048.
 - **No key exists.** Vercel proves which deployment is asking and Google issues a short-lived token. Only the Production environment is trusted.
 
 ## The organizer

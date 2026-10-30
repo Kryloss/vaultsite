@@ -256,7 +256,53 @@ test("an unreadable reply says why, and never what it said", () => {
     candidates: [{ finishReason: "MAX_TOKENS", content: { parts: [{ text: '{"message":"private' }] } }],
   };
   assert.equal(replyAnswer(reply, (reason) => reasons.push(reason)), null);
-  assert.deepEqual(reasons, ["unreadable reply, finish: MAX_TOKENS, length: 19"]);
+  assert.deepEqual(reasons, [
+    "unreadable reply, finish: MAX_TOKENS, length: 19, tokens: 0 answer, 0 thinking",
+  ]);
+});
+
+test("a cut-off reply reports where its tokens went", () => {
+  const reasons: string[] = [];
+  replyAnswer(
+    {
+      candidates: [{ finishReason: "MAX_TOKENS", content: { parts: [{ text: "{" }] } }],
+      usageMetadata: { candidatesTokenCount: 500, thoughtsTokenCount: 1548 },
+    },
+    (reason) => reasons.push(reason)
+  );
+  assert.match(reasons[0], /tokens: 500 answer, 1548 thinking/);
+});
+
+test("a task's day isn't lost when it arrives in the block field", () => {
+  const parsed = parseAnswer(
+    answer({ action: "add", kind: "task", title: "Homework 5", date: "2026-10-31", start: "17:00" }),
+    {}
+  );
+  assert.equal(parsed?.ops[0].values?.due_on, "2026-10-31");
+  assert.equal(parsed?.ops[0].values?.due_min, 1020);
+});
+
+test("a task's own fields win over the block fields", () => {
+  const parsed = parseAnswer(
+    answer({ action: "add", kind: "task", title: "x", due: "2026-11-01", date: "2026-10-31" }),
+    {}
+  );
+  assert.equal(parsed?.ops[0].values?.due_on, "2026-11-01");
+});
+
+test("moving a task with the block field moves it", () => {
+  const parsed = parseAnswer(
+    answer({ action: "update", kind: "task", ref: "t1", date: "2026-11-09" }),
+    refs
+  );
+  assert.equal(parsed?.ops[0].values?.due_on, "2026-11-09");
+  assert.equal(parsed?.ops[0].values?.due_min, 1439);
+});
+
+test("the prompt keeps a task's day in due, and a weekly repeat in one block", () => {
+  const prompt = systemPrompt("2026-10-30");
+  assert.match(prompt, /Put its day in due/);
+  assert.match(prompt, /one block with weekday, never one block per date/);
 });
 
 test("an empty reply is refused without throwing", () => {

@@ -13,8 +13,12 @@ import { replyAnswer, RESPONSE_SCHEMA } from "@/lib/routine-gemini";
 
 const MODEL = process.env.ROUTINE_GEMINI_MODEL ?? "gemini-3.1-flash-lite";
 
-/** One note is a small job, so a long answer means something went wrong. */
-const MAX_OUTPUT_TOKENS = 2048;
+/**
+ * Thinking counts against this, and a real note hit 2048 with only 2153
+ * characters of answer. 30 changes, the most a note may hold, fit well inside
+ * this, so it stops a runaway reply without cutting off a real one.
+ */
+const MAX_OUTPUT_TOKENS = 8192;
 const TIMEOUT_MS = 25_000;
 
 interface Settings {
@@ -86,6 +90,8 @@ export async function askGemini(system: string, user: string) {
   return {
     answer: replyAnswer(body, (reason) => console.error("routine: Gemini reply:", reason)),
     inputTokens: (body.usageMetadata?.promptTokenCount ?? 0) as number,
-    outputTokens: (body.usageMetadata?.candidatesTokenCount ?? 0) as number,
+    // Thinking is billed as output, so the daily record has to include it.
+    outputTokens: ((body.usageMetadata?.candidatesTokenCount ?? 0) +
+      (body.usageMetadata?.thoughtsTokenCount ?? 0)) as number,
   };
 }
