@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   buildContext,
   parseAnswer,
+  replyAnswer,
   RESPONSE_SCHEMA,
   systemPrompt,
   type GeminiRefs,
@@ -230,6 +231,88 @@ test("an answer with no changes is fine, and a broken one isn't", () => {
   assert.equal(parseAnswer({ message: "x" }, refs), null);
   assert.equal(parseAnswer("text", refs), null);
   assert.equal(parseAnswer(null, refs), null);
+});
+
+test("a reply split into parts is joined, and thoughts are left out", () => {
+  const reply = {
+    candidates: [
+      {
+        content: {
+          parts: [
+            { thought: true, text: "Let me think." },
+            { text: '{"message":"Do' },
+            { text: 'ne.","changes":[]}' },
+          ],
+        },
+      },
+    ],
+  };
+  assert.deepEqual(replyAnswer(reply), { message: "Done.", changes: [] });
+});
+
+test("an unreadable reply says why, and never what it said", () => {
+  const reasons: string[] = [];
+  const reply = {
+    candidates: [{ finishReason: "MAX_TOKENS", content: { parts: [{ text: '{"message":"private' }] } }],
+  };
+  assert.equal(replyAnswer(reply, (reason) => reasons.push(reason)), null);
+  assert.deepEqual(reasons, ["unreadable reply, finish: MAX_TOKENS, length: 19"]);
+});
+
+test("an empty reply is refused without throwing", () => {
+  assert.equal(replyAnswer({}), null);
+  assert.equal(replyAnswer({ candidates: [{ content: { parts: [] } }] }), null);
+  assert.equal(replyAnswer(null), null);
+});
+
+test("empty values count as left out", () => {
+  const parsed = parseAnswer(
+    answer({
+      action: "add",
+      kind: "block",
+      title: "Gym",
+      weekday: 1,
+      date: "",
+      start: "18:00",
+      end: "",
+      location: "",
+      notes: "",
+      due: "",
+      time: "",
+      weekdays: [],
+      ref: "",
+    }),
+    refs
+  );
+  assert.equal(parsed?.ops[0].values?.start_min, 1080);
+  assert.equal(parsed?.ops[0].values?.end_min, 1140);
+  assert.equal(parsed?.ops[0].values?.on_date, null);
+});
+
+test("a weekday of 0 isn't a weekday", () => {
+  const parsed = parseAnswer(
+    answer({ action: "add", kind: "block", title: "x", weekday: 0, date: "2026-11-02", start: "09:00" }),
+    refs
+  );
+  assert.equal(parsed?.ops[0].values?.weekday, null);
+  assert.equal(parsed?.ops[0].values?.on_date, "2026-11-02");
+});
+
+test("a block with no day is refused, naming fields and not their contents", () => {
+  const reasons: string[] = [];
+  const parsed = parseAnswer(
+    answer({ action: "add", kind: "block", title: "Private clinic", start: "18:00", location: "" }),
+    refs,
+    (reason) => reasons.push(reason)
+  );
+  assert.equal(parsed, null);
+  assert.equal(reasons.length, 1);
+  assert.match(reasons[0], /add block invalid, fields: action,kind,title,start/);
+  assert.equal(reasons[0].includes("Private clinic"), false);
+});
+
+test("the prompt says how to write something that happens every day", () => {
+  assert.match(systemPrompt("2026-10-30"), /every day is seven blocks/);
 });
 
 test("the message is cut to fit the page", () => {

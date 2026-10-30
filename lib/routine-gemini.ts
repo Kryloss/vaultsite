@@ -106,6 +106,7 @@ export function systemPrompt(today: string): string {
     "- Always write titles, notes, locations and the message in English, translating if needed.",
     "- Keep course codes, names and room numbers exactly as written, such as CYS 119 or ARC108.",
     "- Something at a fixed time is a block. Weekly repeats use weekday; once-only uses date.",
+    "- Every block needs a weekday or a date. Something every day is seven blocks, one for each weekday.",
     "- Something to get done is a task, with due if a day is given. Do not invent a date.",
     "- Add a habit only when the note asks for a new daily or weekly check-off.",
     "- Use update to change an existing item, and fill in only the fields that change.",
@@ -232,45 +233,92 @@ function values(kind: ItemKind, change: RawChange, current?: Block | Task | Habi
   return rest;
 }
 
+/** A model told a field is optional often sends an empty value rather than none at all. */
+function withoutBlanks(change: RawChange): RawChange {
+  const kept: Record<string, unknown> = { ...change };
+  for (const [key, value] of Object.entries(kept)) {
+    const empty = Array.isArray(value) ? value.length === 0 : value === "";
+    if (empty || (key === "weekday" && value === 0)) kept[key] = null;
+  }
+  return kept;
+}
+
 /**
  * Gemini's answer, as changes the database may apply, or null when any part of
  * it can't be trusted. `message` stays short because it goes on the page.
+ * `onRefuse` hears why, naming fields and never their contents, because this
+ * goes to the server's logs and the note is private.
  */
 export function parseAnswer(
   raw: unknown,
-  refs: GeminiRefs
+  refs: GeminiRefs,
+  onRefuse: (reason: string) => void = () => {}
 ): { message: string; ops: GeminiOp[] } | null {
-  if (typeof raw !== "object" || raw === null) return null;
+  const refuse = (reason: string) => {
+    onRefuse(reason);
+    return null;
+  };
+
+  if (typeof raw !== "object" || raw === null) return refuse("not an object");
   const { message, changes } = raw as { message?: unknown; changes?: unknown };
-  if (typeof message !== "string" || !Array.isArray(changes) || changes.length > 30) return null;
+  if (typeof message !== "string") return refuse("no message");
+  if (!Array.isArray(changes)) return refuse("no changes");
+  if (changes.length > 30) return refuse("too many changes");
 
   const ops: GeminiOp[] = [];
-  for (const change of changes as RawChange[]) {
-    if (typeof change !== "object" || change === null) return null;
+  for (const rawChange of changes as RawChange[]) {
+    if (typeof rawChange !== "object" || rawChange === null) return refuse("change not an object");
+    const change = withoutBlanks(rawChange);
     const { action, kind } = change;
-    if (kind !== "block" && kind !== "task" && kind !== "habit") return null;
+    if (kind !== "block" && kind !== "task" && kind !== "habit") return refuse("unknown kind");
+    const filled = Object.entries(change)
+      .filter(([, value]) => value !== null)
+      .map(([key]) => key)
+      .join(",");
 
     if (action === "add") {
       const added = values(kind, change);
-      if (!added) return null;
+      if (!added) return refuse(`add ${kind} invalid, fields: ${filled}`);
       ops.push({ action, kind, values: added });
       continue;
     }
 
     const target = typeof change.ref === "string" ? refs[change.ref] : undefined;
-    if (!target || target.kind !== kind) return null;
+    if (!target || target.kind !== kind) return refuse(`${String(action)} ${kind}: unknown item`);
 
     if (action === "update") {
       const updated = values(kind, change, target.item);
-      if (!updated) return null;
+      if (!updated) return refuse(`update ${kind} invalid, fields: ${filled}`);
       ops.push({ action, kind, id: target.item.id, values: updated });
     } else if (action === "archive" || (action === "done" && kind === "task")) {
       ops.push({ action, kind, id: target.item.id });
     } else {
-      return null;
+      return refuse(`bad action for ${kind}`);
     }
   }
 
-  if (ops.filter((op) => op.action === "archive").length > 5) return null;
+  if (ops.filter((op) => op.action === "archive").length > 5) return refuse("too many removals");
   return { message: message.trim().slice(0, 300), ops };
+}
+
+/**
+ * The JSON inside a Vertex reply. A reply can arrive in several parts, and
+ * `thought` parts aren't the answer. Null when there's nothing usable, with
+ * `onRefuse` hearing why: a token limit or safety stop shows in `finishReason`.
+ */
+export function replyAnswer(body: unknown, onRefuse: (reason: string) => void = () => {}): unknown {
+  const candidate = (body as {
+    candidates?: { finishReason?: string; content?: { parts?: { text?: string; thought?: boolean }[] } }[];
+  })?.candidates?.[0];
+  const text = (candidate?.content?.parts ?? [])
+    .filter((part) => !part.thought)
+    .map((part) => part.text ?? "")
+    .join("");
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    onRefuse(`unreadable reply, finish: ${candidate?.finishReason ?? "none"}, length: ${text.length}`);
+    return null;
+  }
 }

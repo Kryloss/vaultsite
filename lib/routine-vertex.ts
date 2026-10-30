@@ -1,6 +1,6 @@
 import { getVercelOidcToken } from "@vercel/oidc";
 import { ExternalAccountClient } from "google-auth-library";
-import { RESPONSE_SCHEMA } from "@/lib/routine-gemini";
+import { replyAnswer, RESPONSE_SCHEMA } from "@/lib/routine-gemini";
 
 /**
  * Calling Gemini on Vertex AI, imported only by `app/api/routine/`. No key exists
@@ -84,7 +84,7 @@ export async function askGemini(system: string, user: string) {
 
   const body = await response.json();
   return {
-    answer: JSON.parse(body.candidates?.[0]?.content?.parts?.[0]?.text ?? "null") as unknown,
+    answer: replyAnswer(body, (reason) => console.error("routine: Gemini reply:", reason)),
     inputTokens: (body.usageMetadata?.promptTokenCount ?? 0) as number,
     outputTokens: (body.usageMetadata?.candidatesTokenCount ?? 0) as number,
   };
