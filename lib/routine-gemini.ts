@@ -106,8 +106,9 @@ export function systemPrompt(today: string): string {
     "- Always write titles, notes, locations and the message in English, translating if needed.",
     "- Keep course codes, names and room numbers exactly as written, such as CYS 119 or ARC108.",
     "- Something at a fixed time is a block. Weekly repeats use weekday; once-only uses date.",
-    "- Every block needs a weekday or a date. Something every day is seven blocks, one for each weekday.",
-    "- Something to get done is a task, with due if a day is given. Do not invent a date.",
+    "- Every block needs a weekday or a date. A weekly repeat is one block with weekday, never one block per date. Something every day is seven blocks, one for each weekday.",
+    "- Something to get done is a task. Put its day in due and its time in time, never in date or start. Work out words like tomorrow from today's date. Do not invent a date the note doesn't give.",
+    "- Leave out every field that doesn't apply to a change.",
     "- Add a habit only when the note asks for a new daily or weekly check-off.",
     "- Use update to change an existing item, and fill in only the fields that change.",
     "- Use done when the note says a task is finished.",
@@ -202,11 +203,18 @@ function blockFields(change: RawChange, current?: Block) {
   };
 }
 
+/**
+ * A task's day is `due` and its time is `time`, but the schema's fields are
+ * shared with blocks, and Gemini has put a task's day in `date`. Dropping that
+ * would quietly save "tomorrow" as no date at all, so either name counts.
+ */
 function taskFields(change: RawChange, current?: Task) {
+  const due = change.due ?? change.date;
+  const at = change.time ?? change.start;
   return {
     title: change.title ?? current?.title,
-    due_on: change.due !== undefined && change.due !== null ? change.due : current?.due_on ?? null,
-    due_min: change.time != null ? time(change.time) : current?.due_min ?? null,
+    due_on: due ?? current?.due_on ?? null,
+    due_min: at != null ? time(at) : current?.due_min ?? null,
     notes: change.notes ?? current?.notes ?? "",
   };
 }
@@ -307,9 +315,11 @@ export function parseAnswer(
  * `onRefuse` hearing why: a token limit or safety stop shows in `finishReason`.
  */
 export function replyAnswer(body: unknown, onRefuse: (reason: string) => void = () => {}): unknown {
-  const candidate = (body as {
+  const reply = body as {
     candidates?: { finishReason?: string; content?: { parts?: { text?: string; thought?: boolean }[] } }[];
-  })?.candidates?.[0];
+    usageMetadata?: { thoughtsTokenCount?: number; candidatesTokenCount?: number };
+  } | null;
+  const candidate = reply?.candidates?.[0];
   const text = (candidate?.content?.parts ?? [])
     .filter((part) => !part.thought)
     .map((part) => part.text ?? "")
@@ -318,7 +328,11 @@ export function replyAnswer(body: unknown, onRefuse: (reason: string) => void = 
   try {
     return JSON.parse(text);
   } catch {
-    onRefuse(`unreadable reply, finish: ${candidate?.finishReason ?? "none"}, length: ${text.length}`);
+    const usage = reply?.usageMetadata;
+    onRefuse(
+      `unreadable reply, finish: ${candidate?.finishReason ?? "none"}, length: ${text.length}, ` +
+        `tokens: ${usage?.candidatesTokenCount ?? 0} answer, ${usage?.thoughtsTokenCount ?? 0} thinking`
+    );
     return null;
   }
 }
