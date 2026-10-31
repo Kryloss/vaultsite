@@ -79,7 +79,8 @@ export async function askGemini(system: string, user: string) {
         responseSchema: RESPONSE_SCHEMA,
         maxOutputTokens: MAX_OUTPUT_TOKENS,
         temperature: 0.2,
-        thinkingConfig: { thinkingLevel: "MINIMAL" },
+        // MINIMAL dropped the 7pm from a note saying "11am-7pm".
+        thinkingConfig: { thinkingLevel: "LOW" },
       },
     }),
     signal: AbortSignal.timeout(TIMEOUT_MS),

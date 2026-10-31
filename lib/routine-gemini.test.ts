@@ -299,10 +299,60 @@ test("moving a task with the block field moves it", () => {
   assert.equal(parsed?.ops[0].values?.due_min, 1439);
 });
 
-test("the prompt keeps a task's day in due, and a weekly repeat in one block", () => {
+test("the prompt keeps a task's day in due_date, and a weekly repeat in one block", () => {
   const prompt = systemPrompt("2026-10-30");
-  assert.match(prompt, /Put its day in due/);
+  assert.match(prompt, /Put its day in due_date/);
   assert.match(prompt, /one block with weekday, never one block per date/);
+  assert.match(prompt, /always send end_time/);
+});
+
+test("the note that failed live: a shift tomorrow with its full time range", () => {
+  const parsed = parseAnswer(
+    answer({
+      action: "add",
+      kind: "block",
+      title: "Work",
+      on_date: "2026-10-31",
+      weekday: 6,
+      start_time: "11:00",
+      end_time: "19:00",
+    }),
+    {}
+  );
+  assert.equal(parsed?.ops[0].values?.on_date, "2026-10-31");
+  assert.equal(parsed?.ops[0].values?.weekday, null);
+  assert.equal(parsed?.ops[0].values?.start_min, 660);
+  assert.equal(parsed?.ops[0].values?.end_min, 1140);
+});
+
+test("the explicit field names work for tasks too", () => {
+  const parsed = parseAnswer(
+    answer({ action: "add", kind: "task", title: "x", due_date: "2026-10-31", due_time: "17:00" }),
+    {}
+  );
+  assert.equal(parsed?.ops[0].values?.due_on, "2026-10-31");
+  assert.equal(parsed?.ops[0].values?.due_min, 1020);
+});
+
+test("moving a weekly block to a date with both fields makes it a one-off", () => {
+  const parsed = parseAnswer(
+    answer({ action: "update", kind: "block", ref: "b1", on_date: "2026-11-05", weekday: 4 }),
+    refs
+  );
+  assert.equal(parsed?.ops[0].values?.weekday, null);
+  assert.equal(parsed?.ops[0].values?.on_date, "2026-11-05");
+});
+
+test("the schema and the context use the same explicit names", () => {
+  const { text } = buildContext(
+    { blocks: [block], tasks: [task], habits: [], logs: [] },
+    "2026-10-30"
+  );
+  for (const name of ["on_date", "start_time", "end_time", "due_date", "due_time"]) {
+    assert.ok(text.includes(`"${name}"`), name);
+    assert.ok(JSON.stringify(RESPONSE_SCHEMA).includes(`"${name}"`), name);
+  }
+  assert.equal(JSON.stringify(RESPONSE_SCHEMA).includes('"date"'), false);
 });
 
 test("an empty reply is refused without throwing", () => {
