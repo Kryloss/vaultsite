@@ -247,6 +247,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 236 | The organizer never deletes, and a viewer's data is built by one function |
 | 237 | Gemini returns data, never acts, and can't change what a viewer sees |
 | 238 | The Mac syncs Calendar and Reminders, never the vault's notes, and no model reads them |
+| 239 | A review is stored and changes nothing, and backups live on the owner's Mac |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1983,3 +1984,11 @@ Calendar is read through AppleScript, which returns a repeating event once, so t
 The Mac uses a token because it has no Google session, and the site has no service-role key to lend it. Only the hash is stored. Calling three functions directly rather than through a route handler keeps Vercel out of the path, and a route would still have needed an anonymous grant, having no session either. Those functions are the first anonymous door into the database, so they take a 256-bit token, can't reach the access tables or `shareable`, and everything they do lands in the history under the actor `uni`.
 
 The script is copied out of the repository when installed, because this checkout auto-publishes and half-finished edits sit in it. A job on a timer shouldn't run whatever happens to be there. See `docs/ROUTINE.md`.
+
+## 239. A review is stored and changes nothing, and backups live on the owner's Mac (2026-10-31)
+
+The weekly review shares Gemini's path but not its powers. A note may change the routine because the owner asked it to; a review was only asked to read, so its route writes one row in `routine_reviews` and never reaches `routine_apply_gemini()`. It is stored rather than regenerated so opening the Week tab never spends a call, and it runs on a button rather than a timer so a week nobody looks at costs nothing.
+
+Backups run from the Mac because the Free plan has none, and Pro's cost isn't worth it for one person's routine. That widens the sync token from writing to reading, the one real cost of this choice: a stolen token now reads the organizer. The token already sits on the same Mac as the Calendar and Reminders it comes from, so the exposure is small. Files stay in Application Support rather than iCloud-synced Documents, and the access tables stay out, because visitors' names and emails have no reason to be in a file on a laptop.
+
+There is no restore button. It would be rarely used, hard to test, and able to do real damage in one press. Undo covers everyday mistakes, and a backup covers the rare disaster by hand. See `docs/ROUTINE.md`.

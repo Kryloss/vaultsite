@@ -123,6 +123,14 @@ export function blocksFrom(events, overrides, from, to) {
   return [...byKey.values()];
 }
 
+/** Backups past the newest `keep`. Dated names sort by date. */
+export function staleBackups(names, keep) {
+  return names
+    .filter((name) => /^routine-\d{4}-\d{2}-\d{2}\.json$/.test(name))
+    .sort()
+    .slice(0, -keep);
+}
+
 /** Open Reminders. A due time of midnight is how Reminders stores "no time". */
 export function tasksFrom(reminders) {
   const seen = new Set();

@@ -60,7 +60,7 @@ async function accessToken({ projectNumber, pool, provider, serviceAccount }: Se
   return token;
 }
 
-export async function askGemini(system: string, user: string) {
+export async function askGemini(system: string, user: string, schema: object = RESPONSE_SCHEMA) {
   const config = settings();
   if (!config) throw new Error("not_connected");
 
@@ -76,7 +76,7 @@ export async function askGemini(system: string, user: string) {
       contents: [{ role: "user", parts: [{ text: user }] }],
       generationConfig: {
         responseMimeType: "application/json",
-        responseSchema: RESPONSE_SCHEMA,
+        responseSchema: schema,
         maxOutputTokens: MAX_OUTPUT_TOKENS,
         temperature: 0.2,
         // MINIMAL dropped the 7pm from a note saying "11am-7pm".

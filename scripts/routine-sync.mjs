@@ -14,11 +14,11 @@
 
 import { execFileSync } from "node:child_process";
 import { createHash, randomBytes } from "node:crypto";
-import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { blocksFrom, isoDate, parseOverrides, tasksFrom } from "./routine-sync-lib.mjs";
+import { blocksFrom, isoDate, parseOverrides, staleBackups, tasksFrom } from "./routine-sync-lib.mjs";
 
 const CALENDARS = ["TMUCalendar", "Work", "School"];
 const REMINDER_LISTS = ["School", "Study"];
@@ -26,6 +26,8 @@ const DAYS_AHEAD = 21;
 const OVERRIDES = join(homedir(), "Documents/Uni/.claude/data/overrides.tsv");
 const KEYCHAIN_SERVICE = "kryloss-routine-sync";
 const LABEL = "com.kryloss.routine-sync";
+const BACKUPS = join(homedir(), "Library/Application Support/routine-sync/backups");
+const BACKUPS_KEPT = 30;
 const FIELD = "\u001f";
 const RECORD = "\u001e";
 
@@ -185,6 +187,18 @@ function read() {
   };
 }
 
+/** The Free plan keeps no backups, so the Mac takes one a day. Readable only by this account. */
+async function backup(config, p_token) {
+  const file = join(BACKUPS, `routine-${isoDate(new Date())}.json`);
+  if (existsSync(file)) return;
+
+  mkdirSync(BACKUPS, { recursive: true, mode: 0o700 });
+  writeFileSync(file, JSON.stringify(await rpc(config, "routine_sync_backup", { p_token })), { mode: 0o600 });
+  for (const name of staleBackups(readdirSync(BACKUPS), BACKUPS_KEPT)) {
+    rmSync(join(BACKUPS, name));
+  }
+}
+
 async function sync() {
   const config = settings();
   const p_token = keychainToken();
@@ -202,6 +216,7 @@ async function sync() {
     p_blocks: blocks,
     p_tasks: tasks,
   });
+  await backup(config, p_token);
   console.log(
     `${new Date().toISOString()} ok: ${blocks.length} events, ${tasks.length} reminders, ` +
       `${closed.length}/${ticks.length} closed, ${result.added} added, ${result.changed} changed, ${result.gone} gone`

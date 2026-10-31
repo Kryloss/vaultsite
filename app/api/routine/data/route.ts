@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
 
   const first = addDays(from, -7);
   const last = addDays(from, 13);
-  const [blocks, tasks, habits, checks, logs, changes, synced] = await Promise.all([
+  const [blocks, tasks, habits, checks, logs, changes, synced, review] = await Promise.all([
     supabase.from("routine_blocks").select(BLOCK_FIELDS).is("archived_at", null),
     supabase
       .from("routine_tasks")
@@ -60,6 +60,7 @@ export async function GET(request: NextRequest) {
       .order("id", { ascending: false })
       .limit(20),
     supabase.rpc("routine_sync_status"),
+    supabase.from("routine_reviews").select("body").eq("week", from).maybeSingle(),
   ]);
 
   const failed = [blocks, tasks, habits, checks, logs, changes].some((result) => result.error);
@@ -72,6 +73,7 @@ export async function GET(request: NextRequest) {
     checks: checks.data,
     logs: logs.data,
     syncedAt: synced.data ?? null,
+    review: review.data?.body ?? null,
     changes: (changes.data ?? []).map(
       ({ after, ...change }): Change => ({
         ...(change as Omit<Change, "title">),

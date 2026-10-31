@@ -1,6 +1,20 @@
 # Routine
 
-`/routine` is the owner's private daily organizer. Built so far: the access layer (sign-in, requests, approval, expiry, the viewer gate), the organizer itself (Today and Week views, tasks, habits, the daily log, undo), Gemini organizing a typed note, and the sync from the owner's Mac. Why it is built this way: `docs/DECISIONS.md` #235 to #238.
+`/routine` is the owner's private daily organizer: the access layer (sign-in, requests, approval, expiry, the viewer gate), the organizer itself (Today and Week views, tasks, habits, the daily log, undo), Gemini organizing a typed note, the sync from the owner's Mac, the weekly review, daily backups and a phone home-screen install. Why it is built this way: `docs/DECISIONS.md` #235 to #239.
+
+## Weekly review
+
+**Review this week** on the Week tab sends one week to Gemini and stores its answer in `routine_reviews`, so reading it later costs nothing. `lib/routine-review.ts` holds what it is shown: that week's tasks, habit counts and daily logs, plus next week's open tasks. It uses the same model and shares the 40-a-day limit with notes. The route's only write is that one row, so a review can't change the routine.
+
+## Backups
+
+The Free plan keeps no backups, so the Mac saves one a day to `~/Library/Application Support/routine-sync/backups/`, readable only by the owner's account, and keeps 30. Each is JSON with every row of the organizer tables, reviews and the history. The access tables stay out, since they hold other people's details. `routine_sync_backup()` means the Mac's token can read the organizer as well as write it.
+
+To restore, match rows by `id` and put them back through the Supabase SQL editor with `jsonb_populate_recordset`, starting with what was lost rather than the whole file.
+
+## On a phone
+
+`public/routine.webmanifest`, the `routine-icon-*.png` files and the page's `appleWebApp` metadata let Share → **Add to Home Screen** open `/routine` as its own app. Its `scope` is `/` because Google sign-in returns through `/api/routine`. A home-screen app keeps its own cookies, so it signs in separately from Safari once.
 
 ## The Mac sync
 
@@ -14,7 +28,7 @@
 - **A tick closes the Reminder on the next run,** by Reminder id, which is the `source_key`. The Uni vault's `AGENTS.md` tells its agents never to close Reminders; this is the owner's own tick, on the owner's instruction. Undoing a tick after the Mac has closed the Reminder doesn't hold: the next push sees it closed and ticks it again, so reopen it in Reminders instead.
 - **Logs hold counts, never titles:** `~/Library/Logs/routine-sync.log`. The page shows when the last sync got through.
 
-The Mac has no Google session, so it proves itself with a token in the login Keychain (service `kryloss-routine-sync`), and the database holds only its SHA-256 hash in `private.sync_token`. It calls three functions directly with the publishable key, so the site's code isn't in the path.
+The Mac has no Google session, so it proves itself with a token in the login Keychain (service `kryloss-routine-sync`), and the database holds only its SHA-256 hash in `private.sync_token`. It calls its own functions directly with the publishable key, so the site's code isn't in the path.
 
 Setting it up, or replacing the token:
 
@@ -59,7 +73,7 @@ The owner types a note on Today, and Gemini applies it straight away. It can add
 
 ## Where the rules live
 
-Postgres, in `supabase/migrations/`. Signed-in users hold no privilege on the access tables, only EXECUTE on twelve functions: `routine_status`, `submit_access_request`, `routine_access_overview`, `decide_access_request`, `revoke_access`, `routine_undo`, `routine_undo_batch`, `routine_shared_days`, `routine_apply_gemini`, `routine_ai_reserve`, `routine_ai_record`, `routine_sync_status`. Each one checks who is calling. Anonymous callers can execute none of them, only the Mac's three: `routine_sync_ticks`, `routine_sync_closed` and `routine_sync_push`, each of which refuses without the token.
+Postgres, in `supabase/migrations/`. Signed-in users hold no privilege on the access tables, only EXECUTE on twelve functions: `routine_status`, `submit_access_request`, `routine_access_overview`, `decide_access_request`, `revoke_access`, `routine_undo`, `routine_undo_batch`, `routine_shared_days`, `routine_apply_gemini`, `routine_ai_reserve`, `routine_ai_record`, `routine_sync_status`. Each one checks who is calling. Anonymous callers can execute none of them, only the Mac's four: `routine_sync_ticks`, `routine_sync_closed`, `routine_sync_push` and `routine_sync_backup`, each of which refuses without the token.
 
 The organizer tables (`routine_*`) grant `authenticated` the privileges the app needs, behind a row level security policy that only the owner passes. For anyone else they read as empty and refuse writes.
 
@@ -120,6 +134,6 @@ Changing the owner takes SQL on purpose. Nothing in the site can do it.
 
 ## Checking changes
 
-Schema changes go in a new migration file, and get tested as fake users in a transaction that rolls back: set `request.jwt.claims` and `set local role authenticated`, then try what each kind of user must not be able to do. Run the Supabase security advisor after. Expected findings: `rls_enabled_no_policy` on the access tables, `authenticated_security_definer_function_executable` on the twelve functions above, and `anon_security_definer_function_executable` on the Mac's three. `auth_leaked_password_protection` also appears and doesn't apply, since password sign-in is off.
+Schema changes go in a new migration file, and get tested as fake users in a transaction that rolls back: set `request.jwt.claims` and `set local role authenticated`, then try what each kind of user must not be able to do. Run the Supabase security advisor after. Expected findings: `rls_enabled_no_policy` on the access tables, `authenticated_security_definer_function_executable` on the twelve functions above, and `anon_security_definer_function_executable` on the Mac's four. `auth_leaked_password_protection` also appears and doesn't apply, since password sign-in is off.
 
 `/routine` has a limit no test covers: the Google redirect only works on the real domain.

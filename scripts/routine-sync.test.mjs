@@ -7,6 +7,7 @@ import {
   occurrences,
   parseOverrides,
   parseRule,
+  staleBackups,
   tasksFrom,
 } from "./routine-sync-lib.mjs";
 
@@ -120,6 +121,19 @@ test("Reminders keep a time only when one was set", () => {
     { key: "b", title: "[CRM101] Read Ch 8", due_on: "2026-11-03", due_min: null },
     { key: "c", title: "No date", due_on: null, due_min: null },
   ]);
+});
+
+test("old backups go, and only the sync's own files are ever touched", () => {
+  const names = ["routine-2026-10-30.json", "routine-2026-10-28.json", "routine-2026-10-29.json", "notes.txt"];
+  assert.deepEqual(staleBackups(names, 2), ["routine-2026-10-28.json"]);
+  assert.deepEqual(staleBackups(names, 3), []);
+});
+
+test("the backup holds the organizer, and none of the visitors' details", () => {
+  const sql = readFileSync("supabase/migrations/20261031130000_routine_reviews.sql", "utf8");
+  const code = sql.slice(sql.indexOf("create function public.routine_sync_backup"));
+  assert.ok(code.indexOf("require_sync_token") < code.indexOf("jsonb_build_object"));
+  assert.doesNotMatch(code, /access_|private\.owner|auth\./);
 });
 
 test("the sync reads titles and times only, and never opens the vault's notes", () => {
