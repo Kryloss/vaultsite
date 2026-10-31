@@ -167,6 +167,7 @@ export const ui = {
   routineByYou: { en: "you", uk: "ви" },
   routineByGemini: { en: "Gemini", uk: "Gemini" },
   routineByUni: { en: "Uni sync", uk: "Синхронізація Uni" },
+  routineSynced: { en: "Last synced from the Mac:", uk: "Остання синхронізація з Mac:" },
   routineNoteLabel: { en: "Tell Gemini what changed", uk: "Напишіть Gemini, що змінилося" },
   routineOrganize: { en: "Organize", uk: "Упорядкувати" },
   routineOrganizing: { en: "Organizing…", uk: "Упорядковую…" },
