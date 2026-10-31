@@ -59,9 +59,9 @@ export function buildContext(
       ref,
       title: block.title,
       weekday: block.weekday,
-      date: block.on_date,
-      start: formatTime(block.start_min),
-      end: formatTime(block.end_min),
+      on_date: block.on_date,
+      start_time: formatTime(block.start_min),
+      end_time: formatTime(block.end_min),
       location: block.location,
       notes: short(block.notes),
     };
@@ -76,8 +76,8 @@ export function buildContext(
       return {
         ref,
         title: task.title,
-        due: task.due_on,
-        time: task.due_min === null ? null : formatTime(task.due_min),
+        due_date: task.due_on,
+        due_time: task.due_min === null ? null : formatTime(task.due_min),
         notes: short(task.notes),
       };
     });
@@ -105,9 +105,11 @@ export function systemPrompt(today: string): string {
     "Reply with changes that carry out the note and nothing else.",
     "- Always write titles, notes, locations and the message in English, translating if needed.",
     "- Keep course codes, names and room numbers exactly as written, such as CYS 119 or ARC108.",
-    "- Something at a fixed time is a block. Weekly repeats use weekday; once-only uses date.",
-    "- Every block needs a weekday or a date. A weekly repeat is one block with weekday, never one block per date. Something every day is seven blocks, one for each weekday.",
-    "- Something to get done is a task. Put its day in due and its time in time, never in date or start. Work out words like tomorrow from today's date. Do not invent a date the note doesn't give.",
+    "- Something at a fixed time is a block. A block has exactly one of on_date or weekday, never both.",
+    "- A block on one specific day, including today or tomorrow, uses on_date. Do not also send weekday.",
+    "- A weekly repeat is one block with weekday, never one block per date. Something every day is seven blocks, one for each weekday.",
+    "- A block needs start_time. When the note gives an end or a range such as 11am-7pm, always send end_time too.",
+    "- Something to get done is a task. Put its day in due_date and its time in due_time. Work out words like tomorrow from today's date. Do not invent a date the note doesn't give.",
     "- Leave out every field that doesn't apply to a change.",
     "- Add a habit only when the note asks for a new daily or weekly check-off.",
     "- Use update to change an existing item, and fill in only the fields that change.",
@@ -144,16 +146,32 @@ export const RESPONSE_SCHEMA = {
           kind: { type: "STRING", enum: ["block", "task", "habit"] },
           ref: { type: "STRING", nullable: true },
           title: { type: "STRING", nullable: true },
+          on_date: { type: "STRING", nullable: true },
           weekday: { type: "INTEGER", nullable: true },
-          date: { type: "STRING", nullable: true },
-          start: { type: "STRING", nullable: true },
-          end: { type: "STRING", nullable: true },
+          start_time: { type: "STRING", nullable: true },
+          end_time: { type: "STRING", nullable: true },
+          due_date: { type: "STRING", nullable: true },
+          due_time: { type: "STRING", nullable: true },
+          weekdays: { type: "ARRAY", items: { type: "INTEGER" }, nullable: true },
           location: { type: "STRING", nullable: true },
           notes: { type: "STRING", nullable: true },
-          due: { type: "STRING", nullable: true },
-          time: { type: "STRING", nullable: true },
-          weekdays: { type: "ARRAY", items: { type: "INTEGER" }, nullable: true },
         },
+        // Keeps each kind's fields together, in the order a person would say them.
+        propertyOrdering: [
+          "action",
+          "kind",
+          "ref",
+          "title",
+          "on_date",
+          "weekday",
+          "start_time",
+          "end_time",
+          "due_date",
+          "due_time",
+          "weekdays",
+          "location",
+          "notes",
+        ],
       },
     },
   },
@@ -184,6 +202,9 @@ function time(value: unknown): number | null {
 function blockFields(change: RawChange, current?: Block) {
   const start = change.start == null ? current?.start_min : time(change.start);
   const repeats = change.weekday != null || change.date != null;
+  // Both is a contradiction Gemini does send. A date is the more specific of
+  // the two, and treating "tomorrow" as weekly would repeat it forever.
+  const weekday = change.date != null ? null : (change.weekday ?? null);
   const end =
     change.end != null
       ? time(change.end)
@@ -194,7 +215,7 @@ function blockFields(change: RawChange, current?: Block) {
           : null;
   return {
     title: change.title ?? current?.title,
-    weekday: repeats ? (change.weekday ?? null) : current?.weekday,
+    weekday: repeats ? weekday : current?.weekday,
     on_date: repeats ? (change.date ?? null) : current?.on_date,
     start_min: start,
     end_min: end,
@@ -241,9 +262,21 @@ function values(kind: ItemKind, change: RawChange, current?: Block | Task | Habi
   return rest;
 }
 
+/** The schema's explicit names, onto the short ones this file works in. */
+const FIELD_NAMES: Record<string, keyof RawChange> = {
+  on_date: "date",
+  start_time: "start",
+  end_time: "end",
+  due_date: "due",
+  due_time: "time",
+};
+
 /** A model told a field is optional often sends an empty value rather than none at all. */
 function withoutBlanks(change: RawChange): RawChange {
-  const kept: Record<string, unknown> = { ...change };
+  const kept: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(change)) {
+    kept[FIELD_NAMES[key] ?? key] = value;
+  }
   for (const [key, value] of Object.entries(kept)) {
     const empty = Array.isArray(value) ? value.length === 0 : value === "";
     if (empty || (key === "weekday" && value === 0)) kept[key] = null;
