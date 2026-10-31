@@ -72,15 +72,41 @@ test("Gemini can't change what a viewer sees, and it has no key to leak", () => 
   assert.doesNotMatch(vertex, /API_KEY|private_key|GOOGLE_APPLICATION_CREDENTIALS/);
 });
 
-test("only the owner's organize route reaches Gemini", () => {
+test("only the owner's organize and review routes reach Gemini", () => {
   const callers = files("app/api/routine").filter((path) =>
     readFileSync(path, "utf8").includes("askGemini")
   );
-  assert.deepEqual(callers, ["app/api/routine/organize/route.ts"]);
+  assert.deepEqual(callers.sort(), ["app/api/routine/organize/route.ts", "app/api/routine/review/route.ts"]);
 
   const route = readFileSync("app/api/routine/organize/route.ts", "utf8");
   assert.ok(route.indexOf('rpc("routine_ai_reserve"') < route.indexOf("askGemini(systemPrompt"));
   assert.ok(route.indexOf("parseAnswer(result") < route.indexOf('rpc("routine_apply_gemini"'));
+
+  const review = readFileSync("app/api/routine/review/route.ts", "utf8");
+  assert.ok(review.indexOf('rpc("routine_ai_reserve"') < review.indexOf("askGemini(reviewSystemPrompt"));
+  assert.ok(review.indexOf("parseReview(result") < review.indexOf('from("routine_reviews")'));
+});
+
+test("a review can only write a review", () => {
+  const review = readFileSync("app/api/routine/review/route.ts", "utf8");
+  assert.deepEqual(
+    [...review.matchAll(/\.(insert|update|upsert|delete)\(/g)].map(([, method]) => method),
+    ["upsert"]
+  );
+  assert.doesNotMatch(review, /routine_apply_gemini/);
+});
+
+test("the phone install declares itself without leaving the page indexable", () => {
+  const manifest = JSON.parse(readFileSync("public/routine.webmanifest", "utf8"));
+  assert.equal(manifest.start_url, "/routine");
+  assert.equal(manifest.display, "standalone");
+  for (const icon of manifest.icons) {
+    assert.ok(statSync(join("public", icon.src)).size > 0, icon.src);
+  }
+  const page = readFileSync("app/routine/page.tsx", "utf8");
+  assert.match(page, /manifest: "\/routine\.webmanifest"/);
+  assert.match(page, /appleWebApp/);
+  assert.ok(statSync("public/routine-icon-180.png").size > 0);
 });
 
 test("the site has no middleware, so only the API routes run per request", () => {
@@ -89,7 +115,11 @@ test("the site has no middleware, so only the API routes run per request", () =>
 });
 
 test("the organizer's write routes check for a session before touching data", () => {
-  for (const path of ["app/api/routine/item/route.ts", "app/api/routine/organize/route.ts"]) {
+  for (const path of [
+    "app/api/routine/item/route.ts",
+    "app/api/routine/organize/route.ts",
+    "app/api/routine/review/route.ts",
+  ]) {
     const source = readFileSync(path, "utf8");
     const signedIn = source.indexOf("auth.getUser()");
     assert.ok(signedIn > 0, path);

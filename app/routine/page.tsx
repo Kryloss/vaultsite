@@ -18,6 +18,9 @@ export const metadata: Metadata = {
   title: "Routine",
   description: "A private daily routine organizer.",
   robots: { index: false, follow: false },
+  manifest: "/routine.webmanifest",
+  appleWebApp: { capable: true, title: "Routine", statusBarStyle: "black" },
+  icons: { apple: "/routine-icon-180.png" },
   ...pageMeta({ path: "/routine" }),
 };
 
