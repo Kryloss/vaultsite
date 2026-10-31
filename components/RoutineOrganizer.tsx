@@ -39,6 +39,14 @@ function formatted(iso: string, options: Intl.DateTimeFormatOptions): Str {
   return { en: format("en-CA"), uk: format("uk-UA") };
 }
 
+/** An instant, so this one does pass through the reader's time zone. */
+function syncedTime(at: string): Str {
+  const date = new Date(at);
+  const format = (locale: string) =>
+    new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(date);
+  return { en: format("en-CA"), uk: format("uk-UA") };
+}
+
 /** Any Monday plus its weekday gives that weekday's name. */
 function weekdayName(weekday: number): Str {
   return formatted(addDays("2026-11-02", weekday - 1), { weekday: "short" });
@@ -952,6 +960,12 @@ export default function RoutineOrganizer({ access }: { access: ReactNode }) {
         changes={data.changes}
         onUndo={(id) => void act({ action: "undo", change: id })}
       />
+
+      {data.syncedAt ? (
+        <p className="routine-note">
+          <T {...ui.routineSynced} /> <T {...syncedTime(data.syncedAt)} />
+        </p>
+      ) : null}
     </>
   );
 }

@@ -67,6 +67,7 @@ export interface RoutineData {
   checks: HabitCheck[];
   logs: DayLog[];
   changes: Change[];
+  syncedAt: string | null;
 }
 
 /** One day of what a viewer may see, from `routine_shared_days()`. A null title means Busy. */
