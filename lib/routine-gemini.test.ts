@@ -2,9 +2,14 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   buildContext,
+  CHEAP_MODEL,
+  chooseModel,
+  dayTable,
   parseAnswer,
   replyAnswer,
   RESPONSE_SCHEMA,
+  retryPrompt,
+  STRONG_MODEL,
   systemPrompt,
   type GeminiRefs,
 } from "./routine-gemini.ts";
@@ -114,16 +119,45 @@ test("adding a task and a weekly block", () => {
   assert.equal(parsed?.ops[1].values?.end_min, 1170);
 });
 
-test("a block with no end runs for an hour, and stops at midnight", () => {
+test("a new block with no end is refused, and the reason says so", () => {
+  const reasons: string[] = [];
   const parsed = parseAnswer(
-    answer(
-      { action: "add", kind: "block", title: "A", date: "2026-11-02", start: "09:00" },
-      { action: "add", kind: "block", title: "B", date: "2026-11-02", start: "23:30" }
-    ),
-    {}
+    answer({ action: "add", kind: "block", title: "Work", date: "2026-11-02", start: "11:00" }),
+    {},
+    (reason) => reasons.push(reason)
   );
-  assert.equal(parsed?.ops[0].values?.end_min, 600);
-  assert.equal(parsed?.ops[1].values?.end_min, 1440);
+  assert.equal(parsed, null);
+  assert.match(reasons[0], /add block has no end_time/);
+});
+
+test("moving a block late in the day stops it at midnight", () => {
+  const parsed = parseAnswer(answer({ action: "update", kind: "block", ref: "b1", start: "23:30" }), refs);
+  assert.equal(parsed?.ops[0].values?.end_min, 1440);
+});
+
+test("a question changes nothing, and its answer has room", () => {
+  assert.match(systemPrompt("2026-10-30"), /asks a question, change nothing/);
+  const parsed = parseAnswer({ message: "x".repeat(450), changes: [] }, refs);
+  assert.equal(parsed?.message.length, 450);
+  assert.deepEqual(parsed?.ops, []);
+});
+
+test("the prompt writes out the dates ahead", () => {
+  assert.equal(dayTable("2026-10-30").split(", ")[0], "Sat 2026-10-31");
+  assert.equal(dayTable("2026-10-30").split(", ")[6], "Fri 2026-11-06");
+  assert.equal(dayTable("2026-10-30").split(", ").length, 14);
+  assert.ok(systemPrompt("2026-10-30").includes("Fri 2026-11-06"));
+});
+
+test("the second try says what was wrong and repeats the note", () => {
+  const prompt = retryPrompt("{}", "gym at 6", "add block has no end_time, fields: action,kind");
+  assert.ok(prompt.includes("<note>\ngym at 6\n</note>"));
+  assert.ok(prompt.includes("refused: add block has no end_time"));
+});
+
+test("the stronger model runs while the trial credit lasts", () => {
+  assert.equal(chooseModel("2027-01-31"), STRONG_MODEL);
+  assert.equal(chooseModel("2027-02-01"), CHEAP_MODEL);
 });
 
 test("an update changes only what it names", () => {
@@ -303,7 +337,7 @@ test("the prompt keeps a task's day in due_date, and a weekly repeat in one bloc
   const prompt = systemPrompt("2026-10-30");
   assert.match(prompt, /Put its day in due_date/);
   assert.match(prompt, /one block with weekday, never one block per date/);
-  assert.match(prompt, /always send end_time/);
+  assert.match(prompt, /always has start_time and end_time/);
 });
 
 test("the note that failed live: a shift tomorrow with its full time range", () => {
@@ -370,7 +404,7 @@ test("empty values count as left out", () => {
       weekday: 1,
       date: "",
       start: "18:00",
-      end: "",
+      end: "19:00",
       location: "",
       notes: "",
       due: "",
@@ -387,7 +421,7 @@ test("empty values count as left out", () => {
 
 test("a weekday of 0 isn't a weekday", () => {
   const parsed = parseAnswer(
-    answer({ action: "add", kind: "block", title: "x", weekday: 0, date: "2026-11-02", start: "09:00" }),
+    answer({ action: "add", kind: "block", title: "x", weekday: 0, date: "2026-11-02", start: "09:00", end: "10:00" }),
     refs
   );
   assert.equal(parsed?.ops[0].values?.weekday, null);
@@ -397,13 +431,13 @@ test("a weekday of 0 isn't a weekday", () => {
 test("a block with no day is refused, naming fields and not their contents", () => {
   const reasons: string[] = [];
   const parsed = parseAnswer(
-    answer({ action: "add", kind: "block", title: "Private clinic", start: "18:00", location: "" }),
+    answer({ action: "add", kind: "block", title: "Private clinic", start: "18:00", end: "19:00", location: "" }),
     refs,
     (reason) => reasons.push(reason)
   );
   assert.equal(parsed, null);
   assert.equal(reasons.length, 1);
-  assert.match(reasons[0], /add block invalid, fields: action,kind,title,start/);
+  assert.match(reasons[0], /add block invalid, fields: action,kind,title,start,end/);
   assert.equal(reasons[0].includes("Private clinic"), false);
 });
 
@@ -434,5 +468,5 @@ test("the prompt lets one dated class be cancelled", () => {
 
 test("the message is cut to fit the page", () => {
   const parsed = parseAnswer({ message: "x".repeat(1000), changes: [] }, refs);
-  assert.equal(parsed?.message.length, 300);
+  assert.equal(parsed?.message.length, 600);
 });

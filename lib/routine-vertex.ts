@@ -1,6 +1,6 @@
 import { getVercelOidcToken } from "@vercel/oidc";
 import { ExternalAccountClient } from "google-auth-library";
-import { replyAnswer, RESPONSE_SCHEMA } from "@/lib/routine-gemini";
+import { CHEAP_MODEL, chooseModel, replyAnswer, RESPONSE_SCHEMA } from "@/lib/routine-gemini";
 
 /**
  * Calling Gemini on Vertex AI, imported only by `app/api/routine/`. No key exists
@@ -11,8 +11,6 @@ import { replyAnswer, RESPONSE_SCHEMA } from "@/lib/routine-gemini";
  * AI Studio, and because API traffic on the free tier may be used for training.
  */
 
-const MODEL = process.env.ROUTINE_GEMINI_MODEL ?? "gemini-3.1-flash-lite";
-
 /**
  * Thinking counts against this, and a real note hit 2048 with only 2153
  * characters of answer. 30 changes, the most a note may hold, fit well inside
@@ -20,6 +18,9 @@ const MODEL = process.env.ROUTINE_GEMINI_MODEL ?? "gemini-3.1-flash-lite";
  */
 const MAX_OUTPUT_TOKENS = 8192;
 const TIMEOUT_MS = 25_000;
+
+/** MINIMAL dropped the 7pm from a note saying "11am-7pm", and 3.8 Flash refuses it anyway. */
+const thinkingLevel = (model: string) => (model === CHEAP_MODEL ? "LOW" : "MEDIUM");
 
 interface Settings {
   projectId: string;
@@ -64,27 +65,37 @@ export async function askGemini(system: string, user: string, schema: object = R
   const config = settings();
   if (!config) throw new Error("not_connected");
 
-  const url = `https://aiplatform.googleapis.com/v1/projects/${config.projectId}/locations/global/publishers/google/models/${MODEL}:generateContent`;
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${await accessToken(config)}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: system }] },
-      contents: [{ role: "user", parts: [{ text: user }] }],
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: schema,
-        maxOutputTokens: MAX_OUTPUT_TOKENS,
-        temperature: 0.2,
-        // MINIMAL dropped the 7pm from a note saying "11am-7pm".
-        thinkingConfig: { thinkingLevel: "LOW" },
-      },
-    }),
-    signal: AbortSignal.timeout(TIMEOUT_MS),
-  });
+  const token = await accessToken(config);
+  const call = (model: string) =>
+    fetch(
+      `https://aiplatform.googleapis.com/v1/projects/${config.projectId}/locations/global/publishers/google/models/${model}:generateContent`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: system }] },
+          contents: [{ role: "user", parts: [{ text: user }] }],
+          generationConfig: {
+            responseMimeType: "application/json",
+            responseSchema: schema,
+            maxOutputTokens: MAX_OUTPUT_TOKENS,
+            temperature: 0.2,
+            thinkingConfig: { thinkingLevel: thinkingLevel(model) },
+          },
+        }),
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      }
+    );
+
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Toronto" });
+  const model = process.env.ROUTINE_GEMINI_MODEL ?? chooseModel(today);
+  let response = await call(model);
+
+  // A model Google refuses shouldn't stop the page working.
+  if (!response.ok && model !== CHEAP_MODEL) {
+    console.error(`routine: ${model} failed with ${response.status}, using ${CHEAP_MODEL}`);
+    response = await call(CHEAP_MODEL);
+  }
   if (!response.ok) throw new Error(`vertex_${response.status}`);
 
   const body = await response.json();

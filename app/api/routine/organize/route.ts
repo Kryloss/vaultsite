@@ -3,6 +3,7 @@ import {
   buildContext,
   MAX_NOTE,
   parseAnswer,
+  retryPrompt,
   systemPrompt,
   userPrompt,
 } from "@/lib/routine-gemini";
@@ -11,7 +12,7 @@ import { addDays, type Block, type DayLog, type Habit, type Task } from "@/lib/r
 import { askGemini, geminiConnected } from "@/lib/routine-vertex";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 /**
  * One messy note, organized. The order matters: the daily limit is taken before
@@ -69,22 +70,36 @@ export async function POST(request: NextRequest) {
     today
   );
 
-  let result: Awaited<ReturnType<typeof askGemini>>;
-  try {
-    result = await askGemini(systemPrompt(today), userPrompt(text, note));
-  } catch (error) {
-    console.error("routine: Gemini call failed:", (error as Error).message);
-    return reply({ error: "gemini_failed" }, 502);
+  // A refused answer gets one more try, told what was wrong, so a note isn't
+  // lost to a missing field. The retry counts against the daily limit too.
+  let prompt = userPrompt(text, note);
+  let parsed: ReturnType<typeof parseAnswer> = null;
+
+  for (let attempt = 0; attempt < 2 && !parsed; attempt += 1) {
+    if (attempt > 0) {
+      const { error: retryError } = await supabase.rpc("routine_ai_reserve");
+      if (retryError) return reply({ error: "gemini_bad" }, 422);
+    }
+
+    let result: Awaited<ReturnType<typeof askGemini>>;
+    try {
+      result = await askGemini(systemPrompt(today), prompt);
+    } catch (error) {
+      console.error("routine: Gemini call failed:", (error as Error).message);
+      return reply({ error: "gemini_failed" }, 502);
+    }
+
+    await supabase.rpc("routine_ai_record", {
+      p_input: result.inputTokens,
+      p_output: result.outputTokens,
+    });
+
+    parsed = parseAnswer(result.answer, refs, (reason) => {
+      console.error("routine: answer refused:", reason);
+      prompt = retryPrompt(text, note, reason);
+    });
   }
 
-  await supabase.rpc("routine_ai_record", {
-    p_input: result.inputTokens,
-    p_output: result.outputTokens,
-  });
-
-  const parsed = parseAnswer(result.answer, refs, (reason) =>
-    console.error("routine: answer refused:", reason)
-  );
   if (!parsed) return reply({ error: "gemini_bad" }, 422);
   if (!parsed.ops.length) return reply({ message: parsed.message, batch: null });
 
