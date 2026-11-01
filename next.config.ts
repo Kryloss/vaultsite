@@ -19,18 +19,26 @@ const nextConfig: NextConfig = {
 
   /** The vault editor is a loopback sidecar started by `npm run dev`. */
   async rewrites() {
-    if (process.env.NODE_ENV !== "development") return [];
+    if (process.env.NODE_ENV !== "development") return { beforeFiles: [], afterFiles: [], fallback: [] };
     const port = process.env.VAULT_EDITOR_PORT ?? "3211";
     const portNumber = Number(port);
     if (!/^\d+$/.test(port) || portNumber < 1 || portNumber > 65_535) {
       throw new Error("VAULT_EDITOR_PORT must be a valid TCP port");
     }
-    return [
-      {
-        source: "/__vault-editor/:path*",
-        destination: `http://127.0.0.1:${port}/:path*`,
-      },
-    ];
+    return {
+      // Made-up routines for working on /routine locally (docs/ROUTINE.md). This
+      // goes before the real routes, so nothing reaches the database.
+      beforeFiles: process.env.ROUTINE_SAMPLE
+        ? [{ source: "/api/routine/:path*", destination: "/api/routine-sample/:path*" }]
+        : [],
+      afterFiles: [
+        {
+          source: "/__vault-editor/:path*",
+          destination: `http://127.0.0.1:${port}/:path*`,
+        },
+      ],
+      fallback: [],
+    };
   },
 
   // Replace the editor and contextual server slots in production so their

@@ -13,9 +13,9 @@ import { siteUrl } from "@/lib/site-config";
  * site: Postgres decides what a visitor may do, so a mistake in a route handler
  * can't hand them more than the database would (DECISIONS #235).
  *
- * The settings exist only on Vercel's Production environment. Anywhere else
- * `routineClient()` returns null and the page says it is unavailable, which
- * keeps preview deployments of a public repository out of it.
+ * The settings exist on Vercel's Production environment and in the owner's own
+ * `.env.local`. Anywhere else `routineClient()` returns null and the page says it
+ * is unavailable, which keeps preview deployments of a public repository out of it.
  */
 
 /** Session cookies go only to these routes; the rest of the site never carries them. */

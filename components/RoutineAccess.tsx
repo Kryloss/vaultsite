@@ -289,7 +289,7 @@ function OwnerPanel({
 }
 
 export default function RoutineAccess() {
-  const [status, setStatus] = useState<RoutineStatus | null>(null);
+  const [status, setStatus] = useState<(RoutineStatus & { sample?: boolean }) | null>(null);
 
   const load = useCallback(() => {
     void fetchStatus().then(setStatus);
@@ -299,6 +299,19 @@ export default function RoutineAccess() {
 
   if (!status) return null;
 
+  return (
+    <>
+      {status.sample ? (
+        <p role="status" className="routine-note">
+          <T {...ui.routineSample} />
+        </p>
+      ) : null}
+      <AccessView status={status} load={load} />
+    </>
+  );
+}
+
+function AccessView({ status, load }: { status: RoutineStatus; load: () => void }) {
   switch (status.role) {
     case "unavailable":
       return (

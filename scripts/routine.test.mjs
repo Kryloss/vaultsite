@@ -138,6 +138,25 @@ test("every routine API route that changes state checks where it came from", () 
   }
 });
 
+test("sample data can't reach production or the real routine", () => {
+  const config = readFileSync("next.config.ts", "utf8");
+  const devGuard = config.indexOf('process.env.NODE_ENV !== "development"');
+  assert.ok(devGuard > 0 && devGuard < config.indexOf("/api/routine-sample"));
+
+  const route = readFileSync("app/api/routine-sample/[...path]/route.ts", "utf8");
+  assert.match(route, /process\.env\.NODE_ENV === "development" && Boolean\(process\.env\.ROUTINE_SAMPLE\)/);
+  for (const handler of ["GET", "POST"]) {
+    const body = route.slice(route.indexOf(`export async function ${handler}`));
+    assert.ok(body.indexOf("if (!available())") < body.indexOf("await params"), handler);
+  }
+
+  const sample = readFileSync("lib/routine-sample.ts", "utf8");
+  for (const source of [route, sample]) {
+    assert.doesNotMatch(source, /supabase|routineClient|askGemini|routine-vertex|fetch\(/i);
+  }
+  assert.doesNotMatch(readFileSync("app/routine/page.tsx", "utf8"), /routine-sample/);
+});
+
 test("identity is read from auth.identities, never from user_metadata", () => {
   for (const path of files("supabase")) {
     const code = readFileSync(path, "utf8").replace(/--.*$/gm, "");
