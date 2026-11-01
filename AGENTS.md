@@ -74,7 +74,7 @@ npm run check
 | A YouTube video reaching the shelf (nightly task) | `docs/YOUTUBE-SHELF.md` |
 | A message starting `/post` or `/sync`; publishing from a cloud session | `docs/REMOTE-POSTING.md` |
 | The localhost pencil dock and its sidecar | `docs/LOCAL-AUTHORING.md` |
-| The private `/routine` page, sign-in, viewers, its database | `docs/ROUTINE.md` |
+| The private `/routine` page: its components, sign-in, viewers, database, Gemini, the Mac sync, weekly review, backups, what isn't built yet | `docs/ROUTINE.md` |
 | Checks to run, isolated build, lint status | `docs/VERIFY.md` |
 | Why something is the way it is | search `docs/DECISIONS.md` (index at the top; `#N` references are stable) |
 
