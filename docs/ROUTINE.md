@@ -46,14 +46,15 @@ ROUTINE_SUPABASE_URL=https://<project-ref>.supabase.co ROUTINE_SUPABASE_KEY=<pub
 
 ## Gemini
 
-The owner types a note on Today, and Gemini applies it straight away. It can add, change, finish and remove items, in English whatever language the note was in. **Undo** beside its reply takes the whole note back.
+The owner types a note on Today, and Gemini applies it straight away. It can add, change, finish and remove items, in English whatever language the note was in, or answer a question about the routine without changing anything. **Undo** beside its reply takes the whole note back.
 
 - **It has no tools.** `/api/routine/organize` sends a note and returns JSON. `parseAnswer()` in `lib/routine-gemini.ts` checks every change, and one bad change refuses the whole note. `routine_apply_gemini()` then applies it as one transaction.
 - **It can only name what it was shown.** Items reach it as `b1`, `t2`, `h3`, never as database ids.
 - **It can't change what viewers see.** `shareable` is not sent, not in the answer's schema, and not in the database function. Anything Gemini adds starts private.
 - **What it reads:** titles, times, locations, notes and the last 7 days of daily logs, with long fields cut. Past dated blocks stay out, since the sync adds one for every class. Requests, viewers and email addresses never reach it.
+- **A refused answer gets one more try,** told what was wrong by field name. The retry counts against the daily limit. A new block must carry an end time, because a left-out end would otherwise become one hour with no warning.
 - **Limits:** 40 calls a day in `routine_ai_reserve()`, counted before the call. Each note is capped at 30 changes and 5 removals. Google's spend cap sits above that.
-- **Costs:** model `gemini-3.1-flash-lite` on Vertex with thinking at `LOW`, overridable with `ROUTINE_GEMINI_MODEL`. Check a new model accepts that level first: `MINIMAL` dropped details from real notes, and Gemini 3.8 Flash reportedly refuses it. Output stops at 8192 tokens, which has to cover thinking as well as the answer: a real note was cut off at 2048.
+- **Costs:** `chooseModel()` uses `gemini-3.8-flash` at `MEDIUM` thinking until the trial credit ends on 2027-02-01, then `gemini-3.1-flash-lite` at `LOW`, by itself. `ROUTINE_GEMINI_MODEL` overrides that. If Google refuses 3.8 Flash, the call falls back to Flash-Lite and logs it. 3.8 Flash rejects `MINIMAL`, and `MINIMAL` dropped details from real notes on Flash-Lite. Output stops at 8192 tokens, which has to cover thinking as well as the answer: a real note was cut off at 2048.
 - **No key exists.** Vercel proves which deployment is asking and Google issues a short-lived token. Only the Production environment is trusted.
 
 ## The organizer
