@@ -246,6 +246,8 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 235 | `/routine` is a static page over route handlers, and Postgres holds the rules |
 | 236 | The organizer never deletes, and a viewer's data is built by one function |
 | 237 | Gemini returns data, never acts, and can't change what a viewer sees |
+| 238 | The Mac syncs Calendar and Reminders, never the vault's notes, and no model reads them |
+| 239 | A review is stored and changes nothing, and backups live on the owner's Mac |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -1970,3 +1972,23 @@ Gemini has no tools and no database access. It answers in a fixed JSON schema, `
 `shareable` is outside the whole path: not sent, not in the schema, and not in the function, which on an update leaves the column alone. A note mentioning that something is public still can't reveal it. This is the rule that matters most for the Uni sync, where the text reaching Gemini will not all be the owner's own.
 
 Login is workload identity federation rather than a service account key, because there is then no long-lived secret for a public repository or a stolen environment to leak, and the trust is limited to this project's Production environment. Calls go to Vertex rather than AI Studio because the trial credit can't pay for AI Studio. The app's 40-a-day limit sits under Google's spend cap because the cap isn't instant and counts cost before credits. `gemini-3.1-flash-lite` is the default on cost: about US$1 a month at the expected use, against 3.8 Flash doubling in price on 2027-01-01. Only one short sentence of Gemini's goes on the page, and the owner reads it, so it is text and never markup.
+
+## 238. The Mac syncs Calendar and Reminders, never the vault's notes, and no model reads them (2026-10-31)
+
+The plan was Gemini reading allowlisted parts of the Uni vault. Reading the vault changed that. Its weekly notes mix the plan with marks, in lines like "can replace your 82.25%", so an allowlist of sections would still leak grades, and a parser for notes written by another agent would break whenever that agent changed its wording. Calendar and Reminders already hold what the vault's commands decided, in a fixed shape, with no marks in them. Syncing those keeps grades and email summaries out because nothing opens them, which is stronger than filtering them. It is also deterministic and free, and a sync that has to be right shouldn't depend on a model's reading.
+
+Classes are dated blocks, three weeks ahead, rather than one weekly block each. Weekly blocks would need a term end and a way to cancel one day, which the schema doesn't have. A dated block needs neither: the term ends when the calendar's series do, and cancelling a class is removing one row. The cost is more rows, so past dated blocks stay out of Gemini's context.
+
+Calendar is read through AppleScript, which returns a repeating event once, so the dates are expanded here. EventKit would expand them itself, but it was denied from a script and a headless tool can't show its permission prompt; a small weekly-only expander that skips any rule it can't read was the smaller risk.
+
+The Mac uses a token because it has no Google session, and the site has no service-role key to lend it. Only the hash is stored. Calling three functions directly rather than through a route handler keeps Vercel out of the path, and a route would still have needed an anonymous grant, having no session either. Those functions are the first anonymous door into the database, so they take a 256-bit token, can't reach the access tables or `shareable`, and everything they do lands in the history under the actor `uni`.
+
+The script is copied out of the repository when installed, because this checkout auto-publishes and half-finished edits sit in it. A job on a timer shouldn't run whatever happens to be there. See `docs/ROUTINE.md`.
+
+## 239. A review is stored and changes nothing, and backups live on the owner's Mac (2026-10-31)
+
+The weekly review shares Gemini's path but not its powers. A note may change the routine because the owner asked it to; a review was only asked to read, so its route writes one row in `routine_reviews` and never reaches `routine_apply_gemini()`. It is stored rather than regenerated so opening the Week tab never spends a call, and it runs on a button rather than a timer so a week nobody looks at costs nothing.
+
+Backups run from the Mac because the Free plan has none, and Pro's cost isn't worth it for one person's routine. That widens the sync token from writing to reading, the one real cost of this choice: a stolen token now reads the organizer. The token already sits on the same Mac as the Calendar and Reminders it comes from, so the exposure is small. Files stay in Application Support rather than iCloud-synced Documents, and the access tables stay out, because visitors' names and emails have no reason to be in a file on a laptop.
+
+There is no restore button. It would be rarely used, hard to test, and able to do real damage in one press. Undo covers everyday mistakes, and a backup covers the rare disaster by hand. See `docs/ROUTINE.md`.

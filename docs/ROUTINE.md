@@ -1,6 +1,48 @@
 # Routine
 
-`/routine` is the owner's private daily organizer. Built so far: the access layer (sign-in, requests, approval, expiry, the viewer gate), the organizer itself (Today and Week views, tasks, habits, the daily log, undo), and Gemini organizing a typed note. The Uni sync comes later. Why it is built this way: `docs/DECISIONS.md` #235, #236 and #237.
+`/routine` is the owner's private daily organizer: the access layer (sign-in, requests, approval, expiry, the viewer gate), the organizer itself (Today and Week views, tasks, habits, the daily log, undo), Gemini organizing a typed note, the sync from the owner's Mac, the weekly review, daily backups and a phone home-screen install. Why it is built this way: `docs/DECISIONS.md` #235 to #239.
+
+## Weekly review
+
+**Review this week** on the Week tab sends one week to Gemini and stores its answer in `routine_reviews`, so reading it later costs nothing. `lib/routine-review.ts` holds what it is shown: that week's tasks, habit counts and daily logs, plus next week's open tasks. It uses the same model and shares the 40-a-day limit with notes. The route's only write is that one row, so a review can't change the routine.
+
+## Backups
+
+The Free plan keeps no backups, so the Mac saves one a day to `~/Library/Application Support/routine-sync/backups/`, readable only by the owner's account, and keeps 30. Each is JSON with every row of the organizer tables, reviews and the history. The access tables stay out, since they hold other people's details. `routine_sync_backup()` means the Mac's token can read the organizer as well as write it.
+
+To restore, match rows by `id` and put them back through the Supabase SQL editor with `jsonb_populate_recordset`, starting with what was lost rather than the whole file.
+
+## On a phone
+
+`public/routine.webmanifest`, the `routine-icon-*.png` files and the page's `appleWebApp` metadata let Share → **Add to Home Screen** open `/routine` as its own app. Its `scope` is `/` because Google sign-in returns through `/api/routine`. A home-screen app keeps its own cookies, so it signs in separately from Safari once.
+
+## The Mac sync
+
+`scripts/routine-sync.mjs` runs on the owner's Mac every 30 minutes. It needs the Mac to be awake, so nothing moves while the lid is shut.
+
+- **What it reads:** events from the Calendar app's `TMUCalendar`, `Work` and `School`, and open items in the Reminders lists `School` and `Study`. It takes titles, times and rooms, never notes, plus the list of cancelled classes in the Uni vault's `.claude/data/overrides.tsv`. It opens no other vault file, so grades and email summaries can't leave the Mac. `Personal` is left out.
+- **Why not the vault's Markdown:** the weekly notes mix plans with marks, while Calendar and Reminders already hold what the vault's commands decided. Ticked study blocks reach the School calendar at 22:00, so the week's plan arrives that way. No model is involved, so the sync costs nothing.
+- **Classes arrive as dated blocks, three weeks ahead.** Calendar returns a repeating class once, so `scripts/routine-sync-lib.mjs` works out the dates. A dated block can be cancelled alone, and the term's end needs no handling. TMU's series overlap, so one class can arrive twice; the key is title, date and start time, and the newest series wins. Classes before noon start ten minutes after the hour.
+- **Each push is the whole picture, applied in one transaction.** A Reminder missing from it is marked done, and an event missing from it is archived. A Reminder list that comes back empty is refused, since that is more likely a failed read.
+- **An edit on the page survives** until the source changes that same item: `source_seen` holds what the Mac last sent. Something the owner removed stays removed. Something the sync removed comes back if the source does.
+- **A tick closes the Reminder on the next run,** by Reminder id, which is the `source_key`. The Uni vault's `AGENTS.md` tells its agents never to close Reminders; this is the owner's own tick, on the owner's instruction. Undoing a tick after the Mac has closed the Reminder doesn't hold: the next push sees it closed and ticks it again, so reopen it in Reminders instead.
+- **Logs hold counts, never titles:** `~/Library/Logs/routine-sync.log`. The page shows when the last sync got through.
+
+The Mac has no Google session, so it proves itself with a token in the login Keychain (service `kryloss-routine-sync`), and the database holds only its SHA-256 hash in `private.sync_token`. It calls its own functions directly with the publishable key, so the site's code isn't in the path.
+
+Setting it up, or replacing the token:
+
+```bash
+node scripts/routine-sync.mjs --new-token
+```
+
+Put the printed hash in `private.sync_token.token_hash` in the Supabase SQL editor, then:
+
+```bash
+ROUTINE_SUPABASE_URL=https://<project-ref>.supabase.co ROUTINE_SUPABASE_KEY=<publishable-key> node scripts/routine-sync.mjs --install
+```
+
+`--install` copies both scripts to `~/Library/Application Support/routine-sync/`, so an unfinished edit in this checkout can't reach the schedule, and loads `com.kryloss.routine-sync` into launchd. **After changing either script, run `--install` again.** macOS asks once for permission to control Calendar and Reminders. `--dry-run` reads everything and sends nothing.
 
 ## Gemini
 
@@ -9,7 +51,7 @@ The owner types a note on Today, and Gemini applies it straight away. It can add
 - **It has no tools.** `/api/routine/organize` sends a note and returns JSON. `parseAnswer()` in `lib/routine-gemini.ts` checks every change, and one bad change refuses the whole note. `routine_apply_gemini()` then applies it as one transaction.
 - **It can only name what it was shown.** Items reach it as `b1`, `t2`, `h3`, never as database ids.
 - **It can't change what viewers see.** `shareable` is not sent, not in the answer's schema, and not in the database function. Anything Gemini adds starts private.
-- **What it reads:** titles, times, locations, notes and the last 7 days of daily logs, with long fields cut. Requests, viewers and email addresses never reach it.
+- **What it reads:** titles, times, locations, notes and the last 7 days of daily logs, with long fields cut. Past dated blocks stay out, since the sync adds one for every class. Requests, viewers and email addresses never reach it.
 - **Limits:** 40 calls a day in `routine_ai_reserve()`, counted before the call. Each note is capped at 30 changes and 5 removals. Google's spend cap sits above that.
 - **Costs:** model `gemini-3.1-flash-lite` on Vertex with thinking at `LOW`, overridable with `ROUTINE_GEMINI_MODEL`. Check a new model accepts that level first: `MINIMAL` dropped details from real notes, and Gemini 3.8 Flash reportedly refuses it. Output stops at 8192 tokens, which has to cover thinking as well as the answer: a real note was cut off at 2048.
 - **No key exists.** Vercel proves which deployment is asking and Google issues a short-lived token. Only the Production environment is trusted.
@@ -31,7 +73,7 @@ The owner types a note on Today, and Gemini applies it straight away. It can add
 
 ## Where the rules live
 
-Postgres, in `supabase/migrations/`. Signed-in users hold no privilege on the access tables, only EXECUTE on eleven functions: `routine_status`, `submit_access_request`, `routine_access_overview`, `decide_access_request`, `revoke_access`, `routine_undo`, `routine_undo_batch`, `routine_shared_days`, `routine_apply_gemini`, `routine_ai_reserve`, `routine_ai_record`. Each one checks who is calling. Anonymous callers can execute none of them.
+Postgres, in `supabase/migrations/`. Signed-in users hold no privilege on the access tables, only EXECUTE on twelve functions: `routine_status`, `submit_access_request`, `routine_access_overview`, `decide_access_request`, `revoke_access`, `routine_undo`, `routine_undo_batch`, `routine_shared_days`, `routine_apply_gemini`, `routine_ai_reserve`, `routine_ai_record`, `routine_sync_status`. Each one checks who is calling. Anonymous callers can execute none of them, only the Mac's four: `routine_sync_ticks`, `routine_sync_closed`, `routine_sync_push` and `routine_sync_backup`, each of which refuses without the token.
 
 The organizer tables (`routine_*`) grant `authenticated` the privileges the app needs, behind a row level security policy that only the owner passes. For anyone else they read as empty and refuse writes.
 
@@ -92,6 +134,6 @@ Changing the owner takes SQL on purpose. Nothing in the site can do it.
 
 ## Checking changes
 
-Schema changes go in a new migration file, and get tested as fake users in a transaction that rolls back: set `request.jwt.claims` and `set local role authenticated`, then try what each kind of user must not be able to do. Run the Supabase security advisor after. Two findings are expected: `rls_enabled_no_policy` on the access tables, and `authenticated_security_definer_function_executable` on the eleven functions above. `auth_leaked_password_protection` also appears and doesn't apply, since password sign-in is off.
+Schema changes go in a new migration file, and get tested as fake users in a transaction that rolls back: set `request.jwt.claims` and `set local role authenticated`, then try what each kind of user must not be able to do. Run the Supabase security advisor after. Expected findings: `rls_enabled_no_policy` on the access tables, `authenticated_security_definer_function_executable` on the twelve functions above, and `anon_security_definer_function_executable` on the Mac's four. `auth_leaked_password_protection` also appears and doesn't apply, since password sign-in is off.
 
 `/routine` has a limit no test covers: the Google redirect only works on the real domain.

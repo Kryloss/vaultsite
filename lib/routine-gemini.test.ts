@@ -411,6 +411,27 @@ test("the prompt says how to write something that happens every day", () => {
   assert.match(systemPrompt("2026-10-30"), /every day is seven blocks/);
 });
 
+test("a past dated block isn't sent, and a weekly one always is", () => {
+  const { refs: built } = buildContext(
+    {
+      blocks: [
+        { ...block, id: "past", weekday: null, on_date: "2026-10-29" },
+        { ...block, id: "today", weekday: null, on_date: "2026-10-30" },
+        { ...block, id: "weekly", weekday: 1, on_date: null },
+      ],
+      tasks: [],
+      habits: [],
+      logs: [],
+    },
+    "2026-10-30"
+  );
+  assert.deepEqual(Object.values(built).map(({ item }) => item.id), ["today", "weekly"]);
+});
+
+test("the prompt lets one dated class be cancelled", () => {
+  assert.match(systemPrompt("2026-10-30"), /archive that block to cancel that day/);
+});
+
 test("the message is cut to fit the page", () => {
   const parsed = parseAnswer({ message: "x".repeat(1000), changes: [] }, refs);
   assert.equal(parsed?.message.length, 300);

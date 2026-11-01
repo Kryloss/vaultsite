@@ -39,6 +39,14 @@ function formatted(iso: string, options: Intl.DateTimeFormatOptions): Str {
   return { en: format("en-CA"), uk: format("uk-UA") };
 }
 
+/** An instant, so this one does pass through the reader's time zone. */
+function syncedTime(at: string): Str {
+  const date = new Date(at);
+  const format = (locale: string) =>
+    new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(date);
+  return { en: format("en-CA"), uk: format("uk-UA") };
+}
+
 /** Any Monday plus its weekday gives that weekday's name. */
 function weekdayName(weekday: number): Str {
   return formatted(addDays("2026-11-02", weekday - 1), { weekday: "short" });
@@ -498,6 +506,75 @@ function NoteBox({ onOrganized, onUndo }: { onOrganized: () => void; onUndo: (ba
   );
 }
 
+/** Gemini's reading of one week. Stored, so only the button spends a call. */
+function WeekReviewBox({
+  week,
+  review,
+  onReviewed,
+}: {
+  week: string;
+  review: RoutineData["review"];
+  onReviewed: () => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<Str | null>(null);
+
+  async function run() {
+    setBusy(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/routine/review", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ week }),
+      });
+      if (response.ok) {
+        onReviewed();
+      } else {
+        setError(noteError((await response.json()).error));
+      }
+    } catch {
+      setError(ui.routineErrorGeneric);
+    }
+    setBusy(false);
+  }
+
+  const sections: [Str, string[]][] = review
+    ? [
+        [ui.routineWentWell, review.went_well],
+        [ui.routineSlipped, review.slipped],
+        [ui.routineNextWeek, review.next_week],
+      ]
+    : [];
+
+  return (
+    <>
+      {sections
+        .filter(([, lines]) => lines.length)
+        .map(([heading, lines]) => (
+          <section key={heading.en}>
+            <h3 className="routine-subheading"><T {...heading} /></h3>
+            <ul className="routine-plain">
+              {lines.map((line) => (
+                <li key={line} className="routine-note">{line}</li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      <div className="routine-actions">
+        <button type="button" disabled={busy} onClick={() => void run()} className="routine-btn press">
+          <T {...(busy ? ui.routineReviewing : review ? ui.routineReviewAgain : ui.routineReview)} />
+        </button>
+      </div>
+      {error ? (
+        <p role="alert" className="routine-note">
+          <T {...error} />
+        </p>
+      ) : null}
+    </>
+  );
+}
+
 function History({ changes, onUndo }: { changes: Change[]; onUndo: (id: number) => void }) {
   const actors: Record<string, Str> = {
     owner: ui.routineByYou,
@@ -729,6 +806,9 @@ export default function RoutineOrganizer({ access }: { access: ReactNode }) {
             );
           })}
         </div>
+        {week <= weekStart(today) ? (
+          <WeekReviewBox key={week} week={week} review={data.review} onReviewed={load} />
+        ) : null}
       </>
     );
   }
@@ -952,6 +1032,12 @@ export default function RoutineOrganizer({ access }: { access: ReactNode }) {
         changes={data.changes}
         onUndo={(id) => void act({ action: "undo", change: id })}
       />
+
+      {data.syncedAt ? (
+        <p className="routine-note">
+          <T {...ui.routineSynced} /> <T {...syncedTime(data.syncedAt)} />
+        </p>
+      ) : null}
     </>
   );
 }

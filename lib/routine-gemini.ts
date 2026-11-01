@@ -52,7 +52,9 @@ export function buildContext(
   const refs: GeminiRefs = {};
   const short = (value: string) => value.slice(0, MAX_NOTE_FIELD);
 
-  const blocks = data.blocks.slice(0, MAX_ITEMS).map((block, index) => {
+  // The sync adds a dated block per class, so past ones would soon fill the cap.
+  const current = data.blocks.filter((block) => !block.on_date || block.on_date >= today);
+  const blocks = current.slice(0, MAX_ITEMS).map((block, index) => {
     const ref = `b${index + 1}`;
     refs[ref] = { kind: "block", item: block };
     return {
@@ -115,6 +117,7 @@ export function systemPrompt(today: string): string {
     "- Use update to change an existing item, and fill in only the fields that change.",
     "- Use done when the note says a task is finished.",
     "- Use archive only when the note clearly asks to remove or cancel that item.",
+    "- A block with on_date is one day only, including classes and shifts, so archive that block to cancel that day.",
     "- A weekly block can't be cancelled for one day. Archive it only if the note ends it for good; otherwise leave it and say so in the message.",
     "- Refer to existing items only by their ref. If the note is unclear about which item, change nothing and say so.",
     "- Use existing blocks and logs to choose sensible free times, and do not create overlaps unless asked.",

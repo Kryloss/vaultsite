@@ -67,6 +67,8 @@ export interface RoutineData {
   checks: HabitCheck[];
   logs: DayLog[];
   changes: Change[];
+  syncedAt: string | null;
+  review: { went_well: string[]; slipped: string[]; next_week: string[] } | null;
 }
 
 /** One day of what a viewer may see, from `routine_shared_days()`. A null title means Busy. */
