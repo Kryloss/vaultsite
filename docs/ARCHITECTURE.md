@@ -24,8 +24,9 @@ components and stay static. See `docs/LOCAL-AUTHORING.md`.
 
 `app/api/routine/*` is the one exception in production: route handlers for the
 private organizer, backed by a Supabase project. The `/routine` page is still
-static, there is no middleware, and no public page touches the database. See
-`docs/ROUTINE.md`.
+static, there is no middleware, and no public page touches the database. The
+owner's Mac syncs to that database directly, without passing through the site.
+See `docs/ROUTINE.md`.
 
 ## Content model
 

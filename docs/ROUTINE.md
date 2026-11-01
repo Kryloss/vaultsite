@@ -1,6 +1,28 @@
 # Routine
 
-`/routine` is the owner's private daily organizer: the access layer (sign-in, requests, approval, expiry, the viewer gate), the organizer itself (Today and Week views, tasks, habits, the daily log, undo), Gemini organizing a typed note, the sync from the owner's Mac, the weekly review, daily backups and a phone home-screen install. Why it is built this way: `docs/DECISIONS.md` #235 to #239.
+`/routine` is the owner's private daily organizer: the access layer (sign-in, requests, approval, expiry, the viewer gate), the organizer itself (Today and Week views, tasks, habits, the daily log, undo), Gemini organizing a typed note or answering a question, the sync from the owner's Mac, the weekly review, daily backups and a phone home-screen install. Why it is built this way: `docs/DECISIONS.md` #235 to #240.
+
+## The page
+
+- **`components/RoutineAccess.tsx`** decides what a visitor sees: sign-in, the request form, a viewer's week, or the organizer. It also holds the Access tab's requests and viewers.
+- **`components/RoutineOrganizer.tsx`** is the owner's page: the Today, Week and Access tabs, `NoteBox`, the block, task and habit forms, `WeekReviewBox`, `History` and `DayLogBox`. It reads `/api/routine/data` into a `RoutineData`, and every change goes through `act()` to `/api/routine/item`, which reloads after. Ticks change the screen first, because a checkbox that waits for the network feels broken on a phone.
+- **`components/RoutineShared.tsx`** is a viewer's read-only week.
+- **`app/routine/privacy/page.tsx`** is the privacy page Google requires.
+- **Styles** are the `.routine-*` classes at the end of `app/globals.css`. **Text** is `ui.routine*` and `routinePrivacy` in `lib/ui-strings.ts`, in English and Ukrainian. Anything Gemini writes is English only.
+- **The page is phone first,** and hard rule 6 applies: both languages, light and dark, both colour families, reduced motion. `.lang-en` and `.lang-uk` elements must never be given a `display`, or both languages show.
+- **`source`** on a block or task says where it came from: `owner`, `gemini` or `uni`. The page receives it but doesn't show it yet.
+
+## Not built yet
+
+These came up in real use. Build them when the owner asks.
+
+- Changing one day of a weekly block. Synced classes already allow this, since each is its own dated block.
+- Date ranges on a weekly block, such as "until Dec 18".
+- Repeating tasks.
+- Phone notifications.
+- Marking where an item came from, and a tidier Today with 78 Reminders on it.
+- The `/routine` intro still says "Log in, or ask for temporary view-only access" to the signed-in owner. It sits in the static page, so a different line for the owner has to move into a client component.
+- Syncing Calendar from Google rather than the Mac, so the schedule updates with the lid shut. A small Apps Script in the owner's account is the likely way. Reminders would stay on the Mac, because Google Tasks drops due times.
 
 ## Weekly review
 
@@ -62,13 +84,13 @@ The owner types a note on Today, and Gemini applies it straight away. It can add
 - **`lib/routine-model.ts` holds the rules:** what a day contains, and what a save may contain. Dates are `YYYY-MM-DD` strings and times are minutes since midnight, so neither passes through a time zone. Weekdays are ISO: 1 is Monday.
 - **A task with no date waits on today** so it can't get lost. Past-due tasks collapse into one card on today with **Move all to today**, so they don't pile up. The owner's own weekly notes showed why: 11 overdue reminders that nobody cleared.
 - **Nothing is deleted.** Remove sets `archived_at`, the app has no DELETE privilege on blocks, tasks or habits, and `routine_changes` records every insert and update through a trigger, whoever made it. **Undo** works on any recent change. Habit ticks and the daily log are not in the history: a tick is undone by unticking, and the log is one text box.
-- **Later phases write through the same tables.** They set `routine.actor` so the history names them, and `source` plus `source_key` so a sync can find what it already added.
+- **Gemini and the sync write through the same tables.** They set `routine.actor` so the history names them, and the sync uses `source` plus `source_key` to find what it already added.
 - **New items are private.** `shareable` is off unless the owner ticks it, and a value that isn't exactly `true` stays off.
 
 ## How it fits a static site
 
 - **`app/routine/page.tsx` is a static page with no private data in it.** Never make it dynamic: the root layout reads `vault/` from disk, so a dynamic route would read the vault at runtime (hard rule 2).
-- **`app/api/routine/*` are the only runtime code on the site.** There is no middleware, so no other page runs anything per request.
+- **`app/api/routine/*` are the only runtime code on the site.** There is no middleware, so no other page runs anything per request. The Mac sync doesn't pass through them: it talks to the database directly.
 - `components/RoutineAccess.tsx` asks `/api/routine/status` after hydration and draws what that says. It draws nothing until the answer arrives.
 - The tab is pushed onto the sidebar's items in `app/layout.tsx`, since no vault folder backs it. It stays out of the sitemap and search index, carries `noindex`, and `robots.txt` disallows `/api/`.
 
