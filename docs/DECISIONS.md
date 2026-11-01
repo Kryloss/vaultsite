@@ -249,6 +249,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 238 | The Mac syncs Calendar and Reminders, never the vault's notes, and no model reads them |
 | 239 | A review is stored and changes nothing, and backups live on the owner's Mac |
 | 240 | 3.8 Flash runs while the trial credit lasts, and a refused answer gets one retry |
+| 241 | `/routine` runs locally through real sign-in or invented data, never a bypass |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -2003,3 +2004,11 @@ Google's refusal of a model falls back to Flash-Lite, because a live model name 
 A stronger model doesn't remove bad answers, so the shape around it moved too. `parseAnswer` used to give a new block with no end one hour, which is how a shift of eight hours nearly became one. Now that is refused, and a refused answer gets one retry, told the reason by field name, so a stricter check doesn't mean retyping. One retry and no more, counted against the daily limit, so a model that keeps failing can't loop.
 
 Questions go through the same path with no changes in the answer, rather than a separate route: the context is already there, and an answer with no changes was already valid. The prompt writes out the next 14 dates with their weekdays, since working a date out from "Friday" was where these notes went wrong. This changes the default in #237, not its rules.
+
+## 241. `/routine` runs locally through real sign-in or invented data, never a bypass (2026-11-01)
+
+Google sign-in only worked on the real domain, so the page couldn't be opened during development. A local login bypass would have been the quick answer and was rejected: a flag that skips the owner check is one mistake away from production, and the owner check is the point of the page.
+
+Real data on localhost uses the same sign-in and the same database rules, so it adds no access. It needs one exact redirect URL in Supabase and the two settings that are already public by design. No secret reaches the laptop, and Gemini stays out of reach because Google trusts only Production.
+
+Design work uses invented data instead, because it needs states the real account can't show on demand, and a stray click shouldn't change the real routine. It replaces the routes with a rewrite that exists only in development rather than adding a check to each real route, so the production path gains no branch. `app/api/routine-sample` still ships as a file, and it answers 404 unless `NODE_ENV` is development. That was tested by building for production with `ROUTINE_SAMPLE` set. See `docs/ROUTINE.md`.

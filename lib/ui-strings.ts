@@ -167,6 +167,10 @@ export const ui = {
   routineByYou: { en: "you", uk: "ви" },
   routineByGemini: { en: "Gemini", uk: "Gemini" },
   routineByUni: { en: "Uni sync", uk: "Синхронізація Uni" },
+  routineSample: {
+    en: "Sample data. Nothing here is real, and it resets when the server restarts.",
+    uk: "Зразкові дані. Тут немає нічого справжнього, і все скинеться після перезапуску сервера.",
+  },
   routineSynced: { en: "Last synced from the Mac:", uk: "Остання синхронізація з Mac:" },
   routineReview: { en: "Review this week", uk: "Підсумувати тиждень" },
   routineReviewAgain: { en: "Review again", uk: "Підсумувати ще раз" },

@@ -12,6 +12,26 @@
 - **The page is phone first,** and hard rule 6 applies: both languages, light and dark, both colour families, reduced motion. `.lang-en` and `.lang-uk` elements must never be given a `display`, or both languages show.
 - **`source`** on a block or task says where it came from: `owner`, `gemini` or `uni`. The page receives it but doesn't show it yet.
 
+## Working on it locally
+
+**Sample data is the default for design work.** It needs no sign-in or network, and it can't touch the real routine:
+
+```bash
+ROUTINE_SAMPLE=owner npm run dev -- --hostname localhost
+```
+
+`--hostname localhost` keeps the server off the network. Add `?sample=` to `/routine` to switch state without restarting: `owner`, `empty`, `viewer`, `visitor`, `request`, `pending`, `denied`, `unverified` or `unavailable`. Log in and Sign out move between `owner` and `visitor`. A line on the page says it's sample data, and changes last until the server restarts.
+
+A rewrite in `next.config.ts`, which exists only in development, sends `/api/routine/*` to `app/api/routine-sample`, so the real routes never run. `lib/routine-sample.ts` holds the invented data. Its stand-in for Gemini fails on a note containing "error" or "limit", answers a note ending in `?`, and adds anything else as a task.
+
+**The real routine works locally too,** through the normal Google sign-in. Nothing about it is weaker on localhost, since the same owner check and database rules apply:
+
+1. In Supabase, add `http://localhost:3000/api/routine/auth/callback` to Authentication → URL Configuration → Redirect URLs. Keep it exact, with no wildcard.
+2. Put these two in `.env.local`, which Git ignores: `SUPABASE_URL` from Project Settings → Data API, and `SUPABASE_PUBLISHABLE_KEY` from Project Settings → API Keys. Never add a secret or service-role key.
+3. Run `npm run dev -- --hostname localhost` without `ROUTINE_SAMPLE`, open `http://localhost:3000/routine` and sign in.
+
+This is the live data, so a change on localhost is a real change. Gemini and the request email don't work locally, because only Production holds their settings.
+
 ## Not built yet
 
 These came up in real use. Build them when the owner asks.
@@ -117,7 +137,7 @@ Keep these true:
 
 ## Settings
 
-Set on Vercel's **Production** environment only. Anywhere else the routes return unavailable, which keeps preview deployments out.
+Set on Vercel's **Production** environment only, so preview deployments get unavailable. The one other place is a local `.env.local`, with the first two settings alone.
 
 | Variable | What it is |
 |---|---|
@@ -159,4 +179,4 @@ Changing the owner takes SQL on purpose. Nothing in the site can do it.
 
 Schema changes go in a new migration file, and get tested as fake users in a transaction that rolls back: set `request.jwt.claims` and `set local role authenticated`, then try what each kind of user must not be able to do. Run the Supabase security advisor after. Expected findings: `rls_enabled_no_policy` on the access tables, `authenticated_security_definer_function_executable` on the twelve functions above, and `anon_security_definer_function_executable` on the Mac's four. `auth_leaked_password_protection` also appears and doesn't apply, since password sign-in is off.
 
-`/routine` has a limit no test covers: the Google redirect only works on the real domain.
+`/routine` has a limit no test covers: Google sign-in only works on the real domain and on `localhost:3000`, the one local address Supabase allows.
