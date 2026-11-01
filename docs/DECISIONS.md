@@ -250,6 +250,7 @@ Append new entries at the bottom: number, date, the decision, and the reason tha
 | 239 | A review is stored and changes nothing, and backups live on the owner's Mac |
 | 240 | 3.8 Flash runs while the trial credit lasts, and a refused answer gets one retry |
 | 241 | `/routine` runs locally through real sign-in or invented data, never a bypass |
+| 242 | Two npm overrides carry security fixes the packages above them haven't shipped |
 
 ## 1. Git-based publishing, no Supabase for content (2026-07-16)
 
@@ -2012,3 +2013,14 @@ Google sign-in only worked on the real domain, so the page couldn't be opened du
 Real data on localhost uses the same sign-in and the same database rules, so it adds no access. It needs one exact redirect URL in Supabase and the two settings that are already public by design. No secret reaches the laptop, and Gemini stays out of reach because Google trusts only Production.
 
 Design work uses invented data instead, because it needs states the real account can't show on demand, and a stray click shouldn't change the real routine. It replaces the routes with a rewrite that exists only in development rather than adding a check to each real route, so the production path gains no branch. `app/api/routine-sample` still ships as a file, and it answers 404 unless `NODE_ENV` is development. That was tested by building for production with `ROUTINE_SAMPLE` set. See `docs/ROUTINE.md`.
+
+## 242. Two npm overrides carry security fixes the packages above them haven't shipped (2026-11-01)
+
+`npm audit --omit=dev` is at zero, but two of the fixes can't arrive through a normal upgrade, because a package above them pins an exact old version. `package.json` overrides both:
+
+- `next` pins `postcss` 8.4.31 on the 15.5 line. Overridden to `^8.5.32`, the version Tailwind already uses. Next 16 pins 8.5.23, so the 8.5 line is one Next itself ships. Drop this override when the site moves to Next 16, which is otherwise a major upgrade with nothing in the audit asking for it.
+- `@vercel/cli-config`, pulled in by `@vercel/oidc`, pins `zod` 4.1.11, and even its latest release does. Overridden to `^4.6.7`. `npm audit fix --force` proposed downgrading `@vercel/oidc` to 3.5.0 instead, which would mean going back a major on the thing that signs `/routine` into Vertex. Drop this override when `@vercel/cli-config` stops pinning a version below 4.6.6.
+
+To check whether either can go, remove it, reinstall and run `npm audit --omit=dev`. An override already on a package's lockfile entry is not applied until that entry is removed: `npm install` left `next/node_modules/postcss` at 8.4.31 until the entry was deleted from the lockfile by hand.
+
+The 16 moderate findings left are all one advisory, `minimatch` below 11.0.1, reached through ESLint and its plugins. They stay. ESLint is dev-only and not part of the build (#149), it matches only this repository's own patterns, even ESLint 10 still asks for `minimatch` 10, and forcing 11 under packages written for 3 would break them. `npm audit fix --force` proposes `eslint` 4.0.0 and `eslint-config-next` 0.2.4, which are years-old downgrades, so don't run it.
